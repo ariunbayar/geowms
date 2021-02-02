@@ -14,7 +14,7 @@ export const FormJson = ({form_json}) => {
                     form_json.map((prop, idx) =>
                         <div key={idx} className="row my-3">
                             <div className="col-md-5">
-                                <label className="col-form-label">{prop.property_code}</label>
+                                <label className="col-form-label">{prop.property_name}</label>
                             </div>
                             <div className="col-md-7">
                                 <input
@@ -205,11 +205,11 @@ export default class RequestModal extends Component {
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
                             <div className="col-md-12">
-                                <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
+                                <div className="row mt-2" style={{background:"white"}}>
                                     <div className="col-md-11">
                                         <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
                                     </div>
-                                    <div className="col-md-1">
+                                    <div className="col-md-1" onClick={() => this.handleClose()}>
                                         <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>

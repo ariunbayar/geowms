@@ -715,27 +715,27 @@ def _check_and_make_form_json(feature_id, values):
         view_props = ViewProperties.objects.filter(view=view)
 
         for view_prop in view_props:
+            prop_qs = LProperties.objects
+            prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+            prop_qs = prop_qs.first()
+
+            form_json = dict()
+            form_json['property_name'] = prop_qs.property_name
+            form_json['property_id'] = prop_qs.property_id
+            form_json['property_code'] = prop_qs.property_code
+            form_json['property_definition'] = prop_qs.property_definition
+            if prop_qs.value_type_id == 'single-select':
+                code_list_values = _code_list_display(prop_qs.property_id)
+            form_json['value_type_id'] = prop_qs.value_type_id
+            form_json['value_type'] = prop_qs.value_type_id
+            form_json['data_list'] = code_list_values
+            form_json['data'] = ''
+
             for p_code, value in values.items():
-                form_json = dict()
-
-                prop = LProperties.objects.filter(
-                    property_id=view_prop.property_id,
-                    property_code__icontains=p_code
-                ).first()
-
-                if prop:
-                    form_json['property_name'] = prop.property_name
-                    form_json['property_id'] = prop.property_id
-                    form_json['property_code'] = prop.property_code
-                    form_json['property_definition'] = prop.property_definition
-                    if prop.value_type_id == 'single-select':
-                        code_list_values = _code_list_display(prop.property_id)
-                    form_json['value_type_id'] = prop.value_type_id
-                    form_json['value_type'] = prop.value_type_id
+                if p_code.lower() in prop_qs.property_name.lower():
                     form_json['data'] = value
-                    form_json['data_list'] = code_list_values
 
-                    form_json_list.append(form_json)
+            form_json_list.append(form_json)
 
     form_json_list = json.dumps(form_json_list)
     return form_json_list
@@ -852,22 +852,13 @@ def _check_file_for_geom(form_file_name, uniq_name, ext):
     return uniq_file_name, file_type_name, return_name
 
 
-def _make_geo_id(feature_id, field_name, value):
-    geo_id = ''
-    if field_name == 'inspire_id' or field_name == 'geo_id':
-        geo_id = value
-    else:
-        f_code = get_object_or_404(
-            LFeatures,
-            feature_id=feature_id
-        ).feature_code
-        splited_f_code = f_code.split('-')
-        feature_code = splited_f_code[len(splited_f_code)-1]
-
-        count = ChangeRequest.objects.count()
-        geo_id = str(feature_code) + "_" + str(count)
-
-    return geo_id
+def _make_geo_id(feature_id):
+    qs = LFeatures.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.first()
+    feature_code = qs.feature_code
+    new_geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    return new_geo_id
 
 
 def _check_perm(geo_id, employee, feature_id, geo_json):
@@ -935,18 +926,18 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
         layer = ds[0]
         if layer:
-
-            request_datas = {
-                'theme_id': tid,
-                'package_id': pid,
-                'feature_id': feature_id,
-                'state': ChangeRequest.STATE_NEW,
-                'kind': ChangeRequest.KIND_CREATE,
-                'employee': employee,
-                'order_at': order_at,
-                'order_no': order_no,
-            }
-            main_request_id = _create_request(request_datas)
+            with transaction.atomic():
+                request_datas = {
+                    'theme_id': tid,
+                    'package_id': pid,
+                    'feature_id': feature_id,
+                    'state': ChangeRequest.STATE_NEW,
+                    'kind': ChangeRequest.KIND_CREATE,
+                    'employee': employee,
+                    'order_at': order_at,
+                    'order_no': order_no,
+                }
+                main_request_id = _create_request(request_datas)
 
             for val in layer:
                 values = dict()
@@ -956,7 +947,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
                     if name == 0:
 
-                        geo_id = _make_geo_id(feature_id, field_name, value)
+                        geo_id = _make_geo_id(feature_id)
                         geo_json = val.geom.json  # goemetry json
 
                         if geo_json:
