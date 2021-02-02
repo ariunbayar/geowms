@@ -24,7 +24,6 @@ export class OrgUser extends Component {
         return (
             <Switch>
                 <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={ UserTable }/>
-                {/* <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/нэмэх/" component={ UserAdd }/> */}
                 <Route
                     exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/нэмэх/"
                     component={(props) =>
