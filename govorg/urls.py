@@ -144,6 +144,7 @@ urlpatterns = [
     path('', include(([
         path('', org_views.frontend, name='frontend'),
         path('emp-role/', org_views.emp_role, name='emp-role'),
+        path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

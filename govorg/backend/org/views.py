@@ -200,3 +200,19 @@ def emp_role(request):
     }
 
     return JsonResponse(rsp)
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_approve_and_revoke(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+
+    approve = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).first()
+    revoke = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_REVOKE).first()
+
+    rsp = {
+        'approve': True if approve else False,
+        'revoke': True if revoke else False,
+    }
+    return JsonResponse(rsp)
