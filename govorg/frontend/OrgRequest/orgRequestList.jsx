@@ -5,6 +5,7 @@ import ModalAlert from "@utils/Modal/ModalAlert"
 import { PortalDataTable } from '@utils/DataTable/index'
 import MakeOronZai from './makeOronZai'
 import OpenMapModal from './openMapModal'
+import { service } from "./service"
 
 const make_org_employee = ({values}) => {
     return values.org + '/' + values.employee
@@ -83,7 +84,18 @@ export default class OrgRequestList extends Component {
         this.modalAlertCloseTime = this.modalAlertCloseTime.bind(this)
         this.openModalMap = this.openModalMap.bind(this)
         this.refreshData = this.refreshData.bind(this)
+        this.onChangeItems = this.onChangeItems.bind(this)
 
+    }
+
+    componentDidMount() {
+        service
+            .getChoices()
+            .then(({success, modules, choices}) => {
+                if (success) {
+                    this.setState({ modules, choices })
+                }
+            })
     }
 
     openModalMap(values) {
@@ -120,9 +132,19 @@ export default class OrgRequestList extends Component {
         }
     }
 
+    onChangeItems(value, field, main_module) {
+        console.log(field, value, main_module);
+        this.state[main_module].map((module, idx) => {
+            if (module.id == value) {
+                this.setState({ [field]: module[field]})
+            }
+        })
+    }
+
     render() {
-        const {choices, packages, features, themes, title, model_type_icon, modal_alert_status} = this.state
+        const {choices, packages, features, title, model_type_icon, modal_alert_status, modules} = this.state
         const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
+        console.log(packages, features);
         return (
             <div className="row">
                 <div className="col-md-12 row">
@@ -134,11 +156,11 @@ export default class OrgRequestList extends Component {
                             {
                                 choices && choices.length > 0
                                 ?
-                                choices[0].map((choice, idx) =>
-                                    <option key={idx} value={choice[0]}>{choice[1]}</option>
-                                )
+                                    choices[0].map((choice, idx) =>
+                                        <option key={idx} value={choice[0]}>{choice[1]}</option>
+                                    )
                                 :
-                                null
+                                    null
                             }
                         </select>
                     </div>
@@ -151,9 +173,9 @@ export default class OrgRequestList extends Component {
                             {
                                 choices && choices.length > 0
                                 ?
-                                choices[1].map((choice, idx) =>
-                                    <option key={idx} value={choice[0]}>{choice[1]}</option>
-                                )
+                                    choices[1].map((choice, idx) =>
+                                        <option key={idx} value={choice[0]}>{choice[1]}</option>
+                                    )
                                 :
                                 null
                             }
@@ -165,14 +187,14 @@ export default class OrgRequestList extends Component {
                         <div className="row">
                             <div className="col-md-4">
                                 <select className="form-control form-control-sm"
-                                    onChange={(e) => this.onChangeTheme(e.target.value, 'theme')}
+                                    onChange={(e) => this.onChangeItems(e.target.value, 'packages', 'modules')}
                                 >
                                 <option value=''>--- Дэд сангаар хайх ---</option>
                                 {
-                                    themes && themes.length > 0
+                                    modules && modules.length > 0
                                     ?
-                                        themes.map((module, idx) =>
-                                            <option key={idx} value={module.id}>{module.name}</option>
+                                        modules.map((theme, idx) =>
+                                            <option key={idx} value={theme.id}>{theme.name}</option>
                                         )
                                     :
                                     null
@@ -181,7 +203,7 @@ export default class OrgRequestList extends Component {
                             </div>
                             <div className="col-md-4">
                                 <select className="form-control form-control-sm"
-                                    onChange={(e) => this.onChangePackage(e.target.value, 'package')}
+                                    onChange={(e) => this.onChangeItems(e.target.value, 'features', 'packages')}
                                 >
                                 <option value="">--- Багцаас хайх ---</option>
                                 {

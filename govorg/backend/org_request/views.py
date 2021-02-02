@@ -195,7 +195,9 @@ def _get_packages(theme_id, package_ids, feature_ids):
     return packages
 
 
-def _getChoices(user):
+@require_GET
+@ajax_required
+def get_choices(request):
     choices = []
     modules = []
     for f in ChangeRequest._meta.get_fields():
@@ -205,7 +207,7 @@ def _getChoices(user):
             if f.name == 'kind':
                 choices.append(f.choices)
 
-    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(user)
+    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(request.user)
     themes = LThemes.objects.filter(theme_id__in=theme_ids)
     for theme in themes:
         modules.append({
@@ -214,7 +216,12 @@ def _getChoices(user):
             'packages': _get_packages(theme.theme_id, package_ids, feature_ids)
         })
 
-    return {'choices': choices, 'modules': modules}
+    rsp = {
+        'success': True,
+        'choices': choices,
+        'modules': modules
+    }
+    return JsonResponse(rsp)
 
 
 def _make_group_request(group_id, item):
