@@ -494,42 +494,6 @@ def _geo_json_convert_geom(geojson):
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def geomAdd(request, payload, fid):
-
-    feature_obj = get_object_or_404(LFeatures, feature_id=fid)
-    geojson = payload.get('geojson')
-    geom = _geo_json_convert_geom(geojson)
-    if not geom:
-        rsp = {
-            'success': False,
-            'info': "Geojson алдаатай байна.",
-            'id': None
-        }
-        return JsonResponse(rsp)
-    geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
-    MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
-    fields = get_rows(fid)
-    for field in fields:
-        MDatas.objects.create(
-            geo_id = geo_id,
-            feature_config_id = field['feature_config_id'],
-            data_type_id = field['data_type_id'],
-            property_id = field['property_id'],
-            created_by = 1,
-            modified_by = 1
-        )
-    refreshMaterializedView(fid)
-    rsp = {
-        'success': True,
-        'info': "Ажилттай ",
-        'id': geo_id
-    }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
 def create(request, payload):
 
     tid = payload.get('tid')

@@ -27,7 +27,6 @@ export const service = {
     sendFeature,
     update,
     geomUpdate,
-    geomAdd,
     geomType,
     getRole,
     detailCreate,
@@ -128,15 +127,6 @@ function geomUpdate(geojson, fid, id) {
         body: JSON.stringify({geojson, fid, id}),
     }
     return fetch(`${prefix}/${fid}/geom-update/`, opts).then(handleResponse)
-}
-
-function geomAdd(geojson, fid) {
-
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({geojson}),
-    }
-    return fetch(`${prefix}/${fid}/add-geom/`, opts).then(handleResponse)
 }
 
 function create(tid, pid, fid, form_json, geo_json) {
