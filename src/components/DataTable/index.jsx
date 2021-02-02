@@ -11,7 +11,7 @@ export class PortalDataTable extends Component {
         this.state = {
             items: [],
             items_length: null,
-            current_page:1,
+            current_page: 1,
             per_page: props.per_page || 20,
             query: '',
             уншиж_байгаа_эсэх: false,
@@ -36,19 +36,16 @@ export class PortalDataTable extends Component {
     handleSort(sort_name, sort_type) {
         if(sort_type){
             this.setState({[sort_name]: false, sort_name})
-            this.paginate(this.state.current_page, this.state.query, sort_name)
         }else{
             this.setState({[sort_name]: true, sort_name: '-' + sort_name})
-            this.paginate(this.state.current_page, this.state.query, '-'+sort_name)
         }
     }
 
-    paginate (page, query, sort_name, custom_query) {
+    paginate (page, query, sort_name, per_page, custom_query) {
         const { жагсаалтын_холбоос } = this.state
-        const perpage = this.state.per_page
-        this.setState({ current_page: page, уншиж_байгаа_эсэх: true })
+        this.setState({ уншиж_байгаа_эсэх: true })
         return service
-            .list(жагсаалтын_холбоос, page, perpage, query, sort_name, custom_query)
+            .list(жагсаалтын_холбоос, page, per_page, query, sort_name, custom_query)
             .then(page => {
                 this.setState({ items: page.items, items_length: page.items.length, уншиж_байгаа_эсэх: false })
                 return page
@@ -58,38 +55,25 @@ export class PortalDataTable extends Component {
     handleSearch(field, e) {
         if(e.target.value.length >= 1)
         {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value)
+            this.setState({ [field]: e.target.value, query: e.target.value })
         }
         else
         {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value)
+            this.setState({ [field]: e.target.value, query: e.target.value })
         }
     }
 
     componentDidUpdate(pp, ps){
-        const {current_page, query, sort_name} = this.state
         if(pp.refresh !== this.props.refresh){
-            this.paginate(current_page, query, sort_name)
-        }
-        if(ps.per_page !== this.state.per_page){
-            this.paginate(current_page, query, sort_name)
+            this.setState({ current_page: 1 })
         }
         if(pp.custom_query !== this.props.custom_query){
-            this.paginate(1, query, sort_name, this.props.custom_query)
+            this.setState({ current_page: 1, custom_query: this.props.custom_query})
         }
-    }
-
-    pageInput(per_page){
-        const {current_page, query, sort_name} = this.state
-        this.setState({per_page})
-        this.paginate(current_page, query, sort_name)
-
     }
 
     render() {
-        const { items,current_page, items_length, per_page,
+        const { items, current_page, items_length, per_page,
             талбарууд, хоосон_байх_үед_зурвас, нэмэх_товч, уншиж_байх_үед_зурвас,
             уншиж_байгаа_эсэх, хувьсах_талбарууд, нэмэлт_талбарууд,
             хайлт, color, max_data, table_head_color
@@ -186,9 +170,12 @@ export class PortalDataTable extends Component {
                             </table>
                         </div>
                         <Pagination
+                            current_page={current_page}
+                            custom_query={this.state.custom_query}
                             paginate={this.paginate}
                             query={this.state.query}
                             sort_name={this.state.sort_name}
+                            per_page={per_page}
                             color={color}
                         />
                     </div>

@@ -8,6 +8,7 @@ from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections, transaction
+from django.db.models import Q
 
 from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
@@ -681,11 +682,10 @@ def get_count(request):
 
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
-
     qs = ChangeRequest.objects
     qs = qs.filter(state=ChangeRequest.STATE_NEW)
     qs = qs.filter(feature_id__in=emp_features)
-
+    qs = qs.exclude(Q(form_json__isnull=True) & Q(geo_json__isnull=True))
     revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
     request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 
