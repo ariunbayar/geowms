@@ -38,9 +38,11 @@ export class App extends Component {
     }
 
     componentDidMount() {
-        this.requestCount()
-        this.getEmpRoles()
-        this.getApproveAndRevoke()
+        Promise.all([
+            this.requestCount(),
+            this.getEmpRoles(),
+            this.getApproveAndRevoke()
+        ])
     }
 
     requestCount() {
