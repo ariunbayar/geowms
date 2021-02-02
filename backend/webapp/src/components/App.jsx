@@ -97,7 +97,10 @@ export default class App extends Component {
               <Route path={"/back/wms/"} component={WMSPage} />
               <Route path={"/back/geoserver/"} component={Geoserver} />
               <Route path={"/back/org-role/"} component={OrgRole} />
-              <Route path={"/back/байгууллага/"} component={Org} />
+              <Route
+                path="/back/байгууллага/"
+                component={(props) => <Org {...props} refreshCount={() => this.componentDidMount()} />}
+              />
               <Route path={"/back/дэд-сан-бүтэц/"} component={DedsanBvtets} />
               <Route path={"/back/inspire-views/"} component={InspireViews} />
               <Route exact path={"/back/log/"} component={Log} />

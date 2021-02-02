@@ -192,12 +192,14 @@ export class OrgAdd extends Component {
 
     modalClose(){
         const org_level = this.props.match.params.level
+        this.props.refreshCount()
         this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
     }
 
     modalCloseTime(){
         const org_level = this.props.match.params.level
         this.state.timer = setTimeout(() => {
+            this.props.refreshCount()
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
         }, 2000)
     }
