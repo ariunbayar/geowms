@@ -65,10 +65,10 @@ export class PortalDataTable extends Component {
 
     componentDidUpdate(pp, ps){
         if(pp.refresh !== this.props.refresh){
-            this.setState({ current_page: 1 })
+            this.setState({ refresh: this.props.refresh })
         }
         if(pp.custom_query !== this.props.custom_query){
-            this.setState({ current_page: 1, custom_query: this.props.custom_query})
+            this.setState({ custom_query: this.props.custom_query })
         }
     }
 
@@ -170,6 +170,7 @@ export class PortalDataTable extends Component {
                             </table>
                         </div>
                         <Pagination
+                            refresh={this.state.refresh}
                             current_page={current_page}
                             custom_query={this.state.custom_query}
                             paginate={this.paginate}

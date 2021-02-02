@@ -48,6 +48,10 @@ export class Pagination extends Component {
             this.setState({ page: current_page })
             this.loadPage(current_page, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
         }
+        if(prevProps.refresh !== this.props.refresh)
+        {
+            this.loadPage(1, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
+        }
         if(prevProps.per_page !== this.props.per_page)
         {
             const per_page = this.props.per_page
