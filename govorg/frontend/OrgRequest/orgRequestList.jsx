@@ -10,6 +10,25 @@ const make_org_employee = ({values}) => {
     return values.org + '/' + values.employee
 }
 
+export const make_state_color = (state) => {
+    let color
+    if (state == "ШИНЭ") color = 'text-primary'
+    else if (state == "ТАТГАЛЗСАН") color = 'text-danger'
+    else if (state == "ЗӨВШӨӨРСӨН") color = 'text-success'
+    else if (state == "ХЯНАХ") color = 'text-success'
+    return color
+}
+
+export const make_kind_color = (kind) => {
+    let color
+    if (kind == "ҮҮССЭН") color = 'text-success'
+    else if (kind == "ЗАССАН") color = 'text-primary'
+    else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
+    else if (kind == "УСТГАСАН") color = 'text-danger'
+    else if (kind == "ШУУД") color = 'text-danger'
+    return color
+}
+
 export default class OrgRequestList extends Component {
 
     constructor(props) {
@@ -46,8 +65,8 @@ export default class OrgRequestList extends Component {
                         'refreshData': (is_modal, title, model_type_icon) => this.refreshData(is_modal, title, model_type_icon),
                     }
                 },
-                {"field": "state", "action": (values) => this.make_state_color(values) , "action_type": true},
-                {"field": "kind", "action": (values) => this.make_kind_color(values), "action_type": true},
+                {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
+                {"field": "kind", "action": (values) => make_kind_color(values), "action_type": true},
             ],
             нэмэлт_талбарууд: [{
                 "title": 'Шийдвэрлэх',
@@ -65,25 +84,6 @@ export default class OrgRequestList extends Component {
         this.openModalMap = this.openModalMap.bind(this)
         this.refreshData = this.refreshData.bind(this)
 
-    }
-
-    make_state_color(state) {
-        let color
-        if (state == "ШИНЭ") color = 'text-primary'
-        else if (state == "ТАТГАЛЗСАН") color = 'text-danger'
-        else if (state == "ЗӨВШӨӨРСӨН") color = 'text-success'
-        else if (state == "ХЯНАХ") color = 'text-success'
-        return color
-    }
-
-    make_kind_color(kind) {
-        let color
-        if (kind == "ҮҮССЭН") color = 'text-success'
-        else if (kind == "ЗАССАН") color = 'text-primary'
-        else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
-        else if (kind == "УСТГАСАН") color = 'text-danger'
-        else if (kind == "ШУУД") color = 'text-danger'
-        return color
     }
 
     openModalMap(values) {

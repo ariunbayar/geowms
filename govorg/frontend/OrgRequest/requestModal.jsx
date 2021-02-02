@@ -5,6 +5,14 @@ import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
 
+export const get_modal_text = (kind) => {
+    let text = ''
+    if (kind == 'ҮҮССЭН') text = 'шинэ геометр өгөгдөл үүсгэхийг'
+    else if (kind == 'ЗАССАН') text ='засагдсан геометр өгөгдлийг'
+    else if (kind == 'УСТГАСАН') text = 'геометр өгөгдлийг устгахыг'
+    return text
+}
+
 export const FormJson = ({form_json, handleModalOpen, values}) => {
     return (
         <div className="col-md-4 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
@@ -18,10 +26,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                             onClick={() => handleModalOpen(
                                 'reject',
                                 `Та ${
-                                    values.kind == 'ҮҮССЭН' ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                    : values.kind == 'ЗАССАН' ? 'засагдсан геометр өгөгдлийг'
-                                    : values.kind == 'УСТГАСАН' ? 'геометр өгөгдлийг устгахыг'
-                                    : null
+                                    get_modal_reject_text(values.kind)
                                 }
                                 татгалзахдаа итгэлтэй байна уу ?`,
                                 "Тохиргоог татгалзах",
@@ -38,10 +43,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                             onClick={() => handleModalOpen(
                                 'approve',
                                 `Та ${
-                                    values.kind == 'ҮҮССЭН' ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                    : values.kind == 'ЗАССАН' ? 'засагдсан геометр өгөгдлийг'
-                                    : values.kind == 'УСТГАСАН' ? 'геометр өгөгдлийг устгахыг'
-                                    : null
+                                    get_modal_text(values.kind)
                                 }
                                 зөвшөөрөхдөө итгэлтэй байна уу ?`,
                                 "Тохиргоог зөвшөөрөх",
@@ -317,10 +319,7 @@ export default class RequestModal extends Component {
                                             `Та ${
                                                 values.length == 1
                                                     ?
-                                                        values[0].kind == 'ҮҮССЭН' ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                                        : values[0].kind == 'ЗАССАН' ? 'засагдсан геометр өгөгдлийг'
-                                                        : values[0].kind == 'УСТГАСАН' ? 'геометр өгөгдлийг устгахыг'
-                                                        : null
+                                                        get_modal_text(values[0].kind)
                                                     :
                                                 values.length > 1
                                                     ?
@@ -344,10 +343,7 @@ export default class RequestModal extends Component {
                                             `Та ${
                                                 values.length == 1
                                                     ?
-                                                        values[0].kind == 'ҮҮССЭН' ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                                        : values[0].kind == 'ЗАССАН' ? 'засагдсан геометр өгөгдлийг'
-                                                        : values[0].kind == 'УСТГАСАН' ? 'геометр өгөгдлийг устгахыг'
-                                                        : null
+                                                        get_modal_text(values[0].kind)
                                                     :
                                                 values.length > 1
                                                     ?
