@@ -104,6 +104,7 @@ export class UserAdd extends Component {
     }
 
     modalCloseTime(user_id) {
+        this.props.refreshCount()
         setTimeout(() => this.modalClose(user_id), 2000)
     }
 
