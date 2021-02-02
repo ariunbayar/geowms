@@ -573,10 +573,37 @@ def _is_geom_included(geo_json, org_geo_id):
     return is_included
 
 
+# Тухайн geom ни feature доторх geom той давхцаж байгаа эсэхийг шалгана
+# Давхцаж байгаа geom болон feature_id array хэлбэрээр буцаана
+# geo_json = нэг geojson авна
+# feature_ids = feature id list авна
+def _geom_contains_feature_geoms(geo_json, feature_ids):
+    is_included = list()
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT geo_id, feature_id
+            FROM m_geo_datas
+            WHERE (
+                    st_overlaps(geo_data, ST_GeomFromGeoJSON(%s))
+                    OR
+                    ST_Contains(geo_data, ST_GeomFromGeoJSON(%s))
+                    OR
+                    ST_Contains(ST_GeomFromGeoJSON(%s), geo_data)
+            )
+            AND feature_id in ({feature_ids})
+        """.format(feature_ids=', '.join(['{}'.format(f) for f in feature_ids]))
+        cursor.execute(sql, [str(geo_json), str(geo_json), str(geo_json)])
+        is_included = [dict((cursor.description[i][0], value) \
+            for i, value in enumerate(row)) for row in cursor.fetchall()]
+
+    return is_included
+
+
 def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
     success = True
     info = ''
     EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
+    FeatureOverlaps = apps.get_model('dedsanbutets', 'FeatureOverlaps')
     qs = EmpPermInspire.objects
     qs = qs.filter(emp_perm__employee=employee)
     qs = qs.filter(feature_id=fid)
@@ -591,6 +618,13 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
         if not is_included:
             success = False
             info = "Байгууллагын эрх олгогдоогүй байна."
+        overlap_feature_id = FeatureOverlaps.objects.filter(feature_id=fid).values_list('overlap_feature_id', flat=True)
+        overlap_feature_id = [i for i in overlap_feature_id]
+        overlap_feature_id.append(fid)
+        is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id)
+        if is_contains:
+            success = False
+            info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains]))
 
     return success, info
 
