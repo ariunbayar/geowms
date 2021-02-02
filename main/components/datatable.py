@@ -14,6 +14,7 @@ class Datatable():
         self.perpage = payload.get('perpage') or 20
         self.page = payload.get('page') or 1
         self.sort_name = payload.get('sort_name') or 'pk'
+        self.custom_query = payload.get('custom_query') or ''
         self.хувьсах_талбарууд = хувьсах_талбарууд
         self.search_qs = initial_qs or model.objects
         self.items_page = None
@@ -36,6 +37,10 @@ class Datatable():
     def search(self):
         search_qs = self.search_qs.annotate(search=SearchVector(*self.оруулах_талбарууд))
         search_qs = search_qs.filter(search__icontains=self.query)
+
+        if self.custom_query:
+            search_qs = search_qs.filter(**self.custom_query)
+
         self.search_qs = search_qs
 
     def sort(self):

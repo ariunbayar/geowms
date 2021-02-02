@@ -25,7 +25,6 @@ from django.contrib.auth.decorators import login_required
 from main.utils import (
     dict_fetchall,
     refreshMaterializedView,
-    ModelFilter,
     date_to_timezone,
     get_display_items,
     get_fields,
@@ -195,7 +194,9 @@ def _get_packages(theme_id, package_ids, feature_ids):
     return packages
 
 
-def _getChoices(user):
+@require_GET
+@ajax_required
+def get_choices(request):
     choices = []
     modules = []
     for f in ChangeRequest._meta.get_fields():
@@ -205,7 +206,7 @@ def _getChoices(user):
             if f.name == 'kind':
                 choices.append(f.choices)
 
-    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(user)
+    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(request.user)
     themes = LThemes.objects.filter(theme_id__in=theme_ids)
     for theme in themes:
         modules.append({
@@ -214,7 +215,12 @@ def _getChoices(user):
             'packages': _get_packages(theme.theme_id, package_ids, feature_ids)
         })
 
-    return {'choices': choices, 'modules': modules}
+    rsp = {
+        'success': True,
+        'choices': choices,
+        'modules': modules
+    }
+    return JsonResponse(rsp)
 
 
 def _make_group_request(group_id, item):
@@ -360,13 +366,12 @@ def _хувьсах_талбарууд():
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def getAll(request, payload):
+def get_list(request, payload):
 
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
         qs = ChangeRequest.objects
-        qs = qs.filter(feature_id__in=emp_features)
         qs = qs.filter(feature_id__in=emp_features)
         qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
         if qs:
@@ -690,22 +695,3 @@ def get_count(request):
     }
 
     return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def search(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
-    emp_features = _get_emp_features(employee)
-
-    initial_qs = ChangeRequest.objects.filter(feature_id__in=emp_features)
-    datas = ModelFilter(initial_qs, payload, ChangeRequest).filter()
-    data_list = [_get_org_request(data, employee) for data in datas]
-
-    rsp = {
-        'success': True,
-        'org_request': data_list
-    }
-    return JsonResponse(rsp)
-

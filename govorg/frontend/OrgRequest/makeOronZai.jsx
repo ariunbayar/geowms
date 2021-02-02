@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 
 import OpenMapModal from './openMapModal'
+import {make_kind_color, make_state_color} from './orgRequestList'
 
 export default class MakeOronZai extends Component {
 
@@ -108,10 +109,7 @@ export default class MakeOronZai extends Component {
                                             ?
                                                 <td key={idx}
                                                     className={
-                                                        value[field.eng_name] == 'ШИНЭ' ? 'text-primary' :
-                                                        value[field.eng_name] == 'ТАТГАЛЗСАН' ? 'text-danger' :
-                                                        value[field.eng_name] == 'ЗӨВШӨӨРСӨН' ? 'text-success':
-                                                        value[field.eng_name] == 'ХЯНАХ' ? 'text-success': null
+                                                        make_state_color(value[field.eng_name])
                                                     }
                                                 >
                                                     {value[field.eng_name]}
@@ -121,11 +119,7 @@ export default class MakeOronZai extends Component {
                                             ?
                                                 <td key={idx}
                                                     className={
-                                                        value[field.eng_name] == 'ҮҮССЭН' ? 'text-success' :
-                                                        value[field.eng_name] == 'ЗАССАН' ? 'text-primary' :
-                                                        value[field.eng_name] == 'ЦУЦЛАСАН' ? 'text-danger':
-                                                        value[field.eng_name] == 'УСТГАСАН' ? 'text-danger':
-                                                        value[field.eng_name] == 'ШУУД' ? 'text-danger': null
+                                                        make_kind_color(value[field.eng_name])
                                                     }
                                                 >
                                                     {value[field.eng_name]}
