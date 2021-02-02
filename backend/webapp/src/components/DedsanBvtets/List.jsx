@@ -28,6 +28,7 @@ export class List extends Component {
             hideRight: false,
             formLorR: '',
             top_id: '',
+            feature_id: null
         }
         this.getAll = this.getAll.bind(this)
         this.handleForm = this.handleForm.bind(this)
@@ -44,7 +45,7 @@ export class List extends Component {
     }
 
     getAll(){
-        const { formLorR, code } = this.state
+        const { formLorR, code, feature_id } = this.state
         service.getall().then(({success, data }) => {
             if(success){
                 this.setState({
@@ -52,14 +53,14 @@ export class List extends Component {
                 })
             }
             if ( formLorR == 'right') {
-                this.getProperties(code)
+                this.getProperties(code, feature_id)
                 this.setState({ hideRight: true })
             }
             if ( formLorR == 'left') this.setState({ hideRight: false })
         })
     }
 
-    getProperties(code) {
+    getProperties(code, feature_id) {
         this.setState({ form_is_laod: true, })
         service.getprop(code).then(rsp => {
             if(rsp.success){
@@ -67,7 +68,8 @@ export class List extends Component {
                     feature_lists: rsp.feature_lists,
                     check: rsp.check,
                     code: code,
-                    hideRight: true
+                    hideRight: true,
+                    feature_id
                 })
             }
         })
@@ -195,9 +197,9 @@ export class List extends Component {
                                                 <ul>
                                                     {packages.features.map((feature, idx) =>
                                                         <li key={idx}>
-                                                            <a onClick={() => this.getProperties(feature.code)}>
+                                                            <a onClick={() => this.getProperties(feature.code, feature.id)}>
                                                                 <i className="fa fa-table"></i> &nbsp;
-                                                                <span role="button" className="hidden-xs gp-text-primary" > {feature.name} </span>
+                                                                <span role="button" className="hidden-xs gp-text-primary" > {feature.name}</span>
                                                             </a>
                                                             &nbsp;
                                                             {is_delete &&
@@ -257,9 +259,11 @@ export class List extends Component {
                         <SideBar
                             features={this.state.feature_lists}
                             check={this.state.check}
+                            feature_id={this.state.feature_id}
                             handleFormLeft={this.handleFormLeft}
                             handleForm={() => this.handleForm()}
                             hide={hideRight}
+                            list_all={list_all}
                         />:
                         <div>
                             <Forms

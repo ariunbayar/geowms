@@ -2,7 +2,7 @@ from django.db import connections
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 
-from .models import ViewNames, ViewProperties
+from .models import ViewNames, ViewProperties, FeatureOverlaps
 from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
 
 from django.views.decorators.http import require_GET, require_POST
@@ -927,3 +927,51 @@ def removeView(table_name):
         return True
     except Exception:
         return False
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def feature_overlaps_set(request, payload):
+    feature_id = payload.get('feature_id')
+    overlap_feature_id = payload.get('overlap_feature_id')
+    state = payload.get('state')
+    qs = FeatureOverlaps.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.filter(overlap_feature_id=overlap_feature_id)
+    if state == 'remove':
+        qs.delete()
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хаслаа'
+        }
+
+    else:
+        qs = qs.first()
+        if not qs:
+            FeatureOverlaps.objects.create(
+                feature_id=feature_id,
+                overlap_feature_id=overlap_feature_id
+            )
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай нэмлээ'
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def feature_overlaps_get(request, feature_id):
+    qs = FeatureOverlaps.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.values_list('overlap_feature_id', flat=True)
+    feature_ids = [i for i in qs]
+    rsp = {
+        'success': True,
+        'feature_ids': feature_ids
+    }
+
+    return JsonResponse(rsp)
