@@ -196,6 +196,7 @@ def _get_packages(theme_id, package_ids, feature_ids):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_choices(request):
     choices = []
     modules = []
@@ -664,7 +665,7 @@ def request_approve(request, payload):
                     'info': 'Танд баталгаажуулах эрх алга байна.'
                 }
 
-        # refreshMaterializedView(feature_id)
+        refreshMaterializedView(feature_id)
         rsp = {
             'success': True,
             'info': 'Амжилттай баталгаажуулж дууслаа'
