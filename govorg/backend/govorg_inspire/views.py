@@ -585,6 +585,8 @@ def remove(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     geo_data = _get_geom(old_geo_id, fid)
     if not geo_data:
         rsp = {
@@ -606,7 +608,7 @@ def remove(request, payload):
             theme_id = tid,
             package_id = pid,
             feature_id = fid,
-            employee = employee,
+            org = org,
             state = ChangeRequest.STATE_NEW,
             kind = ChangeRequest.KIND_DELETE,
             form_json = None,
@@ -636,6 +638,8 @@ def update(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -649,7 +653,7 @@ def update(request, payload):
             theme_id = tid,
             package_id = pid,
             feature_id = fid,
-            employee = employee,
+            org = org,
             state = ChangeRequest.STATE_NEW,
             kind = ChangeRequest.KIND_UPDATE,
             form_json = form_json,
