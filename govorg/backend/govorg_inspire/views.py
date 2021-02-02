@@ -744,7 +744,7 @@ def _check_and_make_form_json(feature_id, values):
 def _create_request(request_datas):
     change_request = ChangeRequest()
 
-    change_request.old_geo_id = request_datas['geo_id'] if 'geo_id' in request_datas else None
+    change_request.old_geo_id = None
     change_request.new_geo_id = None
     change_request.theme_id = request_datas['theme_id']
     change_request.package_id = request_datas['package_id']
@@ -769,7 +769,6 @@ def _make_request(values, request_values):
     )
 
     request_datas = {
-        'geo_id': request_values['geo_id'],
         'theme_id': request_values['theme_id'],
         'package_id': request_values['package_id'],
         'feature_id': request_values['feature_id'],
@@ -861,16 +860,10 @@ def _make_geo_id(feature_id):
     return new_geo_id
 
 
-def _check_perm(geo_id, employee, feature_id, geo_json):
-    perm_kind = ''
+def _check_perm(employee, feature_id, geo_json):
 
-    geo = MGeoDatas.objects.filter(geo_id=geo_id)
-    if geo:
-        request_kind = ChangeRequest.KIND_UPDATE
-        perm_kind = EmpPermInspire.PERM_UPDATE
-    else:
-        request_kind = ChangeRequest.KIND_CREATE
-        perm_kind = EmpPermInspire.PERM_CREATE
+    request_kind = ChangeRequest.KIND_CREATE
+    perm_kind = EmpPermInspire.PERM_CREATE
 
     success, info = has_employee_perm(
                         employee,
@@ -894,6 +887,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
     feature_id = fid
     success = False
     info = ''
+    main_request_id = None
 
     form = OrderForm(request.POST)
     if form.is_valid():
@@ -927,17 +921,18 @@ def file_upload_save_data(request, tid, pid, fid, ext):
         layer = ds[0]
         if layer:
             with transaction.atomic():
-                request_datas = {
-                    'theme_id': tid,
-                    'package_id': pid,
-                    'feature_id': feature_id,
-                    'state': ChangeRequest.STATE_NEW,
-                    'kind': ChangeRequest.KIND_CREATE,
-                    'employee': employee,
-                    'order_at': order_at,
-                    'order_no': order_no,
-                }
-                main_request_id = _create_request(request_datas)
+                if len(layer) > 1:
+                    request_datas = {
+                        'theme_id': tid,
+                        'package_id': pid,
+                        'feature_id': feature_id,
+                        'state': ChangeRequest.STATE_NEW,
+                        'kind': ChangeRequest.KIND_CREATE,
+                        'employee': employee,
+                        'order_at': order_at,
+                        'order_no': order_no,
+                    }
+                    main_request_id = _create_request(request_datas)
 
             for val in layer:
                 values = dict()
@@ -947,12 +942,11 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
                     if name == 0:
 
-                        geo_id = _make_geo_id(feature_id)
+                        # geo_id = _make_geo_id(feature_id)
                         geo_json = val.geom.json  # goemetry json
 
                         if geo_json:
                             success, info, request_kind = _check_perm(
-                                geo_id,
                                 employee,
                                 feature_id,
                                 geo_json
@@ -977,7 +971,6 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     values[field_name] = value
 
                 request_values = {
-                    'geo_id': geo_id,
                     'theme_id': tid,
                     'package_id': pid,
                     'feature_id': fid,

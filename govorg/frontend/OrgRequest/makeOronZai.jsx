@@ -10,7 +10,6 @@ export default class MakeOronZai extends Component {
             show_group: false,
             values: props.values,
             fields:[
-                {'mn_name': 'Геом дугаар', 'eng_name': 'old_geo_id'},
                 {'mn_name': 'Төлөв', 'eng_name': 'state'},
                 {'mn_name': 'Өөрчлөлт', 'eng_name': 'kind'},
             ],
@@ -61,9 +60,9 @@ export default class MakeOronZai extends Component {
         const { group, theme_name, package_name, feature_name } = values
         return (
             <div>
-                <span className={group ? "btn " : ''} onClick={this.showGroup}>
+                <a role={group ? 'button' : ""} className={group ? "text-primary" : ''} onClick={this.showGroup}>
                     {theme_name} / {package_name} / {feature_name}
-                </span>
+                </a>
                 {show_group && <br />}
                 {
                     show_group
@@ -103,7 +102,7 @@ export default class MakeOronZai extends Component {
                                             :
                                                 <td></td>
                                         }
-                                        <th>{g_idx + 1}</th>
+                                        <th htmlFor={g_idx}>{g_idx + 1}</th>
                                         {fields.map((field, idx) =>
                                             field.eng_name == 'state'
                                             ?

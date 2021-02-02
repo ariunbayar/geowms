@@ -717,6 +717,8 @@ def datetime_to_string(date):
 
 
 def date_to_timezone(input_date):
+    if '/' in input_date:
+        input_date = input_date.replace('/', '-')
     naive_time = datetime.strptime(input_date, '%Y-%m-%d')
     output_date = timezone.make_aware(naive_time)
     return output_date

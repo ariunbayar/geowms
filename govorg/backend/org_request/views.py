@@ -219,17 +219,19 @@ def _getChoices(user):
 
 def _make_group_request(group_id, item):
     if not item['form_json'] and not item['geo_json'] and not item['old_geo_id']:
+        display_items = list()
+
         qs = ChangeRequest.objects
         qs = qs.filter(group_id=item['id'])
-
-        fields = get_fields(ChangeRequest)
-        хувьсах_талбарууд = _хувьсах_талбарууд()
-
-        return get_display_items(
+        if qs.count() > 1:
+            fields = get_fields(ChangeRequest)
+            хувьсах_талбарууд = _хувьсах_талбарууд()
+            display_items = get_display_items(
                 qs,
                 fields,
                 хувьсах_талбарууд
             )
+        return display_items
 
 
 def _get_emp_inspire_roles(user):
@@ -413,6 +415,7 @@ def request_reject(request, payload):
     if perm_reject:
         for r_id in ids:
             change_req_obj = get_object_or_404(ChangeRequest, pk=r_id)
+            _check_group_items(change_req_obj)
             change_req_obj.state = ChangeRequest.STATE_REJECT
             change_req_obj.save()
 
@@ -555,12 +558,20 @@ def _has_data_in_geo_datas(old_geo_id, feature_id):
     return qs
 
 
-def _change_state_main_group(initial_qs):
-    group_id = initial_qs.first().group_id
-    group_qs = ChangeRequest.objects
-    group_qs = group_qs.filter(pk=group_id)
-    group_qs.update(state=ChangeRequest.STATE_APPROVE)
-    return True
+def _check_group_items(r_approve):
+    qs = ChangeRequest.objects
+    group_qs = qs.filter(group_id=r_approve.group_id)
+    if group_qs:
+        group_count = group_qs.count()
+
+        if group_count <= 2:
+            group_main = qs.filter(id=r_approve.group_id)
+            group_main.delete()
+            for other_item in group_qs:
+                other_item.group_id = None
+                other_item.save()
+
+        r_approve.group_id = None
 
 
 @require_POST
@@ -592,6 +603,7 @@ def request_approve(request, payload):
                 old_geo_id = r_approve.old_geo_id
                 geo_json = r_approve.geo_json
                 form_json = r_approve.form_json
+                group_id = r_approve.group_id
 
                 m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
 
@@ -626,10 +638,18 @@ def request_approve(request, payload):
 
                     else:
                         m_geo_datas_qs.delete()
-                        geo_data_model = MDatas.objects.filter(geo_id=old_geo_id)
-                        geo_data_model.delete()
+                        qs = MDatas.objects.filter(geo_id=old_geo_id)
+                        qs.delete()
+                        r_approve.state = ChangeRequest.STATE_REJECT
+                        r_approve.save()
+                        rsp = {
+                            'success': False,
+                            'info': 'Геом өгөгдөл нь олдоогүй учраас татгалзлаа.'
+                        }
+                        return JsonResponse(rsp)
 
                 r_approve.state = ChangeRequest.STATE_APPROVE
+                _check_group_items(r_approve)
                 r_approve.save()
 
             else:
@@ -639,10 +659,9 @@ def request_approve(request, payload):
                     'info': 'Танд баталгаажуулах эрх алга байна.'
                 }
 
-        changed = _change_state_main_group(requests_qs)
-        refreshMaterializedView(feature_id)
+        # refreshMaterializedView(feature_id)
         rsp = {
-            'success': changed,
+            'success': True,
             'info': 'Амжилттай баталгаажуулж дууслаа'
         }
 
