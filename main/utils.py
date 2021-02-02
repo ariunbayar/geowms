@@ -628,7 +628,7 @@ def get_emp_property_roles(employee, fid):
 
             property_details.append({
                 'property_id': property_id,
-                'roles':property_roles
+                'roles': property_roles
             })
 
     return property_ids, property_details
@@ -654,7 +654,6 @@ def check_form_json(fid, form_json, employee):
                         'data_list': propert.get('data_list') or '',
                         'roles': propert.get('roles') or ''
                     })
-                    request_json.append(propert)
 
     return json.dumps(request_json, ensure_ascii=False) if request_json else ''
 

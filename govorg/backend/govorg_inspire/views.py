@@ -551,16 +551,16 @@ def create(request, payload):
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
-            old_geo_id = None,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_CREATE,
-            form_json = form_json,
-            geo_json = geo_json,
+            old_geo_id=None,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_CREATE,
+            form_json=form_json,
+            geo_json=geo_json,
             order_at=order_at,
             order_no=order_no,
     )
