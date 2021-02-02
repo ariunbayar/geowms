@@ -143,8 +143,7 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
-        const { modifyend_selected_feature_check, update_geom_from_list, cancel_button_active, null_form_isload, is_selected_feature } = this.props
-
+        const { modifyend_selected_feature_check, update_geom_from_list, is_delete_request, null_form_isload, cancel_button_active, remove_button_active } = this.props
         if (this.state.is_loading) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
@@ -199,11 +198,8 @@ export default class Маягт extends Component {
                                                             modifyend_selected_feature_check ||
                                                             update_geom_from_list ||
                                                             null_form_isload ||
-                                                            is_selected_feature
-                                                            ?
-                                                                false
-                                                            :
-                                                                true
+                                                            cancel_button_active ||
+                                                            remove_button_active
                                                         }
                                                     >
                                                         {friend.data_list &&
@@ -226,11 +222,8 @@ export default class Маягт extends Component {
                                                         modifyend_selected_feature_check ||
                                                         update_geom_from_list  ||
                                                         null_form_isload ||
-                                                        is_selected_feature
-                                                        ?
-                                                            false
-                                                        :
-                                                            true
+                                                        cancel_button_active ||
+                                                        remove_button_active
                                                     }
                                                 >
                                                     <option value="true">True</option>
@@ -244,11 +237,8 @@ export default class Маягт extends Component {
                                                         modifyend_selected_feature_check ||
                                                         update_geom_from_list ||
                                                         null_form_isload ||
-                                                        is_selected_feature
-                                                        ?
-                                                            false
-                                                        :
-                                                            true
+                                                        cancel_button_active ||
+                                                        remove_button_active
                                                     }
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
