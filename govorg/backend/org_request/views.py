@@ -655,6 +655,23 @@ def request_approve(request, payload):
                         }
                         return JsonResponse(rsp)
 
+                if r_approve.kind == ChangeRequest.KIND_DELETE:
+                    if old_geo_id:
+                        mgeo_qs = MGeoDatas.objects
+                        mgeo_qs = mgeo_qs.filter(geo_id=old_geo_id)
+                        mgeo_qs.delete()
+                        mdatas_qs = MDatas.objects
+                        mdatas_qs = mdatas_qs.filter(geo_id=old_geo_id)
+                        mdatas_qs.delete()
+                    else:
+                        r_approve.state = ChangeRequest.STATE_REJECT
+                        r_approve.save()
+                        rsp = {
+                            'success': False,
+                            'info': 'Геом өгөгдөл нь олдоогүй учраас татгалзлаа.'
+                        }
+                        return JsonResponse(rsp)
+
                 r_approve.state = ChangeRequest.STATE_APPROVE
                 _check_group_items(r_approve)
                 r_approve.save()
@@ -685,7 +702,7 @@ def get_count(request):
     qs = ChangeRequest.objects
     qs = qs.filter(state=ChangeRequest.STATE_NEW)
     qs = qs.filter(feature_id__in=emp_features)
-    qs = qs.exclude(Q(form_json__isnull=True) & Q(geo_json__isnull=True))
+    qs = qs.exclude(Q(form_json__isnull=True) & Q(geo_json__isnull=True) & Q(old_geo_id__isnull=True))
     revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
     request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 

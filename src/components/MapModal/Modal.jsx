@@ -97,7 +97,9 @@ export class Modal extends Control {
     renderComponent(props) {
 
         props.handleClose = () => {
-            props.actionBack()
+            if (props.actionBack) {
+                props.actionBack()
+            }
             this.toggleControl(false)
         }
 
