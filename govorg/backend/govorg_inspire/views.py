@@ -14,9 +14,10 @@ from django.db import connections, transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
-from django.contrib.gis.geos import GEOSGeometry
 from django.core.files.storage import FileSystemStorage
-from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.geos import MultiLineString
+from django.contrib.gis.geos import MultiPoint
+from django.contrib.gis.geos import MultiPolygon
 
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
@@ -54,16 +55,16 @@ def _get_changeset_display(ob):
     geom1 = geom[:9]
     geom2 = geom[10:-2]
     geom3 = geom[-1]
-    geom4 = geom1 + geom2 +geom3
+    geom4 = geom1 + geom2 + geom3
     values_list = json.loads(geom4)
     coordinates = values_list['geom']['coordinates']
     geom_type = values_list['geom']['type']
 
     return {
-        'coordinate':coordinates,
-        'geom_type':geom_type,
-        'changeset_id':ob.id,
-        'changeset_attributes':ob.features,
+        'coordinate': coordinates,
+        'geom_type': geom_type,
+        'changeset_id': ob.id,
+        'changeset_attributes': ob.features,
         'projection': ob.projection
     }
 
@@ -139,12 +140,11 @@ def getRoles(request, fid):
         elif perm_kind == EmpPermInspire.PERM_REVOKE:
             inspire_roles['PERM_REVOKE'] = True
     rsp = {
-        'roles':inspire_roles,
+        'roles': inspire_roles,
         'success': True
     }
 
     return JsonResponse(rsp)
-
 
 
 @require_GET
@@ -350,7 +350,7 @@ def _get_property(ob, roles, lproperties):
     value_type = _get_type(lproperties.value_type_id)
 
     if value_type == 'option':
-       data_list =  _code_list_display(lproperties.property_id)
+        data_list = _code_list_display(lproperties.property_id)
     elif value_type == 'text':
         data = ob.get('value_text') or ''
     elif value_type == 'number':
@@ -362,9 +362,8 @@ def _get_property(ob, roles, lproperties):
         if role.get('property_id') == lproperties.property_id:
             property_roles = role.get('roles')
 
-
     return {
-        'pk':ob.get('id'),
+        'pk': ob.get('id'),
         'property_name': lproperties.property_name,
         'property_id': lproperties.property_id,
         'property_code': lproperties.property_code,
@@ -375,6 +374,7 @@ def _get_property(ob, roles, lproperties):
         'data_list': data_list,
         'roles': property_roles
     }
+
 
 @require_GET
 @ajax_required
@@ -405,10 +405,10 @@ def detailCreate(request, tid, pid, fid):
     property_roles = []
     org_propties_front = []
     value_data = {
-        'pk':'',
-        'value_text':'',
-        'value_date':'',
-        'value_number':''
+        'pk': '',
+        'value_text': '',
+        'value_date': '',
+        'value_number': ''
         }
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_roles = get_emp_property_roles(employee, fid)
@@ -476,11 +476,11 @@ def _geo_json_convert_geom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
 
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom)
         geom_type = GEOSGeometry(geom).geom_type
         if geom_type == 'Point':
@@ -552,8 +552,8 @@ def remove(request, payload):
     geo_data = _get_geom(old_geo_id, fid)
     if not geo_data:
         rsp = {
-        'success': False,
-        'info': "Аль хэдийн устсан геом байна.",
+            'success': False,
+            'info': "Аль хэдийн устсан геом байна.",
         }
         return JsonResponse(rsp)
 
@@ -565,16 +565,16 @@ def remove(request, payload):
         return JsonResponse({'success': success, 'info': info})
 
     ChangeRequest.objects.create(
-            old_geo_id = old_geo_id,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_DELETE,
-            form_json = None,
-            geo_json = None,
+            old_geo_id=old_geo_id,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_DELETE,
+            form_json=None,
+            geo_json=None,
             order_at=order_at,
             order_no=order_no,
     )
@@ -608,16 +608,16 @@ def update(request, payload):
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
-            old_geo_id = old_geo_id,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_UPDATE,
-            form_json = form_json,
-            geo_json = geo_json,
+            old_geo_id=old_geo_id,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_UPDATE,
+            form_json=form_json,
+            geo_json=geo_json,
             order_at=order_at,
             order_no=order_no,
     )
@@ -747,7 +747,7 @@ def _make_request(values, request_values):
     }
     with transaction.atomic():
         success = _create_request(request_datas)
-        info = 'Амжилттай хадгалалаа'
+        info = 'Амжилттай хадгаллаа'
 
     return success, info
 
@@ -954,11 +954,6 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             rsp = {
                 'success': success,
                 'info': info
-            }
-        else:
-            rsp = {
-                'success': success,
-                'info': 'Файл хоосон байна'
             }
 
     else:
