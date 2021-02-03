@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     'backend.org.apps.OrgConfig',
     'backend.log.apps.LogConfig',
     'backend.payment.apps.PaymentConfig',
-    'backend.changeset.apps.ChangesetConfig',
     'backend.gis.apps.GisConfig',
     'backend.dedsanbutets.apps.DedsanbutetsConfig',
     'backend.inspire.apps.InspireConfig',
