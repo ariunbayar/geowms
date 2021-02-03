@@ -32,6 +32,7 @@ def _get_govorg_display(govorg):
 def _system_validation(payload, system=None):
     system_name = payload['name']
     domain = payload['website']
+    org = payload['org']
     errors = {}
 
     if not system_name:
@@ -49,7 +50,7 @@ def _system_validation(payload, system=None):
         if system.name != system_name:
             is_name_changed = True
     if is_name_changed or not system:
-        if GovOrg.objects.filter(name=system_name, deleted_by__isnull=True).first():
+        if GovOrg.objects.filter(name=system_name, deleted_by__isnull=True, org_id=org).first():
             errors['name'] = 'Системийн нэр бүртгэлтэй байна.'
 
     return errors

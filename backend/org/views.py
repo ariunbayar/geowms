@@ -261,6 +261,11 @@ def employee_remove(request, pk):
 
     user = get_object_or_404(User, id=pk)
     employee = get_object_or_404(Employee, user=user)
+    check = _remove_user(user, employee)
+    return JsonResponse({'success': check})
+
+
+def _remove_user(user, employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     change_requests = ChangeRequest.objects.filter(employee=employee)
 
@@ -272,9 +277,10 @@ def employee_remove(request, pk):
             EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
             emp_perm.delete()
         employee.delete()
+        user.delete()
 
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False})
+        return True
+    return False
 
 
 def _org_validation(org_name, org_id):
@@ -387,21 +393,24 @@ def org_remove(request, payload, level):
     org_id = payload.get('org_id')
     org = get_object_or_404(Org, pk=org_id, level=level)
     org_users = Employee.objects.filter(org=org_id)
-    for org_user in org_users:
-        user = User.objects.filter(pk=org_user.user_id)
-        org_user.delete()
-        user.delete()
-    org_govorgs = GovOrg.objects.filter(org=org)
-    for org_govorg in org_govorgs:
-        org_govorg.org = None
-        org_govorg.deleted_by = request.user
-        org_govorg.deleted_at = localtime(now())
-        org_govorg.save()
-    org.orgrole_set.all().delete()
     gov_perm = GovPerm.objects.filter(org=org)
-    gov_perm.delete()
-    org.delete()
-    return JsonResponse({'success': True})
+    with transaction.atomic():
+        gov_perm.delete()
+        for org_user in org_users:
+            user = User.objects.filter(pk=org_user.user_id).first()
+            if user:
+                _remove_user(user, org_user)
+        org_govorgs = GovOrg.objects.filter(org=org)
+        for org_govorg in org_govorgs:
+            org_govorg.org = None
+            org_govorg.deleted_by = request.user
+            org_govorg.deleted_at = localtime(now())
+            org_govorg.save()
+
+        org.orgrole_set.all().delete()
+        org.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 
 @require_POST
