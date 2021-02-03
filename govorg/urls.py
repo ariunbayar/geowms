@@ -61,12 +61,12 @@ urlpatterns = [
         ], 'inspire'))),
 
         path('org-request/', include(([
-            path('', org_request_views.getAll, name="all"),
+            path('', org_request_views.get_list),
             path('change-request/', org_request_views.get_change_all, name="change-request"),
-            path('<int:pk>/delete/', org_request_views.request_delete, name="delete"),
-            path('<int:pk>/approve/', org_request_views.request_approve, name="approve"),
+            path('reject/', org_request_views.request_reject, name="reject"),
+            path('approve/', org_request_views.request_approve, name="approve"),
             path('getCount/', org_request_views.get_count, name='getCount'),
-            path('search/', org_request_views.search, name='request-search'),
+            path('get_choices/', org_request_views.get_choices, name='get-choices'),
         ], 'org-request'))),
         path('zip-code/', include(([
             path('aimag/', zipcode_views.aimag, name='aimag'),

@@ -1,6 +1,6 @@
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-from main.utils import get_display_items
+from main.utils import get_display_items, get_fields
 
 
 class Datatable():
@@ -14,20 +14,11 @@ class Datatable():
         self.perpage = payload.get('perpage') or 20
         self.page = payload.get('page') or 1
         self.sort_name = payload.get('sort_name') or 'pk'
+        self.custom_query = payload.get('custom_query') or ''
         self.хувьсах_талбарууд = хувьсах_талбарууд
-        self.search_qs = initial_qs or model.objects.all()
+        self.search_qs = initial_qs or model.objects
         self.items_page = None
         self.total_page = None
-
-    def get_fields(self):
-        fields = []
-        for field in self.Model._meta.get_fields():
-            name = field.name
-            if field.get_internal_type() == 'ForeignKey':
-                name = name + '_id'
-            fields.append(name)
-
-        return fields
 
     @property
     def хасах_талбарууд(self):
@@ -36,7 +27,7 @@ class Datatable():
     @хасах_талбарууд.setter
     def хасах_талбарууд(self, values):
         if values or not self.оруулах_талбарууд:
-            fields = self.get_fields()
+            fields = get_fields(self.Model)
             for value in values:
                 if value in fields:
                     fields.remove(value)
@@ -46,6 +37,10 @@ class Datatable():
     def search(self):
         search_qs = self.search_qs.annotate(search=SearchVector(*self.оруулах_талбарууд))
         search_qs = search_qs.filter(search__icontains=self.query)
+
+        if self.custom_query:
+            search_qs = search_qs.filter(**self.custom_query)
+
         self.search_qs = search_qs
 
     def sort(self):
