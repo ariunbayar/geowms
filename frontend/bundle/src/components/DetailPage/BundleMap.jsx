@@ -101,6 +101,7 @@ export default class BundleMap extends Component {
         this.drawBorderCircle = this.drawBorderCircle.bind(this)
         this.removeCircle = this.removeCircle.bind(this)
         this.fromLonLatToMapCoord = this.fromLonLatToMapCoord.bind(this)
+        this.featureFromUrl = this.featureFromUrl.bind(this)
     }
 
     initMarker() {
@@ -171,6 +172,7 @@ export default class BundleMap extends Component {
             service.loadBaseLayers(),
             service.loadWMSLayers(bundle_id),
         ]).then(([{base_layer_list}, {wms_list}]) => {
+            console.log(base_layer_list, wms_list);
             this.handleMapDataLoaded(base_layer_list, wms_list)
 
         })
@@ -582,15 +584,10 @@ export default class BundleMap extends Component {
         return this.array
     }
 
-    showFeaturesAt(coordinate) {
-        const overlay = this.overlay
-        overlay.setPosition(coordinate)
-        this.is_empty = true
-        this.sendFeatureInfo = []
+    featureFromUrl(coordinate) {
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
-        this.setState({pay_modal_check: false})
         const wms_array = this.getWMSArray()
         wms_array.map(({layers}) => {
             if(layers) {
@@ -695,6 +692,18 @@ export default class BundleMap extends Component {
                 })
             }
         })
+    }
+
+    showFeaturesAt(coordinate) {
+        this.is_empty = true
+        this.sendFeatureInfo = []
+
+        const overlay = this.overlay
+        overlay.setPosition(coordinate)
+
+        this.setState({ pay_modal_check: false })
+        this.featureFromUrl(coordinate)
+
         this.sendFeatureInfo = []
         this.is_empty = true
     }

@@ -37,7 +37,7 @@ class PopUpCmp extends Component {
     componentDidMount() {
         this.element = document.getElementById("popup")
         if (this.props.sendElem) this.props.sendElem(this.element)
-        service.isUser().then(({success}) =>
+        service.getUser().then(({success}) =>
         {
             if (success) {
                 this.setState({is_user: true})
