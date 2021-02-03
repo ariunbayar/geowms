@@ -25,7 +25,7 @@ class PopUpCmp extends Component {
             pdf_id:'',
             is_purchase: false,
             is_enable: false,
-            is_user: false,
+            is_authenticated: false,
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -38,11 +38,9 @@ class PopUpCmp extends Component {
     componentDidMount() {
         this.element = document.getElementById("popup")
         if (this.props.sendElem) this.props.sendElem(this.element)
-        service.getUser().then(({success}) =>
+        service.getUser().then(({is_authenticated}) =>
         {
-            if (success) {
-                this.setState({is_user: true})
-            }
+            this.setState({is_authenticated: is_authenticated})
         })
     }
 
@@ -162,7 +160,7 @@ class PopUpCmp extends Component {
     }
 
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_user } = this.state
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
         const { is_empty, is_from_inspire } = this.props
         return (
                 <div>
@@ -239,7 +237,7 @@ class PopUpCmp extends Component {
                                 </table>
                             </div>
                     }
-                    {!is_user && !is_empty && this.state.mode == 'mpoint_view'
+                    {!is_authenticated && !is_empty && is_from_inspire
                         ?
                         <div className="btn-group flex-wrap d-flex justify-content-center">
                             <button
@@ -262,7 +260,7 @@ class PopUpCmp extends Component {
                                         </button>
                                     </div>
                                 :
-                                this.state.mode == 'mpoint_view'
+                                is_from_inspire
                                 ?
                                     <div className="btn-group flex-wrap d-flex justify-content-center">
                                         <button
