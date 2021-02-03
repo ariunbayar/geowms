@@ -17,7 +17,7 @@ urlpatterns = [
         path('api/sum/', bundle_views.sumfind, name='sum'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
-        path('is_user/', bundle_views.is_user, name='is_user'),
+        path('get_user/', bundle_views.get_user, name='get_user'),
     ], 'bundle'))),
 
     path('', include(([

@@ -13,7 +13,7 @@ import {Log} from "./Log"
 import {Gis} from "./Gis"
 import {Access} from "./Access"
 import {Huulga} from "./Huulga"
-import MenuItem from "../../../../src/components/MenuItem"
+import MenuItem from "@utils/MenuItem"
 import {DedsanBvtets} from './DedsanBvtets'
 import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'
@@ -28,7 +28,7 @@ export default class App extends Component {
 
     this.state = {
       user_count: 0,
-      gov_count: []
+      gov_count: [],
     };
     this.handleBoxOver = this.handleBoxOver.bind(this)
   }

@@ -104,15 +104,13 @@ def wms_layers(request, pk):
 
 @require_GET
 @ajax_required
-def is_user(request):
+def get_user(request):
 
-    is_user = request.user
-
-    if str(is_user) != 'AnonymousUser':
-        return JsonResponse({'success': True})
+    if request.user.is_authenticated:
+        return JsonResponse({'is_authenticated': True})
 
     else:
-        return JsonResponse({'success': False})
+        return JsonResponse({'is_authenticated': False})
 
 
 @require_GET

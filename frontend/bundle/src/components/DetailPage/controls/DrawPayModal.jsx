@@ -12,14 +12,9 @@ class ModalComponent extends Component{
         this.state = {
             total_price: 0,
             description: 'Газрын бүрхэвч, газар ашиглалт',
-            payLoad: false,
-            user_name: '',
-            user_email: '',
-            user_number: '',
             handlePaymentIsLoad: false,
             types: ['shp', 'jpeg', 'png', 'tiff', 'pdf'],
             selected_type: '',
-            is_user: true,
         }
 
         this.handlePayment = this.handlePayment.bind(this)
@@ -33,12 +28,12 @@ class ModalComponent extends Component{
         const selected_type = e.target.value
         this.setState({ selected_type })
         service
-        .paymentCalcPrice(area, layer_list, feature_info_list, selected_type)
-        .then(({ success, total_price, is_user }) => {
-            if (success) {
-                this.setState({total_price, is_user})
-            }
-        })
+            .paymentCalcPrice(area, layer_list, feature_info_list, selected_type)
+            .then(({ success, total_price }) => {
+                if (success) {
+                    this.setState({ total_price })
+                }
+            })
     }
 
     closeModal(){
@@ -48,10 +43,10 @@ class ModalComponent extends Component{
 
     handlePayment(){
 
-        this.setState({payLoad: true, handlePaymentIsLoad:true})
+        this.setState({ handlePaymentIsLoad: true })
 
-        const {description, user_name, user_email, user_number, selected_type, total_price} = this.state
-        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle, wms_list }, area, feature_info_list} = this.props
+        const {description, selected_type, total_price} = this.state
+        const {coodrinatLeftTop, coodrinatRightBottom, layer_info: { bundle }, area, feature_info_list, layer_list} = this.props
 
         const values = {
             price: total_price,
@@ -59,29 +54,26 @@ class ModalComponent extends Component{
             coodrinatLeftTop,
             coodrinatRightBottom,
             bundle_id: bundle.id,
-            layer_ids: wms_list.reduce((acc, { layers }) => {
-                return [...acc, ...layers.map((layer) => layer.id)]
-            }, []),
             area: area.output,
             area_type: area.type,
-            user_name,
-            user_email,
-            user_number,
             feature_info_list,
+            layer_list,
+            selected_type,
         }
-
         service.paymentDraw(values).then(({ success, payment_id }) => {
             if (success) {
                 window.location.href = `/payment/purchase/polygon/${payment_id}/${selected_type}/`;
             }
+        }).catch((error) => {
+            alert("Алдаа гарсан байна")
+            this.setState({handlePaymentIsLoad: false})
         })
 
     }
 
     render() {
-        const {user_name, user_email, user_number, types, total_price, is_user} = this.state
+        const { types, total_price } = this.state
         const { layer_info, is_loading, area } = this.props
-
         return (
             <div>
                 <div className="show d-block modal bd-example-modal-lg" tabIndex="-1" role="dialog" aria-hidden="true">
@@ -122,38 +114,6 @@ class ModalComponent extends Component{
                                                     <label htmlFor="recipient-name" className="col-form-label">Худалдан авах мөнгөн дүн:</label>
                                                     <span className="form-control" id="price">{total_price}₮</span>
                                                 </div>
-                                                {
-                                                    !is_user &&
-                                                    <div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="user_name" className="col-form-label">Хэрэглэгчийн нэр:</label>
-                                                            <input type="text"
-                                                                className="form-control"
-                                                                id="user_name"
-                                                                value={user_name}
-                                                                onChange={(e) => this.setState({ user_name: e.target.value })}
-                                                            />
-                                                        </div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="user_number" className="col-form-label">Хэрэглэгчийн утас:</label>
-                                                            <input type="text"
-                                                                className="form-control"
-                                                                id="user_number"
-                                                                value={user_number}
-                                                                onChange={(e) => this.setState({ user_number: e.target.value })}
-                                                            />
-                                                        </div>
-                                                        <div className="form-group">
-                                                            <label htmlFor="user_email" className="col-form-label">Хэрэглэгчийн имэйл:</label>
-                                                            <input type="text"
-                                                                className="form-control"
-                                                                id="user_email"
-                                                                value={user_email}
-                                                                onChange={(e) => this.setState({ user_email: e.target.value })}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                }
                                             </div>
                                             <div className="col-md-6">
                                                 <ul>

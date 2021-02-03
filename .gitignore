@@ -13,14 +13,11 @@ main/settings/prod.py
 main/settings/test.py
 
 
-backend/webapp/static/
-frontend/bundle/static/
-frontend/mobile/static/
-frontend/payment/static/
-frontend/profile/static/
-
-
 geoportal_app/static/dist_dev
+
+geoportal_app/datas/geojson/*
+geoportal_app/datas/gml/*
+geoportal_app/datas/shp/*
 
 geoportal_app/media/DejaVuSansCondensed.cw127.pkl
 geoportal_app/media/DejaVuSansCondensed.pkl
@@ -40,16 +37,20 @@ geoportal_app/media/tseg-personal-img/*
 !geoportal_app/media/tseg-personal-img/.keep
 geoportal_app/media/tseg-personal/*
 !geoportal_app/media/tseg-personal/.keep
+<<<<<<< HEAD
 geoportal_app/files/payment/*
 !geoportal_app/files/payment/*.csv
 !geoportal_app/files/payment/shape
+=======
+>>>>>>> edf90aeabc75675c350bcfea4e09df360ab7c041
 geoportal_app/files/payment/shape/*
-!geoportal_app/files/payment/pdf
-geoportal_app/files/payment/pdf/*
-!geoportal_app/files/payment/image
-geoportal_app/files/payment/image/*
-!geoportal_app/files/payment/tseg-personal-file/.keep
 !geoportal_app/files/payment/shape/.keep
+geoportal_app/files/payment/pdf/*
+!geoportal_app/files/payment/pdf/.keep
+geoportal_app/files/payment/image/*
+!geoportal_app/files/payment/image/.keep
+geoportal_app/files/payment/tseg-personal-file/*
+!geoportal_app/files/payment/tseg-personal-file/.keep
 
 package-lock.json
 node_modules/

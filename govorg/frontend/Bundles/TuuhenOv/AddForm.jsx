@@ -23,7 +23,6 @@ export class AddForm extends Component {
             huree_len: 0,
             x: '',
             y: '',
-            perms: this.props.perms,
             id: this.props.id.match.params.id,
             load: 0,
             rows: [],
@@ -51,10 +50,6 @@ export class AddForm extends Component {
     }
 
     componentDidMount() {
-        const { perms } = this.state
-        if (perms.perm_create && perms.perm_remove && perms.perm_view) {
-            this.setState({ is_editable: perms.perm_create })
-        }
         this.hureeTooShirheg()
         this.paginate(1, "")
         this.loadRows()
@@ -131,14 +126,12 @@ export class AddForm extends Component {
 
 
     render() {
-        const { perms, is_editable, currentPage } = this.state
+        const { currentPage } = this.state
         const dursgalt_id = this.state.id
         const huree_len = this.state.huree_len
         const huree_components = []
-        if (perms.perm_create || perms.perm_view) {
-            for (var i = 1; i <= huree_len; i++) {
-                huree_components.push(<HureeForm key={i} dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i} x={this.state.x} y={this.state.y} perms={perms} is_editable={is_editable} loadRows={() => this.loadRows()}></HureeForm>)
-            }
+        for (var i = 1; i <= huree_len; i++) {
+            huree_components.push(<HureeForm key={i} dursgalt_id={dursgalt_id} tuuh_soyl_huree_id={i} x={this.state.x} y={this.state.y} loadRows={() => this.loadRows()}></HureeForm>)
         }
         return (
             <div className='col-md-9 card'>
@@ -152,17 +145,14 @@ export class AddForm extends Component {
                         type="ayuul"
                     />
                     <div className="card-body col-md-11 ml-5">
-                        {perms.perm_view ? <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4> : null}
+                        <h4 className="ml-5">СОЁЛЫН ҮЛ ХӨДЛӨХ ДУРСГАЛЫН ҮЗЛЭГ, ТООЛЛОГЫН ХЭЭРИЙН БҮРТГЭЛ</h4>
                         <div className="text-right my-3">
                             <a href="#" className="btn gp-outline-primary" onClick={this.props.id.history.goBack}>
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </a>
-                            {
-                                perms.perm_create &&
-                                <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
-                                    Нэмэх
-                                </NavLink>
-                            }
+                            <NavLink className="btn gp-btn-primary" to={`/gov/tuuhen-ov/dursgalt-gazar/${dursgalt_id}/`}>
+                                Нэмэх
+                            </NavLink>
                             <input
                                 type="text"
                                 className="form-control col-md-4  mb-1 float-left"
@@ -175,44 +165,32 @@ export class AddForm extends Component {
                         <div className="table-responsive">
                             <table className="table">
                                 <thead>
-                                    {
-                                        perms.perm_view
-                                            ?
-                                            <tr>
-                                                <th scope="col">№</th>
-                                                <th scope="col">Дурсгалт газрын нэр</th>
-                                                <th scope="col">Чулуулгийн төрөл</th>
-                                                <th scope="col">X</th>
-                                                <th scope="col">Y</th>
-                                                <th scope="col">Хамрах хүрээнд багтсан</th>
-                                                <th scope="col">Үүссэн</th>
-                                                {is_editable ? <th scope="col">Засах</th> : null}
-                                                {perms.perm_remove ? <th scope="col">Устгах</th> : null}
-                                            </tr>
-                                            :
-                                            null
-                                    }
+                                    <tr>
+                                        <th scope="col">№</th>
+                                        <th scope="col">Дурсгалт газрын нэр</th>
+                                        <th scope="col">Чулуулгийн төрөл</th>
+                                        <th scope="col">X</th>
+                                        <th scope="col">Y</th>
+                                        <th scope="col">Хамрах хүрээнд багтсан</th>
+                                        <th scope="col">Үүссэн</th>
+                                        <th scope="col">Засах</th>
+                                        <th scope="col">Устгах</th>
+                                    </tr>
                                 </thead>
                                 <tfoot>
                                     {
-                                        perms.perm_view
-                                            ?
-                                            this.state.form_data.map((values, idx) =>
-                                                <DursgaltGazarTable
-                                                    key={idx}
-                                                    idx={(currentPage * 1) - 1 + idx + 1}
-                                                    // idx = {idx}
-                                                    dursgalt_id={dursgalt_id}
-                                                    values={values}
-                                                    handleRemove={() => this.handleRemove(values.id)}
-                                                    handleMove={this.handleMove}
-                                                    perms={perms}
-                                                    is_editable={is_editable}
-                                                    loadGeomPoints={() => loadGeomPoints()}
-                                                />
-                                            )
-                                            :
-                                            null
+                                    this.state.form_data.map((values, idx) =>
+                                        <DursgaltGazarTable
+                                            key={idx}
+                                            idx={(currentPage * 1) - 1 + idx + 1}
+                                            // idx = {idx}
+                                            dursgalt_id={dursgalt_id}
+                                            values={values}
+                                            handleRemove={() => this.handleRemove(values.id)}
+                                            handleMove={this.handleMove}
+                                            loadGeomPoints={() => loadGeomPoints()}
+                                        />
+                                    )
                                     }
                                 </tfoot>
                             </table>
@@ -225,23 +203,15 @@ export class AddForm extends Component {
                     </div>
                 </div>
                 <div className="col-md-7 card-body ml-3">
-                    {perms.perm_create ? <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4> : null}
+                <h4>Дурсгалт газрын хамрах хүрээний солбилцол.</h4>
                     {huree_components}
-                    {
-                        perms.perm_create || perms.perm_view
-                            ?
-                            <AyulForm
-                                dursgalt_id={dursgalt_id}
-                                x={this.state.x}
-                                y={this.state.y}
-                                perms={perms}
-                                is_editable={is_editable}
-                                loadAyuulRows={() => this.loadAyuulRows()}
-                            >
-                            </AyulForm>
-                            :
-                            null
-                    }
+                    <AyulForm
+                        dursgalt_id={dursgalt_id}
+                        x={this.state.x}
+                        y={this.state.y}
+                        loadAyuulRows={() => this.loadAyuulRows()}
+                    >
+                    </AyulForm>
                 </div>
             </div>
         )

@@ -1,38 +1,16 @@
-import os
-import datetime
-import uuid
-import glob
-import requests
 from django.db import connections
-from django.db.utils import InternalError
 from django.forms.models import model_to_dict
-from django.conf import settings
-from django.shortcuts import render
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 
-from .models import ViewNames, ViewProperties
-from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas
+from .models import ViewNames, ViewProperties, FeatureOverlaps
+from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists
 
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 
-from django.core.management import call_command
-from django.core.files.uploadedfile import UploadedFile
-from django.core.files.storage import FileSystemStorage
-
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
-from django.contrib.gis.geos import WKBWriter, WKBReader
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.geos import fromstr
-from django.contrib.gis.gdal import OGRGeometry
-from django.contrib.gis.geos.error import GEOSException
-from django.contrib.gis.gdal.error import GDALException
-from django.contrib.gis.geos.collections import GeometryCollection
 from django.contrib.auth.decorators import user_passes_test
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
-from backend.config.models import Config
 
 from backend.bundle.models import BundleLayer, Bundle
 from backend.wmslayer.models import WMSLayer
@@ -514,7 +492,6 @@ def save(request, payload):
                 theme_code = datas['theme_code']
                 theme_name = datas['theme_name']
                 theme_name_eng = datas['theme_name_eng']
-                top_theme_id = datas['top_theme_id']
                 order_no = datas['order_no']
                 is_active = datas['is_active']
                 modified_by = datas['modified_by']
@@ -528,7 +505,6 @@ def save(request, payload):
                                     theme_code=theme_code,
                                     theme_name=theme_name,
                                     theme_name_eng=theme_name_eng,
-                                    top_theme_id=top_theme_id,
                                     order_no=order_no,
                                     is_active=is_active,
                                     created_by=created_by,
@@ -951,3 +927,51 @@ def removeView(table_name):
         return True
     except Exception:
         return False
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def feature_overlaps_set(request, payload):
+    feature_id = payload.get('feature_id')
+    overlap_feature_id = payload.get('overlap_feature_id')
+    state = payload.get('state')
+    qs = FeatureOverlaps.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.filter(overlap_feature_id=overlap_feature_id)
+    if state == 'remove':
+        qs.delete()
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хаслаа'
+        }
+
+    else:
+        qs = qs.first()
+        if not qs:
+            FeatureOverlaps.objects.create(
+                feature_id=feature_id,
+                overlap_feature_id=overlap_feature_id
+            )
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай нэмлээ'
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def feature_overlaps_get(request, feature_id):
+    qs = FeatureOverlaps.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.values_list('overlap_feature_id', flat=True)
+    feature_ids = [i for i in qs]
+    rsp = {
+        'success': True,
+        'feature_ids': feature_ids
+    }
+
+    return JsonResponse(rsp)

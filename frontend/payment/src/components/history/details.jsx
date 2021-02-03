@@ -1,7 +1,8 @@
 import React, { Component } from "react"
-import { service } from "./service"
+import { service } from "../service"
 import { NavLink } from "react-router-dom"
-import { Notif } from '../../../../../src/components/Notification/index'
+import { Notif } from '@utils/Notification/index'
+
 
 export class Details extends Component {
 

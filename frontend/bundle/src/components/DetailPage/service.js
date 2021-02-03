@@ -10,7 +10,7 @@ export const service = {
     searchPoint,
     getAimags,
     getSum,
-    isUser,
+    getUser,
     checkButtonEnable,
 }
 
@@ -79,11 +79,11 @@ function loadBaseLayers() {
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }
 
-function isUser() {
+function getUser() {
     const requestOptions = {
         ..._getGetOptions(),
     }
-    return fetch('/is_user/', requestOptions).then(handleResponse)
+    return fetch('/get_user/', requestOptions).then(handleResponse)
 }
 
 function payment(price, description, data_id) {

@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import "./styles.css";
 import {service} from './service'
-import {Notif} from '../../../../../src/components/Notification/index'
+import {Notif} from '@utils/Notification'
 
 export default class BundleFormTable extends Component {
 
@@ -91,7 +91,7 @@ export default class BundleFormTable extends Component {
     }
 
     render() {
-        const {id, name, price} = this.props.values
+        const {id, name} = this.props.values
         return (
             <tr>
                 <td >

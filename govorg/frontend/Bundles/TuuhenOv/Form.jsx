@@ -1,10 +1,12 @@
 import React, { Component } from "react"
+import { Formik, Field, Form, ErrorMessage } from 'formik'
+
 import { service } from './service'
 import { validationSchema } from './validationSchema'
 import { HureeEdit } from './HureeEdit'
-import { Formik, Field, Form, ErrorMessage } from 'formik'
 import Maps from '../../components/map/Map'
-import ModalAlert from '../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class Forms extends Component {
 

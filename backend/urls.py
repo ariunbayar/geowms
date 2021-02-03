@@ -31,14 +31,13 @@ urlpatterns = [
         path('move/', wms_views.move, name='move'),
         path('activeUpdate/', wms_views.activeUpdate, name='activeUpdate'),
         path('<int:pk>/updatemore/', wms_views.updateMore, name='updatemore'),
-        path('paginatedList/', wms_views.paginatedList, name='paginatedList'),
+        path('paginatedList/', wms_views.paginated_list, name='paginatedList'),
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
     ], 'wms'))),
 
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
-        path('module-check/', bundle_views.moduleCheck, name='module-check'),
         path('update/', bundle_views.update, name='update'),
         path('move/', bundle_views.move, name='move'),
         path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
@@ -69,12 +68,9 @@ urlpatterns = [
     path('api/org/', include(([
         path('level-<int:level>/', org_views.all, name='all'),
         path('level-<int:level>/<int:pk>/', org_views.detail),
-        path('level-<int:level>/<int:pk>/roles/', org_views.roles, name='roles'),
-        path('level-<int:level>/<int:pk>/Inspireroles/', org_views.inspire_roles),
-        path('level-<int:level>/<int:pk>/roles-save/', org_views.roles_save, name='roles-save'),
-        path('level-<int:level>/<int:pk>/roles-add/', org_views.roles_add),
         path('level-<int:level>/<int:pk>/employee-add/', org_views.employee_add, name='employee-add'),
         path('employee-remove-<int:pk>/', org_views.employee_remove, name='employee-remove'),
+        path('employee-token-refresh-<int:pk>/', org_views.employee_token_refresh, name='employee-token-refresh'),
         path('employee-detail-<int:pk>/', org_views.employee_detail, name='employee-detail'),
         path('level-<int:level>/employee-update-<int:pk>/', org_views.employee_update, name='employee-update'),
         path('level-<int:level>/org-add/', org_views.org_add, name='org-add'),
@@ -109,7 +105,7 @@ urlpatterns = [
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('үүсгэх/', govorg_views.хадгалах),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах),
-        path('<int:pk>/шинэ_токен/', govorg_views.шинэ_токен, name='шинэ_токен'),
+        path('<int:pk>/refresh-token/', govorg_views.refresh_token, name='refresh-token'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
         path('govorgList/', govorg_views.govorgList, name='govorgList'),
@@ -129,6 +125,8 @@ urlpatterns = [
         path('email/save/', config_views.email_configs_save),
         path('qgis/', config_views.qgis_configs),
         path('qgis/save/', config_views.qgis_configs_save),
+        path('dan/', config_views.dan_configs),
+        path('dan/save/', config_views.dan_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([
@@ -157,6 +155,9 @@ urlpatterns = [
         path('remove/', dedsan_butets.remove),
         path('erese/', dedsan_butets.erese),
         path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
+
+        path('overlaps-feature-get/<str:feature_id>/', dedsan_butets.feature_overlaps_get),
+        path('overlaps-feature-set/', dedsan_butets.feature_overlaps_set),
     ], 'dedsan-butests'))),
 
     path('geoserver/rest/', include(([

@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_POST, require_GET
-from django.http import JsonResponse, Http404
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import login_required
@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required
 from main.decorators import ajax_required
 from geoportal_app.models import User
 from .models import Payment, PaymentPoint
-from govorg.backend.forms.models import Mpoint_view
 
 from django.contrib.postgres.search import SearchVector
 

@@ -9,18 +9,6 @@ export class HistoryTable extends Component {
         this.state={
             export_state: this.props.values.export_file ? 'success' : '',
         }
-        this.handleDownload = this.handleDownload.bind(this)
-    }
-
-    handleDownload(payment_id){
-
-        this.setState({ export_state: 'loading' })
-
-        service.downloadPurchase(payment_id).then(({success}) => {
-            this.setState({
-                export_state: 'success',
-            })
-        })
     }
 
     render() {

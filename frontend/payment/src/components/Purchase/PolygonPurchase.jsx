@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
-import Modal from '../../../../../src/components/Modal/InfoModal'
+import ModalAlert from '@utils/Modal/ModalAlert'
 
 export class PolygonPurchase extends Component {
 
@@ -15,8 +15,6 @@ export class PolygonPurchase extends Component {
             polygon: [],
             layers: [],
 
-            purchase: props.purchase,
-            price: 3000,
             purchase_all: [],
             qpay_modal_is: false,
             is_modal_info_open: false,
@@ -28,14 +26,6 @@ export class PolygonPurchase extends Component {
         this.alertOver = this.alertOver.bind(this)
         this.alertOut = this.alertOut.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
-        this.downloadPurchase = this.downloadPurchase.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleModalClose = this.handleModalClose.bind(this)
-    }
-
-    downloadPurchase(id) {
-        service
-            .downloadPurchase(id, this.props.match.params.type)
     }
 
     componentDidMount(){
@@ -45,7 +35,6 @@ export class PolygonPurchase extends Component {
               items.map(( items ) =>
                   this.setState({items})
               )
-              this.downloadPurchase(id)
               this.setState({ polygon, layers })
             }
             else {
@@ -76,11 +65,11 @@ export class PolygonPurchase extends Component {
     }
 
     handleModalApproveClose(){
-      const purchase_id = this.props.match.params.id
-      if(!this.state.items.export_file) {
-        this.downloadPurchase(purchase_id)
-      }
-      this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
+        const purchase_id = this.props.match.params.id
+        if (!this.state.purchase_all.export_files) {
+            service.downloadPurchase(purchase_id, this.props.match.params.type)
+        }
+        this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
 
     handleQpay(){
@@ -91,7 +80,7 @@ export class PolygonPurchase extends Component {
     }
 
     qPayClose(){
-        this.setState({qpay_modal_is: false, is_modal_info_open: true})
+        this.setState({ qpay_modal_is: false, is_modal_info_open: true })
     }
 
     alertOver(){
@@ -104,8 +93,8 @@ export class PolygonPurchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, qpay_modal_is, alert_msg, alert_toggle, is_modal_info_open, is_modal_open } = this.state
-        const { items, polygon, layers} = this.state
+        const { alert_msg, is_modal_info_open } = this.state
+        const { items, layers} = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -193,12 +182,12 @@ export class PolygonPurchase extends Component {
 
             {
              is_modal_info_open &&
-                <Modal
-                    modalClose = {() => this.handleModalApproveClose()}
+                <ModalAlert
+                    model_type_icon='success'
                     text='Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.'
                     title="Худалдан авалтын мэдээлэл"
                     status={this.state.status}
-                    actionNameDelete="зөвшөөрөх"
+                    modalAction={() => this.handleModalApproveClose()}
                 />
             }
         </div>

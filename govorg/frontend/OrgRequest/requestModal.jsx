@@ -1,57 +1,225 @@
 import React, {Component, Fragment} from "react"
-import RequestMap from './Map'
+import RequestMap from './Map/Map'
+
 import {service} from './service'
-import Modal from '../components/helpers/Modal'
+import Modal from "@utils/Modal/Modal"
+import Loader from "@utils/Loader/index"
+
+export const get_modal_text = (kind) => {
+    let text = ''
+    if (kind == 'ҮҮССЭН') text = 'шинэ геометр өгөгдөл үүсгэхийг'
+    else if (kind == 'ЗАССАН') text ='засагдсан геометр өгөгдлийг'
+    else if (kind == 'УСТГАСАН') text = 'геометр өгөгдлийг устгахыг'
+    return text
+}
+
+export const FormJson = ({form_json, handleModalOpen, values}) => {
+    return (
+        <div className="col-md-4 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
+            {
+                handleModalOpen
+                ?
+                <div className="row">
+                    <div className="col-md-4">
+                        <button
+                            className="btn gp-btn-primary"
+                            onClick={() => handleModalOpen(
+                                'reject',
+                                `Та ${
+                                    get_modal_reject_text(values.kind)
+                                }
+                                татгалзахдаа итгэлтэй байна уу ?`,
+                                "Тохиргоог татгалзах",
+                                "success",
+                                " татгалзах"
+                            )}
+                        >
+                            Татгалзах
+                        </button>
+                    </div>
+                    <div className="ml-auto mr-3">
+                        <button
+                            className="btn gp-btn-outline-primary"
+                            onClick={() => handleModalOpen(
+                                'approve',
+                                `Та ${
+                                    get_modal_text(values.kind)
+                                }
+                                зөвшөөрөхдөө итгэлтэй байна уу ?`,
+                                "Тохиргоог зөвшөөрөх",
+                                "warning",
+                                "зөвшөөрөх"
+                            )}
+                        >
+                            Зөвшөөрөх
+                        </button>
+                    </div>
+                </div>
+            :
+                null
+            }
+            {handleModalOpen && <hr/>}
+            {
+                form_json
+                ?
+                    form_json.map((prop, idx) =>
+                        <div key={idx} className="row my-3">
+                            <div className="col-md-5">
+                                <label className="col-form-label">{prop.property_name}</label>
+                            </div>
+                            <div className="col-md-7">
+                                <input
+                                    className='form-control'
+                                    disabled={true}
+                                    value={prop.data || ''}
+                                    type={prop.value_type}
+                                />
+                            <div  className="col-form-label " >{prop.property_definition}</div>
+                            </div>
+                        </div>
+                    )
+                :
+                    null
+            }
+        </div>
+    )
+}
 
 
 export default class RequestModal extends Component {
 
     constructor(props) {
         super(props)
+
         this.state = {
-            status: this.props.status || "initial",
-            is_modal_approve_open:false,
-            is_modal_reject_open:false,
-            is_loading:this.props.is_loading
+            status: "initial",
+            is_modal_approve_open: false,
+            is_modal_reject_open: false,
+
+            modal_status: "closed",
+            action_type: '',
+            text: '',
+            title: '',
+            model_type_icon: '',
+            action_name: '',
+
+            values: props.values
         }
+
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
-        this.handleProceed = this.handleProceed.bind(this)
-        this.handleModalRejectClose=this.handleModalRejectClose.bind(this)
-        this.handleModalRejectOpen=this.handleModalRejectOpen.bind(this)
-        this.handleModalApproveOpen=this.handleModalApproveOpen.bind(this)
-        this.handleModalApproveClose=this.handleModalApproveClose.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalAction = this.handleModalAction.bind(this)
+        this.selectedFeature = this.selectedFeature.bind(this)
+        this.handleRequestApprove = this.handleRequestApprove.bind(this)
     }
-    handleModalRejectClose(){
+
+    handleModalClose(){
+        this.setState({ modal_status: "closed" })
+    }
+
+    handleModalOpen(action_type, text, title, model_type_icon, action_name){
+
         this.setState({
-            is_modal_reject_open:false
+            modal_status: "open",
+            action_type,
+            text,
+            title,
+            model_type_icon,
+            action_name
         })
     }
 
-    handleModalRejectOpen(){
-        this.setState({
-            is_modal_reject_open:true
+    getRequestIds(selected_value, values) {
+        let request_values
+        let ids = []
+        let feature_id
+
+        if (selected_value){
+            request_values = [selected_value]
+        }
+        else {
+            request_values = values
+        }
+        request_values.map((value, idx) => {
+            if (idx == 0) feature_id = value.feature_id
+            ids.push(value.id);
         })
+        return {ids, feature_id}
     }
 
-    handleModalApproveOpen(){
-        this.setState({
-            is_modal_approve_open:true,
-        })
+    handleModalAction(){
+        const { selected_value, values } = this.state
+
+        const {ids, feature_id} = this.getRequestIds(selected_value, values)
+
+        this.setState({ is_loading: true, modal_status: "closed" })
+        if(this.state.action_type == 'reject')
+        {
+           this.handleRequestReject(ids, feature_id)
+        }
+        if(this.state.action_type == 'approve') {
+            this.handleRequestApprove(ids, feature_id)
+        }
     }
 
-    handleModalApproveClose(){
-        this.setState({
-            is_modal_approve_open:false
-        })
+    handleRequestReject(ids, feature_id,) {
+        const open_modal = true
+        let modal_info
+        let modal_type
+        service
+            .requestReject(ids, feature_id)
+            .then(({ success, info }) => {
+                if(success) {
+                    modal_type = 'success'
+                }
+                else {
+                    modal_type = 'warning'
+                }
+                this.setState({ is_loading: false })
+                this.props.refreshData(open_modal, modal_info, modal_type)
+            })
+            .catch((error) => {
+                if(error == 'Bad Request') {
+                    modal_type = 'danger'
+                    modal_info = 'Алдаа гарлаа. Обьект олдсонгүй'
+                    this.setState({ is_loading: false })
+                }
+            }).finally(() => this.setState({ status: 'closed' }))
+    }
+
+    handleRequestApprove(ids, feature_id){
+        const open_modal = true
+        let modal_info
+        let modal_type
+        service
+            .requestApprove(ids, feature_id)
+            .then(({ success, info }) => {
+                if(success) {
+                    modal_info = info
+                    modal_type = 'success'
+                }
+                else {
+                    modal_info = info
+                    modal_type = 'warning'
+                }
+                this.setState({ is_loading: false })
+                this.props.refreshData(open_modal, modal_info, modal_type)
+            }).catch((error) => {
+                if(error == 'Bad Request')
+                {
+                    this.setState({ is_loading: false })
+                    modal_info = 'Алдаа гарсан байна'
+                    modal_type = 'danger'
+                    this.props.refreshData(open_modal, modal_info, modal_type)
+                }
+            }).finally(() => this.setState({ status: 'closed' }))
     }
 
     componentDidMount() {
-        if (this.state.status == "initial") {
-            this.handleOpen()
-        }
+        if (this.state.status == "initial") this.handleOpen()
     }
-
 
     componentDidUpdate(prevProps) {
         if (this.props.status != prevProps.status) {
@@ -65,41 +233,31 @@ export default class RequestModal extends Component {
     }
 
     handleOpen() {
-        this.setState({status: "initial"})
-        setTimeout(() => {
-            this.setState({status: "open"})
-        }, 0)
+        this.setState({ status: "open" })
     }
 
-    handleClose(id,callback) {
-        if(id){
-            service.requestDelete(id).then(({success}) =>{
-                this.setState({status: "closing"})
-                setTimeout(() => {
-                    this.setState({status: "closed"})
-                    this.props.modalClose()
-                    this.props.getAll()
-                }, 150)
+    handleClose() {
+        this.setState({status: "closed"})
+        this.props.modalClose()
+    }
+
+    selectedFeature(e) {
+        const feature = e.selected[0]
+        if (feature) {
+            const { values } = this.props
+            const id = feature.getProperties()['id']
+            values.map((value, idx) => {
+                if (value.id == id) {
+                    this.setState({ form_json: value.form_json, selected_value: value })
+                }
             })
         }
-        else{
-            this.setState({status: "closing"})
-            setTimeout(() => {
-                this.setState({status: "closed"})
-                this.props.modalClose()
-            }, 150)
-        }
-    }
-
-    handleProceed() {
-        this.setState({
-            is_loading:true
-        })
-        this.props.modalAction()
     }
 
     render () {
-        const {status} = this.state
+
+        const selected_form_json = this.state.form_json
+        const { is_loading,  modal_status, text, title, model_type_icon, action_name, status, selected_value, values } = this.state
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -111,103 +269,114 @@ export default class RequestModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const {form_json, id, kind, geo_json} = this.props
-        const {is_modal_approve_open, is_modal_reject_open, is_loading} = this.state
+
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
-
                             <div className="col-md-12">
-                                <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
+                                <div className="row mt-2" style={{background:"white"}}>
                                     <div className="col-md-11">
                                         <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
                                     </div>
-                                    <div className="col-md-1">
+                                    <div className="col-md-1" onClick={() => this.handleClose()}>
                                         <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                 </div>
-
-                                <div className="row">
-                                    {form_json &&
-                                    <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
-                                        {
-                                        form_json ? form_json.map((prop, idx)=>
-                                            <div key={idx} className="row my-3">
-                                                <div className="col-md-3">
-                                                    <label className="col-form-label">{prop.property_code}</label>
-                                                </div>
-                                                <div className="col-md-2"></div>
-                                                <div  className="col-md-6 mr-1">
-                                                    <input
-                                                        className='form-control'
-                                                        disabled={true}
-                                                        value={prop.data}
-                                                        type={prop.value_type}
-                                                    />
-                                                <div  className="col-form-label " >{prop.property_definition}</div>
-                                                </div>
-                                            </div>
-                                            ):null
-                                        }
-                                    </div>
-                                    }
-                                    <div className= {form_json ? "col-md-6" : "col-md-12"}>
-                                        {
-                                            <RequestMap geoJson ={geo_json}/>
-                                        }
-
-                                    </div>
-                                </div>
+                                {
+                                    values.length > 0
+                                    ?
+                                        values.map((value, idx) => {
+                                            const { form_json } = value
+                                            if (idx == values.length - 1) {
+                                                return (
+                                                    <div key={idx} className="row">
+                                                        {
+                                                            values.length == 1
+                                                            ?
+                                                                form_json && <FormJson form_json={form_json} />
+                                                            :
+                                                                selected_form_json && <FormJson form_json={selected_form_json} handleModalOpen={this.handleModalOpen} values={selected_value}/>
+                                                        }
+                                                        <div className={selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
+                                                            <RequestMap values={values} selectedFeature={this.selectedFeature}/>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+                                        })
+                                    :
+                                        null
+                                }
                                 <div className="row my-2 mr-1 float-right">
-                                    <button type="button mr-2 ml-2" onClick={() => this.handleModalRejectOpen()} className="btn gp-btn-primary waves-effect waves-light">
+                                    <button
+                                        type="button mr-2 ml-2"
+                                        onClick={() => this.handleModalOpen(
+                                            'reject',
+                                            `Та ${
+                                                values.length == 1
+                                                    ?
+                                                        get_modal_text(values[0].kind)
+                                                    :
+                                                values.length > 1
+                                                    ?
+                                                        `сонгосон ${values.length} геометр өгөгдлөө`
+                                                    :
+                                                    null
+                                            }
+                                            татгалзахдаа итгэлтэй байна уу ?`,
+                                            "Тохиргоог татгалзах",
+                                            "success",
+                                            " татгалзах"
+                                        )}
+                                        className="btn gp-btn-primary waves-effect waves-light"
+                                    >
                                         <i className="fa fa-check-square-o">Татгалзах</i>
                                     </button>
-                                    {
-                                     is_modal_reject_open &&
-                                        <Modal
-                                            modalAction={() => this.handleClose(id)}
-                                            modalClose = {() => this.handleModalRejectClose()}
-                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
-                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
-                                            татгалзахдаа итгэлтэй байна уу ?`}
-                                            title="Тохиргоог татгалзах"
-                                            status={this.state.status}
-                                            model_type_icon = "success"
-                                            actionNameDelete="татгалзах"
-                                        />
-                                    }
-                                    <button type="button mr-2 ml-2" onClick={() => this.handleModalApproveOpen()} className="btn gp-btn-outline-primary waves-effect waves-light ml-2">
+                                    <button
+                                        type="button mr-2 ml-2"
+                                        onClick={() => this.handleModalOpen(
+                                            'approve',
+                                            `Та ${
+                                                values.length == 1
+                                                    ?
+                                                        get_modal_text(values[0].kind)
+                                                    :
+                                                values.length > 1
+                                                    ?
+                                                        `сонгосон ${values.length} геометр өгөгдлөө`
+                                                    :
+                                                    null
+                                            }
+                                            зөвшөөрөхдөө итгэлтэй байна уу ?`,
+                                            "Тохиргоог зөвшөөрөх",
+                                            "warning",
+                                            "зөвшөөрөх"
+                                        )}
+                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                                    >
                                         <i className="fa fa-check">Зөвшөөрөх</i>
                                     </button>
-                                    {
-                                     is_modal_approve_open &&
-                                        <Modal
-                                            modalAction={() => this.handleProceed()}
-                                            modalClose = {() => this.handleModalApproveClose()}
-                                            text={`Та ${kind == 1 ? 'шинэ геометр өгөгдөл үүсгэхийг'
-                                            : kind == 2 ? 'засагдсан геометр өгөгдлийг':
-                                            kind == 3 ? 'геометр өгөгдлийг устгахыг' :null }
-                                            зөвшөөрөхдөө итгэлтэй байна уу ?`}
-                                            title="Тохиргоог зөвшөөрөх"
-                                            status={this.state.status}
-                                            model_type_icon = "warning"
-                                            actionNameDelete="зөвшөөрөх"
-                                        />
-                                    }
                                 </div>
-                             {is_loading && <span className="text-center modal fade show d-block text-sp" style={{position:"fixed", top:"50%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Хүсэлтийг шалгаж байна түр хүлээнэ үү... </span>}
+                             <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
                             </div>
                         </div>
                     </div>
+                    <Modal
+                        modalAction={() => this.handleModalAction()}
+                        modalClose={() => this.handleModalClose()}
+                        text={text}
+                        title={title}
+                        status={modal_status}
+                        model_type_icon={model_type_icon}
+                        actionNameDelete={action_name}
+                    />
                 </div>
                 <div className={classNameBackdrop}></div>
             </Fragment>
         )
     }
-
 }

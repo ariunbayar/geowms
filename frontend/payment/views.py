@@ -9,11 +9,12 @@ import urllib.request
 import glob
 import csv
 import PIL.Image as Image
+from datetime import date
+from fpdf import FPDF
 
 from django.conf import settings
 from django.db import transaction
 
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
 from django.contrib.gis.gdal import DataSource
@@ -32,10 +33,11 @@ from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, Paymen
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
 from backend.inspire.models import (
-    LThemes, LFeatureConfigs,
-    LDataTypeConfigs, LProperties,
-    LValueTypes, LCodeListConfigs,
-    LCodeLists, LFeatures, LPackages,
+    LFeatureConfigs,
+    LDataTypeConfigs,
+    LProperties,
+    LValueTypes,
+    LCodeLists,
     MDatas,
 )
 
@@ -101,14 +103,15 @@ def dictionaryResponse(request):
         return JsonResponse({'success': True, 'xmlmsg': 12})
 
 
-def _calc_layer_amount(area, area_type, len_object_in_layer):
-    amount = 0
-    if area_type == 'm':
-        amount = Payment.POLYGON_PER_M_AMOUNT
-    if area_type == 'km':
-        amount = Payment.POLYGON_PER_KM_AMOUNT
-    amount = (area * amount) * len_object_in_layer
-    return amount
+def _get_layer_ids(feature_info_list):
+    layer_ids = list()
+    for geoms in feature_info_list:
+        for key, value in geoms.items():
+            for geom in geoms[key]:
+                layer_id = geom['layer_id']
+                if layer_id not in layer_ids:
+                    layer_ids.append(layer_id)
+    return layer_ids
 
 
 @require_POST
@@ -116,18 +119,25 @@ def _calc_layer_amount(area, area_type, len_object_in_layer):
 @login_required
 def purchaseDraw(request, payload):
 
-    price = payload.get('price')
     description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
-    layer_ids = payload.get('layer_ids')
     bundle_id = payload.get('bundle_id')
     area = payload.get('area')
     area_type = payload.get('area_type')
+    layer_list = payload.get('layer_list')
     feature_info_list = payload.get('feature_info_list')
+    selected_type = payload.get('selected_type')
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
+    layer_ids = _get_layer_ids(feature_info_list)
     layers = get_list_or_404(WMSLayer, pk__in=layer_ids)
+
+    layer_prices = {}
+    for layer in layers:
+        all_len_property = _get_all_property_count(layer_list, feature_info_list)
+        layer_prices[layer.id] = _calc_per_price(area, area_type, all_len_property, len(feature_info_list), selected_type)
+
     with transaction.atomic():
 
         payment = Payment()
@@ -137,7 +147,7 @@ def purchaseDraw(request, payload):
         payment.user = request.user
         payment.bundle = bundle
         payment.kind = Payment.KIND_QPAY
-        payment.total_amount = price
+        payment.total_amount = sum(layer_prices.values())
         payment.export_kind = Payment.EXPORT_KIND_POLYGON
         payment.is_success = False
         payment.message = 'Хэсэгчлэн худалдаж авах хүсэлт'
@@ -158,13 +168,12 @@ def purchaseDraw(request, payload):
             payment_layer = PaymentLayer()
             payment_layer.payment = payment
             payment_layer.wms_layer = layer
-            payment_layer.amount = _calc_layer_amount(area, area_type, len(feature_info_list))
+            payment_layer.amount = layer_prices[layer.id]
             payment_layer.save()
 
     return JsonResponse({
         'success': True,
         'payment_id': payment.id,
-        'msg': 'Амжилттай боллоо',
     })
 
 
@@ -342,7 +351,7 @@ def _create_shp_file(payment, layer, polygon):
         # source_srs = 'EPSG:32648'
         trans_srs = 'EPSG:4326'
         meta = 'ENCODING=UTF-8'
-        command = subprocess.run([
+        subprocess.run([
             'ogr2ogr',
             '-f', file_type,
             filename,
@@ -375,8 +384,6 @@ def get_all_file_paths(directory):
 
 def get_all_file_remove(directory):
 
-    file_paths = []
-
     for root, directories, files in os.walk(directory):
         for filename in files:
             if filename != 'export.zip':
@@ -389,10 +396,10 @@ def _file_to_zip(payment_id, folder_name):
         path = os.path.join(settings.FILES_ROOT, folder_name, payment_id)
         file_paths = get_all_file_paths(path)
         zip_path = os.path.join(path, 'export.zip')
-        with ZipFile(zip_path,'w') as zip:
+        with ZipFile(zip_path, 'w') as zip:
             for file in file_paths:
                 if folder_name == 'pdf':
-                    if not '.jpeg' in str(file):
+                    if '.jpeg' not in str(file):
                         zip.write(file, os.path.basename(file))
                 else:
                     zip.write(file, os.path.basename(file))
@@ -1153,12 +1160,13 @@ def _get_all_property_count(layer_list, feature_info_list):
             key = _get_key_and_compare(feature, code)
             if key:
                 for info in feature[key]:
-                    fconfig_count = _lfeature_config_count(info['feature_id'])
-                    count += fconfig_count
+                    if 'feature_id' in info:
+                        fconfig_count = _lfeature_config_count(info['feature_id'])
+                        count += fconfig_count
     return count
 
 
-def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_in_layer, selected_type):
+def _calc_per_price(area, area_type, all_len_property, len_object_in_layer, selected_type):
     amount = None
     price = None
     if area_type == 'km':
@@ -1166,9 +1174,9 @@ def _calc_per_price(area, area_type, layer_length, all_len_property, len_object_
     if area_type == 'm':
         amount = Payment.POLYGON_PER_M_AMOUNT
     if selected_type == 'shp' or selected_type == 'pdf':
-        price = (((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * layer_length) * len_object_in_layer
+        price = ((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * len_object_in_layer
     if selected_type == 'png' or selected_type == 'jpeg' or selected_type == 'tiff':
-        price = ((area * amount) * layer_length) * len_object_in_layer
+        price = (area * amount) * len_object_in_layer
     return price
 
 
@@ -1184,19 +1192,12 @@ def calcPrice(request, payload):
     area_type = area['type']
     area = area['output']
 
-    is_user = request.user
-    if str(is_user) != 'AnonymousUser':
-        is_user = True
-    else:
-        is_user = False
-
     all_len_property = _get_all_property_count(layer_list, feature_info_list)
-    total_price = _calc_per_price(area, area_type, len(layer_list), all_len_property, len(feature_info_list), selected_type)
+    total_price = _calc_per_price(area, area_type, all_len_property, len(feature_info_list), selected_type)
 
     rsp = {
         'success': True,
         'total_price': total_price,
-        'is_user': is_user,
     }
 
     return JsonResponse(rsp)

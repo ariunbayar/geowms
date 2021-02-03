@@ -21,15 +21,15 @@ export class PermSwitches extends Component {
         const { radio_switch_class_name } = this.state
         var max = 0
         const width = document.getElementsByClassName(`${radio_switch_class_name}`)[0].offsetWidth
-        if(total_length == now_length) {
+        if(total_length === now_length) {
             element.style.backgroundColor = '#006CB6'
             max = Math.ceil(width / 2)
         }
-        if(total_length > now_length) {
+        else if(total_length > now_length) {
             element.style.backgroundColor = '#FFD24A'
             max = Math.floor(width / 3)
         }
-        if(total_length == 0) {
+        else{
             element.style.backgroundColor = '#ccc'
             max = 0
         }
@@ -71,12 +71,12 @@ export class PermAcc extends Component {
         super(props)
         this.state = {
             perms: [
-                {'name': 'харах', 'eng_name': 'PERM_VIEW', 'value': false},
-                {'name': 'нэмэх', 'eng_name': 'PERM_CREATE', 'value': false},
-                {'name': 'хасах', 'eng_name': 'PERM_REMOVE', 'value': false},
-                {'name': 'засах', 'eng_name': 'PERM_UPDATE', 'value': false},
-                {'name': 'цуцлах', 'eng_name': 'PERM_REVOKE', 'value': false},
-                {'name': 'батлах', 'eng_name': 'PERM_APPROVE', 'value': false},
+                {'name': 'ХАРАХ', 'eng_name': 'PERM_VIEW', 'value': false},
+                {'name': 'НЭМЭХ', 'eng_name': 'PERM_CREATE', 'value': false},
+                {'name': 'ХАСАХ', 'eng_name': 'PERM_REMOVE', 'value': false},
+                {'name': 'ЗАСАХ', 'eng_name': 'PERM_UPDATE', 'value': false},
+                {'name': 'ЦУЦЛАХ', 'eng_name': 'PERM_REVOKE', 'value': false},
+                {'name': 'БАТЛАХ', 'eng_name': 'PERM_APPROVE', 'value': false},
             ],
             r_name: '',
         }
@@ -86,7 +86,7 @@ export class PermAcc extends Component {
         const { perms, r_name } = this.state
         const { name, index, type, id, total_length, small, is_open, t_name, p_name, f_name, now_length } = this.props
         return (
-            <div className={type == "theme" ? "card-header bg-light " : type == "feature" ? " " : "card-header"} id={`${index}-${type}`}>
+            <div className={"role-card-body " + (type == "feature" ? "ml-5" : "card-header")} id={`${index}-${type}`}>
                 <div className="row">
                     <div className="col-3">
                         <h5 className="mb-0 mt-4">
@@ -120,9 +120,9 @@ export class PermAcc extends Component {
                                 <PermSwitches key={p_idx}
                                     name={perm.name}
                                     p_idx={p_idx}
-                                    index={`${p_idx}-perm-${name}-${index}`}
+                                    index={`${p_idx}-perm-${name}-${index}-${type}`}
                                     total_length={total_length}
-                                    now_length={now_length}
+                                    now_length={now_length[perm.name]}
                                 />
                             )}
                         </div>

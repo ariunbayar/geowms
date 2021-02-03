@@ -12,7 +12,6 @@ export class BundleForms extends Component {
         this.initial_form_values = {
             id: null,
             name: '',
-            price: 0,
             icon: '',
             icon_url: '',
             layers: [],

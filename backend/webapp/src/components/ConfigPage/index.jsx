@@ -8,6 +8,7 @@ import ConfigSite from './ConfigSite'
 import ConfigSystem from './ConfigSystem'
 import ConfigEmail from './ConfigEmail'
 import ConfigQgis from './ConfigQgis'
+import ConfigDan from './ConfigDan'
 
 
 export class ConfigPage extends Component {
@@ -28,9 +29,10 @@ export class ConfigPage extends Component {
                     <div className="col-lg-4">
                         <ConfigSystem/>
                         <ConfigQgis/>
+                        <ConfigGeoserver/>
                     </div>
                     <div className="col-lg-4">
-                        <ConfigGeoserver/>
+                        <ConfigDan/>
                     </div>
                     <div className="col-lg-4">
                         <ConfigEmail/>

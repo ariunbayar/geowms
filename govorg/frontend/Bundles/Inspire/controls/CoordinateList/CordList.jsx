@@ -128,10 +128,15 @@ class ListComponent extends Component {
                         ?
                         <div className="list-group overflow-auto">
                             {coords_list.data.map((datas, ix) =>
-                                ((!coords_list.type.includes('Point')) ?
-                                (datas.turning == coords_list.last ?
-                                    ix !== coords_list.data.length - 1
-                                : ix == ix) : ix == ix) &&
+                               ( coords_list.type.includes('Polygon')
+                                    ?
+                                (
+                                    datas.turning == coords_list.last
+                                    ?
+                                        ix !== coords_list.data.length - 1
+                                    :
+                                        ix == ix
+                                ) : ix == ix ) &&
                                 <div key={ix} className="list-group-item animated slideInLeft">
                                     <b>Эргэлтийн цэгийн дугаар: {datas.turning !== null ? datas.turning : ix}</b>
                                     <ul className="m-0 p-0" style={{listStyle:'none'}}>

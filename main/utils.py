@@ -6,12 +6,13 @@ import re
 import unicodedata
 
 from django.conf import settings
+import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 
@@ -254,7 +255,10 @@ def send_approve_email(user, subject=None, text=None):
         subject = 'Геопортал хэрэглэгч баталгаажуулах'
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
-    msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+    if host_name == 'localhost:8000':
+        msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+    else:
+        msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
 
@@ -350,7 +354,7 @@ def get_administrative_levels():
         table_au_au_ab.filter({'geo_id': national_codes})
         table_au_au_ab.select({
             'geo_id': True,
-            i_data_type_administrative_boundary: {i_property_name},
+            i_data_type_administrative_boundary: [i_property_name],
         })
 
         for item in table_au_au_ab.fetch():
@@ -519,6 +523,13 @@ def is_email(email):
     return re.search(re_email, email) is not None
 
 
+def _is_domain(domain):
+    pattern = re.compile(
+        r'^((http|https):\/\/)?([a-zA-Z0-9]+\.)?([a-zA-Z0-9][a-zA-Z0-9-]*)?((\:[a-zA-Z0-9]{2,6})|(\.[a-zA-Z0-9]{2,6}))$'
+    )
+    return re.search(pattern, domain) is not None
+
+
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
 def get_config(config_name):
@@ -562,10 +573,37 @@ def _is_geom_included(geo_json, org_geo_id):
     return is_included
 
 
+# Тухайн geom ни feature доторх geom той давхцаж байгаа эсэхийг шалгана
+# Давхцаж байгаа geom болон feature_id array хэлбэрээр буцаана
+# geo_json = нэг geojson авна
+# feature_ids = feature id list авна
+def _geom_contains_feature_geoms(geo_json, feature_ids):
+    is_included = list()
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT geo_id, feature_id
+            FROM m_geo_datas
+            WHERE (
+                    st_overlaps(geo_data, ST_GeomFromGeoJSON(%s))
+                    OR
+                    ST_Contains(geo_data, ST_GeomFromGeoJSON(%s))
+                    OR
+                    ST_Contains(ST_GeomFromGeoJSON(%s), geo_data)
+            )
+            AND feature_id in ({feature_ids})
+        """.format(feature_ids=', '.join(['{}'.format(f) for f in feature_ids]))
+        cursor.execute(sql, [str(geo_json), str(geo_json), str(geo_json)])
+        is_included = [dict((cursor.description[i][0], value) \
+            for i, value in enumerate(row)) for row in cursor.fetchall()]
+
+    return is_included
+
+
 def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
     success = True
     info = ''
     EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
+    FeatureOverlaps = apps.get_model('dedsanbutets', 'FeatureOverlaps')
     qs = EmpPermInspire.objects
     qs = qs.filter(emp_perm__employee=employee)
     qs = qs.filter(feature_id=fid)
@@ -580,5 +618,139 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
         if not is_included:
             success = False
             info = "Байгууллагын эрх олгогдоогүй байна."
+        overlap_feature_id = FeatureOverlaps.objects.filter(feature_id=fid).values_list('overlap_feature_id', flat=True)
+        overlap_feature_id = [i for i in overlap_feature_id]
+        overlap_feature_id.append(fid)
+        is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id)
+        if is_contains:
+            success = False
+            info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains]))
 
     return success, info
+
+
+def get_emp_property_roles(employee, fid):
+
+    property_ids = []
+    property_details = []
+    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+
+    EmpPerm = apps.get_model('backend_inspire', 'EmpPerm')
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
+    EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
+    property_perms = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid).distinct('property_id', 'perm_kind').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+    if property_perms:
+        for prop in property_perms:
+            if prop.get('property_id') not in property_ids:
+                property_ids.append(prop.get('property_id'))
+        for property_id in property_ids:
+            for prop in property_perms:
+                if property_id == prop['property_id']:
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
+                        property_roles['PERM_VIEW'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_CREATE:
+                        property_roles['PERM_CREATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_REMOVE:
+                        property_roles['PERM_REMOVE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_UPDATE:
+                        property_roles['PERM_UPDATE'] = True
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
+                        property_roles['PERM_APPROVE'] = True
+                    else:
+                        property_roles['PERM_REVOKE'] = True
+
+            property_details.append({
+                'property_id': property_id,
+                'roles': property_roles
+            })
+
+    return property_ids, property_details
+
+
+def check_form_json(fid, form_json, employee):
+
+    request_json = []
+    property_ids, roles = get_emp_property_roles(employee, fid)
+    if form_json and roles:
+        for role in roles:
+            for propert in form_json['form_values']:
+                if role.get('property_id') == propert.get('property_id'):
+                    request_json.append({
+                        'pk': propert.get('pk') or '',
+                        'property_name': propert.get('property_name') or '',
+                        'property_id': propert.get('property_id'),
+                        'property_code': propert.get('property_code') or '',
+                        'property_definition': propert.get('property_definition') or '',
+                        'value_type_id': propert.get('value_type_id') or '',
+                        'value_type': propert.get('value_type') or '',
+                        'data': propert.get('data') or '',
+                        'data_list': propert.get('data_list') or '',
+                        'roles': propert.get('roles') or ''
+                    })
+
+    return json.dumps(request_json, ensure_ascii=False) if request_json else ''
+
+
+def get_1stOrder_geo_id():
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
+
+    try:
+        feature_id = LFeatures.objects.filter(feature_code='au-au-au').first().feature_id
+        property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
+        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder\n').first().code_list_id
+        feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+
+        qs = MDatas.objects.filter(property_id=property_id)
+        qs = qs.filter(code_list_id=code_list_id)
+
+        return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
+
+    except:
+        return None
+
+
+def datetime_to_string(date):
+    return date.strftime('%Y-%m-%d') if date else ''
+
+
+def date_to_timezone(input_date):
+    if '/' in input_date:
+        input_date = input_date.replace('/', '-')
+    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
+    output_date = timezone.make_aware(naive_time)
+    return output_date
+
+
+def get_display_items(items, fields, хувьсах_талбарууд=[]):
+    display = list()
+    for item in items.values():
+        obj = dict()
+        for field in fields:
+            if isinstance(item[field], datetime):
+                obj[field] = datetime_to_string(item[field])
+            else:
+                obj[field] = item[field]
+            for хувьсах_талбар in хувьсах_талбарууд:
+                if хувьсах_талбар['field'] == field:
+                    action = хувьсах_талбар['action']
+                    obj[хувьсах_талбар['new_field']] = action(item[field], item)
+
+        display.append(obj)
+
+    return display
+
+
+def get_fields(Model):
+    fields = []
+    for field in Model._meta.get_fields():
+        name = field.name
+        if field.get_internal_type() == 'ForeignKey':
+            name = name + '_id'
+        fields.append(name)
+
+    return fields

@@ -1,10 +1,12 @@
 import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
-import {service} from './service'
 import {NavLink} from "react-router-dom"
 import { Formik, Form, Field, ErrorMessage} from 'formik'
+
+import {service} from './service'
 import {validationSchemaAdmin} from './validationSchema'
-import ModalAlert from '../../../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class FormTseg extends Component {
 

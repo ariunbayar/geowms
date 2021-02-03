@@ -9,7 +9,6 @@ export default class BundleAdminRights extends Component {
         this.state = {
             id: props.values.id,
             name: props.values.name,
-            price: props.values.price,
             layers: props.values.layers,
             icon: props.values.icon,
             icon_url: props.values.icon_url,
@@ -18,8 +17,8 @@ export default class BundleAdminRights extends Component {
 
     componentDidUpdate(prevProps) {
         if (this.props.values.id !== prevProps.values.id) {
-            const {id, name, price, layers} = this.props.values
-            this.setState({id, name, price, layers})
+            const {id, name, layers} = this.props.values
+            this.setState({id, name, layers})
         }
     }
 

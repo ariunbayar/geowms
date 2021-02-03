@@ -1,40 +1,40 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 
 import 'ol/ol.css'
-import {Map, View, Feature, Overlay, Observable } from 'ol'
-import {unByKey} from 'ol/Observable'
-import {fromLonLat, transform as transformCoordinate} from 'ol/proj'
+import { Map, View, Feature, Overlay } from 'ol'
+import { transform as transformCoordinate } from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
-import {getArea, getLength} from 'ol/sphere';
-import {toLonLat} from 'ol/proj';
+import { getArea } from 'ol/sphere';
+import { toLonLat } from 'ol/proj';
 import Tile from 'ol/layer/Tile'
-import {Vector as VectorLayer} from 'ol/layer'
-import {Vector, Vector as VectorSource} from 'ol/source'
-import {Icon, Style, Stroke, Fill, Text} from 'ol/style'
+import { Vector as VectorLayer } from 'ol/layer'
+import { Vector as VectorSource } from 'ol/source'
+import { Icon, Style, Stroke, Fill } from 'ol/style'
 import {Point, Circle, Polygon} from 'ol/geom'
 import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
-import {format as coordinateFormat} from 'ol/coordinate';
-import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
-import {fromCircle, fromExtent} from 'ol/geom/Polygon';
+import { format as coordinateFormat } from 'ol/coordinate';
+import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
 
-import {СуурьДавхарга} from './controls/СуурьДавхарга'
-import {CoordinateCopy} from './controls/CoordinateCopy'
-import {Modal} from './controls/Modal'
-import {ShopModal} from './ShopControls/Modal'
-import {ShopCart} from './ShopControls/ShopCart'
-import {DrawPayModal} from './controls/DrawPayModal'
+import { СуурьДавхарга } from './controls/СуурьДавхарга'
+import { CoordinateCopy } from './controls/CoordinateCopy'
+import { Modal } from './controls/Modal'
+import { ShopModal } from './ShopControls/Modal'
+import { ShopCart } from './ShopControls/ShopCart'
+import { DrawPayModal } from './controls/DrawPayModal'
 import "./styles.css"
-import {service} from './service'
-import {SidebarButton} from './SidebarButton'
-import {Sidebar} from './Sidebar'
-import {SearchBar} from './searchControl/SearchBar'
-import {SearchBarButton} from './searchControl/SearchBarButton'
-import {DrawButton} from './controls/Draw'
-import {PopUp} from './popUp/PopUp'
-import Draw, { createBox, createRegularPolygon, } from 'ol/interaction/Draw';
+import { service } from './service'
+import { SidebarButton } from './SidebarButton'
+import { Sidebar } from './Sidebar'
+import { SearchBar } from './searchControl/SearchBar'
+import { SearchBarButton } from './searchControl/SearchBarButton'
+import { DrawButton } from './controls/Draw'
+import { PopUp } from './popUp/PopUp'
+import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
-import LoginModal from '../../../../../src/components/Modal/InfoModal'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
+
 export default class BundleMap extends Component {
 
     constructor(props) {
@@ -44,7 +44,7 @@ export default class BundleMap extends Component {
         this.saved_aimag_name = ''
         this.state = {
             projection: 'EPSG:3857',
-            is_user: false,
+            is_authenticated: false,
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
@@ -70,7 +70,7 @@ export default class BundleMap extends Component {
             drawModal: new DrawPayModal(),
             sidebar: new Sidebar(),
             searchbar: new SearchBar(),
-            alertBox: new AlertRoot(),
+            alertBox: new AlertRoot(), // this.controls.alertBox.showAlert(true, "....")
             popup: new PopUp(),
         }
 
@@ -135,12 +135,10 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
-      service.isUser().then(({success}) =>
-      {
-        if (success) {
-            this.setState({is_user: true})
-        }
-      })
+      service.getUser().then(({is_authenticated}) =>
+        {
+            this.setState({is_authenticated})
+        })
         this.loadMapData(this.state.bundle.id)
     }
 
@@ -686,14 +684,17 @@ export default class BundleMap extends Component {
                                         //     }
                                         // }
                                     }
+                                    else {
+                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                    }
                                 })
-                        } else {
-                            /* TODO */
-                            console.log('no feature url', wms_source);
+                                
+                            // }
                         }
-                    }
-                })
-            }
+                } else {
+                    /* TODO */
+                }
+            })
         })
         this.sendFeatureInfo = []
         this.is_empty = true
@@ -748,7 +749,7 @@ export default class BundleMap extends Component {
 
     toggleDrawed(event){
         this.feature_info_list = []
-
+        this.controls.drawModal.showModal(true)
         const view = this.map.getView()
         const projection = view.getProjection()
         const coordinat = event.feature.getGeometry().getCoordinates()
@@ -762,8 +763,9 @@ export default class BundleMap extends Component {
         const coodrinatRightBottom_map_coord = transformCoordinate(coodrinatRightBottom, projection, this.state.projection_display)
         const coodrinatRightBottomFormat = coordinateFormat(coodrinatRightBottom_map_coord, '{y},{x}', 6)
 
-        const { bundle } = this.state //http://127.0.0.1:8080/geoserver/gp_bu/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=gp_bu:gp_layer_building_view&bbox=100.4464067,46.2854066,100.4489819,46.2870236,EPSG:4326
+        const { bundle, map_wms_list } = this.state
         const wms_array = this.getWMSArray()
+
         const layer_info = {
             bundle: { id: bundle.id },
             wms_list: wms_array.reduce((acc, { name, layers }) => {
@@ -790,59 +792,54 @@ export default class BundleMap extends Component {
         var list = []
         wms_array.map(({ name, layers }, w_idx) => {
             layers.map(({ id, code, tile }, l_idx) => {
-                if(tile) {
-                    if (tile.getVisible()) {
-                        const main_url = tile.getSource().urls[0]
-                        if(main_url) {
-                            const url =
-                                main_url.slice(0, -1) +
-                                '?service=WFS' +
-                                '&version=1.1.0' +
-                                '&request=GetFeature' +
-                                '&typeName=' + code +
-                                '&bbox=' + full_extent + ',' + this.state.projection_display
-                            fetch(url)
-                                .then((rsp) => rsp.text())
-                                .then((text) => {
-                                    const parser = new WMSGetFeatureInfo()
-                                    const features = parser.readFeatures(text)
-                                    const feature_info = features.map((feature) => {
-                                        const geometry_name = feature.getGeometryName()
-                                        const values =
-                                            feature.getKeys()
-                                                .filter((key) => key != geometry_name)
-                                                .map((key) => [key, feature.get(key)])
-                                        const list_id = feature.getId().split('.')
-                                        const id = list_id[list_id.length - 1]
-                                        return [id, values]
-                                    })
-                                    if(feature_info.length > 0) {
-                                        const info = feature_info.map((feature, idx) => {
-                                            var obj = new Object()
-                                            obj['geom_id'] = feature[0]
-                                            feature[1].map((info, idx) => {
-                                                if(info[0] == 'feature_id') {
-                                                    obj['feature_id'] = info[1]
-                                                }
-                                            })
-                                            obj['layer_code'] = code
-                                            obj['layer_id'] = id
-                                            return obj
+                if (tile.getVisible()) {
+                    const main_url = tile.getSource().urls[0]
+                    if(main_url) {
+                        const url =
+                            main_url.slice(0, -1) +
+                            '?service=WFS' +
+                            '&version=1.1.0' +
+                            '&request=GetFeature' +
+                            '&typeName=' + code +
+                            '&bbox=' + full_extent + ',' + this.state.projection_display
+                        fetch(url)
+                            .then((rsp) => rsp.text())
+                            .then((text) => {
+                                const parser = new WMSGetFeatureInfo()
+                                const features = parser.readFeatures(text)
+                                const feature_info = features.map((feature) => {
+                                    const geometry_name = feature.getGeometryName()
+                                    const values =
+                                        feature.getKeys()
+                                            .filter((key) => key != geometry_name)
+                                            .map((key) => [key, feature.get(key)])
+                                    const list_id = feature.getId().split('.')
+                                    const id = list_id[list_id.length - 1]
+                                    return [id, values]
+                                })
+                                if(feature_info.length > 0) {
+                                    const info = feature_info.map((feature, idx) => {
+                                        var obj = new Object()
+                                        obj['geom_id'] = feature[0]
+                                        feature[1].map((info, idx) => {
+                                            if(info[0] == 'feature_id') {
+                                                obj['feature_id'] = info[1]
+                                            }
                                         })
-                                        list.push({[code]: info})
-                                    }
-                                    if(w_idx == wms_array.length - 1 && layers.length - 1 == l_idx) {
-                                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
-                                    }
-                            })
-                        }
+                                        obj['layer_code'] = code
+                                        obj['layer_id'] = id
+                                        return obj
+                                    })
+                                    list.push({[code]: info})
+                                }
+                        })
                     }
+                }
+                if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {
+                    this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
                 }
             })
         })
-
-        const is_loading = true
-        this.controls.drawModal.showModal(is_loading)
     }
 
     formatArea(polygon) {
@@ -882,9 +879,9 @@ export default class BundleMap extends Component {
 
     toggleDraw() {
 
-        const {is_user} = this.state
+        const {is_authenticated} = this.state
 
-        if (is_user){
+        if (is_authenticated){
 
           this.setState(prevState => ({
               is_draw_open: !prevState.is_draw_open,
@@ -930,8 +927,8 @@ export default class BundleMap extends Component {
                             <div id="map"></div>
                             {
                              is_modal_info_open &&
-                                <LoginModal
-                                    modalClose = {() => this.handleModalApproveClose()}
+                                <ModalAlert
+                                    modalAction = {() => this.handleModalApproveClose()}
                                     text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
                                     title="Худалдан авалтын мэдээлэл"
                                     status={this.state.status}

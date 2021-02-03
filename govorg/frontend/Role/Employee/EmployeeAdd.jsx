@@ -1,10 +1,12 @@
 import React, { Component, Fragment } from "react"
 import { NavLink } from "react-router-dom"
-import ModalAlert from '../../components/helpers/ModalAlert';
-import { service } from './service'
-import InsPerms from '../Role/GovPerms'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+
+import { service } from './service'
+import ModalAlert from "@utils/Modal/ModalAlert"
+import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
+
 
 export class EmployeeAdd extends Component {
 
@@ -30,15 +32,14 @@ export class EmployeeAdd extends Component {
             emp_role_id: null,
             roles: {},
             modal_alert_status: "closed",
-            timer: null,
             model_type_icon: '',
             title: '',
             prefix: '/gov/perm/employee/',
-            is_inspire_role: false
+            is_inspire_role: false,
+            is_inspire_role_null: true,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getRolesForOption = this.getRolesForOption.bind(this)
         this.getRole = this.getRole.bind(this)
         this.getValue = this.getValue.bind(this)
@@ -59,15 +60,23 @@ export class EmployeeAdd extends Component {
     }
 
     getRole(emp_role_id) {
-        const emp_role_id_parsed = parseInt(emp_role_id)
-        this.setState({ is_inspire_role: false, emp_role_id: emp_role_id_parsed })
-        if(emp_role_id_parsed) {
-        service
-            .getRole(emp_role_id_parsed)
-            .then(({ success, role_name, role_id, role_description, roles }) => {
-                if (success) {
-                    this.setState({ roles, is_inspire_role: true })
-                }
+        this.setState({emp_role_id, is_inspire_role: false, is_inspire_role_null: false })
+        if(emp_role_id)
+        {
+            service
+                .getRole(emp_role_id)
+                .then(({ success, role_name, role_id, role_description, roles }) => {
+                    if (success) {
+                        this.setState({ roles, is_inspire_role: true })
+                    }
+                })
+        }
+        else
+        {
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    this.setState({roles: {}, is_inspire_role_null: true})
+                }, 300);
             })
         }
     }
@@ -102,41 +111,26 @@ export class EmployeeAdd extends Component {
             .then(({ success, errors, info }) => {
                 if(success) {
                     setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'success'})
+                    this.setState({
+                        model_type_icon: 'success',
+                        modal_alert_status: 'open',
+                        title: info
+                    })
                 } else {
                     if (errors) {
                         setErrors(errors)
                     }
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'danger'})
                 }
-                this.setState({ modal_alert_status: 'open', title: "Алдаа гарлаа"})
-                this.modalCloseTime()
+                setSubmitting(false)
             })
     }
 
     modalClose() {
-        if (this.state.model_type_icon === 'success') {
-            this.props.history.push(this.state.prefix)
-        } else {
-            this.setState({ modal_alert_status: "closed" })
-            clearTimeout(this.state.timer)
-        }
-    }
-
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            if (this.state.model_type_icon === 'success') {
-                this.props.history.push(this.state.prefix)
-            } else {
-                this.setState({ modal_alert_status: "closed" })
-            }
-        }, 2000)
+        this.props.history.push(this.state.prefix)
     }
 
     render() {
-        const {form_values, roles, role_list, emp_role_id, prefix, is_inspire_role } = this.state
+        const {form_values, roles, role_list, emp_role_id, prefix, is_inspire_role, is_inspire_role_null } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -278,7 +272,7 @@ export class EmployeeAdd extends Component {
                                         </div>
                                         <div>
                                             {
-                                                roles !== {} && is_inspire_role
+                                                is_inspire_role || is_inspire_role_null
                                                 ?
                                                     <InsPerms
                                                         action_type="editable"
@@ -287,13 +281,14 @@ export class EmployeeAdd extends Component {
                                                         dontDid={true}
                                                         org_roles={org_roles}
                                                         role={roles}
+                                                        is_inspire_role_null={is_inspire_role_null}
                                                         editable_is_check={this.perms}
                                                     />
                                                 : null
                                             }
                                         </div>
                                         <div className="form-group">
-                                            <button type="submit" className="btn btn-primary btn-block waves-effect waves-light m-1" disabled={isSubmitting}>
+                                            <button type="submit" className="btn btn-primary waves-effect waves-light m-1" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                 {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                 {!isSubmitting && 'Хадгалах' }

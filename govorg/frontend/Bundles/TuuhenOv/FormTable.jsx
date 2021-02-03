@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../../components/helpers/Modal"
+
+import Modal from "@utils/Modal/Modal"
+
 
 export default class FormTable extends Component {
 
@@ -30,7 +32,6 @@ export default class FormTable extends Component {
     }
 
     render() {
-        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         const { id, dugaar, date, inspireid, too_shirheg, aimagname, sumname, burtgegch, created_at} = this.props.values
         const idx = this.props.idx
         return (
@@ -48,14 +49,11 @@ export default class FormTable extends Component {
                             <i className="fa fa-plus-circle gp-text-primary" aria-hidden="true"></i>
                     </NavLink>
                 </th>
-                {perm_view && perm_create && perm_remove ?
                 <th>
                     <NavLink to={`/gov/tuuhen-ov/${id}/update/`}>
                             <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
-                </th> : null
-                }
-                {perm_remove ?
+                </th>
                 <th>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
@@ -69,8 +67,7 @@ export default class FormTable extends Component {
                             model_type_icon = "success"
                         />
                     }
-                </th> : null
-                }
+                </th>
             </tr>
         )
     }

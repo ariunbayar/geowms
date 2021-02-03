@@ -13,3 +13,10 @@ class ViewProperties(models.Model):
     property_id = models.IntegerField()
     update_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class FeatureOverlaps(models.Model):
+    feature_id = models.IntegerField()
+    overlap_feature_id = models.IntegerField()
+    update_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)

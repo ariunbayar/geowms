@@ -47,18 +47,18 @@
 
 /* Track */
 .scroll-fixed::-webkit-scrollbar-track {
-    background: #ffffff; 
+    background: #ffffff;
 }
 
 /* Handle */
 .scroll-fixed::-webkit-scrollbar-thumb {
-    background: #484848; 
+    background: #484848;
     border-radius: 10px;
 }
 
 /* Handle on hover */
 .scroll-fixed::-webkit-scrollbar-thumb:hover {
-    background: #034ea2; 
+    background: #034ea2;
 }
 
 /* scroll data table агуулж буй div class="table_wrapper" table class="table_wrapper_table" */
@@ -83,6 +83,7 @@
 .table_wrapper .table_wrapper_table thead th{
     background:  #223035;
     color: #fff;
+    top: -1px;
 }
 
 .table_wrapper::-webkit-scrollbar {
@@ -130,11 +131,13 @@
     background:  #034ea2;
     color: #fff;
     z-index: 100;
+    border-top: 1px;
 }
 .table_wrapper-100 .table_wrapper_table_saaral thead th{
     background:  #034ea2;
     color: #fff;
     z-index: 100;
+    border-top: 1px;
 }
 .table_wrapper_table_saaral{
     border: 1px solid #e9eaea;
@@ -181,12 +184,16 @@
     background:  #034ea2;
     color: #fff;
     z-index: 100;
+    border-top: 1px;
 }
+
 .table_wrapper-80 .table_wrapper_table_saaral thead th{
     background:  #034ea2;
     color: #fff;
     z-index: 100;
+    border-top: 1px;
 }
+
 .table_wrapper_table_saaral{
     border: 1px solid #e9eaea;
     border-radius: 25px;
