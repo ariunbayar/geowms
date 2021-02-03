@@ -98,7 +98,6 @@ export class Modal extends Control {
 
         props.handleClose = (type) => {
             if (props.actionBack && type == 'back') {
-                console.log(type);
                 props.actionBack()
             }
             this.toggleControl(false)

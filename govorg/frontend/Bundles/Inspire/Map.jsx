@@ -940,7 +940,6 @@ export default class BarilgaSuurinGazar extends Component{
         const fid = this.state.fid
         const json = JSON.parse(this.state.drawed)
         const datas = json.geometry
-        console.log("data", datas);
         this.setState({ is_loading: false, geojson: datas, togle_islaod: false})
       } else {
         this.addNotif('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')

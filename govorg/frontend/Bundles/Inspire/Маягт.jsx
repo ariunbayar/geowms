@@ -29,7 +29,6 @@ export default class Маягт extends Component {
         const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list, cancel_button_active } = this.props
             if(null_form_isload){
                 if (this.props.geojson != {}) {
-                    console.log('geojson',this.props.geojson);
                     service.create(this.state.tid, this.state.pid, this.state.fid, values, this.props.geojson).then(({ success, info }) => {
                         if (success) {
                             this.setState({is_loading: true})
