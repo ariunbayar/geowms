@@ -30,7 +30,7 @@ from backend.inspire.models import LProperties
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
@@ -507,6 +507,8 @@ def create(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -520,6 +522,7 @@ def create(request, payload):
             theme_id=tid,
             package_id=pid,
             feature_id=fid,
+            org=org,
             employee=employee,
             state=ChangeRequest.STATE_NEW,
             kind=ChangeRequest.KIND_CREATE,
@@ -549,6 +552,8 @@ def remove(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     geo_data = _get_geom(old_geo_id, fid)
     if not geo_data:
         rsp = {
@@ -570,6 +575,7 @@ def remove(request, payload):
             theme_id=tid,
             package_id=pid,
             feature_id=fid,
+            org=org,
             employee=employee,
             state=ChangeRequest.STATE_NEW,
             kind=ChangeRequest.KIND_DELETE,
@@ -600,6 +606,8 @@ def update(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -613,6 +621,7 @@ def update(request, payload):
             theme_id=tid,
             package_id=pid,
             feature_id=fid,
+            org=org,
             employee=employee,
             state=ChangeRequest.STATE_NEW,
             kind=ChangeRequest.KIND_UPDATE,
@@ -745,14 +754,15 @@ def _make_request(values, request_values):
         'order_no': request_values['order_no'],
         'group_id': request_values['group_id'],
     }
-    with transaction.atomic():
-        success = _create_request(request_datas)
-        info = 'Амжилттай хадгаллаа'
+
+    success = _create_request(request_datas)
+    info = 'Амжилттай хадгаллаа'
 
     return success, info
 
 
 def _delete_file(for_delete_items):
+    transaction.rollback()
     fileList = glob.glob(
         os.path.join(
             settings.BASE_DIR,
@@ -898,63 +908,63 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     }
                     main_request_id = _create_request(request_datas)
 
-            for val in layer:
-                values = dict()
-                for name in range(0, len(layer.fields)):
-                    field_name = val[name].name  # field name
-                    value = val.get(name)  # value ni
+                for val in layer:
+                    values = dict()
+                    for name in range(0, len(layer.fields)):
+                        field_name = val[name].name  # field name
+                        value = val.get(name)  # value ni
 
-                    if name == 0:
+                        if name == 0:
 
-                        # geo_id = _make_geo_id(feature_id)
-                        geo_json = val.geom.json  # goemetry json
+                            # geo_id = _make_geo_id(feature_id)
+                            geo_json = val.geom.json  # goemetry json
 
-                        if geo_json:
-                            success, info, request_kind = _check_perm(
-                                employee,
-                                feature_id,
-                                geo_json
-                            )
+                            if geo_json:
+                                success, info, request_kind = _check_perm(
+                                    employee,
+                                    feature_id,
+                                    geo_json
+                                )
 
-                            if not success:
+                                if not success:
+                                    _delete_file(for_delete_items)
+                                    rsp = {
+                                        'success': success,
+                                        'info': info,
+                                    }
+                                    return JsonResponse(rsp)
+
+                            else:
                                 _delete_file(for_delete_items)
                                 rsp = {
-                                    'success': success,
-                                    'info': info,
+                                    'success': False,
+                                    'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
                                 }
                                 return JsonResponse(rsp)
 
-                        else:
-                            _delete_file(for_delete_items)
-                            rsp = {
-                                'success': False,
-                                'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
-                            }
-                            return JsonResponse(rsp)
+                        values[field_name] = value
 
-                    values[field_name] = value
+                    request_values = {
+                        'theme_id': tid,
+                        'package_id': pid,
+                        'feature_id': fid,
+                        'employee': employee,
+                        'geo_json': geo_json,
+                        'kind': request_kind,
+                        'order_at': order_at,
+                        'order_no': order_no,
+                        'group_id': main_request_id,
+                    }
+                    success, info = _make_request(values, request_values)
 
-                request_values = {
-                    'theme_id': tid,
-                    'package_id': pid,
-                    'feature_id': fid,
-                    'employee': employee,
-                    'geo_json': geo_json,
-                    'kind': request_kind,
-                    'order_at': order_at,
-                    'order_no': order_no,
-                    'group_id': main_request_id,
+                    if not success:
+                        _delete_file(for_delete_items)
+                        break
+
+                rsp = {
+                    'success': success,
+                    'info': info
                 }
-                success, info = _make_request(values, request_values)
-
-                if not success:
-                    _delete_file(for_delete_items)
-                    break
-
-            rsp = {
-                'success': success,
-                'info': info
-            }
 
     else:
         rsp = {
