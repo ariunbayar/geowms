@@ -14,6 +14,8 @@ export class OrgMenu extends Component {
 
         super(props)
         this.state = {
+            level: this.props.match.params.level,
+            id: this.props.match.params.id,
             org_name: '',
             allowed_geom: null,
             sistem_count: 0,
@@ -25,9 +27,7 @@ export class OrgMenu extends Component {
     }
 
     componentDidMount() {
-        const level= this.props.match.params.level
-        const id= this.props.match.params.id
-        this.getOrgName(level, id)
+        this.getOrgName(this.state.level, this.state.id)
         this.handleSistemCount()
     }
 
@@ -96,7 +96,12 @@ export class OrgMenu extends Component {
                             <OrgDetail { ...routeProps } allowed_geom={ allowed_geom }/>
                         }/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
+                        <Route
+                            path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/"
+                            component={(props) =>
+                                <OrgUser {...props} refreshCount={() => this.getOrgName(this.state.level, this.state.id)}/>
+                            }
+                        />
                         <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
                     </Switch>
                 </div>
