@@ -141,13 +141,14 @@ export class Upload extends Component {
                         }
                     }
                     this.props.setLoading(false)
+                    setSubmitting(false)
                 })
                 .catch((error) => {
                     alert('Алдаа гарлаа, Файлаа шалгана уу!')
                     this.props.setLoading(false)
+                    setSubmitting(false)
                     this.setState({ is_upload_button: false, not_cancel: false, btn_upload_is_laod: false })
                 })
-            setSubmitting(false)
         }
     }
 
