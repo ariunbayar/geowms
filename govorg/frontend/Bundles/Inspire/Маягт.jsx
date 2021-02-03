@@ -143,7 +143,7 @@ export default class Маягт extends Component {
 
     render() {
         const { values, id } = this.state
-        const { modifyend_selected_feature_check, update_geom_from_list, is_delete_request, null_form_isload, cancel_button_active, remove_button_active } = this.props
+        const { modifyend_selected_feature_check, update_geom_from_list, null_form_isload, cancel_button_active, remove_button_active } = this.props
         if (this.state.is_loading) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>

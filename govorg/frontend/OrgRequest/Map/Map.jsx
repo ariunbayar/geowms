@@ -271,7 +271,7 @@ export default class RequestMap extends Component {
               <div className="row">
                   <div className="col-md-12 px-0 reaquest">
                       <div id="map"></div>
-                      <input className={!is_layer_swipe ? "invisible" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
+                      <input className={!is_layer_swipe ? "d-none" : ''} id="swipe" type="range" style={{width:"100%"}}></input>
                   </div>
               </div>
           </div>
