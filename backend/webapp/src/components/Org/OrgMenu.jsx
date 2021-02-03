@@ -27,21 +27,22 @@ export class OrgMenu extends Component {
     }
 
     componentDidMount() {
-        this.getOrgName(this.state.level, this.state.id)
-        this.handleSistemCount()
+        Promise.all([
+            this.getOrgName(),
+            this.handleSistemCount()
+        ])
     }
 
     handleSistemCount(){
-
         const id = this.props.match.params.id
-
         service.sistemCount(id).then(({ count }) => {
             this.setState({ sistem_count: count })
         })
     }
 
-    getOrgName(org_level,id){
-        service.orgAll(org_level,id).then(({ orgs, count }) => {
+    getOrgName(){
+        const {level, id} = this.state
+        service.orgAll(level, id).then(({ orgs, count }) => {
             if (orgs) {
                 orgs.map(org => this.setState({
                     org_name: org.name,
@@ -99,10 +100,15 @@ export class OrgMenu extends Component {
                         <Route
                             path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/"
                             component={(props) =>
-                                <OrgUser {...props} refreshCount={() => this.getOrgName(this.state.level, this.state.id)}/>
+                                <OrgUser {...props} refreshCount={this.getOrgName}/>
                             }
                         />
-                        <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
+                        <Route
+                            path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}
+                            component={(props) =>
+                                <OrgSystem {...props} refreshCount={this.handleSistemCount}/>
+                            }
+                        />
                     </Switch>
                 </div>
                 <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}>
