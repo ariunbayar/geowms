@@ -9,6 +9,7 @@ class PopUpCmp extends Component {
 
         super(props)
         this.click_count = 0
+        this.properties = []
         this.state = {
             startNumber: null,
             totalNumner: null,
@@ -48,6 +49,7 @@ class PopUpCmp extends Component {
     componentDidUpdate(pP, pS) {
         const { datas } = this.props
         if(pP.datas !== datas) {
+            this.properties = []
             const startNumber = 1
             this.setState({ startNumber, is_plus: true, is_prev: false })
             this.checkModeAndCode(startNumber, datas)
@@ -55,6 +57,8 @@ class PopUpCmp extends Component {
     }
 
     plusTab() {
+        this.properties = []
+
         const { startNumber, datas } = this.state
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
@@ -68,6 +72,8 @@ class PopUpCmp extends Component {
     }
 
     prevTab() {
+        this.properties = []
+
         const { startNumber, datas } = this.state
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
@@ -81,12 +87,22 @@ class PopUpCmp extends Component {
     }
 
     checkModeAndCode(number, datas) {
+        let mode
+        let code
+        let values
+        let geom_name
         this.click_count = 0
         if (datas.length > 0) {
-            const mode = datas[number - 1][1]
-            const code = datas[number - 1][2]
-            const values = datas[number - 1][0][1]
-            const geom_name = datas[number - 1][0][0]
+            if (this.props.is_from_inspire) {
+                code = datas[number - 1][0]
+                values = datas[number - 1][1]
+            }
+            else {
+                mode = datas[number - 1][1]
+                code = datas[number - 1][2]
+                values = datas[number - 1][0][1]
+                geom_name = datas[number - 1][0][0]
+            }
             values.map((value, idx) => {
                 if (value[0] == 'point_id') {
                     this.setState({ id: value[1] })
@@ -104,7 +120,9 @@ class PopUpCmp extends Component {
     }
 
     setNowData(number, datas, mode, code, geom_name) {
-        const data = datas[number - 1]
+        let data
+        if (this.props.is_from_inspire) data = [datas[number - 1]]
+        else data = datas[number - 1]
         this.setState({ data, mode, datas, code, geom_name })
     }
 
@@ -144,8 +162,8 @@ class PopUpCmp extends Component {
     }
 
     render() {
-        const { datas, startNumber, is_prev, is_plus, is_enable, is_user } = this.state
-        const { is_empty } = this.props
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_user } = this.state
+        const { is_empty, is_from_inspire } = this.props
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -186,33 +204,34 @@ class PopUpCmp extends Component {
                             </div>
                         :
                             <div className="ol-popup-contet">
-                                {datas && datas.map((layer, idx) =>
-                                    idx + 1 == startNumber &&
-                                    layer[0].map((values, v_idx) =>
-                                        v_idx == 1 &&
-                                        values.map((value, val_idx) =>
-                                        value[0] == 'point_name' ?
-                                        <b key={val_idx}>{value[1]}</b>
-                                        : null
-                                )))}
+                                {
+                                    data.length >= 1
+                                    &&
+                                        data[0].map((layer, idx) =>
+                                            idx == 1 &&
+                                            layer.map((value, v_idx) =>
+                                                value[0].toLowerCase().startsWith('name')
+                                                && <b key={v_idx}>{value[1]}</b>
+                                            )
+                                        )
+                                }
                                 <hr className="m-1 border border-secondary rounded"/>
                                 <table className="table borderless no-padding">
                                     <tbody>
                                         {
-                                            datas && datas.length > 0
+                                            data.length >= 1
                                             ?
-                                                datas.map((layer, idx) =>
-                                                (idx + 1 == startNumber &&
-                                                layer[0].map((values, v_idx) =>
-                                                    v_idx == 1 &&
-                                                    values.map((value, val_idx) =>
-                                                        value[0] !== 'point_name' &&
-                                                        <tr style={{fontSize: '12px'}} key={val_idx}>
-                                                            <th>{value[0]}</th>
-                                                            <td>{value[1]}</td>
-                                                        </tr>
-                                                    )
-                                                )))
+                                                data[0].map((layer, idx) =>
+                                                    idx == 1 &&
+                                                    layer.map((value, v_idx) =>
+                                                        !value[0].toLowerCase().startsWith('name')
+                                                        &&
+                                                            <tr style={{fontSize: '12px'}} key={v_idx}>
+                                                                <th>{value[0]}</th>
+                                                                <td>{value[1]}</td>
+                                                            </tr>
+                                                        )
+                                                )
                                             :
                                             <tr><th>Хоосон байна</th></tr>
                                         }
@@ -320,8 +339,8 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource, cartButton, is_empty) {
+    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire) {
         this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource, cartButton, is_empty})
+        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire})
     }
 }

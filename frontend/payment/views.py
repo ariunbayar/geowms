@@ -18,6 +18,7 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Point
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404, get_list_or_404, reverse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
@@ -32,6 +33,8 @@ from govorg.backend.forms.models import Mpoint_view
 from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
+from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import (
     LFeatureConfigs,
     LDataTypeConfigs,
@@ -39,6 +42,7 @@ from backend.inspire.models import (
     LValueTypes,
     LCodeLists,
     MDatas,
+    MGeoDatas,
 )
 
 from main.decorators import ajax_required
@@ -1261,6 +1265,75 @@ def testPay(request, id):
 
     rsp = {
         'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_popup_info(request, payload):
+
+    layer_code = payload.get('layer_code')
+    coordinate = payload.get('coordinate')
+
+    value_type = None
+    property_name = None
+    infos = list()
+
+    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+
+    feature_id = view_qs.feature_id
+
+    viewproperties_qs = ViewProperties.objects
+    viewproperties_qs = viewproperties_qs.filter(view=view_qs)
+    viewproperty_ids = viewproperties_qs.values_list('property_id', flat=True)
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.filter(property_id__in=viewproperty_ids)
+
+    point = Point(coordinate, srid=4326)
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(feature_id=feature_id)
+    mgeo_qs = mgeo_qs.filter(geo_data__distance_lte=(point, D(km=1)))
+    mgeo_qs = mgeo_qs.order_by('geo_data')
+    nearest_points = mgeo_qs
+
+    for nearest_point in nearest_points:
+        mdatas_qs = MDatas.objects
+        mdatas_qs = mdatas_qs.filter(geo_id=nearest_point.geo_id)
+        mdatas_qs = mdatas_qs.filter(property_id__in=viewproperty_ids)
+
+        datas = list()
+        datas.append(layer_code)
+        datas.append(list())
+
+        for mdata in mdatas_qs.values():
+            values = datas[1]
+            for l_property in property_qs:
+                if (l_property.property_id == mdata['property_id']):
+                    value_type = l_property.value_type_id
+                    property_name = l_property.property_name
+
+            if 'select' in value_type:
+                if mdata['code_list_id']:
+                    lcode_qs = LCodeLists.objects
+                    lcode_qs = lcode_qs.filter(code_list_id=mdata['code_list_id'])
+                    lcode_qs = lcode_qs.first()
+                    value = lcode_qs.code_list_name
+            elif value_type != 'boolean':
+                value_type = 'value_' + value_type
+                value = mdata[value_type]
+
+            if value:
+                values.append([property_name, value])
+
+        if datas:
+            infos.append(datas)
+
+    rsp = {
+        'datas': infos,
     }
 
     return JsonResponse(rsp)

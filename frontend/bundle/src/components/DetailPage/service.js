@@ -12,6 +12,7 @@ export const service = {
     getSum,
     getUser,
     checkButtonEnable,
+    getPopUpInfo,
 }
 
 function getCookie(name) {
@@ -147,4 +148,12 @@ function checkButtonEnable(pdf_id) {
         body: JSON.stringify({pdf_id})
     }
     return fetch('/payment/check-enable/', requestOptions).then(handleResponse)
+}
+
+function getPopUpInfo(layer_code, coordinate) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layer_code, coordinate})
+    }
+    return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
 }

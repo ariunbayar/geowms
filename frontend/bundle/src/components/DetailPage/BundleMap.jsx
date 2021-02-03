@@ -172,11 +172,8 @@ export default class BundleMap extends Component {
             service.loadBaseLayers(),
             service.loadWMSLayers(bundle_id),
         ]).then(([{base_layer_list}, {wms_list}]) => {
-            console.log(base_layer_list, wms_list);
             this.handleMapDataLoaded(base_layer_list, wms_list)
-
         })
-
     }
 
     handleMapDataLoaded(base_layer_list, wms_list) {
@@ -585,6 +582,9 @@ export default class BundleMap extends Component {
     }
 
     featureFromUrl(coordinate) {
+        let is_feature = false
+        let layer_code
+
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -592,7 +592,32 @@ export default class BundleMap extends Component {
         wms_array.map(({layers}) => {
             if(layers) {
                 layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
-                    if (tile) {
+                    if (tile.getVisible()){
+                        let splited_code = code.split('_')
+                        splited_code.map((split_code, idx) => {
+                            if (idx == 0 && split_code == 'gp') {
+                                if (splited_code[idx + 1] == 'layer') {
+                                    let sliced_code = splited_code.slice(2)
+                                    layer_code = sliced_code.join("_");
+                                    is_feature = true
+                                }
+                            }
+                        })
+                    }
+                    if (is_feature) {
+                        const latlong = toLonLat(coordinate)
+                        service
+                            .getPopUpInfo(layer_code, latlong)
+                            .then(({ datas }) => {
+                                let is_empty = false
+                                if (datas.length == 0) {
+                                    is_empty = true
+                                }
+                                const is_from_inspire = true
+                                this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, feature_price, is_empty, is_from_inspire)
+                            })
+                    }
+                    if (tile && !is_feature) {
                         if (tile.getVisible() != true) {
                             return
                         }

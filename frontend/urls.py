@@ -57,6 +57,7 @@ urlpatterns = [
         path('calc-price/', payment_views.calcPrice, name='calculate-price'),
         path('test-pay/<int:id>/', payment_views.testPay, name='test-pay'),
         path('check-enable/', payment_views.checkButtonEnable, name='check-button-enable'),
+        path('get-popup-info/', payment_views.get_popup_info),
     ], 'payment'))),
 
     path('qpay/', include(([
