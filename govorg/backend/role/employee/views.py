@@ -8,6 +8,7 @@ from geoportal_app.models import User
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
+from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from backend.inspire.models import (
     GovPermInspire,
@@ -378,14 +379,20 @@ def delete(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
+    change_requests = ChangeRequest.objects.filter(employee=employee)
 
     with transaction.atomic():
-        EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
-        emp_perm.delete()
+        for change_request in change_requests:
+            change_request.employee = None
+            change_request.save()
+        if emp_perm:
+            EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
+            emp_perm.delete()
         employee.delete()
+
         return JsonResponse({'success': True})
 
-    return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 
 @require_GET
