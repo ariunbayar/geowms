@@ -29,6 +29,8 @@ import {MetaList} from './controls/MetaData/MetaList'
 import {CancelBarButton} from './controls/Cancel/CancelBarButton'
 import {QgisButton} from './controls/QgisLink/QgisButton'
 import {QgisModal} from './controls/QgisLink/QgisPopUp'
+import {ApiButton} from './controls/ApiLink/ApiButton'
+import {ApiModal} from './controls/ApiLink/ApiPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -60,7 +62,7 @@ export default class BarilgaSuurinGazar extends Component{
             'side', 'remove', 'qgis',
             'polygon', 'point', 'modify',
             'meta', 'form', 'upload',
-            'shapeDraw', 'cancel', 'add'
+            'shapeDraw', 'cancel', 'add', 'api'
           ],
           roles:[],
           is_loading:true,
@@ -95,13 +97,15 @@ export default class BarilgaSuurinGazar extends Component{
           layer_choices: [],
           emp_perm_prefix: '',
           wms_url: '',
-          wfs_url: ''
+          wfs_url: '',
+          api_links: {}
       }
 
       this.controls = {
         modal: new Modal(),
         upload: new UploadBtn(),
         qgis: new QgisModal(),
+        api: new ApiModal(),
         sidebar: new Sidebar(),
         metaList: new MetaList(),
         coordList: new CoordList(),
@@ -138,6 +142,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.showUploadBtn = this.showUploadBtn.bind(this)
       this.showQgisBtn = this.showQgisBtn.bind(this)
       this.closeQgisBtn = this.closeQgisBtn.bind(this)
+      this.showApiBtn = this.showApiBtn.bind(this)
+      this.closeApiBtn = this.closeApiBtn.bind(this)
       this.closeUploadBtn = this.closeUploadBtn.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
       this.WmsTile = this.WmsTile.bind(this)
@@ -162,9 +168,13 @@ export default class BarilgaSuurinGazar extends Component{
 
     componentDidMount(){
       const {pid, fid} = this.state
-      service.qgisGetUrl().then(({wms_url, wfs_url}) => {
-        this.setState({ wms_url, wfs_url })
+      Promise.all([
+        service.qgisGetUrl(),
+        service.apiGetUrl(),
+      ]).then(([{wms_url, wfs_url}, {api_links}]) => {
+        this.setState({wms_url, wfs_url, api_links})
       })
+
       service.geomType(pid, fid).then(({type}) => {
         this.setState({ type })
         this.loadRows()
@@ -205,10 +215,12 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
         map.addControl(this.controls.qgis)
+        map.addControl(this.controls.api)
         map.addControl(this.controls.metaList)
         map.addControl(this.controls.sidebar)
         map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
         map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
+        map.addControl(new ApiButton({showApiBtn: this.showApiBtn}))
       }
       if(roles.PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
       if(roles.PERM_REVOKE) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
@@ -999,8 +1011,18 @@ export default class BarilgaSuurinGazar extends Component{
       this.controls.qgis.showUpload(true, this.closeQgisBtn, this.addNotif, this.state.wfs_url, this.state.wms_url)
     }
 
+    showApiBtn(){
+      this.setInActiveButtonStyle('api')
+      const {create, remove, update, select} = this.state.api_links
+      this.controls.api.showApi(true, this.closeApiBtn, this.addNotif, create, remove, update, select)
+    }
+
     closeQgisBtn(){
       this.controls.qgis.showUpload(false)
+    }
+
+    closeApiBtn(){
+      this.controls.api.showApi(false)
     }
 
     closeUploadBtn(){

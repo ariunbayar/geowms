@@ -980,3 +980,20 @@ def get_qgis_url(request):
         'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
     }
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_api_url(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    rsp = {
+        'success': True,
+        'api_links': {
+            'create': request.build_absolute_uri(reverse('api:inspire:create', args=[employee.token])),
+            'remove': request.build_absolute_uri(reverse('api:inspire:remove', args=[employee.token])),
+            'update': request.build_absolute_uri(reverse('api:inspire:update', args=[employee.token])),
+            'select': request.build_absolute_uri(reverse('api:inspire:select', args=[employee.token]))
+        }
+    }
+    return JsonResponse(rsp)
