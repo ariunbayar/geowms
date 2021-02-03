@@ -688,13 +688,12 @@ export default class BundleMap extends Component {
                                         this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
                                     }
                                 })
-                                
-                            // }
-                        }
-                } else {
-                    /* TODO */
-                }
-            })
+                            }
+                    } else {
+                        /* TODO */
+                    }
+                })
+            }
         })
         this.sendFeatureInfo = []
         this.is_empty = true
