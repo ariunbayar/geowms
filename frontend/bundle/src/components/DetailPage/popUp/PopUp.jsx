@@ -24,6 +24,7 @@ class PopUpCmp extends Component {
             pdf_id:'',
             is_purchase: false,
             is_enable: false,
+            is_user: false,
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -36,6 +37,12 @@ class PopUpCmp extends Component {
     componentDidMount() {
         this.element = document.getElementById("popup")
         if (this.props.sendElem) this.props.sendElem(this.element)
+        service.isUser().then(({success}) =>
+        {
+            if (success) {
+                this.setState({is_user: true})
+            }
+        })
     }
 
     componentDidUpdate(pP, pS) {
@@ -137,7 +144,7 @@ class PopUpCmp extends Component {
     }
 
     render() {
-        const { datas, startNumber, is_prev, is_plus, is_enable } = this.state
+        const { datas, startNumber, is_prev, is_plus, is_enable, is_user } = this.state
         const { is_empty } = this.props
         return (
                 <div>
@@ -213,42 +220,51 @@ class PopUpCmp extends Component {
                                 </table>
                             </div>
                     }
-                    {
-                        !is_empty
+                    {!is_user && !is_empty && this.state.mode == 'mpoint_view'
                         ?
-                            this.state.is_purchase
+                        <div className="btn-group flex-wrap d-flex justify-content-center">
+                            <button
+                                className="btn btn-xs btn-primary mb-2 mx-3"
+                            >
+                                <a className="text-decoration-none text-white" href="/login/">Нэвтрэх</a>
+                            </button>
+                        </div>
+                        :
+                        !is_empty
                             ?
-                                <div className="btn-group flex-wrap d-flex justify-content-center">
-                                    <button className="btn btn-xs btn-primary my-2 mx-1" disabled>
-                                        <div className="spinner-border" role="status">
-                                            <span className="sr-only"></span>
-                                        </div>
-                                        {} Хүлээнэ үү..
-                                    </button>
-                                </div>
-                            :
-                            this.state.mode == 'mpoint_view'
-                            ?
-                                <div className="btn-group flex-wrap d-flex justify-content-center">
-                                    <button
-                                        className="btn btn-xs btn-primary my-2 mx-1"
-                                        onClick={() => this.checkDataForPurchase()}
-                                        disabled={is_enable ? "" : "disabled"}
-                                    >
-                                        Худалдаж авах
-                                    </button>
-                                    <button
-                                        className="btn btn-xs btn-primary my-2 mx-1"
-                                        onClick={() => this.openCartSide()}
-                                        disabled={is_enable ? "" : "disabled"}
-                                    >
-                                        Сагсанд нэмэх
-                                    </button>
-                                </div>
+                                this.state.is_purchase
+                                ?
+                                    <div className="btn-group flex-wrap d-flex justify-content-center">
+                                        <button className="btn btn-xs btn-primary my-2 mx-3" disabled>
+                                            <div className="spinner-border" role="status">
+                                                <span className="sr-only"></span>
+                                            </div>
+                                            {} Хүлээнэ үү..
+                                        </button>
+                                    </div>
+                                :
+                                this.state.mode == 'mpoint_view'
+                                ?
+                                    <div className="btn-group flex-wrap d-flex justify-content-center">
+                                        <button
+                                            className="btn btn-xs btn-primary mx-3"
+                                            onClick={() => this.checkDataForPurchase()}
+                                            disabled={is_enable ? "" : "disabled"}
+                                        >
+                                            Худалдаж авах
+                                        </button>
+                                        <button
+                                            className="btn btn-xs btn-primary my-2 mx-3"
+                                            onClick={() => this.openCartSide()}
+                                            disabled={is_enable ? "" : "disabled"}
+                                        >
+                                            Сагсанд нэмэх
+                                        </button>
+                                    </div>
+                                :
+                                null
                             :
                             null
-                        :
-                        null
                     }
                     <div className="ol-popup-arrow">
 
