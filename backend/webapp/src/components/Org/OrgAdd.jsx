@@ -180,6 +180,7 @@ export class OrgAdd extends Component {
         service.org_add(org_level, datas).then(({success, errors}) => {
             if (success) {
                 this.setState({modal_alert_status: "open"})
+                this.props.refreshCount()
                 setStatus('saved')
                 setSubmitting(false)
                 this.modalCloseTime()

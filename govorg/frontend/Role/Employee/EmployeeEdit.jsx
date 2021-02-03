@@ -274,9 +274,11 @@ export class EmployeeEdit extends Component {
     }
 
     handleSendMail(){
+        this.setState({modal_status: 'closed'})
         this.setState({ is_loading: true })
+        const username = this.state.form_values.username
         service
-            .sendMail()
+            .sendMail(username)
             .then(({ success, info }) => {
                 if(success) {
                     this.setState({ is_loading: false })

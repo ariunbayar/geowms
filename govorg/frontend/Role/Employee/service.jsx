@@ -80,9 +80,10 @@ function empTokenRefresh(id) {
     return fetch(`${prefix}/${id}/refresh-token/`, requestOptions).then(handleResponse)
 }
 
-function sendMail() {
+function sendMail(username) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({username})
     }
     return fetch(`${prefix}/send-mail/`, requestOptions).then(handleResponse)
 }

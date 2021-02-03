@@ -31,6 +31,7 @@ export class Org extends Component {
         }
     }
 
+
     render() {
         const { user_count } = this.state;
         const org_level = this.props.match.params.level
@@ -40,7 +41,12 @@ export class Org extends Component {
                     <div className="col-md-12">
                         <Switch>
                             <Route exact path="/back/байгууллага/түвшин/:level/" component={OrgForm}/>
-                            <Route exact path="/back/байгууллага/түвшин/:level/нэмэх/" component={OrgAdd} />
+                            <Route
+                                path="/back/байгууллага/түвшин/:level/нэмэх/"
+                                component={(props) =>
+                                    <OrgAdd {...props} refreshCount={this.props.refreshCount}/>
+                                }
+                            />
                             <Route exact path="/back/байгууллага/түвшин/:level/:id/засах/" component={OrgAdd}/>
                             <Route path="/back/байгууллага/түвшин/:level/:id/" component={OrgMenu}/>
                         </Switch>
