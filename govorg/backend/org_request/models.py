@@ -25,8 +25,8 @@ class ChangeRequest(models.Model):
 
     KIND_CHOICES = (
         (KIND_CREATE, 'ҮҮССЭН'),
-        (KIND_DELETE, 'УСТГАСАН'),
         (KIND_UPDATE, 'ЗАССАН'),
+        (KIND_DELETE, 'УСТГАСАН'),
         (KIND_DIRECT, 'ШУУД'),
         (KIND_REVOKE, 'ЦУЦЛАСАН'),
     )
@@ -43,5 +43,6 @@ class ChangeRequest(models.Model):
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
     form_json = models.TextField(null=True)
     geo_json = models.TextField(null=True)
+    group_id = models.TextField(max_length=100, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -663,7 +663,7 @@ def get_emp_property_roles(employee, fid):
 
             property_details.append({
                 'property_id': property_id,
-                'roles':property_roles
+                'roles': property_roles
             })
 
     return property_ids, property_details
@@ -677,7 +677,18 @@ def check_form_json(fid, form_json, employee):
         for role in roles:
             for propert in form_json['form_values']:
                 if role.get('property_id') == propert.get('property_id'):
-                    request_json.append(propert)
+                    request_json.append({
+                        'pk': propert.get('pk') or '',
+                        'property_name': propert.get('property_name') or '',
+                        'property_id': propert.get('property_id'),
+                        'property_code': propert.get('property_code') or '',
+                        'property_definition': propert.get('property_definition') or '',
+                        'value_type_id': propert.get('value_type_id') or '',
+                        'value_type': propert.get('value_type') or '',
+                        'data': propert.get('data') or '',
+                        'data_list': propert.get('data_list') or '',
+                        'roles': propert.get('roles') or ''
+                    })
 
     return json.dumps(request_json, ensure_ascii=False) if request_json else ''
 
@@ -709,6 +720,8 @@ def datetime_to_string(date):
 
 
 def date_to_timezone(input_date):
+    if '/' in input_date:
+        input_date = input_date.replace('/', '-')
     naive_time = datetime.strptime(input_date, '%Y-%m-%d')
     output_date = timezone.make_aware(naive_time)
     return output_date
@@ -731,7 +744,6 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
         display.append(obj)
 
     return display
-
 
 
 def geoJsonConvertGeom(geojson):
@@ -760,3 +772,14 @@ def geojson_to_geom(geo_json):
     if geom_type == 'Polygon':
         geom = MultiPolygon(geom, srid=4326)
     return geom
+
+
+def get_fields(Model):
+    fields = []
+    for field in Model._meta.get_fields():
+        name = field.name
+        if field.get_internal_type() == 'ForeignKey':
+            name = name + '_id'
+        fields.append(name)
+
+    return fields

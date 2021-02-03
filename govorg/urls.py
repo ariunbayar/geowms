@@ -3,6 +3,7 @@ from django.urls import re_path, path, include
 from govorg.backend.org import views as org_views
 from govorg.backend.role.employee import views as role_employee_views
 from govorg.backend.role.role import views as role_views
+from govorg.backend.role.region import views as role_region_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
 from govorg.backend.govorg_inspire import views as govorg_inspire_views
@@ -16,6 +17,9 @@ urlpatterns = [
     path('api/', include(([
 
         path('role/', include(([
+            path('region/', include(([
+                path('', role_region_views.map_region)
+            ], 'region'))),
             path('employee/', include(([
                 path('', role_employee_views.list),
                 path('send-mail/', role_employee_views.send_mail),
@@ -62,12 +66,12 @@ urlpatterns = [
         ], 'inspire'))),
 
         path('org-request/', include(([
-            path('', org_request_views.getAll, name="all"),
+            path('', org_request_views.get_list),
             path('change-request/', org_request_views.get_change_all, name="change-request"),
-            path('<int:pk>/delete/', org_request_views.request_delete, name="delete"),
-            path('<int:pk>/approve/', org_request_views.request_approve, name="approve"),
+            path('reject/', org_request_views.request_reject, name="reject"),
+            path('approve/', org_request_views.request_approve, name="approve"),
             path('getCount/', org_request_views.get_count, name='getCount'),
-            path('search/', org_request_views.search, name='request-search'),
+            path('get_choices/', org_request_views.get_choices, name='get-choices'),
         ], 'org-request'))),
         path('zip-code/', include(([
             path('aimag/', zipcode_views.aimag, name='aimag'),

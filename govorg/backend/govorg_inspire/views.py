@@ -14,7 +14,9 @@ from django.db import connections, transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
+from django.contrib.gis.geos import GEOSGeometry
 from django.core.files.storage import FileSystemStorage
+from django.contrib.gis.gdal import DataSource
 
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
@@ -513,16 +515,16 @@ def create(request, payload):
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
-            old_geo_id = None,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_CREATE,
-            form_json = form_json,
-            geo_json = geo_json,
+            old_geo_id=None,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_CREATE,
+            form_json=form_json,
+            geo_json=geo_json,
             order_at=order_at,
             order_no=order_no,
     )
@@ -677,27 +679,27 @@ def _check_and_make_form_json(feature_id, values):
         view_props = ViewProperties.objects.filter(view=view)
 
         for view_prop in view_props:
+            prop_qs = LProperties.objects
+            prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+            prop_qs = prop_qs.first()
+
+            form_json = dict()
+            form_json['property_name'] = prop_qs.property_name
+            form_json['property_id'] = prop_qs.property_id
+            form_json['property_code'] = prop_qs.property_code
+            form_json['property_definition'] = prop_qs.property_definition
+            if prop_qs.value_type_id == 'single-select':
+                code_list_values = _code_list_display(prop_qs.property_id)
+            form_json['value_type_id'] = prop_qs.value_type_id
+            form_json['value_type'] = prop_qs.value_type_id
+            form_json['data_list'] = code_list_values
+            form_json['data'] = ''
+
             for p_code, value in values.items():
-                form_json = dict()
-
-                prop = LProperties.objects.filter(
-                    property_id=view_prop.property_id,
-                    property_code__icontains=p_code
-                ).first()
-
-                if prop:
-                    form_json['property_name'] = prop.property_name
-                    form_json['property_id'] = prop.property_id
-                    form_json['property_code'] = prop.property_code
-                    form_json['property_definition'] = prop.property_definition
-                    if prop.value_type_id == 'single-select':
-                        code_list_values = _code_list_display(prop.property_id)
-                    form_json['value_type_id'] = prop.value_type_id
-                    form_json['value_type'] = prop.value_type_id
+                if p_code.lower() in prop_qs.property_name.lower():
                     form_json['data'] = value
-                    form_json['data_list'] = code_list_values
 
-                    form_json_list.append(form_json)
+            form_json_list.append(form_json)
 
     form_json_list = json.dumps(form_json_list)
     return form_json_list
@@ -706,7 +708,7 @@ def _check_and_make_form_json(feature_id, values):
 def _create_request(request_datas):
     change_request = ChangeRequest()
 
-    change_request.old_geo_id = request_datas['geo_id']
+    change_request.old_geo_id = None
     change_request.new_geo_id = None
     change_request.theme_id = request_datas['theme_id']
     change_request.package_id = request_datas['package_id']
@@ -714,13 +716,14 @@ def _create_request(request_datas):
     change_request.employee = request_datas['employee']
     change_request.state = request_datas['state']
     change_request.kind = request_datas['kind']
-    change_request.form_json = request_datas['form_json']
-    change_request.geo_json = request_datas['geo_json']
+    change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
+    change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
+    change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
     change_request.order_at = request_datas['order_at'] if 'order_at' in request_datas else None
-    change_request.order_no = request_datas['order_no']
+    change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
 
     change_request.save()
-    return True
+    return change_request.id
 
 
 def _make_request(values, request_values):
@@ -730,7 +733,6 @@ def _make_request(values, request_values):
     )
 
     request_datas = {
-        'geo_id': request_values['geo_id'],
         'theme_id': request_values['theme_id'],
         'package_id': request_values['package_id'],
         'feature_id': request_values['feature_id'],
@@ -741,6 +743,7 @@ def _make_request(values, request_values):
         'geo_json': request_values['geo_json'],
         'order_at': request_values['order_at'],
         'order_no': request_values['order_no'],
+        'group_id': request_values['group_id'],
     }
     with transaction.atomic():
         success = _create_request(request_datas)
@@ -812,34 +815,19 @@ def _check_file_for_geom(form_file_name, uniq_name, ext):
     return uniq_file_name, file_type_name, return_name
 
 
-def _make_geo_id(feature_id, field_name, value):
-    geo_id = ''
-    if field_name == 'inspire_id' or field_name == 'geo_id':
-        geo_id = value
-    else:
-        f_code = get_object_or_404(
-            LFeatures,
-            feature_id=feature_id
-        ).feature_code
-        splited_f_code = f_code.split('-')
-        feature_code = splited_f_code[len(splited_f_code)-1]
-
-        count = ChangeRequest.objects.count()
-        geo_id = str(feature_code) + "_" + str(count)
-
-    return geo_id
+def _make_geo_id(feature_id):
+    qs = LFeatures.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.first()
+    feature_code = qs.feature_code
+    new_geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    return new_geo_id
 
 
-def _check_perm(geo_id, employee, feature_id, geo_json):
-    perm_kind = ''
+def _check_perm(employee, feature_id, geo_json):
 
-    geo = MGeoDatas.objects.filter(geo_id=geo_id)
-    if geo:
-        request_kind = ChangeRequest.KIND_UPDATE
-        perm_kind = EmpPermInspire.PERM_UPDATE
-    else:
-        request_kind = ChangeRequest.KIND_CREATE
-        perm_kind = EmpPermInspire.PERM_CREATE
+    request_kind = ChangeRequest.KIND_CREATE
+    perm_kind = EmpPermInspire.PERM_CREATE
 
     success, info = has_employee_perm(
                         employee,
@@ -863,6 +851,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
     feature_id = fid
     success = False
     info = ''
+    main_request_id = None
 
     form = OrderForm(request.POST)
     if form.is_valid():
@@ -895,6 +884,20 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
         layer = ds[0]
         if layer:
+            with transaction.atomic():
+                if len(layer) > 1:
+                    request_datas = {
+                        'theme_id': tid,
+                        'package_id': pid,
+                        'feature_id': feature_id,
+                        'state': ChangeRequest.STATE_NEW,
+                        'kind': ChangeRequest.KIND_CREATE,
+                        'employee': employee,
+                        'order_at': order_at,
+                        'order_no': order_no,
+                    }
+                    main_request_id = _create_request(request_datas)
+
             for val in layer:
                 values = dict()
                 for name in range(0, len(layer.fields)):
@@ -903,12 +906,11 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
                     if name == 0:
 
-                        geo_id = _make_geo_id(feature_id, field_name, value)
+                        # geo_id = _make_geo_id(feature_id)
                         geo_json = val.geom.json  # goemetry json
 
                         if geo_json:
                             success, info, request_kind = _check_perm(
-                                geo_id,
                                 employee,
                                 feature_id,
                                 geo_json
@@ -933,7 +935,6 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     values[field_name] = value
 
                 request_values = {
-                    'geo_id': geo_id,
                     'theme_id': tid,
                     'package_id': pid,
                     'feature_id': fid,
@@ -942,6 +943,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     'kind': request_kind,
                     'order_at': order_at,
                     'order_no': order_no,
+                    'group_id': main_request_id,
                 }
                 success, info = _make_request(values, request_values)
 
@@ -964,7 +966,6 @@ def file_upload_save_data(request, tid, pid, fid, ext):
             'success': False,
             'errors': form.errors,
         }
-
     return JsonResponse(rsp)
 
 

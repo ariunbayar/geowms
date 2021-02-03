@@ -9,11 +9,13 @@ export class Pagination extends Component {
         super(props)
         this.state = {
             items:[],
-            page: 1,
+            page: props.current_page,
             total_page: 1,
             is_loading: false,
-            searchQuery: this.props.searchQuery,
-            sort_name: this.props.sort_name,
+            query: props.query,
+            sort_name: props.sort_name,
+            custom_query: props.custom_query,
+            per_page: props.per_page,
         }
 
         this.loadPage = this.loadPage.bind(this)
@@ -23,79 +25,76 @@ export class Pagination extends Component {
     }
 
     componentDidMount() {
-        this.loadPage(this.state.page, this.state.searchQuery,  this.state.sort_name)
+        this.loadPage(this.state.page, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
     }
 
     componentDidUpdate(prevProps) {
-        if(prevProps.searchQuery !== this.props.searchQuery)
+        if(prevProps.query !== this.props.query)
         {
-            const query = this.props.searchQuery
-            this.setState({ searchQuery: query })
-            this.loadPage(1, query)
+            const query = this.props.query
+            this.setState({ query })
+            this.loadPage(1, query, this.props.sort_name, this.state.per_page, this.props.custom_query)
         }
         if(prevProps.sort_name !== this.props.sort_name)
         {
             const sort_name = this.props.sort_name
-            const query = this.props.searchQuery
+            const query = this.props.query
             this.setState({ sort_name })
-            this.loadPage(1, query, sort_name)
+            this.loadPage(1, query, sort_name, this.state.per_page, this.props.custom_query)
         }
-        if(prevProps.load !== this.props.load)
+        if(prevProps.current_page !== this.props.current_page)
         {
-            const query = this.props.d
-            this.loadPage(1, query)
+            const current_page = this.props.current_page
+            this.setState({ page: current_page })
+            this.loadPage(current_page, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
         }
-        if(this.props.org_level){
-            if(prevProps.org_level !== this.props.org_level){
-                const query = this.props.searchQuery
-                this.loadPage(1, query)
+        if(prevProps.refresh !== this.props.refresh)
+        {
+            this.loadPage(1, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
+        }
+        if(prevProps.per_page !== this.props.per_page)
+        {
+            const per_page = this.props.per_page
+            this.setState({ per_page })
+            this.loadPage(1, this.props.query, this.props.sort_name, per_page, this.props.custom_query)
+        }
+        if(this.props.custom_query){
+            if(prevProps.custom_query !== this.props.custom_query){
+                this.setState({ custom_query: this.props.custom_query })
+                this.loadPage(1, this.props.query, this.props.sort_name, this.state.per_page, this.props.custom_query)
             }
         }
     }
 
     nextPage() {
-        this.loadPage(this.state.page + 1, this.state.searchQuery, this.state.sort_name)
+        this.loadPage(this.state.page + 1, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query)
     }
 
     prevPage() {
-        this.loadPage(this.state.page - 1, this.state.searchQuery, this.state.sort_name)
+        this.loadPage(this.state.page - 1, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query)
     }
 
-    loadPage(page, query, sort_name) {
+    loadPage(page, query, sort_name, per_page, custom_query) {
         if (this.state.is_loading) {
             return
         }
         page = Math.max(page, 1)
         page = Math.min(page, this.state.total_page)
         this.setState({is_loading: true})
-        if(this.props.org_level){
-            const level = this.props.org_level
-            this.props.paginate(page, query, level, sort_name)
-            .then(({ page, total_page}) => {
-                this.setState({
-                    page,
-                    total_page,
-                    is_loading: false,
-                })
+        this.props.paginate(page, query, sort_name, per_page, custom_query)
+        .then(({ page, total_page }) => {
+            this.setState({
+                page,
+                total_page,
+                is_loading: false,
             })
-        }
-        else
-        {
-            this.props.paginate(page, query, sort_name)
-            .then(({ page, total_page }) => {
-                this.setState({
-                    page,
-                    total_page,
-                    is_loading: false,
-                })
-            })
-        }
+        })
     }
 
     addPage(id) {
         const page = id.target.value
         this.setState({ page })
-        this.loadPage(page, '')
+        this.loadPage(page, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query)
     }
 
     render() {
@@ -126,7 +125,7 @@ export class Pagination extends Component {
                                 <button
                                     type=" button"
                                     className={`btn btn-${color} waves-effect waves-light btn-sm` + (this.state.is_loading ? " disabled" : "")}
-                                    onClick={this.prevPage}
+                                    onClick={() => this.prevPage()}
                                 >
                                     &lt;
                                 </button>
@@ -141,7 +140,7 @@ export class Pagination extends Component {
                                 <button
                                     type="button"
                                     className={`btn btn-${color} waves-effect waves-light btn-sm` + (this.state.is_loading ? " disabled" : "")}
-                                    onClick={this.nextPage}
+                                    onClick={() => this.nextPage()}
                                 >
                                     &gt;
                                 </button>
