@@ -22,6 +22,7 @@ from main.inspire import InspireDataType
 from main.inspire import InspireFeature
 from backend.config.models import Config
 from backend.token.utils import TokenGeneratorUserValidationEmail
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -743,6 +744,34 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
         display.append(obj)
 
     return display
+
+
+def geoJsonConvertGeom(geojson):
+    with connections['default'].cursor() as cursor:
+        sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        geom =  ''.join(geom)
+        geom = GEOSGeometry(geom).hex
+        geom = geom.decode("utf-8")
+    return geom
+
+
+def geojson_to_geom(geo_json):
+    geom = []
+    geo_json = str(geo_json).replace("\'", "\"")
+    geo_data = geoJsonConvertGeom(geo_json)
+    geom = ''.join(geo_data)
+    geom = GEOSGeometry(geom)
+
+    geom_type = GEOSGeometry(geom).geom_type
+    if geom_type == 'Point':
+        geom = MultiPoint(geom, srid=4326)
+    if geom_type == 'LineString':
+        geom = MultiLineString(geom, srid=4326)
+    if geom_type == 'Polygon':
+        geom = MultiPolygon(geom, srid=4326)
+    return geom
 
 
 def get_fields(Model):

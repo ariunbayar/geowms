@@ -41,7 +41,8 @@ export const service = {
     createMeta,
     deleteMeta,
     getLayers,
-    qgisGetUrl
+    qgisGetUrl,
+    apiGetUrl
 }
 
 const prefix = '/gov/api/inspire'
@@ -227,4 +228,9 @@ function getLayers(emp_perm_prefix) {
 function qgisGetUrl() {
     const requestOptions = getGetOptions()
     return fetch(`${prefix}/qgis-url/`, requestOptions).then(handleResponse)
+}
+
+function apiGetUrl() {
+    const requestOptions = getGetOptions()
+    return fetch(`${prefix}/qpi-url/`, requestOptions).then(handleResponse)
 }

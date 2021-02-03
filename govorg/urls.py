@@ -60,6 +60,7 @@ urlpatterns = [
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('send-data/<int:tid>/<int:pid>/<int:fid>/<str:ext>/', govorg_inspire_views.file_upload_save_data),
             path('qgis-url/', govorg_inspire_views.get_qgis_url),
+            path('qpi-url/', govorg_inspire_views.get_api_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),
         ], 'inspire'))),
