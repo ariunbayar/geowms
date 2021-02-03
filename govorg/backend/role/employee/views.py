@@ -225,7 +225,7 @@ def create(request, payload):
             obj_array.append(emp_perm_inspire)
         EmpPermInspire.objects.bulk_create(obj_array)
 
-        # utils.send_approve_email(user)
+        utils.send_approve_email(user)
 
         return JsonResponse({
             'success': True,
@@ -378,7 +378,8 @@ def detail(request, pk):
 def delete(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
-    emp_perm = get_object_or_404(EmpPerm, employee=employee)
+    user = User.objects.filter(pk=employee.user_id).first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
     change_requests = ChangeRequest.objects.filter(employee=employee)
 
     with transaction.atomic():
@@ -389,6 +390,7 @@ def delete(request, pk):
             EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
             emp_perm.delete()
         employee.delete()
+        user.delete()
 
         return JsonResponse({'success': True})
 
