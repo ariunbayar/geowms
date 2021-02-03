@@ -27,7 +27,6 @@ export const service = {
     sendFeature,
     update,
     geomUpdate,
-    geomAdd,
     geomType,
     getRole,
     detailCreate,
@@ -42,7 +41,8 @@ export const service = {
     createMeta,
     deleteMeta,
     getLayers,
-    qgisGetUrl
+    qgisGetUrl,
+    apiGetUrl
 }
 
 const prefix = '/gov/api/inspire'
@@ -128,15 +128,6 @@ function geomUpdate(geojson, fid, id) {
         body: JSON.stringify({geojson, fid, id}),
     }
     return fetch(`${prefix}/${fid}/geom-update/`, opts).then(handleResponse)
-}
-
-function geomAdd(geojson, fid) {
-
-    const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({geojson}),
-    }
-    return fetch(`${prefix}/${fid}/add-geom/`, opts).then(handleResponse)
 }
 
 function create(tid, pid, fid, form_json, geo_json) {
@@ -237,4 +228,9 @@ function getLayers(emp_perm_prefix) {
 function qgisGetUrl() {
     const requestOptions = getGetOptions()
     return fetch(`${prefix}/qgis-url/`, requestOptions).then(handleResponse)
+}
+
+function apiGetUrl() {
+    const requestOptions = getGetOptions()
+    return fetch(`${prefix}/qpi-url/`, requestOptions).then(handleResponse)
 }

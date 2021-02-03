@@ -421,12 +421,16 @@ def refresh_token(request, pk):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def send_mail(request):
+def send_mail(request, payload):
     subject = 'Геопортал нууц үг солих'
     text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-    utils.send_approve_email(request.user, subject, text)
+    username = payload.get('username')
+
+    user = get_object_or_404(User, username=username)
+
+    utils.send_approve_email(user, subject, text)
 
     return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})

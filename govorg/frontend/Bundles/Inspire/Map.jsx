@@ -29,6 +29,8 @@ import {MetaList} from './controls/MetaData/MetaList'
 import {CancelBarButton} from './controls/Cancel/CancelBarButton'
 import {QgisButton} from './controls/QgisLink/QgisButton'
 import {QgisModal} from './controls/QgisLink/QgisPopUp'
+import {ApiButton} from './controls/ApiLink/ApiButton'
+import {ApiModal} from './controls/ApiLink/ApiPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
@@ -60,7 +62,8 @@ export default class BarilgaSuurinGazar extends Component{
             'side', 'remove', 'qgis',
             'polygon', 'point', 'modify',
             'meta', 'form', 'upload',
-            'shapeDraw', 'cancel', 'add'
+            'shapeDraw', 'cancel', 'add',
+            'line', 'api'
           ],
           roles:[],
           is_loading:true,
@@ -72,7 +75,7 @@ export default class BarilgaSuurinGazar extends Component{
           selectedFeature_ID: null,
           modifyend_selected_feature_ID: null,
           modifyend_selected_feature_check: false,
-          send: false,
+          is_selected_feature: false,
           changedFeature: '',
           Mongolia: [11461613.630815497, 5878656.0228370065],
           chkbox: true,
@@ -95,13 +98,16 @@ export default class BarilgaSuurinGazar extends Component{
           layer_choices: [],
           emp_perm_prefix: '',
           wms_url: '',
-          wfs_url: ''
+          wfs_url: '',
+          api_links: {},
+          is_delete_request: false,
       }
 
       this.controls = {
         modal: new Modal(),
         upload: new UploadBtn(),
         qgis: new QgisModal(),
+        api: new ApiModal(),
         sidebar: new Sidebar(),
         metaList: new MetaList(),
         coordList: new CoordList(),
@@ -138,6 +144,8 @@ export default class BarilgaSuurinGazar extends Component{
       this.showUploadBtn = this.showUploadBtn.bind(this)
       this.showQgisBtn = this.showQgisBtn.bind(this)
       this.closeQgisBtn = this.closeQgisBtn.bind(this)
+      this.showApiBtn = this.showApiBtn.bind(this)
+      this.closeApiBtn = this.closeApiBtn.bind(this)
       this.closeUploadBtn = this.closeUploadBtn.bind(this)
       this.SideBarBtn = this.SideBarBtn.bind(this)
       this.WmsTile = this.WmsTile.bind(this)
@@ -158,13 +166,19 @@ export default class BarilgaSuurinGazar extends Component{
       this.getTypeFunction = this.getTypeFunction.bind(this)
       this.handleMapClick = this.handleMapClick.bind(this)
       this.showFeaturesAt = this.showFeaturesAt.bind(this)
+      this.resetDrawed = this.resetDrawed.bind(this)
+      this.removeDrawedFeature = this.removeDrawedFeature.bind(this)
     }
 
     componentDidMount(){
       const {pid, fid} = this.state
-      service.qgisGetUrl().then(({wms_url, wfs_url}) => {
-        this.setState({ wms_url, wfs_url })
+      Promise.all([
+        service.qgisGetUrl(),
+        service.apiGetUrl(),
+      ]).then(([{wms_url, wfs_url}, {api_links}]) => {
+        this.setState({wms_url, wfs_url, api_links})
       })
+
       service.geomType(pid, fid).then(({type}) => {
         this.setState({ type })
         this.loadRows()
@@ -205,10 +219,12 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
         map.addControl(this.controls.upload)
         map.addControl(this.controls.qgis)
+        map.addControl(this.controls.api)
         map.addControl(this.controls.metaList)
         map.addControl(this.controls.sidebar)
         map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
         map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
+        map.addControl(new ApiButton({showApiBtn: this.showApiBtn}))
       }
       if(roles.PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
       if(roles.PERM_REVOKE) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
@@ -378,7 +394,7 @@ export default class BarilgaSuurinGazar extends Component{
                         {
                           this.state.vector_layer.setSource(source)
                         }
-                        this.setState({selectedFeature_ID: value})
+                        this.setState({selectedFeature_ID: value, is_selected_feature: true})
                       }
                     })
                   })
@@ -437,7 +453,7 @@ export default class BarilgaSuurinGazar extends Component{
           const featureID_list = this.state.featureID_list
           if (this.state.modify_button_active) this.DrawButton()
           const selectedFeature_ID = this.state.selectedFeature_ID
-          this.setState({ send: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0] })
+          this.setState({ is_selected_feature: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0]  })
           featureID_list.push(selectedFeature_ID)
           if(this.state.remove_button_active) this.removeModal()
           if(this.state.cancel_button_active){
@@ -452,7 +468,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
       else
       {
-        this.setState({ send: false })
+        this.setState({ is_selected_feature: false })
       }
     }
 
@@ -559,16 +575,20 @@ export default class BarilgaSuurinGazar extends Component{
           const map_coord = transformCoordinate(coordinate, projection.code_, this.state.dataProjection)
           const yChange = coordinateFormat(map_coord, '{y}', 6)
           const xChange = coordinateFormat(map_coord, '{x}', 6)
-          this.setState({ xChange, yChange})
+          this.setState({ xChange, yChange })
           overlay.setPosition(coordinate)
         })
       } else {
-        const features = this.vector.getSource().getFeatures();
-        if(features.length > 0)
-        {
-            const lastFeature = features[features.length - 1];
-            this.vector.getSource().removeFeature(lastFeature);
-        }
+        this.removeDrawedFeature()
+      }
+    }
+
+    removeDrawedFeature() {
+      const features = this.vector.getSource().getFeatures();
+      if(features.length > 0)
+      {
+          const lastFeature = features[features.length - 1];
+          this.vector.getSource().removeFeature(lastFeature);
       }
     }
 
@@ -790,7 +810,7 @@ export default class BarilgaSuurinGazar extends Component{
       const features_new = vector.getSource().getFeatures();
 
       if(selectedFeature_ID){
-            this.setState({ togle_islaod: false })
+          this.setState({ togle_islaod: false })
       }
       else
       {
@@ -852,6 +872,11 @@ export default class BarilgaSuurinGazar extends Component{
       })
     }
 
+    resetDrawed() {
+      this.removeDrawedFeature()
+      this.setState({ is_loading: false, geojson: {}, togle_islaod: true})
+    }
+
     SaveBtn(form_values) {
       this.hideMetaList()
       const {modifyend_selected_feature_ID, modifyend_selected_feature_check, update_geom_from_list, build_name } = this.state
@@ -874,7 +899,7 @@ export default class BarilgaSuurinGazar extends Component{
           }
       }
       else{
-        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, "warning", "Үгүй")
+        if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, "warning", "Үгүй", this.resetDrawed)
         else this.addNotif('warning', "Шинэ мэдээлэл алга байна.", 'exclamation')
       }
     }
@@ -930,7 +955,7 @@ export default class BarilgaSuurinGazar extends Component{
       else {
         this.setInActiveButtonStyle('modify')
         this.DrawButton()
-        this.setState({modify_button_active: true, remove_button_active: false, cancel_button_active: false})
+        this.setState({modify_button_active: true, remove_button_active: false, cancel_button_active: false })
       }
       this.setState({draw_is_active: false})
       this.drawE.setActive(false);
@@ -940,7 +965,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     LineButton(){
       this.setInActiveButtonStyle('line')
-      this.setState({modify_button_active: false, remove_button_active: false, cancel_button_active: false})
+      this.setState({modify_button_active: false, remove_button_active: false, cancel_button_active: false })
       this.setState({ type: 'LineString' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -950,7 +975,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     PointButton(){
       this.setInActiveButtonStyle('point')
-      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
+      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false })
       this.setState({ type: 'Point' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -960,7 +985,7 @@ export default class BarilgaSuurinGazar extends Component{
 
     PolygonButton(){
       this.setInActiveButtonStyle('polygon')
-      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false})
+      this.setState({modify_button_active: false,  remove_button_active: false, cancel_button_active: false })
       this.setState({ type: 'Polygon' })
       this.drawE.getActive()
       this.drawE.setActive(true);
@@ -979,12 +1004,13 @@ export default class BarilgaSuurinGazar extends Component{
       }
       else {
         this.setInActiveButtonStyle('meta')
-        this.setState({ isMeta: true, draw_is_active: false })
+        this.setState({ isMeta: true, draw_is_active: false, remove_button_active: false, cancel_button_active: false , togle_islaod: true })
       }
     }
 
     showUploadBtn(){
       this.setInActiveButtonStyle('upload')
+      this.setState({ draw_is_active: false, remove_button_active: false, cancel_button_active: false  })
       this.controls.upload.showUpload(
         true, this.state.fid,
         this.closeUploadBtn, this.props.refreshCount,
@@ -999,8 +1025,18 @@ export default class BarilgaSuurinGazar extends Component{
       this.controls.qgis.showUpload(true, this.closeQgisBtn, this.addNotif, this.state.wfs_url, this.state.wms_url)
     }
 
+    showApiBtn(){
+      this.setInActiveButtonStyle('api')
+      const {create, remove, update, select} = this.state.api_links
+      this.controls.api.showApi(true, this.closeApiBtn, this.addNotif, create, remove, update, select)
+    }
+
     closeQgisBtn(){
       this.controls.qgis.showUpload(false)
+    }
+
+    closeApiBtn(){
+      this.controls.api.showApi(false)
     }
 
     closeUploadBtn(){
@@ -1376,6 +1412,7 @@ export default class BarilgaSuurinGazar extends Component{
                           remove_button_active={this.state.remove_button_active}
                           cancel_button_active={this.state.cancel_button_active}
                           update_geom_from_list={this.state.update_geom_from_list}
+                          is_delete_request={this.state.is_delete_request}
                         >
                         </Маягт>
                       </div>

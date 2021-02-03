@@ -15,6 +15,9 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.core.files.storage import FileSystemStorage
+from django.contrib.gis.geos import MultiLineString
+from django.contrib.gis.geos import MultiPoint
+from django.contrib.gis.geos import MultiPolygon
 
 from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
@@ -52,16 +55,16 @@ def _get_changeset_display(ob):
     geom1 = geom[:9]
     geom2 = geom[10:-2]
     geom3 = geom[-1]
-    geom4 = geom1 + geom2 +geom3
+    geom4 = geom1 + geom2 + geom3
     values_list = json.loads(geom4)
     coordinates = values_list['geom']['coordinates']
     geom_type = values_list['geom']['type']
 
     return {
-        'coordinate':coordinates,
-        'geom_type':geom_type,
-        'changeset_id':ob.id,
-        'changeset_attributes':ob.features,
+        'coordinate': coordinates,
+        'geom_type': geom_type,
+        'changeset_id': ob.id,
+        'changeset_attributes': ob.features,
         'projection': ob.projection
     }
 
@@ -137,12 +140,11 @@ def getRoles(request, fid):
         elif perm_kind == EmpPermInspire.PERM_REVOKE:
             inspire_roles['PERM_REVOKE'] = True
     rsp = {
-        'roles':inspire_roles,
+        'roles': inspire_roles,
         'success': True
     }
 
     return JsonResponse(rsp)
-
 
 
 @require_GET
@@ -348,7 +350,7 @@ def _get_property(ob, roles, lproperties):
     value_type = _get_type(lproperties.value_type_id)
 
     if value_type == 'option':
-       data_list =  _code_list_display(lproperties.property_id)
+        data_list = _code_list_display(lproperties.property_id)
     elif value_type == 'text':
         data = ob.get('value_text') or ''
     elif value_type == 'number':
@@ -360,9 +362,8 @@ def _get_property(ob, roles, lproperties):
         if role.get('property_id') == lproperties.property_id:
             property_roles = role.get('roles')
 
-
     return {
-        'pk':ob.get('id'),
+        'pk': ob.get('id'),
         'property_name': lproperties.property_name,
         'property_id': lproperties.property_id,
         'property_code': lproperties.property_code,
@@ -373,6 +374,7 @@ def _get_property(ob, roles, lproperties):
         'data_list': data_list,
         'roles': property_roles
     }
+
 
 @require_GET
 @ajax_required
@@ -403,10 +405,10 @@ def detailCreate(request, tid, pid, fid):
     property_roles = []
     org_propties_front = []
     value_data = {
-        'pk':'',
-        'value_text':'',
-        'value_date':'',
-        'value_number':''
+        'pk': '',
+        'value_text': '',
+        'value_date': '',
+        'value_number': ''
         }
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_roles = get_emp_property_roles(employee, fid)
@@ -474,11 +476,11 @@ def _geo_json_convert_geom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
 
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom)
         geom_type = GEOSGeometry(geom).geom_type
         if geom_type == 'Point':
@@ -489,42 +491,6 @@ def _geo_json_convert_geom(geojson):
             geom = MultiPolygon(geom, srid=4326)
         return geom
     return None
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def geomAdd(request, payload, fid):
-
-    feature_obj = get_object_or_404(LFeatures, feature_id=fid)
-    geojson = payload.get('geojson')
-    geom = _geo_json_convert_geom(geojson)
-    if not geom:
-        rsp = {
-            'success': False,
-            'info': "Geojson алдаатай байна.",
-            'id': None
-        }
-        return JsonResponse(rsp)
-    geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
-    MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
-    fields = get_rows(fid)
-    for field in fields:
-        MDatas.objects.create(
-            geo_id = geo_id,
-            feature_config_id = field['feature_config_id'],
-            data_type_id = field['data_type_id'],
-            property_id = field['property_id'],
-            created_by = 1,
-            modified_by = 1
-        )
-    refreshMaterializedView(fid)
-    rsp = {
-        'success': True,
-        'info': "Ажилттай ",
-        'id': geo_id
-    }
-    return JsonResponse(rsp)
 
 
 @require_POST
@@ -591,8 +557,8 @@ def remove(request, payload):
     geo_data = _get_geom(old_geo_id, fid)
     if not geo_data:
         rsp = {
-        'success': False,
-        'info': "Аль хэдийн устсан геом байна.",
+            'success': False,
+            'info': "Аль хэдийн устсан геом байна.",
         }
         return JsonResponse(rsp)
 
@@ -722,27 +688,27 @@ def _check_and_make_form_json(feature_id, values):
         view_props = ViewProperties.objects.filter(view=view)
 
         for view_prop in view_props:
+            prop_qs = LProperties.objects
+            prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+            prop_qs = prop_qs.first()
+
+            form_json = dict()
+            form_json['property_name'] = prop_qs.property_name
+            form_json['property_id'] = prop_qs.property_id
+            form_json['property_code'] = prop_qs.property_code
+            form_json['property_definition'] = prop_qs.property_definition
+            if prop_qs.value_type_id == 'single-select':
+                code_list_values = _code_list_display(prop_qs.property_id)
+            form_json['value_type_id'] = prop_qs.value_type_id
+            form_json['value_type'] = prop_qs.value_type_id
+            form_json['data_list'] = code_list_values
+            form_json['data'] = ''
+
             for p_code, value in values.items():
-                form_json = dict()
-
-                prop = LProperties.objects.filter(
-                    property_id=view_prop.property_id,
-                    property_code__icontains=p_code
-                ).first()
-
-                if prop:
-                    form_json['property_name'] = prop.property_name
-                    form_json['property_id'] = prop.property_id
-                    form_json['property_code'] = prop.property_code
-                    form_json['property_definition'] = prop.property_definition
-                    if prop.value_type_id == 'single-select':
-                        code_list_values = _code_list_display(prop.property_id)
-                    form_json['value_type_id'] = prop.value_type_id
-                    form_json['value_type'] = prop.value_type_id
+                if p_code.lower() in prop_qs.property_name.lower():
                     form_json['data'] = value
-                    form_json['data_list'] = code_list_values
 
-                    form_json_list.append(form_json)
+            form_json_list.append(form_json)
 
     form_json_list = json.dumps(form_json_list)
     return form_json_list
@@ -751,7 +717,7 @@ def _check_and_make_form_json(feature_id, values):
 def _create_request(request_datas):
     change_request = ChangeRequest()
 
-    change_request.old_geo_id = request_datas['geo_id']
+    change_request.old_geo_id = None
     change_request.new_geo_id = None
     change_request.theme_id = request_datas['theme_id']
     change_request.package_id = request_datas['package_id']
@@ -759,13 +725,14 @@ def _create_request(request_datas):
     change_request.employee = request_datas['employee']
     change_request.state = request_datas['state']
     change_request.kind = request_datas['kind']
-    change_request.form_json = request_datas['form_json']
-    change_request.geo_json = request_datas['geo_json']
+    change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
+    change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
+    change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
     change_request.order_at = request_datas['order_at'] if 'order_at' in request_datas else None
-    change_request.order_no = request_datas['order_no']
+    change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
 
     change_request.save()
-    return True
+    return change_request.id
 
 
 def _make_request(values, request_values):
@@ -775,7 +742,6 @@ def _make_request(values, request_values):
     )
 
     request_datas = {
-        'geo_id': request_values['geo_id'],
         'theme_id': request_values['theme_id'],
         'package_id': request_values['package_id'],
         'feature_id': request_values['feature_id'],
@@ -786,10 +752,11 @@ def _make_request(values, request_values):
         'geo_json': request_values['geo_json'],
         'order_at': request_values['order_at'],
         'order_no': request_values['order_no'],
+        'group_id': request_values['group_id'],
     }
     with transaction.atomic():
         success = _create_request(request_datas)
-        info = 'Амжилттай хадгалалаа'
+        info = 'Амжилттай хадгаллаа'
 
     return success, info
 
@@ -857,34 +824,19 @@ def _check_file_for_geom(form_file_name, uniq_name, ext):
     return uniq_file_name, file_type_name, return_name
 
 
-def _make_geo_id(feature_id, field_name, value):
-    geo_id = ''
-    if field_name == 'inspire_id' or field_name == 'geo_id':
-        geo_id = value
-    else:
-        f_code = get_object_or_404(
-            LFeatures,
-            feature_id=feature_id
-        ).feature_code
-        splited_f_code = f_code.split('-')
-        feature_code = splited_f_code[len(splited_f_code)-1]
-
-        count = ChangeRequest.objects.count()
-        geo_id = str(feature_code) + "_" + str(count)
-
-    return geo_id
+def _make_geo_id(feature_id):
+    qs = LFeatures.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.first()
+    feature_code = qs.feature_code
+    new_geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    return new_geo_id
 
 
-def _check_perm(geo_id, employee, feature_id, geo_json):
-    perm_kind = ''
+def _check_perm(employee, feature_id, geo_json):
 
-    geo = MGeoDatas.objects.filter(geo_id=geo_id)
-    if geo:
-        request_kind = ChangeRequest.KIND_UPDATE
-        perm_kind = EmpPermInspire.PERM_UPDATE
-    else:
-        request_kind = ChangeRequest.KIND_CREATE
-        perm_kind = EmpPermInspire.PERM_CREATE
+    request_kind = ChangeRequest.KIND_CREATE
+    perm_kind = EmpPermInspire.PERM_CREATE
 
     success, info = has_employee_perm(
                         employee,
@@ -908,6 +860,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
     feature_id = fid
     success = False
     info = ''
+    main_request_id = None
 
     form = OrderForm(request.POST)
     if form.is_valid():
@@ -940,6 +893,20 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
         layer = ds[0]
         if layer:
+            with transaction.atomic():
+                if len(layer) > 1:
+                    request_datas = {
+                        'theme_id': tid,
+                        'package_id': pid,
+                        'feature_id': feature_id,
+                        'state': ChangeRequest.STATE_NEW,
+                        'kind': ChangeRequest.KIND_CREATE,
+                        'employee': employee,
+                        'order_at': order_at,
+                        'order_no': order_no,
+                    }
+                    main_request_id = _create_request(request_datas)
+
             for val in layer:
                 values = dict()
                 for name in range(0, len(layer.fields)):
@@ -948,12 +915,11 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
                     if name == 0:
 
-                        geo_id = _make_geo_id(feature_id, field_name, value)
+                        # geo_id = _make_geo_id(feature_id)
                         geo_json = val.geom.json  # goemetry json
 
                         if geo_json:
                             success, info, request_kind = _check_perm(
-                                geo_id,
                                 employee,
                                 feature_id,
                                 geo_json
@@ -978,7 +944,6 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     values[field_name] = value
 
                 request_values = {
-                    'geo_id': geo_id,
                     'theme_id': tid,
                     'package_id': pid,
                     'feature_id': fid,
@@ -987,6 +952,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     'kind': request_kind,
                     'order_at': order_at,
                     'order_no': order_no,
+                    'group_id': main_request_id,
                 }
                 success, info = _make_request(values, request_values)
 
@@ -998,18 +964,12 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                 'success': success,
                 'info': info
             }
-        else:
-            rsp = {
-                'success': success,
-                'info': 'Файл хоосон байна'
-            }
 
     else:
         rsp = {
             'success': False,
             'errors': form.errors,
         }
-
     return JsonResponse(rsp)
 
 
@@ -1023,5 +983,22 @@ def get_qgis_url(request):
         'success': True,
         'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
         'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_api_url(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    rsp = {
+        'success': True,
+        'api_links': {
+            'create': request.build_absolute_uri(reverse('api:inspire:create', args=[employee.token])),
+            'remove': request.build_absolute_uri(reverse('api:inspire:remove', args=[employee.token])),
+            'update': request.build_absolute_uri(reverse('api:inspire:update', args=[employee.token])),
+            'select': request.build_absolute_uri(reverse('api:inspire:select', args=[employee.token]))
+        }
     }
     return JsonResponse(rsp)

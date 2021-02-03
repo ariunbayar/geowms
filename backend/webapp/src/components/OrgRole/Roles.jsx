@@ -324,7 +324,7 @@ export class Roles extends Component {
                     <div className="fixed-height">
                     {data.map((theme, theme_index) => (
                         (theme.packages.length > 0 && theme.perm_all > 0 &&
-                        <div className="bc-white" key={theme_index}>
+                        <div className="bc-white border border-secondary" key={theme_index}>
                             <div className="">
                                 <div className="my-0">
                                     <div id={`accordion${theme_index+1}`} className="" key={theme_index}>

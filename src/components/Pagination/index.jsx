@@ -71,7 +71,7 @@ export class Pagination extends Component {
         if(this.props.org_level){
             const level = this.props.org_level
             this.props.paginate(page, query, level, sort_name)
-            .then(({ page, total_page}) => {
+            .then(({ page, total_page }) => {
                 this.setState({
                     page,
                     total_page,

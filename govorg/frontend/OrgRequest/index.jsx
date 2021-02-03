@@ -1,7 +1,7 @@
 
 import React, { Component } from "react"
 import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
-import OrgRequestForm from './orgRequestForm'
+import OrgRequestList from './orgRequestList'
 
 export default class OrgRequest extends Component {
 
@@ -16,7 +16,7 @@ export default class OrgRequest extends Component {
             <div className="card">
               <div className="card-body">
                     <Switch>
-                        <Route path="/gov/org-request/" component={OrgRequestForm}/>
+                        <Route path="/gov/org-request/" component={OrgRequestList}/>
                     </Switch>
               </div>
            </div>
