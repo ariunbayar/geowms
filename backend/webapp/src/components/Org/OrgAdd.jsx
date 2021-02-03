@@ -180,6 +180,7 @@ export class OrgAdd extends Component {
         service.org_add(org_level, datas).then(({success, errors}) => {
             if (success) {
                 this.setState({modal_alert_status: "open"})
+                this.props.refreshCount()
                 setStatus('saved')
                 setSubmitting(false)
                 this.modalCloseTime()
@@ -192,14 +193,12 @@ export class OrgAdd extends Component {
 
     modalClose(){
         const org_level = this.props.match.params.level
-        this.props.refreshCount()
         this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
     }
 
     modalCloseTime(){
         const org_level = this.props.match.params.level
         this.state.timer = setTimeout(() => {
-            this.props.refreshCount()
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
         }, 2000)
     }

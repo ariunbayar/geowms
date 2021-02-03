@@ -44,7 +44,7 @@ export class Org extends Component {
                             <Route
                                 path="/back/байгууллага/түвшин/:level/нэмэх/"
                                 component={(props) =>
-                                    <OrgAdd {...props} refreshCount={() => this.props.refreshCount()}/>
+                                    <OrgAdd {...props} refreshCount={this.props.refreshCount}/>
                                 }
                             />
                             <Route exact path="/back/байгууллага/түвшин/:level/:id/засах/" component={OrgAdd}/>
