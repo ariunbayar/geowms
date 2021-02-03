@@ -9,7 +9,7 @@ from django.conf import settings
 import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, Point
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
 from datetime import timedelta, datetime
@@ -237,6 +237,19 @@ def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
 
 
+def _make_connection(from_email):
+    connection = get_connection(
+        username=from_email,
+        password=get_config('EMAIL_HOST_PASSWORD'),
+        port=get_config('EMAIL_PORT'),
+        host=get_config('EMAIL_HOST'),
+        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
+        use_ssl=False,
+        fail_silently=False,
+    )
+    return connection
+
+
 def send_approve_email(user, subject=None, text=None):
 
     if not user.email:
@@ -262,24 +275,15 @@ def send_approve_email(user, subject=None, text=None):
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
 
-    connection = get_connection(
-        username=from_email,
-        password=get_config('EMAIL_HOST_PASSWORD'),
-        port=get_config('EMAIL_PORT'),
-        host=get_config('EMAIL_HOST'),
-        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
-        use_ssl=False,
-        fail_silently=False,
-    )
-    send_mail(subject, msg, from_email, to_email, connection=connection)
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
 
     return True
 
 
 def send_email(subject, msg, to_email):
 
-    from_email = settings.EMAIL_HOST_USER
-    send_mail(subject, msg, from_email, to_email, fail_silently=False)
+    from_email = get_config('EMAIL_HOST_USER')
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
 
 
 def get_administrative_levels():
@@ -754,3 +758,17 @@ def get_fields(Model):
         fields.append(name)
 
     return fields
+
+
+def get_key_and_compare(dict, item):
+    value = ''
+    for key in dict.keys():
+        if key == item:
+            value = key
+    return value
+
+
+def lat_long_to_utm(lat, longi):
+    point = Point([lat, longi], srid=4326)
+    utm = point.transform(3857, clone=True)
+    return utm.coords

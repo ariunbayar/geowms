@@ -129,9 +129,19 @@ export default class BundleMap extends Component {
       this.setState({'is_modal_info_open': false})
     }
 
-    cartButton(is_cart, content, code, point_id, is_again_clicked, geom_name){
+    cartButton(is_cart, point_name, code, point_id, is_again_clicked, geom_name, pdf_id){
         if(is_cart == true){
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code, point_id, is_again_clicked, geom_name)
+            this.controls.cart.showModal(
+                this.state.coordinate_clicked,
+                is_cart,
+                this.state.x,
+                this.state.y,
+                point_name,
+                code,
+                point_id,
+                is_again_clicked,
+                geom_name, pdf_id
+            )
         }
     }
 
@@ -614,7 +624,7 @@ export default class BundleMap extends Component {
                                     is_empty = true
                                 }
                                 const is_from_inspire = true
-                                this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, feature_price, is_empty, is_from_inspire)
+                                this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire)
                             })
                     }
                     if (tile && !is_feature) {
@@ -707,7 +717,7 @@ export default class BundleMap extends Component {
                                         // }
                                     }
                                     else {
-                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
                                     }
                                 })
                             }

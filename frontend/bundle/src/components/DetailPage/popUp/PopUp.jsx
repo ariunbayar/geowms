@@ -32,7 +32,8 @@ class PopUpCmp extends Component {
         this.checkModeAndCode = this.checkModeAndCode.bind(this)
         this.openCartSide = this.openCartSide.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
-        this.checkButtonEnable = this.checkButtonEnable.bind(this)
+        this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
+        this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
     }
 
     componentDidMount() {
@@ -105,11 +106,16 @@ class PopUpCmp extends Component {
                 if (value[0] == 'point_id') {
                     this.setState({ id: value[1] })
                 }
-                if (value[0] == 'point_name') {
+                if ((value[0] == 'point_name') || value[2] == 'Name') {
                     this.setState({ name: value[1] })
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
                     this.checkButtonEnable(value[1])
+                }
+                if (value[2] == 'PointNumber') {
+                    this.checkButtonEnableWithId(value[1])
+                    this.setState({ id: value[1] })
+                    geom_name = value[1]
                 }
             })
             this.setNowData(number, datas, mode, code, geom_name)
@@ -124,9 +130,18 @@ class PopUpCmp extends Component {
         this.setState({ data, mode, datas, code, geom_name })
     }
 
-    checkButtonEnable(pdf_id){
-        service.checkButtonEnable(pdf_id)
+    checkButtonEnableWithPdf(pdf_id){
+        service.checkButtonEnableWithPdf(pdf_id)
             .then(({is_enable, success}) => {
+                if(success){
+                    this.setState({ is_enable, pdf_id })
+                }
+            })
+    }
+
+    checkButtonEnableWithId(geo_id){
+        service.checkButtonEnableWithId(geo_id)
+            .then(({is_enable, success, pdf_id}) => {
                 if(success){
                     this.setState({ is_enable, pdf_id })
                 }
@@ -139,7 +154,7 @@ class PopUpCmp extends Component {
         if (this.click_count > 1) {
             is_again_clicked = true
         }
-        this.props.cartButton(true, this.state.data, this.state.code, this.state.id, is_again_clicked, this.state.geom_name)
+        this.props.cartButton(true, this.state.name, this.state.code, this.state.id, is_again_clicked, this.state.geom_name, this.state.pdf_id)
     }
 
 
@@ -224,9 +239,11 @@ class PopUpCmp extends Component {
                                                     layer.map((value, v_idx) =>
                                                         !value[0].toLowerCase().startsWith('name')
                                                         &&
-                                                            <tr style={{fontSize: '12px'}} key={v_idx}>
-                                                                <th>{value[0]}</th>
-                                                                <td>{value[1]}</td>
+                                                            <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
+                                                                <th className="font-weight-normal">
+                                                                    <b>{value[0]}:</b>
+                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1]}</p>
+                                                                </th>
                                                             </tr>
                                                         )
                                                 )
