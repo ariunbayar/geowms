@@ -28,7 +28,7 @@ from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
 
 from govorg.backend.forms.models import Mpoint_view
-from backend.payment.models import Payment, PaymentPoint, PaymentLayer
+from backend.payment.models import Payment, PaymentPoint, PaymentLayer, PaymentPolygon
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import Bundle
 from backend.dedsanbutets.models import ViewNames
@@ -326,39 +326,35 @@ def _create_shp_file(payment, layer, polygon):
 
     x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
 
-    try:
-        file_type = 'ESRI SHAPEFILE'
-        path = _create_folder_payment_id('shape', payment.id)
-        file_ext = '.shp'
-        filename = os.path.join(path, str(layer.code) + file_ext)
+    file_type = 'ESRI SHAPEFILE'
+    path = _create_folder_payment_id('shape', payment.id)
+    file_ext = '.shp'
+    filename = os.path.join(path, str(layer.code) + file_ext)
 
-        url = layer.wms.url
-        url_service = 'SERVICE=WFS'
-        url_version = 'VERSION=1.1.0'
-        url_request = 'REQUEST=GetCapabilities'
-        geoserver_layer = layer.code
+    url = layer.wms.url
+    url_service = 'SERVICE=WFS'
+    url_version = 'VERSION=1.1.0'
+    url_request = 'REQUEST=GetCapabilities'
+    geoserver_layer = layer.code
 
-        spat_srs = 'EPSG:4326'
-        # source_srs = 'EPSG:32648'
-        trans_srs = 'EPSG:4326'
-        meta = 'ENCODING=UTF-8'
-        subprocess.run([
-            'ogr2ogr',
-            '-f', file_type,
-            filename,
-            'WFS:' + url + '?&' + url_service + '&' + url_version + '&' + url_request,
-            geoserver_layer,
-            '-spat_srs', spat_srs,
-            '-spat', str(x1), str(y1), str(x2), str(y2),
-            '-lco', meta,
-            # '-s_srs', source_srs,
-            '-t_srs', trans_srs,
-            '-skipfailures'
-        ])
-        _update_and_add_column_with_value(path, str(layer.code) + file_ext)
-
-    except Exception as e:
-        print(e)
+    spat_srs = 'EPSG:4326'
+    # source_srs = 'EPSG:32648'
+    trans_srs = 'EPSG:4326'
+    meta = 'ENCODING=UTF-8'
+    subprocess.run([
+        'ogr2ogr',
+        '-f', file_type,
+        filename,
+        'WFS:' + url + '?&' + url_service + '&' + url_version + '&' + url_request,
+        geoserver_layer,
+        '-spat_srs', spat_srs,
+        '-spat', str(x1), str(y1), str(x2), str(y2),
+        '-lco', meta,
+        # '-s_srs', source_srs,
+        '-t_srs', trans_srs,
+        '-skipfailures'
+    ])
+    _update_and_add_column_with_value(path, str(layer.code) + file_ext)
 
 
 def get_all_file_paths(directory):
@@ -399,22 +395,17 @@ def _file_to_zip(payment_id, folder_name):
 
 def _export_shp(payment):
 
-    try:
-        layers = PaymentLayer.objects.filter(payment=payment)
-        polygon = PaymentPolygon.objects.filter(payment=payment).first()
+    layers = PaymentLayer.objects.filter(payment=payment)
+    polygon = PaymentPolygon.objects.filter(payment=payment).first()
 
-        for layer in layers:
-            _create_shp_file(payment, layer.wms_layer, polygon)
+    for layer in layers:
+        _create_shp_file(payment, layer.wms_layer, polygon)
 
-        _file_to_zip(str(payment.id), 'shape')
-        payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
-        payment.save()
+    _file_to_zip(str(payment.id), 'shape')
+    payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
+    payment.save()
 
-        return True
-
-    except Exception as e:
-        print(e)
-        return False
+    return True
 
 
 def _get_size_from_extent(x1, y1, x2, y2):
@@ -481,22 +472,17 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
 
 def _export_image(payment, download_type):
 
-    try:
-        layers = PaymentLayer.objects.filter(payment=payment)
-        polygon = PaymentPolygon.objects.filter(payment=payment).first()
-        folder_name = 'image'
+    layers = PaymentLayer.objects.filter(payment=payment)
+    polygon = PaymentPolygon.objects.filter(payment=payment).first()
+    folder_name = 'image'
 
-        for layer in layers:
-            _create_image_file(payment, layer, polygon, download_type, folder_name)
+    for layer in layers:
+        _create_image_file(payment, layer, polygon, download_type, folder_name)
 
-        _file_to_zip(str(payment.id), folder_name)
-        payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
-        payment.save()
-        return True
-
-    except Exception as e:
-        print(e)
-        return False
+    _file_to_zip(str(payment.id), folder_name)
+    payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+    payment.save()
+    return True
 
 
 def _get_Feature_info_from_url(polygon, layer):
@@ -855,7 +841,6 @@ def _get_info_from_file(get_type, mpoint, pdf_id, geo_id=None):
 
 
 def _get_items_with_file(content, mpoint, att_names):
-    print(mpoint)
     point_info = {
         'point_id': content[att_names['point_name']],
         'ondor': content[att_names['ondor']],
@@ -899,7 +884,6 @@ def _create_lavlagaa_infos(payment):
         if point.pdf_id:
             mpoint_qs = Mpoint_view.objects.using('postgis_db')
             mpoint_qs = mpoint_qs.filter(point_name=point.point_name)
-            print(mpoint_qs)
             if mpoint_qs:
                 mpoint_qs = mpoint_qs.first()
                 pid = mpoint_qs.pid
@@ -1001,7 +985,6 @@ def download_purchase(request, pk, download_type):
     is_created = False
     payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
 
-    print(download_type)
     if payment.export_file:
         is_created = True
     else:

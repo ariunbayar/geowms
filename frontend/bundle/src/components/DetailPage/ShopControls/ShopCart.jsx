@@ -128,7 +128,6 @@ export class Cart extends Component{
     checkDataForPurchase(){
         this.setState({ is_purchase: true })
         if(this.state.data.length > 0){
-            console.log(this.state.data);
             service.purchaseFromCart(this.state.data)
                 .then(({success, msg, payment_id}) => {
                     if(success){
