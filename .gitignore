@@ -37,12 +37,9 @@ geoportal_app/media/tseg-personal-img/*
 !geoportal_app/media/tseg-personal-img/.keep
 geoportal_app/media/tseg-personal/*
 !geoportal_app/media/tseg-personal/.keep
-<<<<<<< HEAD
 geoportal_app/files/payment/*
 !geoportal_app/files/payment/*.csv
 !geoportal_app/files/payment/shape
-=======
->>>>>>> edf90aeabc75675c350bcfea4e09df360ab7c041
 geoportal_app/files/payment/shape/*
 !geoportal_app/files/payment/shape/.keep
 geoportal_app/files/payment/pdf/*
