@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('backend_org', '0016_delete_inspireperm'),
-        ('org_request', '0013_g_changereq_update_geom_and_form'),
+        ('org_request', '0015_changerequest_group_id'),
     ]
 
     operations = [
