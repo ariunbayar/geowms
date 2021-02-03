@@ -49,7 +49,7 @@ class ModalComponent extends Component{
                                 </div>
                             }
                             <div className="modal-footer" style={{border: 'none'}}>
-                                <button type="button" onClick={this.props.handleClose} className="btn btn-primary waves-effect waves-light">
+                                <button type="button" onClick={() => this.props.handleClose('back')} className="btn btn-primary waves-effect waves-light">
                                     <i className="fa fa-times"></i>
                                     {this.props.actionNameBack ? this.props.actionNameBack : "  БУЦАХ"}
                                 </button>
@@ -96,8 +96,9 @@ export class Modal extends Control {
 
     renderComponent(props) {
 
-        props.handleClose = () => {
-            if (props.actionBack) {
+        props.handleClose = (type) => {
+            if (props.actionBack && type == 'back') {
+                console.log(type);
                 props.actionBack()
             }
             this.toggleControl(false)
