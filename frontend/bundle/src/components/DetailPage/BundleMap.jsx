@@ -103,6 +103,7 @@ export default class BundleMap extends Component {
         this.fromLonLatToMapCoord = this.fromLonLatToMapCoord.bind(this)
         this.featureFromUrl = this.featureFromUrl.bind(this)
         this.check_inspire_layer = this.check_inspire_layer.bind(this)
+        this.transformToLatLong = this.transformToLatLong.bind(this)
     }
 
     initMarker() {
@@ -795,6 +796,14 @@ export default class BundleMap extends Component {
         }
     }
 
+    transformToLatLong(coordinateList) {
+        const geom = coordinateList[0].map((coord, idx) => {
+            const map_coord = transformCoordinate(coord, this.state.projection, this.state.projection_display)
+              return map_coord
+        })
+        return geom
+      }
+
     toggleDrawed(event){
         this.feature_info_list = []
         this.controls.drawModal.showModal(true)
@@ -841,10 +850,17 @@ export default class BundleMap extends Component {
         wms_array.map(({ name, layers }, w_idx) => {
             layers.map(({ id, code, tile }, l_idx) => {
                 const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
-                // if (tile.getVisible() && is_feature) {
-
-                // }
                 if (tile.getVisible() && is_feature) {
+                    const coordinates = event.feature.getGeometry().getCoordinates()
+                    const trans_coordinates = this.transformToLatLong(coordinates)
+                    service
+                        .getFeatureInfo(layer_code, trans_coordinates)
+                        .then(({datas}) => {
+                            datas['layer_id'] = id
+                            list.push(datas)
+                        })
+                }
+                if (tile.getVisible() && !is_feature) {
                     const main_url = tile.getSource().urls[0]
                     if(main_url) {
                         const url =
@@ -870,19 +886,17 @@ export default class BundleMap extends Component {
                                     return [id, values]
                                 })
                                 if(feature_info.length > 0) {
+                                    let feature_id = ''
+                                    var geom_ids = new Array()
                                     const info = feature_info.map((feature, idx) => {
-                                        var obj = new Object()
-                                        obj['geom_id'] = feature[0]
                                         feature[1].map((info, idx) => {
                                             if(info[0] == 'feature_id') {
-                                                obj['feature_id'] = info[1]
+                                                feature_id = info[1]
                                             }
                                         })
-                                        obj['layer_code'] = code
-                                        obj['layer_id'] = id
-                                        return obj
+                                        return feature[0]
                                     })
-                                    list.push({[code]: info})
+                                    list.push({'geom_ids': info, 'layer_code': code, 'layer_id': id, 'feature_id': feature_id })
                                 }
                             })
                     }

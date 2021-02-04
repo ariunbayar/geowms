@@ -15,7 +15,7 @@ from django.conf import settings
 from django.db import transaction
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import Polygon
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404, get_list_or_404
@@ -49,6 +49,7 @@ from main.utils import (
     get_config,
     get_key_and_compare,
     lat_long_to_utm,
+    get_nearest_geom,
 )
 
 from zipfile import ZipFile
@@ -97,12 +98,8 @@ def dictionaryResponse(request):
 def _get_layer_ids(feature_info_list):
     layer_ids = list()
     for geoms in feature_info_list:
-        if geoms:
-            for key, value in geoms.items():
-                for geom in geoms[key]:
-                    layer_id = geom['layer_id']
-                    if layer_id not in layer_ids:
-                        layer_ids.append(layer_id)
+        if 'layer_id' in geoms:
+            layer_ids.append(geoms['layer_id'])
     return layer_ids
 
 
@@ -1138,12 +1135,10 @@ def _get_all_property_count(layer_list, feature_info_list):
     count = 0
     for code in layer_list:
         for feature in feature_info_list:
-            key = get_key_and_compare(feature, code)
-            if key:
-                for info in feature[key]:
-                    if 'feature_id' in info:
-                        fconfig_count = _lfeature_config_count(info['feature_id'])
-                        count += fconfig_count
+            if code == feature['layer_code']:
+                if 'feature_id' in feature:
+                    fconfig_count = _lfeature_config_count(feature['feature_id'])
+                    count += fconfig_count
     return count
 
 
@@ -1267,7 +1262,6 @@ def check_button_ebable_pdf_geo_id(request, payload):
     return JsonResponse(rsp)
 
 
-
 @require_GET
 @ajax_required
 @login_required
@@ -1279,6 +1273,17 @@ def testPay(request, id):
     }
 
     return JsonResponse(rsp)
+
+
+def _get_properties_qs(view_qs):
+    viewproperties_qs = ViewProperties.objects
+    viewproperties_qs = viewproperties_qs.filter(view=view_qs)
+    viewproperty_ids = viewproperties_qs.values_list('property_id', flat=True)
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.filter(property_id__in=viewproperty_ids)
+
+    return viewproperty_ids, property_qs
 
 
 @require_POST
@@ -1298,19 +1303,9 @@ def get_popup_info(request, payload):
 
     feature_id = view_qs.feature_id
 
-    viewproperties_qs = ViewProperties.objects
-    viewproperties_qs = viewproperties_qs.filter(view=view_qs)
-    viewproperty_ids = viewproperties_qs.values_list('property_id', flat=True)
+    viewproperty_ids, property_qs = _get_properties_qs(view_qs)
 
-    property_qs = LProperties.objects
-    property_qs = property_qs.filter(property_id__in=viewproperty_ids)
-
-    point = Point(coordinate, srid=4326)
-    mgeo_qs = MGeoDatas.objects
-    mgeo_qs = mgeo_qs.filter(feature_id=feature_id)
-    mgeo_qs = mgeo_qs.filter(geo_data__distance_lte=(point, D(km=1)))
-    mgeo_qs = mgeo_qs.order_by('geo_data')
-    nearest_points = mgeo_qs
+    nearest_points = get_nearest_geom(coordinate, feature_id)
 
     for nearest_point in nearest_points:
         mdatas_qs = MDatas.objects
@@ -1347,6 +1342,38 @@ def get_popup_info(request, payload):
 
     rsp = {
         'datas': infos,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_feature_info(request, payload):
+
+    datas = dict()
+    layer_code = payload.get('layer_code')
+    coordinates = payload.get('coordinates')
+
+    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+
+    feature_id = view_qs.feature_id
+    layer_code = 'gp_layer_' + layer_code
+
+    polygon = Polygon(coordinates, srid=4326)
+
+    mgeodatas_qs = MGeoDatas.objects
+    mgeodatas_qs = mgeodatas_qs.filter(feature_id=feature_id)
+    mgeodatas_qs = mgeodatas_qs.filter(geo_data__within=polygon)
+    geom_ids = [mgeodata.geo_id for mgeodata in mgeodatas_qs]
+
+    datas['feature_id'] = feature_id
+    datas['layer_code'] = layer_code
+    datas['geom_ids'] = geom_ids
+
+    rsp = {
+        'datas': datas,
     }
 
     return JsonResponse(rsp)

@@ -5,7 +5,6 @@ import base64
 import re
 import unicodedata
 
-from django.conf import settings
 import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
@@ -15,6 +14,7 @@ from backend.dedsanbutets.models import ViewNames
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
+from django.contrib.gis.measure import D
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -772,3 +772,14 @@ def lat_long_to_utm(lat, longi):
     point = Point([lat, longi], srid=4326)
     utm = point.transform(3857, clone=True)
     return utm.coords
+
+
+def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
+    point = Point(coordinate, srid=srid)
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(feature_id=feature_id)
+    mgeo_qs = mgeo_qs.filter(geo_data__distance_lte=(point, D(km=km)))
+    mgeo_qs = mgeo_qs.order_by('geo_data')
+    nearest_points = mgeo_qs
+    return nearest_points

@@ -14,6 +14,7 @@ export const service = {
     checkButtonEnableWithPdf,
     getPopUpInfo,
     checkButtonEnableWithId,
+    getFeatureInfo,
 }
 
 function getCookie(name) {
@@ -165,4 +166,12 @@ function getPopUpInfo(layer_code, coordinate) {
         body: JSON.stringify({layer_code, coordinate})
     }
     return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
+}
+
+function getFeatureInfo(layer_code, coordinates) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layer_code, coordinates})
+    }
+    return fetch('/payment/get-feature-info/', requestOptions).then(handleResponse)
 }

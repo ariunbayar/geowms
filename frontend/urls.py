@@ -59,6 +59,7 @@ urlpatterns = [
         path('check-enable-pdf/', payment_views.check_button_ebable_pdf),
         path('check-enable-pdf-id/', payment_views.check_button_ebable_pdf_geo_id),
         path('get-popup-info/', payment_views.get_popup_info),
+        path('get-feature-info/', payment_views.get_feature_info),
     ], 'payment'))),
 
     path('qpay/', include(([
