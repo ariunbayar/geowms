@@ -97,20 +97,20 @@ def dictionaryResponse(request):
 def _get_layer_ids(feature_info_list):
     layer_ids = list()
     for geoms in feature_info_list:
-        for key, value in geoms.items():
-            for geom in geoms[key]:
-                layer_id = geom['layer_id']
-                if layer_id not in layer_ids:
-                    layer_ids.append(layer_id)
+        if geoms:
+            for key, value in geoms.items():
+                for geom in geoms[key]:
+                    layer_id = geom['layer_id']
+                    if layer_id not in layer_ids:
+                        layer_ids.append(layer_id)
     return layer_ids
 
 
 @require_POST
 @ajax_required
 @login_required
-def purchaseDraw(request, payload):
+def purchase_draw(request, payload):
 
-    description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
     bundle_id = payload.get('bundle_id')
@@ -247,40 +247,41 @@ def _get_code_list_name(code_list_id):
 
 
 def _create_field_and_insert_to_shp(feature_infos, feature_id, geo_id, path, gml_id, table_name):
-    att_type = ''
+    filter_value = None
     for info in feature_infos:
         for property in info['data_types']:
             property_code = property['property_code']
             mdata_value = MDatas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
             if mdata_value:
                 mdata_value = mdata_value.first()
-            for value_type in property['value_types']:
-                value_type = value_type['value_type_id']
-                if value_type == 'double':
-                    value_type = 'number'
-                if value_type == 'single-select':
-                    value_type = 'code_list_id'
+                for value_type in property['value_types']:
+                    value_type = value_type['value_type_id']
+                    if value_type == 'double':
+                        value_type = 'number'
+                    if 'select' in value_type:
+                        value_type = 'code_list_id'
+                if value_type != 'boolean':
+                    if 'code' in value_type:
+                        filter_value = value_type
+                    else:
+                        filter_value = "value_" + value_type
 
-            if 'code' in value_type:
-                filter_value = value_type
-            else:
-                filter_value = "value_" + value_type
+                    if filter_value:
+                        value = getattr(mdata_value, filter_value)
 
-            value = getattr(mdata_value, filter_value)
-
-            if filter_value == 'value_date' and value:
-                value = value.strftime('%m/%d/%Y, %H:%M:%S')
-            if filter_value == 'value_number' and value:
-                value = str(value)
-            if 'code_list' in filter_value and value:
-                value = _get_code_list_name(value)
-            if value:
-                subprocess.run([
-                    'ogrinfo',
-                    path,
-                    '-dialect', 'SQLite',
-                    '-sql', "UPDATE '" + table_name + "' SET " + property_code[0:10] + "='" + value + "' WHERE gml_id='" + gml_id + "'"
-                ])
+                    if filter_value == 'value_date' and value:
+                        value = value.strftime('%m/%d/%Y, %H:%M:%S')
+                    if filter_value == 'value_number' and value:
+                        value = str(value)
+                    if 'code_list' in filter_value and value:
+                        value = _get_code_list_name(value)
+                    if value and filter_value:
+                        subprocess.run([
+                            'ogrinfo',
+                            path,
+                            '-dialect', 'SQLite',
+                            '-sql', "UPDATE '" + table_name + "' SET " + property_code[0:10] + "='" + value + "' WHERE gml_id='" + gml_id + "'"
+                        ])
 
 
 def _update_and_add_column_with_value(path, file_name):
@@ -792,7 +793,7 @@ def _class_name_eer_angilah(point_infos):
 
 
 def _get_attribute_name_from_file(content):
-    att = {}
+    att = dict()
     for idx in range(0, len(content)):
         if content[idx].lower() == 'aimag':
             att['aimag'] = idx
@@ -818,7 +819,7 @@ def _get_attribute_name_from_file(content):
 
 
 def _get_info_from_file(get_type, mpoint, pdf_id, geo_id=None):
-    found_items = []
+    found_items = list()
     file_list = [f for f in glob.glob(os.path.join(settings.FILES_ROOT, "*.csv"))]
     for a_file in file_list:
         with open(a_file, 'rt') as f:

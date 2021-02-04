@@ -102,6 +102,7 @@ export default class BundleMap extends Component {
         this.removeCircle = this.removeCircle.bind(this)
         this.fromLonLatToMapCoord = this.fromLonLatToMapCoord.bind(this)
         this.featureFromUrl = this.featureFromUrl.bind(this)
+        this.check_inspire_layer = this.check_inspire_layer.bind(this)
     }
 
     initMarker() {
@@ -591,10 +592,25 @@ export default class BundleMap extends Component {
         return this.array
     }
 
-    featureFromUrl(coordinate) {
+    check_inspire_layer(code, tile) {
         let is_feature = false
-        let layer_code
+        let layer_code = ''
+        if (tile.getVisible()){
+            let splited_code = code.split('_')
+            splited_code.map((split_code, idx) => {
+                if (idx == 0 && split_code == 'gp') {
+                    if (splited_code[idx + 1] == 'layer') {
+                        let sliced_code = splited_code.slice(2)
+                        layer_code = sliced_code.join("_");
+                        is_feature = true
+                    }
+                }
+            })
+        }
+        return {layer_code, is_feature}
+    }
 
+    featureFromUrl(coordinate) {
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
@@ -602,18 +618,7 @@ export default class BundleMap extends Component {
         wms_array.map(({layers}) => {
             if(layers) {
                 layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
-                    if (tile.getVisible()){
-                        let splited_code = code.split('_')
-                        splited_code.map((split_code, idx) => {
-                            if (idx == 0 && split_code == 'gp') {
-                                if (splited_code[idx + 1] == 'layer') {
-                                    let sliced_code = splited_code.slice(2)
-                                    layer_code = sliced_code.join("_");
-                                    is_feature = true
-                                }
-                            }
-                        })
-                    }
+                    const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
                     if (is_feature) {
                         const latlong = toLonLat(coordinate)
                         service
@@ -835,7 +840,11 @@ export default class BundleMap extends Component {
         var list = []
         wms_array.map(({ name, layers }, w_idx) => {
             layers.map(({ id, code, tile }, l_idx) => {
-                if (tile.getVisible()) {
+                const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
+                // if (tile.getVisible() && is_feature) {
+
+                // }
+                if (tile.getVisible() && is_feature) {
                     const main_url = tile.getSource().urls[0]
                     if(main_url) {
                         const url =
@@ -875,7 +884,7 @@ export default class BundleMap extends Component {
                                     })
                                     list.push({[code]: info})
                                 }
-                        })
+                            })
                     }
                 }
                 if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {

@@ -49,7 +49,7 @@ urlpatterns = [
     path('payment/', include(([
         path('dictionaryRequest/', payment_views.dictionaryRequest, name='dictionaryRequest'),
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
-        path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
+        path('purchase-draw/', payment_views.purchase_draw, name='purchase-draw'),
         path('api/download-purchase/<int:pk>/<str:download_type>/', payment_views.download_purchase, name="download_purchase"),
         path('purchase-from-cart/', payment_views.purchase_from_cart),
         path('download-pdf/<int:pk>/<str:pdf_id>/', payment_views.download_pdf, name='download-pdf'),
