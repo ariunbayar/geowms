@@ -273,7 +273,6 @@ def update(request, payload, pk):
             emp_perm.updated_by = user
             emp_perm.save()
 
-
         if remove_perms:
             _delete_remove_perm(remove_perms)
 
