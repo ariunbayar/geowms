@@ -981,10 +981,11 @@ def get_api_url(request):
     rsp = {
         'success': True,
         'api_links': {
-            'create': request.build_absolute_uri(reverse('api:inspire:create', args=[employee.token])),
-            'remove': request.build_absolute_uri(reverse('api:inspire:remove', args=[employee.token])),
-            'update': request.build_absolute_uri(reverse('api:inspire:update', args=[employee.token])),
-            'select': request.build_absolute_uri(reverse('api:inspire:select', args=[employee.token]))
+            'token_auth': request.build_absolute_uri(reverse('api:inspire:token-auth')),
+            'create': request.build_absolute_uri(reverse('api:inspire:create')),
+            'remove': request.build_absolute_uri(reverse('api:inspire:remove')),
+            'update': request.build_absolute_uri(reverse('api:inspire:update')),
+            'select': request.build_absolute_uri(reverse('api:inspire:select'))
         }
     }
     return JsonResponse(rsp)

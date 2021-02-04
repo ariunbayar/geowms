@@ -19,7 +19,7 @@ urlpatterns = [
     ], 'service'))),
 
     path('inspire/', include(([
-        path('token-auth/', obtain_jwt_token),
+        path('token-auth/', obtain_jwt_token, name='token-auth'),
         path('create/', inspire_views.create, name='create'),
         path('update/', inspire_views.update, name='update'),
         path('remove/', inspire_views.remove, name='remove'),
