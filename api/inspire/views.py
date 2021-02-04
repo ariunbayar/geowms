@@ -97,7 +97,7 @@ def update(request, payload):
         is_contains_update_id_busad = list()
         for is_contain in is_contains:
             if is_contain['geo_id'] != old_geo_id:
-                is_contains_update_id_busad.append()
+                is_contains_update_id_busad.append(is_contain['geo_id'])
         if is_contains_update_id_busad:
             info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains_update_id_busad]))
             return JsonResponse({"success": False, "info": info})
