@@ -1027,8 +1027,8 @@ export default class BarilgaSuurinGazar extends Component{
 
     showApiBtn(){
       this.setInActiveButtonStyle('api')
-      const {create, remove, update, select} = this.state.api_links
-      this.controls.api.showApi(true, this.closeApiBtn, this.addNotif, create, remove, update, select)
+      const {create, remove, update, select, token_auth} = this.state.api_links
+      this.controls.api.showApi(true, this.closeApiBtn, this.addNotif, create, remove, update, select, token_auth)
     }
 
     closeQgisBtn(){

@@ -38,7 +38,16 @@ class ApiCmp extends Component {
                         <div className="modal-body">
                             <div className="row">
                                 <div className="col-md-12">
-                                    <h5>CREATE</h5>
+                                    <h5>TOKEN AUTH</h5>
+                                    <div className="input-group">
+                                        <input type="text" className="form-control col-12" disabled value={this.props.token_auth}/>
+                                        <span className="input-group-btn">
+                                        <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.props.token_auth)}>
+                                            <i className="fa fa-clone" aria-hidden="true"></i>
+                                        </button>
+                                        </span>
+                                    </div>
+                                    <h5 className="mt-3">CREATE</h5>
                                     <div className="input-group">
                                         <input type="text" className="form-control col-12" disabled value={this.props.create}/>
                                         <span className="input-group-btn">
@@ -132,9 +141,9 @@ export class ApiModal extends Control {
         ReactDOM.hydrate(<ApiCmp {...props}/>, this.element)
     }
 
-    showApi(islaod, func, addNotif, create, remove, update, select) {
+    showApi(islaod, func, addNotif, create, remove, update, select, token_auth) {
         this.toggleControl(islaod)
-        this.renderComponent({func, addNotif, create: create, remove, update, select})
+        this.renderComponent({func, addNotif, create: create, remove, update, select, token_auth})
     }
 
 }

@@ -1,38 +1,18 @@
 from django.db import connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-import json
-from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from backend.inspire.models import LFeatures
-from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
 from backend.inspire.models import LFeatureConfigs
 from backend.inspire.models import LDataTypeConfigs
-from backend.org.models import Employee
 from main import utils
 from main.inspire import GEoIdGenerator
 from backend.dedsanbutets.models import FeatureOverlaps
-from django.http import Http404
-
-
-def check_feature_perm(employee, feature_id, perm_kind):
-    emp_perm = EmpPerm.objects.filter(employee=employee).first()
-
-    qs = EmpPermInspire.objects
-    qs = qs.filter(feature_id=feature_id)
-    qs = qs.filter(perm_kind=perm_kind)
-    qs = qs.filter(emp_perm=emp_perm)
-    qs = qs.first()
-
-    rsp = {
-        'success': True if qs else False,
-        'info': "Ажилтанд эрх алга байна",
-    }
-
-    return rsp
+from main.decorators import api_inspire_perm
+from rest_framework.decorators import api_view
 
 
 def property_of_feature(feature_id):
@@ -50,25 +30,15 @@ def property_of_feature(feature_id):
     return property_displays
 
 
-@require_POST
+@api_view(['POST'])
 @csrf_exempt
-def create(request, token):
-    payload = json.loads(request.body)
-    payload_json = payload.get('payload_json') or None
-    if not payload_json:
-        raise Http404
-    feature_id = payload_json.get('feature_id')
-    datas = payload_json.get('datas')
-    feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
+@api_inspire_perm(EmpPermInspire.PERM_CREATE)
+def create(request, payload):
+    datas = payload.get('datas') or None
+    feature_id = payload.get('feature_id') or None
 
-    employee = get_object_or_404(Employee, token=token)
-    result = check_feature_perm(employee, feature_id, EmpPermInspire.PERM_CREATE)
-    if not result['success']:
-        return JsonResponse(result)
-
+    feature_obj = LFeatures.objects.filter(feature_id=feature_id).first()
     property_displays = property_of_feature(feature_id)
-
-    datas = payload_json.get('datas')
     m_datas_objs = list()
     info = []
     for data in datas:
@@ -107,26 +77,14 @@ def create(request, token):
     return JsonResponse({'success': True, 'msg': "Амжилттай үүсгэлээ"})
 
 
-@require_POST
+@api_view(['POST'])
 @csrf_exempt
-def update(request, token):
-    payload = json.loads(request.body)
-    payload_json = payload.get('payload_json') or None
-    if not payload_json:
-        raise Http404
-
-    feature_id = payload_json.get('feature_id')
-    datas = payload_json.get('datas')
-    feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
-
-    employee = get_object_or_404(Employee, token=token)
-    result = check_feature_perm(employee, feature_id, EmpPermInspire.PERM_UPDATE)
-    if not result['success']:
-        return JsonResponse(result)
+@api_inspire_perm(EmpPermInspire.PERM_UPDATE)
+def update(request, payload):
+    datas = payload.get('datas') or None
+    feature_id = payload.get('feature_id') or None
 
     property_displays = property_of_feature(feature_id)
-
-    datas = payload_json.get('datas')
     info = []
     for data in datas:
         geojson = data['geojson']
@@ -171,22 +129,13 @@ def update(request, token):
     return JsonResponse({'success': True, 'info': "Амжилттай заслаа."})
 
 
-@require_POST
+@api_view(['POST'])
 @csrf_exempt
-def remove(request, token):
-    payload = json.loads(request.body)
-    feature_id = payload.get('feature_id') or None
-
-    if not feature_id:
-        raise Http404
+@api_inspire_perm(EmpPermInspire.PERM_REMOVE)
+def remove(request, payload):
+    feature_id = payload.get('feature_id')
     geo_id = payload.get('geo_id') or ''
-    get_object_or_404(LFeatures, feature_id=feature_id)
-    employee = get_object_or_404(Employee, token=token)
-    result = check_feature_perm(employee, feature_id, EmpPermInspire.PERM_REMOVE)
-    if not result['success']:
-        return JsonResponse(result)
-
-    m_geo_datas = MGeoDatas.objects.filter(geo_id=geo_id)
+    m_geo_datas = MGeoDatas.objects.filter(geo_id=geo_id, feature_id=feature_id)
     m_datas = MDatas.objects.filter(geo_id=geo_id)
     m_geo_datas.delete()
     m_datas.delete()
@@ -199,22 +148,15 @@ def remove(request, token):
     return JsonResponse(rsp)
 
 
-@require_POST
+@api_view(['POST'])
 @csrf_exempt
-def select(request, token):
-    payload = json.loads(request.body)
+@api_inspire_perm(EmpPermInspire.PERM_VIEW)
+def select(request, payload):
     feature_id = payload.get('feature_id') or None
-    if not feature_id:
-        raise Http404
     limit = payload.get('limit') or None
     search_geo_ids = payload.get('search_geo_ids') or None
     sort_type = payload.get('sort_type') or None
     sort_name = payload.get('sort_name') or None
-    get_object_or_404(LFeatures, feature_id=feature_id)
-    employee = get_object_or_404(Employee, token=token)
-    result = check_feature_perm(employee, feature_id, EmpPermInspire.PERM_VIEW)
-    if not result['success']:
-        return JsonResponse(result)
 
     datas = select_query(
         feature_id,

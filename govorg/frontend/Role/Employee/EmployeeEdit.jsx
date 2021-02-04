@@ -133,7 +133,7 @@ export class EmployeeEdit extends Component {
     }
 
     getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm) {
-        if(!checked && this.role.length > 0 && type == null) {
+        if(!checked && type == null) {
             this.removeItemFromArray(
                 this.role,
                 feature_id,

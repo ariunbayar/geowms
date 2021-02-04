@@ -3,6 +3,7 @@ from django.urls import path, include
 from api.govorg import views as govorg_views
 from api.public import views as public_views
 from api.inspire import views as inspire_views
+from rest_framework_jwt.views import obtain_jwt_token
 
 app_name = 'api'
 urlpatterns = [
@@ -18,9 +19,10 @@ urlpatterns = [
     ], 'service'))),
 
     path('inspire/', include(([
-        path('<str:token>/create/', inspire_views.create, name='create'),
-        path('<str:token>/update/', inspire_views.update, name='update'),
-        path('<str:token>/remove/', inspire_views.remove, name='remove'),
-        path('<str:token>/select/', inspire_views.select, name='select')
+        path('token-auth/', obtain_jwt_token, name='token-auth'),
+        path('create/', inspire_views.create, name='create'),
+        path('update/', inspire_views.update, name='update'),
+        path('remove/', inspire_views.remove, name='remove'),
+        path('select/', inspire_views.select, name='select')
     ], 'inspire'))),
 ]
