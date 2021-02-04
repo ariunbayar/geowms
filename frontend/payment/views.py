@@ -499,7 +499,7 @@ def _get_Feature_info_from_url(polygon, layer):
         y2 = save_y
 
     url = layer.wms_layer.wms.url
-    if not '?' in url:
+    if '?' not in url:
         url = url + "?"
     service = 'WFS'
     version = '1.1.0'
@@ -509,7 +509,8 @@ def _get_Feature_info_from_url(polygon, layer):
     property_name = 'feature_id'
     out_format = 'JSON'
 
-    full_url =  url + 'service=' + service + '&version=' + version + '&request=' +request + '&typeName=' + code + '&bbox=' + str(x1) +  ',' + str(y1)  + ',' + str(x2) + ',' + str(y2) + ',' + trans_srs + '&PropertyName=' + property_name + '&outputFormat=' + out_format
+    full_url = url + 'service=' + service + '&version=' + version + '&request=' + request + '&typeName=' + code + '&bbox=' + str(x1) +  ',' + str(y1) + ',' + str(x2) + ',' + str(y2) + ',' + trans_srs + '&PropertyName=' + property_name + '&outputFormat=' + out_format
+
     with urllib.request.urlopen(full_url) as response:
         get_features = response.read().decode("utf-8")
         for feature in json.loads(get_features)['features']:
