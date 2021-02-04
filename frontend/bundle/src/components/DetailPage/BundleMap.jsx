@@ -101,6 +101,9 @@ export default class BundleMap extends Component {
         this.drawBorderCircle = this.drawBorderCircle.bind(this)
         this.removeCircle = this.removeCircle.bind(this)
         this.fromLonLatToMapCoord = this.fromLonLatToMapCoord.bind(this)
+        this.featureFromUrl = this.featureFromUrl.bind(this)
+        this.check_inspire_layer = this.check_inspire_layer.bind(this)
+        this.transformToLatLong = this.transformToLatLong.bind(this)
     }
 
     initMarker() {
@@ -128,9 +131,19 @@ export default class BundleMap extends Component {
       this.setState({'is_modal_info_open': false})
     }
 
-    cartButton(is_cart, content, code, point_id, is_again_clicked, geom_name){
+    cartButton(is_cart, point_name, code, point_id, is_again_clicked, geom_name, pdf_id){
         if(is_cart == true){
-            this.controls.cart.showModal(this.state.coordinate_clicked, is_cart, this.state.x, this.state.y, content, code, point_id, is_again_clicked, geom_name)
+            this.controls.cart.showModal(
+                this.state.coordinate_clicked,
+                is_cart,
+                this.state.x,
+                this.state.y,
+                point_name,
+                code,
+                point_id,
+                is_again_clicked,
+                geom_name, pdf_id
+            )
         }
     }
 
@@ -172,9 +185,7 @@ export default class BundleMap extends Component {
             service.loadWMSLayers(bundle_id),
         ]).then(([{base_layer_list}, {wms_list}]) => {
             this.handleMapDataLoaded(base_layer_list, wms_list)
-
         })
-
     }
 
     handleMapDataLoaded(base_layer_list, wms_list) {
@@ -582,20 +593,47 @@ export default class BundleMap extends Component {
         return this.array
     }
 
-    showFeaturesAt(coordinate) {
-        const overlay = this.overlay
-        overlay.setPosition(coordinate)
-        this.is_empty = true
-        this.sendFeatureInfo = []
+    check_inspire_layer(code, tile) {
+        let is_feature = false
+        let layer_code = ''
+        if (tile.getVisible()){
+            let splited_code = code.split('_')
+            splited_code.map((split_code, idx) => {
+                if (idx == 0 && split_code == 'gp') {
+                    if (splited_code[idx + 1] == 'layer') {
+                        let sliced_code = splited_code.slice(2)
+                        layer_code = sliced_code.join("_");
+                        is_feature = true
+                    }
+                }
+            })
+        }
+        return {layer_code, is_feature}
+    }
+
+    featureFromUrl(coordinate) {
         const view = this.map.getView()
         const projection = view.getProjection()
         const resolution = view.getResolution()
-        this.setState({pay_modal_check: false})
         const wms_array = this.getWMSArray()
         wms_array.map(({layers}) => {
             if(layers) {
                 layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
-                    if (tile) {
+                    const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
+                    if (is_feature) {
+                        const latlong = toLonLat(coordinate)
+                        service
+                            .getPopUpInfo(layer_code, latlong)
+                            .then(({ datas }) => {
+                                let is_empty = false
+                                if (datas.length == 0) {
+                                    is_empty = true
+                                }
+                                const is_from_inspire = true
+                                this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire)
+                            })
+                    }
+                    if (tile && !is_feature) {
                         if (tile.getVisible() != true) {
                             return
                         }
@@ -685,7 +723,7 @@ export default class BundleMap extends Component {
                                         // }
                                     }
                                     else {
-                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, feature_price)
+                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
                                     }
                                 })
                             }
@@ -695,6 +733,18 @@ export default class BundleMap extends Component {
                 })
             }
         })
+    }
+
+    showFeaturesAt(coordinate) {
+        this.is_empty = true
+        this.sendFeatureInfo = []
+
+        const overlay = this.overlay
+        overlay.setPosition(coordinate)
+
+        this.setState({ pay_modal_check: false })
+        this.featureFromUrl(coordinate)
+
         this.sendFeatureInfo = []
         this.is_empty = true
     }
@@ -746,6 +796,14 @@ export default class BundleMap extends Component {
         }
     }
 
+    transformToLatLong(coordinateList) {
+        const geom = coordinateList[0].map((coord, idx) => {
+            const map_coord = transformCoordinate(coord, this.state.projection, this.state.projection_display)
+              return map_coord
+        })
+        return geom
+      }
+
     toggleDrawed(event){
         this.feature_info_list = []
         this.controls.drawModal.showModal(true)
@@ -791,7 +849,18 @@ export default class BundleMap extends Component {
         var list = []
         wms_array.map(({ name, layers }, w_idx) => {
             layers.map(({ id, code, tile }, l_idx) => {
-                if (tile.getVisible()) {
+                const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
+                if (tile.getVisible() && is_feature) {
+                    const coordinates = event.feature.getGeometry().getCoordinates()
+                    const trans_coordinates = this.transformToLatLong(coordinates)
+                    service
+                        .getFeatureInfo(layer_code, trans_coordinates)
+                        .then(({datas}) => {
+                            datas['layer_id'] = id
+                            list.push(datas)
+                        })
+                }
+                if (tile.getVisible() && !is_feature) {
                     const main_url = tile.getSource().urls[0]
                     if(main_url) {
                         const url =
@@ -817,21 +886,19 @@ export default class BundleMap extends Component {
                                     return [id, values]
                                 })
                                 if(feature_info.length > 0) {
+                                    let feature_id = ''
+                                    var geom_ids = new Array()
                                     const info = feature_info.map((feature, idx) => {
-                                        var obj = new Object()
-                                        obj['geom_id'] = feature[0]
                                         feature[1].map((info, idx) => {
                                             if(info[0] == 'feature_id') {
-                                                obj['feature_id'] = info[1]
+                                                feature_id = info[1]
                                             }
                                         })
-                                        obj['layer_code'] = code
-                                        obj['layer_id'] = id
-                                        return obj
+                                        return feature[0]
                                     })
-                                    list.push({[code]: info})
+                                    list.push({'geom_ids': info, 'layer_code': code, 'layer_id': id, 'feature_id': feature_id })
                                 }
-                        })
+                            })
                     }
                 }
                 if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {

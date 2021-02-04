@@ -58,19 +58,17 @@ export class Cart extends Component{
     }
 
     makeList() {
-        const {coordinate, torf, content, code, point_id, geom_name} = this.props
+        const {coordinate, torf, point_name, code, point_id, geom_name, pdf_id_props} = this.props
         if(torf == true) {
-            if(content.length !== 0) {
+            if(geom_name !== '') {
                 var name = 'Нэр байхгүй байна'
                 var pdf_id = 'pdf байхгүй'
-                content[0][1].map((value, idx) => {
-                    if (value[0] == 'point_name') {
-                        name = value[1]
-                    }
-                    if (value[0] == 'pid') {
-                        pdf_id = value[1]
-                    }
-                })
+                if (pdf_id_props) {
+                    pdf_id = pdf_id_props
+                }
+                if (point_name) {
+                    name = point_name
+                }
                 var json = {
                     'name': name,
                     'id': point_id,
@@ -283,7 +281,7 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf, x, y, content, code, point_id, is_again_clicked, geom_name) {
-        this.renderComponent({coordinate, torf, x, y, content, code, point_id, is_again_clicked, geom_name})
+    showModal(coordinate, torf, x, y, point_name, code, point_id, is_again_clicked, geom_name, pdf_id_props) {
+        this.renderComponent({coordinate, torf, x, y, point_name, code, point_id, is_again_clicked, geom_name, pdf_id_props})
     }
 }

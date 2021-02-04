@@ -9,6 +9,7 @@ class PopUpCmp extends Component {
 
         super(props)
         this.click_count = 0
+        this.properties = []
         this.state = {
             startNumber: null,
             totalNumner: null,
@@ -24,30 +25,30 @@ class PopUpCmp extends Component {
             pdf_id:'',
             is_purchase: false,
             is_enable: false,
-            is_user: false,
+            is_authenticated: false,
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
         this.checkModeAndCode = this.checkModeAndCode.bind(this)
         this.openCartSide = this.openCartSide.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
-        this.checkButtonEnable = this.checkButtonEnable.bind(this)
+        this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
+        this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
     }
 
     componentDidMount() {
         this.element = document.getElementById("popup")
         if (this.props.sendElem) this.props.sendElem(this.element)
-        service.isUser().then(({success}) =>
+        service.getUser().then(({is_authenticated}) =>
         {
-            if (success) {
-                this.setState({is_user: true})
-            }
+            this.setState({is_authenticated: is_authenticated})
         })
     }
 
     componentDidUpdate(pP, pS) {
         const { datas } = this.props
         if(pP.datas !== datas) {
+            this.properties = []
             const startNumber = 1
             this.setState({ startNumber, is_plus: true, is_prev: false })
             this.checkModeAndCode(startNumber, datas)
@@ -55,6 +56,8 @@ class PopUpCmp extends Component {
     }
 
     plusTab() {
+        this.properties = []
+
         const { startNumber, datas } = this.state
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
@@ -68,6 +71,8 @@ class PopUpCmp extends Component {
     }
 
     prevTab() {
+        this.properties = []
+
         const { startNumber, datas } = this.state
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
@@ -81,21 +86,36 @@ class PopUpCmp extends Component {
     }
 
     checkModeAndCode(number, datas) {
+        let mode
+        let code
+        let values
+        let geom_name
         this.click_count = 0
         if (datas.length > 0) {
-            const mode = datas[number - 1][1]
-            const code = datas[number - 1][2]
-            const values = datas[number - 1][0][1]
-            const geom_name = datas[number - 1][0][0]
+            if (this.props.is_from_inspire) {
+                code = datas[number - 1][0]
+                values = datas[number - 1][1]
+            }
+            else {
+                mode = datas[number - 1][1]
+                code = datas[number - 1][2]
+                values = datas[number - 1][0][1]
+                geom_name = datas[number - 1][0][0]
+            }
             values.map((value, idx) => {
                 if (value[0] == 'point_id') {
                     this.setState({ id: value[1] })
                 }
-                if (value[0] == 'point_name') {
+                if ((value[0] == 'point_name') || value[2] == 'Name') {
                     this.setState({ name: value[1] })
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
                     this.checkButtonEnable(value[1])
+                }
+                if (value[2] == 'PointNumber') {
+                    this.checkButtonEnableWithId(value[1])
+                    this.setState({ id: value[1] })
+                    geom_name = value[1]
                 }
             })
             this.setNowData(number, datas, mode, code, geom_name)
@@ -104,13 +124,24 @@ class PopUpCmp extends Component {
     }
 
     setNowData(number, datas, mode, code, geom_name) {
-        const data = datas[number - 1]
+        let data
+        if (this.props.is_from_inspire) data = [datas[number - 1]]
+        else data = datas[number - 1]
         this.setState({ data, mode, datas, code, geom_name })
     }
 
-    checkButtonEnable(pdf_id){
-        service.checkButtonEnable(pdf_id)
+    checkButtonEnableWithPdf(pdf_id){
+        service.checkButtonEnableWithPdf(pdf_id)
             .then(({is_enable, success}) => {
+                if(success){
+                    this.setState({ is_enable, pdf_id })
+                }
+            })
+    }
+
+    checkButtonEnableWithId(geo_id){
+        service.checkButtonEnableWithId(geo_id)
+            .then(({is_enable, success, pdf_id}) => {
                 if(success){
                     this.setState({ is_enable, pdf_id })
                 }
@@ -123,7 +154,7 @@ class PopUpCmp extends Component {
         if (this.click_count > 1) {
             is_again_clicked = true
         }
-        this.props.cartButton(true, this.state.data, this.state.code, this.state.id, is_again_clicked, this.state.geom_name)
+        this.props.cartButton(true, this.state.name, this.state.code, this.state.id, is_again_clicked, this.state.geom_name, this.state.pdf_id)
     }
 
 
@@ -144,8 +175,8 @@ class PopUpCmp extends Component {
     }
 
     render() {
-        const { datas, startNumber, is_prev, is_plus, is_enable, is_user } = this.state
-        const { is_empty } = this.props
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
+        const { is_empty, is_from_inspire } = this.props
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -186,33 +217,36 @@ class PopUpCmp extends Component {
                             </div>
                         :
                             <div className="ol-popup-contet">
-                                {datas && datas.map((layer, idx) =>
-                                    idx + 1 == startNumber &&
-                                    layer[0].map((values, v_idx) =>
-                                        v_idx == 1 &&
-                                        values.map((value, val_idx) =>
-                                        value[0] == 'point_name' ?
-                                        <b key={val_idx}>{value[1]}</b>
-                                        : null
-                                )))}
+                                {
+                                    data.length >= 1
+                                    &&
+                                        data[0].map((layer, idx) =>
+                                            idx == 1 &&
+                                            layer.map((value, v_idx) =>
+                                                value[0].toLowerCase().startsWith('name')
+                                                && <b key={v_idx}>{value[1]}</b>
+                                            )
+                                        )
+                                }
                                 <hr className="m-1 border border-secondary rounded"/>
                                 <table className="table borderless no-padding">
                                     <tbody>
                                         {
-                                            datas && datas.length > 0
+                                            data.length >= 1
                                             ?
-                                                datas.map((layer, idx) =>
-                                                (idx + 1 == startNumber &&
-                                                layer[0].map((values, v_idx) =>
-                                                    v_idx == 1 &&
-                                                    values.map((value, val_idx) =>
-                                                        value[0] !== 'point_name' &&
-                                                        <tr style={{fontSize: '12px'}} key={val_idx}>
-                                                            <th>{value[0]}</th>
-                                                            <td>{value[1]}</td>
-                                                        </tr>
-                                                    )
-                                                )))
+                                                data[0].map((layer, idx) =>
+                                                    idx == 1 &&
+                                                    layer.map((value, v_idx) =>
+                                                        !value[0].toLowerCase().startsWith('name')
+                                                        &&
+                                                            <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
+                                                                <th className="font-weight-normal">
+                                                                    <b>{value[0]}:</b>
+                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1]}</p>
+                                                                </th>
+                                                            </tr>
+                                                        )
+                                                )
                                             :
                                             <tr><th>Хоосон байна</th></tr>
                                         }
@@ -220,7 +254,7 @@ class PopUpCmp extends Component {
                                 </table>
                             </div>
                     }
-                    {!is_user && !is_empty && this.state.mode == 'mpoint_view'
+                    {!is_authenticated && !is_empty && is_from_inspire
                         ?
                         <div className="btn-group flex-wrap d-flex justify-content-center">
                             <button
@@ -243,7 +277,7 @@ class PopUpCmp extends Component {
                                         </button>
                                     </div>
                                 :
-                                this.state.mode == 'mpoint_view'
+                                is_from_inspire
                                 ?
                                     <div className="btn-group flex-wrap d-flex justify-content-center">
                                         <button
@@ -320,8 +354,8 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource, cartButton, is_empty) {
+    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire) {
         this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource, cartButton, is_empty})
+        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire})
     }
 }

@@ -5,16 +5,16 @@ import base64
 import re
 import unicodedata
 
-from django.conf import settings
 import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, Point
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
+from django.contrib.gis.measure import D
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -237,6 +237,19 @@ def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
 
 
+def _make_connection(from_email):
+    connection = get_connection(
+        username=from_email,
+        password=get_config('EMAIL_HOST_PASSWORD'),
+        port=get_config('EMAIL_PORT'),
+        host=get_config('EMAIL_HOST'),
+        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
+        use_ssl=False,
+        fail_silently=False,
+    )
+    return connection
+
+
 def send_approve_email(user, subject=None, text=None):
 
     if not user.email:
@@ -262,24 +275,15 @@ def send_approve_email(user, subject=None, text=None):
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
 
-    connection = get_connection(
-        username=from_email,
-        password=get_config('EMAIL_HOST_PASSWORD'),
-        port=get_config('EMAIL_PORT'),
-        host=get_config('EMAIL_HOST'),
-        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
-        use_ssl=False,
-        fail_silently=False,
-    )
-    send_mail(subject, msg, from_email, to_email, connection=connection)
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
 
     return True
 
 
 def send_email(subject, msg, to_email):
 
-    from_email = settings.EMAIL_HOST_USER
-    send_mail(subject, msg, from_email, to_email, fail_silently=False)
+    from_email = get_config('EMAIL_HOST_USER')
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
 
 
 def get_administrative_levels():
@@ -754,3 +758,28 @@ def get_fields(Model):
         fields.append(name)
 
     return fields
+
+
+def get_key_and_compare(dict, item):
+    value = ''
+    for key in dict.keys():
+        if key == item:
+            value = key
+    return value
+
+
+def lat_long_to_utm(lat, longi):
+    point = Point([lat, longi], srid=4326)
+    utm = point.transform(3857, clone=True)
+    return utm.coords
+
+
+def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
+    point = Point(coordinate, srid=srid)
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(feature_id=feature_id)
+    mgeo_qs = mgeo_qs.filter(geo_data__distance_lte=(point, D(km=km)))
+    mgeo_qs = mgeo_qs.order_by('geo_data')
+    nearest_points = mgeo_qs
+    return nearest_points

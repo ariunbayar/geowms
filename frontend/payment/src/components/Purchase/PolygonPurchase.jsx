@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
 import ModalAlert from '@utils/Modal/ModalAlert'
+import Modal from '@utils/Modal/Modal'
 
 export class PolygonPurchase extends Component {
 
@@ -93,7 +94,7 @@ export class PolygonPurchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { alert_msg, is_modal_info_open } = this.state
+        const { alert_msg, is_modal_info_open, is_modal_open } = this.state
         const { items, layers} = this.state
         return (
         <div className="container my-4">
@@ -161,7 +162,8 @@ export class PolygonPurchase extends Component {
                                 modalClose={this.handleModalClose}
                                 text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
                                 title="Анхааруулга"
-                                actionNameBack="Үргэлжлүүлэх"
+                                actionNameDelete="Үргэлжлүүлэх"
+                                model_type_icon="warning"
                                 status={this.state.status}
                             />
                         }
