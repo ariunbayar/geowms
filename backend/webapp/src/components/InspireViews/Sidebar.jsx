@@ -3,6 +3,7 @@ import { service } from './service'
 import ModalAlert from '../ModalAlert'
 import './styles.css'
 import StyleMap from './Map'
+import Loader from "@utils/Loader"
 
 
 export default class SideBar extends Component {
@@ -131,7 +132,6 @@ export default class SideBar extends Component {
                 dashed_line_gap, dashed_line_length, check_style_name: ''
             })
         }
-        // ,
         if (pS.style_state != style_state || pP.view_name != this.props.view_name){
             this.setState({
                 check_style:false, style_size: 1,
@@ -500,7 +500,7 @@ export default class SideBar extends Component {
                         status={this.state.modal_alert_check}
                         modalAction={() => this.handleModalAlert()}
                     />
-                    {is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                    <Loader is_loading={is_loading}/>
                 </div>
             </div>
         )

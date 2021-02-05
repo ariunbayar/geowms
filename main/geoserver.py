@@ -336,7 +336,7 @@ def get_wms_url(wms_name):
 
 def get_legend_url(wms_id, layer_name):
 
-    legend_url =  (
+    legend_url = (
         'https://nsdi.gov.mn/back/wms/WMS/{wms_id}/?'
         'service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'
     ).format(
@@ -372,7 +372,7 @@ def get_layer_style(layer_name):
 
 def check_geoserver_style(style_name):
     BASE_URL, AUTH = getHeader()
-    url = 'styles/' + style_name +'.sld'
+    url = 'styles/' + style_name + '.sld'
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
@@ -405,7 +405,7 @@ def create_style(values):
     color_opacity = values.get('color_opacity')
     if geom_type == 'MultiLineString' or geom_type == 'LineString':
         geom_type = 'LineSymbolizer'
-        style_content= '''
+        style_content = '''
             <Rule>
                 <{geom_type}>
                     <Fill>
@@ -429,8 +429,8 @@ def create_style(values):
             dashed_line_gap=dashed_line_gap
         )
     elif geom_type == 'Polygon' or geom_type == 'MultiPolygon':
-        geom_type =  'PolygonSymbolizer'
-        style_content= '''
+        geom_type = 'PolygonSymbolizer'
+        style_content = '''
             <Rule>
                 <{geom_type}>
                     <Fill>
@@ -456,8 +456,8 @@ def create_style(values):
 
     else:
         if not wellknownname:
-            wellknownname='circle'
-        style_content= '''
+            wellknownname = 'circle'
+        style_content = '''
                 <Rule>
                 <PointSymbolizer>
                     <Graphic>
@@ -487,7 +487,6 @@ def create_style(values):
             wellknownname=wellknownname
         )
 
-
     payload = """
         <StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
             xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -511,6 +510,6 @@ def create_style(values):
         style_content=style_content
     )
     url = 'styles'
-    headers = { 'Content-type': 'application/vnd.ogc.sld+xml' }
+    headers = {'Content-type': 'application/vnd.ogc.sld+xml'}
     rsp = requests.post(BASE_URL + url, headers=headers, auth=AUTH, data=payload.encode('utf-8') )
     return rsp

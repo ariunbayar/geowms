@@ -1,6 +1,4 @@
 import React, { Component } from "react"
-
-
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
@@ -8,9 +6,6 @@ import Tile from 'ol/layer/Tile'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import View from 'ol/View';
 import GeoJSON from 'ol/format/GeoJSON';
-import {Polygon, MultiPoint, LineString} from 'ol/geom'
-import * as olCoordinate from 'ol/coordinate';
-
 import {Fill, Stroke, Style, Circle as CircleStyle, RegularShape, Image} from 'ol/style';
 import {Vector as VectorLayer} from 'ol/layer';
 import { service } from './service'
@@ -18,9 +13,7 @@ import { service } from './service'
 
 export default class StyleMap extends Component {
     constructor(props) {
-
             super(props)
-
             this.state = {
                 geojson: [],
                 dataProjection: 'EPSG:4326',
@@ -39,8 +32,6 @@ export default class StyleMap extends Component {
                 color_opacity: props.color_opacity,
                 wellknownname: props.wellknownname,
                 is_loading: false
-
-
             }
             this.loadMapData = this.loadMapData.bind(this)
             this.loadMap = this.loadMap.bind(this)
@@ -56,7 +47,6 @@ export default class StyleMap extends Component {
             this.setState({geom_type:this.props.geom_type})
         }
     }
-
 
     loadMap(){
         const map = new Map({
@@ -124,18 +114,17 @@ export default class StyleMap extends Component {
                 })
             }
         else{
-
-               var point_style = new CircleStyle({
-                        radius: 5,
-                        fill: new Fill({
-                            color: fill_color,
-                        }),
-                        stroke: new Stroke({
-                            color: style_color,
-                            width: style_size,
-                        }),
-                    })
-                }
+            var point_style = new CircleStyle({
+                    radius: 5,
+                    fill: new Fill({
+                        color: fill_color,
+                    }),
+                    stroke: new Stroke({
+                        color: style_color,
+                        width: style_size,
+                    }),
+                })
+            }
 
         const styles_new = {
             'MultiPolygon': new Style({
@@ -224,7 +213,8 @@ export default class StyleMap extends Component {
             this.setState({is_loading: true})
             service.getStyleData(geom_type).then(({data}) =>
                 {
-                if (data){
+                if (data)
+                {
                         const features = new GeoJSON({
                             dataProjection: dataProjection,
                             featureProjection: featureProjection,
@@ -243,20 +233,17 @@ export default class StyleMap extends Component {
                         this.setState({is_loading: false})
                     }
                 }
-        )
-
-    }
-
+            )
+        }
     }
     render() {
         return (
-                <div className="row">
-                    <div className="col-md-12 px-0">
-                        <div id="map"></div>
-                    </div>
-                    {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+            <div className="row">
+                <div className="col-md-12 px-0">
+                    <div id="map"></div>
                 </div>
+                {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+            </div>
         )
     }
-
 }

@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { service } from './service'
 import SideBar from './Sidebar'
 import './styles.css'
+import Loader from "@utils/Loader"
 
 export class List extends Component {
 
@@ -205,7 +206,7 @@ export class List extends Component {
                     geom_type={geom_type}
                     property_loading={property_loading}
                 />
-                {is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", left:"35%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                <Loader is_loading={is_loading}/>
             </div>
         )
     }
