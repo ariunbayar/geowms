@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.db import transaction
 
 from main.decorators import ajax_required
-from backend.org.models import Org
+from backend.org.models import Org, Employee
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
@@ -134,6 +134,7 @@ def _role_name_validation(payload, role):
 @require_POST
 @ajax_required
 def create(request, payload):
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
@@ -160,7 +161,7 @@ def create(request, payload):
 @require_POST
 @ajax_required
 def update(request, payload, pk):
-
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
     description = payload.get('role_description')
     remove_roles = payload.get('remove_roles')
@@ -266,7 +267,7 @@ def detail(request, pk):
 @require_GET
 @ajax_required
 def delete(request, pk):
-
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     emp_role = get_object_or_404(EmpRole, pk=pk)
     with transaction.atomic():
         EmpRoleInspire.objects.filter(emp_role=emp_role).delete()

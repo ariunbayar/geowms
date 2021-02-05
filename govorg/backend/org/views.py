@@ -175,13 +175,18 @@ def _emp_role(org, user):
 @login_required(login_url='/gov/secure/login/')
 def frontend(request):
 
-    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, user=request.user)
+    org = get_object_or_404(Org, employee=employee)
 
     context = {
         'org': {
             "org_name": org.name.upper(),
             "org_level": org.level,
             'org_role': _org_role(org),
+            'employee': {
+                'is_admin': employee.is_admin,
+                'username': employee.user.username
+            }
         },
     }
 

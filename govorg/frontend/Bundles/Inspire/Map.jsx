@@ -224,7 +224,7 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(this.controls.sidebar)
         map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
         map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
-        map.addControl(new ApiButton({showApiBtn: this.showApiBtn}))
+        if(this.props.employee.is_admin) map.addControl(new ApiButton({showApiBtn: this.showApiBtn}))
       }
       if(roles.PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
       if(roles.PERM_REVOKE) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))

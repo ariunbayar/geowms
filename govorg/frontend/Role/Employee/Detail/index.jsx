@@ -153,21 +153,25 @@ export class Detail extends Component {
                             <div className="col-md-6 p-0">
                                 <ButtonBack to={prefix}/>
                             </div>
-
                             <div className="col-md-6 p-0 text-right">
-
+                                {this.props.employee.is_admin || this.props.employee.username == username ?
                                 <ButtonTokenRefresh
                                     onClick={ this.handleTokenRefresh }
                                     status={ status_token_refresh }
                                     status_info={ info_token_refresh }
-                                />
-                                <ButtonEdit to={`${prefix}${id}/edit/`}/>
+                                />: null
+                                }
+                                {this.props.employee.is_admin || this.props.employee.username == username ?
+                                <ButtonEdit to={`${prefix}${id}/edit/`}/> : null
+                                }
+                                {this.props.employee.is_admin &&
                                 <ButtonDelete
                                     status={ status_delete }
                                     onClick={ this.handleDelete }
                                     employee_name={ first_name }
                                     onSuccess={ this.handleDeleteSuccess }
                                 />
+                                }
                             </div>
                         </div>
 
