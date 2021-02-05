@@ -146,6 +146,7 @@ urlpatterns = [
 
     path('dedsan-butests/', include(([
         path('all/', dedsan_butets.bundleButetsAll),
+        path('check-style-name/', dedsan_butets.check_styles_name),
         path('prop/<str:code>/', dedsan_butets.Property),
         path('editName/', dedsan_butets.Edit_name),
         path('get-fields/', dedsan_butets.getFields),
@@ -155,7 +156,7 @@ urlpatterns = [
         path('remove/', dedsan_butets.remove),
         path('erese/', dedsan_butets.erese),
         path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
-
+        path('style-data/', dedsan_butets.get_style_data),
         path('overlaps-feature-get/<str:feature_id>/', dedsan_butets.feature_overlaps_get),
         path('overlaps-feature-set/', dedsan_butets.feature_overlaps_set),
     ], 'dedsan-butests'))),

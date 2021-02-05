@@ -6,10 +6,13 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+from main.utils import get_geoJson
+import datetime
+import random
+from backend.org.models import Org, Employee
 from django.db import connections, transaction
 from django.db.models import Q
-
 from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from main.inspire import GEoIdGenerator
@@ -55,40 +58,6 @@ def _get_geom(geo_id, fid):
     return rows
 
 
-def _get_geoJson(data):
-    data = json.loads(data)
-    geom_type = data['type']
-    coordinates = data['coordinates']
-    if geom_type == 'Point':
-        from geojson import Point
-        point = Point(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'LineString':
-        from geojson import LineString
-        point = LineString(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'Polygon':
-        from geojson import Polygon
-        point = Polygon(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'MultiPoint':
-        from geojson import MultiPoint
-        point = MultiPoint(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'MultiLineString':
-        from geojson import MultiLineString
-        point = MultiLineString(coordinates)
-        return Feature(geometry=point)
-
-    else:
-        from geojson import MultiPolygon
-        point = MultiPolygon(coordinates)
-        return Feature(geometry=point)
-
 
 def _get_org_request(ob, employee):
 
@@ -102,11 +71,11 @@ def _get_org_request(ob, employee):
         old_geo_data = _get_geom(ob.old_geo_id, ob.feature_id)
         if old_geo_data:
             old_geo_data = old_geo_data[0]['geom']
-            old_geo_data = _get_geoJson(old_geo_data)
+            old_geo_data = get_geoJson(old_geo_data)
 
         if ob.geo_json:
             geo_json = ob.geo_json
-            current_geo_json = _get_geoJson(geo_json)
+            current_geo_json = get_geoJson(geo_json)
             geo_json = FeatureCollection([current_geo_json, old_geo_data])
 
         else:
@@ -114,7 +83,7 @@ def _get_org_request(ob, employee):
 
     elif geo_json and ob.old_geo_id:
         geo_json = ob.geo_json
-        geo_json = _get_geoJson(geo_json)
+        geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
     return {

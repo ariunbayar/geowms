@@ -33,8 +33,7 @@ from backend.org.models import Employee, Org
 
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
-from govorg.backend.org_request.views import _get_geoJson
-
+from main.utils import get_geoJson
 from main.decorators import ajax_required
 from main.utils import check_form_json
 from main.utils import dict_fetchall
@@ -548,7 +547,7 @@ def remove(request, payload):
         return JsonResponse(rsp)
 
     geo_data = geo_data[0]["geom"]
-    geo_json = _get_geoJson(geo_data)
+    geo_json = get_geoJson(geo_data)
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
 
     if not success:

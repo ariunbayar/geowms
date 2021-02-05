@@ -3,6 +3,8 @@ export const service ={
     getall,
     getPropertyFields,
     setPropertyFields,
+    getStyleData,
+    checkStyleName
 }
 
 const prefix = '/back/dedsan-butests'
@@ -14,6 +16,14 @@ function getall() {
     return fetch(`${prefix}/all/`, opts).then(handleResponse)
 }
 
+function checkStyleName(style_name) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ style_name }),
+    }
+    return fetch(`${prefix}/check-style-name/`, opts).then(handleResponse)
+}
+
 function getPropertyFields(fid) {
     const opts = {
         ...getPostOptions(),
@@ -22,10 +32,18 @@ function getPropertyFields(fid) {
 }
 
 
-function setPropertyFields(fid, fields, tid){
+function setPropertyFields(fid, fields, tid, values){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ fid, fields, tid }),
+        body: JSON.stringify({ fid, fields, tid, values}),
     }
     return fetch(`${prefix}/property-fields/save/`, opts).then(handleResponse)
+}
+
+function getStyleData(geom_type) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ geom_type }),
+    }
+    return fetch(`${prefix}/style-data/`, opts).then(handleResponse)
 }
