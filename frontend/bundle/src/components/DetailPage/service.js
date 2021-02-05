@@ -162,10 +162,10 @@ function checkButtonEnableWithId(geo_id) {
     return fetch('/payment/check-enable-pdf-id/', requestOptions).then(handleResponse)
 }
 
-function getPopUpInfo(layer_code, coordinate) {
+function getPopUpInfo(layers_code, coordinate) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({layer_code, coordinate})
+        body: JSON.stringify({layers_code, coordinate})
     }
     return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
 }
@@ -186,10 +186,10 @@ function getGeom(geo_id) {
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }
 
-function getContainGeoms(layer_code, feature, geo_id) {
+function getContainGeoms(layers_code, geometry, geo_id) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({layer_code, feature, geo_id})
+        body: JSON.stringify({layers_code, geometry, geo_id})
     }
     return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
 }

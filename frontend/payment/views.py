@@ -47,6 +47,7 @@ from main import utils
 
 from zipfile import ZipFile
 
+from geojson import FeatureCollection
 
 def index(request):
 
@@ -1284,7 +1285,7 @@ def _get_properties_qs(view_qs):
 @login_required
 def get_popup_info(request, payload):
 
-    layer_code = payload.get('layer_code')
+    layers_code = payload.get('layers_code')
     coordinate = payload.get('coordinate')
 
     value_type = None
@@ -1292,46 +1293,47 @@ def get_popup_info(request, payload):
     property_code = None
     infos = list()
 
-    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+    views_qs = ViewNames.objects.filter(view_name__in=layers_code)
 
-    feature_id = view_qs.feature_id
+    for view_qs in views_qs:
+        feature_id = view_qs.feature_id
 
-    viewproperty_ids, property_qs = _get_properties_qs(view_qs)
+        viewproperty_ids, property_qs = _get_properties_qs(view_qs)
 
-    nearest_points = utils.get_nearest_geom(coordinate, feature_id)
+        nearest_points = utils.get_nearest_geom(coordinate, feature_id)
 
-    for nearest_point in nearest_points:
-        mdatas_qs = MDatas.objects
-        mdatas_qs = mdatas_qs.filter(geo_id=nearest_point.geo_id)
-        mdatas_qs = mdatas_qs.filter(property_id__in=viewproperty_ids)
+        for nearest_point in nearest_points:
+            mdatas_qs = MDatas.objects
+            mdatas_qs = mdatas_qs.filter(geo_id=nearest_point.geo_id)
+            mdatas_qs = mdatas_qs.filter(property_id__in=viewproperty_ids)
 
-        datas = list()
-        datas.append('gp_layer_' + layer_code)
-        datas.append(list())
+            datas = list()
+            datas.append('gp_layer_' + view_qs.view_name)
+            datas.append(list())
 
-        for mdata in mdatas_qs.values():
-            values = datas[1]
-            for l_property in property_qs:
-                if (l_property.property_id == mdata['property_id']):
-                    value_type = l_property.value_type_id
-                    property_name = l_property.property_name
-                    property_code = l_property.property_code
+            for mdata in mdatas_qs.values():
+                values = datas[1]
+                for l_property in property_qs:
+                    if (l_property.property_id == mdata['property_id']):
+                        value_type = l_property.value_type_id
+                        property_name = l_property.property_name
+                        property_code = l_property.property_code
 
-            if 'select' in value_type:
-                if mdata['code_list_id']:
-                    lcode_qs = LCodeLists.objects
-                    lcode_qs = lcode_qs.filter(code_list_id=mdata['code_list_id'])
-                    lcode_qs = lcode_qs.first()
-                    value = lcode_qs.code_list_name
-            elif value_type != 'boolean':
-                value_type = 'value_' + value_type
-                value = mdata[value_type]
+                if 'select' in value_type:
+                    if mdata['code_list_id']:
+                        lcode_qs = LCodeLists.objects
+                        lcode_qs = lcode_qs.filter(code_list_id=mdata['code_list_id'])
+                        lcode_qs = lcode_qs.first()
+                        value = lcode_qs.code_list_name
+                elif value_type != 'boolean':
+                    value_type = 'value_' + value_type
+                    value = mdata[value_type]
 
-            if value:
-                values.append([property_name, value, property_code])
+                if value:
+                    values.append([property_name, value, property_code])
 
-        if datas:
-            infos.append(datas)
+            if datas:
+                infos.append(datas)
 
     rsp = {
         'datas': infos,
@@ -1395,25 +1397,34 @@ def get_geom(request, payload):
 @ajax_required
 @login_required
 def get_contain_geoms(request, payload):
+    features = list()
     geo_id = payload.get('geo_id')
-    feature = payload.get('feature')
-    layer_code = payload.get('layer_code')
-    print(geo_id)
-    print(geo_id)
-    print(geo_id)
-    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+    layers_code = payload.get('layers_code')
 
-    feature_id = view_qs.feature_id
-    layer_code = 'gp_layer_' + layer_code
-    print(feature)
+    views_qs = ViewNames.objects.filter(view_name__in=layers_code)
+
+    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    feature_ids = views_qs.values_list("feature_id", flat=True)
+
     mgeodatas_qs = MGeoDatas.objects
-    mgeodatas_qs = mgeodatas_qs.filter(feature_id=feature_id)
-    mgeodatas_qs = mgeodatas_qs.filter(geo_data__within=feature)
-    # print(mgeodatas_qs)
-    # geom_ids = [mgeodata.geo_id for mgeodata in mgeodatas_qs]
+    mgeodatas_qs = mgeodatas_qs.filter(feature_id__in=feature_ids)
+    mgeodatas_qs = mgeodatas_qs.filter(geo_data__within=geom)
+
+    for mgeodata in mgeodatas_qs:
+        geom = utils.get_geom(mgeodata.geo_id, mgeodata.geo_data.geom_type)
+        geo_json = geom.json
+        feature = utils.get_feature_from_geojson(geo_json)
+        features.append(feature)
+
+    layers_changed_code = [
+        'gp_layer_' + layer_code for layer_code in layers_code
+    ]
+
+    feature_collection = FeatureCollection(features)
 
     rsp = {
-        'feature': feature
+        'features': feature_collection,
+        'layers_code': layers_changed_code,
     }
 
     return JsonResponse(rsp)

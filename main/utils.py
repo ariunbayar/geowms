@@ -787,7 +787,7 @@ def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
     return nearest_points
 
 
-def get_feature_from_geojson(geo_json, get_feature=True):
+def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
     geo_json = json.loads(geo_json)
 
     geom_type = geo_json['type']
@@ -796,7 +796,7 @@ def get_feature_from_geojson(geo_json, get_feature=True):
     module = importlib.import_module('geojson')
     class_ = getattr(module, geom_type)
 
-    geometry = class_(coordinates)
+    geometry = class_(coordinates, srid=srid)
 
     if get_feature:
         feature = Feature(geometry=geometry)
