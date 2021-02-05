@@ -16,6 +16,7 @@ export const service = {
     checkButtonEnableWithId,
     getFeatureInfo,
     getGeom,
+    getContainGeoms,
 }
 
 function getCookie(name) {
@@ -183,4 +184,12 @@ function getGeom(geo_id) {
         body: JSON.stringify({geo_id})
     }
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+}
+
+function getContainGeoms(layer_code, feature, geo_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layer_code, feature, geo_id})
+    }
+    return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
 }

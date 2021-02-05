@@ -105,6 +105,7 @@ export default class BundleMap extends Component {
         this.transformToLatLong = this.transformToLatLong.bind(this)
         this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
         this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
+        this.getFeatureInfoFromInspire = this.getFeatureInfoFromInspire.bind(this)
     }
 
     initMarker() {
@@ -472,6 +473,7 @@ export default class BundleMap extends Component {
 
     resetFilteredOnlyFeature() {
         this.removeCircle()
+        this.removeFeatureFromSource('aimag_sum')
         this.map.getLayers().forEach((layer) => {
             if(layer) {
                 this.is_not_visible_layers.map((visible_layer_code) => {
@@ -765,32 +767,50 @@ export default class BundleMap extends Component {
         layer.setVisible(!layer.getVisible())
     }
 
-    handleSetCenter(coord, zoom) {
+    handleSetCenter(coord, zoom, has_marker=true) {
         this.removeCircle()
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.marker.point.setCoordinates(map_coord)
+        if (has_marker) this.marker.point.setCoordinates(map_coord)
         view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
     }
 
     removeFeatureFromSource(featureID) {
-    const { vector_layer } = this.state
-    const source = vector_layer.getSource()
-    const features = source.getFeatures();
-    if (features != null && features.length > 0) {
-        for (var i = 0; i < features.length; i++) {
-            const properties = features[i].getProperties();
-            const id = properties.id;
-            if (id == featureID) {
-                source.removeFeature(features[i]);
-                break;
+        const { vector_layer } = this.state
+        const source = vector_layer.getSource()
+        const features = source.getFeatures();
+        if (features != null && features.length > 0) {
+            for (var i = 0; i < features.length; i++) {
+                const properties = features[i].getProperties();
+                const id = properties.id;
+                if (id == featureID) {
+                    source.removeFeature(features[i]);
+                    break;
+                }
             }
-        }
         }
     }
 
-    setFeatureOnMap(feature) {
+    getFeatureInfoFromInspire(feature, geo_id) {
+        const wms_array = this.getWMSArray()
+        wms_array.map(({ layers }) => {
+            if(layers) {
+                layers.map(({tile, code}) => {
+                    const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
+                    if (is_feature) {
+                        service
+                            .getContainGeoms(layer_code, feature, geo_id)
+                            .then((rsp) => {
+                                console.log(rsp);
+                            })
+                    }
+                })
+            }
+        })
+    }
+
+    setFeatureOnMap(feature, geo_id) {
         const { vector_layer } = this.state
         const id = 'aimag_sum'
         this.removeFeatureFromSource(id)
@@ -801,6 +821,7 @@ export default class BundleMap extends Component {
         feature[0].setProperties({ id })
         vector_layer.getSource().addFeature(feature[0])
         this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100] })
+        this.getFeatureInfoFromInspire(feature, geo_id)
     }
 
     toggleSidebar(event) {
@@ -885,7 +906,7 @@ export default class BundleMap extends Component {
                     const trans_coordinates = this.transformToLatLong(coordinates)
                     service
                         .getFeatureInfo(layer_code, trans_coordinates)
-                        .then(({datas}) => {
+                        .then(({ datas }) => {
                             datas['layer_id'] = id
                             list.push(datas)
                         })

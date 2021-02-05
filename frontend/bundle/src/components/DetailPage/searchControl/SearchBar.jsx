@@ -33,7 +33,17 @@ class SearchBarComponent extends Component {
             error_msg: '',
             aimag: [],
             sum: [],
-            feature_ids: []
+            feature_ids: [],
+            options_scale: [
+               {'zoom': '2.9903484967519145', 'scale': 5000000},
+               {'zoom': '4.3576399772248543', 'scale': 1000000},
+               {'zoom': '7.3376399772248575', 'scale': 100000},
+               {'zoom': '8.738265134288114', 'scale': 50000},
+               {'zoom': '9.721598467621447', 'scale': 25000},
+               {'zoom': '10.781598467621446', 'scale': 10000},
+               {'zoom': '12.194931800954776', 'scale': 5000},
+               {'zoom': '14.383305008368451', 'scale': 1000},
+            ]
         }
 
         this.handleSubmitCoordinate = this.handleSubmitCoordinate.bind(this)
@@ -59,7 +69,7 @@ class SearchBarComponent extends Component {
 
     handleSubmitClear(event) {
         event.preventDefault()
-        this.setState({sum_id: -1, aimag_id: -1})
+        this.setState({ sum_id: -1, aimag_id: -1 })
         this.setCenterOfMap()
         this.props.resetShowArea()
     }
@@ -112,7 +122,7 @@ class SearchBarComponent extends Component {
             .getGeom(geo_id)
             .then(({ feature }) => {
                 if (feature) {
-                    this.props.setFeatureOnMap(feature)
+                    this.props.setFeatureOnMap(feature, geo_id)
                 }
             })
             .catch((error) => alert("Алдаа гарсан байна"))
@@ -145,7 +155,7 @@ class SearchBarComponent extends Component {
 
     setCenterOfMap() {
         var array = [103.525827, 46.723984]
-        this.props.handleSetCenter(array, 5.041301562246971)
+        this.props.handleSetCenter(array, 5.041301562246971, false)
     }
 
     resetButton() {
@@ -155,7 +165,7 @@ class SearchBarComponent extends Component {
     }
 
     render() {
-        const {error_msg, sum, aimag} = this.state
+        const {error_msg, sum, aimag, options_scale} = this.state
         return (
             <div>
                 {/* <div className="form-group  rounded shadow-sm p-3 mb-3 bg-white rounded">
@@ -225,17 +235,15 @@ class SearchBarComponent extends Component {
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="tseg_dugaar_zoom" as="select"
-                                onChange={(e) => this.setState({ tseg_dugaar_zoom: e.target.value }) }
-                                value={this.state.tseg_dugaar_zoom}
-                                className='form-control'>
-                                <option value='2.9903484967519145'>5000000</option>
-                                <option value='4.3576399772248543'>1000000</option>
-                                <option value='7.3376399772248575'>100000</option>
-                                <option value='8.738265134288114'>50000</option>
-                                <option value='9.721598467621447'>25000</option>
-                                <option value='10.781598467621446'>10000</option>
-                                <option value='12.194931800954776'>5000</option>
-                                <option value='14.383305008368451'>1000</option>
+                            onChange={(e) => this.setState({ tseg_dugaar_zoom: e.target.value }) }
+                            value={this.state.tseg_dugaar_zoom}
+                            className='form-control'
+                        >
+                            {
+                                options_scale.map((option, idx) =>
+                                    <option key={idx} value={option.zoom}>{option.scale}</option>
+                                )
+                            }
                         </select>
                         <div className="input-group mb-3">
                             <div>
@@ -263,17 +271,15 @@ class SearchBarComponent extends Component {
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="bairlal_one_zoom" as="select"
-                                onChange={(e) => this.setState({ bairlal_one_zoom: e.target.value, bairlal_scale: e.target.options[e.target.selectedIndex].text }) }
-                                value={this.state.bairlal_one_zoom}
-                                className='form-control'>
-                                <option value='2.9903484967519145'>5000000</option>
-                                <option value='4.3576399772248543'>1000000</option>
-                                <option value='7.3376399772248575'>100000</option>
-                                <option value='8.738265134288114'>50000</option>
-                                <option value='9.721598467621447'>25000</option>
-                                <option value='10.781598467621446'>10000</option>
-                                <option value='12.194931800954776'>5000</option>
-                                <option value='14.383305008368451'>1000</option>
+                            onChange={(e) => this.setState({ bairlal_one_zoom: e.target.value, bairlal_scale: e.target.options[e.target.selectedIndex].text }) }
+                            value={this.state.bairlal_one_zoom}
+                            className='form-control'
+                        >
+                            {
+                                options_scale.map((option, idx) =>
+                                    <option key={idx} value={option.zoom}>{option.scale}</option>
+                                )
+                            }
                         </select>
                         <div className="mb-3">
                             <div className="row">
@@ -328,17 +334,15 @@ class SearchBarComponent extends Component {
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="bairlal_two_zoom" as="select"
-                                onChange={(e) => this.setState({bairlal_two_zoom: e.target.value}) }
-                                value={this.state.bairlal_two_zoom}
-                                className='form-control'>
-                                <option value='2.9903484967519145'>5000000</option>
-                                <option value='4.3576399772248543'>1000000</option>
-                                <option value='7.3376399772248575'>100000</option>
-                                <option value='8.738265134288114'>50000</option>
-                                <option value='9.721598467621447'>25000</option>
-                                <option value='10.781598467621446'>10000</option>
-                                <option value='12.194931800954776'>5000</option>
-                                <option value='14.383305008368451'>1000</option>
+                            onChange={(e) => this.setState({bairlal_two_zoom: e.target.value}) }
+                            value={this.state.bairlal_two_zoom}
+                            className='form-control'
+                        >
+                            {
+                                options_scale.map((option, idx) =>
+                                    <option key={idx} value={option.zoom}>{option.scale}</option>
+                                )
+                            }
                         </select>
                         <div className="input-group mb-3">
                             <div>

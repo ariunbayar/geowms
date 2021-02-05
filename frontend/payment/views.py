@@ -22,8 +22,6 @@ from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
 
-from geojson import Feature, MultiPolygon
-
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
@@ -1384,9 +1382,35 @@ def get_geom(request, payload):
     geom = utils.get_geom(geo_id, 'MultiPolygon')
     if geom:
         geo_json = geom.json
-        geo_json = json.loads(geo_json)
-        geo_json = MultiPolygon(geo_json['coordinates'])
-        feature = Feature(geometry=geo_json)
+        feature = utils.get_feature_from_geojson(geo_json)
+
+    rsp = {
+        'feature': feature
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_contain_geoms(request, payload):
+    geo_id = payload.get('geo_id')
+    feature = payload.get('feature')
+    layer_code = payload.get('layer_code')
+    print(geo_id)
+    print(geo_id)
+    print(geo_id)
+    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+
+    feature_id = view_qs.feature_id
+    layer_code = 'gp_layer_' + layer_code
+    print(feature)
+    mgeodatas_qs = MGeoDatas.objects
+    mgeodatas_qs = mgeodatas_qs.filter(feature_id=feature_id)
+    mgeodatas_qs = mgeodatas_qs.filter(geo_data__within=feature)
+    # print(mgeodatas_qs)
+    # geom_ids = [mgeodata.geo_id for mgeodata in mgeodatas_qs]
 
     rsp = {
         'feature': feature

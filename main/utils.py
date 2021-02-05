@@ -4,6 +4,7 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
+import importlib
 
 import json
 from django.apps import apps
@@ -15,6 +16,7 @@ from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 from django.contrib.gis.measure import D
+from geojson import Feature
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -783,3 +785,22 @@ def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
     mgeo_qs = mgeo_qs.order_by('geo_data')
     nearest_points = mgeo_qs
     return nearest_points
+
+
+def get_feature_from_geojson(geo_json, get_feature=True):
+    geo_json = json.loads(geo_json)
+
+    geom_type = geo_json['type']
+    coordinates = geo_json['coordinates']
+
+    module = importlib.import_module('geojson')
+    class_ = getattr(module, geom_type)
+
+    geometry = class_(coordinates)
+
+    if get_feature:
+        feature = Feature(geometry=geometry)
+    else:
+        feature = geometry
+
+    return feature
