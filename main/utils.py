@@ -8,6 +8,8 @@ import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry
+from geojson import Feature, FeatureCollection
+from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
 from datetime import timedelta
@@ -658,3 +660,39 @@ def get_1stOrder_geo_id():
 
     except:
         return None
+
+
+
+def get_geoJson(data):
+    data = json.loads(data)
+    geom_type = data['type']
+    coordinates = data['coordinates']
+    if geom_type == 'Point':
+        from geojson import Point
+        point = Point(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'LineString':
+        from geojson import LineString
+        point = LineString(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'Polygon':
+        from geojson import Polygon
+        point = Polygon(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiPoint':
+        from geojson import MultiPoint
+        point = MultiPoint(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiLineString':
+        from geojson import MultiLineString
+        point = MultiLineString(coordinates)
+        return Feature(geometry=point)
+
+    else:
+        from geojson import MultiPolygon
+        point = MultiPolygon(coordinates)
+        return Feature(geometry=point)

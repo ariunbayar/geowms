@@ -7,7 +7,7 @@ from django.db import connections
 from django.db.utils import InternalError
 from django.forms.models import model_to_dict
 from django.conf import settings
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from django.http import JsonResponse, Http404
 
 from .models import ViewNames, ViewProperties
@@ -30,6 +30,7 @@ from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos.collections import GeometryCollection
 from django.contrib.auth.decorators import user_passes_test
+from geojson import FeatureCollection
 from backend.bundle.models import Bundle
 from geoportal_app.models import User
 from backend.config.models import Config
@@ -40,7 +41,8 @@ from backend.wms.models import WMS
 from geoportal_app.models import User
 from main.utils import (
     dict_fetchall,
-    slugifyWord
+    slugifyWord,
+    get_geoJson
 )
 import main.geoserver as geoserver
 
@@ -69,11 +71,48 @@ def _get_package(theme_id):
     return package_data
 
 
+def _check_gp_design():
+    ws_name = 'gp_design'
+    ds_name = ws_name
+    table_name = 'geoserver_desing_view'
+    design_space = geoserver.getWorkspace(ws_name)
+    if design_space.status_code == 404:
+        geoserver.create_space(ws_name)
+
+    check_ds_name = geoserver.getDataStore(ws_name, ds_name)
+    if check_ds_name.status_code == 404:
+        geoserver.create_store(
+            ws_name,
+            ds_name,
+            ds_name,
+        )
+        _create_design_view()
+
+    layer_name = 'gp_layer_' + table_name
+    check_layer = geoserver.getDataStoreLayer(
+        ws_name,
+        ds_name,
+        layer_name
+    )
+    layer_title = layer_name
+    if check_layer.status_code == 404:
+        layer_create = geoserver.create_layer(
+                        ws_name,
+                        ds_name,
+                        layer_name,
+                        layer_title,
+                        table_name,
+                        srs,
+                        geom_att,
+                        extends
+        )
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def bundleButetsAll(request):
     data = []
+    style_names = []
     for themes in LThemes.objects.all():
         bundle = Bundle.objects.filter(ltheme_id=themes.theme_id)
         if bundle:
@@ -85,9 +124,17 @@ def bundleButetsAll(request):
                 })
         else:
             themes.delete()
+
+    check_design = _check_gp_design()
+    geoserver_style = geoserver.getStyles()
+    for style in geoserver_style:
+        style_names.append(style.get('name'))
+    url = reverse('api:service:geo_design_proxy', args=['geoserver_desing_view'])
     rsp = {
         'success': True,
         'data': data,
+        'style_names': style_names,
+        'defualt_url': request.build_absolute_uri(url),
     }
     return JsonResponse(rsp)
 
@@ -356,20 +403,28 @@ def getFields(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
     view_name = ViewNames.objects.filter(feature_id=fid).first()
+    geom = MGeoDatas.objects.filter(feature_id=fid).first()
     if not view_name == None:
         id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
+        url = reverse('api:service:geo_design_proxy', args=[view_name.view_name])
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': id_list,
-            'view_name': view_name.view_name
+            'view_name': view_name.view_name,
+            'url': request.build_absolute_uri(url),
+            'style_name': geoserver.getlayerStyle('gp_layer_'+view_name.view_name),
+            'geom_type': geom.geo_data.geom_type if  geom else ''
+
         }
     else:
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': [],
-            'view_name': ''
+            'view_name': '',
+            'geom_type': geom.geo_data.geom_type if  geom else ''
+
         }
     return JsonResponse(rsp)
 
@@ -381,9 +436,7 @@ def propertyFieldsSave(request, payload):
     id_list = payload.get('fields')
     fid = payload.get('fid')
     tid = payload.get('tid')
-    style_color = payload.get('style_color')
-    style_size = payload.get('style_size')
-    fill_color = payload.get('fill_color')
+    values = payload.get('values')
     user = User.objects.filter(username=request.user).first()
     if not id_list:
         rsp = {
@@ -429,7 +482,7 @@ def propertyFieldsSave(request, payload):
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
     check = _create_view(id_list, table_name, data_type_ids, feature_config_id)
     if check:
-        rsp = _create_geoserver_detail(table_name, theme, user.id, feature, style_color, style_size, fill_color)
+        rsp = _create_geoserver_detail(table_name, theme, user.id, feature, values)
         if rsp['success']:
             new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
             for idx in id_list:
@@ -698,14 +751,16 @@ def get_colName_type(view_name, data):
 
     return geom_att, some_attributes
 
-def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, ):
-
+def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values):
 
     geom_att, extends = get_colName_type(table_name, 'geo_data')
     if extends:
         srs = extends[0]['find_srid']
     else:
         srs = 4326
+
+    style_name = values.get('style_name')
+    style_state = values.get('style_state')
 
     if check_layer.status_code == 200:
         geoserver.deleteLayerName(ws_name, ds_name, layer_name)
@@ -720,22 +775,26 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                         geom_att,
                         extends
     )
+    if style_state == 'create_style':
+        style_name = values.get('style_name')
+        check_style_name = geoserver.checkGeoserverStyle(style_name)
+        if check_style_name.status_code == 200:
+            return {
+                'success': False,
+                'info': 'Style-ийн нэр давхцаж байна'
+            }
+        else:
 
-    style_name = geoserver.getlayerStyle(layer_name)
-    print("hoho")
-    print("hoho")
-    print("hoho")
-    print("hoho")
-    print("hoho")
-    print("hoho")
-    print("hoho", style_name)
+            geoserver.createStyle(values)
+
+    geoserver.updateLayerStyle(layer_name, style_name)
+
     if layer_create.status_code == 201:
        return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
         return {"success": False, 'info': 'Давхарга үүсгэхэд алдаа гарлаа'}
 
-
-def _create_geoserver_detail(table_name, theme, user_id, feature, style_color, style_size, fill_color):
+def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     layer_responce = []
     theme_code = theme.theme_code
     ws_name = 'gp_'+theme_code
@@ -758,18 +817,41 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, style_color, s
 
     check_ds_name = geoserver.getDataStore(ws_name, ds_name)
     if check_ds_name.status_code == 404:
-        geoserver.create_store(
-            ws_name,
-            ds_name,
-            ds_name,
+        data_store  = geoserver.create_store(
+                        ws_name,
+                        ds_name,
+                        ds_name,
         )
+        if  data_store.status_code == 201:
 
+            return {
+                'success': False,
+                'info': 'DataStore үүсгэхэд алдаа гарлаа'
+            }
     check_layer = geoserver.getDataStoreLayer(
         ws_name,
         ds_name,
         layer_name
     )
-    layer_responce = _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title)
+    layer_responce = _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values)
+    wms_id = wms.id
+    wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
+    if not wms_layer:
+        wms_layer = WMSLayer.objects.create(
+                        name=layer_title,
+                        code=layer_name,
+                        wms=wms,
+                        title=layer_title,
+                        feature_price=0,
+                    )
+
+    bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id).first()
+    bundle_id = theme.bundle.id
+    if not  bundle_layer:
+        BundleLayer.objects.create(
+            bundle_id=bundle_id,
+            layer_id=wms_layer.id
+        )
 
     return layer_responce
 
@@ -814,3 +896,69 @@ def removeView(table_name):
         return True
     except Exception:
         return False
+
+
+def _create_design_view():
+    sql = '''
+            CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
+            SELECT geo_data, ST_GeometryType(geo_data) as field_type, feature_id
+                FROM
+                    m_geo_datas
+                where
+                    ST_Contains(
+                        ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
+                        ST_Transform(geo_data, 4326)
+                        ) and
+                        feature_id in (5, 15,23, 17, 81, 38)
+                limit 10000
+            '''
+    with connections['default'].cursor() as cursor:
+        cursor.execute(sql)
+    return True
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getStyleDate(request, payload):
+    geom_type = payload.get('geom_type')
+    cursor = connections['default'].cursor()
+    sql = '''
+            SELECT
+                ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
+            FROM
+                m_geo_datas
+            where
+                ST_Contains(
+                    ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
+                    ST_Transform(geo_data, 4326)
+                    ) and
+                    feature_id in (5, 15,23, 17, 81, 38)
+                    and
+                    ST_GeometryType(geo_data)  similar to '%{geom_type}%'
+            limit 10000
+            '''.format(geom_type=geom_type)
+    cursor.execute(sql)
+    some_attributes = dict_fetchall(cursor)
+    some_attributes = list(some_attributes)
+    features = []
+    for i in some_attributes:
+        data = get_geoJson(i.get('geom'))
+        features.append(data)
+    return JsonResponse({
+        'data': FeatureCollection(features)
+    })
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def checkStileName(request, payload):
+    style_name = payload.get('style_name')
+    success = False
+    check_name = geoserver.checkGeoserverStyle(style_name)
+    if check_name.status_code != 200:
+        success = True
+    return JsonResponse({
+        'success': success,
+    })

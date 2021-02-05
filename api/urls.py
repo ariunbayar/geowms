@@ -13,6 +13,7 @@ urlpatterns = [
         path('net-local/<str:token>/<str:code>.geojson', govorg_views.json_proxy, name='local_system_json_proxy'),
         path('<str:token>/<int:pk>/', govorg_views.proxy, name='proxy'),
         path('<str:token>/', govorg_views.qgis_proxy, name='qgis-proxy'),
-        path('<str:token>/qgis-submit/', govorg_views.qgis_submit, name='qgis_submit')
+        path('<str:token>/qgis-submit/', govorg_views.qgis_submit, name='qgis_submit'),
+        path('geo_design_proxy/<str:veiw_name>/', govorg_views.geo_design_proxy, name='geo_design_proxy')
     ], 'service'))),
 ]

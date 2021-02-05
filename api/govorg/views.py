@@ -265,3 +265,40 @@ def qgis_proxy(request, token):
     rsp = HttpResponse(content, content_type=content_type)
 
     return rsp
+
+
+@require_GET
+def geo_design_proxy(request, veiw_name):
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    conf_geoserver = geoserver.get_connection_conf()
+
+    if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
+        raise Http404
+
+    layer_code = 'gp_layer_' + veiw_name
+
+    headers = {**BASE_HEADERS}
+    base_url = 'http://{host}:{port}/geoserver/ows'.format(
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port'],
+    )
+    queryargs = {
+        **request.GET,
+        'layers': layer_code,
+    }
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    content = rsp.content
+
+    qs_request = queryargs.get('REQUEST', 'no request')
+
+    WMSLog.objects.create(
+        qs_all=dict(queryargs),
+        qs_request=qs_request,
+        rsp_status=rsp.status_code,
+        rsp_size=len(rsp.content),
+        user=request.user
+    )
+    content_type = rsp.headers.get('content-type')
+    return HttpResponse(content, content_type=content_type)
