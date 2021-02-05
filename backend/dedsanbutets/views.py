@@ -373,7 +373,7 @@ def getFields(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
     view_name = ViewNames.objects.filter(feature_id=fid).first()
-    geom = MGeoDatas.objects.filter(feature_id=fid).first()
+    geom = MGeoDatas.objects.filter(feature_id=81).first()
     if not view_name == None:
         id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
         url = reverse('api:service:geo_design_proxy', args=[view_name.view_name])
@@ -745,22 +745,22 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                         geom_att,
                         extends
     )
-    if style_state == 'create_style':
-        style_name = values.get('style_name')
-        check_style_name = geoserver.check_geoserver_style(style_name)
-        if check_style_name.status_code == 200:
-            return {
-                'success': False,
-                'info': 'Style-ийн нэр давхцаж байна'
-            }
-        else:
-
-            geoserver.create_style(values)
-
-    geoserver.update_layer_style(layer_name, style_name)
 
     if layer_create.status_code == 201:
-       return {"success": True, 'info': 'Амжилттай үүслээ'}
+        if style_state == 'create_style':
+            style_name = values.get('style_name')
+            check_style_name = geoserver.check_geoserver_style(style_name)
+            if check_style_name.status_code == 200:
+                return {
+                    'success': False,
+                    'info': 'Style-ийн нэр давхцаж байна'
+                }
+            else:
+                geoserver.create_style(values)
+
+        geoserver.update_layer_style(layer_name, style_name)
+
+        return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
         return {"success": False, 'info': 'Давхарга үүсгэхэд алдаа гарлаа'}
 

@@ -36,7 +36,7 @@ export default class SideBar extends Component {
             style_title: '',
             style_abstract: '',
             check_style_name: '',
-            is_laoding: false,
+            is_loading: props.property_loading
 
         }
         this.handleInput = this.handleInput.bind(this)
@@ -53,14 +53,14 @@ export default class SideBar extends Component {
                 this.setState({check_style_name: 'Style-ийн нэр хоосон байна'})
             }
             else{
-                this.setState({is_laoding:true})
+                this.setState({is_loading:true})
                 service.checkStyleName(style_name).then(({success})=>
                 {
                     if(success){
-                        this.setState({is_laoding: false, check_style:true})
+                        this.setState({is_loading: false, check_style:true})
                     }
                     else{
-                        this.setState({is_laoding:false, check_style_name: 'Style-ийн нэр давхцаж байна'})
+                        this.setState({is_loading:false, check_style_name: 'Style-ийн нэр давхцаж байна'})
                     }
                 })
             }
@@ -170,6 +170,9 @@ export default class SideBar extends Component {
         if(pP.defualt_url!== this.props.defualt_url){
             this.setState({defualt_url:this.props.defualt_url})
         }
+        if(pP.property_loading!== this.props.property_loading){
+            this.setState({is_loading:this.props.property_loading})
+        }
     }
 
     handleModalAlert(){
@@ -191,7 +194,7 @@ export default class SideBar extends Component {
             style_name, url, defualt_url, geom_type,
             wellknownname, wellknowshape, div_angle,
             color_opacity, dashed_line_length, dashed_line_gap,
-            style_title, style_abstract
+            style_title, style_abstract, is_loading
             } = this.state
         return (
 
@@ -300,7 +303,7 @@ export default class SideBar extends Component {
                                                             <option value="square">Дөрвөлжин</option>
                                                             <option value="triangle">Гурвалжин</option>
                                                             <option value="star"> Од</option>
-                                                            <option value="cross"> Хэрээс</option>
+                                                            <option value="x"> Хэрээс</option>
                                                         </select>
                                                 </div>
                                                 :
@@ -497,6 +500,7 @@ export default class SideBar extends Component {
                         status={this.state.modal_alert_check}
                         modalAction={() => this.handleModalAlert()}
                     />
+                    {is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"50%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
                 </div>
             </div>
         )

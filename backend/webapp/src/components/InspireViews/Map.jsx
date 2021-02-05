@@ -37,7 +37,8 @@ export default class StyleMap extends Component {
                 dashed_line_gap: props.dashed_line_gap,
                 dashed_line_length: props.dashed_line_length,
                 color_opacity: props.color_opacity,
-                wellknownname: props.wellknownname
+                wellknownname: props.wellknownname,
+                is_loading: false
 
 
             }
@@ -100,7 +101,7 @@ export default class StyleMap extends Component {
                     radius2 = 4
                     angle = 0
             }
-            else if (wellknownname == 'cross'){
+            else if (wellknownname == 'x'){
                         points =  4
                         radius = 10
                         radius2 = 0
@@ -220,6 +221,7 @@ export default class StyleMap extends Component {
         }
 
         if(style_state == 'create_style'){
+            this.setState({is_loading: true})
             service.getStyleData(geom_type).then(({data}) =>
                 {
                 if (data){
@@ -238,6 +240,7 @@ export default class StyleMap extends Component {
                         })
                         this.map.addLayer(vector_layer)
                         this.map.getView().fit(vectorSource.getExtent(),{ padding: [200, 200, 200, 200] });
+                        this.setState({is_loading: false})
                     }
                 }
         )
@@ -251,6 +254,7 @@ export default class StyleMap extends Component {
                     <div className="col-md-12 px-0">
                         <div id="map"></div>
                     </div>
+                    {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
                 </div>
         )
     }
