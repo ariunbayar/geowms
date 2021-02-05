@@ -21,8 +21,8 @@ class SearchBarComponent extends Component {
             tseg_dugaar_zoom: 7.3376399772248575,
             bairlal_scale: 5000000,
             zoom3: 10,
-            aimagid: -1,
-            sumid: -1,
+            aimag_id: -1,
+            sum_id: -1,
             BA:'',
             BB:'',
             BC:'',
@@ -44,6 +44,7 @@ class SearchBarComponent extends Component {
         this.handleInputSum = this.handleInputSum.bind(this)
         this.resetButton = this.resetButton.bind(this)
         this.setCenterOfMap = this.setCenterOfMap.bind(this)
+        this.getGeom = this.getGeom.bind(this)
     }
 
     handleSubmitCoordinate(event, place) {
@@ -58,32 +59,20 @@ class SearchBarComponent extends Component {
 
     handleSubmitClear(event) {
         event.preventDefault()
-        this.setState({sumid: -1, aimagid: -1})
+        this.setState({sum_id: -1, aimag_id: -1})
         this.setCenterOfMap()
         this.props.resetShowArea()
     }
 
     componentDidMount(){
-        console.log("did moint");
         service.getAimags().then(({info, success}) => {
             if(success){
                 this.setState({ aimag: info })
-                // service.getSum("Хөвсгөл").then(({info, success}) => {
-                //     if(success){
-                //         this.setState({sum: info})
-                //     }
-                //     else{
-                //         this.setState({error_msg: info})
-                //     }setTimeout(() => {
-                //         this.setState({error_msg: ''})
-                //     }, 2222);
-                // })
             }
             else{
                 this.setState({error_msg: info})
             }setTimeout(() => {
                 this.setState({error_msg: ''})
-
             }, 2222);
         })
     }
@@ -118,39 +107,39 @@ class SearchBarComponent extends Component {
         }
     }
 
+    getGeom(geo_id) {
+        service
+            .getGeom(geo_id)
+            .then(({ feature }) => {
+                if (feature) {
+                    this.props.setFeatureOnMap(feature)
+                }
+            })
+            .catch((error) => alert("Алдаа гарсан байна"))
+    }
+
     handleInput(e){
         if(e.target.value){
-            this.setState({ aimagid: e.target.value, sumid: -1 })
             const aimag_id = e.target.value
+            this.setState({ aimag_id, sum_id: -1 })
+
             const aimag_data = this.state.aimag[aimag_id]
-            var aimag_name = aimag_data[2]
 
-            var array = [aimag_data[0], aimag_data[1]]
-            this.props.handleSetCenter(array, 7.555)
+            this.getGeom(aimag_data.geo_id)
 
-            service.getSum(aimag_name).then(({info, success}) => {
-                if(success){
-                    this.props.showOnlyArea(aimag_name, array)
-                    this.setState({ sum: info, aimag_name })
-                }
-                else{
-                    this.setState({error_msg: info})
-                }setTimeout(() => {
-                    this.setState({error_msg: ''})
-                }, 2222);
-            })
+            this.setState({ sum: aimag_data.children })
+
         }
     }
 
     handleInputSum(e){
         if(e.target.value){
-            this.setState({sumid: e.target.value})
             const sum_id = e.target.value
+            this.setState({ sum_id })
+
             const sum_data = this.state.sum[sum_id]
 
-            var array = [sum_data[0], sum_data[1]]
-            this.props.handleSetCenter(array, 10.555)
-            this.props.showOnlyArea(this.state.aimag_name, array, sum_data[2])
+            this.getGeom(sum_data.geo_id)
         }
     }
 
@@ -166,7 +155,7 @@ class SearchBarComponent extends Component {
     }
 
     render() {
-        const {error_msg} = this.state
+        const {error_msg, sum, aimag} = this.state
         return (
             <div>
                 {/* <div className="form-group  rounded shadow-sm p-3 mb-3 bg-white rounded">
@@ -186,25 +175,25 @@ class SearchBarComponent extends Component {
                         <div className="input-group mb-3">
                             <select name="center_typ" as="select"
                                 onChange={(e) => this.handleInput(e)}
-                                value={this.state.aimagid}
+                                value={this.state.aimag_id}
                                 className='form-control'
                             >
                                     <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
                                     {
-                                        this.state.aimag.map((data, idx) =>
-                                            <option key={idx} value={idx}>{data['name']}</option>
+                                        aimag.map((data, idx) =>
+                                            <option key={idx} value={idx}>{data.name}</option>
                                         )
                                     }
                             </select>
                             <select name="center_typ" as="select"
                                 onChange={this.handleInputSum}
                                 className='form-control'
-                                value={this.state.sumid}
+                                value={this.state.sum_id}
                             >
                                 <option value="-1">--- Сум/дүүрэг сонгоно уу ---</option>
                                 {
-                                    this.state.sum.map((data, idx) =>
-                                        <option key={idx} value={idx}>{data[2]}</option>
+                                    sum.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
                                     )
                                 }
                             </select>
@@ -396,8 +385,8 @@ export class SearchBar extends Control {
         ReactDOM.hydrate(<SearchBarComponent {...props}/>, this.element)
     }
 
-    showSideBar(handleSetCenter, islaod, showOnlyArea, resetShowArea) {
+    showSideBar(handleSetCenter, islaod, showOnlyArea, resetShowArea, setFeatureOnMap) {
         this.toggleControl(islaod)
-        this.renderComponent({ handleSetCenter, showOnlyArea, resetShowArea })
+        this.renderComponent({ handleSetCenter, showOnlyArea, resetShowArea, setFeatureOnMap })
     }
 }

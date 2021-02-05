@@ -3,16 +3,14 @@ import React, { Component } from "react"
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
 import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
+import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
-import Tile from 'ol/layer/Tile'
-import { Vector as VectorLayer } from 'ol/layer'
+import { Vector as VectorLayer, Tile } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Icon, Style, Stroke, Fill } from 'ol/style'
-import {Point, Circle, Polygon} from 'ol/geom'
-import TileImage from 'ol/source/TileImage'
-import TileWMS from 'ol/source/TileWMS'
+import { Point, Circle, Polygon } from 'ol/geom'
+import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
 import {fromExtent} from 'ol/geom/Polygon';
@@ -105,6 +103,8 @@ export default class BundleMap extends Component {
         this.featureFromUrl = this.featureFromUrl.bind(this)
         this.check_inspire_layer = this.check_inspire_layer.bind(this)
         this.transformToLatLong = this.transformToLatLong.bind(this)
+        this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
+        this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
     }
 
     initMarker() {
@@ -774,6 +774,35 @@ export default class BundleMap extends Component {
         view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
     }
 
+    removeFeatureFromSource(featureID) {
+    const { vector_layer } = this.state
+    const source = vector_layer.getSource()
+    const features = source.getFeatures();
+    if (features != null && features.length > 0) {
+        for (var i = 0; i < features.length; i++) {
+            const properties = features[i].getProperties();
+            const id = properties.id;
+            if (id == featureID) {
+                source.removeFeature(features[i]);
+                break;
+            }
+        }
+        }
+    }
+
+    setFeatureOnMap(feature) {
+        const { vector_layer } = this.state
+        const id = 'aimag_sum'
+        this.removeFeatureFromSource(id)
+        var feature =  new GeoJSON().readFeatures(feature, {
+            dataProjection: this.state.projection_display,
+            featureProjection: this.state.projection,
+        });
+        feature[0].setProperties({ id })
+        vector_layer.getSource().addFeature(feature[0])
+        this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100] })
+    }
+
     toggleSidebar(event) {
         this.setState(prevState => ({
             is_sidebar_open: !prevState.is_sidebar_open,
@@ -793,7 +822,7 @@ export default class BundleMap extends Component {
             this.controls.searchbar.showSideBar(null, true)
             this.resetFilteredOnlyFeature()
         }else{
-            this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature)
+            this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature, this.setFeatureOnMap)
         }
     }
 

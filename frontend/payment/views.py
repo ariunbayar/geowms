@@ -17,11 +17,12 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Polygon
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
+
+from geojson import Feature, MultiPolygon
 
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
@@ -44,13 +45,7 @@ from backend.inspire.models import (
 )
 
 from main.decorators import ajax_required
-from main.utils import (
-    send_email,
-    get_config,
-    get_key_and_compare,
-    lat_long_to_utm,
-    get_nearest_geom,
-)
+from main import utils
 
 from zipfile import ZipFile
 
@@ -852,13 +847,13 @@ def _get_items_with_file(content, mpoint, att_names):
         't_type': mpoint.t_type,
         'class_name': mpoint.point_class_name,
         'pdf_id': content[att_names['pid']],
-        'org_name': content[att_names['org_name']] if get_key_and_compare(att_names, 'org_name') else 'Геопортал',
+        'org_name': content[att_names['org_name']] if utils.get_key_and_compare(att_names, 'org_name') else 'Геопортал',
     }
     return point_info
 
 
 def _get_item_from_mpoint_view(mpoint):
-    utm = lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
+    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
     point_info = {
         'point_id': mpoint.point_name,
         'ondor': mpoint.ondor,
@@ -1003,11 +998,11 @@ def download_purchase(request, pk, download_type):
 
             subject = 'Худалдан авалт'
             msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу!'
-            host_name = get_config('EMAIL_HOST_NAME')
+            host_name = utils.get_config('EMAIL_HOST_NAME')
             msg = '{msg} http://{host_name}/payment/history/api/details/{id}/'.format(id=payment.pk, msg=msg, host_name=host_name)
             to_email = [payment.user.email]
 
-            send_email(subject, msg, to_email)
+            utils.send_email(subject, msg, to_email)
 
     rsp = {
         'success': is_created,
@@ -1305,7 +1300,7 @@ def get_popup_info(request, payload):
 
     viewproperty_ids, property_qs = _get_properties_qs(view_qs)
 
-    nearest_points = get_nearest_geom(coordinate, feature_id)
+    nearest_points = utils.get_nearest_geom(coordinate, feature_id)
 
     for nearest_point in nearest_points:
         mdatas_qs = MDatas.objects
@@ -1374,6 +1369,27 @@ def get_feature_info(request, payload):
 
     rsp = {
         'datas': datas,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_geom(request, payload):
+    feature = ''
+    geo_id = payload.get('geo_id')
+
+    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    if geom:
+        geo_json = geom.json
+        geo_json = json.loads(geo_json)
+        geo_json = MultiPolygon(geo_json['coordinates'])
+        feature = Feature(geometry=geo_json)
+
+    rsp = {
+        'feature': feature
     }
 
     return JsonResponse(rsp)

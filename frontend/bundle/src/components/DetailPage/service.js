@@ -15,6 +15,7 @@ export const service = {
     getPopUpInfo,
     checkButtonEnableWithId,
     getFeatureInfo,
+    getGeom,
 }
 
 function getCookie(name) {
@@ -174,4 +175,12 @@ function getFeatureInfo(layer_code, coordinates) {
         body: JSON.stringify({layer_code, coordinates})
     }
     return fetch('/payment/get-feature-info/', requestOptions).then(handleResponse)
+}
+
+function getGeom(geo_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({geo_id})
+    }
+    return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }
