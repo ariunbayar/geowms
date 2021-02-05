@@ -194,6 +194,7 @@ def create(request, payload):
     emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
     user = get_object_or_404(User, employee__user=request.user)
+    get_object_or_404(Employee, user=request.user, is_admin=True)
 
     errors = _employee_validation(user, user_detail)
     if errors:
@@ -256,6 +257,7 @@ def update(request, payload, pk):
     employee = get_object_or_404(Employee, pk=pk)
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     new_emp_role = EmpRole.objects.filter(id=role_id).first()
+    get_object_or_404(Employee, user=request.user, is_admin=True)
 
     with transaction.atomic():
         if emp_perm:
@@ -375,7 +377,7 @@ def detail(request, pk):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def delete(request, pk):
-
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     employee = get_object_or_404(Employee, pk=pk)
     user = User.objects.filter(pk=employee.user_id).first()
     emp_perm = EmpPerm.objects.filter(employee=employee).first()

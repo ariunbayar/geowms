@@ -35,6 +35,7 @@ export default class RoleTable extends Component {
     render() {
         const { role_id, role_name } = this.props.values
         const { index } = this.props
+        const { is_admin, username } = this.props.employee
         return (
             <tr>
                 <th>
@@ -47,6 +48,7 @@ export default class RoleTable extends Component {
                     {role_name}
                 </NavLink>
                 </th>
+                {is_admin &&
                 <th>
                     <NavLink
                         to={`/gov/perm/role/${role_id}/edit/`}
@@ -54,6 +56,8 @@ export default class RoleTable extends Component {
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </th>
+                }
+                {is_admin &&
                 <th>
                     <a href="delete" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
@@ -68,6 +72,7 @@ export default class RoleTable extends Component {
                         />
                     }
                 </th>
+                }
             </tr>
         )
     }
