@@ -414,7 +414,7 @@ export default class SideBar extends Component {
                             <table className="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th colspan={4} className="text-center">
+                                        <th colSpan={4} className="text-center">
                                             <h4 className="text-center">{fname}</h4>
                                             {view_name && <h4 className="text-center"><small>View name: {view_name}</small></h4>}
                                         </th>
@@ -434,18 +434,18 @@ export default class SideBar extends Component {
                                         <>
                                             {f_config.data_types.map((data_type, idx) =>
                                                 <>
-                                                    <tr>
+                                                    <tr key={idx}>
                                                         <th rowSpan={data_type.data_type_configs.length +1}
-                                                            className="vertical align-middle text-center"
+                                                            className="text-wrap align-middle text-justify m-2"
                                                         >
-                                                            <span className="text-center text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
-                                                            <span className="text-center align-middle">({data_type.data_type_name_eng})</span>
-                                                            <span className="text-center align-middle">{data_type.data_type_name}</span>
+                                                            <span className="text-center align-middle">({data_type.data_type_name_eng})</span><br/>
+                                                            <span className="text-center align-middle">{data_type.data_type_name}</span><br/>
+                                                            <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
                                                         </th>
                                                     </tr>
                                                     {data_type.data_type_configs.map((data_type_config, idx) =>
                                                         <>
-                                                            <tr>
+                                                            <tr key={idx}>
                                                                 <th>
                                                                     <div className="icheck-primary">
                                                                         <input
@@ -455,18 +455,18 @@ export default class SideBar extends Component {
                                                                             onChange={this.handleInput}
                                                                             value={data_type_config.property_id}
                                                                         />
-                                                                        <label for={data_type_config.property_name}></label>
+                                                                        <label htmlFor={data_type_config.property_name}></label>
                                                                     </div>
                                                                 </th>
                                                                 <th>
                                                                     <label
-                                                                        for={data_type_config.property_name}
+                                                                        htmlFor={data_type_config.property_name}
                                                                         data-toggle="tooltip" data-placement="right" title={data_type_config.property_definition}
                                                                     >
                                                                     {data_type_config.property_name}<br/>
                                                                     (
                                                                     {data_type_config.value_types.map((value_type, idx) =>
-                                                                        <span>{value_type.value_type_name}</span>
+                                                                        <span key={idx}>{value_type.value_type_name}</span>
                                                                     )}
                                                                     )
                                                                     </label>

@@ -75,6 +75,12 @@ def _check_gp_design():
         layer_name
     )
     layer_title = layer_name
+    geom_att, extends = get_colName_type(table_name, 'geo_data')
+    if extends:
+        srs = extends[0]['find_srid']
+    else:
+        srs = 4326
+
     if check_layer.status_code == 404:
         layer_create = geoserver.create_layer(
                         ws_name,
@@ -106,7 +112,7 @@ def bundleButetsAll(request):
             themes.delete()
 
     check_design = _check_gp_design()
-    geoserver_style = geoserver.getStyles()
+    geoserver_style = geoserver.get_styles()
     for style in geoserver_style:
         style_names.append(style.get('name'))
     url = reverse('api:service:geo_design_proxy', args=['geoserver_desing_view'])
@@ -134,22 +140,6 @@ def _lfeatureconfig(feature_id):
                 'data_type_display_name': f_config.data_type_display_name,
                 'data_types': _datatypes(data_type_id)
             })
-        else:
-            connect_features = LFeatureConfigs.objects.filter(feature_id=connect_feature_id)
-            for connect_feature in connect_features:
-                connected_feature_id = connect_feature.connect_feature_id
-                fc_data_type_id = connect_feature.data_type_id
-                if fc_data_type_id is not None:
-                    datatypes = _datatypes(fc_data_type_id)
-                if connect_feature.feature_id == connect_feature_id:
-                    if connected_feature_id is None:
-                        feature_configs_name.append({
-                            'data_type_id': fc_data_type_id,
-                            'feature_config_id': connect_feature.feature_config_id,
-                            'feature_id': connect_feature.feature_id,
-                            'data_type_display_name': connect_feature.data_type_display_name,
-                            'data_types': datatypes
-                        })
         if data_type_id is None and connect_feature_id is None:
             feature_configs_name.append({
                 'data_type_id': data_type_id,
@@ -393,7 +383,7 @@ def propertyFields(request, fid):
             'id_list': id_list,
             'view_name': view_name.view_name,
             'url': request.build_absolute_uri(url),
-            'style_name': geoserver.getlayerStyle('gp_layer_'+view_name.view_name),
+            'style_name': geoserver.get_layer_style('gp_layer_'+view_name.view_name),
             'geom_type': geom.geo_data.geom_type if  geom else ''
 
         }
@@ -757,7 +747,7 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     )
     if style_state == 'create_style':
         style_name = values.get('style_name')
-        check_style_name = geoserver.checkGeoserverStyle(style_name)
+        check_style_name = geoserver.check_geoserver_style(style_name)
         if check_style_name.status_code == 200:
             return {
                 'success': False,
@@ -765,9 +755,9 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
             }
         else:
 
-            geoserver.createStyle(values)
+            geoserver.create_style(values)
 
-    geoserver.updateLayerStyle(layer_name, style_name)
+    geoserver.update_layer_style(layer_name, style_name)
 
     if layer_create.status_code == 201:
        return {"success": True, 'info': 'Амжилттай үүслээ'}
@@ -900,7 +890,7 @@ def _create_design_view():
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def getStyleDate(request, payload):
+def get_style_data(request, payload):
     geom_type = payload.get('geom_type')
     cursor = connections['default'].cursor()
     sql = '''
@@ -933,10 +923,10 @@ def getStyleDate(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def checkStileName(request, payload):
+def check_styles_name(request, payload):
     style_name = payload.get('style_name')
     success = False
-    check_name = geoserver.checkGeoserverStyle(style_name)
+    check_name = geoserver.check_geoserver_style(style_name)
     if check_name.status_code != 200:
         success = True
     return JsonResponse({

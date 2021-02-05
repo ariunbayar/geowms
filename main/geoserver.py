@@ -345,7 +345,8 @@ def get_legend_url(wms_id, layer_name):
     )
     return legend_url
 
-def getStyles():
+
+def get_styles():
 
     BASE_URL, AUTH = getHeader()
     HEADERS = {
@@ -356,7 +357,8 @@ def getStyles():
     styles = rsp.json()
     return styles.get('styles').get('style')
 
-def getlayerStyle(layer_name):
+
+def get_layer_style(layer_name):
     BASE_URL, AUTH = getHeader()
     HEADERS = {
         'Content-type': 'application/json',
@@ -367,13 +369,15 @@ def getlayerStyle(layer_name):
         features = rsp.json()
         return features.get('layer').get('defaultStyle').get('name')
 
-def checkGeoserverStyle(style_name):
+
+def check_geoserver_style(style_name):
     BASE_URL, AUTH = getHeader()
     url = 'styles/' + style_name +'.sld'
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
-def updateLayerStyle(layer_name, style_name):
+
+def update_layer_style(layer_name, style_name):
     BASE_URL, AUTH = getHeader()
     url = 'layers/' + layer_name
     payload = '''
@@ -384,7 +388,8 @@ def updateLayerStyle(layer_name, style_name):
     rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
     return rsp
 
-def createStyle(values):
+
+def create_style(values):
     BASE_URL, AUTH = getHeader()
     style_name = values.get('style_name')
     style_title = values.get('style_title')
@@ -467,7 +472,6 @@ def createStyle(values):
                             <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
                             </Stroke>
                     </Mark>
-                    <Size>12</Size>
                     </Graphic>
                 </PointSymbolizer>
                 </Rule>
