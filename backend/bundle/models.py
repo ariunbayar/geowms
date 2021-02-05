@@ -10,24 +10,8 @@ class Bundle(models.Model):
 
     class Meta:
         ordering = ('sort_order',)
-    MODULE_TUUHEN_UV = 1
-    MODULE_TSEG_BURTGEL = 2
-    MODULE_TEEVRIIN_SULJEE = 3
-    MODULE_DED_BUTETS = 4
-    MODULE_BAIR_ZUIN_ZURAG = 5
-    MODULE_BARILGA_SUURIN_GAZAR = 6
-
-    MODULE_CHOICES = (
-        (MODULE_TUUHEN_UV, 'Түүх, соёлын өв'),
-        (MODULE_TSEG_BURTGEL, 'Геодезийн тулгуур сүлжээ'),
-        (MODULE_TEEVRIIN_SULJEE, 'Тээврийн сүлжээ'),
-        (MODULE_DED_BUTETS, 'Дэд бүтэц'),
-        (MODULE_BAIR_ZUIN_ZURAG, 'Байр зүйн зураг'),
-        (MODULE_BARILGA_SUURIN_GAZAR, 'Барилга, суурин газар'),
-    )
 
     layers = models.ManyToManyField(WMSLayer, through='BundleLayer', blank=True)
-    module = models.PositiveIntegerField(choices=MODULE_CHOICES, db_index=True, null=True)
     ltheme = models.OneToOneField(LThemes, on_delete=models.CASCADE, null=True)
     is_removeable = models.BooleanField()
     icon = models.ImageField(upload_to='дэд-сан/')

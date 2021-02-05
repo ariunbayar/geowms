@@ -3,6 +3,7 @@ from django.urls import re_path, path, include
 from govorg.backend.org import views as org_views
 from govorg.backend.role.employee import views as role_employee_views
 from govorg.backend.role.role import views as role_views
+from govorg.backend.role.region import views as role_region_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
 from govorg.backend.govorg_inspire import views as govorg_inspire_views
@@ -16,12 +17,17 @@ urlpatterns = [
     path('api/', include(([
 
         path('role/', include(([
+            path('region/', include(([
+                path('', role_region_views.map_region)
+            ], 'region'))),
             path('employee/', include(([
                 path('', role_employee_views.list),
+                path('send-mail/', role_employee_views.send_mail),
                 path('create/', role_employee_views.create),
                 path('<int:pk>/update/', role_employee_views.update),
                 path('<int:pk>/detail/', role_employee_views.detail),
                 path('<int:pk>/delete/', role_employee_views.delete),
+                path('<int:pk>/refresh-token/', role_employee_views.refresh_token),
             ], 'employee'))),
             path('', include(([
                 path('', role_views.list),
@@ -39,7 +45,6 @@ urlpatterns = [
         ], 'system'))),
 
         path('inspire/', include(([
-            path('', govorg_inspire_views.changeset_all),
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
             path('<int:tid>/<int:pid>/<int:fid>/get-wms-layer/', govorg_inspire_views.get_wms_layer),
             path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
@@ -52,20 +57,20 @@ urlpatterns = [
             path('<int:tid>/<int:pid>/<int:fid>/detailCreate/', govorg_inspire_views.detailCreate),
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
-            path('<int:fid>/add-geom/', govorg_inspire_views.geomAdd),
-            path('send-data/<int:tid>/<int:fid>/', govorg_inspire_views.file_upload_save_data),
+            path('send-data/<int:tid>/<int:pid>/<int:fid>/<str:ext>/', govorg_inspire_views.file_upload_save_data),
             path('qgis-url/', govorg_inspire_views.get_qgis_url),
+            path('qpi-url/', govorg_inspire_views.get_api_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),
         ], 'inspire'))),
 
         path('org-request/', include(([
-            path('', org_request_views.getAll, name="all"),
+            path('', org_request_views.get_list),
             path('change-request/', org_request_views.get_change_all, name="change-request"),
-            path('<int:pk>/delete/', org_request_views.request_delete, name="delete"),
-            path('<int:pk>/approve/', org_request_views.request_approve, name="approve"),
+            path('reject/', org_request_views.request_reject, name="reject"),
+            path('approve/', org_request_views.request_approve, name="approve"),
             path('getCount/', org_request_views.get_count, name='getCount'),
-            path('search/', org_request_views.search, name='request-search'),
+            path('get_choices/', org_request_views.get_choices, name='get-choices'),
         ], 'org-request'))),
         path('zip-code/', include(([
             path('aimag/', zipcode_views.aimag, name='aimag'),
@@ -142,6 +147,8 @@ urlpatterns = [
 
     path('', include(([
         path('', org_views.frontend, name='frontend'),
+        path('emp-role/', org_views.emp_role, name='emp-role'),
+        path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

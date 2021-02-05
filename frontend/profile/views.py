@@ -5,9 +5,10 @@ from django.views.decorators.http import require_POST, require_GET
 
 from django.core.paginator import Paginator
 from main.decorators import ajax_required
-from backend.payment.models import Payment, PaymentPoint
+from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
+from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import User
-from govorg.backend.forms.models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view
+from govorg.backend.forms.models import TsegUstsan, Mpoint_view
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -174,53 +175,97 @@ def tsegAdd(request):
     return JsonResponse({'success': True})
 
 
-@require_POST
+def _get_tseg_detail(payment):
+    points = []
+    pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
+    for point in pay_point:
+        mpoint = Mpoint_view.objects.using('postgis_db').filter(id=point.point_id).first()
+        if mpoint.pid:
+            pdf = mpoint.pid
+        else:
+            pdf = 'файл байхгүй байна'
+        points.append({
+            'name': point.point_name,
+            'amount': point.amount,
+            'file_name': pdf
+        })
+    return {'points': points, 'mpoint': mpoint}
+
+
+def _get_polygon_detail(payment):
+    polygon_detail = []
+    polygon = PaymentPolygon.objects.filter(payment=payment).first()
+    polygon_detail.append({
+        'LeftTopX': polygon.coodrinatLeftTopX,
+        'LeftTopY': polygon.coodrinatLeftTopY,
+        'RightBottomX': polygon.coodrinatRightBottomX,
+        'RightBottomY': polygon.coodrinatRightBottomY,
+    })
+    return polygon_detail
+
+
+def _get_layer_detail(payment):
+    layer_list = []
+    layers = PaymentLayer.objects.filter(payment=payment)
+    for layer in layers:
+        layer_info = WMSLayer.objects.filter(id=layer.wms_layer_id).first()
+        layer_list.append({
+            'name': layer_info.title,
+            'amount': layer.amount,
+        })
+    return layer_list
+
+
+def _get_detail_items(payment, mpoint):
+    items = []
+    items.append({
+        'description': payment.description,
+        'created_at': _datetime_display(payment.created_at),
+        'success_at': payment.success_at,
+        'is_success': payment.is_success,
+        'user_id': payment.user_id,
+        'geo_unique_number': payment.geo_unique_number,
+        'total': payment.total_amount,
+        'export_file': payment.export_file,
+    })
+    if mpoint:
+         items.append({
+            'mpoint_aimag': mpoint.aimag,
+            'mpoint_sum': mpoint.sum,
+            'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
+        })
+    return items
+
+
+@require_GET
 @ajax_required
 @login_required
-def tseg_details(requist, payload):
-    pk = payload.get('id')
-    payment = Payment.objects.filter(id=pk).first()
+def getDetail(requist, pk):
+
+    payment = Payment.objects.filter(pk=pk).first()
     if payment:
-        pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
-        if pay_point:
-            points = []
-            for point in pay_point:
-                mpoint = Mpoint_view.objects.using('postgis_db').filter(id=point.point_id).first()
-                if mpoint.pid:
-                    pdf = mpoint.pid
-                else:
-                    pdf = 'файл байхгүй байна'
-                points.append({
-                    'name': point.point_name,
-                    'amount': point.amount,
-                    'file_name': pdf
-                })
-            items = []
-            items.append({
-                'description': payment.description,
-                'created_at': _datetime_display(payment.created_at),
-                'success_at': payment.success_at,
-                'is_success': payment.is_success,
-                'user_id': payment.user_id,
-                'geo_unique_number': payment.geo_unique_number,
-                'total': payment.total_amount,
-                'mpoint_aimag': mpoint.aimag,
-                'mpoint_sum': mpoint.sum,
-                'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
-            })
+        if payment.export_kind == Payment.EXPORT_KIND_POINT:
+            points = _get_tseg_detail(payment)
+            items = _get_detail_items(payment, points['mpoint'])
             rsp = {
                 'success': True,
                 'items': items,
                 'points': points
             }
-            return JsonResponse(rsp)
-        else:
+        if payment.export_kind == Payment.EXPORT_KIND_POLYGON:
+            polygon = _get_polygon_detail(payment)
+            layers = _get_layer_detail(payment)
+            items = _get_detail_items(payment, None)
             rsp = {
-                'success': False,
+                'success': True,
+                'polygon': polygon,
+                'layers': layers,
+                'items': items,
             }
-            return JsonResponse(rsp)
     else:
-        return JsonResponse({'success': False})
+        rsp = {'success': False}
+
+    return JsonResponse(rsp)
 
 
 def _get_user_display(user):

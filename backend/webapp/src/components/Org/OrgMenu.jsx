@@ -3,8 +3,6 @@ import {Switch , Route, Link, NavLink} from "react-router-dom"
 
 import {service} from './service'
 import {OrgDetail} from './OrgDetail'
-import {OrgRoleOld} from './OrgRoleOld'
-import {OrgInspireRole} from './OrgInspireRole'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 import {OrgRole} from './OrgRole'
@@ -16,6 +14,8 @@ export class OrgMenu extends Component {
 
         super(props)
         this.state = {
+            level: this.props.match.params.level,
+            id: this.props.match.params.id,
             org_name: '',
             allowed_geom: null,
             sistem_count: 0,
@@ -27,23 +27,22 @@ export class OrgMenu extends Component {
     }
 
     componentDidMount() {
-        const level= this.props.match.params.level
-        const id= this.props.match.params.id
-        this.getOrgName(level, id)
-        this.handleSistemCount()
+        Promise.all([
+            this.getOrgName(),
+            this.handleSistemCount()
+        ])
     }
 
     handleSistemCount(){
-
         const id = this.props.match.params.id
-
         service.sistemCount(id).then(({ count }) => {
             this.setState({ sistem_count: count })
         })
     }
 
-    getOrgName(org_level,id){
-        service.orgAll(org_level,id).then(({ orgs, count }) => {
+    getOrgName(){
+        const {level, id} = this.state
+        service.orgAll(level, id).then(({ orgs, count }) => {
             if (orgs) {
                 orgs.map(org => this.setState({
                     org_name: org.name,
@@ -70,23 +69,10 @@ export class OrgMenu extends Component {
                             <i className="fa fa-th-large"></i> <span className="hidden-xs"></span>
                         </NavLink>
                     </li>
-
                     <li className="nav-item gp-text-primary">
                         <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`} className="nav-link"
                             activeClassName="active"  data-toggle="tab">
                             <i className="fa fa-lock"></i> <span className="hidden-xs">Эрх</span>
-                        </NavLink>
-                    </li>
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/org-role/`} className="nav-link"
-                            activeClassName="active"  data-toggle="tab">
-                            <i className="fa fa-lock"></i> <span className="hidden-xs">Байгууллагын эрх</span>
-                        </NavLink>
-                    </li>
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/inspire/`} className="nav-link"
-                            activeClassName="active"  data-toggle="tab">
-                            <i className="fa fa-lock"></i> <span className="hidden-xs">Эрх inspire</span>
                         </NavLink>
                     </li>
                     <li className="nav-item gp-text-primary">
@@ -110,11 +96,19 @@ export class OrgMenu extends Component {
                         <Route path="/back/байгууллага/түвшин/:level/:id/detail/" render={(routeProps) =>
                             <OrgDetail { ...routeProps } allowed_geom={ allowed_geom }/>
                         }/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRoleOld}/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/org-role/" component={OrgRole}/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/inspire/" component={OrgInspireRole}/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={OrgUser}/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}/>
+                        <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
+                        <Route
+                            path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/"
+                            component={(props) =>
+                                <OrgUser {...props} refreshCount={this.getOrgName}/>
+                            }
+                        />
+                        <Route
+                            path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}
+                            component={(props) =>
+                                <OrgSystem {...props} refreshCount={this.handleSistemCount}/>
+                            }
+                        />
                     </Switch>
                 </div>
                 <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}>

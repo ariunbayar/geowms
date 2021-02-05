@@ -9,6 +9,8 @@ export const service = {
     getCount,
     detail,
     updatePassword,
+    getEmpRoles,
+    getApproveAndRevoke,
 }
 
 function tableListTeevriinSuljee() {
@@ -58,4 +60,14 @@ function updatePassword(new_password, old_password, re_password) {
           body: JSON.stringify({ new_password, old_password, re_password }),
     }
     return fetch(`/profile/api/update-password/`, requestOptions).then(handleResponse)
+}
+
+function getEmpRoles() {
+    const requestOptions = getGetOptions()
+    return fetch('/gov/emp-role/', requestOptions).then(handleResponse)
+}
+
+function getApproveAndRevoke() {
+    const requestOptions = getGetOptions()
+    return fetch('/gov/get_approve_and_revoke/', requestOptions).then(handleResponse)
 }

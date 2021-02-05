@@ -8,6 +8,8 @@ export const service ={
     getDatas,
     remove,
     erese,
+    getOverlapsFeature,
+    setOverlapsFeature
 }
 
 const prefix = '/back/dedsan-butests'
@@ -71,4 +73,19 @@ function erese(model_name, model_id, top_id){
         body: JSON.stringify({ model_name, model_id, top_id }),
     }
     return fetch(`${prefix}/erese/`, opts).then(handleResponse)
+}
+
+function getOverlapsFeature(feature_id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/overlaps-feature-get/${feature_id}/`, opts).then(handleResponse)
+}
+
+function setOverlapsFeature(feature_id, overlap_feature_id, state){
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ feature_id, overlap_feature_id, state }),
+    }
+    return fetch(`${prefix}/overlaps-feature-set/`, opts).then(handleResponse)
 }

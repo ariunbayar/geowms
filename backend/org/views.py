@@ -1,15 +1,13 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, F, Func
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import get_list_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 
-from backend.bundle.models import Bundle
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
 from backend.inspire.models import LDataTypes
@@ -20,98 +18,18 @@ from backend.inspire.models import LProperties
 from backend.inspire.models import LThemes
 from backend.inspire.models import GovRole
 from backend.inspire.models import GovPerm
+from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
-from backend.inspire.models import MDatas
-from backend.inspire.models import LCodeLists
+from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
+from .models import Org, Employee
+from govorg.backend.org_request.models import ChangeRequest
 
 from main.decorators import ajax_required
 from main import utils
 
-from .models import Org, OrgRole, Employee, InspirePerm
-
-
-def _get_property(org_id, feature_id):
-    properties_list = []
-    data_type_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values("data_type_id")
-    property_ids = LDataTypeConfigs.objects.filter(data_type_id__in=[data_type_ids]).values_list('property_id', flat=True)
-    properties = LProperties.objects.filter(property_id__in=property_ids).values('property_id', "property_code", "property_name")
-    for prop in properties:
-        properties_list.append({
-            'id':prop['property_id'],
-            'code':prop['property_code'],
-            'name':prop['property_name'],
-            'roles': _get_roles(org_id, prop['property_id'], 4, feature_id)
-        })
-
-    return properties_list
-
-
-def _get_features(org_id, package_id,):
-    feat_values = []
-    features = LFeatures.objects.filter(package_id=package_id   )
-
-    for feat in features:
-        feat_values.append({
-            'id':feat.feature_id,
-            'code':feat.feature_code,
-            'name':feat.feature_name,
-            'roles': _get_roles(org_id, feat.feature_id, 3, package_id),
-            'properties': _get_property(org_id, feat.feature_id)
-        })
-
-    return feat_values
-
-
-def _get_package(org_id, theme_id):
-
-    package_data = []
-    roles = []
-    for package in LPackages.objects.filter(theme_id=theme_id):
-        roles = _get_roles(org_id, package.package_id, 2, theme_id)
-        package_data.append({
-                'id': package.package_id,
-                'code': package.package_code,
-                'name': package.package_name,
-                'roles':roles,
-                'features': _get_features(org_id, package.package_id)
-            })
-
-    return package_data
-
-
-def _get_roles(org_id, module_id, module, module_root_id):
-    roles = []
-    module = InspirePerm.objects.filter(org_id=org_id, module_id=module_id, module = module, module_root_id=module_root_id ).first()
-    if module:
-        roles = [module.perm_view,module.perm_create, module.perm_remove, module.perm_update, module.perm_revoke, module.perm_review, module.perm_approve]
-    else:
-        roles = [False,False,False,False,False,False,False]
-    return roles
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def inspire_roles(request, level, pk):
-
-    data = []
-    org = get_object_or_404(Org, pk=pk, level=level)
-    for themes in LThemes.objects.all():
-        data.append({
-                'id': themes.theme_id,
-                'code': themes.theme_code,
-                'name': themes.theme_name,
-                'packages': _get_package(org.id, themes.theme_id),
-                'roles': _get_roles(org.id, themes.theme_id, 1, None)
-            })
-
-    return JsonResponse({
-        'data': data,
-        'success': True
-    })
 
 @require_POST
 @ajax_required
@@ -133,125 +51,6 @@ def all(request, payload, level):
     })
 
 
-def _get_org_role_display(org_role):
-
-    bundle = org_role.bundle
-    return {
-        'org_id': org_role.org_id,
-        'bundle': {
-            'id': bundle.id,
-            'name': bundle.ltheme.theme_name if bundle.ltheme else '',
-            'icon_url': bundle.icon.url if bundle.icon else '',
-        },
-        'perm_view': org_role.perm_view,
-        'perm_create': org_role.perm_create,
-        'perm_remove': org_role.perm_remove,
-        'perm_revoke': org_role.perm_revoke,
-        'perm_review': org_role.perm_review,
-        'perm_approve': org_role.perm_approve,
-        'created_at': org_role.created_at.strftime('%Y-%m-%d'),
-        'updated_at': org_role.updated_at.strftime('%Y-%m-%d'),
-    }
-
-
-def _get_default_org_role(org, bundle):
-    org_role = OrgRole()
-    org_role.org = org
-    org_role.bundle = bundle
-    org_role.perm_view = False
-    org_role.perm_create = False
-    org_role.perm_remove = False
-    org_role.perm_revoke = False
-    org_role.perm_review = False
-    org_role.perm_approve = False
-    org_role.created_at = localtime(now())
-    org_role.updated_at = localtime(now())
-    return org_role
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def roles(request, level, pk):
-
-    org = get_object_or_404(Org, pk=pk)
-
-    bundles = Bundle.objects.all()
-    mapped_org_roles = dict([
-        (org_role.bundle_id, org_role)
-        for org_role in org.orgrole_set.all()
-    ])
-
-    org_roles_display = []
-    for bundle in bundles:
-        if bundle.id not in mapped_org_roles:
-            org_role = _get_default_org_role(org, bundle)
-        else:
-            org_role = mapped_org_roles[bundle.id]
-        org_roles_display.append(
-            _get_org_role_display(org_role)
-        )
-
-    return JsonResponse({'org_roles': org_roles_display})
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def roles_save(request, payload, level, pk):
-
-    org = get_object_or_404(Org, pk=pk)
-
-    org_roles_new = []
-    org_roles_existing = org.orgrole_set.all()
-    mapped_org_roles_existing = dict([
-        (org_role.bundle_id, org_role)
-        for org_role in org_roles_existing
-    ])
-
-    bundle_ids = [
-        org_role['bundle']['id']
-        for org_role in payload
-    ]
-    bundles_mapped = dict([
-        (bundle.id, bundle)
-        for bundle in Bundle.objects.filter(pk__in=bundle_ids)
-    ])
-
-    def _set_org_role_perms(org_role, bundle_permission):
-        org_role.perm_view = bundle_permission.get('perm_view') is True
-        org_role.perm_create = bundle_permission.get('perm_create') is True
-        org_role.perm_remove = bundle_permission.get('perm_remove') is True
-        org_role.perm_revoke = bundle_permission.get('perm_revoke') is True
-        org_role.perm_review = bundle_permission.get('perm_review') is True
-        org_role.perm_approve = bundle_permission.get('perm_approve') is True
-
-    for bundle_permission in payload:
-
-        bundle_id = bundle_permission.get('bundle', {}).get('id')
-
-        if bundle_id not in bundles_mapped:
-            continue
-
-        if bundle_id in mapped_org_roles_existing:
-            org_role = mapped_org_roles_existing[bundle_id]
-            org_role.updated_at = localtime(now())
-        else:
-            org_role = OrgRole(org=org, bundle=bundles_mapped[bundle_id])
-            org_roles_new.append(org_role)
-
-        _set_org_role_perms(org_role, bundle_permission)
-
-    OrgRole.objects.bulk_create(org_roles_new)
-
-    OrgRole.objects.bulk_update(
-        org_roles_existing,
-        ['perm_view', 'perm_create', 'perm_remove', 'perm_revoke', 'perm_review', 'perm_approve', 'updated_at']
-    )
-
-    return JsonResponse({'success': True})
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -259,6 +58,7 @@ def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
     employee = Employee.objects.filter(user=user).first()
+
     employees_display = {
         'id': user.id,
         'last_name': user.last_name,
@@ -267,6 +67,7 @@ def employee_detail(request, pk):
         'email': user.email,
         'register': user.register,
         'gender': user.gender,
+        'token': employee.token,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
         'position': employee.position,
@@ -275,7 +76,23 @@ def employee_detail(request, pk):
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
     }
+
     return JsonResponse({'success': True, 'employee': employees_display})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def employee_token_refresh(request, pk):
+    employee = get_object_or_404(Employee, user_id=pk)
+    employee.token = TokenGeneratorEmployee().get()
+    employee.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
 
 
 def _employee_validation(payload, user):
@@ -426,7 +243,15 @@ def employee_add(request, payload, level, pk):
 
         utils.send_approve_email(user)
 
-    return JsonResponse({'success': True, 'errors': errors})
+    rsp = {
+        'success': True,
+        'employee': {
+            'id': employee.id,
+            'user_id': employee.user_id,
+        }
+    }
+
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -435,8 +260,27 @@ def employee_add(request, payload, level, pk):
 def employee_remove(request, pk):
 
     user = get_object_or_404(User, id=pk)
-    Employee.objects.filter(user=user).first().delete()
-    return JsonResponse({'success': True})
+    employee = get_object_or_404(Employee, user=user)
+    check = _remove_user(user, employee)
+    return JsonResponse({'success': check})
+
+
+def _remove_user(user, employee):
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    change_requests = ChangeRequest.objects.filter(employee=employee)
+
+    with transaction.atomic():
+        for change_request in change_requests:
+            change_request.employee = None
+            change_request.save()
+        if emp_perm:
+            EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
+            emp_perm.delete()
+        employee.delete()
+        user.delete()
+
+        return True
+    return False
 
 
 def _org_validation(org_name, org_id):
@@ -476,7 +320,7 @@ def org_add(request, payload, level):
     errors = _org_validation(org_name, org_id)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
-
+    # Байгууллага засах хэсэг
     if org_id:
         org = get_object_or_404(Org, pk=org_id)
         org.name = org_name
@@ -510,22 +354,20 @@ def org_add(request, payload, level):
                 GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
                 GovPerm.objects.filter(org_id=org_id).update(gov_role=None)
             return JsonResponse({'success': True})
+    # Байгууллага шинээр үүсгэх
     else:
         gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
+
+        gov_perm = GovPerm.objects.create(
+                org=org,
+                created_by=request.user,
+                updated_by=request.user
+            )
         if org_role_filter:
-            gov_perm = GovPerm.objects.create(
-                org=org,
-                gov_role=org_role_filter,
-                created_by=request.user,
-                updated_by=request.user
-            )
-        else:
-            gov_perm = GovPerm.objects.create(
-                org=org,
-                created_by=request.user,
-                updated_by=request.user
-            )
+            gov_perm.gov_role = org_role_filter
+            gov_perm.save()
+
         if gov_role_inspire_all:
             for gov_role_inspire in gov_role_inspire_all:
                 objs.append(GovPermInspire(
@@ -551,23 +393,24 @@ def org_remove(request, payload, level):
     org_id = payload.get('org_id')
     org = get_object_or_404(Org, pk=org_id, level=level)
     org_users = Employee.objects.filter(org=org_id)
-    inspire_perm = InspirePerm.objects.filter(org=org)
-    for org_user in org_users:
-        user = User.objects.filter(pk=org_user.user_id)
-        org_user.delete()
-        user.delete()
-    org_govorgs = GovOrg.objects.filter(org=org)
-    for org_govorg in org_govorgs:
-        org_govorg.org = None
-        org_govorg.deleted_by = request.user
-        org_govorg.deleted_at = localtime(now())
-        org_govorg.save()
-    inspire_perm.delete()
-    org.orgrole_set.all().delete()
     gov_perm = GovPerm.objects.filter(org=org)
-    gov_perm.delete()
-    org.delete()
-    return JsonResponse({'success': True})
+    with transaction.atomic():
+        gov_perm.delete()
+        for org_user in org_users:
+            user = User.objects.filter(pk=org_user.user_id).first()
+            if user:
+                _remove_user(user, org_user)
+        org_govorgs = GovOrg.objects.filter(org=org)
+        for org_govorg in org_govorgs:
+            org_govorg.org = None
+            org_govorg.deleted_by = request.user
+            org_govorg.deleted_at = localtime(now())
+            org_govorg.save()
+
+        org.orgrole_set.all().delete()
+        org.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 
 @require_POST
@@ -590,8 +433,8 @@ def org_list(request, payload, level):
     qs = qs.annotate(num_systems=Count('govorg', distinct=True))
 
     if query:
-        qs = qs.annotate(search=SearchVector('name'))
-        qs = qs.filter(Q(search__contains=query) | Q(employee__user__email=query))
+        qs = qs.annotate(search=Func(F('name'), function='LOWER'))
+        qs = qs.filter(search__icontains=query.lower())
     qs = qs.order_by(sort_name)
 
     total_items = Paginator(qs, per_page)
@@ -698,63 +541,13 @@ def employee_list(request,payload, level, pk):
 
     return JsonResponse(rsp)
 
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def roles_add(request, payload, level, pk):
-    form_datas = payload.get("form_values")
-    org = get_object_or_404(Org, pk=pk, level=level)
-    def role_update(roles, table_name, root_id, id):
-        if root_id:
-            org_check = InspirePerm.objects.filter(module_root_id=root_id , module_id=id, module=table_name, org=org)
-        else:
-            org_check = InspirePerm.objects.filter(module_id=id, module=table_name, org=org)
-        if org_check:
-            org_check.update(
-                perm_view=roles[0],
-                perm_create=roles[1],
-                perm_remove=roles[2],
-                perm_update=roles[3],
-                perm_revoke=roles[4],
-                perm_review=roles[5],
-                perm_approve=roles[6]
-            )
-        else:
-            orgRole = InspirePerm.objects.create(
-                org=org,
-                module_id=id,
-                module=table_name,
-                perm_view=roles[0],
-                perm_create=roles[1],
-                perm_remove=roles[2],
-                perm_update=roles[3],
-                perm_revoke=roles[4],
-                perm_review=roles[5],
-                perm_approve=roles[6]
-            )
-            if orgRole and root_id:
-                orgRole.module_root_id = root_id
-                orgRole.save()
-
-
-    for themes in form_datas:
-        role_update(themes['roles'], 1, None, themes['id'])
-        for packages in themes['packages']:
-            role_update(packages['roles'], 2, themes['id'], packages['id'])
-            for features in packages['features']:
-                role_update(features['roles'], 3, packages['id'], features['id'])
-                for properties in features['properties']:
-                    role_update(properties['roles'], 4, features['id'], properties['id'])
-
-    return JsonResponse({'success': True})
-
 
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def count_org(request):
     rsp = {
-        'gov_count':{
+        'gov_count': {
             'level1': Org.objects.filter(level=1).count(),
             'level2': Org.objects.filter(level=2).count(),
             'level3': Org.objects.filter(level=3).count(),

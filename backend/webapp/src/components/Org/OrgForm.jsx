@@ -82,10 +82,14 @@ export class OrgForm extends Component {
         const level = this.props.match.params.level
         const org_id = this.props.match.params.org_id
         service.org_remove(this.state.level,id).then(({ success }) => {
+            var a = load
+            a++
             if (success) {
-                var a = load
-                a++
                 this.setState({ load: a, msg: "Амжилттай боллоо", style: 'success' })
+                this.paginate(1, searchQuery, level, org_id)
+                this.setState({ modal_alert_status: 'open'})
+            }else{
+                this.setState({ load: a, msg: "Амжилтгүй боллоо", style: 'danger' })
                 this.paginate(1, searchQuery, level, org_id)
                 this.setState({ modal_alert_status: 'open'})
             }
@@ -105,7 +109,7 @@ export class OrgForm extends Component {
     }
 
     render() {
-        const {orgs,currentPage,org_length} = this.state
+        const {orgs, currentPage, org_length, msg, style} = this.state
         return (
             <div className="main-content">
                 <div className="page-container">
@@ -171,8 +175,8 @@ export class OrgForm extends Component {
                     />
                 </div>
                 <ModalAlert
-                    title="Амжилттай устгалаа"
-                    model_type_icon = "success"
+                    title={msg}
+                    model_type_icon={style}
                     status={this.state.modal_alert_status}
                     modalAction={() => this.modalClose()}
                 />

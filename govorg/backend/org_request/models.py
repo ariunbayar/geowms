@@ -1,5 +1,6 @@
 from django.db import models
 from backend.org.models import Employee
+from backend.org.models import Org
 
 # Create your models here.
 
@@ -25,8 +26,8 @@ class ChangeRequest(models.Model):
 
     KIND_CHOICES = (
         (KIND_CREATE, 'ҮҮССЭН'),
-        (KIND_DELETE, 'УСТГАСАН'),
         (KIND_UPDATE, 'ЗАССАН'),
+        (KIND_DELETE, 'УСТГАСАН'),
         (KIND_DIRECT, 'ШУУД'),
         (KIND_REVOKE, 'ЦУЦЛАСАН'),
     )
@@ -38,10 +39,12 @@ class ChangeRequest(models.Model):
     theme_id = models.IntegerField()
     package_id = models.IntegerField()
     feature_id = models.IntegerField()
-    employee = models.ForeignKey(Employee, on_delete=models.PROTECT)
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name='+', null=True)
+    org = models.ForeignKey(Org, on_delete=models.PROTECT)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, null=True)
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
     form_json = models.TextField(null=True)
     geo_json = models.TextField(null=True)
+    group_id = models.TextField(max_length=100, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

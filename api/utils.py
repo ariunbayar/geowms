@@ -3,8 +3,7 @@ from xml.etree import ElementTree
 
 
 re_layer = re.compile(r'^(.*?<Layer[^>]*>)(.*)(</Layer>.*)$', re.S)
-re_layer_wfs = re.compile(r'^(.*?<FeatureType[^>]*>)(.*)(</FeatureType>.*)$', re.S)
-
+re_layer_wfs = re.compile(r'^(.*?<FeatureTypeList[^>]*>)(.*)(</FeatureTypeList>.*)$', re.S)
 
 def filter_layers(content, allowed_layers):
     if isinstance(content, bytes):

@@ -1,7 +1,9 @@
 import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
-import ModalAlert from '../components/helpers/ModalAlert'
+
 import { service } from "./service"
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 class HandleInput extends Component {
     constructor(props) {

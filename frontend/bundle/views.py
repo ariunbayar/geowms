@@ -104,6 +104,17 @@ def wms_layers(request, pk):
 
 @require_GET
 @ajax_required
+def get_user(request):
+
+    if request.user.is_authenticated:
+        return JsonResponse({'is_authenticated': True})
+
+    else:
+        return JsonResponse({'is_authenticated': False})
+
+
+@require_GET
+@ajax_required
 def aimag(request):
     try:
         find_cursor = connections['postgis_db'].cursor()

@@ -6,15 +6,13 @@ from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
 from django.db import connections
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
-from django.utils.timezone import localtime, now
+from django.utils.timezone import localtime
 
 from .models import Config
 
 from backend.config.models import Error500
-from backend.payment.models import Payment
 from main.decorators import ajax_required
 from main import geoserver
 
@@ -352,6 +350,55 @@ def qgis_configs_save(request, payload):
 
     config_names = (
         'qgis_local_base_url',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def dan_configs(request):
+
+    default_values = {
+        'AUTHORIZE': '',
+        'TOKEN': '',
+        'SERVICE': '',
+        'CLIENT_ID': '',
+        'CLIENT_SECRET': '',
+        'CALLBACK_URI': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def dan_configs_save(request, payload):
+
+    config_names = (
+        'AUTHORIZE',
+        'TOKEN',
+        'SERVICE',
+        'CLIENT_ID',
+        'CLIENT_SECRET',
+        'CALLBACK_URI',
     )
 
     for config_name in config_names:

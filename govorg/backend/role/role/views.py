@@ -1,10 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse
 from django.db import transaction
 
 from main.decorators import ajax_required
-from backend.org.models import Org
+from backend.org.models import Org, Employee
 from backend.inspire.models import (
     GovPerm,
     GovPermInspire,
@@ -13,6 +13,8 @@ from backend.inspire.models import (
     LFeatures,
     LPackages,
     LProperties,
+    EmpPermInspire,
+    EmpPerm
 )
 
 from govorg.backend.utils import (
@@ -20,6 +22,8 @@ from govorg.backend.utils import (
     get_theme_data_display,
     get_property_data_display,
     get_convert_perm_kind,
+    count_property_of_feature,
+    get_perm_kind_name
 )
 
 
@@ -62,10 +66,10 @@ def _set_emp_role_data(emp_role, name, description):
 
 def _set_emp_role_inspire_data(emp_role, role, user):
 
-    gov_perm_inspire =  get_object_or_404(GovPermInspire, pk=role.get('gov_perm_inspire_id'))
+    gov_perm_inspire =  role.get('gov_perm_inspire_id')
 
     emp_role_inspire = EmpRoleInspire()
-    emp_role_inspire.gov_perm_inspire = gov_perm_inspire
+    emp_role_inspire.gov_perm_inspire_id = gov_perm_inspire
     emp_role_inspire.created_by = user
     emp_role_inspire.emp_role = emp_role
     emp_role_inspire.feature_id = role.get('feature_id')
@@ -74,9 +78,29 @@ def _set_emp_role_inspire_data(emp_role, role, user):
     else:
         emp_role_inspire.property_id = role.get('property_id')
     emp_role_inspire.perm_kind = get_convert_perm_kind(EmpRoleInspire, role.get('perm_kind'))
-    emp_role_inspire.save()
 
-    return True
+    return emp_role_inspire, gov_perm_inspire
+
+
+def _set_emp_perm_ins(emp_perm, perm, user, emp_role_inspire, gov_perm_inspire):
+    feature_id = perm.get('feature_id')
+    property_id = perm.get('property_id')
+    perm_kind = get_convert_perm_kind(EmpPermInspire, perm.get('perm_kind'))
+
+    emp_perm_inspire = EmpPermInspire(
+        emp_role_inspire=emp_role_inspire,
+        gov_perm_inspire_id=gov_perm_inspire,
+        emp_perm=emp_perm,
+        feature_id=feature_id,
+        created_by=user,
+        updated_by=user,
+        perm_kind=perm_kind,
+    )
+    if property_id == 'geom':
+        emp_perm_inspire.geom = True
+    else:
+        emp_perm_inspire.property_id = property_id
+    return emp_perm_inspire
 
 
 def _delete_emp_role_inspire_data(emp_role, roles):
@@ -110,34 +134,34 @@ def _role_name_validation(payload, role):
 @require_POST
 @ajax_required
 def create(request, payload):
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
     description = payload.get('role_description')
     roles = payload.get('roles')
     errors = _role_name_validation(payload, None)
+    user = request.user
     if errors:
         return JsonResponse({'success': False, 'errors':errors})
 
-    with transaction.atomic():
+    gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
+    emp_role = EmpRole()
+    emp_role.gov_perm = gov_perm
+    emp_role.created_by = request.user
+    emp_role.save()
+    if _set_emp_role_data(emp_role, name, description):
+        obj = []
+        for role in roles:
+            emp_role_inspire, gov_perm_inspire = _set_emp_role_inspire_data(emp_role, role, user)
+            obj.append(emp_role_inspire)
+        EmpRoleInspire.objects.bulk_create(obj)
 
-        gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
-        emp_role = EmpRole()
-        emp_role.gov_perm = gov_perm
-        emp_role.created_by = request.user
-        emp_role.save()
-
-        if _set_emp_role_data(emp_role, name, description):
-            for role in roles:
-                _set_emp_role_inspire_data(emp_role, role, request.user)
-
-        return JsonResponse({'success': True, 'errors': errors})
-
-    return JsonResponse({'success': False, 'errors': errors})
+    return JsonResponse({'success': True, 'errors': errors})
 
 
 @require_POST
 @ajax_required
 def update(request, payload, pk):
-
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
     description = payload.get('role_description')
     remove_roles = payload.get('remove_roles')
@@ -152,6 +176,7 @@ def update(request, payload, pk):
 
     emp_role.updated_by = request.user
     emp_role.save()
+    emp_perms = EmpPerm.objects.filter(emp_role=emp_role)
 
     with transaction.atomic():
 
@@ -161,8 +186,18 @@ def update(request, payload, pk):
             _delete_emp_role_inspire_data(emp_role, remove_roles)
 
         if add_roles:
+            objs = []
+            objstest = []
             for role in add_roles:
-                _set_emp_role_inspire_data(emp_role, role, request.user)
+                emp_role_inspire, gov_perm_inspire = _set_emp_role_inspire_data(emp_role, role, request.user)
+                objstest.append(emp_role_inspire)
+                # Role дээр нэмэлд засвар хийхэд тухайн role той хэрэглэгчидэд бас check нэмж өгж байана.
+                for emp_perm in emp_perms:
+                    emp_perm_inspire_obj = _set_emp_perm_ins(emp_perm, role, request.user, emp_role_inspire, gov_perm_inspire)
+                    objs.append(emp_perm_inspire_obj)
+
+            EmpPermInspire.objects.bulk_create(objs)
+            EmpRoleInspire.objects.bulk_create(objstest)
 
         return JsonResponse({'success': True, 'errors': errors})
 
@@ -177,12 +212,22 @@ def _get_emp_roles_data_display(emp_role):
     property_of_feature = {}
 
     for feature_id in feature_ids:
-        property_ids = EmpRoleInspire.objects.filter(emp_role=emp_role, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values_list('property_id', flat=True)
-        property_of_feature[feature_id] = property_ids
-        properties.append(get_property_data_display(None, feature_id, emp_role, EmpRoleInspire, True))
-        for property_id in property_ids:
-            prop = LProperties.objects.get(property_id=property_id)
-            properties.append(get_property_data_display(prop, feature_id, emp_role, EmpRoleInspire, False))
+        emp_perm_properties = EmpRoleInspire.objects.filter(emp_role=emp_role, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+        property_data, perm_list = get_property_data_display(None, feature_id, emp_role, EmpRoleInspire, True)
+        properties.append(property_data)
+
+        property_perm_count = count_property_of_feature(emp_perm_properties)
+
+        for perm in perm_list:
+            kind_name = get_perm_kind_name(perm['kind'])
+            property_perm_count[kind_name] = property_perm_count[kind_name] + 1
+
+        property_of_feature[feature_id] = property_perm_count
+
+        for property_id in emp_perm_properties:
+            prop = LProperties.objects.get(property_id=property_id['property_id'])
+            property_data, perm_list = get_property_data_display(prop, feature_id, emp_role, EmpRoleInspire, False)
+            properties.append(property_data)
 
     package_features = [
         get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
@@ -190,7 +235,7 @@ def _get_emp_roles_data_display(emp_role):
     ]
 
     themes = [
-        get_theme_data_display(theme_id, LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True))
+        get_theme_data_display(theme_id, LPackages.objects.filter(theme_id=theme_id, package_id__in=package_ids).values_list('package_id', flat=True), package_features)
         for theme_id in theme_ids
     ]
 
@@ -222,7 +267,7 @@ def detail(request, pk):
 @require_GET
 @ajax_required
 def delete(request, pk):
-
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     emp_role = get_object_or_404(EmpRole, pk=pk)
     with transaction.atomic():
         EmpRoleInspire.objects.filter(emp_role=emp_role).delete()

@@ -1,7 +1,9 @@
 import React, { Component } from "react"
+
 import {service} from '../service'
 import AyulFormTable from "./AyulFormTable"
-import ModalAlert from '../../../components/helpers/ModalAlert'
+import ModalAlert from "@utils/Modal/ModalAlert"
+
 
 export class AyulForm extends Component {
 
@@ -15,8 +17,6 @@ export class AyulForm extends Component {
             y: 0,
             save_is_error: false,
             handle_save_succes_huree: false,
-            perms: this.props.perms,
-            is_editable: this.props.is_editable,
             modal_alert_status: 'closed',
             timer: null,
             text: ""
@@ -103,7 +103,6 @@ export class AyulForm extends Component {
 
     render() {
         const tuuhen_ov = this.props.dursgalt_id
-        const { perms, is_editable } = this.state
         return (
             <div className="ml-3">
                 <h4>Дурсгалт газрын аюулын хамрах хүрээний солбилцол.</h4>
@@ -116,9 +115,8 @@ export class AyulForm extends Component {
                         <tr>
                             <th rowSpan="2" scope="rowgroup" scope="row">№</th>
                             <td colSpan="2">Latitude Longitude</td>
-                            {is_editable ? <td rowSpan="2">Засах</td> : null}
-                            {perms.perm_remove ? <td rowSpan="2">Устгах</td> : null}
-                            {!perms.perm_remove && perms.perm_create && <td rowSpan="2">Нэмэх</td>}
+                            <td rowSpan="2">Засах</td>
+                            <td rowSpan="2">Устгах</td>
                         </tr>
                         <tr>
                             <th scope="row">X</th>
@@ -133,52 +131,42 @@ export class AyulForm extends Component {
                                 idx={idx}
                                 tuuhen_ov={tuuhen_ov}
                                 handleRemove={() => this.handleRemove(data.id)}
-                                perms = {perms}
-                                is_editable = {is_editable}
                                 loadAyuulRows = {() => this.props.loadAyuulRows()}
                             ></AyulFormTable>
                         )}
-                        {perms.perm_create ?
-                            <tr >
-                                <th scope="row"></th>
+                        <tr >
+                            <th scope="row"></th>
 
-                                <td scope="row">
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        id="x"
-                                        onChange={(e) => this.handleInput('x', e)}
-                                        value={this.state.x}
-                                    />
-                                </td>
-                                <td scope="row">
-                                    <input
-                                        type="number"
-                                        className="form-control"
-                                        id="y"
-                                        onChange={(e) => this.handleInput('y', e)}
-                                        value={this.state.y}
-                                    />
-                                </td>
-                                {
-                                    perms.perm_create
-                                    ?
-                                    <td colSpan="2" scope="rowgroup" scope="row">
-                                        { this.state.handle_save_succes_huree ?
-                                                <a className="spinner-border gp-text-primary" role="status">
-                                                    <span className="sr-only">Loading...</span>
-                                                </a>
-                                            :
-                                            <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
-                                        }
-                                        <br></br>
-                                        {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
-                                    </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="x"
+                                    onChange={(e) => this.handleInput('x', e)}
+                                    value={this.state.x}
+                                />
+                            </td>
+                            <td scope="row">
+                                <input
+                                    type="number"
+                                    className="form-control"
+                                    id="y"
+                                    onChange={(e) => this.handleInput('y', e)}
+                                    value={this.state.y}
+                                />
+                            </td>
+                            <td colSpan="2" scope="rowgroup" scope="row">
+                                { this.state.handle_save_succes_huree ?
+                                        <a className="spinner-border gp-text-primary" role="status">
+                                            <span className="sr-only">Loading...</span>
+                                        </a>
                                     :
-                                    null
+                                    <i onClick={this.handleHureeSave} className="btn btn-outline-primary " aria-hidden="true">Нэмэх</i>
                                 }
-                            </tr> : null
-                        }
+                                <br></br>
+                                {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
                 <ModalAlert

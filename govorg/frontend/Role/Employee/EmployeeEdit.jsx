@@ -1,16 +1,22 @@
 import React, { Component, Fragment } from "react"
 import { NavLink } from "react-router-dom"
-import ModalAlert from '../../components/helpers/ModalAlert';
-import { service } from './service'
-import InsPerms from '../Role/GovPerms'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
+
+import { service } from './service'
+import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
+import {Notif} from '@utils/Notification'
+import Loader from "@utils/Loader"
+import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
+
 
 export class EmployeeEdit extends Component {
 
     constructor(props) {
         super(props)
 
+        this.too=0
         this.perms=[]
         this.role=[]
         this.remove_perms=[]
@@ -26,16 +32,18 @@ export class EmployeeEdit extends Component {
                 register: '',
                 is_admin: false,
             },
-
+            modal_status: 'closed',
+            is_loading: true,
             roles: {},
             perms: {},
             role_id: '',
             old_role_id: null,
             is_inspire_role: false,
+            is_inspire_role_null: false,
             prefix: '/gov/perm/employee/',
             id: this.props.match.params.id,
             role_list: [],
-            modal_alert_status: "closed",
+            modal_alert_status: 'closed',
             timer: null,
             model_type_icon: '',
             title: '',
@@ -51,6 +59,10 @@ export class EmployeeEdit extends Component {
         this.checkRoleAndPerm = this.checkRoleAndPerm.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+        this.addNotif = this.addNotif.bind(this)
+        this.handleSendMail = this.handleSendMail.bind(this)
     }
 
     componentDidMount() {
@@ -68,7 +80,7 @@ export class EmployeeEdit extends Component {
             .getDetailEmployee(id)
             .then(({ success, employee_detail, role_id, perms }) => {
                 if (success) {
-                    this.setState({ perms, role_id, old_role_id: role_id,  form_values:{
+                    this.setState({ perms, role_id, old_role_id: role_id, is_loading: false, form_values:{
                             username: employee_detail.username,
                             last_name: employee_detail.last_name,
                             first_name: employee_detail.first_name,
@@ -98,8 +110,9 @@ export class EmployeeEdit extends Component {
     getRole(role_id) {
         this.perms = []
         this.emp_perms = []
-        this.setState({role_id, is_inspire_role: false })
-        if(role_id) {
+        this.setState({role_id, is_inspire_role: false, is_inspire_role_null: false })
+        if(role_id)
+        {
             service
                 .getRole(role_id)
                 .then(({ success, roles }) => {
@@ -109,10 +122,18 @@ export class EmployeeEdit extends Component {
                     }
                 })
         }
+        else
+        {
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    this.setState({roles: {}, is_inspire_role_null: true})
+                }, 300);
+            })
+        }
     }
 
     getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm) {
-        if(!checked && this.role.length > 0 && type == null) {
+        if(!checked && type == null) {
             this.removeItemFromArray(
                 this.role,
                 feature_id,
@@ -150,13 +171,17 @@ export class EmployeeEdit extends Component {
     }
 
     removeItemFromArray (array, feature_id, property_id, perm_kind, perm_inspire_id, is_emp_perm) {
+        if(is_emp_perm){
+            this.remove_perms.push(perm_inspire_id)
+            return
+        }
+
         array.map((perm, idx) => {
             if(perm.feature_id == feature_id &&
                 perm.property_id == property_id &&
                 perm.perm_kind == perm_kind)
             {
-                if(is_emp_perm) this.remove_perms.push(perm_inspire_id)
-                else array.splice(idx, 1)
+                array.splice(idx, 1)
             }
         })
     }
@@ -189,6 +214,7 @@ export class EmployeeEdit extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                     this.setState({model_type_icon: 'success'})
+                    this.props.getEmpRoles()
                 } else {
                     if (errors) {
                         setErrors(errors)
@@ -217,7 +243,7 @@ export class EmployeeEdit extends Component {
     modalClose() {
         this.setState({ handleSaveIsLoad: false })
         this.props.history.push(this.state.prefix)
-        this.setState({ modal_alert_status: "closed" })
+        this.setState({ modal_alert_status: 'closed' })
         clearTimeout(this.state.timer)
     }
 
@@ -225,18 +251,50 @@ export class EmployeeEdit extends Component {
         setTimeout(() => {
             this.setState({ handleSaveIsLoad: false })
             this.props.history.push(this.state.prefix)
-            this.setState({ modal_alert_status: "closed" })
+            this.setState({ modal_alert_status: 'closed' })
         }, 2000)
     }
 
+    handleModalOpen(){
+        this.setState({modal_status: 'open'})
+    }
+
+    handleModalClose(){
+        this.setState({modal_status: 'closed'})
+    }
+
+    addNotif(style, msg, icon){
+        this.too ++
+        this.setState({ show: true, style: style, msg: msg, icon: icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
+    }
+
+    handleSendMail(){
+        this.setState({modal_status: 'closed'})
+        this.setState({ is_loading: true })
+        const username = this.state.form_values.username
+        service
+            .sendMail(username)
+            .then(({ success, info }) => {
+                if(success) {
+                    this.setState({ is_loading: false })
+                    this.addNotif('success', info, 'check')
+                }
+            })
+    }
+
     render() {
-        const {form_values, roles, role_list, prefix, is_inspire_role, perms, old_role_id, role_id } = this.state
+        const {form_values, roles, role_list, prefix, is_inspire_role, is_inspire_role_null, perms, old_role_id, role_id, id } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="text-left">
-                        <NavLink to={`${prefix}`}>
+                        <NavLink to={`${prefix}${id}/detail/#`}>
                             <p className="btn gp-outline-primary">
                                 <i className="fa fa-angle-double-left"></i> Буцах
                             </p>
@@ -256,6 +314,7 @@ export class EmployeeEdit extends Component {
                             const has_error = Object.keys(errors).length > 0
                             return (
                                 <Form className="col-12">
+                                    <Loader is_loading={this.state.is_loading}/>
                                     <div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
@@ -347,6 +406,7 @@ export class EmployeeEdit extends Component {
                                                 />
                                                 <ErrorMessage name="register" component="div" className="text-danger"/>
                                             </div>
+                                            {this.props.employee.is_admin &&
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="choose_role">Role: </label>
                                                 <select className='form-control' id="choose_role" name='choose_role' value={this.state.role_id} onChange={(e) => this.getRole(e.target.value)}>
@@ -355,9 +415,10 @@ export class EmployeeEdit extends Component {
                                                         <option key={idx} value={role.role_id}>{role.role_name}</option>
                                                     )}
                                                 </select>
-                                            </div>
+                                            </div>}
                                         </div>
                                         <div className='form-row'>
+                                            {this.props.employee.is_admin &&
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
@@ -368,26 +429,37 @@ export class EmployeeEdit extends Component {
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
-                                        </div>
-                                        <div>
-                                            {
-                                                roles !== {} && is_inspire_role
-                                                ?
-                                                    <InsPerms
-                                                        action_type="editable"
-                                                        is_employee={true}
-                                                        getValue={this.getValue}
-                                                        dontDid={true}
-                                                        org_roles={org_roles}
-                                                        role={roles}
-                                                        emp_perms={old_role_id == role_id ? perms : null}
-                                                        editable_is_check={this.perms}
-                                                    />
-                                                : null
+                                            }
+                                            {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
+                                            <div className="col-md-6">
+                                                <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                    {} Нууц үг солих имэйл илгээх
+                                                </button>
+                                            </div>
+                                            : null
                                             }
                                         </div>
+                                        <br/>
+                                        <div>
+                                        {this.props.employee.is_admin &&
+                                            (is_inspire_role || is_inspire_role_null)
+                                            ?
+                                                <InsPerms
+                                                    action_type="editable"
+                                                    is_employee={true}
+                                                    getValue={this.getValue}
+                                                    dontDid={true}
+                                                    org_roles={org_roles}
+                                                    role={roles}
+                                                    is_inspire_role_null={is_inspire_role_null}
+                                                    emp_perms={old_role_id == role_id ? perms : null}
+                                                    editable_is_check={this.perms}
+                                                />
+                                            : null
+                                        }
+                                        </div>
                                         <div className="form-group">
-                                            <button type="submit" className="btn btn-primary btn-block waves-effect waves-light m-1" disabled={isSubmitting}>
+                                            <button type="submit" className="btn btn-primary waves-effect waves-light m-1" disabled={isSubmitting}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                 {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                 {!isSubmitting && 'Хадгалах' }
@@ -399,12 +471,21 @@ export class EmployeeEdit extends Component {
                         </Formik>
                     </div>
                 </div>
+                <Modal
+                    title="Та нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?"
+                    model_type_icon = "warning"
+                    status={this.state.modal_status}
+                    modalClose={this.handleModalClose}
+                    modalAction={() => this.handleSendMail()}
+                    actionNameDelete='Илгээх'
+                />
                 <ModalAlert
                     modalAction={() => this.modalClose()}
                     status = {this.state.modal_alert_status}
                     title = {this.state.title}
                     model_type_icon = {this.state.model_type_icon}
                 />
+                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
             </div>
         )
     }

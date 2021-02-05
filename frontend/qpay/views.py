@@ -1,21 +1,20 @@
-import requests
+import os
+import time
 
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_GET, require_POST
-from main.decorators import ajax_required
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from geoportal_app.models import User
-from .qpay import Qpay
+from django.utils.timezone import localtime, now
+from django.views.decorators.http import require_POST
+from django.conf import settings
+
+from main.decorators import ajax_required
 from backend.payment.models import Payment
-from datetime import datetime
-
-
-# Create your views here.
+from .qpay import Qpay
 
 
 @require_POST
 @ajax_required
+@login_required
 def create(request, payload):
 
     price = payload.get('price')
@@ -42,6 +41,7 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+@login_required
 def check(request, payload):
 
     purchase_id = payload.get('purchase_id')
@@ -52,6 +52,21 @@ def check(request, payload):
             #Токен үүсгэж байна.
             qpay.authenticate()
             data = qpay.check()
+
+            # XXX Debug payment code
+            if settings.DEBUG and os.getenv('QPAY_FAKE') == '1':
+                data = {
+                    'payment_info': {
+                        'payment_status': 'PAID',
+                        'transaction_id': 'fake_%d' % int(time.time()),
+                        'transactions': [
+                            {
+                                'beneficiary_account_number': ' ',
+                            },
+                        ]
+                    }
+                }
+
             if data:
                 if data['payment_info']['payment_status'] == 'PAID':
                     pay_info = data['payment_info']
@@ -64,7 +79,7 @@ def check(request, payload):
                     else:
                         card_number = ' '
                     if not purhcase.is_success:
-                        Payment.objects.filter(id=purchase_id).update(is_success=True, success_at=datetime.now(),bank_unique_number=customer_id , card_number=card_number , code=0, message="Худалдан авалт амжилттай болсон.", qpay_rsp=data)
+                        Payment.objects.filter(id=purchase_id).update(is_success=True, success_at=localtime(now()),bank_unique_number=customer_id , card_number=card_number , code=0, message="Худалдан авалт амжилттай болсон.", qpay_rsp=data)
                     rsp = {
                         'success': True,
                         'msg':'Төлөгдсөн төлбөрийн дугаар'

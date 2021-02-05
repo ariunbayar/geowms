@@ -1,14 +1,12 @@
 import React, { Component } from "react"
-import {service} from '../service'
-import {Switch , Route, Link, NavLink} from "react-router-dom"
-import {UserForm } from './UserForm'
-import {UserAdd } from './UserAdd'
-import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
-
+import { service} from '../service'
+import { Switch , Route, Link, NavLink } from "react-router-dom"
+import { UserTable } from './UserTable'
+import { UserAdd } from './UserAdd'
+import { Detail } from './Detail'
 
 
 export class OrgUser extends Component {
-
 
     constructor(props) {
 
@@ -22,14 +20,18 @@ export class OrgUser extends Component {
     componentDidMount() {
     }
 
-
     render() {
         return (
             <Switch>
-                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={UserForm}/>
-                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/нэмэх/" component={UserAdd}/>
-                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/Дэлгэрэнгүй/" component={Дэлгэрэнгүй}/>
-                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/засах/" component={UserAdd}/>
+                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/" component={ UserTable }/>
+                <Route
+                    exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/нэмэх/"
+                    component={(props) =>
+                        <UserAdd {...props} refreshCount={this.props.refreshCount}/>
+                    }
+                />
+                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/дэлгэрэнгүй/" component={ Detail }/>
+                <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/засах/" component={ UserAdd }/>
             </Switch>
         )
     }

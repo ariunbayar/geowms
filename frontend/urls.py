@@ -17,6 +17,7 @@ urlpatterns = [
         path('api/sum/', bundle_views.sumfind, name='sum'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
+        path('get_user/', bundle_views.get_user, name='get_user'),
     ], 'bundle'))),
 
     path('', include(([
@@ -49,10 +50,11 @@ urlpatterns = [
         path('dictionaryRequest/', payment_views.dictionaryRequest, name='dictionaryRequest'),
         path('dictionaryResponse/', payment_views.dictionaryResponse, name='dictionaryResponse'),
         path('purchase-draw/', payment_views.purchaseDraw, name='purchase-draw'),
-        path('api/download-purchase/<int:pk>/', payment_views.download_purchase),
+        path('api/download-purchase/<int:pk>/<str:download_type>/', payment_views.download_purchase, name="download_purchase"),
         path('purchase-from-cart/', payment_views.purchaseFromCart, name='purchase-from-cart'),
         path('download-pdf/<str:pk>/', payment_views.download_pdf, name='download-pdf'),
         path('download-zip/<int:pk>/', payment_views.download_zip, name='download-zip'),
+        path('calc-price/', payment_views.calcPrice, name='calculate-price'),
     ], 'payment'))),
 
     path('qpay/', include(([
@@ -65,7 +67,7 @@ urlpatterns = [
         path('all/', profile_views.all, name='all'),
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
-        path('get-details/', profile_views.tseg_details, name='tseg-details'),
+        path('<int:pk>/get-details/', profile_views.getDetail, name='tseg-details'),
         path('info/', profile_views.user_info),
         path('update-password/', profile_views.user_update_password),
     ], 'profile'))),

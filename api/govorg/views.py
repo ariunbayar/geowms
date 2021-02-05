@@ -156,6 +156,7 @@ def qgis_submit(request, token):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
     employee = get_object_or_404(Employee, token=token)
+    org = get_object_or_404(Org, pk=employee.org_id)
     update_lists = json.loads(update)
     delete_lists = json.loads(delete)
     objs = []
@@ -178,6 +179,7 @@ def qgis_submit(request, token):
                 package_id=package.package_id,
                 feature_id=feature_id,
                 employee=employee,
+                org=org,
                 state=ChangeRequest.STATE_CONTROL,
                 kind=ChangeRequest.KIND_UPDATE,
                 form_json=None,
@@ -205,6 +207,7 @@ def qgis_submit(request, token):
                 package_id=package.package_id,
                 feature_id=feature_id,
                 employee=employee,
+                org=org,
                 state=ChangeRequest.STATE_CONTROL,
                 kind=ChangeRequest.KIND_DELETE,
                 form_json=None,

@@ -3,35 +3,34 @@ import json
 import datetime
 import uuid
 import glob
-import random
 from geojson import Feature, FeatureCollection
+from .forms import OrderForm
+
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.gdal.error import GDALException
 from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.geos import MultiPoint
-from django.contrib.gis.geos import MultiLineString
-from django.contrib.gis.geos import MultiPolygon
-from django.contrib.gis.geos.error import GEOSException
-from django.core.files.storage import FileSystemStorage
-from django.db import connections
-from django.db.utils import InternalError
+from django.contrib.gis.gdal import DataSource
+from django.contrib.auth.decorators import login_required
+from django.db import connections, transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
-from backend.changeset.models import ChangeSet
+from django.core.files.storage import FileSystemStorage
+from django.contrib.gis.geos import MultiLineString
+from django.contrib.gis.geos import MultiPoint
+from django.contrib.gis.geos import MultiPolygon
+
 from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
 from backend.inspire.models import LCodeLists
-from backend.inspire.models import LFeatureConfigs
 from backend.inspire.models import LProperties
-from backend.inspire.models import LValueTypes
+from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
+
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 from main.utils import get_geoJson
@@ -45,6 +44,7 @@ from main.utils import gis_tables_by_oids
 from main.utils import has_employee_perm
 from main.utils import refreshMaterializedView
 from main.utils import get_emp_property_roles
+from main.inspire import GEoIdGenerator
 
 
 def _get_changeset_display(ob):
@@ -53,16 +53,16 @@ def _get_changeset_display(ob):
     geom1 = geom[:9]
     geom2 = geom[10:-2]
     geom3 = geom[-1]
-    geom4 = geom1 + geom2 +geom3
+    geom4 = geom1 + geom2 + geom3
     values_list = json.loads(geom4)
     coordinates = values_list['geom']['coordinates']
     geom_type = values_list['geom']['type']
 
     return {
-        'coordinate':coordinates,
-        'geom_type':geom_type,
-        'changeset_id':ob.id,
-        'changeset_attributes':ob.features,
+        'coordinate': coordinates,
+        'geom_type': geom_type,
+        'changeset_id': ob.id,
+        'changeset_attributes': ob.features,
         'projection': ob.projection
     }
 
@@ -102,20 +102,6 @@ def _get_feature_coll(ob, changeset_list):
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def changeset_all(request):
-
-    changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
-    features = [_get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
-    feature_collection = FeatureCollection(features)
-    rsp = {
-        'GeoJson': feature_collection,
-    }
-    return JsonResponse(rsp)
-
-
-@require_GET
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
 def getRoles(request, fid):
 
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
@@ -138,12 +124,11 @@ def getRoles(request, fid):
         elif perm_kind == EmpPermInspire.PERM_REVOKE:
             inspire_roles['PERM_REVOKE'] = True
     rsp = {
-        'roles':inspire_roles,
+        'roles': inspire_roles,
         'success': True
     }
 
     return JsonResponse(rsp)
-
 
 
 @require_GET
@@ -349,7 +334,7 @@ def _get_property(ob, roles, lproperties):
     value_type = _get_type(lproperties.value_type_id)
 
     if value_type == 'option':
-       data_list =  _code_list_display(lproperties.property_id)
+        data_list = _code_list_display(lproperties.property_id)
     elif value_type == 'text':
         data = ob.get('value_text') or ''
     elif value_type == 'number':
@@ -361,9 +346,8 @@ def _get_property(ob, roles, lproperties):
         if role.get('property_id') == lproperties.property_id:
             property_roles = role.get('roles')
 
-
     return {
-        'pk':ob.get('id'),
+        'pk': ob.get('id'),
         'property_name': lproperties.property_name,
         'property_id': lproperties.property_id,
         'property_code': lproperties.property_code,
@@ -374,6 +358,7 @@ def _get_property(ob, roles, lproperties):
         'data_list': data_list,
         'roles': property_roles
     }
+
 
 @require_GET
 @ajax_required
@@ -404,10 +389,10 @@ def detailCreate(request, tid, pid, fid):
     property_roles = []
     org_propties_front = []
     value_data = {
-        'pk':'',
-        'value_text':'',
-        'value_date':'',
-        'value_number':''
+        'pk': '',
+        'value_text': '',
+        'value_date': '',
+        'value_number': ''
         }
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_roles = get_emp_property_roles(employee, fid)
@@ -475,11 +460,11 @@ def _geo_json_convert_geom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
 
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom)
         geom_type = GEOSGeometry(geom).geom_type
         if geom_type == 'Point':
@@ -490,42 +475,6 @@ def _geo_json_convert_geom(geojson):
             geom = MultiPolygon(geom, srid=4326)
         return geom
     return None
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def geomAdd(request, payload, fid):
-
-    geojson = payload.get('geojson')
-    geom = _geo_json_convert_geom(geojson)
-    if not geom:
-        rsp = {
-            'success': False,
-            'info': "Geojson алдаатай байна.",
-            'id': None
-        }
-        return JsonResponse(rsp)
-    count = random.randint(1062, 9969)
-    geo_id = str(fid) + str(count) + 'geo'
-    MGeoDatas.objects.create(geo_id=geo_id, geo_data=geom, feature_id=fid, created_by=1, modified_by=1)
-    fields = get_rows(fid)
-    for field in fields:
-        MDatas.objects.create(
-            geo_id = geo_id,
-            feature_config_id = field['feature_config_id'],
-            data_type_id = field['data_type_id'],
-            property_id = field['property_id'],
-            created_by = 1,
-            modified_by = 1
-        )
-    refreshMaterializedView(fid)
-    rsp = {
-        'success': True,
-        'info': "Ажилттай ",
-        'id': geo_id
-    }
-    return JsonResponse(rsp)
 
 
 @require_POST
@@ -542,6 +491,8 @@ def create(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -550,16 +501,17 @@ def create(request, payload):
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
-            old_geo_id = None,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_CREATE,
-            form_json = form_json,
-            geo_json = geo_json,
+            old_geo_id=None,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            org=org,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_CREATE,
+            form_json=form_json,
+            geo_json=geo_json,
             order_at=order_at,
             order_no=order_no,
     )
@@ -584,11 +536,13 @@ def remove(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     geo_data = _get_geom(old_geo_id, fid)
     if not geo_data:
         rsp = {
-        'success': False,
-        'info': "Аль хэдийн устсан геом байна.",
+            'success': False,
+            'info': "Аль хэдийн устсан геом байна.",
         }
         return JsonResponse(rsp)
 
@@ -600,16 +554,17 @@ def remove(request, payload):
         return JsonResponse({'success': success, 'info': info})
 
     ChangeRequest.objects.create(
-            old_geo_id = old_geo_id,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_DELETE,
-            form_json = None,
-            geo_json = None,
+            old_geo_id=old_geo_id,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            org=org,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_DELETE,
+            form_json=None,
+            geo_json=None,
             order_at=order_at,
             order_no=order_no,
     )
@@ -635,6 +590,8 @@ def update(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -643,16 +600,17 @@ def update(request, payload):
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
-            old_geo_id = old_geo_id,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_UPDATE,
-            form_json = form_json,
-            geo_json = geo_json,
+            old_geo_id=old_geo_id,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            org=org,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_UPDATE,
+            form_json=form_json,
+            geo_json=geo_json,
             order_at=order_at,
             order_no=order_no,
     )
@@ -706,86 +664,89 @@ def control_to_remove(request, payload):
     return JsonResponse(rsp)
 
 
-def _make_value_json(val_type, property, value, geo_id, feature_config_id, data_type_id):
-    datas = {}
-    code_value = None
-    if val_type == 'single-select':
-        code_list_values = LCodeLists.objects.filter(property_id=property.property_id, code_list_code=value)
-        for code_list_value in code_list_values:
-            if code_list_value.code_list_code.lower() == value.lower():
-                code_value = code_list_value.code_list_id
-    for i in MDatas._meta.get_fields():
-        if 'value' in i.name:
-            datas[i.name] = None
-            out = i.name.split('_')
-            type_name = 1
-            if out[type_name] == 'date' and val_type == 'date':
-                if '/' in value:
-                    dt = value.split('/')
-                    value = dt[0] + "-" + dt[1] + '-' + dt[2]
-            if out[type_name] == val_type:
-                datas[i.name] = value
-        else:
-            if i.name == 'geo_id':
-                datas[i.name] = geo_id
-            if i.name == 'data_type_id':
-                datas[i.name] = data_type_id
-            if i.name == 'property_id':
-                datas[i.name] = property.property_id
-            if i.name == 'feature_config_id':
-                datas[i.name] = feature_config_id
-            if i.name == 'code_list_id':
-                datas[i.name] = code_value
-            if i.name == 'created_by':
-                datas[i.name] = 1
-            if i.name == 'modified_by':
-                datas[i.name] = 1
-    return datas
+def _check_and_make_form_json(feature_id, values):
+    form_json_list = list()
+    code_list_values = ""
+    with transaction.atomic():
+        view = get_object_or_404(ViewNames, feature_id=feature_id)
+        view_props = ViewProperties.objects.filter(view=view)
+
+        for view_prop in view_props:
+            prop_qs = LProperties.objects
+            prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+            prop_qs = prop_qs.first()
+
+            form_json = dict()
+            form_json['property_name'] = prop_qs.property_name
+            form_json['property_id'] = prop_qs.property_id
+            form_json['property_code'] = prop_qs.property_code
+            form_json['property_definition'] = prop_qs.property_definition
+            if prop_qs.value_type_id == 'single-select':
+                code_list_values = _code_list_display(prop_qs.property_id)
+            form_json['value_type_id'] = prop_qs.value_type_id
+            form_json['value_type'] = prop_qs.value_type_id
+            form_json['data_list'] = code_list_values
+            form_json['data'] = ''
+
+            for p_code, value in values.items():
+                if p_code.lower() in prop_qs.property_name.lower():
+                    form_json['data'] = value
+
+            form_json_list.append(form_json)
+
+    form_json_list = json.dumps(form_json_list)
+    return form_json_list
 
 
-def _save_to_m_data(values, geo_id, feature_id):
-    feature_config_id = None
-    success = False
-    info = ''
-    data_type_id = None
-    try:
+def _create_request(request_datas):
+    change_request = ChangeRequest()
 
-        feature_config = LFeatureConfigs.objects.filter(feature_id=feature_id).first()
-        if feature_config:
-            feature_config_id = feature_config.feature_config_id
-            data_type_id = feature_config.data_type_id
+    change_request.old_geo_id = None
+    change_request.new_geo_id = None
+    change_request.theme_id = request_datas['theme_id']
+    change_request.package_id = request_datas['package_id']
+    change_request.feature_id = request_datas['feature_id']
+    change_request.employee = request_datas['employee']
+    change_request.state = request_datas['state']
+    change_request.kind = request_datas['kind']
+    change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
+    change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
+    change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
+    change_request.order_at = request_datas['order_at'] if 'order_at' in request_datas else None
+    change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
 
-        for j in values:
-            for key, value in j.items():
-                prop = LProperties.objects.filter(property_code__icontains=key).first()
-                if prop:
-                    value_types = LValueTypes.objects.filter(value_type_id=prop.value_type_id)
-                    for value_type in value_types:
-                        val_type = value_type.value_type_id
+    change_request.save()
+    return change_request.id
 
-                        if val_type == 'boolean':
-                            success = False
-                            info = "Алдаа гарсан байна: " + val_type + ' буруу байна'
-                            return success, info
-                        datas = _make_value_json(val_type, prop, value, geo_id, feature_config_id, data_type_id)
 
-                        qs = MDatas.objects.filter(geo_id=geo_id, property_id=prop.property_id, feature_config_id=feature_config_id)
-                        if qs:
-                            qs = qs.update(**datas)
-                        else:
-                            qs = MDatas.objects.create(**datas)
+def _make_request(values, request_values):
+    form_json_list = _check_and_make_form_json(
+        request_values['feature_id'],
+        values
+    )
 
-        success = True
-        info = 'Амжилттай хадгалалаа'
+    request_datas = {
+        'theme_id': request_values['theme_id'],
+        'package_id': request_values['package_id'],
+        'feature_id': request_values['feature_id'],
+        'employee': request_values['employee'],
+        'state': ChangeRequest.STATE_NEW,
+        'kind': request_values['kind'],
+        'form_json': form_json_list,
+        'geo_json': request_values['geo_json'],
+        'order_at': request_values['order_at'],
+        'order_no': request_values['order_no'],
+        'group_id': request_values['group_id'],
+    }
 
-    except Exception as e:
-        success = False
-        info = 'Алдаа ' + str(e)
+    success = _create_request(request_datas)
+    info = 'Амжилттай хадгаллаа'
 
     return success, info
 
 
 def _delete_file(for_delete_items):
+    transaction.rollback()
     fileList = glob.glob(
         os.path.join(
             settings.BASE_DIR,
@@ -796,109 +757,108 @@ def _delete_file(for_delete_items):
         )
     )
     for filePath in fileList:
-            os.remove(filePath)
+        os.remove(filePath)
 
 
-def _delete_db(geo_id):
-    success = False
-    deleted_db_info = ''
-    try:
-        if geo_id:
-            delete_geos = MGeoDatas.objects.filter(geo_id=geo_id)
-            if delete_geos:
-                for geo in delete_geos:
-                    geo.delete()
-            delete_main_datas = MDatas.objects.filter(geo_id=geo_id)
-            if delete_main_datas:
-                for data in delete_main_datas:
-                    data.delete()
-            success = True
-    except Exception as e:
-        deleted_db_info = "Устгах явцад алдаа гарсан " + str(e)
-    return success, deleted_db_info
+def _make_file_name(uniq_file_name, file_type_name):
+    uniq_name = ''
 
+    splited = uniq_file_name.split('.')
+    splited.pop(len(splited)-1)
 
-def _remove_uploaded_file(geo_id, for_delete_items, info, success):
-    success, deleted_db_info = _delete_db(geo_id)
-    _delete_file(for_delete_items)
-    rsp = {
-        'success': success,
-        'info': deleted_db_info if deleted_db_info else info
-    }
-    return rsp
+    for part_name in splited:
+        uniq_name += part_name
+    file_name = uniq_name + '.' + file_type_name
 
-
-def _make_file_name(file_name, file_type_name):
-    uniq_name = file_name.split('.')[0]
-    if '.shx' in file_name or '.shp' in file_name or '.prj' in file_name or '.dbf' in file_name or '.cpg' in file_name:
-        file_name = uniq_name + '.' + file_type_name
-    if '.gml' in file_name or '.gfs' in file_name:
-        file_name = uniq_name + '.' + file_type_name
-    if '.geojson' in file_name:
-        file_name = uniq_name + '.' + file_type_name
     return file_name, uniq_name
 
 
-def _save_file_to_storage(file_type_name, file_name, fo):
-    path = os.path.join(settings.BASE_DIR, 'geoportal_app', 'datas', file_type_name)
+def _save_file_to_storage(file_type_name, uniq_file_name, fo):
+    path = os.path.join(
+        settings.BASE_DIR,
+        'geoportal_app',
+        'datas',
+        file_type_name
+    )
     fs = FileSystemStorage(
         location=path
     )
-    file = fs.save(file_name, fo)
+    file = fs.save(uniq_file_name, fo)
     fs.url(file)
     return path
 
 
-def _check_file_for_geom(form_file_name, unique_filename):
+def _check_file_for_geom(form_file_name, uniq_name, ext):
     return_name = ''
     file_type_name = ''
-    file_name = ''
-    if '.shx' in form_file_name or '.shp' in form_file_name or '.prj' in form_file_name or '.dbf' in form_file_name or '.cpg' in form_file_name:
-        file_name = unique_filename + form_file_name
-        file_type_name = 'shp'
-        return_name += form_file_name + ','
-    elif '.gml' in form_file_name or '.gfs' in form_file_name:
-        file_type_name = 'gml'
-        file_name = unique_filename + form_file_name
-        return_name += form_file_name + ','
-    elif '.geojson' in form_file_name or '.gfs' in form_file_name:
-        file_type_name = 'geojson'
-        file_name = unique_filename + form_file_name
-        return_name += form_file_name + ','
-    return file_name, file_type_name, return_name
+    uniq_file_name = ''
+
+    if ext == 'shp':
+        exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
+    elif ext == 'gml':
+        exts = ['.gml', '.gfs']
+    elif ext == 'geojson':
+        exts = ['.geojson', '.gfs']
+
+    for extension in exts:
+        if extension in form_file_name:
+            uniq_file_name = uniq_name + "_" + form_file_name
+            file_type_name = ext
+            return_name += form_file_name + ','
+
+    return uniq_file_name, file_type_name, return_name
 
 
-def _geom_to_multi(geom, geom_type, SRID):
-    geom = None
-    if geom_type == 'Point':
-        geom = MultiPoint(geom, srid=SRID) # Pointiig MultiPoint bolgoj bna
-    if geom_type == 'LineString':
-        geom = MultiLineString(geom, srid=SRID) # LineString MultiLineString bolgoj bna
-    if geom_type == 'Polygon':
-        geom = MultiPolygon(geom, srid=SRID) # Polygon MultiPolygon bolgoj bna
-    return geom
+def _make_geo_id(feature_id):
+    qs = LFeatures.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.first()
+    feature_code = qs.feature_code
+    new_geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    return new_geo_id
+
+
+def _check_perm(employee, feature_id, geo_json):
+
+    request_kind = ChangeRequest.KIND_CREATE
+    perm_kind = EmpPermInspire.PERM_CREATE
+
+    success, info = has_employee_perm(
+                        employee,
+                        feature_id,
+                        True,
+                        perm_kind,
+                        geo_json
+                    )
+
+    return success, info, request_kind
 
 
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def file_upload_save_data(request, tid, fid):
+def file_upload_save_data(request, tid, pid, fid, ext):
     employee = get_object_or_404(Employee, user=request.user)
-    form = request.FILES.getlist('data')
+    files = request.FILES.getlist('data')
+    order_at = request.POST.get('order_at')
+    order_no = request.POST.get('order_no')
     feature_id = fid
-    geo_id = ''
+    success = False
+    info = ''
+    main_request_id = None
 
-    try:
-        unique_filename = str(uuid.uuid4())
-        for fo in form:
-            file_name, file_type_name, return_name = _check_file_for_geom(fo.name, unique_filename)
-            if not file_name:
-                file_name = fo.name
-            if file_type_name:
-                path = _save_file_to_storage(file_type_name, file_name, fo)
+    form = OrderForm(request.POST)
+    if form.is_valid():
+        uniq_name = str(uuid.uuid4())
+        for fo in files:
+            uniq_file_name, file_type_name, return_name = _check_file_for_geom(
+                fo.name,
+                uniq_name,
+                ext
+            )
+            path = _save_file_to_storage(file_type_name, uniq_file_name, fo)
 
-        file_name, uniq_name = _make_file_name(file_name, file_type_name)
-
+        file_name, uniq_name = _make_file_name(uniq_file_name, file_type_name)
         for_delete_items = {
             "uniq_name": uniq_name,
             "file_name": file_name,
@@ -917,93 +877,83 @@ def file_upload_save_data(request, tid, fid):
             return JsonResponse(rsp)
 
         layer = ds[0]
-        for val in layer:
-            values = []
-            try:
-                for name in range(0, len(layer.fields)):
-                    field_name = val[name].name # field name
+        if layer:
+            with transaction.atomic():
+                if len(layer) > 1:
+                    request_datas = {
+                        'theme_id': tid,
+                        'package_id': pid,
+                        'feature_id': feature_id,
+                        'state': ChangeRequest.STATE_NEW,
+                        'kind': ChangeRequest.KIND_CREATE,
+                        'employee': employee,
+                        'order_at': order_at,
+                        'order_no': order_no,
+                    }
+                    main_request_id = _create_request(request_datas)
 
-                    value = val.get(name) # value ni
-                    if name == 0:
-                        if field_name == 'geo_id':
-                            geo_id = value
-                        else:
-                            g_id = val.get(name)
-                            need_id = MGeoDatas.objects.count()
-                            geo_id = str(need_id) + str(g_id)
-                        geom = ''
-                        geom_type = ''
-                        SRID = 4326
-                        dim = val.geom.coord_dim # dimension
-                        geo_json = val.geom.json # goemetry json
-                        if geo_json:
-                            geom_srid = GEOSGeometry(geo_json).srid # geomiin srid
-                            if geom_srid != SRID:
-                                geom = GEOSGeometry(geo_json, srid=SRID)
-                            if dim == 3:
-                                geom_type = GEOSGeometry(geo_json).geom_type # geom iin type
-                                geom = GEOSGeometry(geo_json).hex
-                                geom = geo_json.decode("utf-8") # binary hurwuuleh
-                                geom = GEOSGeometry(geom)
-                                geom = _geom_to_multi(geom, geom_type, SRID)
-                            if dim == 2:
-                                geom = _geo_json_convert_geom(geo_json)
-                            if geom:
-                                geo = MGeoDatas.objects.filter(geo_id=geo_id)
-                                if geo:
-                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
-                                    if not success:
-                                        _delete_file(for_delete_items)
-                                        return JsonResponse({'success': success, 'info': info})
+                for val in layer:
+                    values = dict()
+                    for name in range(0, len(layer.fields)):
+                        field_name = val[name].name  # field name
+                        value = val.get(name)  # value ni
 
-                                    geo = geo.update(geo_data=geom)
+                        if name == 0:
 
-                                else:
+                            # geo_id = _make_geo_id(feature_id)
+                            geo_json = val.geom.json  # goemetry json
 
-                                    success, info = has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_CREATE, geo_json)
-                                    if not success:
-                                        _delete_file(for_delete_items)
-                                        return JsonResponse({'success': success, 'info': info})
+                            if geo_json:
+                                success, info, request_kind = _check_perm(
+                                    employee,
+                                    feature_id,
+                                    geo_json
+                                )
 
-                                    geo = MGeoDatas.objects.create(
-                                        geo_id=geo_id,
-                                        geo_data=geom,
-                                        feature_id=feature_id,
-                                        created_by=1,
-                                        modified_by=1,
-                                    )
-                        else:
-                            info = 'geom байхгүй дата'
-                            rsp = _remove_uploaded_file(geo_id, for_delete_items, info, False)
-                            return JsonResponse(rsp)
+                                if not success:
+                                    _delete_file(for_delete_items)
+                                    rsp = {
+                                        'success': success,
+                                        'info': info,
+                                    }
+                                    return JsonResponse(rsp)
 
-                    values.append({
-                        field_name: value,
-                    })
+                            else:
+                                _delete_file(for_delete_items)
+                                rsp = {
+                                    'success': False,
+                                    'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
+                                }
+                                return JsonResponse(rsp)
 
-            except InternalError as e:
-                return_info = return_name + '-д Алдаа гарсан байна: UTM байгаа тул болохгүй'
-                rsp = _remove_uploaded_file(geo_id, for_delete_items, return_info, False)
-            except GEOSException as e:
-                return_info = return_name + '-д Алдаа гарсан байна: Geometry утга нь алдаатай байна'
-                rsp = _remove_uploaded_file(geo_id, for_delete_items, return_info, False)
+                        values[field_name] = value
 
-            success, info = _save_to_m_data(values, geo_id, feature_id)
-            if not success:
-                rsp = _remove_uploaded_file(geo_id, for_delete_items, info, success)
-                return JsonResponse(rsp)
-            else:
-                refreshMaterializedView(feature_id)
+                    request_values = {
+                        'theme_id': tid,
+                        'package_id': pid,
+                        'feature_id': fid,
+                        'employee': employee,
+                        'geo_json': geo_json,
+                        'kind': request_kind,
+                        'order_at': order_at,
+                        'order_no': order_no,
+                        'group_id': main_request_id,
+                    }
+                    success, info = _make_request(values, request_values)
+
+                    if not success:
+                        _delete_file(for_delete_items)
+                        break
+
                 rsp = {
                     'success': success,
-                    'info': info,
+                    'info': info
                 }
 
-    except GDALException as e:
-        _delete_file(for_delete_items)
+    else:
         rsp = {
             'success': False,
-            'info': return_name + '-д Алдаа гарсан байна: файлд алдаа гарсан тул файлаа шалгана уу'
+            'errors': form.errors,
         }
     return JsonResponse(rsp)
 
@@ -1018,5 +968,23 @@ def get_qgis_url(request):
         'success': True,
         'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
         'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_api_url(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    rsp = {
+        'success': True,
+        'api_links': {
+            'token_auth': request.build_absolute_uri(reverse('api:inspire:token-auth')),
+            'create': request.build_absolute_uri(reverse('api:inspire:create')),
+            'remove': request.build_absolute_uri(reverse('api:inspire:remove')),
+            'update': request.build_absolute_uri(reverse('api:inspire:update')),
+            'select': request.build_absolute_uri(reverse('api:inspire:select'))
+        }
     }
     return JsonResponse(rsp)

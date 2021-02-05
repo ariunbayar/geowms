@@ -91,6 +91,7 @@ export class GovorgForm extends Component {
                         title: info,
                         model_type_icon: 'success',
                     })
+                    this.props.refreshCount()
                     this.modalCloseTime()
                 } else {
                     setErrors(errors)

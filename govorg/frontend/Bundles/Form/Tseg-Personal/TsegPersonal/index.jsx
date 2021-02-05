@@ -11,12 +11,11 @@ export class TsegPersonal extends Component {
     }
 
     render() {
-        const { perm_view, perm_create, perm_remove, perm_revoke, perm_review, perm_approve } = this.props.perms
         return (
             <Switch>
-                {perm_view ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/"} component={()=><FormList perms={this.props.perms}/>}/> : null}
-                {perm_create ? <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"} component={(data)=><Forms data={data} perms={this.props.perms}/>}/> : null}
-                {perm_view && perm_create && perm_remove ? <Route  exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/:id/:t_type/засах/"} component={(data)=><Forms data={data} perms={this.props.perms}/>}/> : null}
+                <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/"} component={FormList}/>
+                <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"} component={(data)=><Forms data={data}/>}/>
+                <Route  exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/:id/:t_type/засах/"} component={(data)=><Forms data={data}/>}/>
             </Switch>
         )
 
