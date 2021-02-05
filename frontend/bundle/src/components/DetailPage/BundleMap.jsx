@@ -2,7 +2,7 @@ import React, { Component } from "react"
 
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
-import { transform as transformCoordinate } from 'ol/proj'
+import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
@@ -15,6 +15,7 @@ import TileImage from 'ol/source/TileImage'
 import TileWMS from 'ol/source/TileWMS'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
+import {fromExtent} from 'ol/geom/Polygon';
 
 import { СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'

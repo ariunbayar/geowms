@@ -64,19 +64,20 @@ class SearchBarComponent extends Component {
     }
 
     componentDidMount(){
+        console.log("did moint");
         service.getAimags().then(({info, success}) => {
             if(success){
-                this.setState({aimag: info})
-                service.getSum("Хөвсгөл").then(({info, success}) => {
-                    if(success){
-                        this.setState({sum: info})
-                    }
-                    else{
-                        this.setState({error_msg: info})
-                    }setTimeout(() => {
-                        this.setState({error_msg: ''})
-                    }, 2222);
-                })
+                this.setState({ aimag: info })
+                // service.getSum("Хөвсгөл").then(({info, success}) => {
+                //     if(success){
+                //         this.setState({sum: info})
+                //     }
+                //     else{
+                //         this.setState({error_msg: info})
+                //     }setTimeout(() => {
+                //         this.setState({error_msg: ''})
+                //     }, 2222);
+                // })
             }
             else{
                 this.setState({error_msg: info})
@@ -119,13 +120,12 @@ class SearchBarComponent extends Component {
 
     handleInput(e){
         if(e.target.value){
-            this.setState({aimagid: e.target.value})
-            this.setState({sumid: -1})
+            this.setState({ aimagid: e.target.value, sumid: -1 })
             const aimag_id = e.target.value
-            const aiamg_data = this.state.aimag[aimag_id]
-            var aimag_name = aiamg_data[2]
+            const aimag_data = this.state.aimag[aimag_id]
+            var aimag_name = aimag_data[2]
 
-            var array = [aiamg_data[0], aiamg_data[1]]
+            var array = [aimag_data[0], aimag_data[1]]
             this.props.handleSetCenter(array, 7.555)
 
             service.getSum(aimag_name).then(({info, success}) => {
@@ -180,28 +180,33 @@ class SearchBarComponent extends Component {
                     </div>
                 </div> */}
 
-                <form onSubmit={this.handleSubmitClear} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
+                <form onSubmit={this.handleSubmitClear} className="rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Аймгаар хайх</label>
                         <div className="input-group mb-3">
                             <select name="center_typ" as="select"
-                                onChange={this.handleInput}
+                                onChange={(e) => this.handleInput(e)}
                                 value={this.state.aimagid}
-                                className='form-control'>
-                                <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
-                                {this.state.aimag.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data[2]}</option>
-                                )}
+                                className='form-control'
+                            >
+                                    <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
+                                    {
+                                        this.state.aimag.map((data, idx) =>
+                                            <option key={idx} value={idx}>{data['name']}</option>
+                                        )
+                                    }
                             </select>
                             <select name="center_typ" as="select"
                                 onChange={this.handleInputSum}
                                 className='form-control'
                                 value={this.state.sumid}
-                                >
+                            >
                                 <option value="-1">--- Сум/дүүрэг сонгоно уу ---</option>
-                                {this.state.sum.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data[2]}</option>
-                                )}
+                                {
+                                    this.state.sum.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data[2]}</option>
+                                    )
+                                }
                             </select>
                         </div>
                         <div className="input-group mb-3">
