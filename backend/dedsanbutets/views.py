@@ -373,7 +373,7 @@ def getFields(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
     view_name = ViewNames.objects.filter(feature_id=fid).first()
-    geom = MGeoDatas.objects.filter(feature_id=81).first()
+    geom = MGeoDatas.objects.filter(feature_id=fid).first()
     if not view_name == None:
         id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
         url = reverse('api:service:geo_design_proxy', args=[view_name.view_name])
