@@ -122,7 +122,7 @@ class SearchBarComponent extends Component {
             .getGeom(geo_id)
             .then(({ feature }) => {
                 if (feature) {
-                    this.props.setFeatureOnMap(feature, geo_id)
+                    this.props.setFeatureOnMap(feature)
                 }
             })
             .catch((error) => alert("Алдаа гарсан байна"))

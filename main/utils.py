@@ -788,7 +788,8 @@ def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
 
 
 def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
-    geo_json = json.loads(geo_json)
+    if isinstance(geo_json, str):
+        geo_json = json.loads(geo_json)
 
     geom_type = geo_json['type']
     coordinates = geo_json['coordinates']
@@ -804,3 +805,30 @@ def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
         feature = geometry
 
     return feature
+
+
+def get_geom_for_filter_from_geometry(geometry):
+    if isinstance(geometry, str):
+        geometry = json.loads(geo_json)
+
+    polygonlist = GEOSGeometry(json.dumps(geometry))
+    module = importlib.import_module('django.contrib.gis.geos')
+    class_ = getattr(module, geometry['type'])
+    geom = class_(*polygonlist)
+
+    return geom
+
+
+def get_inside_geoms_from_view(geo_json, view_name):
+
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT ST_AsGeoJSON(geo_data)
+            FROM {view_name}
+            WHERE (
+                    st_within(geo_data, ST_GeomFromGeoJSON(%s))
+            )
+        """.format(view_name=view_name)
+        cursor.execute(sql, [str(geo_json)])
+
+        return [item[0] for item in cursor.fetchall()]

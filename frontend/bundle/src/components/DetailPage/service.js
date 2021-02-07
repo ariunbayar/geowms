@@ -186,10 +186,10 @@ function getGeom(geo_id) {
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }
 
-function getContainGeoms(layers_code, geometry, geo_id) {
+function getContainGeoms(layers_code, geometry) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({layers_code, geometry, geo_id})
+        body: JSON.stringify({layers_code, geometry})
     }
     return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
 }

@@ -1398,27 +1398,26 @@ def get_geom(request, payload):
 @login_required
 def get_contain_geoms(request, payload):
     features = list()
-    geo_id = payload.get('geo_id')
+    layers_changed_code = list()
+
+    main_layer_name = 'gp_layer_'
+
     layers_code = payload.get('layers_code')
+    geometry = payload.get('geometry')
 
-    views_qs = ViewNames.objects.filter(view_name__in=layers_code)
+    for layer_code in layers_code:
 
-    geom = utils.get_geom(geo_id, 'MultiPolygon')
-    feature_ids = views_qs.values_list("feature_id", flat=True)
+        if main_layer_name in layer_code:
+            layer_code = layer_code.replace(main_layer_name, '')
 
-    mgeodatas_qs = MGeoDatas.objects
-    mgeodatas_qs = mgeodatas_qs.filter(feature_id__in=feature_ids)
-    mgeodatas_qs = mgeodatas_qs.filter(geo_data__within=geom)
+        geoms = utils.get_inside_geoms_from_view(geometry, layer_code)
+        if geoms:
+            for geom in geoms:
+                feature = utils.get_feature_from_geojson(geom)
+                features.append(feature)
 
-    for mgeodata in mgeodatas_qs:
-        geom = utils.get_geom(mgeodata.geo_id, mgeodata.geo_data.geom_type)
-        geo_json = geom.json
-        feature = utils.get_feature_from_geojson(geo_json)
-        features.append(feature)
-
-    layers_changed_code = [
-        'gp_layer_' + layer_code for layer_code in layers_code
-    ]
+            changed_code = main_layer_name + layer_code
+            layers_changed_code.append(changed_code)
 
     feature_collection = FeatureCollection(features)
 
