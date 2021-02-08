@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react"
 import {service} from '../service'
 import ReactDOM from 'react-dom'
+import Loader from "@utils/Loader"
 import {Control} from 'ol/control'
 
 class PopUpCmp extends Component {
@@ -47,7 +48,7 @@ class PopUpCmp extends Component {
 
     componentDidUpdate(pP, pS) {
         const { datas } = this.props
-        if(pP.datas !== datas) {
+        if(pP.datas !== datas && !this.props.is_loading) {
             this.properties = []
             const startNumber = 1
             this.setState({ startNumber, is_plus: true, is_prev: false })
@@ -119,7 +120,7 @@ class PopUpCmp extends Component {
                 }
             })
             this.setNowData(number, datas, mode, code, geom_name)
-            this.props.setSource(mode)
+            // this.props.setSource(mode)
         }
     }
 
@@ -176,7 +177,7 @@ class PopUpCmp extends Component {
 
     render() {
         const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
-        const { is_empty, is_from_inspire } = this.props
+        const { is_empty, is_from_inspire, is_loading } = this.props
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -209,6 +210,7 @@ class PopUpCmp extends Component {
                             }
                         </div>
                     </div>
+                    <Loader is_loading={is_loading} />
                     {
                         is_empty
                         ?
@@ -354,8 +356,8 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire) {
+    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=true) {
         this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire})
+        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading})
     }
 }

@@ -21,8 +21,8 @@ class SearchBarComponent extends Component {
             tseg_dugaar_zoom: 7.3376399772248575,
             bairlal_scale: 5000000,
             zoom3: 10,
-            aimagid: -1,
-            sumid: -1,
+            aimag_id: -1,
+            sum_id: -1,
             BA:'',
             BB:'',
             BC:'',
@@ -33,7 +33,17 @@ class SearchBarComponent extends Component {
             error_msg: '',
             aimag: [],
             sum: [],
-            feature_ids: []
+            feature_ids: [],
+            options_scale: [
+               {'zoom': '2.9903484967519145', 'scale': 5000000},
+               {'zoom': '4.3576399772248543', 'scale': 1000000},
+               {'zoom': '7.3376399772248575', 'scale': 100000},
+               {'zoom': '8.738265134288114', 'scale': 50000},
+               {'zoom': '9.721598467621447', 'scale': 25000},
+               {'zoom': '10.781598467621446', 'scale': 10000},
+               {'zoom': '12.194931800954776', 'scale': 5000},
+               {'zoom': '14.383305008368451', 'scale': 1000},
+            ]
         }
 
         this.handleSubmitCoordinate = this.handleSubmitCoordinate.bind(this)
@@ -44,21 +54,20 @@ class SearchBarComponent extends Component {
         this.handleInputSum = this.handleInputSum.bind(this)
         this.resetButton = this.resetButton.bind(this)
         this.setCenterOfMap = this.setCenterOfMap.bind(this)
+        this.getGeom = this.getGeom.bind(this)
     }
 
-    handleSubmitCoordinate(event, place) {
+    handleSubmitCoordinate(event) {
         event.preventDefault()
         // const coord = helpers.parseCoordinateString(this.state.coordinate)
-        var array = [this.state.coordinatey, this.state.coordinatex]
-        this.props.handleSetCenter(array, this.state.bairlal_one_zoom)
-        if (place) {
-            this.props.showOnlyArea(undefined, array, undefined, this.state.bairlal_scale)
-        }
+        const coordinates = [this.state.coordinatey, this.state.coordinatex]
+        this.props.handleSetCenter(coordinates, this.state.bairlal_one_zoom)
+        this.props.setFeatureOnMap(undefined, coordinates, this.state.bairlal_scale)
     }
 
     handleSubmitClear(event) {
         event.preventDefault()
-        this.setState({sumid: -1, aimagid: -1})
+        this.setState({ sum_id: -1, aimag_id: -1 })
         this.setCenterOfMap()
         this.props.resetShowArea()
     }
@@ -66,23 +75,12 @@ class SearchBarComponent extends Component {
     componentDidMount(){
         service.getAimags().then(({info, success}) => {
             if(success){
-                this.setState({aimag: info})
-                service.getSum("Хөвсгөл").then(({info, success}) => {
-                    if(success){
-                        this.setState({sum: info})
-                    }
-                    else{
-                        this.setState({error_msg: info})
-                    }setTimeout(() => {
-                        this.setState({error_msg: ''})
-                    }, 2222);
-                })
+                this.setState({ aimag: info })
             }
             else{
                 this.setState({error_msg: info})
             }setTimeout(() => {
                 this.setState({error_msg: ''})
-
             }, 2222);
         })
     }
@@ -117,46 +115,45 @@ class SearchBarComponent extends Component {
         }
     }
 
+    getGeom(geo_id) {
+        service
+            .getGeom(geo_id)
+            .then(({ feature }) => {
+                if (feature) {
+                    this.props.setFeatureOnMap(feature)
+                }
+            })
+            .catch((error) => alert("Алдаа гарсан байна"))
+    }
+
     handleInput(e){
         if(e.target.value){
-            this.setState({aimagid: e.target.value})
-            this.setState({sumid: -1})
             const aimag_id = e.target.value
-            const aiamg_data = this.state.aimag[aimag_id]
-            var aimag_name = aiamg_data[2]
+            this.setState({ aimag_id, sum_id: -1 })
 
-            var array = [aiamg_data[0], aiamg_data[1]]
-            this.props.handleSetCenter(array, 7.555)
+            const aimag_data = this.state.aimag[aimag_id]
 
-            service.getSum(aimag_name).then(({info, success}) => {
-                if(success){
-                    this.props.showOnlyArea(aimag_name, array)
-                    this.setState({ sum: info, aimag_name })
-                }
-                else{
-                    this.setState({error_msg: info})
-                }setTimeout(() => {
-                    this.setState({error_msg: ''})
-                }, 2222);
-            })
+            this.getGeom(aimag_data.geo_id)
+
+            this.setState({ sum: aimag_data.children })
+
         }
     }
 
     handleInputSum(e){
         if(e.target.value){
-            this.setState({sumid: e.target.value})
             const sum_id = e.target.value
+            this.setState({ sum_id })
+
             const sum_data = this.state.sum[sum_id]
 
-            var array = [sum_data[0], sum_data[1]]
-            this.props.handleSetCenter(array, 10.555)
-            this.props.showOnlyArea(this.state.aimag_name, array, sum_data[2])
+            this.getGeom(sum_data.geo_id)
         }
     }
 
     setCenterOfMap() {
         var array = [103.525827, 46.723984]
-        this.props.handleSetCenter(array, 5.041301562246971)
+        this.props.handleSetCenter(array, 5.041301562246971, false)
     }
 
     resetButton() {
@@ -166,7 +163,7 @@ class SearchBarComponent extends Component {
     }
 
     render() {
-        const {error_msg} = this.state
+        const {error_msg, sum, aimag, options_scale} = this.state
         return (
             <div>
                 {/* <div className="form-group  rounded shadow-sm p-3 mb-3 bg-white rounded">
@@ -180,28 +177,33 @@ class SearchBarComponent extends Component {
                     </div>
                 </div> */}
 
-                <form onSubmit={this.handleSubmitClear} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
+                <form onSubmit={this.handleSubmitClear} className="rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Аймгаар хайх</label>
                         <div className="input-group mb-3">
                             <select name="center_typ" as="select"
-                                onChange={this.handleInput}
-                                value={this.state.aimagid}
-                                className='form-control'>
-                                <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
-                                {this.state.aimag.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data[2]}</option>
-                                )}
+                                onChange={(e) => this.handleInput(e)}
+                                value={this.state.aimag_id}
+                                className='form-control'
+                            >
+                                    <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
+                                    {
+                                        aimag.map((data, idx) =>
+                                            <option key={idx} value={idx}>{data.name}</option>
+                                        )
+                                    }
                             </select>
                             <select name="center_typ" as="select"
                                 onChange={this.handleInputSum}
                                 className='form-control'
-                                value={this.state.sumid}
-                                >
+                                value={this.state.sum_id}
+                            >
                                 <option value="-1">--- Сум/дүүрэг сонгоно уу ---</option>
-                                {this.state.sum.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data[2]}</option>
-                                )}
+                                {
+                                    sum.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )
+                                }
                             </select>
                         </div>
                         <div className="input-group mb-3">
@@ -231,17 +233,15 @@ class SearchBarComponent extends Component {
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="tseg_dugaar_zoom" as="select"
-                                onChange={(e) => this.setState({ tseg_dugaar_zoom: e.target.value }) }
-                                value={this.state.tseg_dugaar_zoom}
-                                className='form-control'>
-                                <option value='2.9903484967519145'>5000000</option>
-                                <option value='4.3576399772248543'>1000000</option>
-                                <option value='7.3376399772248575'>100000</option>
-                                <option value='8.738265134288114'>50000</option>
-                                <option value='9.721598467621447'>25000</option>
-                                <option value='10.781598467621446'>10000</option>
-                                <option value='12.194931800954776'>5000</option>
-                                <option value='14.383305008368451'>1000</option>
+                            onChange={(e) => this.setState({ tseg_dugaar_zoom: e.target.value }) }
+                            value={this.state.tseg_dugaar_zoom}
+                            className='form-control'
+                        >
+                            {
+                                options_scale.map((option, idx) =>
+                                    <option key={idx} value={option.zoom}>{option.scale}</option>
+                                )
+                            }
                         </select>
                         <div className="input-group mb-3">
                             <div>
@@ -252,7 +252,7 @@ class SearchBarComponent extends Component {
                 </form>
 
 
-                <form onSubmit={(e) => this.handleSubmitCoordinate(e, 'place')} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
+                <form onSubmit={(e) => this.handleSubmitCoordinate(e)} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Байрлалаар хайх</label>
                         <div className="input-group mb-3">
@@ -269,17 +269,15 @@ class SearchBarComponent extends Component {
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="bairlal_one_zoom" as="select"
-                                onChange={(e) => this.setState({ bairlal_one_zoom: e.target.value, bairlal_scale: e.target.options[e.target.selectedIndex].text }) }
-                                value={this.state.bairlal_one_zoom}
-                                className='form-control'>
-                                <option value='2.9903484967519145'>5000000</option>
-                                <option value='4.3576399772248543'>1000000</option>
-                                <option value='7.3376399772248575'>100000</option>
-                                <option value='8.738265134288114'>50000</option>
-                                <option value='9.721598467621447'>25000</option>
-                                <option value='10.781598467621446'>10000</option>
-                                <option value='12.194931800954776'>5000</option>
-                                <option value='14.383305008368451'>1000</option>
+                            onChange={(e) => this.setState({ bairlal_one_zoom: e.target.value, bairlal_scale: e.target.options[e.target.selectedIndex].text }) }
+                            value={this.state.bairlal_one_zoom}
+                            className='form-control'
+                        >
+                            {
+                                options_scale.map((option, idx) =>
+                                    <option key={idx} value={option.zoom}>{option.scale}</option>
+                                )
+                            }
                         </select>
                         <div className="mb-3">
                             <div className="row">
@@ -334,17 +332,15 @@ class SearchBarComponent extends Component {
                         </div>
                         <label className="font-weight-bold" htmlFor="formGroupInput">масштаб</label>
                         <select name="bairlal_two_zoom" as="select"
-                                onChange={(e) => this.setState({bairlal_two_zoom: e.target.value}) }
-                                value={this.state.bairlal_two_zoom}
-                                className='form-control'>
-                                <option value='2.9903484967519145'>5000000</option>
-                                <option value='4.3576399772248543'>1000000</option>
-                                <option value='7.3376399772248575'>100000</option>
-                                <option value='8.738265134288114'>50000</option>
-                                <option value='9.721598467621447'>25000</option>
-                                <option value='10.781598467621446'>10000</option>
-                                <option value='12.194931800954776'>5000</option>
-                                <option value='14.383305008368451'>1000</option>
+                            onChange={(e) => this.setState({bairlal_two_zoom: e.target.value}) }
+                            value={this.state.bairlal_two_zoom}
+                            className='form-control'
+                        >
+                            {
+                                options_scale.map((option, idx) =>
+                                    <option key={idx} value={option.zoom}>{option.scale}</option>
+                                )
+                            }
                         </select>
                         <div className="input-group mb-3">
                             <div>
@@ -391,8 +387,8 @@ export class SearchBar extends Control {
         ReactDOM.hydrate(<SearchBarComponent {...props}/>, this.element)
     }
 
-    showSideBar(handleSetCenter, islaod, showOnlyArea, resetShowArea) {
+    showSideBar(handleSetCenter, islaod, showOnlyArea, resetShowArea, setFeatureOnMap) {
         this.toggleControl(islaod)
-        this.renderComponent({ handleSetCenter, showOnlyArea, resetShowArea })
+        this.renderComponent({ handleSetCenter, showOnlyArea, resetShowArea, setFeatureOnMap })
     }
 }

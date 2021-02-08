@@ -4,6 +4,7 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
+import importlib
 
 import json
 from django.apps import apps
@@ -15,6 +16,7 @@ from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 from django.contrib.gis.measure import D
+from geojson import Feature
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -783,3 +785,89 @@ def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
     mgeo_qs = mgeo_qs.order_by('geo_data')
     nearest_points = mgeo_qs
     return nearest_points
+
+
+def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
+    if isinstance(geo_json, str):
+        geo_json = json.loads(geo_json)
+
+    geom_type = geo_json['type']
+    coordinates = geo_json['coordinates']
+
+    module = importlib.import_module('geojson')
+    class_ = getattr(module, geom_type)
+
+    geometry = class_(coordinates, srid=srid)
+
+    if get_feature:
+        feature = Feature(geometry=geometry)
+    else:
+        feature = geometry
+
+    return feature
+
+
+def get_geom_for_filter_from_coordinate(coordinate, geom_type, srid=4326):
+    module = importlib.import_module('django.contrib.gis.geos')
+    class_ = getattr(module, geom_type)
+    geom = class_([float(coordinate[0]), float(coordinate[1])], srid=srid)
+    return geom
+
+
+def get_geom_for_filter_from_geometry(geometry):
+    if isinstance(geometry, str):
+        geometry = json.loads(geo_json)
+
+    polygonlist = GEOSGeometry(json.dumps(geometry))
+    module = importlib.import_module('django.contrib.gis.geos')
+    class_ = getattr(module, geometry['type'])
+    geom = class_(*polygonlist)
+
+    return geom
+
+
+def get_inside_geoms_from_view(geo_json, view_name):
+
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT ST_AsGeoJSON(geo_data)
+            FROM {view_name}
+            WHERE (
+                    st_within(geo_data, ST_GeomFromGeoJSON(%s))
+            )
+        """.format(view_name=view_name)
+        cursor.execute(sql, [str(geo_json)])
+
+        return [item[0] for item in cursor.fetchall()]
+
+
+def remove_text_from_str(main_text, remove_text='gp_layer_'):
+    replaced_text = main_text
+    if remove_text in main_text:
+        replaced_text = main_text.replace(remove_text, '')
+    return replaced_text
+
+
+def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT ST_AsGeoJSON(geo_data)
+            FROM {view_name}
+            WHERE (
+                    ST_Dwithin(
+                        geo_data,
+                        ST_SetSRID(
+                            ST_MakePoint({x}, {y})
+                        ,4326)
+                        ,{radius}
+                    )
+            )
+        """.format(
+            view_name=view_name,
+            radius=radius,
+            x=point_coordinates[0],
+            y=point_coordinates[1],
+        )
+        cursor.execute(sql)
+
+        return [item[0] for item in cursor.fetchall()]

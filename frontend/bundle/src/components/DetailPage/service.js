@@ -15,6 +15,8 @@ export const service = {
     getPopUpInfo,
     checkButtonEnableWithId,
     getFeatureInfo,
+    getGeom,
+    getContainGeoms,
 }
 
 function getCookie(name) {
@@ -160,10 +162,10 @@ function checkButtonEnableWithId(geo_id) {
     return fetch('/payment/check-enable-pdf-id/', requestOptions).then(handleResponse)
 }
 
-function getPopUpInfo(layer_code, coordinate) {
+function getPopUpInfo(layers_code, coordinate) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({layer_code, coordinate})
+        body: JSON.stringify({layers_code, coordinate})
     }
     return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
 }
@@ -174,4 +176,20 @@ function getFeatureInfo(layer_code, coordinates) {
         body: JSON.stringify({layer_code, coordinates})
     }
     return fetch('/payment/get-feature-info/', requestOptions).then(handleResponse)
+}
+
+function getGeom(geo_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({geo_id})
+    }
+    return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+}
+
+function getContainGeoms(layers_code, geometry, km_scale) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layers_code, geometry, km_scale})
+    }
+    return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
 }

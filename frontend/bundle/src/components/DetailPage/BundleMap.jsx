@@ -2,19 +2,18 @@ import React, { Component } from "react"
 
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
-import { transform as transformCoordinate } from 'ol/proj'
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
+import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
+import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
-import Tile from 'ol/layer/Tile'
-import { Vector as VectorLayer } from 'ol/layer'
+import { Vector as VectorLayer, Tile } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
-import { Icon, Style, Stroke, Fill } from 'ol/style'
-import {Point, Circle, Polygon} from 'ol/geom'
-import TileImage from 'ol/source/TileImage'
-import TileWMS from 'ol/source/TileWMS'
+import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
+import { Point, Circle, Polygon } from 'ol/geom'
+import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
+import {fromExtent} from 'ol/geom/Polygon';
 
 import { СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
@@ -60,6 +59,7 @@ export default class BundleMap extends Component {
             is_cart: false,
             y: null,
             x: null,
+            format: new GeoJSON(),
         }
 
         this.controls = {
@@ -90,7 +90,6 @@ export default class BundleMap extends Component {
         this.cartButton = this.cartButton.bind(this)
         this.onClickCloser = this.onClickCloser.bind(this)
         this.getElement = this.getElement.bind(this)
-        this.listToJson = this.listToJson.bind(this)
         this.setSourceInPopUp = this.setSourceInPopUp.bind(this)
         this.formatArea = this.formatArea.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
@@ -99,11 +98,16 @@ export default class BundleMap extends Component {
         this.allLayerVisible = this.allLayerVisible.bind(this)
         this.addLayerToSearch = this.addLayerToSearch.bind(this)
         this.drawBorderCircle = this.drawBorderCircle.bind(this)
-        this.removeCircle = this.removeCircle.bind(this)
         this.fromLonLatToMapCoord = this.fromLonLatToMapCoord.bind(this)
         this.featureFromUrl = this.featureFromUrl.bind(this)
         this.check_inspire_layer = this.check_inspire_layer.bind(this)
         this.transformToLatLong = this.transformToLatLong.bind(this)
+        this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
+        this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
+        this.getFeatureInfoFromInspire = this.getFeatureInfoFromInspire.bind(this)
+        this.writeFeat = this.writeFeat.bind(this)
+        this.getPopUpInfo = this.getPopUpInfo.bind(this)
+        this.hideMarker = this.hideMarker.bind(this)
     }
 
     initMarker() {
@@ -124,7 +128,6 @@ export default class BundleMap extends Component {
         feature.setStyle(style)
 
         return {feature: feature, point: point}
-
     }
 
     handleModalApproveClose(){
@@ -291,6 +294,7 @@ export default class BundleMap extends Component {
             }),
             name: maker_layer_name,
         })
+        this.marker_layer = marker_layer
 
         const map = new Map({
             target: 'map',
@@ -344,7 +348,7 @@ export default class BundleMap extends Component {
         const closer = this.element_closer
         overlay.setPosition(undefined);
         closer.blur();
-        this.state.vector_layer.setSource(null)
+        // this.state.vector_layer.setSource(null)
     }
 
     getElement(element) {
@@ -382,62 +386,31 @@ export default class BundleMap extends Component {
         }
     }
 
-    listToJson(feature_info, geodb_table){
-        feature_info.map((info, ix) => {
-            this.object = new Array()
-            const rsp = {
-                'field_name': info[0]
-            }
-            this.object.push(rsp)
-            info[1].map((info_data, i) => {
-                var field_name = ''
-                if(info_data[0] == 'point_name') field_name = 'Цэгийн Нэр'
-                else if(info_data[0] == 'point_id') field_name = 'Цэгийн дугаар'
-                else if(info_data[0] == 'point_class_name') field_name = 'Сүлжээний төрөл'
-                else if(info_data[0] == 'aimag') field_name = 'Аймаг'
-                else if(info_data[0] == 'sum') field_name = 'Сум'
-                else if(info_data[0] == 'mclass') field_name = 'Сүлжээний зэрэг'
-                else if(info_data[0] == 'name') field_name = 'нэр'
-                else field_name = info_data[0]
-                const rsp = {
-                    'field_name': info_data[0],
-                    'value': info_data[1],
-                    'mn_name': field_name,
-                }
-                this.object.push(rsp)
-            })
-            this.object.push({'mode': geodb_table})
-        })
-        return this.object
-    }
-
     allLayerVisible(changed_layers) {
-        this.removeCircle()
+        this.removeFeatureFromSource('buffer')
         this.map.getLayers().getArray().forEach((layer) => {
             if(layer.get('filter') && layer.get('filter') == this.state.filtered_layer_name) {
                 layer.setVisible(false)
-                this.map.removeLayer(layer.getSource())
+                this.map.removeLayer(layer)
             }
-            if(!changed_layers) {
-                if(layer.get('code')) {
+            if(changed_layers) {
+                if(layer.get('code') && layer.getVisible()) {
+                    layer.setVisible(false)
+                }
+                if(layer.get('name') == 'inside') {
+                    if(layer.getVisible()) {
+                        layer.setVisible(false)
+                        this.map.removeLayer(layer)
+                    }
+                }
+            }
+            else {
+                if(layer.get('code') && (layer.get('name') && layer.get('name') != 'inside')) {
                     if(layer.getVisible()) {
                         this.is_not_visible_layers.push(layer.get('code'))
                         layer.setVisible(false)
                     }
                 }
-            } else {
-                if(layer.get('code') && layer.getVisible()) {
-                    layer.setVisible(false)
-                }
-            }
-        })
-    }
-
-    removeCircle() {
-        this.map.getLayers().forEach((layer) => {
-            if(layer && layer.get('name') && layer.get('name') == 'border_circle') {
-                layer.setVisible(false)
-                this.map.removeLayer(layer)
             }
         })
     }
@@ -470,20 +443,25 @@ export default class BundleMap extends Component {
     }
 
     resetFilteredOnlyFeature() {
-        this.removeCircle()
+        this.removeFeatureFromSource('aimag_sum')
+        this.removeFeatureFromSource('buffer')
+
         this.map.getLayers().forEach((layer) => {
             if(layer) {
                 this.is_not_visible_layers.map((visible_layer_code) => {
                     if(layer.get('code') == visible_layer_code) {
                         layer.setVisible(true)
                     }
-                    if(layer.get('filter') == this.state.filtered_layer_name){
-                        this.map.removeLayer(layer.getSource())
+                    if(this.state.filtered_layer_name && layer.get('filter') == this.state.filtered_layer_name){
+                        this.map.removeLayer(layer)
                     }
                 })
+                if (layer.get("name") == 'inside') {
+                    this.map.removeLayer(layer)
+                }
             }
         })
-        this.setState({ filtered_wms: undefined })
+        this.setState({ filtered_wms: undefined, filtered_layer: undefined })
         this.is_not_visible_layers = []
     }
 
@@ -495,30 +473,15 @@ export default class BundleMap extends Component {
         return fromLonLat([coordinate[0], coordinate[1]]);
     }
 
-    drawBorderCircle(coordinate, kilometers) {
-        const circle = new Circle(this.fromLonLatToMapCoord(coordinate), kilometers * 1000 * 1.5)
-        const style = new Style({
-            stroke: new Stroke({
-                color: 'blue',
-                width: 3
-            }),
-            fill: new Fill({
-                color: 'rgba(0, 0, 255, 0.1)'
-            })
-        })
-        const box = fromExtent(circle.getExtent())
-        const box_feature = new Feature(box)
-        box_feature.setStyle(style)
-        const source =  new VectorSource({
-            projection: this.state.projection_display,
-            features: [box_feature]
-        })
-        const layer = new VectorLayer({
-            source: source,
-            name: "border_circle"
-        })
-        this.map.addLayer(layer)
-
+    drawBorderCircle(buffer_feature) {
+        this.removeFeatureFromSource('aimag_sum')
+        const { vector_layer } = this.state
+        const features = (this.state.format.readFeatures(buffer_feature, {
+            dataProjection: this.state.projection_display,
+            featureProjection: this.state.projection,
+        }))
+        features[0].setProperties({ id: 'buffer' })
+        vector_layer.getSource().addFeature(features[0])
     }
 
     getOnlyFeature(aimag_name, coordinate, sum_name, scale, changed_layers) {
@@ -593,22 +556,35 @@ export default class BundleMap extends Component {
         return this.array
     }
 
-    check_inspire_layer(code, tile) {
+    check_inspire_layer(code) {
         let is_feature = false
         let layer_code = ''
-        if (tile.getVisible()){
-            let splited_code = code.split('_')
-            splited_code.map((split_code, idx) => {
-                if (idx == 0 && split_code == 'gp') {
-                    if (splited_code[idx + 1] == 'layer') {
-                        let sliced_code = splited_code.slice(2)
-                        layer_code = sliced_code.join("_");
-                        is_feature = true
-                    }
+        let splited_code = code.split('_')
+        splited_code.map((split_code, idx) => {
+            if (idx == 0 && split_code == 'gp') {
+                if (splited_code[idx + 1] == 'layer') {
+                    let sliced_code = splited_code.slice(2)
+                    layer_code = sliced_code.join("_");
+                    is_feature = true
                 }
+            }
+        })
+    return {layer_code, is_feature}
+    }
+
+    getPopUpInfo(coordinate, layers_code) {
+        const latlong = toLonLat(coordinate)
+        let layer_codes = layers_code.length > 0 ? layers_code : this.is_not_visible_layers.length > 0 ? this.is_not_visible_layers : []
+        service
+            .getPopUpInfo(layer_codes, latlong)
+            .then(({ datas }) => {
+                let is_empty = false
+                if (datas.length == 0) {
+                    is_empty = true
+                }
+                const is_from_inspire = true
+                this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire, false)
             })
-        }
-        return {layer_code, is_feature}
     }
 
     featureFromUrl(coordinate) {
@@ -616,123 +592,112 @@ export default class BundleMap extends Component {
         const projection = view.getProjection()
         const resolution = view.getResolution()
         const wms_array = this.getWMSArray()
+        let not_visible_layers = []
+        this.controls.popup.getData(true)
         wms_array.map(({layers}) => {
             if(layers) {
                 layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
-                    const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
-                    if (is_feature) {
-                        const latlong = toLonLat(coordinate)
-                        service
-                            .getPopUpInfo(layer_code, latlong)
-                            .then(({ datas }) => {
-                                let is_empty = false
-                                if (datas.length == 0) {
-                                    is_empty = true
-                                }
-                                const is_from_inspire = true
-                                this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire)
-                            })
-                    }
-                    if (tile && !is_feature) {
-                        if (tile.getVisible() != true) {
-                            return
+                    if (tile.getVisible()) {
+                        const {layer_code, is_feature} = this.check_inspire_layer(code)
+                        if (is_feature) {
+                            not_visible_layers.push(layer_code)
                         }
-
-                        const wms_source = tile.getSource()
-                        const url = wms_source.getFeatureInfoUrl(
-                            coordinate,
-                            resolution,
-                            projection,
-                            {
-                                //'INFO_FORMAT': 'text/xml'
-                                //'INFO_FORMAT': 'text/html'
-                                'INFO_FORMAT': 'application/vnd.ogc.gml',
-                            }
-                        )
-                        if (url) {
-                            if(!this.state.is_draw_open){
-                            }
-                            fetch(url)
-                                .then((response) => response.text())
-                                .then((text) => {
-                                    const parser = new WMSGetFeatureInfo()
-                                    const features = parser.readFeatures(text)
-                                    if (features.length > 0) {
-                                        features.map((feature, idx) => {
-                                            if(feature.getGeometry().getType().includes('Polygon')) {
-                                                const source = new VectorSource({
-                                                    features: features
-                                                });
-                                                this.selectSource = source
-                                                this.state.vector_layer.setSource(this.selectSource)
-                                            }
+                        if (!is_feature) {
+                            const wms_source = tile.getSource()
+                            const url = wms_source.getFeatureInfoUrl(
+                                coordinate,
+                                resolution,
+                                projection,
+                                {
+                                    //'INFO_FORMAT': 'text/xml'
+                                    //'INFO_FORMAT': 'text/html'
+                                    'INFO_FORMAT': 'application/vnd.ogc.gml',
+                                }
+                            )
+                            if (url) {
+                                if(!this.state.is_draw_open){
+                                }
+                                fetch(url)
+                                    .then((response) => response.text())
+                                    .then((text) => {
+                                        const parser = new WMSGetFeatureInfo()
+                                        const features = parser.readFeatures(text)
+                                        if (features.length > 0) {
+                                            features.map((feature, idx) => {
+                                                if(feature.getGeometry().getType().includes('Polygon')) {
+                                                    const source = new VectorSource({
+                                                        features: features
+                                                    });
+                                                    this.selectSource = source
+                                                    this.state.vector_layer.setSource(this.selectSource)
+                                                }
+                                            })
+                                        }
+                                        const feature_info = features.map((feature) => {
+                                            const geometry_name = feature.getGeometryName()
+                                            const values =
+                                                feature.getKeys()
+                                                .filter((key) => key != geometry_name)
+                                                .map((key) => [key, feature.get(key)])
+                                            return [feature.getId(), values]
                                         })
-                                    }
-                                    const feature_info = features.map((feature) => {
-                                        const geometry_name = feature.getGeometryName()
-                                        const values =
-                                            feature.getKeys()
-                                            .filter((key) => key != geometry_name)
-                                            .map((key) => [key, feature.get(key)])
-                                        return [feature.getId(), values]
-                                    })
-                                    if(!this.state.is_draw_open){
-                                        if(feature_info.length > 0) {
-                                            this.is_empty = false
-                                            if(this.sendFeatureInfo.length > 0) {
-                                                this.sendFeatureInfo.map((feat, idx) => {
-                                                    if (feat[0].field_name !== feature_info[0][0]) {
-                                                        // const object = this.listToJson(feature_info, geodb_table)
-                                                        feature_info.push(geodb_table)
-                                                        feature_info.push(code)
-                                                        this.sendFeatureInfo.push(feature_info)
-                                                    }
-                                                })
-                                            } if (this.sendFeatureInfo.length == 0) {
-                                                // const object = this.listToJson(feature_info, geodb_table)
-                                                feature_info.push(geodb_table)
-                                                feature_info.push(code)
-                                                this.sendFeatureInfo.push(feature_info)
-                                            }
-                                            if(geodb_table == 'mpoint_view') {
-                                                this.state.vector_layer.setSource(null)
-                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty)
+                                        if(!this.state.is_draw_open){
+                                            if(feature_info.length > 0) {
+                                                this.is_empty = false
+                                                if(this.sendFeatureInfo.length > 0) {
+                                                    this.sendFeatureInfo.map((feat, idx) => {
+                                                        if (feat[0].field_name !== feature_info[0][0]) {
+                                                            feature_info.push(geodb_table)
+                                                            feature_info.push(code)
+                                                            this.sendFeatureInfo.push(feature_info)
+                                                        }
+                                                    })
+                                                } if (this.sendFeatureInfo.length == 0) {
+                                                    feature_info.push(geodb_table)
+                                                    feature_info.push(code)
+                                                    this.sendFeatureInfo.push(feature_info)
+                                                }
+                                                if(geodb_table == 'mpoint_view') {
+                                                    this.state.vector_layer.setSource(null)
+                                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                }
+                                                else {
+                                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                }
                                             }
                                             else {
-                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty)
+                                                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
                                             }
+                                            // if(geodb_table == 'mpoint_view'){
+                                            //     if(feature_info.length > 0){
+                                            //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
+                                            //         this.setState({pay_modal_check: true})
+                                            //         this.state.vector_layer.setSource(null)
+                                            //     }
+                                            //     // else{
+                                            //         // this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
+                                            //     // }
+                                            // }
+                                            // else{
+                                            //     if(!this.state.pay_modal_check && geodb_table != 'privite') {
+                                            //         this.state.vector_layer.setSource(source)
+                                            //         // this.controls.modal.showModal(feature_info, true)
+                                            //     }
+                                            // }
                                         }
                                         else {
-                                            this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty)
+                                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
                                         }
-                                        // if(geodb_table == 'mpoint_view'){
-                                        //     if(feature_info.length > 0){
-                                        //         // this.controls.shopmodal.showModal(feature_price,geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code,feature_info, true, this.cartButton)
-                                        //         this.setState({pay_modal_check: true})
-                                        //         this.state.vector_layer.setSource(null)
-                                        //     }
-                                        //     // else{
-                                        //         // this.controls.alertBox.showAlert(true, "Цэгээ дахин шалгана уу !")
-                                        //     // }
-                                        // }
-                                        // else{
-                                        //     if(!this.state.pay_modal_check && geodb_table != 'privite') {
-                                        //         this.state.vector_layer.setSource(source)
-                                        //         // this.controls.modal.showModal(feature_info, true)
-                                        //     }
-                                        // }
-                                    }
-                                    else {
-                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton)
-                                    }
-                                })
-                            }
-                    } else {
-                        /* TODO */
+                                    })
+                                }
+                        } else {
+                            /* TODO */
+                        }
                     }
                 })
             }
         })
+        this.getPopUpInfo(coordinate, not_visible_layers)
     }
 
     showFeaturesAt(coordinate) {
@@ -764,19 +729,147 @@ export default class BundleMap extends Component {
         layer.setVisible(!layer.getVisible())
     }
 
-    handleSetCenter(coord, zoom) {
-        this.removeCircle()
+    handleSetCenter(coord, zoom, has_marker=true) {
+        this.removeFeatureFromSource('buffer')
+        this.removeFeatureFromSource('aimag_sum')
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        this.marker.point.setCoordinates(map_coord)
+        if (has_marker) this.marker.point.setCoordinates(map_coord)
         view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
     }
 
-    toggleSidebar(event) {
-        this.setState(prevState => ({
-            is_sidebar_open: !prevState.is_sidebar_open,
-        }))
+    removeFeatureFromSource(featureID) {
+        const { vector_layer } = this.state
+        const source = vector_layer.getSource()
+        const features = source.getFeatures();
+        if (features != null && features.length > 0) {
+            for (var i = 0; i < features.length; i++) {
+                const properties = features[i].getProperties();
+                const id = properties.id;
+                if (id == featureID) {
+                    source.removeFeature(features[i]);
+                    break;
+                }
+            }
+        }
+    }
+
+    hideMarker() {
+        this.marker_layer.setVisible(false)
+    }
+
+    getFeatureInfoFromInspire(feature, point_coordinate, scale) {
+        this.onClickCloser()
+        this.hideMarker()
+
+        let parsed_geojson
+        let km_scale = null
+
+        if (feature) {
+            const geom = this.writeFeat(feature[0])
+            parsed_geojson = JSON.parse(geom).geometry
+        }
+        else {
+            parsed_geojson = point_coordinate
+            km_scale = this.getKiloFromScale(scale)
+        }
+
+        const wms_array = this.getWMSArray()
+        wms_array.map(({ layers }, w_idx) => {
+            if(layers) {
+                layers.map(({tile, code}, idx) => {
+                    if (tile.getVisible()) {
+                        const {layer_code, is_feature} = this.check_inspire_layer(code)
+                        if (is_feature) {
+                            this.is_not_visible_layers.push(layer_code)
+                        }
+                    }
+                })
+            }
+        })
+
+        this.allLayerVisible('inside')
+
+        service
+            .getContainGeoms(this.is_not_visible_layers, parsed_geojson, km_scale)
+            .then(({ features, layers_code, buffer, success }) => {
+                if (success) {
+                    this.is_not_visible_layers = layers_code
+                    const features_col = (this.state.format.readFeatures(features, {
+                        dataProjection: this.state.projection_display,
+                        featureProjection: this.state.projection,
+                    }))
+                    const style = new Style({
+                        image: new CircleStyle({
+                            radius: 5,
+                            fill: new Fill({
+                            color: 'red',
+                            }),
+                        }),
+                        stroke: new Stroke({
+                            color: 'blue',
+                            width: 2,
+                        }),
+                    })
+                    const source =  new VectorSource({
+                        features: features_col,
+                    })
+                    const layer = new VectorLayer({
+                        source: source,
+                        name: "inside",
+                        style: style,
+                    })
+                    if (buffer) {
+                        this.drawBorderCircle(buffer)
+                    }
+                    this.map.addLayer(layer)
+                    layer.setVisible(true)
+                    this.setState({ filtered_layer: layer })
+                }
+                else {
+                    alert("Ямар нэгэн давхарга нээгээгүй байна")
+                    this.toggleSidebar(false)
+                }
+            })
+    }
+
+    writeFeat(features) {
+        const {format} = this.state
+        const data = format.writeFeatureObject(features, {
+            dataProjection: this.state.projection_display,
+            featureProjection: this.state.projection,
+        })
+        const changedFeature = JSON.stringify(data)
+        return changedFeature
+    }
+
+    setFeatureOnMap(feature, point_coordinate, scale) {
+        if (feature) {
+            const { vector_layer } = this.state
+            const id = 'aimag_sum'
+            this.removeFeatureFromSource(id)
+            var feature =  new GeoJSON().readFeatures(feature, {
+                dataProjection: this.state.projection_display,
+                featureProjection: this.state.projection,
+            });
+            feature[0].setProperties({ id })
+            vector_layer.getSource().addFeature(feature[0])
+            this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
+        }
+        this.getFeatureInfoFromInspire(feature, point_coordinate, scale)
+    }
+
+    toggleSidebar(is_not_open) {
+        let is_setState = true
+        if (is_not_open == this.state.is_sidebar_open) {
+            is_setState = false
+        }
+        if (is_setState) {
+            this.setState(prevState => ({
+                is_sidebar_open: !prevState.is_sidebar_open,
+            }))
+        }
         if(this.state.is_sidebar_open){
             this.controls.sidebar.showSideBar(this.state.map_wms_list, true, this.addLayerToSearch)
         }else{
@@ -792,7 +885,7 @@ export default class BundleMap extends Component {
             this.controls.searchbar.showSideBar(null, true)
             this.resetFilteredOnlyFeature()
         }else{
-            this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature)
+            this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature, this.setFeatureOnMap)
         }
     }
 
@@ -849,60 +942,62 @@ export default class BundleMap extends Component {
         var list = []
         wms_array.map(({ name, layers }, w_idx) => {
             layers.map(({ id, code, tile }, l_idx) => {
-                const {layer_code, is_feature} = this.check_inspire_layer(code, tile)
-                if (tile.getVisible() && is_feature) {
-                    const coordinates = event.feature.getGeometry().getCoordinates()
-                    const trans_coordinates = this.transformToLatLong(coordinates)
-                    service
-                        .getFeatureInfo(layer_code, trans_coordinates)
-                        .then(({datas}) => {
-                            datas['layer_id'] = id
-                            list.push(datas)
-                        })
-                }
-                if (tile.getVisible() && !is_feature) {
-                    const main_url = tile.getSource().urls[0]
-                    if(main_url) {
-                        const url =
-                            main_url.slice(0, -1) +
-                            '?service=WFS' +
-                            '&version=1.1.0' +
-                            '&request=GetFeature' +
-                            '&typeName=' + code +
-                            '&bbox=' + full_extent + ',' + this.state.projection_display
-                        fetch(url)
-                            .then((rsp) => rsp.text())
-                            .then((text) => {
-                                const parser = new WMSGetFeatureInfo()
-                                const features = parser.readFeatures(text)
-                                const feature_info = features.map((feature) => {
-                                    const geometry_name = feature.getGeometryName()
-                                    const values =
-                                        feature.getKeys()
-                                            .filter((key) => key != geometry_name)
-                                            .map((key) => [key, feature.get(key)])
-                                    const list_id = feature.getId().split('.')
-                                    const id = list_id[list_id.length - 1]
-                                    return [id, values]
-                                })
-                                if(feature_info.length > 0) {
-                                    let feature_id = ''
-                                    var geom_ids = new Array()
-                                    const info = feature_info.map((feature, idx) => {
-                                        feature[1].map((info, idx) => {
-                                            if(info[0] == 'feature_id') {
-                                                feature_id = info[1]
-                                            }
-                                        })
-                                        return feature[0]
-                                    })
-                                    list.push({'geom_ids': info, 'layer_code': code, 'layer_id': id, 'feature_id': feature_id })
-                                }
+                if (tile.getVisible()) {
+                    const {layer_code, is_feature} = this.check_inspire_layer(code)
+                    if (is_feature) {
+                        const coordinates = event.feature.getGeometry().getCoordinates()
+                        const trans_coordinates = this.transformToLatLong(coordinates)
+                        service
+                            .getFeatureInfo(layer_code, trans_coordinates)
+                            .then(({ datas }) => {
+                                datas['layer_id'] = id
+                                list.push(datas)
                             })
                     }
-                }
-                if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {
-                    this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
+                    if (!is_feature) {
+                        const main_url = tile.getSource().urls[0]
+                        if(main_url) {
+                            const url =
+                                main_url.slice(0, -1) +
+                                '?service=WFS' +
+                                '&version=1.1.0' +
+                                '&request=GetFeature' +
+                                '&typeName=' + code +
+                                '&bbox=' + full_extent + ',' + this.state.projection_display
+                            fetch(url)
+                                .then((rsp) => rsp.text())
+                                .then((text) => {
+                                    const parser = new WMSGetFeatureInfo()
+                                    const features = parser.readFeatures(text)
+                                    const feature_info = features.map((feature) => {
+                                        const geometry_name = feature.getGeometryName()
+                                        const values =
+                                            feature.getKeys()
+                                                .filter((key) => key != geometry_name)
+                                                .map((key) => [key, feature.get(key)])
+                                        const list_id = feature.getId().split('.')
+                                        const id = list_id[list_id.length - 1]
+                                        return [id, values]
+                                    })
+                                    if(feature_info.length > 0) {
+                                        let feature_id = ''
+                                        var geom_ids = new Array()
+                                        const info = feature_info.map((feature, idx) => {
+                                            feature[1].map((info, idx) => {
+                                                if(info[0] == 'feature_id') {
+                                                    feature_id = info[1]
+                                                }
+                                            })
+                                            return feature[0]
+                                        })
+                                        list.push({'geom_ids': info, 'layer_code': code, 'layer_id': id, 'feature_id': feature_id })
+                                    }
+                                })
+                        }
+                    }
+                    if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {
+                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
+                    }
                 }
             })
         })

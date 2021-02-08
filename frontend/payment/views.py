@@ -17,7 +17,6 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Polygon
 from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.measure import D
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
@@ -44,16 +43,11 @@ from backend.inspire.models import (
 )
 
 from main.decorators import ajax_required
-from main.utils import (
-    send_email,
-    get_config,
-    get_key_and_compare,
-    lat_long_to_utm,
-    get_nearest_geom,
-)
+from main import utils
 
 from zipfile import ZipFile
 
+from geojson import FeatureCollection
 
 def index(request):
 
@@ -852,13 +846,13 @@ def _get_items_with_file(content, mpoint, att_names):
         't_type': mpoint.t_type,
         'class_name': mpoint.point_class_name,
         'pdf_id': content[att_names['pid']],
-        'org_name': content[att_names['org_name']] if get_key_and_compare(att_names, 'org_name') else 'Геопортал',
+        'org_name': content[att_names['org_name']] if utils.get_key_and_compare(att_names, 'org_name') else 'Геопортал',
     }
     return point_info
 
 
 def _get_item_from_mpoint_view(mpoint):
-    utm = lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
+    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
     point_info = {
         'point_id': mpoint.point_name,
         'ondor': mpoint.ondor,
@@ -1003,11 +997,11 @@ def download_purchase(request, pk, download_type):
 
             subject = 'Худалдан авалт'
             msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу!'
-            host_name = get_config('EMAIL_HOST_NAME')
+            host_name = utils.get_config('EMAIL_HOST_NAME')
             msg = '{msg} http://{host_name}/payment/history/api/details/{id}/'.format(id=payment.pk, msg=msg, host_name=host_name)
             to_email = [payment.user.email]
 
-            send_email(subject, msg, to_email)
+            utils.send_email(subject, msg, to_email)
 
     rsp = {
         'success': is_created,
@@ -1290,8 +1284,7 @@ def _get_properties_qs(view_qs):
 @ajax_required
 @login_required
 def get_popup_info(request, payload):
-
-    layer_code = payload.get('layer_code')
+    layers_code = payload.get('layers_code')
     coordinate = payload.get('coordinate')
 
     value_type = None
@@ -1299,46 +1292,51 @@ def get_popup_info(request, payload):
     property_code = None
     infos = list()
 
-    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+    views_qs = ViewNames.objects
+    views_qs = views_qs.filter(view_name__in=[
+        utils.remove_text_from_str(layer_code)
+        for layer_code in layers_code
+    ])
 
-    feature_id = view_qs.feature_id
+    for view_qs in views_qs:
+        feature_id = view_qs.feature_id
 
-    viewproperty_ids, property_qs = _get_properties_qs(view_qs)
+        viewproperty_ids, property_qs = _get_properties_qs(view_qs)
 
-    nearest_points = get_nearest_geom(coordinate, feature_id)
+        nearest_points = utils.get_nearest_geom(coordinate, feature_id)
 
-    for nearest_point in nearest_points:
-        mdatas_qs = MDatas.objects
-        mdatas_qs = mdatas_qs.filter(geo_id=nearest_point.geo_id)
-        mdatas_qs = mdatas_qs.filter(property_id__in=viewproperty_ids)
+        for nearest_point in nearest_points:
+            mdatas_qs = MDatas.objects
+            mdatas_qs = mdatas_qs.filter(geo_id=nearest_point.geo_id)
+            mdatas_qs = mdatas_qs.filter(property_id__in=viewproperty_ids)
 
-        datas = list()
-        datas.append('gp_layer_' + layer_code)
-        datas.append(list())
+            datas = list()
+            datas.append('gp_layer_' + view_qs.view_name)
+            datas.append(list())
 
-        for mdata in mdatas_qs.values():
-            values = datas[1]
-            for l_property in property_qs:
-                if (l_property.property_id == mdata['property_id']):
-                    value_type = l_property.value_type_id
-                    property_name = l_property.property_name
-                    property_code = l_property.property_code
+            for mdata in mdatas_qs.values():
+                values = datas[1]
+                for l_property in property_qs:
+                    if (l_property.property_id == mdata['property_id']):
+                        value_type = l_property.value_type_id
+                        property_name = l_property.property_name
+                        property_code = l_property.property_code
 
-            if 'select' in value_type:
-                if mdata['code_list_id']:
-                    lcode_qs = LCodeLists.objects
-                    lcode_qs = lcode_qs.filter(code_list_id=mdata['code_list_id'])
-                    lcode_qs = lcode_qs.first()
-                    value = lcode_qs.code_list_name
-            elif value_type != 'boolean':
-                value_type = 'value_' + value_type
-                value = mdata[value_type]
+                if 'select' in value_type:
+                    if mdata['code_list_id']:
+                        lcode_qs = LCodeLists.objects
+                        lcode_qs = lcode_qs.filter(code_list_id=mdata['code_list_id'])
+                        lcode_qs = lcode_qs.first()
+                        value = lcode_qs.code_list_name
+                elif value_type != 'boolean':
+                    value_type = 'value_' + value_type
+                    value = mdata[value_type]
 
-            if value:
-                values.append([property_name, value, property_code])
+                if value:
+                    values.append([property_name, value, property_code])
 
-        if datas:
-            infos.append(datas)
+            if datas:
+                infos.append(datas)
 
     rsp = {
         'datas': infos,
@@ -1374,6 +1372,76 @@ def get_feature_info(request, payload):
 
     rsp = {
         'datas': datas,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_geom(request, payload):
+    feature = ''
+    geo_id = payload.get('geo_id')
+
+    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    if geom:
+        geo_json = geom.json
+        feature = utils.get_feature_from_geojson(geo_json)
+
+    rsp = {
+        'feature': feature
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_contain_geoms(request, payload):
+    features = list()
+    layers_changed_code = list()
+    feature_collection = list()
+    buffer = ''
+    success = False
+
+    main_layer_name = 'gp_layer_'
+
+    layers_code = payload.get('layers_code')
+    geometry = payload.get('geometry')
+    km_scale = payload.get('km_scale')
+
+    if len(layers_code) > 0:
+        for layer_code in layers_code:
+
+            layer_code = utils.remove_text_from_str(layer_code, main_layer_name)
+
+            if km_scale:
+                km_scale = km_scale / 10
+                point = utils.get_geom_for_filter_from_coordinate(geometry, 'Point')
+                buffer = utils.get_feature_from_geojson(point.buffer(km_scale).json)
+                geoms = utils.get_geoms_with_point_buffer_from_view(geometry, layer_code, km_scale)
+
+            else:
+                geoms = utils.get_inside_geoms_from_view(geometry, layer_code)
+
+            if geoms:
+                for geom in geoms:
+                    feature = utils.get_feature_from_geojson(geom)
+                    features.append(feature)
+
+            changed_code = main_layer_name + layer_code
+            layers_changed_code.append(changed_code)
+
+        feature_collection = FeatureCollection(features)
+        success = True
+
+    rsp = {
+        'features': feature_collection,
+        'layers_code': layers_changed_code,
+        'buffer': buffer,
+        'success': success or False,
     }
 
     return JsonResponse(rsp)
