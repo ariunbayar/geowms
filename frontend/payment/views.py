@@ -12,7 +12,7 @@ from datetime import date
 from fpdf import FPDF
 
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, connections
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import Polygon
@@ -827,6 +827,8 @@ def _get_info_from_file(get_type, mpoint, pdf_id, geo_id=None):
                             found_items.append(_get_items_with_file(content, mpoint, att_names))
                         if get_type == 'check':
                             found_items.append(pdf_id)
+                        if not get_type and not mpoint:
+                            found_items.append(_get_items_with_file(content, None, att_names))
                     if geo_id and str(content[att_names['point_name']]) == str(geo_id):
                         if get_type == 'check':
                             found_items.append(content[att_names['pid']])
@@ -843,8 +845,8 @@ def _get_items_with_file(content, mpoint, att_names):
         'sheet3': content[att_names['y']],
         'n_utm': content[att_names['n_utm']],
         'e_utm': content[att_names['e_utm']],
-        't_type': mpoint.t_type,
-        'class_name': mpoint.point_class_name,
+        't_type': mpoint.t_type if mpoint else '',
+        'class_name': str(mpoint.point_class_name) if mpoint else '',
         'pdf_id': content[att_names['pid']],
         'org_name': content[att_names['org_name']] if utils.get_key_and_compare(att_names, 'org_name') else 'Геопортал',
     }
@@ -888,6 +890,10 @@ def _create_lavlagaa_infos(payment):
                     else:
                         info = _get_item_from_mpoint_view(mpoint_qs)
                         point_infos.append(info)
+            else:
+                infos = _get_info_from_file(None, None, point.pdf_id, None)
+                for info in infos:
+                    point_infos.append(info)
 
     folder_name = 'tseg-personal-file'
     class_names = _class_name_eer_angilah(point_infos)
@@ -1176,7 +1182,8 @@ def calcPrice(request, payload):
 def _check_pdf_from_mpoint_view(pdf_id):
     has_pdf = False
     pdf_id = None
-    mpoints = Mpoint_view.objects.using("postgis_db").filter(pid=pdf_id)
+    mpoints = Mpoint_view.objects.using("postgis_db")
+    mpoints = mpoints.filter(pid=pdf_id)
     if mpoints:
         pdf_id = mpoints.first().pid
         has_pdf = True
@@ -1235,10 +1242,7 @@ def check_button_ebable_pdf_geo_id(request, payload):
 
     has_csv = _get_info_from_file('check', None, None, geo_id)
     if has_csv:
-        pdf_id = has_csv[0]
-
-    else:
-        has_pdf_in_mpoint, pid = _check_pdf_from_mpoint_view(pdf_id)
+        has_pdf_in_mpoint, pid = _check_pdf_from_mpoint_view(has_csv[0])
         if has_pdf_in_mpoint:
             pdf_id = pid
 
@@ -1286,6 +1290,7 @@ def _get_properties_qs(view_qs):
 def get_popup_info(request, payload):
     layers_code = payload.get('layers_code')
     coordinate = payload.get('coordinate')
+    radius = 1000
 
     value_type = None
     property_name = None
@@ -1295,48 +1300,49 @@ def get_popup_info(request, payload):
     views_qs = ViewNames.objects
     views_qs = views_qs.filter(view_name__in=[
         utils.remove_text_from_str(layer_code)
-        for layer_code in layers_code
-    ])
+        for layer_code in layers_code])
 
     for view_qs in views_qs:
-        feature_id = view_qs.feature_id
-
+        view_name = view_qs.view_name
         viewproperty_ids, property_qs = _get_properties_qs(view_qs)
+        properties = property_qs.values("property_code", "property_name")
 
-        nearest_points = utils.get_nearest_geom(coordinate, feature_id)
+        with connections['default'].cursor() as cursor:
+            sql = """
+                SELECT
+                    {properties}
+                FROM
+                    {view_name}
+                WHERE (
+                    ST_DistanceSphere(
+                        geo_data,
+                        ST_SetSRID(
+                            ST_MakePoint({x}, {y})
+                        ,4326)
+                    )
+                    <= {radius}
+                )
+            """.format(
+                view_name=view_name,
+                properties=",".join([prop_code['property_code'] for prop_code in properties]),
+                x=coordinate[0],
+                y=coordinate[1],
+                radius=radius
+            )
+            cursor.execute(sql)
+            results = [dict((cursor.description[i][0], value) \
+                for i, value in enumerate(row)) for row in cursor.fetchall()[:5]]
 
-        for nearest_point in nearest_points:
-            mdatas_qs = MDatas.objects
-            mdatas_qs = mdatas_qs.filter(geo_id=nearest_point.geo_id)
-            mdatas_qs = mdatas_qs.filter(property_id__in=viewproperty_ids)
-
-            datas = list()
-            datas.append('gp_layer_' + view_qs.view_name)
-            datas.append(list())
-
-            for mdata in mdatas_qs.values():
-                values = datas[1]
-                for l_property in property_qs:
-                    if (l_property.property_id == mdata['property_id']):
-                        value_type = l_property.value_type_id
-                        property_name = l_property.property_name
-                        property_code = l_property.property_code
-
-                if 'select' in value_type:
-                    if mdata['code_list_id']:
-                        lcode_qs = LCodeLists.objects
-                        lcode_qs = lcode_qs.filter(code_list_id=mdata['code_list_id'])
-                        lcode_qs = lcode_qs.first()
-                        value = lcode_qs.code_list_name
-                elif value_type != 'boolean':
-                    value_type = 'value_' + value_type
-                    value = mdata[value_type]
-
-                if value:
-                    values.append([property_name, value, property_code])
-
-            if datas:
-                infos.append(datas)
+            for result in results:
+                datas = list()
+                datas.append('gp_layer_' + view_qs.view_name)
+                datas.append(list())
+                for key, value in result.items():
+                    for prop in properties:
+                        if prop['property_code'].lower() == key and value:
+                            datas[1].append([prop['property_name'], value, key])
+                if datas:
+                    infos.append(datas)
 
     rsp = {
         'datas': infos,
