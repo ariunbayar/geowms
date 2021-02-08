@@ -792,7 +792,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
                         ds_name,
                         ds_name,
         )
-        if  data_store.status_code == 201:
+        if  data_store.status_code != 201:
 
             return {
                 'success': False,
