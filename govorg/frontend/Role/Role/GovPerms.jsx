@@ -31,7 +31,7 @@ export default class InsPerms extends Component {
             roles: [],
             is_role_border: 'border border-warning',
             is_emp_border: 'border border-primary',
-            border_left_right_none_bg_bg: ' border-right-0 border-left-0 bg-light'
+            border_left_right_none_bg: ' border border-primary border-right-0 border-left-0 bg-light '
         }
 
         this.getId = this.getId.bind(this)

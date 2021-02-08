@@ -8,6 +8,7 @@ from geoportal_app.models import User
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
+from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from backend.inspire.models import (
     GovPermInspire,
@@ -193,8 +194,8 @@ def create(request, payload):
     emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
     user = get_object_or_404(User, employee__user=request.user)
-
-    errors = _employee_validation(user, user_detail)
+    get_object_or_404(Employee, user=request.user, is_admin=True)
+    errors = _employee_validation(None, user_detail)
     if errors:
         return JsonResponse({
             'success': False,
@@ -224,7 +225,7 @@ def create(request, payload):
             obj_array.append(emp_perm_inspire)
         EmpPermInspire.objects.bulk_create(obj_array)
 
-        # utils.send_approve_email(user)
+        utils.send_approve_email(user)
 
         return JsonResponse({
             'success': True,
@@ -255,6 +256,13 @@ def update(request, payload, pk):
     employee = get_object_or_404(Employee, pk=pk)
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     new_emp_role = EmpRole.objects.filter(id=role_id).first()
+    get_object_or_404(Employee, user=request.user, is_admin=True)
+    errors = _employee_validation(employee.user, payload)
+    if errors:
+        return JsonResponse({
+            'success': False,
+            'errors': errors
+        })
 
     with transaction.atomic():
         if emp_perm:
@@ -271,7 +279,6 @@ def update(request, payload, pk):
             emp_perm.employee_id = employee.id
             emp_perm.updated_by = user
             emp_perm.save()
-
 
         if remove_perms:
             _delete_remove_perm(remove_perms)
@@ -375,17 +382,25 @@ def detail(request, pk):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def delete(request, pk):
-
+    get_object_or_404(Employee, user=request.user, is_admin=True)
     employee = get_object_or_404(Employee, pk=pk)
-    emp_perm = get_object_or_404(EmpPerm, employee=employee)
+    user = User.objects.filter(pk=employee.user_id).first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    change_requests = ChangeRequest.objects.filter(employee=employee)
 
     with transaction.atomic():
-        EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
-        emp_perm.delete()
+        for change_request in change_requests:
+            change_request.employee = None
+            change_request.save()
+        if emp_perm:
+            EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
+            emp_perm.delete()
         employee.delete()
+        user.delete()
+
         return JsonResponse({'success': True})
 
-    return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 
 @require_GET
@@ -414,12 +429,16 @@ def refresh_token(request, pk):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def send_mail(request):
+def send_mail(request, payload):
     subject = 'Геопортал нууц үг солих'
     text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-    utils.send_approve_email(request.user, subject, text)
+    username = payload.get('username')
+
+    user = get_object_or_404(User, username=username)
+
+    utils.send_approve_email(user, subject, text)
 
     return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})

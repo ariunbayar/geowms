@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { service } from './service'
 import SideBar from './Sidebar'
 import './styles.css'
+import Loader from "@utils/Loader"
 
 export class List extends Component {
 
@@ -21,6 +22,13 @@ export class List extends Component {
             prev_theme_event: null,
             prev_package_event: null,
             check_package_event: null,
+            style_names: [],
+            url: '',
+            defualt_url: '',
+            view_style_name: '',
+            geom_type: '',
+            is_loading: false,
+            property_loading: false
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
@@ -32,10 +40,14 @@ export class List extends Component {
     }
 
     getAll(){
-        service.getall().then(({success, data }) => {
+        this.setState({is_loading:true})
+        service.getall().then(({success, data, style_names, defualt_url}) => {
             if(success){
                 this.setState({
                     list_all: data,
+                    style_names,
+                    defualt_url:defualt_url,
+                    is_loading: false
                 })
             }
         })
@@ -43,14 +55,21 @@ export class List extends Component {
 
     getProperties(fid, tid, fname, event) {
         this.active_view(event)
-        this.setState({fid, tid, fname})
-        service.getPropertyFields(fid).then(({success ,fields, id_list, view_name}) => {
+        this.setState({fid, tid, fname, property_loading: true})
+        service.getPropertyFields(fid).then(({success ,fields, id_list, view_name, url, style_name, geom_type}) => {
             if(success){
-                this.setState({fields, id_list, view_name})
+                this.setState({fields, id_list, view_name, url, view_style_name: style_name, geom_type, property_loading:false})
             }
+            else this.setState({property_loading: false})
         })
     }
 
+    componentDidUpdate(pP, pS){
+
+        if(pS.geom_type !== this.state.geom_type){
+            this.setState({geom_type: this.state.geom_type})
+        }
+    }
     active_view(event){
         this.setState({fields: [], id_list: [], view_name: ''})
         const id = event.id
@@ -109,7 +128,7 @@ export class List extends Component {
     }
 
     render() {
-        const { list_all, fid, tid } = this.state
+        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading} = this.state
         return (
             <div className="row m-0">
                 <div className="col-md-6">
@@ -172,7 +191,22 @@ export class List extends Component {
                         </div>
                     </div>
                 </div>
-                <SideBar getAll={this.getAll} fields={this.state.fields} fid={this.state.fid} fname={this.state.fname} tid={this.state.tid} id_list={this.state.id_list} view_name={this.state.view_name}/>
+                <SideBar
+                    getAll={this.getAll}
+                    fields={this.state.fields}
+                    fid={this.state.fid}
+                    fname={this.state.fname}
+                    tid={this.state.tid}
+                    id_list={this.state.id_list}
+                    view_name={this.state.view_name}
+                    style_names={style_names}
+                    url={url}
+                    defualt_url={defualt_url}
+                    view_style_name={view_style_name}
+                    geom_type={geom_type}
+                    property_loading={property_loading}
+                />
+                <Loader is_loading={is_loading}/>
             </div>
         )
     }

@@ -3,6 +3,7 @@ import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
 import ModalAlert from '@utils/Modal/ModalAlert'
 import Modal from '@utils/Modal/Modal'
+import {Notif} from '@utils/Notification'
 
 export class PolygonPurchase extends Component {
 
@@ -26,6 +27,7 @@ export class PolygonPurchase extends Component {
         this.qPayClose = this.qPayClose.bind(this)
         this.alertOver = this.alertOver.bind(this)
         this.alertOut = this.alertOut.bind(this)
+        this.addNotif = this.addNotif.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
     }
 
@@ -42,6 +44,16 @@ export class PolygonPurchase extends Component {
                 this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
             }
         }).catch(error => console.log(error))
+    }
+
+    addNotif(style, msg, icon){
+        this.too ++
+        this.setState({ show: true, style: style, msg: msg, icon: icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
     }
 
     handlePayment (){
@@ -192,6 +204,7 @@ export class PolygonPurchase extends Component {
                     modalAction={() => this.handleModalApproveClose()}
                 />
             }
+            <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
         </div>
         )
     }

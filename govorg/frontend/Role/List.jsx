@@ -51,6 +51,7 @@ export class List extends Component {
 
     render() {
         const { roles, is_loading } = this.state
+        const { is_admin, username } = this.props.employee
         return (
             <div className="card">
                 <div className="card-body">
@@ -63,6 +64,7 @@ export class List extends Component {
                         :
                             <div className="row">
                                 <div className="col-md-12">
+                                    {is_admin &&
                                     <div className="text-right">
                                         <NavLink
                                             className="btn gp-btn-primary waves-effect waves-light m-1"
@@ -70,14 +72,15 @@ export class List extends Component {
                                             Нэмэх
                                         </NavLink>
                                     </div>
+                                    }
                                     <div className="table-responsive">
                                         <table className="table ">
                                             <thead>
                                                 <tr>
                                                     <th scope="col">№</th>
                                                     <th scope="col">title</th>
-                                                    <th scope="col">Засах</th>
-                                                    <th scope="col">Устгах</th>
+                                                    {is_admin && <th scope="col">Засах</th>}
+                                                    {is_admin && <th scope="col">Устгах</th>}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -87,6 +90,7 @@ export class List extends Component {
                                                             index={idx + 1}
                                                             values={p}
                                                             handleRemove={() => this.handleRemove(p.role_id)}
+                                                            employee={this.props.employee}
                                                         />
                                                     )}
                                             </tbody>

@@ -52,6 +52,7 @@ export default class Bundles extends Component {
                             { ...routeProps }
                             addNotif={ this.addNotif }
                             refreshCount={this.props.refreshCount}
+                            employee={this.props.employee}
                         />
                     }/>
                 </Switch>

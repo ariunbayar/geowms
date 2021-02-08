@@ -15,7 +15,6 @@ export default class Маягт extends Component {
             pid: props.pid,
             fid: props.fid,
             values: {},
-            geojson: {},
             order_at: '',
             order_no: '',
         }
@@ -29,8 +28,8 @@ export default class Маягт extends Component {
     onSubmit(values, { setStatus, setSubmitting }) {
         const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list, cancel_button_active } = this.props
             if(null_form_isload){
-                if (this.state.geojson != {}) {
-                    service.create(this.state.tid, this.state.pid, this.state.fid, values, this.state.geojson).then(({ success, info }) => {
+                if (this.props.geojson != {}) {
+                    service.create(this.state.tid, this.state.pid, this.state.fid, values, this.props.geojson).then(({ success, info }) => {
                         if (success) {
                             this.setState({is_loading: true})
                             this.props.requestRefreshCount()
@@ -92,8 +91,8 @@ export default class Маягт extends Component {
     componentDidUpdate(pP){
         if(pP.togle_islaod !== this.props.togle_islaod)
         {
-            const {gid, tid, pid, fid, geojson} = this.props
-            this.setState({geojson, tid, pid, fid})
+            const {gid, tid, pid, fid} = this.props
+            this.setState({ tid, pid, fid })
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){

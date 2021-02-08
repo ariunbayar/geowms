@@ -8,6 +8,7 @@ import { Profile } from './User/Profile'
 import InsPerms from './Role/Role/GovPerms'
 import Gov from './Role/Gov/index'
 import { Employee } from './Role/Employee'
+import { Region } from './Role/Region'
 import Bundles from './Bundles/Inspire'
 import { TuuhenOv } from './Bundles/TuuhenOv'
 import { Forms } from './Bundles/Form'
@@ -72,7 +73,7 @@ export class App extends Component {
     }
 
     render() {
-        const { org_role } = this.props.org
+        const { org_role, employee } = this.props.org
         const { emp_role , approve, revoke } = this.state
         return (
             <BrowserRouter>
@@ -87,6 +88,7 @@ export class App extends Component {
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Байгууллага">
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
                             </ul>
@@ -183,16 +185,17 @@ export class App extends Component {
                             <Route path="/gov/revoke-request/" component={RevokeRequest} />
                             <Route path="/gov/meta/" component={Meta} />
 
-                            <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} /> } />
+                            <Route path="/gov/perm/region/" component={Region} />
+                            <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
                             <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} refreshCount={() => this.requestCount()} />} />
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} employee={employee} refreshCount={() => this.requestCount()} />} />
 
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={OrgRequest} />
                             <Route path="/gov/history/" component={ChangeRequest} />
                             <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
                             <Route exact path="/gov/perm/org/" component={Gov} />
-                            <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} getEmpRoles={this.getEmpRoles}/>}/>
+                            <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} employee={employee} getEmpRoles={this.getEmpRoles}/>}/>
                             <Route exact path="/gov/help/" component={Help} />
                             <Route exact path="/gov/profile/" component={Profile} />
                             <Route exact path="/gov/profile/password/" component={Password} />

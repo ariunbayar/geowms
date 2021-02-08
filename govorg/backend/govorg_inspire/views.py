@@ -14,11 +14,11 @@ from django.db import connections, transaction
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
-from django.contrib.gis.geos import GEOSGeometry
 from django.core.files.storage import FileSystemStorage
-from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.geos import MultiLineString
+from django.contrib.gis.geos import MultiPoint
+from django.contrib.gis.geos import MultiPolygon
 
-from backend.changeset.models import ChangeSet
 from backend.dedsanbutets.models import ViewNames
 from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import EmpPerm
@@ -29,11 +29,12 @@ from backend.inspire.models import LProperties
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 
+from main.utils import get_geoJson
 from main.decorators import ajax_required
 from main.utils import check_form_json
 from main.utils import dict_fetchall
@@ -54,16 +55,16 @@ def _get_changeset_display(ob):
     geom1 = geom[:9]
     geom2 = geom[10:-2]
     geom3 = geom[-1]
-    geom4 = geom1 + geom2 +geom3
+    geom4 = geom1 + geom2 + geom3
     values_list = json.loads(geom4)
     coordinates = values_list['geom']['coordinates']
     geom_type = values_list['geom']['type']
 
     return {
-        'coordinate':coordinates,
-        'geom_type':geom_type,
-        'changeset_id':ob.id,
-        'changeset_attributes':ob.features,
+        'coordinate': coordinates,
+        'geom_type': geom_type,
+        'changeset_id': ob.id,
+        'changeset_attributes': ob.features,
         'projection': ob.projection
     }
 
@@ -103,20 +104,6 @@ def _get_feature_coll(ob, changeset_list):
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def changeset_all(request):
-
-    changeset_list = [_get_changeset_display(ob) for ob in ChangeSet.objects.all()]
-    features = [_get_feature_coll(ob, changeset_list) for ob in range(len(changeset_list))]
-    feature_collection = FeatureCollection(features)
-    rsp = {
-        'GeoJson': feature_collection,
-    }
-    return JsonResponse(rsp)
-
-
-@require_GET
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
 def getRoles(request, fid):
 
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
@@ -139,12 +126,11 @@ def getRoles(request, fid):
         elif perm_kind == EmpPermInspire.PERM_REVOKE:
             inspire_roles['PERM_REVOKE'] = True
     rsp = {
-        'roles':inspire_roles,
+        'roles': inspire_roles,
         'success': True
     }
 
     return JsonResponse(rsp)
-
 
 
 @require_GET
@@ -350,7 +336,7 @@ def _get_property(ob, roles, lproperties):
     value_type = _get_type(lproperties.value_type_id)
 
     if value_type == 'option':
-       data_list =  _code_list_display(lproperties.property_id)
+        data_list = _code_list_display(lproperties.property_id)
     elif value_type == 'text':
         data = ob.get('value_text') or ''
     elif value_type == 'number':
@@ -362,9 +348,8 @@ def _get_property(ob, roles, lproperties):
         if role.get('property_id') == lproperties.property_id:
             property_roles = role.get('roles')
 
-
     return {
-        'pk':ob.get('id'),
+        'pk': ob.get('id'),
         'property_name': lproperties.property_name,
         'property_id': lproperties.property_id,
         'property_code': lproperties.property_code,
@@ -375,6 +360,7 @@ def _get_property(ob, roles, lproperties):
         'data_list': data_list,
         'roles': property_roles
     }
+
 
 @require_GET
 @ajax_required
@@ -405,10 +391,10 @@ def detailCreate(request, tid, pid, fid):
     property_roles = []
     org_propties_front = []
     value_data = {
-        'pk':'',
-        'value_text':'',
-        'value_date':'',
-        'value_number':''
+        'pk': '',
+        'value_text': '',
+        'value_date': '',
+        'value_number': ''
         }
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_roles = get_emp_property_roles(employee, fid)
@@ -476,11 +462,11 @@ def _geo_json_convert_geom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
 
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom)
         geom_type = GEOSGeometry(geom).geom_type
         if geom_type == 'Point':
@@ -507,6 +493,8 @@ def create(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_CREATE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -520,6 +508,7 @@ def create(request, payload):
             theme_id=tid,
             package_id=pid,
             feature_id=fid,
+            org=org,
             employee=employee,
             state=ChangeRequest.STATE_NEW,
             kind=ChangeRequest.KIND_CREATE,
@@ -549,32 +538,35 @@ def remove(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     geo_data = _get_geom(old_geo_id, fid)
     if not geo_data:
         rsp = {
-        'success': False,
-        'info': "Аль хэдийн устсан геом байна.",
+            'success': False,
+            'info': "Аль хэдийн устсан геом байна.",
         }
         return JsonResponse(rsp)
 
     geo_data = geo_data[0]["geom"]
-    geo_json = _get_geoJson(geo_data)
+    geo_json = get_geoJson(geo_data)
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json['geometry'])
 
     if not success:
         return JsonResponse({'success': success, 'info': info})
 
     ChangeRequest.objects.create(
-            old_geo_id = old_geo_id,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_DELETE,
-            form_json = None,
-            geo_json = None,
+            old_geo_id=old_geo_id,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            org=org,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_DELETE,
+            form_json=None,
+            geo_json=None,
             order_at=order_at,
             order_no=order_no,
     )
@@ -600,6 +592,8 @@ def update(request, payload):
     order_at = form_json.get('order_at')
 
     employee = get_object_or_404(Employee, user__username=request.user)
+    org = get_object_or_404(Org, pk=employee.org_id)
+
     success, info = has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
     if not success:
         return JsonResponse({'success': success, 'info': info})
@@ -608,16 +602,17 @@ def update(request, payload):
     geo_json = json.dumps(geo_json, ensure_ascii=False)
 
     ChangeRequest.objects.create(
-            old_geo_id = old_geo_id,
-            new_geo_id = None,
-            theme_id = tid,
-            package_id = pid,
-            feature_id = fid,
-            employee = employee,
-            state = ChangeRequest.STATE_NEW,
-            kind = ChangeRequest.KIND_UPDATE,
-            form_json = form_json,
-            geo_json = geo_json,
+            old_geo_id=old_geo_id,
+            new_geo_id=None,
+            theme_id=tid,
+            package_id=pid,
+            feature_id=fid,
+            org=org,
+            employee=employee,
+            state=ChangeRequest.STATE_NEW,
+            kind=ChangeRequest.KIND_UPDATE,
+            form_json=form_json,
+            geo_json=geo_json,
             order_at=order_at,
             order_no=order_no,
     )
@@ -745,14 +740,15 @@ def _make_request(values, request_values):
         'order_no': request_values['order_no'],
         'group_id': request_values['group_id'],
     }
-    with transaction.atomic():
-        success = _create_request(request_datas)
-        info = 'Амжилттай хадгалалаа'
+
+    success = _create_request(request_datas)
+    info = 'Амжилттай хадгаллаа'
 
     return success, info
 
 
 def _delete_file(for_delete_items):
+    transaction.rollback()
     fileList = glob.glob(
         os.path.join(
             settings.BASE_DIR,
@@ -898,68 +894,63 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     }
                     main_request_id = _create_request(request_datas)
 
-            for val in layer:
-                values = dict()
-                for name in range(0, len(layer.fields)):
-                    field_name = val[name].name  # field name
-                    value = val.get(name)  # value ni
+                for val in layer:
+                    values = dict()
+                    for name in range(0, len(layer.fields)):
+                        field_name = val[name].name  # field name
+                        value = val.get(name)  # value ni
 
-                    if name == 0:
+                        if name == 0:
 
-                        # geo_id = _make_geo_id(feature_id)
-                        geo_json = val.geom.json  # goemetry json
+                            # geo_id = _make_geo_id(feature_id)
+                            geo_json = val.geom.json  # goemetry json
 
-                        if geo_json:
-                            success, info, request_kind = _check_perm(
-                                employee,
-                                feature_id,
-                                geo_json
-                            )
+                            if geo_json:
+                                success, info, request_kind = _check_perm(
+                                    employee,
+                                    feature_id,
+                                    geo_json
+                                )
 
-                            if not success:
+                                if not success:
+                                    _delete_file(for_delete_items)
+                                    rsp = {
+                                        'success': success,
+                                        'info': info,
+                                    }
+                                    return JsonResponse(rsp)
+
+                            else:
                                 _delete_file(for_delete_items)
                                 rsp = {
-                                    'success': success,
-                                    'info': info,
+                                    'success': False,
+                                    'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
                                 }
                                 return JsonResponse(rsp)
 
-                        else:
-                            _delete_file(for_delete_items)
-                            rsp = {
-                                'success': False,
-                                'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
-                            }
-                            return JsonResponse(rsp)
+                        values[field_name] = value
 
-                    values[field_name] = value
+                    request_values = {
+                        'theme_id': tid,
+                        'package_id': pid,
+                        'feature_id': fid,
+                        'employee': employee,
+                        'geo_json': geo_json,
+                        'kind': request_kind,
+                        'order_at': order_at,
+                        'order_no': order_no,
+                        'group_id': main_request_id,
+                    }
+                    success, info = _make_request(values, request_values)
 
-                request_values = {
-                    'theme_id': tid,
-                    'package_id': pid,
-                    'feature_id': fid,
-                    'employee': employee,
-                    'geo_json': geo_json,
-                    'kind': request_kind,
-                    'order_at': order_at,
-                    'order_no': order_no,
-                    'group_id': main_request_id,
+                    if not success:
+                        _delete_file(for_delete_items)
+                        break
+
+                rsp = {
+                    'success': success,
+                    'info': info
                 }
-                success, info = _make_request(values, request_values)
-
-                if not success:
-                    _delete_file(for_delete_items)
-                    break
-
-            rsp = {
-                'success': success,
-                'info': info
-            }
-        else:
-            rsp = {
-                'success': success,
-                'info': 'Файл хоосон байна'
-            }
 
     else:
         rsp = {
@@ -979,5 +970,23 @@ def get_qgis_url(request):
         'success': True,
         'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
         'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_api_url(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    rsp = {
+        'success': True,
+        'api_links': {
+            'token_auth': request.build_absolute_uri(reverse('api:inspire:token-auth')),
+            'create': request.build_absolute_uri(reverse('api:inspire:create')),
+            'remove': request.build_absolute_uri(reverse('api:inspire:remove')),
+            'update': request.build_absolute_uri(reverse('api:inspire:update')),
+            'select': request.build_absolute_uri(reverse('api:inspire:select'))
+        }
     }
     return JsonResponse(rsp)

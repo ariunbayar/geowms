@@ -133,7 +133,7 @@ export class EmployeeEdit extends Component {
     }
 
     getValue(checked, perm_kind, property_id, feature_id, perm_inspire_id, type, is_true_type, is_role_emp_id, is_emp_perm) {
-        if(!checked && this.role.length > 0 && type == null) {
+        if(!checked && type == null) {
             this.removeItemFromArray(
                 this.role,
                 feature_id,
@@ -209,21 +209,18 @@ export class EmployeeEdit extends Component {
         this.checkRoleAndPerm()
         service
             .updateEmployee(username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, this.perms, this.remove_perms)
-            .then(({ success, info }) => {
+            .then(({ success, info, errors }) => {
                 if(success) {
                     setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'success'})
+                    this.setState({model_type_icon: 'success', modal_alert_status: 'open', title: info})
+                    this.modalCloseTime()
                     this.props.getEmpRoles()
                 } else {
                     if (errors) {
                         setErrors(errors)
                     }
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'danger'})
                 }
-                this.setState({ modal_alert_status: 'open', title: info})
-                this.modalCloseTime()
+                setSubmitting(false)
             })
     }
 
@@ -274,9 +271,11 @@ export class EmployeeEdit extends Component {
     }
 
     handleSendMail(){
+        this.setState({modal_status: 'closed'})
         this.setState({ is_loading: true })
+        const username = this.state.form_values.username
         service
-            .sendMail()
+            .sendMail(username)
             .then(({ success, info }) => {
                 if(success) {
                     this.setState({ is_loading: false })
@@ -404,6 +403,7 @@ export class EmployeeEdit extends Component {
                                                 />
                                                 <ErrorMessage name="register" component="div" className="text-danger"/>
                                             </div>
+                                            {this.props.employee.is_admin &&
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="choose_role">Role: </label>
                                                 <select className='form-control' id="choose_role" name='choose_role' value={this.state.role_id} onChange={(e) => this.getRole(e.target.value)}>
@@ -412,9 +412,10 @@ export class EmployeeEdit extends Component {
                                                         <option key={idx} value={role.role_id}>{role.role_name}</option>
                                                     )}
                                                 </select>
-                                            </div>
+                                            </div>}
                                         </div>
                                         <div className='form-row'>
+                                            {this.props.employee.is_admin &&
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
@@ -425,30 +426,34 @@ export class EmployeeEdit extends Component {
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
+                                            }
+                                            {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
                                             <div className="col-md-6">
                                                 <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
                                                     {} Нууц үг солих имэйл илгээх
                                                 </button>
                                             </div>
+                                            : null
+                                            }
                                         </div>
                                         <br/>
                                         <div>
-                                            {
-                                                is_inspire_role || is_inspire_role_null
-                                                ?
-                                                    <InsPerms
-                                                        action_type="editable"
-                                                        is_employee={true}
-                                                        getValue={this.getValue}
-                                                        dontDid={true}
-                                                        org_roles={org_roles}
-                                                        role={roles}
-                                                        is_inspire_role_null={is_inspire_role_null}
-                                                        emp_perms={old_role_id == role_id ? perms : null}
-                                                        editable_is_check={this.perms}
-                                                    />
-                                                : null
-                                            }
+                                        {this.props.employee.is_admin &&
+                                            (is_inspire_role || is_inspire_role_null)
+                                            ?
+                                                <InsPerms
+                                                    action_type="editable"
+                                                    is_employee={true}
+                                                    getValue={this.getValue}
+                                                    dontDid={true}
+                                                    org_roles={org_roles}
+                                                    role={roles}
+                                                    is_inspire_role_null={is_inspire_role_null}
+                                                    emp_perms={old_role_id == role_id ? perms : null}
+                                                    editable_is_check={this.perms}
+                                                />
+                                            : null
+                                        }
                                         </div>
                                         <div className="form-group">
                                             <button type="submit" className="btn btn-primary waves-effect waves-light m-1" disabled={isSubmitting}>

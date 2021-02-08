@@ -17,8 +17,18 @@ export class OrgSystem extends Component {
             <Switch>
                 <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/"} component={Жагсаалт}/>
                 <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/:system_id/дэлгэрэнгүй/"} component={Дэлгэрэнгүй}/>
-                <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/үүсгэх/"} component={GovorgForm}/>
-                <Route exact path={"/back/байгууллага/түвшин/:level/:id/систем/:system_id/засах/"} component={GovorgForm}/>
+                <Route
+                    exact path={"/back/байгууллага/түвшин/:level/:id/систем/үүсгэх/"}
+                    component={(props) =>
+                        <GovorgForm {...props} refreshCount={this.props.refreshCount}/>
+                    }
+                />
+                <Route
+                    exact path={"/back/байгууллага/түвшин/:level/:id/систем/:system_id/засах/"}
+                    component={(props) =>
+                        <GovorgForm {...props} refreshCount={this.props.refreshCount}/>
+                    }
+                />
             </Switch>
         )
     }

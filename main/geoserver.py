@@ -162,6 +162,17 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                     attribute_name=attribute_name[i]['column_name']
                 )
             attributes_hoho.insert(i, attributes)
+        elif attribute_name[i]['data_type'][:4] == 'text':
+            attributes =  '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>java.lang.String</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+            attributes_hoho.insert(i, attributes)
         elif attribute_name[i]['data_type'][:4] == 'time':
             attributes =  '''
                 <attribute>
@@ -325,7 +336,7 @@ def get_wms_url(wms_name):
 
 def get_legend_url(wms_id, layer_name):
 
-    legend_url =  (
+    legend_url = (
         'https://nsdi.gov.mn/back/wms/WMS/{wms_id}/?'
         'service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'
     ).format(
@@ -333,3 +344,172 @@ def get_legend_url(wms_id, layer_name):
         layer=layer_name,
     )
     return legend_url
+
+
+def get_styles():
+
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'styles'
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    styles = rsp.json()
+    return styles.get('styles').get('style')
+
+
+def get_layer_style(layer_name):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layers/{layer_name}'.format(layer_name=layer_name)
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        return features.get('layer').get('defaultStyle').get('name')
+
+
+def check_geoserver_style(style_name):
+    BASE_URL, AUTH = getHeader()
+    url = 'styles/' + style_name + '.sld'
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    return rsp
+
+
+def update_layer_style(layer_name, style_name):
+    BASE_URL, AUTH = getHeader()
+    url = 'layers/' + layer_name
+    payload = '''
+                <layer>
+                <defaultStyle><name>{style_name}</name></defaultStyle>
+                </layer>
+            '''.format(style_name=style_name)
+    rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
+    return rsp
+
+
+def create_style(values):
+    BASE_URL, AUTH = getHeader()
+
+    style_name = values.get('style_name')
+    style_title = values.get('style_title')
+    style_abstract = values.get('style_abstract')
+    style_color = values.get('style_color')
+    fill_color = values.get('fill_color')
+    style_size = values.get('style_size')
+    geom_type = values.get('geom_type')
+    dashed_line_gap = values.get('dashed_line_gap')
+    dashed_line_length = values.get('dashed_line_length')
+    wellknownname = values.get('wellknownname')
+    color_opacity = values.get('color_opacity')
+    if geom_type == 'MultiLineString' or geom_type == 'LineString':
+        geom_type = 'LineSymbolizer'
+        style_content = '''
+            <Rule>
+                <{geom_type}>
+                    <Fill>
+                    <CssParameter name="fill">{fill_color}</CssParameter>
+                    <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
+                    </Fill>
+                    <Stroke>
+                    <CssParameter name="stroke">{stroke_color}</CssParameter>
+                    <CssParameter name="stroke-width">{stroke_width}</CssParameter>
+                    <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
+                    </Stroke>
+                </{geom_type}>
+            </Rule>
+        '''.format(
+            geom_type=geom_type,
+            fill_color=fill_color,
+            fill_opacity=color_opacity,
+            stroke_color=style_color,
+            stroke_width=style_size,
+            dashed_line_length=dashed_line_length,
+            dashed_line_gap=dashed_line_gap
+        )
+    elif geom_type == 'Polygon' or geom_type == 'MultiPolygon':
+        geom_type = 'PolygonSymbolizer'
+        style_content = '''
+            <Rule>
+                <{geom_type}>
+                    <Fill>
+                    <CssParameter name="fill">{fill_color}</CssParameter>
+                    <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
+                    </Fill>
+                    <Stroke>
+                    <CssParameter name="stroke">{stroke_color}</CssParameter>
+                    <CssParameter name="stroke-width">{stroke_width}</CssParameter>
+                    <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
+                    </Stroke>
+                </{geom_type}>
+            </Rule>
+        '''.format(
+            geom_type=geom_type,
+            fill_color=fill_color,
+            fill_opacity=color_opacity,
+            stroke_color=style_color,
+            stroke_width=style_size,
+            dashed_line_length=dashed_line_length,
+            dashed_line_gap=dashed_line_gap
+        )
+
+    else:
+        if not wellknownname:
+            wellknownname = 'circle'
+        style_content = '''
+                <Rule>
+                <PointSymbolizer>
+                    <Graphic>
+                    <Mark>
+                        <WellKnownName>{wellknownname}</WellKnownName>
+                            <Fill>
+                            <CssParameter name="fill">{fill_color}</CssParameter>
+                            <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
+                            </Fill>
+                            <Stroke>
+                            <CssParameter name="stroke">{stroke_color}</CssParameter>
+                            <CssParameter name="stroke-width">{stroke_width}</CssParameter>
+                            <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
+                            </Stroke>
+                    </Mark>
+                    </Graphic>
+                </PointSymbolizer>
+                </Rule>
+        '''.format(
+            geom_type=geom_type,
+            fill_color=fill_color,
+            fill_opacity=color_opacity,
+            stroke_color=style_color,
+            stroke_width=style_size,
+            dashed_line_length=dashed_line_length,
+            dashed_line_gap=dashed_line_gap,
+            wellknownname=wellknownname
+        )
+
+    payload = """
+        <StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
+            xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/.../StyledLayerDescriptor.xsd">
+            <NamedLayer>
+                <Name>{style_name}</Name>
+                <UserStyle>
+                    <Name>{style_name}</Name>
+                    <Title>{style_title}</Title>
+                    <Abstract>{style_abstract}</Abstract>
+                    <FeatureTypeStyle>
+                            {style_content}
+                    </FeatureTypeStyle>
+                </UserStyle>
+            </NamedLayer>
+        </StyledLayerDescriptor>
+    """.format(
+        style_name=style_name,
+        style_title=style_title,
+        style_abstract=style_abstract,
+        style_content=style_content
+    )
+    url = 'styles'
+    headers = {'Content-type': 'application/vnd.ogc.sld+xml'}
+    rsp = requests.post(BASE_URL + url, headers=headers, auth=AUTH, data=payload.encode('utf-8') )
+    return rsp

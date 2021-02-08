@@ -18,7 +18,6 @@ class Capabilities {
 }
 
 export const service = {
-    geom,
     getWmsLayer,
     remove,
     cancel,
@@ -41,16 +40,12 @@ export const service = {
     createMeta,
     deleteMeta,
     getLayers,
-    qgisGetUrl
+    qgisGetUrl,
+    apiGetUrl
 }
 
 const prefix = '/gov/api/inspire'
 const meta_prefix = '/gov/api/meta-data'
-
-function geom() {
-    const requestOptions = getGetOptions()
-    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
-}
 
 function getRole(fid) {
     const requestOptions = getGetOptions()
@@ -227,4 +222,9 @@ function getLayers(emp_perm_prefix) {
 function qgisGetUrl() {
     const requestOptions = getGetOptions()
     return fetch(`${prefix}/qgis-url/`, requestOptions).then(handleResponse)
+}
+
+function apiGetUrl() {
+    const requestOptions = getGetOptions()
+    return fetch(`${prefix}/qpi-url/`, requestOptions).then(handleResponse)
 }

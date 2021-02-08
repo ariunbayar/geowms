@@ -24,6 +24,7 @@ from main.inspire import InspireDataType
 from main.inspire import InspireFeature
 from backend.config.models import Config
 from backend.token.utils import TokenGeneratorUserValidationEmail
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -579,12 +580,19 @@ def _is_geom_included(geo_json, org_geo_id):
     return is_included
 
 
+def get_perm_kind_name(idx):
+    perms = {1: 'ХАРАХ', 2: 'НЭМЭХ', 3: 'ХАСАХ', 4: 'ЗАСАХ', 5: 'БАТЛАХ', 6: 'ЦУЦЛАХ'}
+    return perms[idx]
+
+
 # Тухайн geom ни feature доторх geom той давхцаж байгаа эсэхийг шалгана
 # Давхцаж байгаа geom болон feature_id array хэлбэрээр буцаана
 # geo_json = нэг geojson авна
 # feature_ids = feature id list авна
-def _geom_contains_feature_geoms(geo_json, feature_ids):
+def _geom_contains_feature_geoms(geo_json, feature_ids, perm_kind=None):
     is_included = list()
+    if perm_kind and get_perm_kind_name(perm_kind) == 'ХАСАХ':
+        return is_included
     with connections['default'].cursor() as cursor:
         sql = """
             SELECT geo_id, feature_id
@@ -627,7 +635,7 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
         overlap_feature_id = FeatureOverlaps.objects.filter(feature_id=fid).values_list('overlap_feature_id', flat=True)
         overlap_feature_id = [i for i in overlap_feature_id]
         overlap_feature_id.append(fid)
-        is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id)
+        is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id, perm_kind)
         if is_contains:
             success = False
             info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains]))
@@ -720,6 +728,40 @@ def get_1stOrder_geo_id():
         return None
 
 
+def get_geoJson(data):
+    data = json.loads(data)
+    geom_type = data['type']
+    coordinates = data['coordinates']
+    if geom_type == 'Point':
+        from geojson import Point
+        point = Point(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'LineString':
+        from geojson import LineString
+        point = LineString(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'Polygon':
+        from geojson import Polygon
+        point = Polygon(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiPoint':
+        from geojson import MultiPoint
+        point = MultiPoint(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiLineString':
+        from geojson import MultiLineString
+        point = MultiLineString(coordinates)
+        return Feature(geometry=point)
+
+    else:
+        from geojson import MultiPolygon
+        point = MultiPolygon(coordinates)
+        return Feature(geometry=point)
+
 def datetime_to_string(date):
     return date.strftime('%Y-%m-%d') if date else ''
 
@@ -749,6 +791,34 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
         display.append(obj)
 
     return display
+
+
+def geoJsonConvertGeom(geojson):
+    with connections['default'].cursor() as cursor:
+        sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        geom =  ''.join(geom)
+        geom = GEOSGeometry(geom).hex
+        geom = geom.decode("utf-8")
+    return geom
+
+
+def geojson_to_geom(geo_json):
+    geom = []
+    geo_json = str(geo_json).replace("\'", "\"")
+    geo_data = geoJsonConvertGeom(geo_json)
+    geom = ''.join(geo_data)
+    geom = GEOSGeometry(geom)
+
+    geom_type = GEOSGeometry(geom).geom_type
+    if geom_type == 'Point':
+        geom = MultiPoint(geom, srid=4326)
+    if geom_type == 'LineString':
+        geom = MultiLineString(geom, srid=4326)
+    if geom_type == 'Polygon':
+        geom = MultiPolygon(geom, srid=4326)
+    return geom
 
 
 def get_fields(Model):

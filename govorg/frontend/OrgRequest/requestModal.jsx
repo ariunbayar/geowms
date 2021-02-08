@@ -173,9 +173,11 @@ export default class RequestModal extends Component {
             .then(({ success, info }) => {
                 if(success) {
                     modal_type = 'success'
+                    modal_info = info
                 }
                 else {
                     modal_type = 'warning'
+                    modal_info = info
                 }
                 this.setState({ is_loading: false })
                 this.props.refreshData(open_modal, modal_info, modal_type)

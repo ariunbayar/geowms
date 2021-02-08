@@ -33,16 +33,19 @@ export class EmployeeForm extends Component {
 
     render() {
         const { employees, prefix } = this.state
+        const { is_admin, username } = this.props.employee
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-12">
+                            {is_admin &&
                             <div className="text-right">
                                 <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`${prefix}/add/`}>
                                     Нэмэх
                                 </NavLink>
                             </div>
+                            }
                             <div className="table-responsive">
                                 <table className="table">
                                     <thead>

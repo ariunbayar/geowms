@@ -31,6 +31,7 @@ export default class App extends Component {
       gov_count: [],
     };
     this.handleBoxOver = this.handleBoxOver.bind(this)
+    this.hanfleCounts = this.hanfleCounts.bind(this)
   }
 
   handleBoxOver (field){
@@ -38,13 +39,16 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    this.hanfleCounts()
+  }
 
-    service.userCount().then(({ user_count }) => {
-      this.setState({ user_count: user_count });
-    });
-    service.govCount().then(({ gov_count }) => {
-      this.setState({ gov_count });
-    });
+  hanfleCounts(){
+    Promise.all([
+      service.userCount(),
+      service.govCount(),
+    ]).then(([{user_count}, {gov_count}]) => {
+      this.setState({user_count, gov_count})
+    })
   }
 
   render() {
@@ -97,7 +101,10 @@ export default class App extends Component {
               <Route path={"/back/wms/"} component={WMSPage} />
               <Route path={"/back/geoserver/"} component={Geoserver} />
               <Route path={"/back/org-role/"} component={OrgRole} />
-              <Route path={"/back/байгууллага/"} component={Org} />
+              <Route
+                path="/back/байгууллага/"
+                component={(props) => <Org {...props} refreshCount={this.hanfleCounts} />}
+              />
               <Route path={"/back/дэд-сан-бүтэц/"} component={DedsanBvtets} />
               <Route path={"/back/inspire-views/"} component={InspireViews} />
               <Route exact path={"/back/log/"} component={Log} />

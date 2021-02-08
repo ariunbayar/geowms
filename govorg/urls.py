@@ -3,6 +3,7 @@ from django.urls import re_path, path, include
 from govorg.backend.org import views as org_views
 from govorg.backend.role.employee import views as role_employee_views
 from govorg.backend.role.role import views as role_views
+from govorg.backend.role.region import views as role_region_views
 from govorg.backend.system import views as system_views
 from govorg.backend.org_request import views as org_request_views
 from govorg.backend.govorg_inspire import views as govorg_inspire_views
@@ -16,6 +17,9 @@ urlpatterns = [
     path('api/', include(([
 
         path('role/', include(([
+            path('region/', include(([
+                path('', role_region_views.map_region)
+            ], 'region'))),
             path('employee/', include(([
                 path('', role_employee_views.list),
                 path('send-mail/', role_employee_views.send_mail),
@@ -41,7 +45,6 @@ urlpatterns = [
         ], 'system'))),
 
         path('inspire/', include(([
-            path('', govorg_inspire_views.changeset_all),
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
             path('<int:tid>/<int:pid>/<int:fid>/get-wms-layer/', govorg_inspire_views.get_wms_layer),
             path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
@@ -56,6 +59,7 @@ urlpatterns = [
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('send-data/<int:tid>/<int:pid>/<int:fid>/<str:ext>/', govorg_inspire_views.file_upload_save_data),
             path('qgis-url/', govorg_inspire_views.get_qgis_url),
+            path('qpi-url/', govorg_inspire_views.get_api_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),
         ], 'inspire'))),
