@@ -30,7 +30,6 @@ export class OrgForm extends Component {
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.handleSort = this.handleSort.bind(this)
 
     }
@@ -77,32 +76,6 @@ export class OrgForm extends Component {
         }
     }
 
-    handleUserDelete(id){
-        const { load, searchQuery } = this.state
-        const level = this.props.match.params.level
-        const org_id = this.props.match.params.org_id
-        service.org_remove(this.state.level,id).then(({ success }) => {
-            var a = load
-            a++
-            if (success) {
-                this.setState({ load: a, msg: "Амжилттай боллоо", style: 'success' })
-                this.paginate(1, searchQuery, level, org_id)
-                this.setState({ modal_alert_status: 'open'})
-            }else{
-                this.setState({ load: a, msg: "Амжилтгүй боллоо", style: 'danger' })
-                this.paginate(1, searchQuery, level, org_id)
-                this.setState({ modal_alert_status: 'open'})
-            }
-            this.modalCloseTime()
-        })
-    }
-
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
-    }
-
     modalClose() {
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
@@ -145,8 +118,6 @@ export class OrgForm extends Component {
                                         <th><a onClick={() => this.handleSort('name', this.state.name)}>Байгууллага нэр <i className={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
                                         <th scope="col">Албан хаагчид</th>
                                         <th scope="col">Систем</th>
-                                        <th scope="col">Засах</th>
-                                        <th scope="col">Устгах</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -158,7 +129,6 @@ export class OrgForm extends Component {
                                                 idx={(currentPage*20)-20+idx+1}
                                                 org_level={this.state.level}
                                                 org={org}
-                                                handleUserDelete={() => this.handleUserDelete(org.id)}
                                             >
                                             </OrgFormTable>
                                     )}

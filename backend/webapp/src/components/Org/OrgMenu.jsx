@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch , Route, Link, NavLink} from "react-router-dom"
 
 import {service} from './service'
-import {OrgDetail} from './OrgDetail'
+import {OrgForm} from './OrgDetail/OrgForm'
 import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 import {OrgRole} from './OrgRole'
@@ -94,7 +94,7 @@ export class OrgMenu extends Component {
                 <div className="tab-content">
                     <Switch>
                         <Route path="/back/байгууллага/түвшин/:level/:id/detail/" render={(routeProps) =>
-                            <OrgDetail { ...routeProps } allowed_geom={ allowed_geom }/>
+                            <OrgForm { ...routeProps } allowed_geom={ allowed_geom }/>
                         }/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
                         <Route
