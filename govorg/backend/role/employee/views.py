@@ -195,8 +195,7 @@ def create(request, payload):
     org = get_object_or_404(Org, employee__user=request.user)
     user = get_object_or_404(User, employee__user=request.user)
     get_object_or_404(Employee, user=request.user, is_admin=True)
-
-    errors = _employee_validation(user, user_detail)
+    errors = _employee_validation(None, user_detail)
     if errors:
         return JsonResponse({
             'success': False,
@@ -258,6 +257,12 @@ def update(request, payload, pk):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     new_emp_role = EmpRole.objects.filter(id=role_id).first()
     get_object_or_404(Employee, user=request.user, is_admin=True)
+    errors = _employee_validation(employee.user, payload)
+    if errors:
+        return JsonResponse({
+            'success': False,
+            'errors': errors
+        })
 
     with transaction.atomic():
         if emp_perm:

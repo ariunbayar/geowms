@@ -25,7 +25,7 @@ export class PermSwitches extends Component {
             element.style.backgroundColor = '#006CB6'
             max = Math.ceil(width / 2)
         }
-        else if(total_length > now_length) {
+        else if(total_length > now_length && now_length != 0) {
             element.style.backgroundColor = '#FFD24A'
             max = Math.floor(width / 3)
         }
