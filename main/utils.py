@@ -576,12 +576,19 @@ def _is_geom_included(geo_json, org_geo_id):
     return is_included
 
 
+def get_perm_kind_name(idx):
+    perms = {1: 'ХАРАХ', 2: 'НЭМЭХ', 3: 'ХАСАХ', 4: 'ЗАСАХ', 5: 'БАТЛАХ', 6: 'ЦУЦЛАХ'}
+    return perms[idx]
+
+
 # Тухайн geom ни feature доторх geom той давхцаж байгаа эсэхийг шалгана
 # Давхцаж байгаа geom болон feature_id array хэлбэрээр буцаана
 # geo_json = нэг geojson авна
 # feature_ids = feature id list авна
-def _geom_contains_feature_geoms(geo_json, feature_ids):
+def _geom_contains_feature_geoms(geo_json, feature_ids, perm_kind=None):
     is_included = list()
+    if perm_kind and get_perm_kind_name(perm_kind) == 'ХАСАХ':
+        return is_included
     with connections['default'].cursor() as cursor:
         sql = """
             SELECT geo_id, feature_id
@@ -624,7 +631,7 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
         overlap_feature_id = FeatureOverlaps.objects.filter(feature_id=fid).values_list('overlap_feature_id', flat=True)
         overlap_feature_id = [i for i in overlap_feature_id]
         overlap_feature_id.append(fid)
-        is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id)
+        is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id, perm_kind)
         if is_contains:
             success = False
             info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains]))

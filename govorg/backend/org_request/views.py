@@ -294,6 +294,41 @@ def _str_to_json(form_json, item):
     return json.loads(form_json) if form_json else ''
 
 
+def _get_geoJson(data):
+    data = json.loads(data)
+    geom_type = data['type']
+    coordinates = data['coordinates']
+    if geom_type == 'Point':
+        from geojson import Point
+        point = Point(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'LineString':
+        from geojson import LineString
+        point = LineString(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'Polygon':
+        from geojson import Polygon
+        point = Polygon(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiPoint':
+        from geojson import MultiPoint
+        point = MultiPoint(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiLineString':
+        from geojson import MultiLineString
+        point = MultiLineString(coordinates)
+        return Feature(geometry=point)
+
+    else:
+        from geojson import MultiPolygon
+        point = MultiPolygon(coordinates)
+        return Feature(geometry=point)
+
+
 def _geojson_to_featurecollection(geo_json, item):
     geo_json_list = list()
     if item['old_geo_id']:
@@ -507,11 +542,12 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
 
 def _request_to_m(request_datas):
     geom = _geojson_to_geom(request_datas['geo_json'])
-
-    success = _create_mdatas_object(
-        request_datas['form_json'], request_datas['feature_id'],
-        request_datas['geo_id'], request_datas['approve_type']
-    )
+    success = True
+    if request_datas['form_json']:
+        success = _create_mdatas_object(
+            request_datas['form_json'], request_datas['feature_id'],
+            request_datas['geo_id'], request_datas['approve_type']
+        )
 
     if request_datas['approve_type'] == 'create':
         if geom:
