@@ -807,6 +807,13 @@ def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
     return feature
 
 
+def get_geom_for_filter_from_coordinate(coordinate, geom_type, srid=4326):
+    module = importlib.import_module('django.contrib.gis.geos')
+    class_ = getattr(module, geom_type)
+    geom = class_([float(coordinate[0]), float(coordinate[1])], srid=srid)
+    return geom
+
+
 def get_geom_for_filter_from_geometry(geometry):
     if isinstance(geometry, str):
         geometry = json.loads(geo_json)
@@ -839,3 +846,28 @@ def remove_text_from_str(main_text, remove_text='gp_layer_'):
     if remove_text in main_text:
         replaced_text = main_text.replace(remove_text, '')
     return replaced_text
+
+
+def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT ST_AsGeoJSON(geo_data)
+            FROM {view_name}
+            WHERE (
+                    ST_Dwithin(
+                        geo_data,
+                        ST_SetSRID(
+                            ST_MakePoint({x}, {y})
+                        ,4326)
+                        ,{radius}
+                    )
+            )
+        """.format(
+            view_name=view_name,
+            radius=radius / 10,
+            x=point_coordinates[0],
+            y=point_coordinates[1],
+        )
+        cursor.execute(sql)
+
+        return [item[0] for item in cursor.fetchall()]

@@ -98,7 +98,6 @@ export default class BundleMap extends Component {
         this.allLayerVisible = this.allLayerVisible.bind(this)
         this.addLayerToSearch = this.addLayerToSearch.bind(this)
         this.drawBorderCircle = this.drawBorderCircle.bind(this)
-        this.removeCircle = this.removeCircle.bind(this)
         this.fromLonLatToMapCoord = this.fromLonLatToMapCoord.bind(this)
         this.featureFromUrl = this.featureFromUrl.bind(this)
         this.check_inspire_layer = this.check_inspire_layer.bind(this)
@@ -389,7 +388,7 @@ export default class BundleMap extends Component {
     }
 
     allLayerVisible(changed_layers) {
-        this.removeCircle()
+        this.removeFeatureFromSource('buffer')
         this.map.getLayers().getArray().forEach((layer) => {
             if(layer.get('filter') && layer.get('filter') == this.state.filtered_layer_name) {
                 layer.setVisible(false)
@@ -413,15 +412,6 @@ export default class BundleMap extends Component {
                         layer.setVisible(false)
                     }
                 }
-            }
-        })
-    }
-
-    removeCircle() {
-        this.map.getLayers().forEach((layer) => {
-            if(layer && layer.get('name') && layer.get('name') == 'border_circle') {
-                layer.setVisible(false)
-                this.map.removeLayer(layer)
             }
         })
     }
@@ -454,7 +444,7 @@ export default class BundleMap extends Component {
     }
 
     resetFilteredOnlyFeature() {
-        this.removeCircle()
+        this.removeFeatureFromSource('buffer')
         this.removeFeatureFromSource('aimag_sum')
         this.map.getLayers().forEach((layer) => {
             if(layer) {
@@ -483,29 +473,14 @@ export default class BundleMap extends Component {
         return fromLonLat([coordinate[0], coordinate[1]]);
     }
 
-    drawBorderCircle(coordinate, kilometers) {
-        const circle = new Circle(this.fromLonLatToMapCoord(coordinate), kilometers * 1000 * 1.5)
-        const style = new Style({
-            stroke: new Stroke({
-                color: 'blue',
-                width: 3
-            }),
-            fill: new Fill({
-                color: 'rgba(0, 0, 255, 0.1)'
-            })
-        })
-        const box = fromExtent(circle.getExtent())
-        const box_feature = new Feature(box)
-        box_feature.setStyle(style)
-        const source =  new VectorSource({
-            projection: this.state.projection_display,
-            features: [box_feature]
-        })
-        const layer = new VectorLayer({
-            source: source,
-            name: "border_circle"
-        })
-        this.map.addLayer(layer)
+    drawBorderCircle(buffer_feature) {
+        const { vector_layer } = this.state
+        const features = (this.state.format.readFeatures(buffer_feature, {
+            dataProjection: this.state.projection_display,
+            featureProjection: this.state.projection,
+        }))
+        features[0].setProperties({ id: 'buffer' })
+        vector_layer.getSource().addFeature(features[0])
 
     }
 
@@ -755,7 +730,7 @@ export default class BundleMap extends Component {
     }
 
     handleSetCenter(coord, zoom, has_marker=true) {
-        this.removeCircle()
+        this.removeFeatureFromSource('buffer')
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
@@ -783,12 +758,21 @@ export default class BundleMap extends Component {
         this.marker_layer.setVisible(false)
     }
 
-    getFeatureInfoFromInspire(feature) {
+    getFeatureInfoFromInspire(feature, point_coordinate, scale) {
         this.onClickCloser()
         this.hideMarker()
 
-        const geom = this.writeFeat(feature)
-        const parsed_geojson = JSON.parse(geom).geometry
+        let parsed_geojson
+        let km_scale = null
+
+        if (feature) {
+            const geom = this.writeFeat(feature[0])
+            parsed_geojson = JSON.parse(geom).geometry
+        }
+        else {
+            parsed_geojson = point_coordinate
+            km_scale = this.getKiloFromScale(scale)
+        }
 
         const wms_array = this.getWMSArray()
         wms_array.map(({ layers }, w_idx) => {
@@ -807,10 +791,10 @@ export default class BundleMap extends Component {
         this.allLayerVisible('inside')
 
         service
-            .getContainGeoms(this.is_not_visible_layers, parsed_geojson)
-            .then(({ features, layers_code }) => {
+            .getContainGeoms(this.is_not_visible_layers, parsed_geojson, km_scale)
+            .then(({ features, layers_code, buffer }) => {
                 this.is_not_visible_layers = layers_code
-
+                console.log(features, layers_code, buffer);
                 const features_col = (this.state.format.readFeatures(features, {
                     dataProjection: this.state.projection_display,
                     featureProjection: this.state.projection,
@@ -828,7 +812,6 @@ export default class BundleMap extends Component {
                     }),
                 })
                 const source =  new VectorSource({
-                    projection: layers_code,
                     features: features_col,
                 })
                 const layer = new VectorLayer({
@@ -836,6 +819,7 @@ export default class BundleMap extends Component {
                     name: "inside",
                     style: style,
                 })
+                if (buffer != {}) this.drawBorderCircle(buffer)
                 this.map.addLayer(layer)
                 layer.setVisible(true)
                 this.setState({ filtered_layer: layer })
@@ -853,6 +837,7 @@ export default class BundleMap extends Component {
     }
 
     getGeomFromBuffer(point_coordinate) {
+        console.log(point_coordinate);
         service
             .getGeomWithBuffer(this.is_not_visible_layers, point_coordinate)
             .then(({ feature }) => {
@@ -862,11 +847,8 @@ export default class BundleMap extends Component {
             })
     }
 
-    setFeatureOnMap(feature, point_coordinate) {
-        if (!feature && point_coordinate) {
-            this.getGeomFromBuffer(point_coordinate)
-        }
-        else {
+    setFeatureOnMap(feature, point_coordinate, scale) {
+        if (feature) {
             const { vector_layer } = this.state
             const id = 'aimag_sum'
             this.removeFeatureFromSource(id)
@@ -877,8 +859,8 @@ export default class BundleMap extends Component {
             feature[0].setProperties({ id })
             vector_layer.getSource().addFeature(feature[0])
             this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
-            this.getFeatureInfoFromInspire(feature[0])
         }
+        this.getFeatureInfoFromInspire(feature, point_coordinate, scale)
     }
 
     toggleSidebar(event) {

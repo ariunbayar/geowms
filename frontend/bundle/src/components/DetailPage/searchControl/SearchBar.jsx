@@ -57,14 +57,12 @@ class SearchBarComponent extends Component {
         this.getGeom = this.getGeom.bind(this)
     }
 
-    handleSubmitCoordinate(event, place) {
+    handleSubmitCoordinate(event) {
         event.preventDefault()
         // const coord = helpers.parseCoordinateString(this.state.coordinate)
-        var array = [this.state.coordinatey, this.state.coordinatex]
-        this.props.handleSetCenter(array, this.state.bairlal_one_zoom)
-        if (place) {
-            this.props.setFeatureOnMap(feature, array)
-        }
+        const coordinates = [this.state.coordinatey, this.state.coordinatex]
+        this.props.handleSetCenter(coordinates, this.state.bairlal_one_zoom)
+        this.props.setFeatureOnMap(undefined, coordinates, this.state.bairlal_scale)
     }
 
     handleSubmitClear(event) {
@@ -254,7 +252,7 @@ class SearchBarComponent extends Component {
                 </form>
 
 
-                <form onSubmit={(e) => this.handleSubmitCoordinate(e, 'place')} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
+                <form onSubmit={(e) => this.handleSubmitCoordinate(e)} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Байрлалаар хайх</label>
                         <div className="input-group mb-3">
