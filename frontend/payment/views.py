@@ -1402,39 +1402,46 @@ def get_geom(request, payload):
 def get_contain_geoms(request, payload):
     features = list()
     layers_changed_code = list()
-    buffer = dict()
+    feature_collection = list()
+    buffer = ''
+    success = False
 
     main_layer_name = 'gp_layer_'
 
     layers_code = payload.get('layers_code')
     geometry = payload.get('geometry')
     km_scale = payload.get('km_scale')
-    for layer_code in layers_code:
 
-        layer_code = utils.remove_text_from_str(layer_code, main_layer_name)
+    if len(layers_code) > 0:
+        for layer_code in layers_code:
 
-        if km_scale:
-            point = utils.get_geom_for_filter_from_coordinate(geometry, 'Point')
-            buffer = utils.get_feature_from_geojson(point.buffer(km_scale / 10).json)
-            geoms = utils.get_geoms_with_point_buffer_from_view(geometry, layer_code, km_scale)
+            layer_code = utils.remove_text_from_str(layer_code, main_layer_name)
 
-        else:
-            geoms = utils.get_inside_geoms_from_view(geometry, layer_code)
+            if km_scale:
+                km_scale = km_scale / 10
+                point = utils.get_geom_for_filter_from_coordinate(geometry, 'Point')
+                buffer = utils.get_feature_from_geojson(point.buffer(km_scale).json)
+                geoms = utils.get_geoms_with_point_buffer_from_view(geometry, layer_code, km_scale)
 
-        if geoms:
-            for geom in geoms:
-                feature = utils.get_feature_from_geojson(geom)
-                features.append(feature)
+            else:
+                geoms = utils.get_inside_geoms_from_view(geometry, layer_code)
 
-        changed_code = main_layer_name + layer_code
-        layers_changed_code.append(changed_code)
+            if geoms:
+                for geom in geoms:
+                    feature = utils.get_feature_from_geojson(geom)
+                    features.append(feature)
 
-    feature_collection = FeatureCollection(features)
+            changed_code = main_layer_name + layer_code
+            layers_changed_code.append(changed_code)
+
+        feature_collection = FeatureCollection(features)
+        success = True
 
     rsp = {
         'features': feature_collection,
         'layers_code': layers_changed_code,
         'buffer': buffer,
+        'success': success or False,
     }
 
     return JsonResponse(rsp)

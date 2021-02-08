@@ -864,7 +864,7 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
             )
         """.format(
             view_name=view_name,
-            radius=radius / 10,
+            radius=radius,
             x=point_coordinates[0],
             y=point_coordinates[1],
         )

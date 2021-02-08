@@ -108,7 +108,6 @@ export default class BundleMap extends Component {
         this.writeFeat = this.writeFeat.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
         this.hideMarker = this.hideMarker.bind(this)
-        this.getGeomFromBuffer = this.getGeomFromBuffer.bind(this)
     }
 
     initMarker() {
@@ -444,19 +443,20 @@ export default class BundleMap extends Component {
     }
 
     resetFilteredOnlyFeature() {
-        this.removeFeatureFromSource('buffer')
         this.removeFeatureFromSource('aimag_sum')
+        this.removeFeatureFromSource('buffer')
+
         this.map.getLayers().forEach((layer) => {
             if(layer) {
                 this.is_not_visible_layers.map((visible_layer_code) => {
                     if(layer.get('code') == visible_layer_code) {
                         layer.setVisible(true)
                     }
-                    if(layer.get('filter') == this.state.filtered_layer_name){
+                    if(this.state.filtered_layer_name && layer.get('filter') == this.state.filtered_layer_name){
                         this.map.removeLayer(layer)
                     }
                 })
-                if (layer.get('name') == 'inside') {
+                if (layer.get("name") == 'inside') {
                     this.map.removeLayer(layer)
                 }
             }
@@ -474,6 +474,7 @@ export default class BundleMap extends Component {
     }
 
     drawBorderCircle(buffer_feature) {
+        this.removeFeatureFromSource('aimag_sum')
         const { vector_layer } = this.state
         const features = (this.state.format.readFeatures(buffer_feature, {
             dataProjection: this.state.projection_display,
@@ -481,7 +482,6 @@ export default class BundleMap extends Component {
         }))
         features[0].setProperties({ id: 'buffer' })
         vector_layer.getSource().addFeature(features[0])
-
     }
 
     getOnlyFeature(aimag_name, coordinate, sum_name, scale, changed_layers) {
@@ -731,6 +731,7 @@ export default class BundleMap extends Component {
 
     handleSetCenter(coord, zoom, has_marker=true) {
         this.removeFeatureFromSource('buffer')
+        this.removeFeatureFromSource('aimag_sum')
         const view = this.map.getView()
         const map_projection = view.getProjection()
         const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
@@ -792,37 +793,44 @@ export default class BundleMap extends Component {
 
         service
             .getContainGeoms(this.is_not_visible_layers, parsed_geojson, km_scale)
-            .then(({ features, layers_code, buffer }) => {
-                this.is_not_visible_layers = layers_code
-                console.log(features, layers_code, buffer);
-                const features_col = (this.state.format.readFeatures(features, {
-                    dataProjection: this.state.projection_display,
-                    featureProjection: this.state.projection,
-                }))
-                const style = new Style({
-                    image: new CircleStyle({
-                        radius: 5,
-                        fill: new Fill({
-                        color: 'red',
+            .then(({ features, layers_code, buffer, success }) => {
+                if (success) {
+                    this.is_not_visible_layers = layers_code
+                    const features_col = (this.state.format.readFeatures(features, {
+                        dataProjection: this.state.projection_display,
+                        featureProjection: this.state.projection,
+                    }))
+                    const style = new Style({
+                        image: new CircleStyle({
+                            radius: 5,
+                            fill: new Fill({
+                            color: 'red',
+                            }),
                         }),
-                    }),
-                    stroke: new Stroke({
-                        color: 'blue',
-                        width: 2,
-                    }),
-                })
-                const source =  new VectorSource({
-                    features: features_col,
-                })
-                const layer = new VectorLayer({
-                    source: source,
-                    name: "inside",
-                    style: style,
-                })
-                if (buffer != {}) this.drawBorderCircle(buffer)
-                this.map.addLayer(layer)
-                layer.setVisible(true)
-                this.setState({ filtered_layer: layer })
+                        stroke: new Stroke({
+                            color: 'blue',
+                            width: 2,
+                        }),
+                    })
+                    const source =  new VectorSource({
+                        features: features_col,
+                    })
+                    const layer = new VectorLayer({
+                        source: source,
+                        name: "inside",
+                        style: style,
+                    })
+                    if (buffer) {
+                        this.drawBorderCircle(buffer)
+                    }
+                    this.map.addLayer(layer)
+                    layer.setVisible(true)
+                    this.setState({ filtered_layer: layer })
+                }
+                else {
+                    alert("Ямар нэгэн давхарга нээгээгүй байна")
+                    this.toggleSidebar(false)
+                }
             })
     }
 
@@ -834,17 +842,6 @@ export default class BundleMap extends Component {
         })
         const changedFeature = JSON.stringify(data)
         return changedFeature
-    }
-
-    getGeomFromBuffer(point_coordinate) {
-        console.log(point_coordinate);
-        service
-            .getGeomWithBuffer(this.is_not_visible_layers, point_coordinate)
-            .then(({ feature }) => {
-                if (feature) {
-                    console.log(feature);
-                }
-            })
     }
 
     setFeatureOnMap(feature, point_coordinate, scale) {
@@ -863,10 +860,16 @@ export default class BundleMap extends Component {
         this.getFeatureInfoFromInspire(feature, point_coordinate, scale)
     }
 
-    toggleSidebar(event) {
-        this.setState(prevState => ({
-            is_sidebar_open: !prevState.is_sidebar_open,
-        }))
+    toggleSidebar(is_not_open) {
+        let is_setState = true
+        if (is_not_open == this.state.is_sidebar_open) {
+            is_setState = false
+        }
+        if (is_setState) {
+            this.setState(prevState => ({
+                is_sidebar_open: !prevState.is_sidebar_open,
+            }))
+        }
         if(this.state.is_sidebar_open){
             this.controls.sidebar.showSideBar(this.state.map_wms_list, true, this.addLayerToSearch)
         }else{
