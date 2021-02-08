@@ -1214,60 +1214,65 @@ export default class BarilgaSuurinGazar extends Component{
 
     BoxEnd(dragBox) {
       const {selected_feature} = this.state
-      const selectedFeatures = this.select.getFeatures();
-      const extent = dragBox.getGeometry().getExtent();
-      this.sendCoordinateList = []
-      this.turningPoint = []
-      const feat_type = selected_feature.getGeometry().getType()
-      this.feat_type = feat_type
-      var feature = []
-      if (feat_type.includes('MultiPolygon')) {
-        const feat_multi = this.getTypeFunction(selected_feature.getGeometry())
-        feat_multi.map((feature_multi, idx) => {
-          feature = feature_multi
+      if (selected_feature) {
+        const selectedFeatures = this.select.getFeatures();
+        const extent = dragBox.getGeometry().getExtent();
+        this.sendCoordinateList = []
+        this.turningPoint = []
+        const feat_type = selected_feature.getGeometry().getType()
+        this.feat_type = feat_type
+        var feature = []
+        if (feat_type.includes('MultiPolygon')) {
+          const feat_multi = this.getTypeFunction(selected_feature.getGeometry())
+          feat_multi.map((feature_multi, idx) => {
+            feature = feature_multi
+          })
+        } else {
+          feature = selected_feature
+        }
+        var checkBounds = null
+        if (feat_type.includes('MultiPolygon')) {
+          checkBounds = feature.getCoordinates()
+        }
+        else if (feat_type.includes('MultiPoint')){
+          checkBounds = [feature.getGeometry().getCoordinates()]
+        }
+        else if (feat_type == 'Point'){
+          checkBounds = [[feature.getGeometry().getCoordinates()]]
+        }
+        else {
+          checkBounds = feature.getGeometry().getCoordinates()
+        }
+        checkBounds.map((checkBound, idx) => {
+          const lastElement = checkBound.length
+          this.lastElement = lastElement
+          const coordinates = this.getTurningPoints(dragBox, checkBound)
+          selectedFeatures.push(selected_feature);
+          this.setState({ build_name: selected_feature.get('inspire_id'), coord_list_geom: checkBound })
+          coordinates.map((coordinate, i) => {
+            this.sendCoordinateList.push(coordinate.coordinate)
+            this.turningPoint.push(coordinate.turning)
+            if (feat_type.includes("Line") ||
+                (
+                  !feat_type.includes("Point") &&
+                    (feat_type.includes("Polygon") &&
+                    lastElement !== coordinate.turning)
+                )) {
+              this.addMarker(coordinate)
+            }
+          })
         })
-      } else {
-        feature = selected_feature
-      }
-      var checkBounds = null
-      if (feat_type.includes('MultiPolygon')) {
-        checkBounds = feature.getCoordinates()
-      }
-      else if (feat_type.includes('MultiPoint')){
-        checkBounds = [feature.getGeometry().getCoordinates()]
-      }
-      else if (feat_type == 'Point'){
-        checkBounds = [[feature.getGeometry().getCoordinates()]]
+        const data = {
+          'geom': this.sendCoordinateList,
+          'turning': this.turningPoint,
+          'last': this.lastElement,
+          'type': this.feat_type,
+        }
+        this.sendToShowList(data)
       }
       else {
-        checkBounds = feature.getGeometry().getCoordinates()
+        this.addNotif('warning', 'Сонгосон геомоо идэвхжүүлэх ёстой', 'exclamation')
       }
-      checkBounds.map((checkBound, idx) => {
-        const lastElement = checkBound.length
-        this.lastElement = lastElement
-        const coordinates = this.getTurningPoints(dragBox, checkBound)
-        selectedFeatures.push(selected_feature);
-        this.setState({ build_name: selected_feature.get('inspire_id'), coord_list_geom: checkBound })
-        coordinates.map((coordinate, i) => {
-          this.sendCoordinateList.push(coordinate.coordinate)
-          this.turningPoint.push(coordinate.turning)
-          if (feat_type.includes("Line") ||
-              (
-                !feat_type.includes("Point") &&
-                  (feat_type.includes("Polygon") &&
-                  lastElement !== coordinate.turning)
-              )) {
-            this.addMarker(coordinate)
-          }
-        })
-      })
-      const data = {
-        'geom': this.sendCoordinateList,
-        'turning': this.turningPoint,
-        'last': this.lastElement,
-        'type': this.feat_type,
-      }
-      this.sendToShowList(data)
     }
 
     listToModal() {
