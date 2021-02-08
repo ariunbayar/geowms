@@ -107,13 +107,13 @@ class PopUpCmp extends Component {
                 if (value[0] == 'point_id') {
                     this.setState({ id: value[1] })
                 }
-                if ((value[0] == 'point_name') || value[2] == 'Name') {
+                if ((value[0] == 'point_name') || value[2].toLowerCase() == 'name') {
                     this.setState({ name: value[1] })
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
-                    this.checkButtonEnable(value[1])
+                    this.checkButtonEnableWithPdf(value[1])
                 }
-                if (value[2] == 'PointNumber') {
+                if (value[2].toLowerCase() == 'pointnumber') {
                     this.checkButtonEnableWithId(value[1])
                     this.setState({ id: value[1] })
                     geom_name = value[1]

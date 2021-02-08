@@ -28,7 +28,6 @@ export class Purchase extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
-        this.madeLavlagaa = this.madeLavlagaa.bind(this)
     }
 
     componentDidMount(){
@@ -84,14 +83,10 @@ export class Purchase extends Component {
         }))
     }
 
-    madeLavlagaa(id) {
-        service.downloadPurchase(id, 'point')
-    }
-
     handleModalApproveClose(){
         const purchase_id = this.props.match.params.id
         if (!this.state.purchase_all.export_files) {
-            this.madeLavlagaa(purchase_id)
+            service.downloadPurchase(purchase_id, 'point')
         }
         this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
