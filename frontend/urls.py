@@ -62,6 +62,7 @@ urlpatterns = [
         path('get-feature-info/', payment_views.get_feature_info),
         path('get-geom/', payment_views.get_geom),
         path('get-contain-geoms/', payment_views.get_contain_geoms),
+        path('get-geoms-with-buffer/', payment_views.get_geoms_with_buffer),
     ], 'payment'))),
 
     path('qpay/', include(([

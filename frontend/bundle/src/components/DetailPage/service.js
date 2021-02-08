@@ -17,6 +17,7 @@ export const service = {
     getFeatureInfo,
     getGeom,
     getContainGeoms,
+    getGeomWithBuffer,
 }
 
 function getCookie(name) {
@@ -192,4 +193,12 @@ function getContainGeoms(layers_code, geometry) {
         body: JSON.stringify({layers_code, geometry})
     }
     return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
+}
+
+function getGeomWithBuffer(layers_code, geometry) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layers_code, geometry})
+    }
+    return fetch('/payment/get-geoms-with-buffer/', requestOptions).then(handleResponse)
 }

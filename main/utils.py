@@ -832,3 +832,10 @@ def get_inside_geoms_from_view(geo_json, view_name):
         cursor.execute(sql, [str(geo_json)])
 
         return [item[0] for item in cursor.fetchall()]
+
+
+def remove_text_from_str(main_text, remove_text='gp_layer_'):
+    replaced_text = main_text
+    if remove_text in main_text:
+        replaced_text = main_text.replace(remove_text, '')
+    return replaced_text

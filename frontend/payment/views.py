@@ -1284,7 +1284,6 @@ def _get_properties_qs(view_qs):
 @ajax_required
 @login_required
 def get_popup_info(request, payload):
-
     layers_code = payload.get('layers_code')
     coordinate = payload.get('coordinate')
 
@@ -1293,7 +1292,11 @@ def get_popup_info(request, payload):
     property_code = None
     infos = list()
 
-    views_qs = ViewNames.objects.filter(view_name__in=layers_code)
+    views_qs = ViewNames.objects
+    views_qs = views_qs.filter(view_name__in=[
+        utils.remove_text_from_str(layer_code)
+        for layer_code in layers_code
+    ])
 
     for view_qs in views_qs:
         feature_id = view_qs.feature_id
@@ -1407,8 +1410,7 @@ def get_contain_geoms(request, payload):
 
     for layer_code in layers_code:
 
-        if main_layer_name in layer_code:
-            layer_code = layer_code.replace(main_layer_name, '')
+        layer_code = utils.remove_text_from_str(layer_code, main_layer_name)
 
         geoms = utils.get_inside_geoms_from_view(geometry, layer_code)
         if geoms:

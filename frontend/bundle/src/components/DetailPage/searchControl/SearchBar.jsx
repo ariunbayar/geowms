@@ -63,7 +63,7 @@ class SearchBarComponent extends Component {
         var array = [this.state.coordinatey, this.state.coordinatex]
         this.props.handleSetCenter(array, this.state.bairlal_one_zoom)
         if (place) {
-            this.props.showOnlyArea(undefined, array, undefined, this.state.bairlal_scale)
+            this.props.setFeatureOnMap(feature, array)
         }
     }
 

@@ -109,6 +109,7 @@ export default class BundleMap extends Component {
         this.writeFeat = this.writeFeat.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
         this.hideMarker = this.hideMarker.bind(this)
+        this.getGeomFromBuffer = this.getGeomFromBuffer.bind(this)
     }
 
     initMarker() {
@@ -392,7 +393,7 @@ export default class BundleMap extends Component {
         this.map.getLayers().getArray().forEach((layer) => {
             if(layer.get('filter') && layer.get('filter') == this.state.filtered_layer_name) {
                 layer.setVisible(false)
-                this.map.removeLayer(layer.getSource())
+                this.map.removeLayer(layer)
             }
             if(changed_layers) {
                 if(layer.get('code') && layer.getVisible()) {
@@ -401,7 +402,7 @@ export default class BundleMap extends Component {
                 if(layer.get('name') == 'inside') {
                     if(layer.getVisible()) {
                         layer.setVisible(false)
-                        this.map.removeLayer(layer.getSource())
+                        this.map.removeLayer(layer)
                     }
                 }
             }
@@ -462,7 +463,7 @@ export default class BundleMap extends Component {
                         layer.setVisible(true)
                     }
                     if(layer.get('filter') == this.state.filtered_layer_name){
-                        this.map.removeLayer(layer.getSource())
+                        this.map.removeLayer(layer)
                     }
                 })
                 if (layer.get('name') == 'inside') {
@@ -598,8 +599,9 @@ export default class BundleMap extends Component {
 
     getPopUpInfo(coordinate, layers_code) {
         const latlong = toLonLat(coordinate)
+        let layer_codes = layers_code.length > 0 ? layers_code : this.is_not_visible_layers.length > 0 ? this.is_not_visible_layers : []
         service
-            .getPopUpInfo(layers_code, latlong)
+            .getPopUpInfo(layer_codes, latlong)
             .then(({ datas }) => {
                 let is_empty = false
                 if (datas.length == 0) {
@@ -850,18 +852,33 @@ export default class BundleMap extends Component {
         return changedFeature
     }
 
-    setFeatureOnMap(feature) {
-        const { vector_layer } = this.state
-        const id = 'aimag_sum'
-        this.removeFeatureFromSource(id)
-        var feature =  new GeoJSON().readFeatures(feature, {
-            dataProjection: this.state.projection_display,
-            featureProjection: this.state.projection,
-        });
-        feature[0].setProperties({ id })
-        vector_layer.getSource().addFeature(feature[0])
-        this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
-        this.getFeatureInfoFromInspire(feature[0])
+    getGeomFromBuffer(point_coordinate) {
+        service
+            .getGeomWithBuffer(this.is_not_visible_layers, point_coordinate)
+            .then(({ feature }) => {
+                if (feature) {
+                    console.log(feature);
+                }
+            })
+    }
+
+    setFeatureOnMap(feature, point_coordinate) {
+        if (!feature && point_coordinate) {
+            this.getGeomFromBuffer(point_coordinate)
+        }
+        else {
+            const { vector_layer } = this.state
+            const id = 'aimag_sum'
+            this.removeFeatureFromSource(id)
+            var feature =  new GeoJSON().readFeatures(feature, {
+                dataProjection: this.state.projection_display,
+                featureProjection: this.state.projection,
+            });
+            feature[0].setProperties({ id })
+            vector_layer.getSource().addFeature(feature[0])
+            this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
+            this.getFeatureInfoFromInspire(feature[0])
+        }
     }
 
     toggleSidebar(event) {
