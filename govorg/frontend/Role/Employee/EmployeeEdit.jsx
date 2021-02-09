@@ -209,21 +209,18 @@ export class EmployeeEdit extends Component {
         this.checkRoleAndPerm()
         service
             .updateEmployee(username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, this.perms, this.remove_perms)
-            .then(({ success, info }) => {
+            .then(({ success, info, errors }) => {
                 if(success) {
                     setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'success'})
+                    this.setState({model_type_icon: 'success', modal_alert_status: 'open', title: info})
+                    this.modalCloseTime()
                     this.props.getEmpRoles()
                 } else {
                     if (errors) {
                         setErrors(errors)
                     }
-                    setSubmitting(false)
-                    this.setState({model_type_icon: 'danger'})
                 }
-                this.setState({ modal_alert_status: 'open', title: info})
-                this.modalCloseTime()
+                setSubmitting(false)
             })
     }
 

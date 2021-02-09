@@ -1,5 +1,5 @@
 import json
-from geojson import Feature, FeatureCollection
+from geojson import FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
 from django.http import JsonResponse
@@ -32,6 +32,7 @@ from main.utils import (
     date_to_timezone,
     get_display_items,
     get_fields,
+    get_feature_from_geojson,
 )
 from main.components import Datatable
 
@@ -56,7 +57,6 @@ def _get_geom(geo_id, fid):
     rows = dict_fetchall(cursor)
     rows = list(rows)
     return rows
-
 
 
 def _get_org_request(ob, employee):
@@ -294,22 +294,57 @@ def _str_to_json(form_json, item):
     return json.loads(form_json) if form_json else ''
 
 
+def _get_geoJson(data):
+    data = json.loads(data)
+    geom_type = data['type']
+    coordinates = data['coordinates']
+    if geom_type == 'Point':
+        from geojson import Point
+        point = Point(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'LineString':
+        from geojson import LineString
+        point = LineString(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'Polygon':
+        from geojson import Polygon
+        point = Polygon(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiPoint':
+        from geojson import MultiPoint
+        point = MultiPoint(coordinates)
+        return Feature(geometry=point)
+
+    elif geom_type == 'MultiLineString':
+        from geojson import MultiLineString
+        point = MultiLineString(coordinates)
+        return Feature(geometry=point)
+
+    else:
+        from geojson import MultiPolygon
+        point = MultiPolygon(coordinates)
+        return Feature(geometry=point)
+
+
 def _geojson_to_featurecollection(geo_json, item):
     geo_json_list = list()
     if item['old_geo_id']:
 
         if item['geo_json']:
-            current_geo_json = _get_geoJson(geo_json)
+            current_geo_json = get_feature_from_geojson(geo_json)
             geo_json_list.append(current_geo_json)
 
         old_geo_data = _get_geom(item['old_geo_id'], item['feature_id'])
         if old_geo_data:
             old_geo_data = old_geo_data[0]['geom']
-            old_geo_data = _get_geoJson(old_geo_data)
+            old_geo_data = get_feature_from_geojson(old_geo_data)
             geo_json_list.append(old_geo_data)
 
     elif geo_json and not item['old_geo_id']:
-        geo_json = _get_geoJson(geo_json)
+        geo_json = get_feature_from_geojson(geo_json)
         geo_json_list.append(geo_json)
 
     geo_json = FeatureCollection(geo_json_list)
@@ -507,11 +542,12 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
 
 def _request_to_m(request_datas):
     geom = _geojson_to_geom(request_datas['geo_json'])
-
-    success = _create_mdatas_object(
-        request_datas['form_json'], request_datas['feature_id'],
-        request_datas['geo_id'], request_datas['approve_type']
-    )
+    success = True
+    if request_datas['form_json']:
+        success = _create_mdatas_object(
+            request_datas['form_json'], request_datas['feature_id'],
+            request_datas['geo_id'], request_datas['approve_type']
+        )
 
     if request_datas['approve_type'] == 'create':
         if geom:

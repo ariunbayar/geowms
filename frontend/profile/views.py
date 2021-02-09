@@ -1,3 +1,8 @@
+import os
+import glob
+import csv
+from django.conf import settings
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -5,7 +10,10 @@ from django.views.decorators.http import require_POST, require_GET
 
 from django.core.paginator import Paginator
 from main.decorators import ajax_required
-from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
+from backend.payment.models import Payment
+from backend.payment.models import PaymentPoint
+from backend.payment.models import PaymentPolygon
+from backend.payment.models import PaymentLayer
 from backend.wmslayer.models import WMSLayer
 from geoportal_app.models import User
 from govorg.backend.forms.models import TsegUstsan, Mpoint_view
@@ -23,23 +31,25 @@ def history(request):
 def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d %H:%M') if dt else None
 
+
 def _date_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
+
 
 def _get_payment_display(payment):
 
     return {
-        'id':payment.id,
-        'geo_unique_number':payment.geo_unique_number,
-        'bank_unique_number':payment.bank_unique_number,
-        'description':payment.description,
-        'total_amount':payment.total_amount,
-        'user':payment.user.username,
-        'is_success':payment.is_success,
-        'card_number':payment.card_number,
-        'message':payment.message,
-        'code':payment.code,
-        'export_file':payment.export_file,
+        'id': payment.id,
+        'geo_unique_number': payment.geo_unique_number,
+        'bank_unique_number': payment.bank_unique_number,
+        'description': payment.description,
+        'total_amount': payment.total_amount,
+        'user': payment.user.username,
+        'is_success': payment.is_success,
+        'card_number': payment.card_number,
+        'message': payment.message,
+        'code': payment.code,
+        'export_file': payment.export_file,
         'created_at': _datetime_display(payment.created_at),
         'failed_at': _date_display(payment.failed_at),
         'success_at': _date_display(payment.success_at),
@@ -175,21 +185,64 @@ def tsegAdd(request):
     return JsonResponse({'success': True})
 
 
+def _get_attribute_name_from_file(content):
+    att = dict()
+    for idx in range(0, len(content)):
+        if content[idx].lower() == 'aimag':
+            att['aimag'] = idx
+        if content[idx].lower() == 'sum':
+            att['sum_name'] = idx
+        if content[idx].lower() == 'point_name':
+            att['point_name'] = idx
+        if content[idx].lower() == 'pid':
+            att['pid'] = idx
+        if content[idx].lower() == 'ondor':
+            att['ondor'] = idx
+    return att
+
+
+def _get_items_with_file(content, att_names):
+    point_info = {
+        'undur': content[att_names['ondor']] or 'Өндөр байхгүй',
+        'aimag': content[att_names['aimag']],
+        'sum': content[att_names['sum_name']],
+    }
+    return point_info
+
+
+def _get_info_from_file(point_id, pdf_id):
+    found_items = dict()
+    file_list = [
+        f for f in glob.glob(os.path.join(settings.FILES_ROOT, "*.csv"))
+    ]
+    for a_file in file_list:
+        with open(a_file, 'rt') as f:
+            contents = csv.reader(f)
+            contents = list(contents)
+            for idx in range(0, len(contents)):
+                if idx == 0:
+                    att_names = _get_attribute_name_from_file(contents[idx])
+                else:
+                    content = contents[idx]
+                    # check_pdf_path = '/home/odk/Desktop/pdfs/tseg-personal-file'
+                    if str(content[att_names['pid']]) == str(pdf_id) and str(content[att_names['point_name']]) == str(point_id):
+                        found_items = _get_items_with_file(content, att_names)
+    return found_items
+
+
 def _get_tseg_detail(payment):
-    points = []
-    pay_point = PaymentPoint.objects.filter(payment_id=payment.id)
-    for point in pay_point:
-        mpoint = Mpoint_view.objects.using('postgis_db').filter(id=point.point_id).first()
-        if mpoint.pid:
-            pdf = mpoint.pid
-        else:
-            pdf = 'файл байхгүй байна'
-        points.append({
-            'name': point.point_name,
-            'amount': point.amount,
-            'file_name': pdf
-        })
-    return {'points': points, 'mpoint': mpoint}
+    points = list()
+    pay_points = PaymentPoint.objects.filter(payment=payment)
+    for point in pay_points:
+        point_info = _get_info_from_file(point.point_id, point.pdf_id)
+        if point_info:
+            points.append({
+                'name': point.point_name,
+                'amount': point.amount,
+                'file_name': point.pdf_id,
+                'mpoint': point_info
+            })
+    return points
 
 
 def _get_polygon_detail(payment):
@@ -216,7 +269,7 @@ def _get_layer_detail(payment):
     return layer_list
 
 
-def _get_detail_items(payment, mpoint):
+def _get_detail_items(payment):
     items = []
     items.append({
         'description': payment.description,
@@ -228,12 +281,6 @@ def _get_detail_items(payment, mpoint):
         'total': payment.total_amount,
         'export_file': payment.export_file,
     })
-    if mpoint:
-         items.append({
-            'mpoint_aimag': mpoint.aimag,
-            'mpoint_sum': mpoint.sum,
-            'undur': mpoint.ondor if mpoint.ondor else "Өндөр байхгүй",
-        })
     return items
 
 
@@ -246,7 +293,7 @@ def getDetail(requist, pk):
     if payment:
         if payment.export_kind == Payment.EXPORT_KIND_POINT:
             points = _get_tseg_detail(payment)
-            items = _get_detail_items(payment, points['mpoint'])
+            items = _get_detail_items(payment)
             rsp = {
                 'success': True,
                 'items': items,
@@ -255,7 +302,7 @@ def getDetail(requist, pk):
         if payment.export_kind == Payment.EXPORT_KIND_POLYGON:
             polygon = _get_polygon_detail(payment)
             layers = _get_layer_detail(payment)
-            items = _get_detail_items(payment, None)
+            items = _get_detail_items(payment)
             rsp = {
                 'success': True,
                 'polygon': polygon,

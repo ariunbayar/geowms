@@ -17,7 +17,6 @@ export class QPay extends Component {
             success: false,
         }
         this.payCheck = this.payCheck.bind(this)
-        this.close = this.close.bind(this)
         this.timerRemaining = this.timerRemaining.bind(this)
     }
 
@@ -25,10 +24,6 @@ export class QPay extends Component {
         if(this.state.qpay_open){
             this.HandleCreateQpay()
         }
-    }
-
-    close(callback){
-        callback()
     }
 
     componentDidUpdate(prevProps){
@@ -74,7 +69,7 @@ export class QPay extends Component {
             service.check(purchase_id).then(({success, msg}) => {
                 if(success) //Amjilttai boloh uyd
                 {
-                    this.close(this.props.handleClose)
+                    this.props.handleClose(true)
                 }
                 else{
 
@@ -98,7 +93,7 @@ export class QPay extends Component {
                 if (minutes === 0) {
                     this.setState({ msg: 'Хугацаа дууссан'})
                     setTimeout(() => {
-                        this.close(this.props.handleClose)
+                        this.props.handleClose(false)
                     }, 2000);
                     clearInterval(this.myInterval)
                 } else {
@@ -135,7 +130,8 @@ export class QPay extends Component {
                 }
                 <h1 className="text-succes gp-text-primary"></h1>
                 <h1 className="text-succes gp-text-primary">QR Code уншуулна уу.</h1><br></br>
-                {msg == '' ?
+                {
+                    msg == '' ?
                     (qPay_QRimage != [] ?
                         <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  qPay_QRimage} />:
                         <div className="my-5">
@@ -144,7 +140,8 @@ export class QPay extends Component {
                             </div>
                         </div>
                     ):
-                    <h6 className="text-success">{msg}</h6>}
+                    <h6 className="text-success">{msg}</h6>
+                }
             </div>
         )
     }
