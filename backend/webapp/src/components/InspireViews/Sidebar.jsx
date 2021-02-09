@@ -269,6 +269,7 @@ export default class SideBar extends Component {
                                             <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
                                             <select className="form-control form-control-sm"
                                                 onChange={(e) => this.setState({ image_format: e.target.value })}>
+                                                <option value="seed">seed</option>
                                                 <option value="reseed">reseed</option>
                                                 <option value="truncate">Truncate</option>
                                             </select>
