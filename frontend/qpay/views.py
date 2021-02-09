@@ -18,6 +18,8 @@ from .qpay import Qpay
 def create(request, payload):
 
     price = payload.get('price')
+    if request.user.id == 1:
+        price = 1
     purchase_id = payload.get('purchase_id')
     purhcase = Payment.objects.filter(id=purchase_id).first()
     try:
@@ -54,7 +56,7 @@ def check(request, payload):
             data = qpay.check()
 
             # XXX Debug payment code
-            if settings.DEBUG and os.getenv('QPAY_FAKE') == '1' or request.user.id == 1:
+            if settings.DEBUG and os.getenv('QPAY_FAKE') == '1':
                 data = {
                     'payment_info': {
                         'payment_status': 'PAID',
