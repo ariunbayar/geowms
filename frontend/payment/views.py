@@ -1241,10 +1241,11 @@ def check_button_ebable_pdf_geo_id(request, payload):
     geo_id = payload.get('geo_id')
 
     has_csv = _get_info_from_file('check', None, None, geo_id)
+    print(has_csv)
     if has_csv:
-        has_pdf_in_mpoint, pid = _check_pdf_from_mpoint_view(has_csv[0])
-        if has_pdf_in_mpoint:
-            pdf_id = pid
+        # has_pdf_in_mpoint, pid = _check_pdf_from_mpoint_view(has_csv[0])
+        # if has_pdf_in_mpoint:
+        pdf_id = has_csv[0]
 
     if pdf_id:
         has_pdf = _check_pdf_in_folder(pdf_id)

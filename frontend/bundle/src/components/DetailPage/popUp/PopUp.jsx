@@ -243,8 +243,8 @@ class PopUpCmp extends Component {
                                                         &&
                                                             <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
                                                                 <th className="font-weight-normal">
-                                                                    <b>{value[0]}:</b>
-                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1]}</p>
+                                                                    <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
+                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
                                                                 </th>
                                                             </tr>
                                                         )
