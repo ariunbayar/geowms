@@ -721,7 +721,7 @@ def get_colName_type(view_name, data):
 
     return geom_att, some_attributes
 
-def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values):
+def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values, wms):
 
     geom_att, extends = get_colName_type(table_name, 'geo_data')
     if extends:
@@ -731,6 +731,7 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
 
     style_name = values.get('style_name')
     style_state = values.get('style_state')
+    tile_cache_check = values.get('tile_cache_check')
 
     if check_layer.status_code == 200:
         geoserver.deleteLayerName(ws_name, ds_name, layer_name)
@@ -747,8 +748,14 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     )
 
     if layer_create.status_code == 201:
+        cache_values = values.get('cache_values')
         if style_state == 'create_style':
             style_name = values.get('style_name')
+            if not style_name:
+                return {
+                    'success': False,
+                    'info': 'Style-ийн нэр хоосон байна'
+                }
             check_style_name = geoserver.check_geoserver_style(style_name)
             if check_style_name.status_code == 200:
                 return {
@@ -759,6 +766,18 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                 geoserver.create_style(values)
 
         geoserver.update_layer_style(layer_name, style_name)
+        if tile_cache_check:
+            if int(cache_values.get('zoom_start')) >21 or int(cache_values.get('zoom_start'))>21 or int(cache_values.get('number_of_cache'))>100:
+                return {
+                    'success': False,
+                    'info': 'TileCache-ийн max утга хэтэрсэн байна'
+                }
+            cache_layer = geoserver.create_tilelayers_cache(ws_name, layer_name, srs, cache_values)
+            wmts_url = ''
+            if cache_layer.status_code == 200:
+                wmts_url = geoserver.get_wmts_url(ws_name)
+                wms.cache_url = wmts_url
+                wms.save()
 
         return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
@@ -792,7 +811,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
                         ds_name,
                         ds_name,
         )
-        if  data_store.status_code == 201:
+        if  data_store.status_code != 201:
 
             return {
                 'success': False,
@@ -803,7 +822,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
         ds_name,
         layer_name
     )
-    layer_responce = _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values)
+    layer_responce = _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values, wms)
     wms_id = wms.id
     wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
     if not wms_layer:
