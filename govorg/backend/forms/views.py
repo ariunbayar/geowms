@@ -600,12 +600,16 @@ def tseg_personal_list(request, payload):
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'id'
-    mpoint = Mpoint_view.objects.using('postgis_db').annotate(search=SearchVector(
+    mpoint = Mpoint_view.objects.using('postgis_db')
+    mpoint = mpoint.annotate(search=SearchVector(
         'point_id',
         'pid',
         't_type',
         'mclass',
-        ) + SearchVector('point_name')).filter(search__contains=query).order_by(sort_name)
+        ) + SearchVector('point_name'))
+    mpoint = mpoint.filter(search__contains=query)
+    mpoint = mpoint.exclude(t_type='g110')
+    mpoint = mpoint.order_by(sort_name)
     total_items = Paginator(mpoint, per_page)
     items_page = total_items.page(page)
     for mpoint_all in items_page.object_list:
@@ -694,7 +698,6 @@ def tsegPersonalUpdate(request, payload):
     point_id = data.point_id
     feature_code = 'gnp-gp-gp'
     tseg = utils.get_mdata_values(feature_code, point_id)
-    # tseg = TsegPersonal.objects.filter(id = point_id).first()
     search_cursor_data = GEOSGeometry(data.geom)
     if search_cursor_data:
         latlongx = search_cursor_data[0]
@@ -755,6 +758,7 @@ def tsegPersonalUpdate(request, payload):
         'tseg_display': tseg_display,
     }
     return JsonResponse(rsp)
+
 
 class UnAcceptedValueError(Exception):
     def __init__(self, data):
@@ -1074,64 +1078,27 @@ def tsegPersonal(request):
             value['ExternalId'] = request.POST.get('tesgiin_ner')
             value['beginLifespanVersion'] = date
             value['endLifespanVersion'] = date
-            # tsegPersenal = TsegPersonal.objects.create(
-            #             id=point_id,
-            #             suljeenii_torol=point_class,
-            #             latlongx=x,
-            #             latlongy=y,
-            #             barishil_tuhai=request.POST.get('barishil_tuhai'),
-            #             sudalga_or_shine=request.POST.get('sudalga_or_shine'),
-            #             hors_shinj_baidal=request.POST.get('hors_shinj_baidal'),
-            #             date=date, hotolson=request.POST.get('hotolson'),
-            #             file_path1=file1,file_path2=file2,
-            #             alban_tushaal=request.POST.get('alban_tushaal'),
-            #             alban_baiguullga=request.POST.get('alban_baiguullga'),
-            # )
             if  request.POST.get('tseg_oiroos_img_url'):
                 [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_oiroos_img_url'), [(720, 720)])
-
-                # tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
-                # tsegPersenal.tseg_oiroos_img_url = tseg_oiroos_img_url
-                # tsegPersenal.save()
-
                 image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img', '.png')
                 value['PointNearPhoto'] = image_name
 
             if  request.POST.get('tseg_holoos_img_url'):
                 [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_holoos_img_url'), [(720, 720)])
-                # tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
-                # tsegPersenal.tseg_holoos_img_url = tseg_holoos_img_url
-                # tsegPersenal.save()
                 image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img', '.png')
                 value['PointFarPhoto'] = image_name
 
             if  request.POST.get('bairshil_tseg_oiroos_img_url'):
                 [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_oiroos_img_url'), [(720, 720)])
-                # bairshil_tseg_oiroos_img_url = SimpleUploadedFile('img.png', image_x2)
-                # tsegPersenal.bairshil_tseg_oiroos_img_url = bairshil_tseg_oiroos_img_url
-                # tsegPersenal.save()
-
                 image_name = utils.save_img_to_folder(image_x2, tseg_bairshil_img_url, 'img', '.png')
                 value['LocationOverviewMap'] = image_name
 
             if  request.POST.get('bairshil_tseg_holoos_img_url'):
                 [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_holoos_img_url'), [(720, 720)])
-                # bairshil_tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
-                # tsegPersenal.bairshil_tseg_holoos_img_url = bairshil_tseg_holoos_img_url
-                # tsegPersenal.save()
-
                 image_name = utils.save_img_to_folder(image_x2, tseg_bairshil_img_url, 'img', '.png')
                 value['LocationOverviewMap'] = image_name
 
-            if not request.POST.get('file1'):
-                file1 = request.FILES['file1']
-            if not request.POST.get('file2'):
-                file2 = request.FILES['file2']
-            if request.POST.get('date'):
-                date = request.POST.get('date')
-
             mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0])
-            
             src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
             pdf = createPdf(value, x, y)
             pdf.output(src_file, 'F')
@@ -1717,125 +1684,122 @@ def tsegPersonalSearch(request, payload):
 @require_POST
 @ajax_required
 def tsegPersonalSuccess(request, payload):
-    try:
-        point_type = int(payload.get('point_type')) # zereg
+    feauture_id = 83
+    point_type = int(payload.get('point_type')) # zereg
 
-        objectid = payload.get('objectid')
-        point_class = int(payload.get('point_class'))
-        t_type = payload.get('t_type')
-        data = None
-        if t_type == 'g102':
-            data = Mpoint2.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 2:
-                data = None
-        if t_type == 'g103':
-            data = Mpoint3.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 3:
-                data = None
-        if t_type == 'g104':
-            data = Mpoint4.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 4:
-                data = None
-        if t_type == 'g105':
-            data = Mpoint5.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 5:
-                data = None
-        if t_type == 'g106':
-            data = Mpoint6.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 6:
-                data = None
-        if t_type == 'g107':
-            data = Mpoint7.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 7:
-                data = None
-        if t_type == 'g108':
-            data = Mpoint8.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 8:
-                data = None
-        if t_type == 'g109':
-            data = Mpoint9.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 9:
-                data = None
-        if t_type == 'g110':
-            data = Mpoint10.objects.using('postgis_db').filter(id=objectid).first()
-            if data.point_class == 10:
-                data = None
+    objectid = payload.get('objectid')
+    point_class = int(payload.get('point_class'))
+    t_type = payload.get('t_type')
+    data = None
+    if t_type == 'g102':
+        data = Mpoint2.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 2:
+            data = None
+    if t_type == 'g103':
+        data = Mpoint3.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 3:
+            data = None
+    if t_type == 'g104':
+        data = Mpoint4.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 4:
+            data = None
+    if t_type == 'g105':
+        data = Mpoint5.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 5:
+            data = None
+    if t_type == 'g106':
+        data = Mpoint6.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 6:
+            data = None
+    if t_type == 'g107':
+        data = Mpoint7.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 7:
+            data = None
+    if t_type == 'g108':
+        data = Mpoint8.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 8:
+            data = None
+    if t_type == 'g109':
+        data = Mpoint9.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 9:
+            data = None
+    if t_type == 'g110':
+        data = Mpoint10.objects.using('postgis_db').filter(id=objectid).first()
+        if data.point_class == 10:
+            data = None
 
-        if data:
-            if data.point_class == 2:
-                point_class = 2
-                Mpoint = Mpoint2
-                point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
-                t_type='g102',
-            if data.point_class == 3:
-                Mpoint = Mpoint3
-                point_class=3
-                point_class_name='GPS-ийн сүлжээний цэг'
-                t_type='g103'
-            if data.point_class == 4:
-                Mpoint = Mpoint4
-                point_class=4
-                point_class_name='Триангуляцийн сүлжээний цэг'
-                t_type='g104'
-            if data.point_class == 5:
-                Mpoint = Mpoint5
-                point_class=5
-                point_class_name='Полигонометрийн сүлжээний цэг'
-                t_type='g105'
-            if data.point_class == 6:
-                Mpoint = Mpoint6
-                point_class=6
-                point_class_name='Гравиметрийн сүлжээний цэг'
-                t_type='g106'
-            if data.point_class == 7:
-                Mpoint = Mpoint7
-                point_class=7
-                point_class_name='Өндрийн сүлжээний цэг'
-                t_type='g107'
-            if data.point_class == 8:
-                Mpoint = Mpoint8
-                point_class=8
-                point_class_name='Зураглалын сүлжээний цэг'
-                t_type='g108'
-            if data.point_class == 9:
-                Mpoint = Mpoint9
-                point_class=9
-                point_class_name='Шинээр нэмэгдсэн төлөв'
-                t_type='g109'
-            if data.point_class == 10:
-                Mpoint = Mpoint10
-                point_class=10
-                point_class_name='Устсан төлөв'
-                t_type='g110'
-            Mpoint.objects.using('postgis_db').create(
-                objectid=data.objectid,
-                point_id=data.point_id, point_name=data.point_name,
-                pid=data.pid, point_class=point_class,
-                ondor_type=data.ondor_type,
-                point_class_name=point_class_name,
-                mclass=data.mclass, center_typ=data.center_typ,
-                sum=data.sum, aimag=data.aimag,
-                sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-                ondor=data.ondor, t_type=t_type,
-                geom = data.geom
-                )
+    if data:
+        print(data.point_class)
+        if data.point_class == 2:
+            point_class = 2
+            Mpoint = Mpoint2
+            point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
+            t_type='g102',
+        if data.point_class == 3:
+            Mpoint = Mpoint3
+            point_class=3
+            point_class_name='GPS-ийн сүлжээний цэг'
+            t_type='g103'
+        if data.point_class == 4:
+            Mpoint = Mpoint4
+            point_class=4
+            point_class_name='Триангуляцийн сүлжээний цэг'
+            t_type='g104'
+        if data.point_class == 5:
+            Mpoint = Mpoint5
+            point_class=5
+            point_class_name='Полигонометрийн сүлжээний цэг'
+            t_type='g105'
+        if data.point_class == 6:
+            Mpoint = Mpoint6
+            point_class=6
+            point_class_name='Гравиметрийн сүлжээний цэг'
+            t_type='g106'
+        if data.point_class == 7:
+            Mpoint = Mpoint7
+            point_class=7
+            point_class_name='Өндрийн сүлжээний цэг'
+            t_type='g107'
+        if data.point_class == 8:
+            Mpoint = Mpoint8
+            point_class=8
+            point_class_name='Зураглалын сүлжээний цэг'
+            t_type='g108'
+        if data.point_class == 9:
+            Mpoint = Mpoint9
+            point_class=9
+            point_class_name='Шинээр нэмэгдсэн төлөв'
+            t_type='g109'
+        if data.point_class == 10:
+            Mpoint = Mpoint10
+            point_class=10
+            point_class_name='Устсан төлөв'
+            t_type='g110'
 
-            data.delete()
-            rsp = {
-                'success': True,
-                'msg': "Амжилттай боллоо",
-            }
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success': False,
-                'msg': "Төлөв адилхан тул боломжгүй",
-            }
-            return JsonResponse(rsp)
-    except Exception:
+        Mpoint.objects.using('postgis_db').create(
+            objectid=data.objectid,
+            point_id=data.point_id, point_name=data.point_name,
+            pid=data.pid, point_class=point_class,
+            ondor_type=data.ondor_type,
+            point_class_name=point_class_name,
+            mclass=data.mclass, center_typ=data.center_typ,
+            sum=data.sum, aimag=data.aimag,
+            sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
+            ondor=data.ondor, t_type=t_type,
+            geom = data.geom
+        )
+
+        data.delete()
+        utils.refreshMaterializedView(feauture_id)
+        rsp = {
+            'success': True,
+            'msg': "Амжилттай боллоо",
+        }
+        return JsonResponse(rsp)
+    else:
         rsp = {
             'success': False,
-            'msg': "Амжилтгүй боллоо",
+            'msg': "Төлөв адилхан тул боломжгүй",
         }
         return JsonResponse(rsp)
 
