@@ -6,7 +6,6 @@ export const service = {
     downloadPurchase,
     getDetails,
     paginatedList,
-    testPay,
 }
 
 

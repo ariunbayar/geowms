@@ -73,7 +73,7 @@ export class PolygonPurchase extends Component {
     }
 
     handleModalClose(){
-        this.setState({is_modal_open: false})
+        this.setState({ is_modal_open: false })
     }
 
     handleModalApproveClose(){
@@ -107,6 +107,7 @@ export class PolygonPurchase extends Component {
         const purchase_id = this.props.match.params.id
         const { alert_msg, is_modal_info_open, is_modal_open } = this.state
         const { items, layers} = this.state
+        console.log(is_modal_open);
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -170,7 +171,7 @@ export class PolygonPurchase extends Component {
                         { is_modal_open &&
                             <Modal
                                 modalAction={() => this.handleQpay()}
-                                modalClose={this.handleModalClose}
+                                modalClose={() => this.handleModalClose()}
                                 text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
                                 title="Анхааруулга"
                                 actionNameDelete="Үргэлжлүүлэх"
