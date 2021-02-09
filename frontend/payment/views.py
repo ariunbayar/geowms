@@ -876,9 +876,6 @@ def calcPrice(request, payload):
     all_len_property = _get_all_property_count(layer_list, feature_info_list)
     total_price = _calc_per_price(area, area_type, all_len_property, len(feature_info_list), selected_type)
 
-    if request.user.id == 1: # for uuganaa butsaaj arilgana
-        total_price = 1
-
     rsp = {
         'success': True,
         'total_price': total_price,
