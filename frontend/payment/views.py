@@ -1,26 +1,37 @@
-from zipfile import ZipFile
 import os
 import io
-import PIL.Image as Image
 import urllib.request
 import uuid
 import json
+import math
 import subprocess
-from fpdf import FPDF
+import glob
+import csv
+import PIL.Image as Image
 from datetime import date
+from fpdf import FPDF
 
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, connections
+
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, FileResponse, Http404
+from django.contrib.gis.geos import Polygon
+from django.contrib.gis.gdal import DataSource
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST, require_GET
+from django.http import JsonResponse, FileResponse, Http404
+
 from .MBUtil import MBUtil
 from .PaymentMethod import PaymentMethod
 from .PaymentMethodMB import PaymentMethodMB
+
 from govorg.backend.forms.models import Mpoint_view
-from backend.payment.models import Payment, PaymentPoint, PaymentPolygon, PaymentLayer
+from backend.payment.models import Payment, PaymentPoint, PaymentLayer, PaymentPolygon
+from backend.wmslayer.models import WMSLayer
+from backend.bundle.models import Bundle
+from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import (
     LFeatureConfigs,
     LDataTypeConfigs,
@@ -28,15 +39,15 @@ from backend.inspire.models import (
     LValueTypes,
     LCodeLists,
     MDatas,
+    MGeoDatas,
 )
-from geoportal_app.models import User
-from backend.wmslayer.models import WMSLayer
-from backend.bundle.models import Bundle
+
 from main.decorators import ajax_required
-from main.utils import send_email
+from main import utils
 
-from django.contrib.gis.gdal import DataSource
+from zipfile import ZipFile
 
+from geojson import FeatureCollection
 
 def index(request):
 
@@ -81,20 +92,16 @@ def dictionaryResponse(request):
 def _get_layer_ids(feature_info_list):
     layer_ids = list()
     for geoms in feature_info_list:
-        for key, value in geoms.items():
-            for geom in geoms[key]:
-                layer_id = geom['layer_id']
-                if layer_id not in layer_ids:
-                    layer_ids.append(layer_id)
+        if 'layer_id' in geoms:
+            layer_ids.append(geoms['layer_id'])
     return layer_ids
 
 
 @require_POST
 @ajax_required
 @login_required
-def purchaseDraw(request, payload):
+def purchase_draw(request, payload):
 
-    description = payload.get('description')
     coodrinatLeftTop = payload.get('coodrinatLeftTop')
     coodrinatRightBottom = payload.get('coodrinatRightBottom')
     bundle_id = payload.get('bundle_id')
@@ -231,40 +238,41 @@ def _get_code_list_name(code_list_id):
 
 
 def _create_field_and_insert_to_shp(feature_infos, feature_id, geo_id, path, gml_id, table_name):
-    att_type = ''
+    filter_value = None
     for info in feature_infos:
         for property in info['data_types']:
             property_code = property['property_code']
             mdata_value = MDatas.objects.filter(geo_id=geo_id, property_id=property['property_id'])
             if mdata_value:
                 mdata_value = mdata_value.first()
-            for value_type in property['value_types']:
-                value_type = value_type['value_type_id']
-                if value_type == 'double':
-                    value_type = 'number'
-                if value_type == 'single-select':
-                    value_type = 'code_list_id'
+                for value_type in property['value_types']:
+                    value_type = value_type['value_type_id']
+                    if value_type == 'double':
+                        value_type = 'number'
+                    if 'select' in value_type:
+                        value_type = 'code_list_id'
+                if value_type != 'boolean':
+                    if 'code' in value_type:
+                        filter_value = value_type
+                    else:
+                        filter_value = "value_" + value_type
 
-            if 'code' in value_type:
-                filter_value = value_type
-            else:
-                filter_value = "value_" + value_type
+                    if filter_value:
+                        value = getattr(mdata_value, filter_value)
 
-            value = getattr(mdata_value, filter_value)
-
-            if filter_value == 'value_date' and value:
-                value = value.strftime('%m/%d/%Y, %H:%M:%S')
-            if filter_value == 'value_number' and value:
-                value = str(value)
-            if 'code_list' in filter_value and value:
-                value = _get_code_list_name(value)
-            if value:
-                subprocess.run([
-                    'ogrinfo',
-                    path,
-                    '-dialect', 'SQLite',
-                    '-sql', "UPDATE '" + table_name + "' SET " + property_code[0:10] + "='" + value + "' WHERE gml_id='" + gml_id + "'"
-                ])
+                    if filter_value == 'value_date' and value:
+                        value = value.strftime('%m/%d/%Y, %H:%M:%S')
+                    if filter_value == 'value_number' and value:
+                        value = str(value)
+                    if 'code_list' in filter_value and value:
+                        value = _get_code_list_name(value)
+                    if value and filter_value:
+                        subprocess.run([
+                            'ogrinfo',
+                            path,
+                            '-dialect', 'SQLite',
+                            '-sql', "UPDATE '" + table_name + "' SET " + property_code[0:10] + "='" + value + "' WHERE gml_id='" + gml_id + "'"
+                        ])
 
 
 def _update_and_add_column_with_value(path, file_name):
@@ -297,8 +305,8 @@ def _update_and_add_column_with_value(path, file_name):
     return True
 
 
-def _create_folder_payment_id(type, payment_id):
-    path = os.path.join(settings.FILES_ROOT, type, str(payment_id))
+def _create_folder_payment_id(folder_name, payment_id):
+    path = os.path.join(settings.FILES_ROOT, folder_name, str(payment_id))
     if not os.path.isdir(path):
         os.mkdir(path)
     return path
@@ -310,39 +318,35 @@ def _create_shp_file(payment, layer, polygon):
 
     x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
 
-    try:
-        file_type = 'ESRI SHAPEFILE'
-        path = _create_folder_payment_id('shape', payment.id)
-        file_ext = '.shp'
-        filename = os.path.join(path, str(layer.code) + file_ext)
+    file_type = 'ESRI SHAPEFILE'
+    path = _create_folder_payment_id('shape', payment.id)
+    file_ext = '.shp'
+    filename = os.path.join(path, str(layer.code) + file_ext)
 
-        url = layer.wms.url
-        url_service = 'SERVICE=WFS'
-        url_version = 'VERSION=1.1.0'
-        url_request = 'REQUEST=GetCapabilities'
-        geoserver_layer = layer.code
+    url = layer.wms.url
+    url_service = 'SERVICE=WFS'
+    url_version = 'VERSION=1.1.0'
+    url_request = 'REQUEST=GetCapabilities'
+    geoserver_layer = layer.code
 
-        spat_srs = 'EPSG:4326'
-        # source_srs = 'EPSG:32648'
-        trans_srs = 'EPSG:4326'
-        meta = 'ENCODING=UTF-8'
-        subprocess.run([
-            'ogr2ogr',
-            '-f', file_type,
-            filename,
-            'WFS:' + url + '?&' + url_service + '&' + url_version + '&' + url_request,
-            geoserver_layer,
-            '-spat_srs', spat_srs,
-            '-spat', str(x1), str(y1), str(x2), str(y2),
-            '-lco', meta,
-            # '-s_srs', source_srs,
-            '-t_srs', trans_srs,
-            '-skipfailures'
-        ])
-        _update_and_add_column_with_value(path, str(layer.code) + file_ext)
-
-    except Exception as e:
-        print(e)
+    spat_srs = 'EPSG:4326'
+    # source_srs = 'EPSG:32648'
+    trans_srs = 'EPSG:4326'
+    meta = 'ENCODING=UTF-8'
+    subprocess.run([
+        'ogr2ogr',
+        '-f', file_type,
+        filename,
+        'WFS:' + url + '?&' + url_service + '&' + url_version + '&' + url_request,
+        geoserver_layer,
+        '-spat_srs', spat_srs,
+        '-spat', str(x1), str(y1), str(x2), str(y2),
+        '-lco', meta,
+        # '-s_srs', source_srs,
+        '-t_srs', trans_srs,
+        '-skipfailures'
+    ])
+    _update_and_add_column_with_value(path, str(layer.code) + file_ext)
 
 
 def get_all_file_paths(directory):
@@ -367,41 +371,33 @@ def get_all_file_remove(directory):
 
 
 def _file_to_zip(payment_id, folder_name):
-    try:
-        path = os.path.join(settings.FILES_ROOT, folder_name, payment_id)
-        file_paths = get_all_file_paths(path)
-        zip_path = os.path.join(path, 'export.zip')
-        with ZipFile(zip_path, 'w') as zip:
-            for file in file_paths:
-                if folder_name == 'pdf':
-                    if '.jpeg' not in str(file):
-                        zip.write(file, os.path.basename(file))
-                else:
+    path = os.path.join(settings.FILES_ROOT, folder_name, payment_id)
+    file_paths = get_all_file_paths(path)
+    zip_path = os.path.join(path, 'export.zip')
+    with ZipFile(zip_path, 'w') as zip:
+        for file in file_paths:
+            if folder_name == 'pdf':
+                if '.jpeg' not in str(file):
                     zip.write(file, os.path.basename(file))
+            else:
+                zip.write(file, os.path.basename(file))
 
-        get_all_file_remove(path)
-    except Exception as e:
-        print(e)
+    get_all_file_remove(path)
 
 
 def _export_shp(payment):
 
-    try:
-        layers = PaymentLayer.objects.filter(payment=payment)
-        polygon = PaymentPolygon.objects.filter(payment=payment).first()
+    layers = PaymentLayer.objects.filter(payment=payment)
+    polygon = PaymentPolygon.objects.filter(payment=payment).first()
 
-        for layer in layers:
-            _create_shp_file(payment, layer.wms_layer, polygon)
+    for layer in layers:
+        _create_shp_file(payment, layer.wms_layer, polygon)
 
-        _file_to_zip(str(payment.id), 'shape')
-        payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
-        payment.save()
+    _file_to_zip(str(payment.id), 'shape')
+    payment.export_file = 'shape/' + str(payment.id) + '/export.zip'
+    payment.save()
 
-        return True
-
-    except Exception as e:
-        print(e)
-        return False
+    return True
 
 
 def _get_size_from_extent(x1, y1, x2, y2):
@@ -437,9 +433,8 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
 
     size = _get_size_from_extent(x1, y1, x2, y2)
 
-    path = os.path.join(settings.FILES_ROOT, folder_name, str(payment.id))
-    if not os.path.isdir(path):
-        os.mkdir(path)
+
+    path = _create_folder_payment_id(folder_name, payment.id)
 
     file_ext = '.' + download_type
     filename = os.path.join(path, str(geoserver_layer) + file_ext)
@@ -469,22 +464,17 @@ def _create_image_file(payment, layer, polygon, download_type, folder_name):
 
 def _export_image(payment, download_type):
 
-    try:
-        layers = PaymentLayer.objects.filter(payment=payment)
-        polygon = PaymentPolygon.objects.filter(payment=payment).first()
-        folder_name = 'image'
+    layers = PaymentLayer.objects.filter(payment=payment)
+    polygon = PaymentPolygon.objects.filter(payment=payment).first()
+    folder_name = 'image'
 
-        for layer in layers:
-            _create_image_file(payment, layer, polygon, download_type, folder_name)
+    for layer in layers:
+        _create_image_file(payment, layer, polygon, download_type, folder_name)
 
-        _file_to_zip(str(payment.id), folder_name)
-        payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
-        payment.save()
-        return True
-
-    except Exception as e:
-        print(e)
-        return False
+    _file_to_zip(str(payment.id), folder_name)
+    payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+    payment.save()
+    return True
 
 
 def _get_Feature_info_from_url(polygon, layer):
@@ -501,7 +491,7 @@ def _get_Feature_info_from_url(polygon, layer):
         y2 = save_y
 
     url = layer.wms_layer.wms.url
-    if not '?' in url:
+    if '?' not in url:
         url = url + "?"
     service = 'WFS'
     version = '1.1.0'
@@ -511,7 +501,8 @@ def _get_Feature_info_from_url(polygon, layer):
     property_name = 'feature_id'
     out_format = 'JSON'
 
-    full_url =  url + 'service=' + service + '&version=' + version + '&request=' +request + '&typeName=' + code + '&bbox=' + str(x1) +  ',' + str(y1)  + ',' + str(x2) + ',' + str(y2) + ',' + trans_srs + '&PropertyName=' + property_name + '&outputFormat=' + out_format
+    full_url = url + 'service=' + service + '&version=' + version + '&request=' + request + '&typeName=' + code + '&bbox=' + str(x1) +  ',' + str(y1) + ',' + str(x2) + ',' + str(y2) + ',' + trans_srs + '&PropertyName=' + property_name + '&outputFormat=' + out_format
+
     with urllib.request.urlopen(full_url) as response:
         get_features = response.read().decode("utf-8")
         for feature in json.loads(get_features)['features']:
@@ -578,6 +569,344 @@ def _get_pdf_info_from_inspire(payment, layer, polygon):
         })
         prev_feature_id = feature_id
     return infos
+
+
+def _table_json():
+    table_col = [
+        {
+            'width': 10,
+            'head_name': 'Д/д',
+            'body_name': '',
+        },
+        {
+            'width': 30,
+            'head_name': 'Аймгийн нэр',
+            'body_name': 'aimag',
+        },
+        {
+            'width': 30,
+            'head_name': 'Сумын нэр',
+            'body_name': 'sum',
+        },
+        {
+            'width': 30,
+            'head_name': 'Цэгийн дугаар',
+            'body_name': 'point_id',
+        },
+        {
+            'width': 30,
+            'head_name': 'Өргөрөг',
+            'body_name': 'sheet2',
+        },
+        {
+            'width': 30,
+            'head_name': 'Уртраг',
+            'body_name': 'sheet3',
+        },
+        {
+            'width': 30,
+            'head_name': 'N_UTM',
+            'body_name': 'n_utm',
+        },
+        {
+            'width': 30,
+            'head_name': 'E_UTM',
+            'body_name': 'e_utm',
+        },
+        {
+            'width': 20,
+            'head_name': 'Өндөр',
+            'body_name': 'ondor',
+        },
+    ]
+    return table_col
+
+
+def _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pdf):
+    this_columns = []
+    max_height = 0
+    for row in range(0, len(table_col)):
+        if row != 0:
+            cell_width = table_col[row]['width']
+            cell_text = str(point_infos[idx][table_col[row]['body_name']])
+            zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
+            if zuruu >= 1:
+                max_height = cell_height * (zuruu + 1)
+    if max_height < cell_height:
+        max_height = cell_height
+    return max_height
+
+
+def _remove_white_spaces(class_name):
+    updated_class_name = ''
+    class_per_name = class_name.split(" ")
+    for per_name in class_per_name:
+        if per_name:
+            updated_class_name += per_name + ' '
+    return updated_class_name[:-1]
+
+
+def _create_lavlagaa_file(class_infos, path):
+    table_col = _table_json()
+    point_infos = class_infos['infos']
+    class PDF(FPDF):
+        def footer(self):
+            self.set_y(-15)
+            self.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+            self.set_font(font_name, '', 8)
+            self.set_x(-40)
+            self.cell(0, 8, 'Геопортал', 0, 0, 'C')
+
+        def table_header(self):
+            pdf.cell(30)
+
+            pdf.set_font(font_name, '', 11)
+            for col in range(0, len(table_col)):
+                pdf.cell(table_col[col]['width'], 10, str(table_col[col]['head_name']), 1, 0, 'C')
+
+            pdf.ln()
+
+    pdf = PDF()
+    pdf.add_page(orientation='Landscape')
+    pdf.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'gzbgzzg-logo.jpg'), x=25, y=8, w=37, h=40)
+    org_name = class_infos['org_name']
+    class_name = _remove_white_spaces(class_infos['class_name'])
+    font_name = 'DejaVu'
+
+    pdf.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font(font_name, '', 15)
+    pdf.cell(0, 8, org_name, 0, 2, 'C')
+    pdf.set_font(font_name, '', 5)
+    pdf.cell(0, 2, '( ААН-ын нэр )', 0, 2, 'C')
+
+    pdf.ln(10)
+
+    pdf.set_font(font_name, '', 15)
+    pdf.cell(0, 8, class_name, 0, 2, 'C')
+    pdf.set_font(font_name, '', 5)
+    pdf.cell(0, 4, '( мэдээллийн утга )', 0, 2, 'C')
+
+    pdf.ln(5)
+
+    pdf.set_font('Arial', '', 10)
+    pdf.set_x(-40)
+    pdf.cell(10, 10, date.today().strftime("%Y-%m-%d"))
+
+    pdf.ln(20)
+    pdf.table_header()
+
+    end_y = 0
+    for idx in range(0, len(point_infos)):
+        pdf.cell(30)
+        pdf.set_font(font_name, '', 9)
+        current_x = pdf.get_x()
+        current_y = pdf.get_y()
+        cell_height = 5
+        calc_cell_height = _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pdf)
+        for row in range(0, len(table_col)):
+            cell_width = table_col[row]['width']
+            if row == 0:
+                pdf.cell(cell_width, calc_cell_height, str(idx + 1), 1, 0, 'C')
+                end_y = pdf.get_y()
+            else:
+                before_cell_width = table_col[row - 1]['width']
+                current_x = current_x + before_cell_width
+                pdf.set_xy(current_x, current_y)
+                cell_text = str(point_infos[idx][table_col[row]['body_name']])
+
+                zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
+                if zuruu >= 1:
+                    pdf.multi_cell(cell_width, cell_height, cell_text, 1, 'C', False)
+                else:
+                    pdf.cell(cell_width, calc_cell_height, cell_text, 1, 0, 'C', False)
+
+            if pdf.get_y() > end_y:
+                end_y = pdf.get_y()
+        pdf.set_y(end_y)
+        if calc_cell_height == cell_height:
+            pdf.ln()
+
+    file_name = class_infos['t_type'] + "_" + class_infos['org_name']
+    file_ext = 'pdf'
+    pdf.output(os.path.join(path, file_name + "." + file_ext), 'F')
+
+
+def _list_items(point_info):
+    infos = {
+        'point_id': point_info['point_id'],
+        'ondor': point_info['ondor'],
+        'aimag': point_info['aimag'],
+        'sum': point_info['sum'],
+        'sheet2': point_info['sheet2'],
+        'sheet3': point_info['sheet3'],
+        'n_utm': point_info['n_utm'],
+        'e_utm': point_info['e_utm']
+    }
+    return infos
+
+
+def _append_to_item_with_check(class_names, point_info, before_org_name, pdf):
+    org_name = point_info['org_name']
+    for class_name in class_names:
+        if class_name['t_type'] == point_info['t_type'] and org_name == class_name['org_name']:
+            if class_name['pdf_id'] != pdf:
+                class_name['infos'].append(_list_items(point_info))
+        else:
+            class_names.append({
+                't_type': point_info['t_type'],
+                'org_name': org_name,
+                'class_name': point_info['class_name'],
+                'pdf_id': point_info['pdf_id'],
+                'infos': [_list_items(point_info)]
+            })
+    return class_names
+
+
+def _class_name_eer_angilah(point_infos):
+    class_names = []
+    t_type = ''
+    before_org_name = None
+    for point_info in point_infos:
+        org_name = point_info['org_name']
+        if not class_names and org_name != before_org_name:
+            class_names.append({
+                't_type': point_info['t_type'],
+                'org_name': org_name,
+                'class_name': point_info['class_name'],
+                'pdf_id': point_info['pdf_id'],
+                'infos': [_list_items(point_info)]
+            })
+        else:
+            class_names = _append_to_item_with_check(class_names, point_info, before_org_name, point_info['pdf_id'])
+        t_type = point_info['t_type']
+        before_org_name = org_name
+    return class_names
+
+
+def _get_attribute_name_from_file(content):
+    att = dict()
+    for idx in range(0, len(content)):
+        if content[idx].lower() == 'aimag':
+            att['aimag'] = idx
+        if content[idx].lower() == 'sum':
+            att['sum_name'] = idx
+        if content[idx].lower() == 'point_name':
+            att['point_name'] = idx
+        if content[idx].lower() == 'pid':
+            att['pid'] = idx
+        if content[idx].lower() == 'l_degree':
+            att['x'] = idx
+        if content[idx].lower() == 'b_degree':
+            att['y'] = idx
+        if content[idx].lower() == 'ondor':
+            att['ondor'] = idx
+        if content[idx].lower() == 'n_utm':
+            att['n_utm'] = idx
+        if content[idx].lower() == 'e_utm':
+            att['e_utm'] = idx
+        if content[idx].lower() == 'org_name':
+            att['org_name'] = idx
+    return att
+
+
+def _get_info_from_file(get_type, mpoint, pdf_id, geo_id=None):
+    found_items = list()
+    file_list = [f for f in glob.glob(os.path.join(settings.FILES_ROOT, "*.csv"))]
+    for a_file in file_list:
+        with open(a_file, 'rt') as f:
+            contents = csv.reader(f)
+            contents = list(contents)
+            for idx in range(0, len(contents)):
+                if idx == 0:
+                    att_names = _get_attribute_name_from_file(contents[idx])
+                else:
+                    content = contents[idx]
+                    # check_pdf_path = '/home/odk/Desktop/pdfs/tseg-personal-file'
+                    if str(content[att_names['pid']]) == str(pdf_id):
+                        if not get_type:
+                            found_items.append(_get_items_with_file(content, mpoint, att_names))
+                        if get_type == 'check':
+                            found_items.append(pdf_id)
+                        if not get_type and not mpoint:
+                            found_items.append(_get_items_with_file(content, None, att_names))
+                    if geo_id and str(content[att_names['point_name']]) == str(geo_id):
+                        if get_type == 'check':
+                            found_items.append(content[att_names['pid']])
+    return found_items
+
+
+def _get_items_with_file(content, mpoint, att_names):
+    point_info = {
+        'point_id': content[att_names['point_name']],
+        'ondor': content[att_names['ondor']],
+        'aimag': content[att_names['aimag']],
+        'sum': content[att_names['sum_name']],
+        'sheet2': content[att_names['x']],
+        'sheet3': content[att_names['y']],
+        'n_utm': content[att_names['n_utm']],
+        'e_utm': content[att_names['e_utm']],
+        't_type': mpoint.t_type if mpoint else '',
+        'class_name': str(mpoint.point_class_name) if mpoint else '',
+        'pdf_id': content[att_names['pid']],
+        'org_name': content[att_names['org_name']] if utils.get_key_and_compare(att_names, 'org_name') else 'Геопортал',
+    }
+    return point_info
+
+
+def _get_item_from_mpoint_view(mpoint):
+    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
+    point_info = {
+        'point_id': mpoint.point_name,
+        'ondor': mpoint.ondor,
+        'aimag': mpoint.aimag,
+        'sum': mpoint.sum,
+        'sheet2': mpoint.sheet2,
+        'sheet3': mpoint.sheet3,
+        'n_utm': utm[0],
+        'e_utm': utm[1],
+        't_type': mpoint.t_type,
+        'class_name': mpoint.point_class_name,
+        'pdf_id': mpoint.pid,
+        'org_name': mpoint.org_name if hasattr(mpoint, 'org_name') else 'Геопортал',
+    }
+    return point_info
+
+
+def _create_lavlagaa_infos(payment):
+    point_infos = []
+    points = PaymentPoint.objects.filter(payment=payment)
+    for point in points:
+        if point.pdf_id:
+            mpoint_qs = Mpoint_view.objects.using('postgis_db')
+            mpoint_qs = mpoint_qs.filter(point_name=point.point_name)
+            if mpoint_qs:
+                mpoint_qs = mpoint_qs.first()
+                pid = mpoint_qs.pid
+                if pid == point.pdf_id:
+                    infos = _get_info_from_file(None, mpoint_qs, point.pdf_id, None)
+                    if infos:
+                        for info in infos:
+                            point_infos.append(info)
+                    else:
+                        info = _get_item_from_mpoint_view(mpoint_qs)
+                        point_infos.append(info)
+            else:
+                infos = _get_info_from_file(None, None, point.pdf_id, None)
+                for info in infos:
+                    point_infos.append(info)
+
+    folder_name = 'tseg-personal-file'
+    class_names = _class_name_eer_angilah(point_infos)
+    if class_names:
+        for class_name in class_names:
+            if class_name['org_name']:
+                path = _create_folder_payment_id(folder_name, payment.id)
+                _create_lavlagaa_file(class_name, path)
+
+        _file_to_zip(str(payment.id), folder_name)
+        payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+        payment.save()
+    return True
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
@@ -667,13 +996,18 @@ def download_purchase(request, pk, download_type):
         if download_type == 'pdf':
             is_created = _export_pdf(payment, download_type)
 
+        if download_type == 'point':
+            is_created = _create_lavlagaa_infos(payment)
+
         if is_created:
 
             subject = 'Худалдан авалт'
-            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу! http://192.168.10.92/payment/history/api/details/{id}/'.format(id=payment.pk)
+            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу!'
+            host_name = utils.get_config('EMAIL_HOST_NAME')
+            msg = '{msg} http://{host_name}/payment/history/api/details/{id}/'.format(id=payment.pk, msg=msg, host_name=host_name)
             to_email = [payment.user.email]
 
-            send_email(subject, msg, to_email)
+            utils.send_email(subject, msg, to_email)
 
     rsp = {
         'success': is_created,
@@ -682,111 +1016,79 @@ def download_purchase(request, pk, download_type):
     return JsonResponse(rsp)
 
 
-@require_POST
-@ajax_required
-@login_required
-def purchaseFromCart(request, payload):
-
-    datas = payload.get('data')
-    code = payload.get('code')
+def _get_uniq_id(payment):
     check_id = True
     while check_id:
         uniq_id = uuid.uuid4()
-        if len(Payment.objects.filter(geo_unique_number=uniq_id)) == 0:
-            check_id = False
+        if not payment:
+            check_id = False if len(Payment.objects.filter(geo_unique_number=uniq_id)) == 0 else True
         else:
-            check_id = True
+            check_id = False if payment.geo_unique_number == uniq_id else True
+    return uniq_id
 
-    user_id = request.user.id
-    userList = User.objects.filter(id=user_id)
-    for user in userList:
-        userID = user.id
-    amount = 1
-    total_amount = 0
-    try:
+
+@require_POST
+@ajax_required
+@login_required
+def purchase_from_cart(request, payload):
+    with transaction.atomic():
+        datas = payload.get('datas')
+        uniq_id = _get_uniq_id(None)
+        user_id = request.user.id
+        total_amount = 0
         payment = Payment.objects.create(
-            geo_unique_number = uniq_id,
-            bank_unique_number = ' ',
-            description = 'Цэг худалдаж авах хүсэлт',
-            user_id = userID,
+            geo_unique_number=uniq_id,
+            bank_unique_number=' ',
+            description='Цэг худалдаж авах хүсэлт',
+            user_id=user_id,
             kind=2,
-            total_amount=0,
+            total_amount=total_amount,
             export_kind=1,
-            is_success = False,
-            message = 'Цэг худалдаж авах хүсэлт',
-            code = '',
+            is_success=False,
+            message='Цэг худалдаж авах хүсэлт',
+            code='',
         )
         pay_id = payment.id
-        check_id = True
-        while check_id:
-            uniq_id = uuid.uuid4()
-            if payment.geo_unique_number == uniq_id:
-                check_id = True
-            else:
-                check_id = False
-        total_amount = 0
         for data in datas:
-            dId = data['id']
-            if pay_id > 0:
-                mpoint = Mpoint_view.objects.using('postgis_db').filter(id=dId).first()
-                amount=0
-                if dId:
-                    wms_layer = WMSLayer.objects.filter(code=code).first()
-                    if wms_layer:
-                        amount = wms_layer.feature_price
+            amount = 0
+            pdf_id = data['pdf_id']
 
-                total_amount = total_amount + amount
-                pdf_id = ''
-                point_name = 'Нэр алга'
-                if mpoint:
-                    if mpoint.pid:
-                        pdf_id = mpoint.pid
-                    if mpoint.point_name:
-                        point_name = mpoint.point_name
-                point = PaymentPoint.objects.create(
-                    payment_id = pay_id,
-                    point_id = dId,
-                    point_name = point_name,
-                    amount = amount,
-                    pdf_id = pdf_id,
+            if pdf_id:
+                wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+
+                amount = wms_layer.feature_price
+                total_amount += amount
+
+                PaymentPoint.objects.create(
+                    payment_id=pay_id,
+                    point_id=data['id'],
+                    point_name=data['name'],
+                    amount=amount,
+                    pdf_id=data['pdf_id'],
                 )
-            else:
-                rsp = {
-                    'success': False,
-                    'msg': "Амжилтгүй"
-                }
-                return JsonResponse(rsp)
-        Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
-    except Exception:
-        rsp = {
-            'success': False,
-            'msg': 'Алдаа гарсан байна'
-        }
-        return JsonResponse(rsp)
 
-    rsp = {
-        'success': True,
-        'msg': 'Амжилттай боллоо',
-        'payment': pay_id
-    }
+        Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
+
+        rsp = {
+            'success': True,
+            'msg': 'Амжилттай боллоо',
+            'payment_id': pay_id
+        }
     return JsonResponse(rsp)
 
 
 @require_GET
 @login_required
-def download_pdf(request, pk):
-    mpoint = Mpoint_view.objects.using('postgis_db').filter(pid=pk).first()
-    if mpoint:
-        point = PaymentPoint.objects.filter(point_id=mpoint.id).first()
-        if point:
-            payment = get_object_or_404(Payment, user=request.user, id=point.payment_id, is_success=True)
-            # generate the file
-            file_name = pk + '.pdf'
-            src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
-            response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
-            return response
-        else:
-            raise Http404
+def download_pdf(request, pk, pdf_id):
+    has_pdf = _check_pdf_in_folder(pdf_id)
+    if len(has_pdf) > 0:
+        payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
+        point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
+        # generate the file
+        file_name = pdf_id + '.pdf'
+        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+        response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
+        return response
     else:
         raise Http404
 
@@ -829,22 +1131,14 @@ def _data_type_configs_count(data_type_id):
     return property_len
 
 
-def _get_key_and_compare(dict, item):
-    for key in dict.keys():
-        if key == item:
-            return key
-
-
 def _get_all_property_count(layer_list, feature_info_list):
     count = 0
     for code in layer_list:
         for feature in feature_info_list:
-            key = _get_key_and_compare(feature, code)
-            if key:
-                for info in feature[key]:
-                    if 'feature_id' in info:
-                        fconfig_count = _lfeature_config_count(info['feature_id'])
-                        count += fconfig_count
+            if code == feature['layer_code']:
+                if 'feature_id' in feature:
+                    fconfig_count = _lfeature_config_count(feature['feature_id'])
+                    count += fconfig_count
     return count
 
 
@@ -864,6 +1158,7 @@ def _calc_per_price(area, area_type, all_len_property, len_object_in_layer, sele
 
 @require_POST
 @ajax_required
+@login_required
 def calcPrice(request, payload):
     area = payload.get('area')
     layer_list = payload.get("layer_list")
@@ -879,6 +1174,281 @@ def calcPrice(request, payload):
     rsp = {
         'success': True,
         'total_price': total_price,
+    }
+
+    return JsonResponse(rsp)
+
+
+def _check_pdf_from_mpoint_view(pdf_id):
+    has_pdf = False
+    pdf_id = None
+    mpoints = Mpoint_view.objects.using("postgis_db")
+    mpoints = mpoints.filter(pid=pdf_id)
+    if mpoints:
+        pdf_id = mpoints.first().pid
+        has_pdf = True
+
+    return has_pdf, pdf_id
+
+
+def _check_pdf_in_folder(pdf_id):
+    file_ext = 'pdf'
+    path = os.path.join(settings.FILES_ROOT, 'tseg-personal-file')
+    pdf_full_name = pdf_id + "." + file_ext
+    file_paths = []
+
+    for root, directories, files in os.walk(path):
+        for filename in files:
+            if filename == pdf_full_name:
+                filepath = os.path.join(root, filename)
+                file_paths.append(filepath)
+                break
+
+    return file_paths
+
+
+@require_POST
+@ajax_required
+@login_required
+def check_button_ebable_pdf(request, payload):
+    is_enable = False
+    pdf_id = payload.get('pdf_id')
+
+    has_csv = _get_info_from_file('check', None, pdf_id, None)
+    has_pdf = _check_pdf_in_folder(pdf_id)
+    if len(has_pdf) > 0:
+        if len(has_csv) > 0:
+            is_enable = True
+        else:
+            has_pdf_in_mpoint, pid = _check_pdf_from_mpoint_view(pdf_id)
+            if has_pdf_in_mpoint:
+                is_enable = True
+
+    rsp = {
+        'success': True,
+        'is_enable': is_enable
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def check_button_ebable_pdf_geo_id(request, payload):
+    is_enable = False
+    pdf_id = None
+    geo_id = payload.get('geo_id')
+
+    has_csv = _get_info_from_file('check', None, None, geo_id)
+    if has_csv:
+        # has_pdf_in_mpoint, pid = _check_pdf_from_mpoint_view(has_csv[0]) # mpoint_voew ээс үзэх
+        # if has_pdf_in_mpoint:
+        pdf_id = has_csv[0]
+
+    if pdf_id:
+        has_pdf = _check_pdf_in_folder(pdf_id)
+        if len(has_pdf) > 0:
+            is_enable = True
+
+    rsp = {
+        'success': True,
+        'is_enable': is_enable,
+        'pdf_id': pdf_id
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required
+def testPay(request, id):
+    payment = Payment.objects.filter(id=id).update(is_success=True)
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+def _get_properties_qs(view_qs):
+    viewproperties_qs = ViewProperties.objects
+    viewproperties_qs = viewproperties_qs.filter(view=view_qs)
+    viewproperty_ids = viewproperties_qs.values_list('property_id', flat=True)
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.filter(property_id__in=viewproperty_ids)
+
+    return viewproperty_ids, property_qs
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_popup_info(request, payload):
+    layers_code = payload.get('layers_code')
+    coordinate = payload.get('coordinate')
+    radius = 1000
+
+    value_type = None
+    property_name = None
+    property_code = None
+    infos = list()
+
+    views_qs = ViewNames.objects
+    views_qs = views_qs.filter(view_name__in=[
+        utils.remove_text_from_str(layer_code)
+        for layer_code in layers_code])
+
+    for view_qs in views_qs:
+        view_name = view_qs.view_name
+        viewproperty_ids, property_qs = _get_properties_qs(view_qs)
+        properties = property_qs.values("property_code", "property_name")
+
+        with connections['default'].cursor() as cursor:
+            sql = """
+                SELECT
+                    {properties}
+                FROM
+                    {view_name}
+                WHERE (
+                    ST_DistanceSphere(
+                        geo_data,
+                        ST_SetSRID(
+                            ST_MakePoint({x}, {y})
+                        ,4326)
+                    )
+                    <= {radius}
+                )
+            """.format(
+                view_name=view_name,
+                properties=",".join([prop_code['property_code'] for prop_code in properties]),
+                x=coordinate[0],
+                y=coordinate[1],
+                radius=radius
+            )
+            cursor.execute(sql)
+            results = [dict((cursor.description[i][0], value) \
+                for i, value in enumerate(row)) for row in cursor.fetchall()[:5]]
+
+            for result in results:
+                datas = list()
+                datas.append('gp_layer_' + view_qs.view_name)
+                datas.append(list())
+                for key, value in result.items():
+                    for prop in properties:
+                        if prop['property_code'].lower() == key and value:
+                            datas[1].append([prop['property_name'], value, key])
+                if datas:
+                    infos.append(datas)
+
+    rsp = {
+        'datas': infos,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_feature_info(request, payload):
+
+    datas = dict()
+    layer_code = payload.get('layer_code')
+    coordinates = payload.get('coordinates')
+
+    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+
+    feature_id = view_qs.feature_id
+    layer_code = 'gp_layer_' + layer_code
+
+    polygon = Polygon(coordinates, srid=4326)
+
+    mgeodatas_qs = MGeoDatas.objects
+    mgeodatas_qs = mgeodatas_qs.filter(feature_id=feature_id)
+    mgeodatas_qs = mgeodatas_qs.filter(geo_data__within=polygon)
+    geom_ids = [mgeodata.geo_id for mgeodata in mgeodatas_qs]
+
+    datas['feature_id'] = feature_id
+    datas['layer_code'] = layer_code
+    datas['geom_ids'] = geom_ids
+
+    rsp = {
+        'datas': datas,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_geom(request, payload):
+    feature = ''
+    geo_id = payload.get('geo_id')
+
+    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    if geom:
+        geo_json = geom.json
+        feature = utils.get_feature_from_geojson(geo_json)
+
+    rsp = {
+        'feature': feature
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def get_contain_geoms(request, payload):
+    features = list()
+    layers_changed_code = list()
+    feature_collection = list()
+    buffer = ''
+    success = False
+
+    main_layer_name = 'gp_layer_'
+
+    layers_code = payload.get('layers_code')
+    geometry = payload.get('geometry')
+    km_scale = payload.get('km_scale')
+    km_scale = km_scale / 10 if km_scale else None
+
+
+    if len(layers_code) > 0:
+        for layer_code in layers_code:
+
+            layer_code = utils.remove_text_from_str(layer_code, main_layer_name)
+
+            if km_scale:
+                point = utils.get_geom_for_filter_from_coordinate(geometry, 'Point')
+                buffer = utils.get_feature_from_geojson(point.buffer(km_scale + 0.1).json)
+                geoms = utils.get_geoms_with_point_buffer_from_view(geometry, layer_code, km_scale)
+
+            else:
+                geoms = utils.get_inside_geoms_from_view(geometry, layer_code)
+
+            if geoms:
+                for geom in geoms:
+                    feature = utils.get_feature_from_geojson(geom)
+                    features.append(feature)
+
+            changed_code = main_layer_name + layer_code
+            layers_changed_code.append(changed_code)
+
+        feature_collection = FeatureCollection(features)
+        success = True
+
+    rsp = {
+        'features': feature_collection,
+        'layers_code': layers_changed_code,
+        'buffer': buffer,
+        'success': success or False,
     }
 
     return JsonResponse(rsp)

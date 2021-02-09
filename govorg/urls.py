@@ -72,6 +72,7 @@ urlpatterns = [
             path('getCount/', org_request_views.get_count, name='getCount'),
             path('get_choices/', org_request_views.get_choices, name='get-choices'),
         ], 'org-request'))),
+
         path('zip-code/', include(([
             path('aimag/', zipcode_views.aimag, name='aimag'),
             path('sum/', zipcode_views.sum, name='sum'),
@@ -82,6 +83,26 @@ urlpatterns = [
             path('search/', zipcode_views.search, name='search'),
         ], 'zip-code'))),
 
+        path('tseg-personal/', include(([
+            path('', forms_views.tsegPersonal, name='tseg-personal'),
+            path('findSum/', forms_views.findSum, name='findSum'),
+            path('find-point/', forms_views.findPoints, name='find-point'),
+            path('batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
+            path('update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
+            path('search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
+            path('searchName/', forms_views.tsegPersonalNameSearch, name='tsegPersonalNameSearch'),
+            path('list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
+            path('remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
+        ], 'tseg-personal'))),
+
+        path('tseg-ustsan/', include(([
+            path('', forms_views.tsegUstsan, name='tseg-ustsan'),
+            path('success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
+            path('list/', forms_views.tsegUstsanList, name='tseg-ustsan-list'),
+            path('remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
+            path('edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
+        ], 'tseg-ustsan'))),
+
         path('tuuhen_ov/', include(([
             path('', forms_views.all, name='all'),
             path('list/', forms_views.tuuhenOvList, name='list'),
@@ -90,20 +111,6 @@ urlpatterns = [
             path('remove/', forms_views.remove, name='remove'),
             path('create/', forms_views.create, name='create'),
             path('huree-count/', forms_views.hureeCountEdit, name='huree-count'),
-            path('tseg-personal/', forms_views.tsegPersonal, name='tseg-personal'),
-            path('tseg-personal/findSum/', forms_views.findSum, name='findSum'),
-            path('tseg-personal/find-point/', forms_views.findPoints, name='find-point'),
-            path('tseg-personal/batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
-            path('tseg-personal/update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
-            path('tseg-personal/search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
-            path('tseg-personal/searchName/', forms_views.tsegPersonalNameSearch, name='tsegPersonalNameSearch'),
-            path('tseg-personal/list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
-            path('tseg-personal/remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
-            path('tseg-ustsan/', forms_views.tsegUstsan, name='tseg-ustsan'),
-            path('tseg-ustsan-success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
-            path('tseg-ustsan-list/', forms_views.tsegUstsanList, name='tseg-ustsan-list'),
-            path('tseg-ustsan-remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
-            path('tseg-ustsan_edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
             path('dursgalt-gazar/create/', forms_views.dursgaltGazarCreate, name='dursgalt-gazar-create'),
             path('dursgalt-gazar/update/', forms_views.dursgaltGazarUpdate, name='dursgalt-gazar-update'),
             path('dursgalt-gazar/all/', forms_views.dursgaltGazarAll, name='dursgalt-gazar-all'),

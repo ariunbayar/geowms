@@ -1,5 +1,5 @@
 import json
-from geojson import Feature, FeatureCollection
+from geojson import FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
 from django.http import JsonResponse
@@ -32,6 +32,7 @@ from main.utils import (
     date_to_timezone,
     get_display_items,
     get_fields,
+    get_feature_from_geojson,
 )
 from main.components import Datatable
 
@@ -56,7 +57,6 @@ def _get_geom(geo_id, fid):
     rows = dict_fetchall(cursor)
     rows = list(rows)
     return rows
-
 
 
 def _get_org_request(ob, employee):
@@ -334,17 +334,17 @@ def _geojson_to_featurecollection(geo_json, item):
     if item['old_geo_id']:
 
         if item['geo_json']:
-            current_geo_json = _get_geoJson(geo_json)
+            current_geo_json = get_feature_from_geojson(geo_json)
             geo_json_list.append(current_geo_json)
 
         old_geo_data = _get_geom(item['old_geo_id'], item['feature_id'])
         if old_geo_data:
             old_geo_data = old_geo_data[0]['geom']
-            old_geo_data = _get_geoJson(old_geo_data)
+            old_geo_data = get_feature_from_geojson(old_geo_data)
             geo_json_list.append(old_geo_data)
 
     elif geo_json and not item['old_geo_id']:
-        geo_json = _get_geoJson(geo_json)
+        geo_json = get_feature_from_geojson(geo_json)
         geo_json_list.append(geo_json)
 
     geo_json = FeatureCollection(geo_json_list)

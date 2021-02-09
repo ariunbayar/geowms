@@ -1,7 +1,5 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../../../components/helpers/service'
 
-const prefix = '/gov/api/tuuhen_ov'
-
 export const service = {
     tsegustsanEdit,
     searchTseg,
@@ -11,12 +9,17 @@ export const service = {
     paginatedList
 }
 
+const prefix = '/gov/api/tuuhen_ov'
+const tseg_personal_prefix = '/gov/api/tseg-personal'
+const tseg_ustsan_prefix = '/gov/api/tseg-ustsan'
+
+
 function tsegustsanEdit(id) {
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({id}),
     }
-    return fetch(`${prefix}/tseg-ustsan_edit/`, opts).then(handleResponse)
+    return fetch(`${tseg_ustsan_prefix}/edit/`, opts).then(handleResponse)
 }
 
 function searchTseg(query){
@@ -24,7 +27,7 @@ function searchTseg(query){
         ...getPostOptions(),
         body: JSON.stringify({query}),
     }
-    return fetch(`${prefix}/tseg-personal/search/`, opts).then(handleResponse)
+    return fetch(`${tseg_personal_prefix}/search/`, opts).then(handleResponse)
 }
 
 function tsegUstsan(form_datas) {
@@ -32,7 +35,7 @@ function tsegUstsan(form_datas) {
         ...getPostOptions(),
         body: form_datas,
     }
-    return fetch(`${prefix}/tseg-ustsan/`, opts).then(handleResponse)
+    return fetch(`${tseg_ustsan_prefix}/`, opts).then(handleResponse)
 }
 
 function tseg_success(id) {
@@ -40,7 +43,7 @@ function tseg_success(id) {
         ...getPostOptions(),
         body: JSON.stringify({id}),
     }
-    return fetch(`${prefix}/tseg-ustsan-success/`, opts).then(handleResponse)
+    return fetch(`${tseg_ustsan_prefix}/success/`, opts).then(handleResponse)
 }
 
 function tseg_remove(id) {
@@ -48,7 +51,7 @@ function tseg_remove(id) {
         ...getPostOptions(),
         body: JSON.stringify({id}),
     }
-    return fetch(`${prefix}/tseg-ustsan-remove/`, opts).then(handleResponse)
+    return fetch(`${tseg_ustsan_prefix}/remove/`, opts).then(handleResponse)
 }
 
 function paginatedList(page,perpage,query) {
@@ -56,5 +59,5 @@ function paginatedList(page,perpage,query) {
         ...getPostOptions(),
         body: JSON.stringify({page,perpage,query}),
     }
-    return fetch(`${prefix}/tseg-ustsan-list/`, opts).then(handleResponse)
+    return fetch(`${tseg_ustsan_prefix}/list/`, opts).then(handleResponse)
 }

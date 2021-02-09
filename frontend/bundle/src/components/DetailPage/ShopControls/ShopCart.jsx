@@ -2,14 +2,6 @@ import React, {Component} from "react"
 import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
 import {service} from '../service'
-import { toStringHDMS } from "ol/coordinate"
-import Corner from "ol/extent/Corner"
-import { array } from "yup"
-import { CompilationStatus } from "webpack-build-notifier/dist/types"
-import OverlayPositioning from "ol/OverlayPositioning"
-import { set } from "ol/transform"
-import { withRouter } from 'react-router-dom';
-import { identityTransform } from "ol/proj"
 
 export class Cart extends Component{
 
@@ -28,73 +20,92 @@ export class Cart extends Component{
             alert_msg: '',
             max_size: 8,
             first_number: 0,
+            is_again: false,
         }
 
         this.removeList = this.removeList.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
         this.moreItems = this.moreItems.bind(this)
         this.undoItems = this.undoItems.bind(this)
+        this.makeList = this.makeList.bind(this)
     }
 
     componentDidMount(){
-        const {coordinate, torf, content} = this.props
-        if(torf == true){
-            if(content.length !== 0){
-                var arr = [this.props.content[0][1][2]]
-                if(arr[0][1]){
-                    name = arr[0][1]
-                }
-                else
-                {
-                    name = 'Нэр байхгүй байна'
-                }
-                var arr1 = [this.props.content[0][1][0]]
-                var json = [{ 'name': name, 'id': arr1[0][1] }]
-                this.setState({ data: json, is_button: false, })
-            }
-        }
+        this.makeList()
     }
 
     componentDidUpdate(pP, pS){
-        if(pP.coordinate !== this.props.coordinate){
-            if(this.props.torf == true){
-                if(this.props.content.length !== 0){
-                    var arr = [this.props.content[0][1][2]]
-                    if(arr[0][1]){
-                        name = arr[0][1]
-                    }
-                    else
-                    {
-                        name = 'Нэр байхгүй байна'
-                    }
-                    var arr1 = [this.props.content[0][1][0]]
-                    var json = [{ 'name': name ,'id': arr1[0][1] }]
-                    const found = this.state.data.filter(element => {
-                        return element.id == json[0].id
-                    }).length > 0
-                    if(!found){
-                        this.setState({
-                            data: this.state.data.concat(json),
-                            is_button: false,
-                        })
-                    }
-                    else{
-                        this.setState({ alert_msg: "Адилхан цэг байна !", success: false })
-                        setTimeout(() => {
-                            this.setState({ alert_msg: '', success: false})
-                        }, 2000);
-                    }
+        if(pP.geom_name !== this.props.geom_name) {
+            this.makeList()
+        }
+        if(pP.point_id === this.props.point_id && this.props.is_again_clicked) {
+            if (this.state.data.length > 0) {
+                const found = this.state.data.filter(element => {
+                    return element.id == this.props.point_id
+                }).length > 0
+                if (!found) {
+                    this.makeList()
                 }
+            } else {
+                this.makeList()
             }
         }
-        if(pS.data !== this.state.data){
+        if(pS.data !== this.state.data) {
             if(this.state.data.length == 0){
                 this.setState({ is_button: true })
             }
         }
     }
 
-    removeList(coordinate){
+    makeList() {
+        const {coordinate, torf, point_name, code, point_id, geom_name, pdf_id_props} = this.props
+        if(torf == true) {
+            if(geom_name !== '') {
+                var name = 'Нэр байхгүй байна'
+                var pdf_id = 'pdf байхгүй'
+                if (pdf_id_props) {
+                    pdf_id = pdf_id_props
+                }
+                if (point_name) {
+                    name = point_name
+                }
+                var json = {
+                    'name': name,
+                    'id': point_id,
+                    'code': code,
+                    'geom_name': geom_name,
+                    'pdf_id': pdf_id,
+                }
+                if (this.state.data.length > 0) {
+                    const found = this.state.data.filter(element => {
+                        return element.geom_name == json.geom_name
+                    }).length > 0
+                    if(!found) {
+                        const data = this.state.data
+                        data.push(json)
+                        this.setState({
+                            data,
+                            is_button: false,
+                        })
+                    }
+                    else {
+                        this.setState({ alert_msg: "Адилхан цэг байна !", success: false })
+                        setTimeout(() => {
+                            this.setState({ alert_msg: '', success: false})
+                        }, 2000);
+                    }
+                }
+                else {
+                    this.setState({
+                        data: [json],
+                        is_button: false,
+                    })
+                }
+            }
+        }
+    }
+
+    removeList(geom_name){
         const {data} = this.state
         if(data.length == 1){
             this.setState({
@@ -102,10 +113,10 @@ export class Cart extends Component{
             })
         }
         if(data.length > 1){
-            const isBelowThreshold = (coordinateFromArray) => coordinateFromArray = coordinate;
+            const isBelowThreshold = (geom_name_from_array) => geom_name_from_array = geom_name;
             if(data.every(isBelowThreshold)){
                 var array = data.filter((item) =>{
-                    return item.id !== coordinate
+                    return item.geom_name !== geom_name
                 })
                 this.setState({
                     data: array,
@@ -117,14 +128,14 @@ export class Cart extends Component{
     checkDataForPurchase(){
         this.setState({ is_purchase: true })
         if(this.state.data.length > 0){
-            service.purchaseFromCart(this.state.data, this.props.code)
-                .then(({success, msg, payment}) => {
+            service.purchaseFromCart(this.state.data)
+                .then(({success, msg, payment_id}) => {
                     if(success){
                         this.setState({ alert_msg: msg, success })
                         setTimeout(() => {
-                            //this.props.history(`/payment/purchase/${payment}/`)
+                            //this.props.history(`/payment/purchase/${payment_id}/`)
                             this.setState({ data: [], is_purchase: false, is_button: true })
-                            window.location.href=`/payment/purchase/${payment}/`;
+                            window.location.href=`/payment/purchase/${payment_id}/`;
                         }, 1000);
                     }
                     if(!success){
@@ -133,7 +144,8 @@ export class Cart extends Component{
                             this.setState({ alert_msg: '' })
                         }, 2000);
                     }
-                }).catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
+                })
+                .catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
         }
         else{
             this.setState({ alert_msg: "Уучлаарай сагс хоосон байна" })
@@ -166,14 +178,15 @@ export class Cart extends Component{
     render(){
         const {coordinate, torf, data, is_button, alert_msg, success, max_size, first_number, undoItem } = this.state
         const {x, y} = this.props
+
         if(data.length > 0){
             this.div = []
             data.slice(first_number, max_size).map((data, key) => {
                 var idx = key + 1 + first_number
                 this.div.push(
                     <div className="rounded bg-light card-baraa row shadow-sm bg-white"  key={key}>
-                        <div className="col-md-1 icon"><i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.id)}></i></div>
-                        <div className="col-md-10 name"><b>{idx}. Цэгийн нэр: </b>{data.name}</div>
+                        <div className="col-md-1 icon"><i type="button" className="fa fa-trash text-danger" onClick={() => this.removeList(data.geom_name)}></i></div>
+                        <span className="col-md-10 name"><b>{idx}. Цэгийн нэр: </b>{data.name}</span>
                     </div>
                 )
             })
@@ -197,9 +210,7 @@ export class Cart extends Component{
                 <div>
                 <div className="cart-button">
                     <div className="card-count">
-                        <span classname="cart-count-span text-success">
-                            {data.length}
-                        </span>
+                        {data.length}
                     </div>
                     <div className="card-icon">
                         <i className="fa fa-shopping-cart" aria-hidden="true"></i>
@@ -222,7 +233,7 @@ export class Cart extends Component{
                         null
                     }
                     {this.state.is_purchase ?
-                        <button className="btn gp-btn-primary" disabled>
+                        <button className="btn gp-btn-primary my-4" disabled>
                             <div className="spinner-border" role="status">
                                 <span className="sr-only"></span>
                             </div>
@@ -231,7 +242,7 @@ export class Cart extends Component{
                         <button
                             className="btn gp-btn-primary pay-button my-4"
                             onClick={() => this.checkDataForPurchase()}
-                            disabled = {is_button}
+                            disabled={is_button}
                         >
                             Худалдаж авах
                         </button>
@@ -270,7 +281,7 @@ export class ShopCart extends Control {
         ReactDOM.hydrate(<Cart {...props}/>, this.element)
     }
 
-    showModal(coordinate, torf, x, y, content, code) {
-        this.renderComponent({coordinate, torf, x, y, content, code})
+    showModal(coordinate, torf, x, y, point_name, code, point_id, is_again_clicked, geom_name, pdf_id_props) {
+        this.renderComponent({coordinate, torf, x, y, point_name, code, point_id, is_again_clicked, geom_name, pdf_id_props})
     }
 }

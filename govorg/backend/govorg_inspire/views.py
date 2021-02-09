@@ -33,6 +33,7 @@ from backend.org.models import Employee, Org
 
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
+
 from main.utils import get_geoJson
 from main.decorators import ajax_required
 from main.utils import check_form_json
@@ -44,6 +45,7 @@ from main.utils import gis_tables_by_oids
 from main.utils import has_employee_perm
 from main.utils import refreshMaterializedView
 from main.utils import get_emp_property_roles
+from main.utils import get_feature_from_geojson
 from main.inspire import GEoIdGenerator
 
 
