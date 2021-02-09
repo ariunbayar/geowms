@@ -93,6 +93,7 @@ urlpatterns = [
             path('searchName/', forms_views.tsegPersonalNameSearch, name='tsegPersonalNameSearch'),
             path('list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
             path('remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
+            path('get-field-values/', forms_views.get_field_values),
         ], 'tseg-personal'))),
 
         path('tseg-ustsan/', include(([

@@ -8,7 +8,8 @@ export const service = {
     searchTseg,
     tsegPersonalSuccess,
     findSum,
-    searchTsegName
+    searchTsegName,
+    getFieldValue,
 }
 
 const prefix = '/gov/api/tseg-personal'
@@ -80,4 +81,11 @@ function searchTsegName(name, query){
         body: JSON.stringify({name,query}),
     }
     return fetch(`${prefix}/searchName/`, opts).then(handleResponse)
+}
+
+function getFieldValue(){
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/get-field-values/`, opts).then(handleResponse)
 }

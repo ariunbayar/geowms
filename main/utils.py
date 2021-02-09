@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image
 from collections import namedtuple
 from io import BytesIO
@@ -10,6 +12,7 @@ import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry, Point
+from django.conf import settings
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
 from datetime import timedelta, datetime
@@ -22,6 +25,7 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+from main.inspire import GEoIdGenerator
 from backend.config.models import Config
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
@@ -762,6 +766,7 @@ def get_geoJson(data):
         point = MultiPolygon(coordinates)
         return Feature(geometry=point)
 
+
 def datetime_to_string(date):
     return date.strftime('%Y-%m-%d') if date else ''
 
@@ -880,18 +885,23 @@ def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
 def get_geom_for_filter_from_coordinate(coordinate, geom_type, srid=4326):
     module = importlib.import_module('django.contrib.gis.geos')
     class_ = getattr(module, geom_type)
-    geom = class_([float(coordinate[0]), float(coordinate[1])], srid=srid)
+    geom = class_([float(coord) for coord in coordinate], srid=srid)
     return geom
 
 
-def get_geom_for_filter_from_geometry(geometry):
+def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
     if isinstance(geometry, str):
-        geometry = json.loads(geo_json)
+        geometry = json.loads(geometry)
 
     polygonlist = GEOSGeometry(json.dumps(geometry))
     module = importlib.import_module('django.contrib.gis.geos')
-    class_ = getattr(module, geometry['type'])
-    geom = class_(*polygonlist)
+
+    geom_type = geometry['type']
+    if change_to_multi:
+        geom_type = 'Multi' + geometry['type']
+
+    class_ = getattr(module, geom_type)
+    geom = class_(polygonlist)
 
     return geom
 
@@ -941,3 +951,144 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
         cursor.execute(sql)
 
         return [item[0] for item in cursor.fetchall()]
+
+
+def save_img_to_folder(image, folder_name, file_full_name):
+    import PIL.Image as Image
+    import io
+    bytes = bytearray(image)
+    image = Image.open(io.BytesIO(bytes))
+    image = image.resize((720,720), Image.ANTIALIAS)
+    image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
+    return folder_name + '/' + file_full_name
+
+
+def save_file_to_storage(file, folder_name, file_full_name):
+    from django.core.files.storage import FileSystemStorage
+    path = os.path.join(settings.MEDIA_ROOT, folder_name)
+    fs = FileSystemStorage(
+        location=path
+    )
+    file = fs.save(file_full_name, file)
+    fs.url(file)
+    return path
+
+# ------------------------------------------------------------------------------------------------
+# feature code oor feature iin qs awah
+def get_feature_from_code(feature_code):
+    Lfeature = apps.get_model('backend_inspire', 'LFeatures')
+    l_feature_qs = Lfeature.objects
+    l_feature_qs = l_feature_qs.filter(feature_code=feature_code)
+    if l_feature_qs:
+        return l_feature_qs.first()
+    else:
+        raise Exception('Бүртгэлгүй feature ийн мэдээлэл байна: {}'.format(feature_code))
+
+
+def save_geom_to_mgeo_data(geo_data, feature_id, feature_code):
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.create(
+        geo_id=geo_id,
+        feature_id=feature_id,
+        geo_data=geo_data,
+    )
+    return mgeo_qs
+
+
+def get_properties(feature_id):
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
+    DataTypeConfigs = apps.get_model('backend_inspire', 'LDataTypeConfigs')
+
+    l_feature_c_qs = LFeatureConfigs.objects
+    l_feature_c_qs = l_feature_c_qs.filter(feature_id=feature_id)
+    data_type_ids = l_feature_c_qs.values_list('data_type_id', flat=True)
+
+    data_type_c_qs = DataTypeConfigs.objects
+    data_type_c_qs = data_type_c_qs.filter(data_type_id__in=data_type_ids)
+    property_ids = data_type_c_qs.values_list('property_id', flat=True)
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.filter(property_id__in=property_ids)
+
+    return property_qs, l_feature_c_qs, data_type_c_qs
+
+
+def _value_types():
+    return [
+        {'value_type': 'value_number', 'value_names': ['double', 'number']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
+        {'value_type': 'value_date', 'value_names': ['date']},
+        {'value_type': 'code_list_id', 'value_names': ['single-select', 'multi-select']},
+    ]
+
+
+def make_value_dict(value, properties_qs):
+    for types in _value_types():
+        for prop in properties_qs:
+            for key, val in value.items():
+                if prop.value_type_id in types['value_names'] and key == prop.property_code:
+                    data = dict()
+                    data[types['value_type']] = val
+                    data['property_id'] = prop.property_id
+                    yield data
+
+
+def save_value_to_mdatas(value, feature_code, geom, geom_type='Point'):
+    l_feature_qs = get_feature_from_code(feature_code)
+
+    feature_id = l_feature_qs.feature_id
+
+    point = get_geom_for_filter_from_coordinate(geom, geom_type)
+    point = get_geom_for_filter_from_geometry(point.json, True)
+    mgeo_qs = save_geom_to_mgeo_data(point, feature_id, feature_code)
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    datas = make_value_dict(value, properties_qs)
+    for data in datas:
+        for data_type_c in data_type_c_qs:
+            if data_type_c.property_id == data['property_id']:
+                for l_feature_c in l_feature_c_qs:
+                    if data_type_c.data_type_id == l_feature_c.data_type_id:
+                        data['feature_config_id'] = l_feature_c.feature_config_id
+                        data['data_type_id'] = l_feature_c.data_type_id
+        data['geo_id'] = mgeo_qs.geo_id
+        data['geo_id'] = mgeo_qs.geo_id
+
+        MDatas = apps.get_model('backend_inspire', 'MDatas')
+        mdata_qs = MDatas.objects
+        mdata_qs = mdata_qs.create(**data)
+
+    return True
+
+
+def get_code_list_from_property_id(property_id):
+    LCodeListConfigs = apps.get_model('backend_inspire', 'LCodeListConfigs')
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    code_list_values = []
+    code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
+    if code_list_configs:
+        for code_list_config in code_list_configs:
+            property_id = code_list_config.property_id
+            to_property_id = code_list_config.to_property_id
+            if property_id == to_property_id:
+                to_property_id += 1
+            x_range = range(property_id, to_property_id)
+            for property_id_up in x_range:
+                code_lists = LCodeLists.objects.filter(property_id=property_id_up)
+                if code_lists:
+                    for code_list in code_lists:
+                        value = dict()
+                        if code_list.top_code_list_id:
+                            value['top_code_list_id'] = code_list.top_code_list_id
+
+                        value['code_list_id'] = code_list.code_list_id
+                        value['property_id'] = code_list.property_id
+                        value['code_list_code'] = code_list.code_list_code
+                        value['code_list_name'] = code_list.code_list_name
+                        value['code_list_definition'] = code_list.code_list_definition
+                        code_list_values.append(value)
+
+    return code_list_values

@@ -92,6 +92,7 @@ export  class Forms extends Component {
         this.checkError = this.checkError.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.getFieldValues = this.getFieldValues.bind(this)
     }
     handleBoxOver (e){
         this.setState({ showBox: true })
@@ -101,7 +102,16 @@ export  class Forms extends Component {
         this.setState({ showBox: false })
     }
 
+    getFieldValues() {
+        service
+            .getFieldValue()
+            .then(({ point_classes, point_types }) => {
+                this.setState({ point_classes, point_types })
+            })
+    }
+
     componentDidMount(){
+        this.getFieldValues()
         const id = this.props.data.match.params.id
         const t_type = this.props.data.match.params.t_type
         if(id) {
@@ -512,6 +522,8 @@ export  class Forms extends Component {
         this.getItem()
        }
 
+       const { point_classes, point_types } = this.state
+
        const error_msg = this.state.error_msg
         return (
         <Formik
@@ -617,14 +629,17 @@ export  class Forms extends Component {
                                                     <Fragment>
                                                         <Field name="suljeenii_torol" as="select" className="form-control"
                                                         className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
-                                                            <option>...</option>
-                                                            <option value="3">GPS-ийн сүлжээ</option>
-                                                            <option value="6">Гравиметрийн сүлжээ</option>
-                                                            <option value="7">Өндрийн сүлжээ</option>
-                                                            <option value="4">Триангуляцийн сүлжээ</option>
-                                                            <option value="5">Полигометрийн сүлжээ</option>
-                                                            <option value="8">Зураглалын сүлжээ</option>
-                                                            <option value="2">GNSS-ийн байнгын ажиллагаатай станц</option>
+                                                            <option value="">...</option>
+                                                            {
+                                                                point_types && point_types.map((point_type, idx) =>
+                                                                    <option
+                                                                        key={idx}
+                                                                        value={point_type.code_list_id}
+                                                                    >
+                                                                        {point_type.code_list_name}
+                                                                    </option>
+                                                                )
+                                                            }
                                                         </Field>
                                                         <ErrorMessage name="suljeenii_torol" component="div" className="text-dange"/>
                                                     </Fragment>
@@ -632,80 +647,26 @@ export  class Forms extends Component {
                                             </tr>
                                             <tr>
                                                 <th>Зэрэг</th>
-                                                {values.suljeenii_torol == '2' ?
-                                                    <td>
+                                                <td>
                                                     <Fragment>
                                                         <Field name="center_typ" as="select" className="form-control"
                                                         className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                            <option>...</option>
-                                                            <option value="1">AA анги</option>
-                                                            <option value="2">A анги</option>
-                                                            <option value="3">B анги</option>
-                                                        </Field>
-                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                                    </Fragment>
-                                                </td> : values.suljeenii_torol == '4' ?
-                                                    <td>
-                                                    <Fragment>
-                                                        <Field name="center_typ" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                            <option>...</option>
-                                                            <option value="1">I анги</option>
-                                                            <option value="2">II анги</option>
-                                                            <option value="3">III анги</option>
-                                                            <option value="4">IV анги</option>
-                                                        </Field>
-                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                                    </Fragment>
-                                                </td> : values.suljeenii_torol == '5' ?
-                                                    <td>
-                                                    <Fragment>
-                                                        <Field name="center_typ" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                            <option>...</option>
-                                                            <option value="1">I анги</option>
-                                                            <option value="2">II анги</option>
-                                                            <option value="3">III анги</option>
-                                                            <option value="4">IV анги</option>
-                                                        </Field>
-                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                                    </Fragment>
-                                                </td> : values.suljeenii_torol == '6' ?
-                                                    <td>
-                                                    <Fragment>
-                                                        <Field name="center_typ" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                            <option>...</option>
-                                                            <option value="1">I анги</option>
-                                                            <option value="2">II анги</option>
-                                                        </Field>
-                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                                    </Fragment>
-                                                </td> : values.suljeenii_torol == '7' ?
-                                                    <td>
-                                                    <Fragment>
-                                                        <Field name="center_typ" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                            <option>...</option>
-                                                            <option value="1">I анги</option>
-                                                            <option value="2">II анги</option>
-                                                            <option value="3">III анги</option>
-                                                            <option value="4">IV анги</option>
-                                                        </Field>
-                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
-                                                    </Fragment>
-                                                </td>  :
-                                                    <td>
-                                                    <Fragment>
-                                                        <Field name="center_typ" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
-                                                            <option>...</option>
-                                                            <option value="1">C анги</option>
+                                                            <option value="">...</option>
+                                                            {
+                                                                point_classes && point_classes.map((point_class, idx) =>
+                                                                    values.suljeenii_torol == point_class.top_code_list_id &&
+                                                                    <option
+                                                                        key={idx}
+                                                                        value={point_class.code_list_id}
+                                                                    >
+                                                                        {point_class.code_list_name}
+                                                                    </option>
+                                                                )
+                                                            }
                                                         </Field>
                                                         <ErrorMessage name="center_typ" component="div" className="text-dange"/>
                                                     </Fragment>
                                                 </td>
-                                                }
                                             </tr>
 
                                             <tr>
