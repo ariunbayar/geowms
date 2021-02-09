@@ -1417,6 +1417,8 @@ def get_contain_geoms(request, payload):
     layers_code = payload.get('layers_code')
     geometry = payload.get('geometry')
     km_scale = payload.get('km_scale')
+    km_scale = km_scale / 10 if km_scale else None
+
 
     if len(layers_code) > 0:
         for layer_code in layers_code:
@@ -1424,9 +1426,8 @@ def get_contain_geoms(request, payload):
             layer_code = utils.remove_text_from_str(layer_code, main_layer_name)
 
             if km_scale:
-                km_scale = km_scale / 10
                 point = utils.get_geom_for_filter_from_coordinate(geometry, 'Point')
-                buffer = utils.get_feature_from_geojson(point.buffer(km_scale).json)
+                buffer = utils.get_feature_from_geojson(point.buffer(km_scale + 0.1).json)
                 geoms = utils.get_geoms_with_point_buffer_from_view(geometry, layer_code, km_scale)
 
             else:

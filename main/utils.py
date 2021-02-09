@@ -919,6 +919,8 @@ def remove_text_from_str(main_text, remove_text='gp_layer_'):
 
 
 def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
+    print(radius)
+    print(view_name)
     with connections['default'].cursor() as cursor:
         sql = """
             SELECT ST_AsGeoJSON(geo_data)

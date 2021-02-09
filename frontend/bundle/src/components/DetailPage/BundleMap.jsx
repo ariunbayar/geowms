@@ -107,7 +107,7 @@ export default class BundleMap extends Component {
         this.getFeatureInfoFromInspire = this.getFeatureInfoFromInspire.bind(this)
         this.writeFeat = this.writeFeat.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
-        this.hideMarker = this.hideMarker.bind(this)
+        this.setVisibleMarket = this.setVisibleMarket.bind(this)
     }
 
     initMarker() {
@@ -594,6 +594,9 @@ export default class BundleMap extends Component {
         const wms_array = this.getWMSArray()
         let not_visible_layers = []
         this.controls.popup.getData(true)
+
+        this.setVisibleMarket(true)
+
         wms_array.map(({layers}) => {
             if(layers) {
                 layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
@@ -755,13 +758,13 @@ export default class BundleMap extends Component {
         }
     }
 
-    hideMarker() {
-        this.marker_layer.setVisible(false)
+    setVisibleMarket(is_true) {
+        this.marker_layer.setVisible(is_true)
     }
 
     getFeatureInfoFromInspire(feature, point_coordinate, scale) {
         this.onClickCloser()
-        this.hideMarker()
+        this.setVisibleMarket(false)
 
         let parsed_geojson
         let km_scale = null
@@ -810,6 +813,9 @@ export default class BundleMap extends Component {
                         stroke: new Stroke({
                             color: 'blue',
                             width: 2,
+                        }),
+                        fill: new Fill({
+                            color: 'rgba(0,191,255,0.3)',
                         }),
                     })
                     const source =  new VectorSource({
