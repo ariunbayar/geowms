@@ -91,8 +91,8 @@ export class PolygonPurchase extends Component {
         }))
     }
 
-    qPayClose(){
-        this.setState({ qpay_modal_is: false, is_modal_info_open: true })
+    qPayClose(is_success){
+        this.setState({ qpay_modal_is: false, is_modal_info_open: is_success })
     }
 
     alertOver(){
@@ -107,7 +107,6 @@ export class PolygonPurchase extends Component {
         const purchase_id = this.props.match.params.id
         const { alert_msg, is_modal_info_open, is_modal_open } = this.state
         const { items, layers} = this.state
-        console.log(is_modal_open);
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">

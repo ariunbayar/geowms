@@ -117,7 +117,7 @@ def purchase_draw(request, payload):
 
     layer_prices = {}
     for layer in layers:
-        all_len_property = _get_all_property_count(layer_list, feature_info_list)
+        all_len_property = _get_all_property_count(feature_info_list)
         layer_prices[layer.id] = _calc_per_price(area, area_type, all_len_property, len(feature_info_list), selected_type)
 
     with transaction.atomic():
@@ -412,54 +412,59 @@ def _get_size_from_extent(x1, y1, x2, y2):
         height = 480
         orientation = 'Landscape'
 
-    return {'height': str(height), 'width': str(width), 'orientation': orientation}
+    return str(height), str(width), orientation
 
 
 def _create_image_file(payment, layer, polygon, download_type, folder_name):
+    orientation = ''
     geoserver_layer = layer.wms_layer.code
+    has_layer = utils.check_view_name(geoserver_layer)
+    if has_layer:
+        x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
 
-    x1, y1 = polygon.coodrinatLeftTopX, polygon.coodrinatLeftTopY
+        x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
 
-    x2, y2 = polygon.coodrinatRightBottomX, polygon.coodrinatRightBottomY
+        if x1 > x2:
+            save_x = x1
+            x1 = x2
+            x2 = save_x
+        if y1 > y2:
+            save_y = y1
+            y1 = y2
+            y2 = save_y
 
-    if x1 > x2:
-        save_x = x1
-        x1 = x2
-        x2 = save_x
-    if y1 > y2:
-        save_y = y1
-        y1 = y2
-        y2 = save_y
+        height, width, orientation = _get_size_from_extent(x1, y1, x2, y2)
 
-    size = _get_size_from_extent(x1, y1, x2, y2)
+        path = _create_folder_payment_id(folder_name, payment.id)
 
+        file_ext = '.' + download_type
+        filename = os.path.join(path, str(geoserver_layer) + file_ext)
 
-    path = _create_folder_payment_id(folder_name, payment.id)
+        url = layer.wms_layer.wms.url
+        url_service = 'SERVICE=WMS'
+        url_version = 'VERSION=1.1.0'
+        url_request = 'REQUEST=GetMap'
+        url_format = 'FORMAT=image/' + download_type
+        url_transparent = 'TRANSPARENT=true'
+        url_width = 'WIDTH=' + width
+        url_height = 'HEIGHT=' + height
+        url_layers = 'LAYERS=' + geoserver_layer
+        url_bbox = 'BBOX=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2) + ',urn:ogc:def:crs:EPSG:4326'
 
-    file_ext = '.' + download_type
-    filename = os.path.join(path, str(geoserver_layer) + file_ext)
+        fullurl = url + '?' + url_service + '&' + url_version + '&' + url_request + '&' + url_format + '&' + url_transparent + '&' + url_width + '&' + url_height + '&' + url_bbox + '&' + url_layers
 
-    url = layer.wms_layer.wms.url
-    url_service = 'SERVICE=WMS'
-    url_version = 'VERSION=1.1.0'
-    url_request = 'REQUEST=GetMap'
-    url_format = 'FORMAT=image/' + download_type
-    url_transparent = 'TRANSPARENT=true'
-    url_width = 'WIDTH=' + size['width']
-    url_height = 'HEIGHT=' + size['height']
-    url_layers = 'LAYERS=' + geoserver_layer
-    url_bbox = 'BBOX=' + str(x1) + ',' + str(y1) + ',' + str(x2) + ',' + str(y2) + ',urn:ogc:def:crs:EPSG:4326'
+        with urllib.request.urlopen(fullurl) as response:
+            image_byte = response.read()
 
-    fullurl = url + '?' + url_service + '&' + url_version + '&' + url_request + '&' + url_format + '&' + url_transparent + '&' + url_width + '&' + url_height + '&' + url_bbox + '&' + url_layers
+        if image_byte:
+            bytes = bytearray(image_byte)
+            image = Image.open(io.BytesIO(bytes))
+            image.save(os.path.join(settings.FILES_ROOT, folder_name, str(payment.id), geoserver_layer + file_ext))
+        success = True
+    else:
+        success = False
 
-    with urllib.request.urlopen(fullurl) as response:
-        image_byte = response.read()
-
-    bytes = bytearray(image_byte)
-    image = Image.open(io.BytesIO(bytes))
-    image.save(os.path.join(settings.FILES_ROOT, folder_name, str(payment.id), geoserver_layer + file_ext))
-
-    return {'success': True, 'orientation': size['orientation']}
+    return success, orientation
 
 
 def _export_image(payment, download_type):
@@ -505,7 +510,8 @@ def _get_Feature_info_from_url(polygon, layer):
 
     with urllib.request.urlopen(full_url) as response:
         get_features = response.read().decode("utf-8")
-        for feature in json.loads(get_features)['features']:
+        get_features = json.loads(get_features)
+        for feature in get_features['features']:
             geo_id = feature['id']
             geo_id = geo_id.split('.')[len(geo_id.split('.')) - 1]
             feature_id = feature['properties']['feature_id']
@@ -967,10 +973,10 @@ def _export_pdf(payment, download_type):
     for layer in layers:
         infos = _get_pdf_info_from_inspire(payment, layer, polygon)
         _create_folder_payment_id(download_type, payment_id)
-        is_created_image = _create_image_file(payment, layer, polygon, image_ext, folder_name)
-        if is_created_image['success']:
+        success, orientation = _create_image_file(payment, layer, polygon, image_ext, folder_name)
+        if success:
             image_name = layer.wms_layer.code + '.' + image_ext
-            path = _create_pdf(download_type, payment_id, layer.wms_layer.code, infos, image_name, folder_name, is_created_image['orientation'])
+            path = _create_pdf(download_type, payment_id, layer.wms_layer.code, infos, image_name, folder_name, orientation)
 
     _file_to_zip(str(payment.id), download_type)
     payment.export_file = download_type + '/' + str(payment.id) + '/export.zip'
@@ -1131,14 +1137,12 @@ def _data_type_configs_count(data_type_id):
     return property_len
 
 
-def _get_all_property_count(layer_list, feature_info_list):
+def _get_all_property_count(feature_info_list):
     count = 0
-    for code in layer_list:
-        for feature in feature_info_list:
-            if code == feature['layer_code']:
-                if 'feature_id' in feature:
-                    fconfig_count = _lfeature_config_count(feature['feature_id'])
-                    count += fconfig_count
+    for feature in feature_info_list:
+        if 'feature_id' in feature:
+            fconfig_count = _lfeature_config_count(feature['feature_id'])
+            count += fconfig_count
     return count
 
 
@@ -1159,7 +1163,7 @@ def _calc_per_price(area, area_type, all_len_property, len_object_in_layer, sele
 @require_POST
 @ajax_required
 @login_required
-def calcPrice(request, payload):
+def calc_price(request, payload):
     area = payload.get('area')
     layer_list = payload.get("layer_list")
     feature_info_list = payload.get("feature_info_list")
@@ -1168,7 +1172,7 @@ def calcPrice(request, payload):
     area_type = area['type']
     area = area['output']
 
-    all_len_property = _get_all_property_count(layer_list, feature_info_list)
+    all_len_property = _get_all_property_count(feature_info_list)
     total_price = _calc_per_price(area, area_type, all_len_property, len(feature_info_list), selected_type)
 
     rsp = {
@@ -1260,19 +1264,6 @@ def check_button_ebable_pdf_geo_id(request, payload):
     return JsonResponse(rsp)
 
 
-@require_GET
-@ajax_required
-@login_required
-def testPay(request, id):
-    payment = Payment.objects.filter(id=id).update(is_success=True)
-
-    rsp = {
-        'success': True,
-    }
-
-    return JsonResponse(rsp)
-
-
 def _get_properties_qs(view_qs):
     viewproperties_qs = ViewProperties.objects
     viewproperties_qs = viewproperties_qs.filter(view=view_qs)
@@ -1298,9 +1289,12 @@ def get_popup_info(request, payload):
     infos = list()
 
     views_qs = ViewNames.objects
-    views_qs = views_qs.filter(view_name__in=[
-        utils.remove_text_from_str(layer_code)
-        for layer_code in layers_code])
+    views_qs = views_qs.filter(
+        view_name__in=[
+            utils.remove_text_from_str(layer_code)
+            for layer_code in layers_code
+        ]
+    )
 
     for view_qs in views_qs:
         view_name = view_qs.view_name
@@ -1355,26 +1349,26 @@ def get_popup_info(request, payload):
 @ajax_required
 @login_required
 def get_feature_info(request, payload):
-
-    datas = dict()
-    layer_code = payload.get('layer_code')
+    datas = list()
+    layer_codes = payload.get('layer_codes')
     coordinates = payload.get('coordinates')
+    main_layer_name = 'gp_layer_'
 
-    view_qs = get_object_or_404(ViewNames, view_name=layer_code)
+    polygon = Polygon(coordinates, srid=4326).json
 
-    feature_id = view_qs.feature_id
-    layer_code = 'gp_layer_' + layer_code
+    for layer_code in layer_codes:
+        data = dict()
+        layer_code = utils.remove_text_from_str(layer_code, main_layer_name)
+        geom_ids = utils.get_inside_geoms_from_view(polygon, layer_code, ['geo_id'])
+        data['geom_ids'] = geom_ids
 
-    polygon = Polygon(coordinates, srid=4326)
+        view_qs = ViewNames.objects.filter(view_name=layer_code).first()
+        feature_id = view_qs.feature_id
+        data['feature_id'] = feature_id
 
-    mgeodatas_qs = MGeoDatas.objects
-    mgeodatas_qs = mgeodatas_qs.filter(feature_id=feature_id)
-    mgeodatas_qs = mgeodatas_qs.filter(geo_data__within=polygon)
-    geom_ids = [mgeodata.geo_id for mgeodata in mgeodatas_qs]
-
-    datas['feature_id'] = feature_id
-    datas['layer_code'] = layer_code
-    datas['geom_ids'] = geom_ids
+        layer_code = main_layer_name + layer_code
+        data['layer_code'] = layer_code
+        datas.append(data)
 
     rsp = {
         'datas': datas,

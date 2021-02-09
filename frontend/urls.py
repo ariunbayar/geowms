@@ -54,7 +54,7 @@ urlpatterns = [
         path('purchase-from-cart/', payment_views.purchase_from_cart),
         path('download-pdf/<int:pk>/<str:pdf_id>/', payment_views.download_pdf, name='download-pdf'),
         path('download-zip/<int:pk>/', payment_views.download_zip, name='download-zip'),
-        path('calc-price/', payment_views.calcPrice, name='calculate-price'),
+        path('calc-price/', payment_views.calc_price, name='calculate-price'),
         path('check-enable-pdf/', payment_views.check_button_ebable_pdf),
         path('check-enable-pdf-id/', payment_views.check_button_ebable_pdf_geo_id),
         path('get-popup-info/', payment_views.get_popup_info),

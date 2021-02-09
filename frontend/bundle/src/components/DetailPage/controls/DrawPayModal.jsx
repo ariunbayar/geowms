@@ -73,7 +73,7 @@ class ModalComponent extends Component{
 
     render() {
         const { types, total_price } = this.state
-        const { layer_info, is_loading, area } = this.props
+        const { layer_info, is_loading, area, feature_info_list } = this.props
         return (
             <div>
                 <div className="show d-block modal bd-example-modal-lg" tabIndex="-1" role="dialog" aria-hidden="true">
@@ -117,15 +117,25 @@ class ModalComponent extends Component{
                                             </div>
                                             <div className="col-md-6">
                                                 <ul>
-                                                    {layer_info.wms_list.map(({ name, layers }, idx) =>
-                                                        <li key={ idx }>{ name }
-                                                            <ul>
-                                                                {layers.map(({ name }, idx) =>
-                                                                    <li key={ idx }>{ name }</li>
-                                                                )}
-                                                            </ul>
-                                                        </li>
-                                                    )}
+                                                    {layer_info.wms_list.map(({ name, layers }, idx) => {
+                                                        let layer_codes = []
+                                                        let bundle_name = name
+                                                        {layers.map(({ name, code }, idx) =>
+                                                            feature_info_list.map((feature, idx) => {
+                                                                if (feature.layer_code == code) {
+                                                                    layer_codes.push(name)
+                                                                }
+                                                            })
+                                                        )}
+                                                        return  layer_codes.length > 0 &&
+                                                                <li key={idx}>{bundle_name}
+                                                                    <ul>
+                                                                        {layer_codes.map((name, idx) =>
+                                                                            <li key={idx}>{ name }</li>
+                                                                        )}
+                                                                    </ul>
+                                                                </li>
+                                                    })}
                                                 </ul>
                                             </div>
                                         </div>

@@ -170,10 +170,10 @@ function getPopUpInfo(layers_code, coordinate) {
     return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
 }
 
-function getFeatureInfo(layer_code, coordinates) {
+function getFeatureInfo(layer_codes, coordinates) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({layer_code, coordinates})
+        body: JSON.stringify({layer_codes, coordinates})
     }
     return fetch('/payment/get-feature-info/', requestOptions).then(handleResponse)
 }

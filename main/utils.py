@@ -896,19 +896,45 @@ def get_geom_for_filter_from_geometry(geometry):
     return geom
 
 
-def get_inside_geoms_from_view(geo_json, view_name):
-
+def check_view_name(view_name):
+    view_name = remove_text_from_str(view_name, 'gp_layer_')
+    has_view_name = False
     with connections['default'].cursor() as cursor:
         sql = """
-            SELECT ST_AsGeoJSON(geo_data)
-            FROM {view_name}
-            WHERE (
-                    st_within(geo_data, ST_GeomFromGeoJSON(%s))
-            )
-        """.format(view_name=view_name)
-        cursor.execute(sql, [str(geo_json)])
+            SELECT matviewname as view_name
+            FROM pg_matviews
+            ORDER BY view_name
+        """
+        cursor.execute(sql)
+        for item in cursor.fetchall():
+            if item[0] == view_name:
+                has_view_name = True
+        return has_view_name
 
-        return [item[0] for item in cursor.fetchall()]
+
+def get_inside_geoms_from_view(geo_json, view_name, properties=list()):
+    datas = list()
+
+    if properties:
+        properties = ",".join([prop_code for prop_code in properties])
+        properties = properties + ","
+    else:
+        properties = ''
+
+    has_view_name = check_view_name(view_name)
+    if has_view_name:
+        with connections['default'].cursor() as cursor:
+            sql = """
+                SELECT {properties} ST_AsGeoJSON(geo_data)
+                FROM {view_name}
+                WHERE (
+                        ST_Within(geo_data, ST_GeomFromGeoJSON(%s))
+                )
+            """.format(view_name=view_name, properties=properties)
+            cursor.execute(sql, [str(geo_json)])
+            datas = [item[0] for item in cursor.fetchall()]
+
+    return datas
 
 
 def remove_text_from_str(main_text, remove_text='gp_layer_'):
