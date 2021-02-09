@@ -958,6 +958,7 @@ export default class BundleMap extends Component {
                             .then(({ datas }) => {
                                 datas['layer_id'] = id
                                 list.push(datas)
+                                console.log(list);
                             })
                     }
                     if (!is_feature) {
@@ -1001,9 +1002,9 @@ export default class BundleMap extends Component {
                                 })
                         }
                     }
-                    if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {
-                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
-                    }
+                }
+                if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {
+                    this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
                 }
             })
         })

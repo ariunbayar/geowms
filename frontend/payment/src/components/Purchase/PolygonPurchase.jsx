@@ -21,7 +21,6 @@ export class PolygonPurchase extends Component {
             qpay_modal_is: false,
             is_modal_info_open: false,
             is_modal_open: false,
-            alert_toggle: false,
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
         }
         this.qPayClose = this.qPayClose.bind(this)
@@ -43,7 +42,7 @@ export class PolygonPurchase extends Component {
             else {
                 this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
             }
-        }).catch(error => console.log(error))
+        }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
     }
 
     addNotif(style, msg, icon){
@@ -97,11 +96,11 @@ export class PolygonPurchase extends Component {
     }
 
     alertOver(){
-        this.setState({ alert_toggle: true, alert_msg: "Засвартай байгаа" })
+        this.setState({ alert_msg: "Засвартай байгаа" })
     }
 
     alertOut(){
-        this.setState({  alert_toggle: false, alert_msg: "Монгол Банкаар төлбөр төлөх" })
+        this.setState({ alert_msg: "Монгол Банкаар төлбөр төлөх" })
     }
 
     render() {
