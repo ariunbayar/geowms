@@ -692,7 +692,9 @@ def tsegPersonalUpdate(request, payload):
     tseg_display = []
     data = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
     point_id = data.point_id
-    tseg = TsegPersonal.objects.filter(id = point_id).first()
+    feature_code = 'gnp-gp-gp'
+    tseg = utils.get_mdata_values(feature_code, point_id)
+    # tseg = TsegPersonal.objects.filter(id = point_id).first()
     search_cursor_data = GEOSGeometry(data.geom)
     if search_cursor_data:
         latlongx = search_cursor_data[0]
@@ -720,20 +722,20 @@ def tsegPersonalUpdate(request, payload):
         'BA':BA if search_cursor_data else "",
         'BB':BB if search_cursor_data else "",
         'BC':BC if search_cursor_data else "",
-        'tseg_oiroos_img_url': tseg.tseg_oiroos_img_url.url if tseg and tseg.tseg_oiroos_img_url else '',
-        'tseg_holoos_img_url': tseg.tseg_holoos_img_url.url if tseg and tseg.tseg_holoos_img_url  else '',
-        'barishil_tuhai': tseg.barishil_tuhai if tseg else '',
-        'bairshil_tseg_oiroos_img_url': tseg.bairshil_tseg_oiroos_img_url.url if tseg and tseg.bairshil_tseg_oiroos_img_url else '',
-        'bairshil_tseg_holoos_img_url': tseg.bairshil_tseg_holoos_img_url.url if tseg and tseg.bairshil_tseg_holoos_img_url else '',
-        'sudalga_or_shine':  tseg.sudalga_or_shine if tseg else '',
-        'hors_shinj_baidal': tseg.hors_shinj_baidal if tseg else '',
-        'date': tseg.date.strftime("%Y-%m-%d") if tseg and tseg.date else '',
-        'hotolson': tseg.hotolson if tseg else '',
-        'file_path1': tseg.file_path1.name if tseg else '',
-        'file_path2': tseg.file_path2.name if tseg else '',
-        'alban_tushaal': tseg.alban_tushaal if tseg else '',
-        'alban_baiguullga': tseg.alban_baiguullga if tseg else '',
-        'suljeenii_torol': tseg.suljeenii_torol if tseg else '',
+        'tseg_oiroos_img_url': tseg['PointNearPhoto'] if tseg and 'PointNearPhoto' in tseg else '',
+        'tseg_holoos_img_url': tseg['PointFarPhoto'] if tseg and 'PointFarPhoto' in tseg else '',
+        'barishil_tuhai': tseg['Nomenclature'] if tseg else '',
+        'bairshil_tseg_oiroos_img_url': tseg['LocationOverviewMap'] if tseg and 'LocationOverviewMap' in tseg else '',
+        'bairshil_tseg_holoos_img_url': tseg['LocationOverviewMap'] if tseg and 'LocationOverviewMap' in tseg else '',
+        'sudalga_or_shine':  tseg['PointShape'] if 'PointShape' in tseg else '',
+        'hors_shinj_baidal': tseg['SoilDescription'] if 'SoilDescription' in tseg else '',
+        'date': tseg['beginLifespanVersion'].strftime("%Y-%m-%d") if tseg and 'beginLifespanVersion' in tseg else '',
+        'hotolson': tseg['EmployeeName'] if 'EmployeeName' in tseg else '',
+        # 'file_path1': tseg.file_path1.name if tseg else '',
+        # 'file_path2': tseg.file_path2.name if tseg else '',
+        'alban_tushaal': tseg['EmployeePosition'] if 'EmployeePosition' in tseg else '',
+        'alban_baiguullga': tseg['CompanyName'] if 'CompanyName' in tseg else '',
+        'suljeenii_torol': tseg['GeodeticPointClass'] if 'GeodeticPointClass' in tseg else '',
         'id': data.id if data.id else '',
         'objectid': data.objectid if data.objectid else '',
         'point_id': data.point_id if  data.point_id else '',
@@ -1032,23 +1034,34 @@ def tsegPersonal(request):
                 # file2_name = utils.save_file_to_storage(file2, tseg_file_url)
             if request.POST.get('date'):
                 date = request.POST.get('date')
+            mpoint = Mpoint9.objects.using('postgis_db').create(
+                    objectid='null',
+                    point_id=point_id,
+                    ondor=ondor,
+                    point_name=request.POST.get('tesgiin_ner'),
+                    ondor_type=ondor_type,
+                    pid=for_db_pdf_name,
+                    point_class=point_class,
+                    mclass=request.POST.get('center_typ'),
+                    aimag=request.POST.get('aimag_name'),
+                    sum=request.POST.get('sum_name'),
+                    sheet1=request.POST.get('trapetsiin_dugaar'),
+                    sheet2=request.POST.get('BA'),
+                    sheet3=request.POST.get('LA'),
+                    t_type='g109',
+                    point_class_name='Шинээр нэмэгдсэн төлөв',
+                    geom = geom
+            )
 
             point_id = request.POST.get('toviin_dugaar')
             feature_code = 'gnp-gp-gp'
             value = dict()
             value['PointNumber'] = point_id
-            print(point_class)
-            print(point_class)
-            print(point_class)
             value['GeodeticPointClass'] = point_class
-            # value['GeodeticalPointType'] = request.POST.get('center_typ')
+            value['GeodeticalPointType'] = request.POST.get('center_typ')
             value['Nomenclature'] = request.POST.get('barishil_tuhai')
-            value['sudalga_or_shine'] = request.POST.get('sudalga_or_shine')
+            value['PointShape'] = request.POST.get('sudalga_or_shine')
             value['SoilDescription'] = request.POST.get('hors_shinj_baidal')
-            print(date)
-            print(date)
-            print(date)
-            print(date)
             value['date'] = date
             value['EmployeeName'] = request.POST.get('hotolson')
             # value['file_path1'] = file1_name,
@@ -1059,8 +1072,8 @@ def tsegPersonal(request):
             value['OperatorName'] = None
             value['Name'] = request.POST.get('tesgiin_ner')
             value['ExternalId'] = request.POST.get('tesgiin_ner')
-            value['beginLifespanVersion'] = None
-            value['endLifespanVersion'] = None
+            value['beginLifespanVersion'] = date
+            value['endLifespanVersion'] = date
             # tsegPersenal = TsegPersonal.objects.create(
             #             id=point_id,
             #             suljeenii_torol=point_class,
@@ -1081,7 +1094,7 @@ def tsegPersonal(request):
                 # tsegPersenal.tseg_oiroos_img_url = tseg_oiroos_img_url
                 # tsegPersenal.save()
 
-                image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img.png')
+                image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img', '.png')
                 value['PointNearPhoto'] = image_name
 
             if  request.POST.get('tseg_holoos_img_url'):
@@ -1089,7 +1102,7 @@ def tsegPersonal(request):
                 # tseg_holoos_img_url = SimpleUploadedFile('img.png', image_x2)
                 # tsegPersenal.tseg_holoos_img_url = tseg_holoos_img_url
                 # tsegPersenal.save()
-                image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img.png')
+                image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img', '.png')
                 value['PointFarPhoto'] = image_name
 
             if  request.POST.get('bairshil_tseg_oiroos_img_url'):
@@ -1098,7 +1111,7 @@ def tsegPersonal(request):
                 # tsegPersenal.bairshil_tseg_oiroos_img_url = bairshil_tseg_oiroos_img_url
                 # tsegPersenal.save()
 
-                image_name = utils.save_img_to_folder(image_x2,tseg_bairshil_img_url, 'img.png')
+                image_name = utils.save_img_to_folder(image_x2, tseg_bairshil_img_url, 'img', '.png')
                 value['LocationOverviewMap'] = image_name
 
             if  request.POST.get('bairshil_tseg_holoos_img_url'):
@@ -1107,7 +1120,7 @@ def tsegPersonal(request):
                 # tsegPersenal.bairshil_tseg_holoos_img_url = bairshil_tseg_holoos_img_url
                 # tsegPersenal.save()
 
-                image_name = utils.save_img_to_folder(image_x2, tseg_bairshil_img_url, 'img.png')
+                image_name = utils.save_img_to_folder(image_x2, tseg_bairshil_img_url, 'img', '.png')
                 value['LocationOverviewMap'] = image_name
 
             if not request.POST.get('file1'):
@@ -1118,24 +1131,7 @@ def tsegPersonal(request):
                 date = request.POST.get('date')
 
             mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0])
-            mpoint = Mpoint9.objects.using('postgis_db').create(
-                        objectid='null',
-                        point_id=point_id,
-                        ondor=ondor,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor_type=ondor_type,
-                        pid=for_db_pdf_name,
-                        point_class=point_class,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'),
-                        sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'),
-                        sheet2=request.POST.get('BA'),
-                        sheet3=request.POST.get('LA'),
-                        t_type='g109',
-                        point_class_name='Шинээр нэмэгдсэн төлөв',
-                        geom = geom
-            )
+            
             src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
             pdf = createPdf(value, x, y)
             pdf.output(src_file, 'F')

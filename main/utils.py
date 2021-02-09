@@ -29,6 +29,7 @@ from main.inspire import GEoIdGenerator
 from backend.config.models import Config
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+import uuid
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -953,13 +954,15 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
         return [item[0] for item in cursor.fetchall()]
 
 
-def save_img_to_folder(image, folder_name, file_full_name):
+def save_img_to_folder(image, folder_name, file_name, ext):
     import PIL.Image as Image
-    import io
+    import io, uuid
+    uniq = uuid.uuid4().hex[:8]
+    file_full_name = file_name + '_' + uniq + ext
     bytes = bytearray(image)
     image = Image.open(io.BytesIO(bytes))
     image = image.resize((720,720), Image.ANTIALIAS)
-    image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
+    image = image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
     return folder_name + '/' + file_full_name
 
 
@@ -1025,14 +1028,21 @@ def _value_types():
     ]
 
 
-def make_value_dict(value, properties_qs):
+def make_value_dict(value, properties_qs, is_display=False):
+    print(value)
+    print(value)
+    print(value)
+    print(value)
     for types in _value_types():
-        for prop in properties_qs:
+        for prop in properties_qs.values():
             for key, val in value.items():
-                if prop.value_type_id in types['value_names'] and key == prop.property_code:
+                if prop['value_type_id'] in types['value_names'] and key == prop['property_code']:
                     data = dict()
-                    data[types['value_type']] = val
-                    data['property_id'] = prop.property_id
+                    if not is_display:
+                        data[types['value_type']] = val
+                        data[prop['property_id']] = prop['property_id']
+                    if is_display:
+                        data[prop['property_code']] = val
                     yield data
 
 
@@ -1054,7 +1064,6 @@ def save_value_to_mdatas(value, feature_code, geom, geom_type='Point'):
                     if data_type_c.data_type_id == l_feature_c.data_type_id:
                         data['feature_config_id'] = l_feature_c.feature_config_id
                         data['data_type_id'] = l_feature_c.data_type_id
-        data['geo_id'] = mgeo_qs.geo_id
         data['geo_id'] = mgeo_qs.geo_id
 
         MDatas = apps.get_model('backend_inspire', 'MDatas')
@@ -1092,3 +1101,60 @@ def get_code_list_from_property_id(property_id):
                         code_list_values.append(value)
 
     return code_list_values
+
+
+def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs):
+    data = dict()
+    for prop in properties_qs:
+        if prop.property_code == 'PointNumber':
+            property_id = prop.property_id
+            data['property_id'] = property_id
+            for data_type_c in data_type_c_qs:
+                if property_id == data_type_c.property_id:
+                    data_type_id = data_type_c.data_type_id
+                    data['data_type_id'] = data_type_id
+                    for l_feature_c in l_feature_c_qs:
+                        if l_feature_c.data_type_id == data_type_id:
+                            l_feature_c_id = l_feature_c.feature_config_id
+                            data['feature_config_id'] = l_feature_c_id
+    return data
+
+
+def _mdata_values_field():
+    return [
+        'value_text', 'value_number', 'value_date', 'code_list_id'
+    ]
+
+
+def get_mdata_values(feature_code, value):
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    l_feature_qs = get_feature_from_code(feature_code)
+
+    feature_id = l_feature_qs.feature_id
+    send_value = dict()
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    data = _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs)
+
+    data['value_text'] = value
+    mdatas_qs = MDatas.objects
+    mdatas_qs = mdatas_qs.filter(**data)
+    mdatas_qs = mdatas_qs.first()
+    geo_id = mdatas_qs.geo_id
+
+    mdatas = MDatas.objects.filter(geo_id=geo_id)
+    for mdata in mdatas.values():
+        value = dict()
+        values = mdata
+        for field in _mdata_values_field():
+            if values[field]:
+                for prop in properties_qs:
+                    if prop.property_id == mdata['property_id']:
+                        value[prop.property_code] = values[field]
+        datas = make_value_dict(value, properties_qs, True)
+        for data in datas:
+            print(data)
+            for key, value in data.items():
+                send_value[key] = value
+    return send_value
