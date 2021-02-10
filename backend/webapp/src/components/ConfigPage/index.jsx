@@ -28,13 +28,13 @@ export class ConfigPage extends Component {
                 </div>
                 <div className="row">
                     <div className="col-lg-4">
+                        <ConfigPayment/>
                         <ConfigSystem/>
                         <ConfigQgis/>
                         <ConfigGeoserver/>
                     </div>
                     <div className="col-lg-4">
                         <ConfigDan/>
-                        <ConfigPayment/>
                     </div>
                     <div className="col-lg-4">
                         <ConfigEmail/>
