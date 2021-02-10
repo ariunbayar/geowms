@@ -576,6 +576,11 @@ export default class BundleMap extends Component {
                     is_empty = true
                 }
                 const is_from_inspire = true
+                if (this.sendFeatureInfo.length > 0) {
+                    this.sendFeatureInfo.map((info, idx) => {
+                        datas.push(info[0])
+                    })
+                }
                 this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire, false)
             })
     }
@@ -586,6 +591,7 @@ export default class BundleMap extends Component {
         const resolution = view.getResolution()
         const wms_array = this.getWMSArray()
         let not_visible_layers = []
+        let is_not_inspire = true
         this.controls.popup.getData(true)
 
         this.setVisibleMarket(true)
@@ -639,6 +645,7 @@ export default class BundleMap extends Component {
                                         })
                                         if(!this.state.is_draw_open){
                                             if(feature_info.length > 0) {
+                                                is_not_inspire = false
                                                 this.is_empty = false
                                                 if(this.sendFeatureInfo.length > 0) {
                                                     this.sendFeatureInfo.map((feat, idx) => {
@@ -655,11 +662,11 @@ export default class BundleMap extends Component {
                                                 }
                                                 if(geodb_table == 'mpoint_view') {
                                                     this.state.vector_layer.setSource(null)
-                                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
                                                 }
-                                                else {
-                                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                if (not_visible_layers.length > 0) {
+                                                    this.getPopUpInfo(coordinate, not_visible_layers)
                                                 }
+                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
                                             }
                                             else {
                                                 this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
@@ -693,7 +700,9 @@ export default class BundleMap extends Component {
                 })
             }
         })
-        this.getPopUpInfo(coordinate, not_visible_layers)
+        if (is_not_inspire) {
+            this.getPopUpInfo(coordinate, not_visible_layers)
+        }
     }
 
     showFeaturesAt(coordinate) {
