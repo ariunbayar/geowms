@@ -87,7 +87,7 @@ export default class ConfigPayment extends Component {
             <div className="card">
 
                 <div className="card-header">
-                    Худалдан авалтын үнийн тохиргоо
+                    Хэсэгчлэн худалдан авалтын үнийн тохиргоо
                     <div className="card-action">
                         <a href="#" onClick={ this.handleEdit }>
                             <i className="fa fa-edit"></i>
