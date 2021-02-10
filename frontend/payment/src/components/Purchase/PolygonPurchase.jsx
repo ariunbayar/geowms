@@ -10,6 +10,7 @@ export class PolygonPurchase extends Component {
     constructor(props) {
         super(props)
 
+        this.too = 0
         this.state = {
             payment_id: this.props.match.params.id,
             items: {},
@@ -184,7 +185,13 @@ export class PolygonPurchase extends Component {
             <div className={this.state.qpay_modal_is ? 'show d-block modal fade bd-example-modal-lg' : 'd-none' } tabIndex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
-                        <QPay purchase_id={purchase_id} qpay_open={this.state.qpay_modal_is} handleClose={this.qPayClose} history={this.props.history.push} price={items.total} ></QPay>
+                        <QPay
+                            purchase_id={purchase_id}
+                            qpay_open={this.state.qpay_modal_is}
+                            handleClose={this.qPayClose}
+                            history={this.props.history.push}
+                            addNotif={this.addNotif}
+                        />
                         <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
                         </button>
