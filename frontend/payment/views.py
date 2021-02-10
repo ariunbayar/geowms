@@ -134,6 +134,7 @@ def purchase_draw(request, payload):
         payment.is_success = False
         payment.message = 'Хэсэгчлэн худалдаж авах хүсэлт'
         payment.code = ''
+        payment.ext_type = selected_type
         payment.save()
 
         payment_polygon = PaymentPolygon()
@@ -986,24 +987,25 @@ def _export_pdf(payment, download_type):
 
 @require_GET
 @login_required
-def download_purchase(request, pk, download_type):
+def download_purchase(request, pk):
     is_created = False
     payment = get_object_or_404(Payment, pk=pk, user=request.user, is_success=True)
 
     if payment.export_file:
         is_created = True
     else:
-        if download_type == 'shp':
-            is_created = _export_shp(payment)
+        if payment.export_kind == EXPORT_KIND_POLYGON:
+            if payment.ext_type == 'shp':
+                is_created = _export_shp(payment)
 
-        if download_type == 'jpeg' or download_type == 'png' or download_type == 'tiff':
-            is_created = _export_image(payment, download_type)
+            if payment.ext_type == 'jpeg' or payment.ext_type == 'png' or payment.ext_type == 'tiff':
+                is_created = _export_image(payment, download_type)
 
-        if download_type == 'pdf':
-            is_created = _export_pdf(payment, download_type)
+            if payment.ext_type == 'pdf':
+                is_created = _export_pdf(payment, download_type)
 
-        if download_type == 'point':
-            is_created = _create_lavlagaa_infos(payment)
+        if payment.export_kind == EXPORT_KIND_POINT:
+                is_created = _create_lavlagaa_infos(payment)
 
         if is_created:
 

@@ -14,7 +14,7 @@ export class App extends Component {
             <BrowserRouter>
               <Switch>
                 <Route exact path={"/payment/purchase/:id/"} component={Purchase} />
-                <Route exact path={"/payment/purchase/polygon/:id/:type/"} component={PolygonPurchase} />
+                <Route exact path={"/payment/purchase/polygon/:id/"} component={PolygonPurchase} />
                 <Route path={"/payment/failed/:id/"} component={Failed} />
                 <Route path={"/payment/history/api/details/:id/"} component={Details} />
                 <Route path="/payment/history/" component={History}/>
