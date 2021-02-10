@@ -9,7 +9,9 @@ class PopUpCmp extends Component {
     constructor(props) {
 
         super(props)
+
         this.click_count = 0
+        this.is_from_inspire = true
         this.properties = []
         this.state = {
             startNumber: null,
@@ -107,13 +109,13 @@ class PopUpCmp extends Component {
                 if (value[0] == 'point_id') {
                     this.setState({ id: value[1] })
                 }
-                if ((value[0] == 'point_name') || value[2].toLowerCase() == 'name') {
+                if ((value[0] == 'point_name') || value[2] && value[2].toLowerCase() == 'name') {
                     this.setState({ name: value[1] })
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
                     this.checkButtonEnableWithPdf(value[1])
                 }
-                if (value[2].toLowerCase() == 'pointnumber') {
+                if (value[2] && value[2].toLowerCase() == 'pointnumber') {
                     this.checkButtonEnableWithId(value[1])
                     this.setState({ id: value[1] })
                     geom_name = value[1]
@@ -126,8 +128,12 @@ class PopUpCmp extends Component {
 
     setNowData(number, datas, mode, code, geom_name) {
         let data
+        this.is_from_inspire = true
         if (this.props.is_from_inspire) data = [datas[number - 1]]
         else data = datas[number - 1]
+        if (!code.startsWith("gp_layer_")) {
+            this.is_from_inspire = false
+        }
         this.setState({ data, mode, datas, code, geom_name })
     }
 
@@ -279,7 +285,7 @@ class PopUpCmp extends Component {
                                         </button>
                                     </div>
                                 :
-                                is_from_inspire
+                                is_from_inspire && this.is_from_inspire
                                 ?
                                     <div className="btn-group flex-wrap d-flex justify-content-center">
                                         <button
