@@ -19,7 +19,7 @@ class PopUpCmp extends Component {
             is_prev: false,
             is_plus: true,
             data: [],
-            datas: [],
+            datas: '',
             mode: '',
             name: '',
             id: '',
@@ -209,7 +209,7 @@ class PopUpCmp extends Component {
                                 :
                                 "Сонгоогүй байна"
                             }
-                            {datas.length > 0 &&
+                            {!datas &&
                                 <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
                                     <i className="fa fa-times" aria-hidden="true"></i>
                                 </div>

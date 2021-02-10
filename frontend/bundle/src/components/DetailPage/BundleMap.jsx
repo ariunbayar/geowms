@@ -572,14 +572,14 @@ export default class BundleMap extends Component {
             .getPopUpInfo(layer_codes, latlong)
             .then(({ datas }) => {
                 let is_empty = false
-                if (datas.length == 0) {
-                    is_empty = true
-                }
                 const is_from_inspire = true
                 if (this.sendFeatureInfo.length > 0) {
                     this.sendFeatureInfo.map((info, idx) => {
                         datas.push(info[0])
                     })
+                }
+                if (datas.length == 0) {
+                    is_empty = true
                 }
                 this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire, false)
             })
@@ -666,10 +666,14 @@ export default class BundleMap extends Component {
                                                 if (not_visible_layers.length > 0) {
                                                     this.getPopUpInfo(coordinate, not_visible_layers)
                                                 }
-                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                else {
+                                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                }
                                             }
                                             else {
-                                                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                if (not_visible_layers.length == 0) {
+                                                    this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                }
                                             }
                                             // if(geodb_table == 'mpoint_view'){
                                             //     if(feature_info.length > 0){
