@@ -60,8 +60,10 @@ export class Details extends Component {
                             Буцах
                         </NavLink>
                         <br></br>
+
                         <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                         <Loader is_loading={is_loading} />
+
                         <div id="container">
                             <h4 className="text-center">
                                 {

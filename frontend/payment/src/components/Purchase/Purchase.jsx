@@ -137,7 +137,7 @@ export class Purchase extends Component {
                                 point_data.map((value, key) =>
                                     <tr key={key} className="text-center">
                                         <td>
-                                            {value.name}
+                                            {value.point_name}
                                         </td>
                                         <td>
                                             {value.amount + '₮'}
