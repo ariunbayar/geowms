@@ -41,7 +41,7 @@ export default class SideBar extends Component {
             is_loading: props.property_loading,
             zoom_stop: 0,
             zoom_start: 0,
-            cache_type: 'reseed',
+            cache_type: 'seed',
             number_of_cache: 2,
             image_format: 'png',
             tile_cache_check: false
@@ -187,6 +187,20 @@ export default class SideBar extends Component {
         }
         if(pP.property_loading!== this.props.property_loading){
             this.setState({is_loading:this.props.property_loading})
+        }
+        if(pP.cache_values!== this.props.cache_values){
+            if (this.props.cache_values){
+                if (this.props.cache_values.length>0) {
+                    const cache_values = this.props.cache_values[0]
+                    this.setState({
+                        zoom_stop: cache_values.zoom_stop,
+                        zoom_start: cache_values.zoom_start,
+                        cache_type: cache_values.cache_type,
+                        number_of_cache: cache_values.number_of_cache,
+                        image_format: cache_values.image_format,
+                    })
+                }
+            }
         }
     }
 

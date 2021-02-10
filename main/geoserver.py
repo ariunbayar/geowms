@@ -545,12 +545,8 @@ def create_style(values):
     return rsp
 
 
-def create_tilelayers_cache(ws_name, layer_name, srs, cache_details):
-    zoom_stop = cache_details.get('zoom_stop')
-    zoom_start = cache_details.get('zoom_start')
-    image_format = cache_details.get('image_format')
-    cache_type = cache_details.get('cache_type')
-    number_of_cache = cache_details.get('number_of_cache')
+def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache):
+
     payload='''
         <seedRequest>
             <name>{ws_name}:{layer_name}</name>
