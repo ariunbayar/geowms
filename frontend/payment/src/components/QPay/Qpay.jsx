@@ -75,7 +75,6 @@ export class QPay extends Component {
             service.check(purchase_id).then(({success, msg}) => {
                 if(success) //Amjilttai boloh uyd
                 {
-                    this.props.addNotif('danger', msg, 'times')
                     this.props.handleClose(true)
                 }
                 else{
