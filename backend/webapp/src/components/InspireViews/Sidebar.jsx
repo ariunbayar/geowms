@@ -4,7 +4,6 @@ import ModalAlert from '../ModalAlert'
 import './styles.css'
 import StyleMap from './Map'
 import Loader from "@utils/Loader"
-import { number } from 'yup'
 
 
 export default class SideBar extends Component {
@@ -45,9 +44,8 @@ export default class SideBar extends Component {
             number_of_cache: 2,
             image_format: 'png',
             tile_cache_check: false
-
-
         }
+
         this.handleInput = this.handleInput.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
@@ -97,13 +95,15 @@ export default class SideBar extends Component {
         const fid = this.props.fid
         const tid = this.props.tid
         const {
-                id_list, style_state, style_color, style_size,
-                fill_color, style_name, geom_type, wellknownname,
-                wellknowshape, div_angle, color_opacity, dashed_line_length,
-                dashed_line_gap,  style_title, style_abstract,zoom_stop,
-                zoom_start, number_of_cache, image_format, cache_type, tile_cache_check
-            }= this.state
-        const values = { 'style_state': style_state, 'style_color': style_color,
+            id_list, style_state, style_color, style_size,
+            fill_color, style_name, geom_type, wellknownname,
+            wellknowshape, div_angle, color_opacity, dashed_line_length,
+            dashed_line_gap,  style_title, style_abstract,zoom_stop,
+            zoom_start, number_of_cache, image_format, cache_type, tile_cache_check
+        }= this.state
+
+        const values = {
+            'style_state': style_state, 'style_color': style_color,
             'style_size': style_size, 'fill_color': fill_color, 'style_name': style_name,
             'geom_type': geom_type, 'wellknownname': wellknownname, 'wellknowshape': wellknowshape,
             'div_angle': div_angle, 'color_opacity': color_opacity, 'dashed_line_length': dashed_line_length,
@@ -114,7 +114,9 @@ export default class SideBar extends Component {
                 'image_format': image_format
             }
         }
+
         this.setState({save_is_load: true})
+
         service.setPropertyFields(fid, id_list, tid, values).then(({success, info}) => {
             if(success){
                 this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'success'})
@@ -161,14 +163,17 @@ export default class SideBar extends Component {
             const fields = this.props.fields
             this.setState({fields})
         }
+
         if(pP.id_list !== this.props.id_list){
             const id_list = this.props.id_list
             this.setState({id_list})
         }
+
         if(pP.view_name !== this.props.view_name){
             const view_name = this.props.view_name
             this.setState({view_name})
         }
+
         if(pP.style_names!== this.props.style_names){
             this.setState({style_names:this.props.style_names})
         }
@@ -176,28 +181,47 @@ export default class SideBar extends Component {
         if(pP.url!== this.props.url){
             this.setState({url:this.props.url})
         }
+
         if(pP.view_style_name!== this.props.view_style_name){
             this.setState({style_name:this.props.view_style_name})
         }
+
         if(pP.geom_type !== this.props.geom_type){
             this.setState({geom_type:this.props.geom_type})
         }
+
         if(pP.defualt_url!== this.props.defualt_url){
             this.setState({defualt_url:this.props.defualt_url})
         }
+
         if(pP.property_loading!== this.props.property_loading){
             this.setState({is_loading:this.props.property_loading})
         }
+
+        if(pP.fid!== this.props.fid){
+            this.setState({ tile_cache_check: false})
+        }
+
         if(pP.cache_values!== this.props.cache_values){
             if (this.props.cache_values){
                 if (this.props.cache_values.length>0) {
                     const cache_values = this.props.cache_values[0]
+                    console.log(cache_values)
                     this.setState({
                         zoom_stop: cache_values.zoom_stop,
                         zoom_start: cache_values.zoom_start,
                         cache_type: cache_values.cache_type,
                         number_of_cache: cache_values.number_of_cache,
                         image_format: cache_values.image_format,
+                    })
+                }
+                else{
+                    this.setState({
+                        zoom_stop: 0,
+                        zoom_start: 0,
+                        cache_type: 'seed',
+                        number_of_cache: 0,
+                        image_format: 'png',
                     })
                 }
             }
@@ -214,6 +238,7 @@ export default class SideBar extends Component {
             this.setState({modal_alert_check: 'closed'})
         }, 2000)
     }
+
     render() {
         const {fields, fid, fname} = this.props
         const {
@@ -226,9 +251,9 @@ export default class SideBar extends Component {
             style_title, style_abstract, is_loading,
             zoom_stop, zoom_start, number_of_cache, tile_cache_check,
             image_format, cache_type
-            } = this.state
-        return (
+        } = this.state
 
+        return (
             <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
                 <div className="card-body">
                     {fid ?
@@ -239,7 +264,7 @@ export default class SideBar extends Component {
                                         <div className="form-row col-md-12  text-center">
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="" className="m-2"><h5>tilecache тохируулах</h5></label>
-                                                <input type="checkbox" onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
+                                                <input type="checkbox" checked={tile_cache_check} onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
                                             </div>
                                         </div>
                                      {tile_cache_check &&
@@ -284,9 +309,11 @@ export default class SideBar extends Component {
                                             </div>
                                             <div className="form-group col-md-4">
                                             <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
-                                            <select className="form-control form-control-sm"
+                                            <select
+                                                className="form-control form-control-sm"
                                                 value={cache_type}
-                                                onChange={(e) => this.setState({ cache_type: e.target.value })}>
+                                                onChange={(e) => this.setState({ cache_type: e.target.value })}
+                                            >
                                                 <option value="seed">seed</option>
                                                 <option value="reseed">reseed</option>
                                                 <option value="truncate">Truncate</option>
@@ -317,8 +344,11 @@ export default class SideBar extends Component {
                                     <div className="form-row">
                                         <div className="form-group col-md-12">
                                             <label htmlFor="state">Style-ийн төлөв</label>
-                                            <select className="form-control form-control-sm"
-                                                onChange={(e) => this.setState({ style_state: e.target.value })}>
+                                            <select
+                                                className="form-control form-control-sm"
+                                                onChange={(e) => this.setState({ style_state: e.target.value })}
+                                                value={style_state}
+                                            >
                                                 <option value="create_style">Style үүсгэх</option>
                                                 <option value="update_style">Үүссэн style-с сонгох</option>
                                             </select>
@@ -591,7 +621,6 @@ export default class SideBar extends Component {
                                                         </>
                                                     )}
                                                 </>
-
                                             )}
                                         </>
                                     )}
