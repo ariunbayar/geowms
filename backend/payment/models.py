@@ -38,6 +38,7 @@ class Payment(models.Model):
     card_number = models.CharField(max_length=500)
     message = models.CharField(max_length=500)
     code = models.CharField(max_length=100)
+    ext_type = models.CharField(max_length=100, null=True)
     qpay_rsp = models.TextField(null=True)
     mongolbank_rsp = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)

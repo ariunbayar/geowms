@@ -95,7 +95,7 @@ export class Purchase extends Component {
     handleModalApproveClose(){
         const purchase_id = this.props.match.params.id
         if (!this.state.purchase_all.export_files) {
-            service.downloadPurchase(purchase_id, 'point')
+            service.downloadPurchase(purchase_id)
         }
         this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }

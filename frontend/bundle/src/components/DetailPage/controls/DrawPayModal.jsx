@@ -62,7 +62,7 @@ class ModalComponent extends Component{
         }
         service.paymentDraw(values).then(({ success, payment_id }) => {
             if (success) {
-                window.location.href = `/payment/purchase/polygon/${payment_id}/${selected_type}/`;
+                window.location.href = `/payment/purchase/polygon/${payment_id}/`;
             }
         }).catch((error) => {
             alert("Алдаа гарсан байна")
