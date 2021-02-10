@@ -19,7 +19,7 @@ export default class SideBar extends Component {
             title: '',
             model_type_icon: 'success',
             view_name: '',
-            style_state: 'create_style',
+            style_state: 'update_style',
             style_color: '#800000',
             style_size: 1,
             fill_color:  '#C0C0C0',
@@ -224,7 +224,8 @@ export default class SideBar extends Component {
             wellknownname, wellknowshape, div_angle,
             color_opacity, dashed_line_length, dashed_line_gap,
             style_title, style_abstract, is_loading,
-            zoom_stop, zoom_start, number_of_cache, tile_cache_check
+            zoom_stop, zoom_start, number_of_cache, tile_cache_check,
+            image_format, cache_type
             } = this.state
         return (
 
@@ -246,7 +247,9 @@ export default class SideBar extends Component {
                                             <div className="form-group col-md-4">
                                                 <label htmlFor="" className="m-2">Зургийн формат</label>
                                                 <select className="form-control form-control-sm"
-                                                    onChange={(e) => this.setState({ image_format: e.target.value })}>
+                                                    value={image_format}
+                                                    onChange={(e) => this.setState({ image_format: e.target.value })}
+                                                    >
                                                     <option value="jpeg">jpeg</option>
                                                     <option value="png">png</option>
                                                 </select>
@@ -282,7 +285,8 @@ export default class SideBar extends Component {
                                             <div className="form-group col-md-4">
                                             <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
                                             <select className="form-control form-control-sm"
-                                                onChange={(e) => this.setState({ image_format: e.target.value })}>
+                                                value={cache_type}
+                                                onChange={(e) => this.setState({ cache_type: e.target.value })}>
                                                 <option value="seed">seed</option>
                                                 <option value="reseed">reseed</option>
                                                 <option value="truncate">Truncate</option>
@@ -477,8 +481,10 @@ export default class SideBar extends Component {
                                         <div className="form-group col-md-6">
                                             <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
                                             <select className="form-control form-control-sm"
-                                                onChange={(e) => this.setState({ style_name: e.target.value })}>
-                                                <option value={style_name}>{style_name ? style_name : '    ----------------------------          '}</option>
+                                                value={style_name ? style_name : ''}
+                                                onChange={(e) => this.setState({ style_name: e.target.value })}
+                                                >
+                                                <option value={style_name}>{style_name ? style_name : ''}</option>
                                                 {style_names.map((name, idx) =>
                                                 <option value={name} key={idx}>{name}</option>
                                                 )}
