@@ -5,7 +5,7 @@ from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
 from django.core.paginator import Paginator
@@ -287,10 +287,10 @@ def _get_detail_items(payment):
 @require_GET
 @ajax_required
 @login_required
-def getDetail(requist, pk):
+def get_detail(request, pk):
 
-    payment = Payment.objects.filter(pk=pk).first()
-    if payment:
+    payment = get_object_or_404(Payment, pk=pk)
+    if payment.user == request.user:
         if payment.export_kind == Payment.EXPORT_KIND_POINT:
             points = _get_tseg_detail(payment)
             items = _get_detail_items(payment)
@@ -299,6 +299,7 @@ def getDetail(requist, pk):
                 'items': items,
                 'points': points
             }
+
         if payment.export_kind == Payment.EXPORT_KIND_POLYGON:
             polygon = _get_polygon_detail(payment)
             layers = _get_layer_detail(payment)
@@ -310,7 +311,10 @@ def getDetail(requist, pk):
                 'items': items,
             }
     else:
-        rsp = {'success': False}
+        rsp = {
+            'success': False,
+            'info': 'Уучлаарай энэ мэдээлэл олдсонгүй.'
+        }
 
     return JsonResponse(rsp)
 
