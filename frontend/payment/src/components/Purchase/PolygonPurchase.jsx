@@ -33,7 +33,7 @@ export class PolygonPurchase extends Component {
 
     componentDidMount(){
         const id = this.state.payment_id
-        service.getDetails(id).then(({success, items, polygon, layers}) => {
+        service.getDetails(id).then(({success, items, polygon, layers, info}) => {
             if(success){
               items.map(( items ) =>
                   this.setState({items})
@@ -41,7 +41,7 @@ export class PolygonPurchase extends Component {
               this.setState({ polygon, layers })
             }
             else {
-                this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
+                this.addNotif('warning', info, 'exclamation')
             }
         }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
     }

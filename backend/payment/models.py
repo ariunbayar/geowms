@@ -30,7 +30,7 @@ class Payment(models.Model):
     geo_unique_number = models.CharField(max_length=300, unique=True)
     bank_unique_number = models.CharField(max_length=300)
     description = models.CharField(max_length=500)
-    total_amount = models.PositiveIntegerField()
+    total_amount = models.FloatField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     is_success = models.BooleanField()
     success_at = models.DateTimeField(null=True)

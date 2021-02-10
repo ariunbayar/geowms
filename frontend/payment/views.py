@@ -1030,6 +1030,7 @@ def _get_uniq_id(payment):
             check_id = False if len(Payment.objects.filter(geo_unique_number=uniq_id)) == 0 else True
         else:
             check_id = False if payment.geo_unique_number == uniq_id else True
+
     return uniq_id
 
 
@@ -1037,11 +1038,14 @@ def _get_uniq_id(payment):
 @ajax_required
 @login_required
 def purchase_from_cart(request, payload):
+
     with transaction.atomic():
+
         datas = payload.get('datas')
         uniq_id = _get_uniq_id(None)
         user_id = request.user.id
         total_amount = 0
+
         payment = Payment.objects.create(
             geo_unique_number=uniq_id,
             bank_unique_number=' ',
@@ -1080,6 +1084,7 @@ def purchase_from_cart(request, payload):
             'msg': 'Амжилттай боллоо',
             'payment_id': pay_id
         }
+
     return JsonResponse(rsp)
 
 
