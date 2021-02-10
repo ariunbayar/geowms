@@ -492,7 +492,7 @@ def detail(request, level, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def employee_list(request,payload, level, pk):
+def employee_list(request, payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
     employees_display = []
     page = payload.get('page')

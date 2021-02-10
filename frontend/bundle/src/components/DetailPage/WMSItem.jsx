@@ -1,3 +1,4 @@
+import { none } from "ol/centerconstraint"
 import React, { Component, Fragment } from "react"
 
 import WMSLayerItems from "./WMSLayerItems"
@@ -22,9 +23,7 @@ export default class WMSItem extends Component {
     toggle(e) {
         const is_visible = e.target.checked
         this.setState({is_visible})
-        this.state.layers.map((layer) =>
-            layer.tile.setVisible(is_visible)
-        )
+        this.props.addLayer(this.state.layers, null, is_visible)
     }
 
     render() {
@@ -44,7 +43,9 @@ export default class WMSItem extends Component {
                     </div>
                 </div>
                 <WMSLayerItems
+                    name={name}
                     layers={layers}
+                    addLayer={this.props.addLayer}
                     tileWMS={tiles}
                 />
             </Fragment>

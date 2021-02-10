@@ -15,7 +15,6 @@ function payment(purchase_all){
     return fetch(`/payment/dictionaryRequest/`, requestOptions).then(handleResponse)
 }
 
-
 function purchaseAll(purchase_id){
     const requestOptions = {
         ...getPostOptions(),

@@ -658,4 +658,4 @@
 /*!**********************************************************!*\
   !*** multi babel-polyfill ./backend/webapp/src/index.js ***!
   \**********************************************************/
-/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/togoldor/workspace/geoWMS/backend/webapp/src/index.js */"./backend/webapp/src/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./backend/webapp/src/index.js?')}},[[0,"manifest","libs"]]]);
+/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/odk/projects/geoportal/geoWMS/backend/webapp/src/index.js */"./backend/webapp/src/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./backend/webapp/src/index.js?')}},[[0,"manifest","libs"]]]);

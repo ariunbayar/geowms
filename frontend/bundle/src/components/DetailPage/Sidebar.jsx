@@ -23,7 +23,7 @@ class SidebarComponent extends Component {
                 <span>Давхаргууд</span>
                 <hr></hr>
                 {this.props.map_wms_list.map((wms, idx) =>
-                    <WMSItem wms={wms} key={idx}/>
+                    <WMSItem wms={wms} key={idx} addLayer={this.props.addLayer}/>
                 )}
             </div>
         )
@@ -63,9 +63,9 @@ export class Sidebar extends Control {
         ReactDOM.hydrate(<SidebarComponent {...props}/>, this.element)
     }
 
-    showSideBar(map_wms_list, islaod) {
+    showSideBar(map_wms_list, islaod, addLayer) {
         this.toggleControl(islaod)
-        this.renderComponent({map_wms_list})
+        this.renderComponent({map_wms_list, addLayer})
     }
 
 }

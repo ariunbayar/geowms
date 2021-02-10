@@ -10,6 +10,7 @@ from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
 from backend.inspire.models import LThemes
+from main import utils
 
 
 def all(request):
@@ -116,29 +117,20 @@ def get_user(request):
 @require_GET
 @ajax_required
 def aimag(request):
-    try:
-        find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "AimagMon" as aimag FROM public."AdmUnitCenter_Aimag" ORDER BY "AimagMon"  ASC ''')
-        data = find_cursor.fetchall()
-        if(data):
 
-            rsp = {
-                'success': True,
-                'info': data
-            }
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success': False,
-                'info': "Уучлаарай энэ мэдээлэл олдсонгүй",
-            }
-            return JsonResponse(rsp)
-    except Exception:
-        rsp = {
-            'success': False,
-            'info': "Алдаа гарсан",
-        }
-        return JsonResponse(rsp)
+    admin_levels = utils.get_administrative_levels()
+    if admin_levels:
+        success = True
+        info = admin_levels
+    else:
+        success = False
+        info = "Уучлаарай ямар нэгэн мэдээлэл олдсонгүй"
+
+    rsp = {
+        'success': success,
+        'info': info,
+    }
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -147,7 +139,7 @@ def sumfind(request, payload):
     try:
         aimag_name = payload.get('aimag_name')
         find_cursor = connections['postgis_db'].cursor()
-        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "SoumMon" as aimag FROM public."AdmUnitCenter_Sum" where "AimagMon" = %s ORDER BY "SoumMon"  ASC ''', [aimag_name])
+        find_cursor.execute(''' SELECT "Long" as X, "Lat" as Y , "SoumMon" as aimag FROM public."AdmUnitCenter_Sum" where "AimagMon" = %s ORDER BY "SoumMon" ASC ''', [aimag_name])
         data = find_cursor.fetchall()
         if(data):
 

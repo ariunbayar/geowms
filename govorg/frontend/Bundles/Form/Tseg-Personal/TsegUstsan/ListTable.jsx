@@ -60,27 +60,38 @@ export default class ListTable extends Component {
                 <td>
                     {tseg_id}
                 </td>
-                <td>
-                    <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
-                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                    </NavLink>
-                </td>
-                <td>
-                <button href="#" className="btn gp-btn-primary" aria-hidden="true" onClick={this.handleModalSuccessOpen}>
-                    Баталгаажуулах
-                </button>
-                {is_modal_success_open &&
-                    <Modal
-                        modalClose={this.handleModalSuccessClose}
-                        modalAction={this.props.handleTsegSuccess}
-                        text={`Та "${name}" цэгийг устгахдаа итгэлтэй байна уу?`}
-                        title="Баталгаажуулах уу?"
-                        actionNameBack="    Үгүй"
-                        actionNameDelete="  Тийм"
-                        model_type_icon = "warning"
-                    />
+                {
+                    perm_view && perm_create && perm_remove
+                    ?
+                        <td>
+                            <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
+                                <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                            </NavLink>
+                        </td>
+                    :
+                    null
                 }
-                </td>
+                {
+                    perm_approve
+                    ?
+                        <td>
+                            <button href="#" className="btn gp-btn-primary" aria-hidden="true" onClick={this.handleModalSuccessOpen}>
+                                Баталгаажуулах
+                            </button>
+                            {is_modal_success_open &&
+                                <Modal
+                                    modalClose={this.handleModalSuccessClose}
+                                    modalAction={this.props.handleTsegSuccess}
+                                    text={`Та "${tseg_id}" цэгийг устгахдаа итгэлтэй байна уу?`}
+                                    title="Баталгаажуулах уу?"
+                                    actionNameBack="    Үгүй"
+                                    actionNameDelete="  Тийм"
+                                    model_type_icon = "warning"
+                                />
+                            }
+                        </td>
+                    : null
+                }
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>

@@ -17,11 +17,13 @@ export default class WMSLayerItem extends Component {
 
         this.toggle = this.toggle.bind(this)
     }
-    componentDidMount(){
+
+    componentDidMount() {
         this.state.tile.setVisible(this.props.layer.defaultCheck)
     }
+
     toggle(is_visible) {
-        this.state.tile.setVisible(is_visible)
+        this.props.addLayer([this.props.layer], this.props.name, is_visible)
         this.setState({is_visible})
     }
 

@@ -14,6 +14,7 @@ export class Details extends Component {
             points: [],
             polygon: [],
             layers: [],
+            is_loading: true,
             payment_id: this.props.match.params.id,
         }
         this.addNotif = this.addNotif.bind(this)
@@ -26,12 +27,15 @@ export class Details extends Component {
                 items.map(( items ) =>
                     this.setState({items})
                 )
-                this.setState({points, polygon, layers})
+                this.setState({ points, polygon, layers, is_loading: false })
             }
             else {
                 this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
             }
-        }).catch(error => console.log(error))
+        }).catch(error => {
+            this.addNotif('danger', 'Алдаа гарсан байна', 'times')
+            console.log(error)
+        })
     }
 
     addNotif(style, msg, icon){
@@ -45,7 +49,7 @@ export class Details extends Component {
     }
 
     render() {
-        const { items, points, polygon, layers, payment_id } = this.state
+        const { items, points, polygon, layers, payment_id, is_loading } = this.state
         return (
             <div className="container">
                 <div className="row">
@@ -68,146 +72,239 @@ export class Details extends Component {
                             {
                                 points ?
                                     <table className="table table-bordered">
-                                        <tbody>
-                                            <tr>
-                                                <td ><i className="fa fa-map mr-2" aria-hidden="true"></i>Цэгийн нэр</td>
-                                                <td>
+                                        {
+                                            is_loading
+                                            ?
+                                            <tbody>
+                                                <tr>
+                                                    <th>
+                                                        <div className="modal-body height-30">
+                                                            <div className="d-flex justify-content-center">
+                                                                <div className="spinner-border gp-text-primary" role="status"></div>
+                                                            </div>
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                            </tbody>
+                                            :
+                                            <tbody>
+                                                <tr className="text-center">
+                                                    <th
+                                                        colSpan={items.is_success ? "7" : "6"}
+                                                        scope="rowgroup"
+                                                    >
+                                                        <h4>
+                                                            <i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>
+                                                            Цэгийн мэдээлэл
+                                                        </h4>
+                                                    </th>
+                                                </tr>
+                                                <tr className="text-center">
+                                                    <th style={{width: "5%"}}>
+                                                        Д/д
+                                                    </th>
+                                                    <th>
+                                                        Цэгийн нэр
+                                                    </th>
+                                                    <th style={{width: "20%"}}>
+                                                        Аймаг
+                                                    </th>
+                                                    <th>
+                                                        Сум
+                                                    </th>
+                                                    <th>
+                                                        Өндөр
+                                                    </th>
+                                                    <th>
+                                                        <i className="fa fa-money mr-2" aria-hidden="true"></i>
+                                                        Төлбөр
+                                                    </th>
                                                     {
-                                                       points.length > 0 && points.map((value, key) => <b key={key}>{'"'+ value.name + '" '}</b>)
+                                                        items.is_success
+                                                        ?
+                                                            <th>
+                                                                Файл
+                                                            </th>
+                                                        : null
                                                     }
-                                                    {items.point_name}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Аймаг</td>
-                                                <td>{items.mpoint_aimag}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i className="fa fa-map-marker mr-2" aria-hidden="true"></i>Сум</td>
-                                                <td>{items.mpoint_sum}</td>
-                                            </tr>
-                                            <tr>
-                                                <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup"><i className="fa fa-location-arrow mr-2" aria-hidden="true"></i>Цэгийн мэдээлэл</th>
-                                            </tr>
-                                            <tr>
-                                                <th style={{textAlign: "center"}} scope="3">
-                                                    Цэгийн нэр
-                                                </th>
-                                                <th style={{textAlign: "center"}} scope="3">
-                                                    Файл
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <td scope="">
-                                                    {
-                                                        points.length > 0 && points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>{value.name}</li>)
-                                                    }
-                                                </td>
-                                                <td scope="">
-                                                    <div>
-                                                    {
-                                                        points.length > 0 && points.map((value, key) => <li className="list-group-item" style={{textAlign: "center"}} key={key}>
-                                                            <a className="text-info" href={`/payment/download-pdf/${value.file_name}/`}>файл</a></li>)
-                                                    }
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><i className="fa fa-money mr-2" aria-hidden="true"></i>Төлбөр:</td>
-                                                <td>{points.length > 0 && points.map((value,key)=><b key={key}>{'"' + value.amount + '" '}</b>)}₮</td>
-                                            </tr>
-                                            <tr>
-                                                <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
-                                                <td>{items.created_at}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                : null
-                            }
-                            {
-                                items !== {} && polygon.length > 0 && polygon ?
-                                    <table className="table table-bordered">
-                                        <tbody>
-                                            <tr>
-                                                <th className="text-center" colSpan="2" style={{fontSize: '20px'}}>
-                                                    <i className="fa fa-location-arrow mr-2" aria-hidden="true">
-                                                    </i>Давхаргын мэдээлэл
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i className="fa fa-map mr-2" aria-hidden="true"></i>Давхаргын нэр
-                                                </th>
-                                                <th>
-                                                    <i className="fa fa-money mr-2" aria-hidden="true"></i>Давхаргын үнэ
-                                                </th>
-                                            </tr>
+                                                </tr>
                                                 {
-                                                    layers.map((value, key) =>
-                                                        <tr key={key}>
-                                                            <td>
-                                                                <label>{value.name}</label>
-                                                            </td>
-                                                            <td>
-                                                                <label>{value.amount}₮</label>
+                                                    points.length > 0
+                                                    ?
+                                                        points.map((value, key) =>
+                                                            <tr className="text-center" key={key}>
+                                                                <th>
+                                                                    {key + 1}
+                                                                </th>
+                                                                <td>
+                                                                    {value.name}
+                                                                </td>
+                                                                <td scope="">
+                                                                    {value.mpoint.aimag}
+                                                                </td>
+                                                                <td scope="">
+                                                                    {value.mpoint.sum}
+                                                                </td>
+                                                                <td scope="">
+                                                                    {value.mpoint.undur}
+                                                                </td>
+                                                                <td>
+                                                                    {value.amount}₮
+                                                                </td>
+                                                                {
+                                                                    items.is_success
+                                                                    ?
+                                                                        <td scope="">
+                                                                            {value.file_name &&
+                                                                                <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value.file_name}/`}>
+                                                                                    файл
+                                                                                </a>
+                                                                            }
+                                                                        </td>
+                                                                    :
+                                                                    null
+                                                                }
+                                                            </tr>
+                                                        )
+                                                    :
+                                                        <tr className="text-center">
+                                                            <th colSpan={items.is_success ? "7" : "6"}>
+                                                                Мэдээлэл байхгүй байна
+                                                            </th>
+                                                        </tr>
+                                                }
+                                                <tr className="text-center">
+                                                    <th colSpan="2"><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Үүссэн огноо:</th>
+                                                    <td colSpan={items.is_success ? "5" : "4"}>{items.created_at}</td>
+                                                </tr>
+                                                {
+                                                    items.is_success && items.export_file
+                                                    ?
+                                                        <tr className="text-center">
+                                                            <th colSpan="2">
+                                                                Лавлагаа
+                                                            </th>
+                                                            <td colSpan={items.is_success ? "5" : "4"}>
+                                                                <a className="text-info" href={`/payment/download-zip/${payment_id}/`}>
+                                                                    Лавлагааг татах
+                                                                </a>
                                                             </td>
                                                         </tr>
-                                                    )
+                                                    :
+                                                    null
                                                 }
-                                            <tr>
-                                                <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
-                                                <td>{items.created_at}</td>
-                                            </tr>
-                                            {
-                                                items.is_success && items.export_file !== null ?
-                                                    <tr>
-                                                        <td><i className="fa fa-download mr-2" aria-hidden="true"></i>Татах:</td>
-                                                        <td><a className="text-info" href={`/payment/download-zip/${payment_id}/`}>Энд дарж татаж авна уу!</a></td>
-                                                    </tr>
-                                                : null
-                                            }
-                                        </tbody>
+                                            </tbody>
+                                        }
+                                    </table>
+                                : null
+                            }
+                            {
+                                items !== {} && polygon && polygon.length > 0 ?
+                                    <table className="table table-bordered">
+                                        {
+                                            is_loading
+                                            ?
+                                            <tbody>
+                                                <tr>
+                                                    <th>
+                                                        <div className="modal-body height-30">
+                                                            <div className="d-flex justify-content-center">
+                                                                <div className="spinner-border gp-text-primary" role="status"></div>
+                                                            </div>
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                            </tbody>
+                                            :
+                                            <tbody>
+                                                <tr>
+                                                    <th className="text-center" colSpan="2" style={{fontSize: '20px'}}>
+                                                        <i className="fa fa-location-arrow mr-2" aria-hidden="true">
+                                                        </i>Давхаргын мэдээлэл
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th>
+                                                        <i className="fa fa-map mr-2" aria-hidden="true"></i>Давхаргын нэр
+                                                    </th>
+                                                    <th>
+                                                        <i className="fa fa-money mr-2" aria-hidden="true"></i>Давхаргын үнэ
+                                                    </th>
+                                                </tr>
+                                                    {
+                                                        layers.map((value, key) =>
+                                                            <tr key={key}>
+                                                                <td>
+                                                                    <label>{value.name}</label>
+                                                                </td>
+                                                                <td>
+                                                                    <label>{value.amount}₮</label>
+                                                                </td>
+                                                            </tr>
+                                                        )
+                                                    }
+                                                <tr>
+                                                    <td><i className="fa fa-calendar-o mr-2" aria-hidden="true"></i>Огноо:</td>
+                                                    <td>{items.created_at}</td>
+                                                </tr>
+                                                {
+                                                    items.is_success && items.export_file !== null ?
+                                                        <tr>
+                                                            <td><i className="fa fa-download mr-2" aria-hidden="true"></i>Татах:</td>
+                                                            <td>
+                                                                <a className="text-info" href={`/payment/download-zip/${payment_id}/`}>
+                                                                    Энд дарж татаж авна уу!
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    : null
+                                                }
+                                            </tbody>
+                                        }
                                     </table>
                                 : null
                             }
                         </div>
-                        <div className="row py-3">
-                            <div className="col-md-6 py-0 my-3">
-                                <div id="payment">
-                                    <h5 className="mb-3">Гүйлгээний төлөв</h5>
-                                    <ul className="list-unstyled">
-                                        <li className="f-nav-item mb-2">
-                                            Гүйлгээний дугаар | {items.geo_unique_number}
-                                        </li>
-                                        <li className="f-nav-item mb-2">
-                                            НИЙТ МӨНГӨН ДҮН | {items.total}₮
-                                        </li>
-                                        <li className="f-nav-item mb-2">
-                                            Үр дүн | {items.is_success ? <span className="text-success">Амжилттай</span> : <span className="text-danger">Амжилтгүй</span>}
-                                        </li>
-                                    </ul>
-                                </div>
-                                <button className="btn btn-primary" onClick={() => {
-                                    const mywindow = window.open('', 'PRINT', 'height=400, width=600');
-                                    mywindow.document.write('<html><body>');
-                                    mywindow.document.write(document.getElementById("container").innerHTML)
-                                    mywindow.document.write(document.getElementById("payment").innerHTML)
-                                    mywindow.document.write('</body></html>');
-                                    mywindow.document.close()
-                                    mywindow.focus()
-                                    mywindow.print()
-                                    mywindow.close();
-                                }}>Хэвлэх</button>
-                            </div>
-                            {
-                                !items.is_success ?
+                        {
+                            !is_loading &&
+                            <div className="row py-3">
                                 <div className="col-md-6 py-0 my-3">
-                                    <h5 className="mb-3">QR Code </h5>
-                                    <img src="/static/assets/image/lavlakh.png"></img>
+                                    <div id="payment">
+                                        <h5 className="mb-3">Гүйлгээний төлөв</h5>
+                                        <ul className="list-unstyled">
+                                            <li className="f-nav-item mb-2">
+                                                Гүйлгээний дугаар | {items.geo_unique_number}
+                                            </li>
+                                            <li className="f-nav-item mb-2">
+                                                НИЙТ МӨНГӨН ДҮН | {items.total}₮
+                                            </li>
+                                            <li className="f-nav-item mb-2">
+                                                Үр дүн | {items.is_success ? <span className="text-success">Амжилттай</span> : <span className="text-danger">Амжилтгүй</span>}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <button className="btn btn-primary" onClick={() => {
+                                        const mywindow = window.open('', 'PRINT', 'height=400, width=600');
+                                        mywindow.document.write('<html><body>');
+                                        mywindow.document.write(document.getElementById("container").innerHTML)
+                                        mywindow.document.write(document.getElementById("payment").innerHTML)
+                                        mywindow.document.write('</body></html>');
+                                        mywindow.document.close()
+                                        mywindow.focus()
+                                        mywindow.print()
+                                        mywindow.close();
+                                    }}>Хэвлэх</button>
                                 </div>
-                                : null
-                            }
-                        </div>
+                                {
+                                    !items.is_success ?
+                                    <div className="col-md-6 py-0 my-3">
+                                        <h5 className="mb-3">QR Code </h5>
+                                        <img src="/static/assets/image/lavlakh.png"></img>
+                                    </div>
+                                    : null
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
