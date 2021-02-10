@@ -23,8 +23,7 @@ def _get_service_url(request, bundle, wms):
 
 
 @require_GET
-def proxy(request, bundle_id, wms_id):
-
+def proxy(request, bundle_id, wms_id, url_type='wms'):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -37,7 +36,10 @@ def proxy(request, bundle_id, wms_id):
 
     queryargs = request.GET
     headers = {**BASE_HEADERS}
-    rsp = requests.get(wms.url, queryargs, headers=headers, timeout=5)
+    if url_type == 'wmts':
+        rsp = requests.get(wms.cache_url, queryargs, headers=headers, timeout=5)
+    else:
+        rsp = requests.get(wms.url, queryargs, headers=headers, timeout=5)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
@@ -51,7 +53,10 @@ def proxy(request, bundle_id, wms_id):
         content = filter_layers(content, allowed_layers)
 
         service_url = _get_service_url(request, bundle, wms)
-        content = replace_src_url(content, wms.url, service_url)
+        if url_type == 'wmts':
+            content = replace_src_url(content, wms.cache_url, service_url)
+        else:
+            content = replace_src_url(content, wms.url, service_url)
 
     content_type = rsp.headers.get('content-type')
 

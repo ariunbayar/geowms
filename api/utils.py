@@ -6,9 +6,13 @@ re_layer = re.compile(r'^(.*?<Layer[^>]*>)(.*)(</Layer>.*)$', re.S)
 re_layer_wfs = re.compile(r'^(.*?<FeatureTypeList[^>]*>)(.*)(</FeatureTypeList>.*)$', re.S)
 
 def filter_layers(content, allowed_layers):
+    print("Wewerwerwe")
+    print("Wewerwerwe")
+    print("Wewerwerwe")
+    print("Wewerwerwe")
+    print("Wewerwerwe")
     if isinstance(content, bytes):
         content = content.decode()
-
     def _el(root, tag_name, get_all=False):
         items = [
                 el for el in root
