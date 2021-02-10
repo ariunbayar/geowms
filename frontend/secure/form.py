@@ -10,7 +10,7 @@ class RegisterForm(UserCreationForm):
 
 
 class LoginForm(forms.ModelForm):
-    email = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Е-Мэйл хаяг'}), label='Е-Мэйл хаяг')
+    email = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'И-Мэйл хаяг'}), label='И-Мэйл хаяг')
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Нууц үг'}), label='Нууц үг')
     # password = forms.CharField(max_length=32, label='Нууц үг')
     class Meta:

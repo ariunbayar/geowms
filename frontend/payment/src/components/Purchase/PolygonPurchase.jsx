@@ -10,6 +10,7 @@ export class PolygonPurchase extends Component {
     constructor(props) {
         super(props)
 
+        this.too = 0
         this.state = {
             payment_id: this.props.match.params.id,
             items: {},
@@ -32,7 +33,7 @@ export class PolygonPurchase extends Component {
 
     componentDidMount(){
         const id = this.state.payment_id
-        service.getDetails(id).then(({success, items, polygon, layers}) => {
+        service.getDetails(id).then(({success, items, polygon, layers, info}) => {
             if(success){
               items.map(( items ) =>
                   this.setState({items})
@@ -40,7 +41,7 @@ export class PolygonPurchase extends Component {
               this.setState({ polygon, layers })
             }
             else {
-                this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
+                this.addNotif('warning', info, 'exclamation')
             }
         }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
     }
@@ -184,7 +185,13 @@ export class PolygonPurchase extends Component {
             <div className={this.state.qpay_modal_is ? 'show d-block modal fade bd-example-modal-lg' : 'd-none' } tabIndex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
-                        <QPay purchase_id={purchase_id} qpay_open={this.state.qpay_modal_is} handleClose={this.qPayClose} history={this.props.history.push} price={items.total} ></QPay>
+                        <QPay
+                            purchase_id={purchase_id}
+                            qpay_open={this.state.qpay_modal_is}
+                            handleClose={this.qPayClose}
+                            history={this.props.history.push}
+                            addNotif={this.addNotif}
+                        />
                         <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
                         </button>

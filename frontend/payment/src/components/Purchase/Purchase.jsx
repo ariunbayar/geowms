@@ -3,12 +3,14 @@ import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
 import ModalAlert from '@utils/Modal/ModalAlert'
 import Modal from '@utils/Modal/Modal'
+import {Notif} from '@utils/Notification'
 
 export class Purchase extends Component {
 
     constructor(props) {
         super(props)
 
+        this.too = 0
         this.state = {
             purchase: props.purchase,
             price: 3000,
@@ -27,6 +29,7 @@ export class Purchase extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
+        this.addNotif = this.addNotif.bind(this)
     }
 
     componentDidMount(){
@@ -48,6 +51,16 @@ export class Purchase extends Component {
                     this.addNotif('danger', 'Мэдээлэл олдсонгүй', 'times')
                 }
             }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
+    }
+
+    addNotif(style, msg, icon){
+        this.too ++
+        this.setState({ show: true, style: style, msg: msg, icon: icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 2000);
     }
 
     handlePayment (){
@@ -87,8 +100,8 @@ export class Purchase extends Component {
         this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
     }
 
-    qPayClose(){
-        this.setState({ qpay_modal_is: false, is_modal_info_open: true })
+    qPayClose(is_success){
+        this.setState({ qpay_modal_is: false, is_modal_info_open: is_success })
     }
 
     alertOver(){
@@ -101,7 +114,7 @@ export class Purchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { purchase, purchase_all, point_data, names, error_msg, qpay_modal_is, alert_msg, is_modal_info_open, is_modal_open } = this.state
+        const { purchase_all, point_data, qpay_modal_is, alert_msg, is_modal_info_open, is_modal_open } = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -124,7 +137,7 @@ export class Purchase extends Component {
                                 point_data.map((value, key) =>
                                     <tr key={key} className="text-center">
                                         <td>
-                                            {value.name}
+                                            {value.point_name}
                                         </td>
                                         <td>
                                             {value.amount + '₮'}
@@ -176,7 +189,13 @@ export class Purchase extends Component {
             <div className={qpay_modal_is ? 'show d-block modal fade bd-example-modal-lg' : 'd-none' } tabIndex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-lg">
                     <div className="modal-content">
-                        <QPay purchase_id={purchase_id} qpay_open={this.state.qpay_modal_is} handleClose={this.qPayClose} history={this.props.history.push} price={purchase_all.total_amount}></QPay>
+                        <QPay
+                            purchase_id={purchase_id}
+                            qpay_open={this.state.qpay_modal_is}
+                            handleClose={this.qPayClose}
+                            history={this.props.history.push}
+                            addNotif={this.addNotif}
+                        />
                         <button type="button" data-toggle="modal" className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleQpay()}>
                             <a className="text-succes ">Гарах</a>
                         </button>
@@ -194,6 +213,7 @@ export class Purchase extends Component {
                     actionNameDelete="зөвшөөрөх"
                 />
             }
+            <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
         </div>
         )
     }

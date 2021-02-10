@@ -31,7 +31,7 @@ export class QPay extends Component {
         {
             if(this.props.qpay_open)
             {
-                this.setState({minutes:5, seconds:0, qPay_QRimage: ''})
+                this.setState({minutes: 5, seconds:0, qPay_QRimage: ''})
                 this.HandleCreateQpay()
             }
             else{
@@ -42,24 +42,30 @@ export class QPay extends Component {
 
     HandleCreateQpay(){
         const { purchase_id } = this.state
-        const { price } = this.props
-        service.handleCreateQpay(price, purchase_id).then(({qPay_QRimage, success, msg}) => {
-            if(success)
-            {
-                this.props.history(`/payment/history/api/details/${purchase_id}/`)
-            }
-            else
-            {
-                if(msg){
-                    this.setState({msg})
+        service
+            .handleCreateQpay(purchase_id)
+            .then(({ qPay_QRimage, success, error, error_message }) => {
+                if(success)
+                {
+                    this.props.history(`/payment/history/api/details/${purchase_id}/`)
                 }
-                if(qPay_QRimage){
-                    this.setState({qPay_QRimage})
-                    this.timerRemaining()
-                    this.payCheck(this.props.qpay_open)
+                else
+                {
+                    if(error_message){
+                        this.props.addNotif('danger', error_message, 'times')
+                    }
+
+                    if(qPay_QRimage){
+                        this.setState({ qPay_QRimage })
+                        this.timerRemaining()
+                        this.payCheck(this.props.qpay_open)
+                    }
+
                 }
-            }
-        })
+                if (error) {
+                    this.props.addNotif('danger', error_message, 'times')
+                }
+            })
 
     }
 
@@ -72,12 +78,12 @@ export class QPay extends Component {
                     this.props.handleClose(true)
                 }
                 else{
-
                     setTimeout(() => {
                         this.payCheck(this.props.qpay_open)
                     }, 5000)
                 }
             })
+            .catch(() => this.props.addNotif('danger', 'Алдаа гарсан байна', 'times'))
         }
     }
 
@@ -91,12 +97,12 @@ export class QPay extends Component {
             }
             if (seconds === 0) {
                 if (minutes === 0) {
-                    this.setState({ msg: 'Хугацаа дууссан'})
                     setTimeout(() => {
                         this.props.handleClose(false)
                     }, 2000);
                     clearInterval(this.myInterval)
-                } else {
+                }
+                else {
                     this.setState(({ minutes }) => ({
                         minutes: minutes - 1,
                         seconds: 59
@@ -107,40 +113,32 @@ export class QPay extends Component {
     }
 
     render() {
-        const { msg, minutes, seconds, qPay_QRimage } = this.state
+        const { minutes, seconds, qPay_QRimage } = this.state
         return (
             <div className="container text-center">
                 <div>
                     {qPay_QRimage != []
                         ?
                         ( minutes === 0 && seconds === 0
-                            ? <h1>Дууссан!</h1>
+                            ? <h1 className="text-warning">Хугацаа дууссан!</h1>
                             : <h1>Хугацаа: {minutes}:{seconds < 10 ? `0${seconds}` : seconds}</h1>
                         )
                         :
                         null
                     }
                 </div>
-                {
-                    msg != ''
-                    ?
-                        <div className="alert alert-danger position-absolute" role="alert">{msg}</div>
-                    :
-                    null
-                }
                 <h1 className="text-succes gp-text-primary"></h1>
                 <h1 className="text-succes gp-text-primary">QR Code уншуулна уу.</h1><br></br>
                 {
-                    msg == '' ?
-                    (qPay_QRimage != [] ?
-                        <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  qPay_QRimage} />:
+                    qPay_QRimage != []
+                    ?
+                        <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  qPay_QRimage} />
+                    :
                         <div className="my-5">
                             <div className="spinner-border gp-text-primary my-5" role="status">
                                 <i className="fas fa-cog fa-spin"></i>
                             </div>
                         </div>
-                    ):
-                    <h6 className="text-success">{msg}</h6>
                 }
             </div>
         )

@@ -134,7 +134,7 @@ urlpatterns = [
     ], 'error500'))),
 
     path('payment/', include(([
-        path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
+        path('purchase-all/', payment_views.purchase_all, name='purchase-all'),
         path('payment-list/', payment_views.paymentList, name='paymentList'),
         path('purchase-awah/', payment_views.purchase, name='purchase'),
     ], 'payment'))),
