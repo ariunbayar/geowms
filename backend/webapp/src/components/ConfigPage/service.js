@@ -122,6 +122,23 @@ const dan = {
 
 }
 
+const payment = {
+
+    get: function() {
+        const requestOptions = getGetOptions()
+        return fetch('/back/api/config/payment/', requestOptions).then(handleResponse)
+    },
+
+    save: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify(values),
+        }
+        return fetch('/back/api/config/payment/save/', opts).then(handleResponse)
+    },
+
+}
+
 export const service = {
     config: {
         geoserver: geoserver,
@@ -129,7 +146,8 @@ export const service = {
         system: system,
         email: email,
         qgis: qgis,
-        dan: dan
+        dan: dan,
+        payment: payment
     },
     getDisk,
     getPostgeVersion,

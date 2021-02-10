@@ -127,6 +127,8 @@ urlpatterns = [
         path('qgis/save/', config_views.qgis_configs_save),
         path('dan/', config_views.dan_configs),
         path('dan/save/', config_views.dan_configs_save),
+        path('payment/', config_views.payment_configs),
+        path('payment/save/', config_views.payment_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([

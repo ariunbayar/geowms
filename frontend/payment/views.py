@@ -1157,11 +1157,11 @@ def _calc_per_price(area, area_type, all_len_property, len_object_in_layer, sele
     amount = None
     price = None
     if area_type == 'km':
-        amount = Payment.POLYGON_PER_KM_AMOUNT
+        amount = float(utils.get_config('POLYGON_PER_KM_AMOUNT'))
     if area_type == 'm':
-        amount = Payment.POLYGON_PER_M_AMOUNT
+        amount = float(utils.get_config('POLYGON_PER_M_AMOUNT'))
     if selected_type == 'shp' or selected_type == 'pdf':
-        price = ((area * amount) + (all_len_property * Payment.PROPERTY_PER_AMOUNT)) * len_object_in_layer
+        price = ((area * amount) + (all_len_property * float(utils.get_config('PROPERTY_PER_AMOUNT')))) * len_object_in_layer
     if selected_type == 'png' or selected_type == 'jpeg' or selected_type == 'tiff':
         price = (area * amount) * len_object_in_layer
     return price
