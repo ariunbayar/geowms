@@ -5,9 +5,9 @@ from geoportal_app.models import User
 
 class Payment(models.Model):
 
-    POLYGON_PER_KM_AMOUNT = 1000
-    POLYGON_PER_M_AMOUNT = 1
-    PROPERTY_PER_AMOUNT = 100
+    POLYGON_PER_KM_AMOUNT = ''
+    POLYGON_PER_M_AMOUNT = ''
+    PROPERTY_PER_AMOUNT = ''
 
     KIND_MONGOLBANK = 1
     KIND_QPAY = 2
