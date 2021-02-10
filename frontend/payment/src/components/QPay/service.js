@@ -5,10 +5,10 @@ export const service = {
     check
 }
 
-function handleCreateQpay(price, purchase_id) {
+function handleCreateQpay(purchase_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({price, purchase_id})
+        body: JSON.stringify({purchase_id})
     }
     return fetch('/qpay/create/', requestOptions).then(handleResponse)
 }
