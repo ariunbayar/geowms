@@ -10,6 +10,7 @@ import ConfigEmail from './ConfigEmail'
 import ConfigQgis from './ConfigQgis'
 import ConfigDan from './ConfigDan'
 import ConfigPayment from './ConfigPayment'
+import ConfigQpay from './ConfigQpay'
 
 
 export class ConfigPage extends Component {
@@ -35,6 +36,7 @@ export class ConfigPage extends Component {
                     </div>
                     <div className="col-lg-4">
                         <ConfigDan/>
+                        <ConfigQpay/>
                     </div>
                     <div className="col-lg-4">
                         <ConfigEmail/>

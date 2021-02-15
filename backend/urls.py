@@ -129,6 +129,8 @@ urlpatterns = [
         path('dan/save/', config_views.dan_configs_save),
         path('payment/', config_views.payment_configs),
         path('payment/save/', config_views.payment_configs_save),
+        path('qpay/', config_views.payment_configs),
+        path('qpay/save/', config_views.payment_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([

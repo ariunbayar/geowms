@@ -51,14 +51,14 @@ class Qpay():
                 **self.BASE_HEADERS,
                 'Authorization': 'Bearer %s' % self.access_token
         }
-        data = {
-                "id": "CUST_001",
-                "register_no": "ddf",
-                "name": "Central brnach",
-                "email": "info@info.mn",
-                "phone_number":"99888899",
-                "note" : "davaa"
-        }
+        # data = {
+        #         "id": "CUST_001",
+        #         "register_no": "ddf",
+        #         "name": "Central brnach",
+        #         "email": "info@info.mn",
+        #         "phone_number":"99888899",
+        #         "note" : "davaa"
+        # }
         body = {
             "template_id": settings.QPAY['TEMPLATE_ID'],
             "merchant_id": settings.QPAY['MERCHANT_ID'],

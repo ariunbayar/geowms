@@ -453,3 +453,52 @@ def payment_configs_save(request, payload):
         )
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def qpay_configs(request):
+
+    default_values = {
+        'id': '',
+        'register_no': '',
+        'name': '',
+        'email': '',
+        'phone_number': '',
+        'note': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def qpay_configs_save(request, payload):
+
+    config_names = (
+        'id',
+        'register_no',
+        'name',
+        'email',
+        'phone_number',
+        'note',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
