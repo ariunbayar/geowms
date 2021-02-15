@@ -340,6 +340,7 @@ export default class BundleMap extends Component {
         const closer = this.element_closer
         overlay.setPosition(undefined);
         closer.blur();
+        this.setVisibleMarket(false)
         // this.state.vector_layer.setSource(null)
     }
 
@@ -373,7 +374,7 @@ export default class BundleMap extends Component {
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-            this.setState({coordinate_clicked})
+            this.setState({ coordinate_clicked })
             this.showFeaturesAt(coordinate)
         }
     }
@@ -455,6 +456,7 @@ export default class BundleMap extends Component {
         })
         this.setState({ filtered_wms: undefined, filtered_layer: undefined })
         this.is_not_visible_layers = []
+        this.onClickCloser()
     }
 
     getKiloFromScale(scale) {
@@ -839,10 +841,6 @@ export default class BundleMap extends Component {
                     layer.setVisible(true)
                     this.setState({ filtered_layer: layer })
                 }
-                else {
-                    alert("Ямар нэгэн давхарга нээгээгүй байна")
-                    this.toggleSidebar(false)
-                }
             })
     }
 
@@ -873,6 +871,7 @@ export default class BundleMap extends Component {
     }
 
     toggleSidebar(is_not_open) {
+
         let is_setState = true
         if (is_not_open == this.state.is_sidebar_open) {
             is_setState = false
@@ -882,21 +881,28 @@ export default class BundleMap extends Component {
                 is_sidebar_open: !prevState.is_sidebar_open,
             }))
         }
+
+        var islaod
         if(this.state.is_sidebar_open){
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, true, this.addLayerToSearch)
-        }else{
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, false, this.addLayerToSearch)
+            islaod = true
         }
+
+        else {
+            islaod = false
+        }
+        this.controls.sidebar.showSideBar(this.state.map_wms_list, islaod, this.addLayerToSearch)
+
     }
 
     searchSidebar(event) {
         this.setState(prevState => ({
             is_search_sidebar_open: !prevState.is_search_sidebar_open,
         }))
+
         if(this.state.is_search_sidebar_open){
             this.controls.searchbar.showSideBar(null, true)
-            this.resetFilteredOnlyFeature()
-        }else{
+        }
+        else {
             this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature, this.setFeatureOnMap)
         }
     }
