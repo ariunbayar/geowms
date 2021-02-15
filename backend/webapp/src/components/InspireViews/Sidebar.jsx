@@ -18,7 +18,7 @@ export default class SideBar extends Component {
             title: '',
             model_type_icon: 'success',
             view_name: '',
-            style_state: 'update_style',
+            style_state: 'create_style',
             style_color: '#800000',
             style_size: 1,
             fill_color:  '#C0C0C0',
