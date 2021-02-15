@@ -178,11 +178,11 @@ export default class SideBar extends Component {
             this.setState({style_names:this.props.style_names})
         }
 
-        if(pP.url!== this.props.url){
+        if(pP.url !== this.props.url){
             this.setState({url:this.props.url})
         }
 
-        if(pP.view_style_name!== this.props.view_style_name){
+        if(pP.view_style_name !== this.props.view_style_name){
             this.setState({style_name:this.props.view_style_name})
         }
 
@@ -190,23 +190,22 @@ export default class SideBar extends Component {
             this.setState({geom_type:this.props.geom_type})
         }
 
-        if(pP.defualt_url!== this.props.defualt_url){
+        if(pP.defualt_url !== this.props.defualt_url){
             this.setState({defualt_url:this.props.defualt_url})
         }
 
-        if(pP.property_loading!== this.props.property_loading){
+        if(pP.property_loading !== this.props.property_loading){
             this.setState({is_loading:this.props.property_loading})
         }
 
-        if(pP.fid!== this.props.fid){
+        if(pP.fid !== this.props.fid){
             this.setState({ tile_cache_check: false})
         }
 
-        if(pP.cache_values!== this.props.cache_values){
+        if(pP.cache_values !== this.props.cache_values){
             if (this.props.cache_values){
                 if (this.props.cache_values.length>0) {
                     const cache_values = this.props.cache_values[0]
-                    console.log(cache_values)
                     this.setState({
                         zoom_stop: cache_values.zoom_stop,
                         zoom_start: cache_values.zoom_start,
@@ -267,14 +266,17 @@ export default class SideBar extends Component {
                                                 <input type="checkbox" checked={tile_cache_check} onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
                                             </div>
                                         </div>
-                                     {tile_cache_check &&
+                                     {
+                                        tile_cache_check
+                                        &&
                                         <div className="form-row col-md-12">
                                             <div className="form-group col-md-4">
                                                 <label htmlFor="" className="m-2">Зургийн формат</label>
-                                                <select className="form-control form-control-sm"
+                                                <select
+                                                    className="form-control form-control-sm"
                                                     value={image_format}
                                                     onChange={(e) => this.setState({ image_format: e.target.value })}
-                                                    >
+                                                >
                                                     <option value="jpeg">jpeg</option>
                                                     <option value="png">png</option>
                                                 </select>
@@ -288,10 +290,13 @@ export default class SideBar extends Component {
                                                         value= {zoom_start}
                                                         onChange={(e) => this.handleOnChange(e)}
                                                     />
-                                                    {zoom_start > 21 ?
-                                                    <label className="text-danger">
-                                                        Томруулах эхний утга нь хамгийн ихдээ 21 байна
-                                                    </label> : ''}
+                                                    {
+                                                        zoom_start > 21
+                                                        &&
+                                                        <label className="text-danger">
+                                                            Томруулах эхний утга нь хамгийн ихдээ 21 байна
+                                                        </label>
+                                                    }
                                             </div>
                                             <div className="form-group col-md-4">
                                                 <label htmlFor="" className="m-2">Томруулах сүүлчийн утга</label>
@@ -302,10 +307,13 @@ export default class SideBar extends Component {
                                                     value= {zoom_stop}
                                                     onChange={(e) => this.handleOnChange(e)}
                                                 />
-                                                {zoom_stop > 21 ?
-                                                <label className="text-danger">
-                                                    Томруулах сүүлчийн утга нь хамгийн ихдээ 21 байна
-                                                </label> : ''}
+                                                {
+                                                    zoom_stop > 21
+                                                    &&
+                                                    <label className="text-danger">
+                                                        Томруулах сүүлчийн утга нь хамгийн ихдээ 21 байна
+                                                    </label>
+                                                }
                                             </div>
                                             <div className="form-group col-md-4">
                                             <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
@@ -328,10 +336,13 @@ export default class SideBar extends Component {
                                                     value= {number_of_cache}
                                                     onChange={(e) => this.handleOnChange(e)}
                                                 />
-                                                 {number_of_cache > 100 ?
-                                                <label className="text-danger">
-                                                   Хэрэглэх таскын тоо хамгийн ихдээ 100 байна
-                                                </label> : ''}
+                                                 {
+                                                    number_of_cache > 100
+                                                    &&
+                                                    <label className="text-danger">
+                                                    Хэрэглэх таскын тоо хамгийн ихдээ 100 байна
+                                                    </label>
+                                                }
                                             </div>
                                         </div>}
                                 </div>
@@ -365,10 +376,13 @@ export default class SideBar extends Component {
                                                         value= {style_name}
                                                         onChange={(e) => this.handleOnChange(e)}
                                                     />
-                                                    {this.state.check_style_name ?
-                                                    <label className="text-danger">
-                                                        {this.state.check_style_name}
-                                                    </label> : ''}
+                                                    {
+                                                        this.state.check_style_name
+                                                        &&
+                                                        <label className="text-danger">
+                                                            {this.state.check_style_name}
+                                                        </label>
+                                                    }
                                                 </div>
                                                 <div className="form-group col-md-4">
                                                     <label htmlFor="color" className="m-2">Style-ийн гарчиг</label>
@@ -391,7 +405,7 @@ export default class SideBar extends Component {
                                                     />
                                                 </div>
                                             {
-                                                geom_type=='Point' || geom_type == 'Polygon' || geom_type == 'MultiPoint'?
+                                                geom_type == 'Point' || geom_type == 'Polygon' || geom_type == 'MultiPoint'?
                                                     <div className="form-row col-md-12">
                                                         <div className="form-group col-md-4">
                                                             <label htmlFor="color" className="m-2">Дүрсийн дүүргэлтийн өнгө</label>
@@ -434,7 +448,7 @@ export default class SideBar extends Component {
                                                             onChange={(e) => this.handleOnChange(e)}
                                                         />
                                                     </div>
-                                                    {geom_type=='Point' ?
+                                                    {geom_type == 'Point' ?
                                                     <div className='form-group col-md-4'>
                                                         <label htmlFor="state">Дүрсний сонголт</label>
                                                             <select className="form-control form-control-sm"
@@ -485,11 +499,11 @@ export default class SideBar extends Component {
                                                     <div className="form-group col-md-4">
                                                         <label htmlFor="color" className="m-2">Зураасын урт</label>
                                                             <input
-                                                            type="number"
-                                                            name='dashed_line_length'
-                                                            className="form-control col-4"
-                                                            value= {dashed_line_length}
-                                                            onChange={(e) => this.handleOnChange(e)}
+                                                                type="number"
+                                                                name='dashed_line_length'
+                                                                className="form-control col-4"
+                                                                value= {dashed_line_length}
+                                                                onChange={(e) => this.handleOnChange(e)}
                                                             />
                                                     </div>
                                                     <div className="form-group col-md-4">
@@ -510,13 +524,15 @@ export default class SideBar extends Component {
 
                                         <div className="form-group col-md-6">
                                             <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
-                                            <select className="form-control form-control-sm"
+                                            <select
+                                                className="form-control form-control-sm"
                                                 value={style_name ? style_name : ''}
                                                 onChange={(e) => this.setState({ style_name: e.target.value })}
-                                                >
+                                            >
                                                 <option value={style_name}>{style_name ? style_name : ''}</option>
-                                                {style_names.map((name, idx) =>
-                                                <option value={name} key={idx}>{name}</option>
+                                                {
+                                                    style_names.map((name, idx) =>
+                                                        <option value={name} key={idx}>{name}</option>
                                                 )}
                                             </select>
                                         </div>

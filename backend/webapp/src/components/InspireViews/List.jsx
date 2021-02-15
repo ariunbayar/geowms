@@ -195,6 +195,7 @@ export class List extends Component {
                             </div>
                         </div>
                     </div>
+                    <Loader is_loading={is_loading}/>
                 </div>
                 <SideBar
                     getAll={this.getAll}
@@ -212,7 +213,6 @@ export class List extends Component {
                     property_loading={property_loading}
                     cache_values={cache_values}
                 />
-                <Loader is_loading={is_loading}/>
             </div>
         )
     }

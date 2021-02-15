@@ -31,7 +31,7 @@ def get_connection_conf():
 
 def getCacheHeader():
 
-    conf_geoserver =get_connection_conf()
+    conf_geoserver = get_connection_conf()
 
     AUTH = requests.auth.HTTPBasicAuth(
         conf_geoserver['geoserver_user'],
@@ -48,7 +48,7 @@ def getCacheHeader():
 
 def getHeader():
 
-    conf_geoserver =get_connection_conf()
+    conf_geoserver = get_connection_conf()
 
     AUTH = requests.auth.HTTPBasicAuth(
         conf_geoserver['geoserver_user'],

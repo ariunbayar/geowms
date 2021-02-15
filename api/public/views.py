@@ -36,10 +36,11 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
 
     queryargs = request.GET
     headers = {**BASE_HEADERS}
+    requests_url = wms.url
     if url_type == 'wmts':
-        rsp = requests.get(wms.cache_url, queryargs, headers=headers, timeout=5)
-    else:
-        rsp = requests.get(wms.url, queryargs, headers=headers, timeout=5)
+        requests_url = wms.cache_url
+
+    rsp = requests.get(requests_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
@@ -53,10 +54,7 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
         content = filter_layers(content, allowed_layers)
 
         service_url = _get_service_url(request, bundle, wms)
-        if url_type == 'wmts':
-            content = replace_src_url(content, wms.cache_url, service_url)
-        else:
-            content = replace_src_url(content, wms.url, service_url)
+        content = replace_src_url(content, requests_url, service_url)
 
     content_type = rsp.headers.get('content-type')
 
