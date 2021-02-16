@@ -1,4 +1,4 @@
-from django.db import models
+from django.contrib.gis.db import models
 from django.conf import settings
 
 
@@ -21,6 +21,7 @@ class Employee(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_admin = models.BooleanField(default=False)
+    phone_number = models.CharField(max_length=8, null=True)
     token = models.CharField(max_length=250, unique=True, null=True)
 
 
@@ -38,3 +39,12 @@ class OrgRole(models.Model):
     perm_approve = models.BooleanField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class EmployeeAddress(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    level_1 = models.CharField(max_length=250, null=True)
+    level_2 = models.CharField(max_length=250, null=True)
+    level_3 = models.CharField(max_length=250, null=True)
+    description = models.CharField(max_length=1000, null=True)
+    point = models.PointField(srid=4326)

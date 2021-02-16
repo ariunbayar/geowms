@@ -60,7 +60,7 @@ function employeeDetail(pk) {
 function employeeAdd(org_level, org_id, payload) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ payload }),
     }
 
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-add/`, opts).then(handleResponse)
@@ -76,7 +76,7 @@ function employeeRemove(pk) {
 function employeeUpdate(pk, level, paylaod) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(paylaod),
+        body: JSON.stringify({ paylaod }),
     }
 
     return fetch(`${prefix}/level-${level}/employee-update-${pk}/`, opts).then(handleResponse)

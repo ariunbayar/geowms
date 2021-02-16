@@ -24,7 +24,7 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee
+from .models import Org, Employee, EmployeeAddress
 from govorg.backend.org_request.models import ChangeRequest
 
 from main.decorators import ajax_required
@@ -196,25 +196,45 @@ def employee_update(request, payload, pk, level):
     return JsonResponse({'success': True, 'errors': errors})
 
 
+def _get_point_for_db(coordinate):
+    from django.contrib.gis.geos import GEOSGeometry
+    if isinstance(coordinate, str):
+        coordinate = coordinate.split(",")
+
+    point = utils.get_geom_for_filter_from_coordinate(coordinate, 'Point')
+    return point
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_add(request, payload, level, pk):
+    payload = payload.get('payload')
 
     org = get_object_or_404(Org, pk=pk, level=level)
 
-    username = payload.get('username')
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    gender = payload.get('gender')
-    register = payload.get('register')
-    is_admin = payload.get('is_admin')
-    is_super = payload.get('is_super')
+    values = payload.get('values')
+    username = values.get('username')
+    position = values.get('position')
+    first_name = values.get('first_name')
+    last_name = values.get('last_name')
+    email = values.get('email')
+    gender = values.get('gender')
+    register = values.get('register')
+    is_admin = values.get('is_admin')
+    is_super = values.get('is_super')
+    phone_number = values.get('phone_number')
+
+    address = payload.get('address')
+    description = address.get('description')
+    level_1 = address.get('level_1')
+    level_2 = address.get('level_2')
+    level_3 = address.get('level_3')
+    point_coordinate = address.get('point_coordinate')
+    point = _get_point_for_db(point_coordinate)
 
     errors = {}
-    errors = _employee_validation(payload, None)
+    errors = _employee_validation(values, None)
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
@@ -239,7 +259,17 @@ def employee_add(request, payload, level, pk):
         employee.user_id = user.id
         employee.is_admin = is_admin
         employee.token = TokenGeneratorEmployee().get()
+        employee.phone_number = phone_number
         employee.save()
+
+        employee_address = EmployeeAddress()
+        employee_address.employee = employee
+        employee_address.level_1 = level_1
+        employee_address.level_2 = level_2
+        employee_address.level_3 = level_3
+        employee_address.description = description
+        employee_address.point = point
+        employee_address.save()
 
         utils.send_approve_email(user)
 

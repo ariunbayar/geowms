@@ -116,8 +116,8 @@ export default class EmployeeMap extends Component {
               new TileLayer({
                 source: new OSM(),
               }),
-              marker_layer,
               vector_layer,
+              marker_layer,
           ],
           target: 'map',
           view: new View({
@@ -137,6 +137,8 @@ export default class EmployeeMap extends Component {
         const projection = event.map.getView().getProjection()
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_data)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
+
+        this.props.sendPoint(coordinate_clicked)
 
         this.setState({ coordinate_clicked })
     }

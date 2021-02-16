@@ -762,6 +762,7 @@ def get_geoJson(data):
         point = MultiPolygon(coordinates)
         return Feature(geometry=point)
 
+
 def datetime_to_string(date):
     return date.strftime('%Y-%m-%d') if date else ''
 
@@ -880,7 +881,7 @@ def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
 def get_geom_for_filter_from_coordinate(coordinate, geom_type, srid=4326):
     module = importlib.import_module('django.contrib.gis.geos')
     class_ = getattr(module, geom_type)
-    geom = class_([float(coordinate[0]), float(coordinate[1])], srid=srid)
+    geom = class_([float(coord) for coord in coordinate], srid=srid)
     return geom
 
 

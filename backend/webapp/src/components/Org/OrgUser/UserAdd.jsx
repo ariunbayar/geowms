@@ -6,6 +6,7 @@ import ModalAlert from "../../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 import EmployeeMap from "./Employee_map/Map"
+import { add } from "ol/coordinate"
 
 
 export class UserAdd extends Component {
@@ -26,6 +27,7 @@ export class UserAdd extends Component {
                 is_admin: false,
                 is_super: false,
                 re_password_mail: false,
+                phone_number: '',
             },
             aimag: [],
             sum: [],
@@ -36,9 +38,13 @@ export class UserAdd extends Component {
             aimag_name: '',
             sum_name: '',
             horoo_name: '',
+            aimag_geo_id: '',
+            sum_geo_id: '',
+            horoo_geo_id: '',
             feature: {},
             modal_alert_status: "closed",
-            text_area_value: '',
+            description: '',
+            point_coordinate: []
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -48,6 +54,7 @@ export class UserAdd extends Component {
         this.getFeildValues = this.getFeildValues.bind(this)
         this.handleChange = this.handleChange.bind(this)
         this.makeTextAreaValue = this.makeTextAreaValue.bind(this)
+        this.getPoint = this.getPoint.bind(this)
     }
 
     componentDidMount() {
@@ -59,20 +66,24 @@ export class UserAdd extends Component {
     }
 
     handleGetAll(org_emp){
-        service.employeeDetail(org_emp).then(({ success, employee }) => {
+        service.employeeDetail(org_emp).then(({ success, employee, description }) => {
             if (success) {
-                this.setState({form_values: {
-                    id: employee.id,
-                    username: employee.username,
-                    first_name: employee.first_name,
-                    last_name: employee.last_name,
-                    email: employee.email,
-                    gender: employee.gender,
-                    register:employee.register,
-                    position: employee.position,
-                    is_admin: employee.is_admin,
-                    is_super:employee.is_super
-                }})
+                this.setState({
+                    form_values: {
+                        id: employee.id,
+                        username: employee.username,
+                        first_name: employee.first_name,
+                        last_name: employee.last_name,
+                        email: employee.email,
+                        gender: employee.gender,
+                        register:employee.register,
+                        position: employee.position,
+                        is_admin: employee.is_admin,
+                        is_super: employee.is_super,
+                        phone_number: employee.phone_number,
+                    },
+                    description,
+                })
             }
         })
     }
@@ -82,40 +93,65 @@ export class UserAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
+
+        const { description, aimag_geo_id, sum_geo_id, horoo_geo_id, point_coordinate } = this.state
+        const address = {
+            'description': description,
+            'level_1': aimag_geo_id,
+            'level_2': sum_geo_id,
+            'level_3': horoo_geo_id,
+            'point_coordinate': point_coordinate,
+        }
+
+        const payload = {
+            'values': values,
+            'address': address,
+        }
+
         if(org_emp){
             if(values.re_password !== values.password)
             {
                 setErrors({'re_password': 'Нууц үг адил биш байна.'})
                 setSubmitting(false)
             }
-            else{
-                service.employeeUpdate(org_emp, org_level, values).then(({ success, errors }) => {
-                    if (success) {
-                        this.setState({modal_alert_status: "open"})
-                        setStatus('saved')
+            else {
+                service
+                    .employeeUpdate(org_emp, org_level, payload)
+                    .then(({ success, errors }) => {
+                        if (success) {
+                            this.setState({modal_alert_status: "open"})
+                            setStatus('saved')
+                            this.modalCloseTime()
+                        } else {
+                            setErrors(errors)
+                        }
                         setSubmitting(false)
-                        this.modalCloseTime()
-                    } else {
-                        setErrors(errors)
+                    })
+                    .catch((error) => {
+                        alert("Алдаа гарсан байна")
                         setSubmitting(false)
-                    }
-                })
+                    })
             }
 
         }
         else{
-            service.employeeAdd(org_level, org_id, values).then(({ success, errors, employee }) => {
-                if (success) {
-                    this.setState({modal_alert_status: "open"})
-                    setStatus('saved')
+            service
+                .employeeAdd(org_level, org_id, payload)
+                .then(({ success, errors, employee }) => {
+                    if (success) {
+                        this.setState({modal_alert_status: "open"})
+                        setStatus('saved')
+                        this.modalCloseTime(employee.user_id)
+                    }
+                    else{
+                        setErrors(errors)
+                    }
                     setSubmitting(false)
-                    this.modalCloseTime(employee.user_id)
-                }
-                else{
-                    setErrors(errors)
+                })
+                .catch((error) => {
+                    alert("Алдаа гарсан байна")
                     setSubmitting(false)
-                }
-            })
+                })
         }
     }
 
@@ -151,8 +187,13 @@ export class UserAdd extends Component {
             })
     }
 
+    getPoint(point_coordinate) {
+        this.setState({ point_coordinate })
+    }
+
     handleChange(e, field, child_field, reset_fields, parent_field) {
         const field_id = field + '_id'
+        const field_geo_id = field + '_geo_id'
         const idx = e.target.value
         let obj = Object()
         let geo_id
@@ -166,16 +207,21 @@ export class UserAdd extends Component {
             geo_id = value.geo_id
             reset_fields.map((r_field, idx) => {
                 const r_field_id = r_field + '_id'
+                const r_field_geo_id = r_field + '_geo_id'
                 obj[r_field_id] = -1
+                obj[r_field_geo_id] = ''
             })
+            obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
         }
         else {
             if (reset_fields.length > 0) {
                 reset_fields.map((r_field, idx) => {
                     const r_field_id = r_field + '_id'
+                    const r_field_geo_id = r_field + '_geo_id'
                     obj[r_field] = []
                     obj[r_field_id] = -1
+                    obj[r_field_geo_id] = ''
                     obj[r_field_id + '_name'] = ''
                 })
             }
@@ -188,10 +234,11 @@ export class UserAdd extends Component {
             else {
                 geo_id = 'au_496'
             }
+            obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
         }
-        const text_area_value = this.makeTextAreaValue()
-        this.setState({ [field_id]: idx, ...obj, text_area_value })
+        const description = this.makeTextAreaValue()
+        this.setState({ [field_id]: idx, ...obj, description })
     }
 
     makeTextAreaValue() {
@@ -226,7 +273,7 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, text_area_value } = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, description } = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
@@ -348,7 +395,7 @@ export class UserAdd extends Component {
                                                     name='phone_number'
                                                     id="id_phone_number"
                                                     type="text"
-                                                    placeholder="Регистер"
+                                                    placeholder="Утасны дугаар"
                                                 />
                                                 <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                             </div>
@@ -454,18 +501,18 @@ export class UserAdd extends Component {
                                 )}
                             </select>
                         </div>
-                        <EmployeeMap height='75' feature={feature} />
+                        <EmployeeMap height='75' feature={feature} sendPoint={this.getPoint} />
 
                         <div className="form-group">
                             <textarea
                                 className="form-control"
                                 rows="3"
-                                value={text_area_value}
-                                onChange={(e) => this.setState({ text_area_value: e.target.value })}
+                                value={description}
+                                onChange={(e) => this.setState({ description: e.target.value })}
                             >
-
                             </textarea>
                         </div>
+
                     </div>
                 </div>
                 <ModalAlert
