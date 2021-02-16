@@ -19,6 +19,7 @@ from geoportal_app.models import User
 from govorg.backend.forms.models import TsegUstsan, Mpoint_view
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
+from main import utils
 
 
 @require_GET
@@ -368,3 +369,54 @@ def user_update_password(request, payload):
         return JsonResponse({'success': True, 'msg': 'Нууц үг амжилттай хадгалаа.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': 'Нууц үг солиход алдаа гарлаа.'})
+
+
+@require_GET
+@ajax_required
+@login_required
+def check_email(request):
+
+    user = request.user
+
+    if user.email:
+        rsp = {
+            'success': True,
+            'info': 'Email хаяг байна.'
+        }
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Уучлаарай email хаяг хоосон байна.'
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def set_email(request, payload):
+
+    errors = dict()
+    email = payload.get('email')
+
+    if not utils.is_email(email):
+        errors['email'] = 'Email хаяг алдаатай байна.'
+    if User.objects.filter(email=email).first():
+        errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+    if errors:
+        rsp = {
+            'success': False,
+            'errors': errors
+        }
+        return JsonResponse(rsp)
+
+    user = request.user
+    user.email = email
+    user.save()
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай'
+    }
+
+    return JsonResponse(rsp)

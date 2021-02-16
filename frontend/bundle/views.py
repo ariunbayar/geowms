@@ -94,6 +94,7 @@ def wms_layers(request, pk):
                 'url': request.build_absolute_uri(url),
                 'chache_url': request.build_absolute_uri(chache_url),
                 'layers': [_layer_to_display(layer) for layer in layers],
+                'wms_or_cache_ur': True if wms.cache_url else False
             }
             wms_list.append(wms_data)
 
