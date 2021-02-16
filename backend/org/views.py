@@ -83,10 +83,12 @@ def employee_detail(request, pk):
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
         'phone_number': employee.phone_number,
-        'description': address.description,
         'level_1': address.level_1,
         'level_2': address.level_2,
         'level_3': address.level_3,
+        'street': address.street,
+        'apartment': address.apartment,
+        'door_number': address.door_number,
         'point': address.point.json,
     }
 
@@ -186,10 +188,12 @@ def employee_update(request, payload, pk, level):
     re_password_mail = values.get('re_password_mail')
 
     address = payload.get('address')
-    description = address.get('description')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
     level_3 = address.get('level_3')
+    street = address.get('street')
+    apartment = address.get('apartment')
+    door_number = address.get('door_number')
     point_coordinate = address.get('point_coordinate')
     point = _get_point_for_db(point_coordinate)
 
@@ -233,10 +237,12 @@ def employee_update(request, payload, pk, level):
         address = address.filter(employee=employee)
         address.update(
             point=point,
-            description=description,
             level_1=level_1,
             level_2=level_2,
             level_3=level_3,
+            street=street,
+            apartment=apartment,
+            door_number=door_number,
         )
 
     return JsonResponse({'success': True, 'errors': errors})
@@ -271,10 +277,12 @@ def employee_add(request, payload, level, pk):
     phone_number = values.get('phone_number')
 
     address = payload.get('address')
-    description = address.get('description')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
     level_3 = address.get('level_3')
+    street = address.get('street')
+    apartment = address.get('apartment')
+    door_number = address.get('door_number')
     point_coordinate = address.get('point_coordinate')
     point = _get_point_for_db(point_coordinate)
 
@@ -312,7 +320,9 @@ def employee_add(request, payload, level, pk):
         employee_address.level_1 = level_1
         employee_address.level_2 = level_2
         employee_address.level_3 = level_3
-        employee_address.description = description
+        employee_address.street = street
+        employee_address.apartment = apartment
+        employee_address.door_number = door_number
         employee_address.point = point
         employee_address.save()
 

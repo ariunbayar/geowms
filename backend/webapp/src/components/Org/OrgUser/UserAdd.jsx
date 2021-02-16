@@ -6,7 +6,6 @@ import ModalAlert from "../../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 import EmployeeMap from "./Employee_map/Map"
-import { add } from "ol/coordinate"
 
 
 export class UserAdd extends Component {
@@ -46,6 +45,9 @@ export class UserAdd extends Component {
             description: '',
             point_coordinate: [],
             point: {},
+            street: '',
+            apartment: '',
+            door_number: '',
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -54,7 +56,6 @@ export class UserAdd extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.getFeildValues = this.getFeildValues.bind(this)
         this.handleChange = this.handleChange.bind(this)
-        this.makeTextAreaValue = this.makeTextAreaValue.bind(this)
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
     }
@@ -70,28 +71,32 @@ export class UserAdd extends Component {
     }
 
     handleGetAll(org_emp){
-        service.employeeDetail(org_emp).then(({ success, employee }) => {
-            if (success) {
-                this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
-                this.setState({
-                    form_values: {
-                        id: employee.id,
-                        username: employee.username,
-                        first_name: employee.first_name,
-                        last_name: employee.last_name,
-                        email: employee.email,
-                        gender: employee.gender,
-                        register:employee.register,
-                        position: employee.position,
-                        is_admin: employee.is_admin,
-                        is_super: employee.is_super,
-                        phone_number: employee.phone_number,
-                    },
-                    description: employee.description,
-                    point: employee.point,
-                })
-            }
-        })
+        service
+            .employeeDetail(org_emp)
+            .then(({ success, employee }) => {
+                if (success) {
+                    this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
+                    this.setState({
+                        form_values: {
+                            id: employee.id,
+                            username: employee.username,
+                            first_name: employee.first_name,
+                            last_name: employee.last_name,
+                            email: employee.email,
+                            gender: employee.gender,
+                            register:employee.register,
+                            position: employee.position,
+                            is_admin: employee.is_admin,
+                            is_super: employee.is_super,
+                            phone_number: employee.phone_number,
+                        },
+                        point: employee.point,
+                        street: employee.street,
+                        apartment: employee.apartment,
+                        door_number: employee.door_number,
+                    })
+                }
+            })
     }
 
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
@@ -100,12 +105,14 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
 
-        const { description, aimag_geo_id, sum_geo_id, horoo_geo_id, point_coordinate } = this.state
+        const { street, apartment, door_number, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
         const address = {
-            'description': description,
-            'level_1': aimag_geo_id,
-            'level_2': sum_geo_id,
-            'level_3': horoo_geo_id,
+            'street': street,
+            'apartment': apartment,
+            'door_number': door_number,
+            'level_1': aimag_name,
+            'level_2': sum_name,
+            'level_3': horoo_name,
             'point_coordinate': point_coordinate,
         }
 
@@ -173,10 +180,10 @@ export class UserAdd extends Component {
         )
     }
 
-    getGeomFromJson(geo_id, array) {
+    getGeomFromJson(geom_name, array) {
         let index
         array.map((data, idx) => {
-            if (data.geo_id == geo_id) {
+            if (data.name == geom_name) {
                 index = idx
             }
         })
@@ -186,28 +193,32 @@ export class UserAdd extends Component {
     getFeildValues(level_1, level_2, level_3) {
         let obj = Object()
         let geo_id
+        let array
         service
             .formOptions('second')
             .then(({ success, secondOrders }) => {
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
-                        geo_id = level_1
-                        obj['aimag_geo_id'] = level_1
+                        geo_id = secondOrders[obj['aimag_id']].geo_id
+                        obj['aimag_geo_id'] = geo_id
+                        obj['aimag_name'] = level_1
+                        array = secondOrders[obj['aimag_id']].children
+                        obj['sum'] = array
                     }
                     if (level_2) {
-                        const array = secondOrders[obj['aimag_id']].children
                         obj['sum_id'] = this.getGeomFromJson(level_2, array)
-                        obj['sum'] = array
-                        geo_id = level_2
-                        obj['sum_geo_id'] = level_2
+                        geo_id = array[obj['sum_id']].geo_id
+                        obj['sum_geo_id'] = geo_id
+                        array = array[obj['sum_id']].children
+                        obj['horoo'] = array
+                        obj['sum_name'] = level_2
                     }
                     if (level_3) {
-                        const array = secondOrders[obj['aimag_id']].children[obj['sum_id']].children
                         obj['horoo_id'] = this.getGeomFromJson(level_3, array)
-                        obj['horoo'] = array
-                        geo_id = level_3
-                        obj['horoo_geo_id'] = level_3
+                        geo_id = array[obj['horoo_id']].geo_id
+                        obj['horoo_geo_id'] = geo_id
+                        obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
                     this.setState({ aimag: secondOrders, ...obj })
@@ -237,6 +248,7 @@ export class UserAdd extends Component {
     handleChange(e, field, child_field, reset_fields, parent_field) {
         const field_id = field + '_id'
         const field_geo_id = field + '_geo_id'
+        const field_name = field + '_name'
         const idx = e.target.value
         let obj = Object()
         let geo_id
@@ -246,16 +258,17 @@ export class UserAdd extends Component {
             if (child_field) {
                 obj[child_field] = value.children
             }
-            obj[field + '_name'] = value.name
             geo_id = value.geo_id
             reset_fields.map((r_field, idx) => {
                 const r_field_id = r_field + '_id'
                 const r_field_geo_id = r_field + '_geo_id'
+                const r_field_name = r_field + '_name'
                 obj[r_field_id] = -1
                 obj[r_field_geo_id] = ''
-                obj[r_field + '_name'] = ''
+                obj[r_field_name] = ''
             })
             obj[field_geo_id] = geo_id
+            obj[field_name] = value.name
             this.getGeom(geo_id)
         }
         else {
@@ -263,10 +276,11 @@ export class UserAdd extends Component {
                 reset_fields.map((r_field, idx) => {
                     const r_field_id = r_field + '_id'
                     const r_field_geo_id = r_field + '_geo_id'
+                    const r_field_name = r_field + '_name'
                     obj[r_field] = []
                     obj[r_field_id] = -1
                     obj[r_field_geo_id] = ''
-                    obj[r_field + '_name'] = ''
+                    obj[r_field_name] = ''
                 })
             }
             if (parent_field !== 'mongol') {
@@ -281,55 +295,11 @@ export class UserAdd extends Component {
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
         }
-        const description = this.makeTextAreaValue(obj)
-        this.setState({ [field_id]: idx, ...obj, description })
-    }
-
-    makeTextAreaValue(obj) {
-
-        let aimag_name = obj.aimag_name
-        let sum_name = obj.sum_name
-        let horoo_name = obj.horoo_name
-        if (sum_name) {
-            aimag_name = this.state.aimag_name
-            horoo_name = ''
-        }
-
-        if (horoo_name) {
-            aimag_name = this.state.aimag_name
-            sum_name = this.state.sum_name
-        }
-
-        let aimag_ext_name = ''
-        let sum_ext_name = ''
-        let horoo_ext_name = ''
-
-        if (aimag_name) {
-            aimag_ext_name = ' аймгын '
-        }
-        if (sum_name) {
-            sum_ext_name = ' сумын '
-        }
-        if (horoo_name) {
-            horoo_ext_name = ' баг, '
-        }
-
-        if (aimag_name == 'Улаанбаатар') {
-            aimag_ext_name = ' хотын '
-            if (sum_name) {
-                sum_ext_name = ' дүүргийн '
-            }
-            if (horoo_name) {
-                horoo_ext_name = ' хороо, '
-            }
-        }
-
-        const value = aimag_name + aimag_ext_name + sum_name + sum_ext_name + horoo_name + horoo_ext_name
-        return value
+        this.setState({ [field_id]: idx, ...obj })
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, description, point } = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point } = this.state
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -522,55 +492,81 @@ export class UserAdd extends Component {
                     </div>
                     <div className="col-md-8">
                         <div className="form-row p-1">
-                            <select
-                                className="form-control col-4"
-                                aria-label="Default select example"
-                                onChange={(e) => this.handleChange(e, 'aimag', 'sum', ['sum', 'horoo'], 'mongol')}
-                                value={aimag_id}
-                            >
-                                <option value='-1'>--- Аймаг/Хот сонгох ---</option>
-                                {aimag.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data.name}</option>
-                                )}
-                            </select>
-                            <select
-                                className="form-control col-4"
-                                aria-label="Default select example"
-                                onChange={(e) => this.handleChange(e, 'sum', 'horoo', ['horoo'], 'aimag')}
-                                value={sum_id}
-                            >
-                                <option value='-1'>--- Сум/Дүүрэг сонгох ---</option>
-                                {sum.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data.name}</option>
-                                )}
-                            </select>
-                            <select
-                                className="form-control col-4"
-                                aria-label="Default select example"
-                                onChange={(e) => this.handleChange(e, 'horoo', undefined, [], 'sum')}
-                                value={horoo_id}
-                            >
-                                <option value='-1'>--- Баг/Хороо сонгох ---</option>
-                                {horoo.map((data, idx) =>
-                                    <option key={idx} value={idx}>{data.name}</option>
-                                )}
-                            </select>
+                            <div className="form-group col-4">
+                                <label htmlFor="aimag">Аймаг/Хот:</label>
+                                <select
+                                    id="aimag"
+                                    className="form-control"
+                                    aria-label="Default select example"
+                                    onChange={(e) => this.handleChange(e, 'aimag', 'sum', ['sum', 'horoo'], 'mongol')}
+                                    value={aimag_id}
+                                >
+                                    <option value='-1'>--- Аймаг/Хот сонгох ---</option>
+                                    {aimag.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="sum">Сум/Дүүрэг:</label>
+                                <select
+                                    id="sum"
+                                    className="form-control"
+                                    onChange={(e) => this.handleChange(e, 'sum', 'horoo', ['horoo'], 'aimag')}
+                                    value={sum_id}
+                                >
+                                    <option value='-1'>--- Сум/Дүүрэг сонгох ---</option>
+                                    {sum.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="horoo">Хороо/Баг:</label>
+                                <select
+                                    id="horoo"
+                                    className="form-control"
+                                    onChange={(e) => this.handleChange(e, 'horoo', undefined, [], 'sum')}
+                                    value={horoo_id}
+                                >
+                                    <option value='-1'>--- Баг/Хороо сонгох ---</option>
+                                    {horoo.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="street">Гудамж:</label>
+                                <input
+                                    id="street"
+                                    className="form-control"
+                                    onChange={(e) => this.setState({ street: e.target.value })}
+                                    value={street}
+                                    placeholder="Гудамжны нэрийг оруулах"
+                                />
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="apartment">Байр:</label>
+                                <input
+                                    id="apartment"
+                                    className="form-control"
+                                    onChange={(e) => this.setState({ apartment: e.target.value })}
+                                    value={apartment}
+                                    placeholder="Байрны дугаарыг оруулах"
+                                />
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="door_number">Хаалганы дугаар:</label>
+                                <input
+                                    id="door_number"
+                                    className="form-control"
+                                    onChange={(e) => this.setState({ door_number: e.target.value })}
+                                    value={door_number}
+                                    placeholder="Хаалганы дугаарыг оруулах"
+                                />
+                            </div>
                         </div>
                         <EmployeeMap height='75' feature={feature} sendPointCoordinate={this.getPoint} point={point} />
-
-                        <div className="form-group">
-                            <label htmlFor='id_description'>Гэрийн хаягийн дэлгэрэнгүй:</label>
-                            <textarea
-                                className="form-control"
-                                id='id_description'
-                                rows="3"
-                                value={description}
-                                placeholder="Гэрийн хаягийн дэлгэрэнгүй мэдээлэл"
-                                onChange={(e) => this.setState({ description: e.target.value })}
-                            >
-                            </textarea>
-                        </div>
-
                     </div>
                 </div>
                 <ModalAlert

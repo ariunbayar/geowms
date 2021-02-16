@@ -96,7 +96,12 @@ export class Detail extends Component {
             created_at,
             updated_at,
             phone_number,
-            description,
+            level_1,
+            level_2,
+            level_3,
+            street,
+            apartment,
+            door_number,
         } = this.state.employee
 
         const {
@@ -183,9 +188,9 @@ export class Detail extends Component {
                             </dd>
                         </dl>
                         <dl className="row">
-                            <dt className="col-md-3">Гэрийн хаягийн дэлгэрэнгүй:</dt>
+                            <dt className="col-md-3">Гэрийн хаяг:</dt>
                             <dd className="col-md-9">
-                                { description }
+                                {  level_1 + ", " + level_2 + ", " + level_3 + ", " + street + " гудамж " + apartment + " байр, " + door_number + " тоот"}
                             </dd>
                         </dl>
                         { is_admin &&

@@ -43,8 +43,10 @@ class OrgRole(models.Model):
 
 class EmployeeAddress(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    level_1 = models.CharField(max_length=250, null=True)
-    level_2 = models.CharField(max_length=250, null=True)
-    level_3 = models.CharField(max_length=250, null=True)
-    description = models.CharField(max_length=1000, null=True)
+    level_1 = models.CharField(max_length=100, null=True)
+    level_2 = models.CharField(max_length=100, null=True)
+    level_3 = models.CharField(max_length=100, null=True)
+    street = models.CharField(max_length=100, null=True)
+    apartment = models.CharField(max_length=100, null=True)
+    door_number = models.CharField(max_length=100, null=True)
     point = models.PointField(srid=4326)
