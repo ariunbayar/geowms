@@ -210,6 +210,7 @@ export class UserAdd extends Component {
                 const r_field_geo_id = r_field + '_geo_id'
                 obj[r_field_id] = -1
                 obj[r_field_geo_id] = ''
+                obj[r_field + '_name'] = ''
             })
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
@@ -222,7 +223,7 @@ export class UserAdd extends Component {
                     obj[r_field] = []
                     obj[r_field_id] = -1
                     obj[r_field_geo_id] = ''
-                    obj[r_field_id + '_name'] = ''
+                    obj[r_field + '_name'] = ''
                 })
             }
             if (parent_field !== 'mongol') {
@@ -237,33 +238,45 @@ export class UserAdd extends Component {
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
         }
-        const description = this.makeTextAreaValue()
+        const description = this.makeTextAreaValue(obj)
         this.setState({ [field_id]: idx, ...obj, description })
     }
 
-    makeTextAreaValue() {
-        const { aimag_name, sum_name, horoo_name } = this.state
+    makeTextAreaValue(obj) {
+
+        let aimag_name = obj.aimag_name
+        let sum_name = obj.sum_name
+        let horoo_name = obj.horoo_name
+        if (sum_name) {
+            aimag_name = this.state.aimag_name
+            horoo_name = ''
+        }
+
+        if (horoo_name) {
+            aimag_name = this.state.aimag_name
+            sum_name = this.state.sum_name
+        }
 
         let aimag_ext_name = ''
         let sum_ext_name = ''
         let horoo_ext_name = ''
 
-        if (aimag_name !== '') {
+        if (aimag_name) {
             aimag_ext_name = ' аймгын '
         }
-        if (sum_name !== '') {
+        if (sum_name) {
             sum_ext_name = ' сумын '
         }
-        if (horoo_name !== '') {
+        if (horoo_name) {
             horoo_ext_name = ' баг, '
         }
 
         if (aimag_name == 'Улаанбаатар') {
             aimag_ext_name = ' хотын '
-            if (sum_name !== '') {
+            if (sum_name) {
                 sum_ext_name = ' дүүргийн '
             }
-            if (horoo_name !== '') {
+            if (horoo_name) {
                 horoo_ext_name = ' хороо, '
             }
         }

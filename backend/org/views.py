@@ -197,7 +197,6 @@ def employee_update(request, payload, pk, level):
 
 
 def _get_point_for_db(coordinate):
-    from django.contrib.gis.geos import GEOSGeometry
     if isinstance(coordinate, str):
         coordinate = coordinate.split(",")
 
