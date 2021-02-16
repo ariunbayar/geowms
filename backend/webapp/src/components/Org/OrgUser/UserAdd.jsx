@@ -336,15 +336,13 @@ export class UserAdd extends Component {
             <div className="ml-3">
                 <div className="row">
                     <div className="col-md-4">
-                        <div className="col-md-12">
-                            <NavLink
-                                to={ org_emp ? url_detail : url_list }
-                                className="btn gp-outline-primary m-1"
-                            >
-                                <i className="fa fa-angle-double-left"></i>
-                                {} Буцах
-                            </NavLink>
-                        </div>
+                        <NavLink
+                            to={ org_emp ? url_detail : url_list }
+                            className="btn gp-outline-primary my-1"
+                        >
+                            <i className="fa fa-angle-double-left"></i>
+                            {} Буцах
+                        </NavLink>
                         <Formik
                             enableReinitialize
                             initialValues={form_values}
