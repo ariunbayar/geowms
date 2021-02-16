@@ -517,10 +517,13 @@ export class UserAdd extends Component {
                         <EmployeeMap height='75' feature={feature} sendPoint={this.getPoint} />
 
                         <div className="form-group">
+                            <label htmlFor='id_description'>Гэрийн хаягийн дэлгэрэнгүй:</label>
                             <textarea
                                 className="form-control"
+                                id='id_description'
                                 rows="3"
                                 value={description}
+                                placeholder="Гэрийн хаягийн дэлгэрэнгүй мэдээлэл"
                                 onChange={(e) => this.setState({ description: e.target.value })}
                             >
                             </textarea>
