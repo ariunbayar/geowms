@@ -86,9 +86,13 @@ export default class EmployeeMap extends Component {
     }
 
     setMarker(point) {
-        const coordinate = JSON.parse(point).coordinates
-        const coordinates = this.fromLonLatToMapCoord([coordinate[1], coordinate[0]])
-        this.marker.point.setCoordinates(coordinates)
+        const point_obj = JSON.parse(point)
+        if (point_obj) {
+            const coordinates = point_obj.coordinates
+            const coordinate = this.fromLonLatToMapCoord(coordinates)
+            this.marker.point.setCoordinates(coordinate)
+            this.props.sendPointCoordinate([coordinates[1], coordinates[0]])
+        }
     }
 
     setFeatures(feature) {

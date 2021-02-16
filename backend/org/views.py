@@ -169,19 +169,32 @@ def _employee_validation(payload, user):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_update(request, payload, pk, level):
-    username = payload.get('username')
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    gender = payload.get('gender')
-    register = payload.get('register')
-    is_admin = payload.get('is_admin')
-    password = payload.get('password')
-    is_super = payload.get('is_super')
-    re_password_mail = payload.get('re_password_mail')
+    payload = payload.get("payload")
+
+    values = payload.get('values')
+    username = values.get('username')
+    position = values.get('position')
+    first_name = values.get('first_name')
+    last_name = values.get('last_name')
+    email = values.get('email')
+    gender = values.get('gender')
+    register = values.get('register')
+    is_admin = values.get('is_admin')
+    password = values.get('password')
+    is_super = values.get('is_super')
+    phone_number = values.get('phone_number')
+    re_password_mail = values.get('re_password_mail')
+
+    address = payload.get('address')
+    description = address.get('description')
+    level_1 = address.get('level_1')
+    level_2 = address.get('level_2')
+    level_3 = address.get('level_3')
+    point_coordinate = address.get('point_coordinate')
+    point = _get_point_for_db(point_coordinate)
+
     user = get_object_or_404(User, pk=pk)
-    errors = _employee_validation(payload, user)
+    errors = _employee_validation(values, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
@@ -190,21 +203,41 @@ def employee_update(request, payload, pk, level):
     else:
         is_super = False
 
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = email
-    user.gender = gender
-    user.register = register.upper()
-    user.username = username
-    user.is_superuser = is_super
-    if password:
-        user.set_password(password)
-    user.save()
-    if re_password_mail:
-        subject = 'Геопортал нууц үг солих'
-        text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-        utils.send_approve_email(user, subject, text)
-    Employee.objects.filter(user_id=pk).update(position=position, is_admin=is_admin)
+    with transaction.atomic():
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.gender = gender
+        user.register = register.upper()
+        user.username = username
+        user.is_superuser = is_super
+        if password:
+            user.set_password(password)
+        user.save()
+
+        if re_password_mail:
+            subject = 'Геопортал нууц үг солих'
+            text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+            utils.send_approve_email(user, subject, text)
+
+        employee = Employee.objects
+        employee = employee.filter(user_id=pk)
+        employee.update(
+            position=position,
+            is_admin=is_admin,
+            phone_number=phone_number
+        )
+        employee = employee.first()
+
+        address = EmployeeAddress.objects
+        address = address.filter(employee=employee)
+        address.update(
+            point=point,
+            description=description,
+            level_1=level_1,
+            level_2=level_2,
+            level_3=level_3,
+        )
 
     return JsonResponse({'success': True, 'errors': errors})
 

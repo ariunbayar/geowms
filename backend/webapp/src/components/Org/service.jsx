@@ -73,10 +73,10 @@ function employeeRemove(pk) {
     return fetch(`${prefix}/employee-remove-${pk}/`, opts).then(handleResponse)
 }
 
-function employeeUpdate(pk, level, paylaod) {
+function employeeUpdate(pk, level, payload) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ paylaod }),
+        body: JSON.stringify({ payload }),
     }
 
     return fetch(`${prefix}/level-${level}/employee-update-${pk}/`, opts).then(handleResponse)

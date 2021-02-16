@@ -133,10 +133,10 @@ export class UserAdd extends Component {
                         }
                         setSubmitting(false)
                     })
-                    .catch((error) => {
-                        alert("Алдаа гарсан байна")
-                        setSubmitting(false)
-                    })
+                    // .catch((error) => {
+                    //     alert("Алдаа гарсан байна")
+                    //     setSubmitting(false)
+                    // })
             }
 
         }
@@ -193,18 +193,21 @@ export class UserAdd extends Component {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
                         geo_id = level_1
+                        obj['aimag_geo_id'] = level_1
                     }
                     if (level_2) {
                         const array = secondOrders[obj['aimag_id']].children
                         obj['sum_id'] = this.getGeomFromJson(level_2, array)
                         obj['sum'] = array
                         geo_id = level_2
+                        obj['sum_geo_id'] = level_2
                     }
                     if (level_3) {
                         const array = secondOrders[obj['aimag_id']].children[obj['sum_id']].children
                         obj['horoo_id'] = this.getGeomFromJson(level_3, array)
                         obj['horoo'] = array
                         geo_id = level_3
+                        obj['horoo_geo_id'] = level_3
                     }
                     this.getGeom(geo_id)
                     this.setState({ aimag: secondOrders, ...obj })
@@ -223,7 +226,10 @@ export class UserAdd extends Component {
     }
 
     getPoint(point_coordinate) {
-        const coordinates = point_coordinate.split(',')
+        let coordinates = point_coordinate
+        if (typeof point_coordinate == 'string') {
+            coordinates = point_coordinate.split(',')
+        }
         const coordinate = [coordinates[1], coordinates[0]]
         this.setState({ point_coordinate: coordinate })
     }
