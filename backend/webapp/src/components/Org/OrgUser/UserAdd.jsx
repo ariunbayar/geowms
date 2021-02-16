@@ -140,10 +140,10 @@ export class UserAdd extends Component {
                         }
                         setSubmitting(false)
                     })
-                    // .catch((error) => {
-                    //     alert("Алдаа гарсан байна")
-                    //     setSubmitting(false)
-                    // })
+                    .catch((error) => {
+                        alert("Алдаа гарсан байна")
+                        setSubmitting(false)
+                    })
             }
 
         }
