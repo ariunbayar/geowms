@@ -58,6 +58,7 @@ export class UserAdd extends Component {
         this.handleChange = this.handleChange.bind(this)
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
+        this.getGeom = this.getGeom.bind(this)
     }
 
     componentDidMount() {

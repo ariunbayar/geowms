@@ -16,6 +16,7 @@ export const service = {
     getBaseLayers,
     formOptions,
     getGeom,
+    getAddresses,
 }
 
 
@@ -126,4 +127,9 @@ function getGeom(geo_id) {
         body: JSON.stringify({geo_id}),
     }
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+}
+
+function getAddresses(level, id) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
 }

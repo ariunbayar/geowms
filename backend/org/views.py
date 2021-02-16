@@ -1,3 +1,6 @@
+import json
+from geojson import FeatureCollection
+
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
@@ -1321,3 +1324,33 @@ def form_options(request, option):
         }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_addresses(request, level, pk):
+    points = []
+    org = get_object_or_404(Org, pk=pk, level=level)
+    employees = Employee.objects
+    employees = employees.filter(org=org)
+
+    for employee in employees:
+        addresses = EmployeeAddress.objects
+        addresses = addresses.filter(employee=employee)
+        addresses = addresses.first()
+        if addresses:
+            point = addresses.point
+            feature = utils.get_feature_from_geojson(point.json)
+            points.append(feature)
+
+    feature_collection = FeatureCollection(points)
+
+    rsp = {
+        'success': True,
+        'points': feature_collection,
+    }
+    return JsonResponse(rsp)
+
+
+
