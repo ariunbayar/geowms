@@ -15,6 +15,7 @@ export const service = {
     orgAll,
     getBaseLayers,
     formOptions,
+    getGeom,
 }
 
 
@@ -109,12 +110,20 @@ function employee_list(page, perpage, query, level, org_id) {
     return fetch(`${prefix}/level-${level}/${org_id}/employeeList/`, requestOptions).then(handleResponse)
 }
 
-function formOptions() {
+function formOptions(option) {
     const opts = getGetOptions()
-    return fetch(`/back/api/org/form-options/`, opts).then(handleResponse)
+    return fetch(`/back/api/org/form-options/${option}/`, opts).then(handleResponse)
 }
 
 function getBaseLayers() {
     const opts = getGetOptions()
     return fetch('/суурь-давхарга/', opts).then(handleResponse)
+}
+
+function getGeom(geo_id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({geo_id}),
+    }
+    return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }

@@ -1217,16 +1217,22 @@ def _get_roles_display():
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def form_options(request):
+def form_options(request, option):
 
     admin_levels = utils.get_administrative_levels()
     roles = _get_roles_display()
 
-    rsp = {
-        'success': True,
-        'secondOrders': admin_levels,
-        'roles': roles,
-        'firstOrder_geom': utils.get_1stOrder_geo_id(),
-    }
+    if option == 'second':
+        rsp = {
+            'success': True,
+            'secondOrders': admin_levels
+        }
+    else:
+        rsp = {
+            'success': True,
+            'secondOrders': admin_levels,
+            'roles': roles,
+            'firstOrder_geom': utils.get_1stOrder_geo_id(),
+        }
 
     return JsonResponse(rsp)
