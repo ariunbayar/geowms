@@ -6,6 +6,8 @@ export const service = {
     downloadPurchase,
     getDetails,
     paginatedList,
+    userEmailCheck,
+    setEmail
 }
 
 
@@ -40,6 +42,18 @@ function paginatedList(page, per_page) {
         ...getPostOptions(),
     body: JSON.stringify({ page, per_page }),
     }
-
     return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
+}
+
+function userEmailCheck(id){
+    const requestOptions = {...getGetOptions()}
+    return fetch(`/profile/api/check-email/`, requestOptions).then(handleResponse)
+}
+
+function setEmail(email) {
+    const requestOptions = {
+        ...getPostOptions(),
+    body: JSON.stringify({ email }),
+    }
+    return fetch(`/profile/api/set-email/`, requestOptions).then(handleResponse)
 }
