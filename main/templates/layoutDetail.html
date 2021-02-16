@@ -91,6 +91,9 @@
       <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
         {% with request.resolver_match.url_name as url_name %}
         <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="/payment/covid/">КОВИД-19</a>
+          </li>
           <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
             <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
           </li>
