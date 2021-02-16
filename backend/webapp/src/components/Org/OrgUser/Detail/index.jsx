@@ -95,6 +95,8 @@ export class Detail extends Component {
             token,
             created_at,
             updated_at,
+            phone_number,
+            description,
         } = this.state.employee
 
         const {
@@ -173,6 +175,17 @@ export class Detail extends Component {
                             <dt className="col-md-3">Регистр:</dt>
                             <dd className="col-md-9">
                                 { register }
+                            </dd>
+
+                            <dt className="col-md-3">Утасны дугаар:</dt>
+                            <dd className="col-md-9">
+                                { phone_number }
+                            </dd>
+                        </dl>
+                        <dl className="row">
+                            <dt className="col-md-3">Гэрийн хаягийн дэлгэрэнгүй:</dt>
+                            <dd className="col-md-9">
+                                { description }
                             </dd>
                         </dl>
                         { is_admin &&

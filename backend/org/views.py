@@ -57,7 +57,14 @@ def all(request, payload, level):
 def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
-    employee = Employee.objects.filter(user=user).first()
+
+    employee = Employee.objects
+    employee = employee.filter(user=user)
+    employee = employee.first()
+
+    address = EmployeeAddress.objects
+    address = address.filter(employee=employee)
+    address = address.first()
 
     employees_display = {
         'id': user.id,
@@ -75,6 +82,12 @@ def employee_detail(request, pk):
         'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+        'phone_number': employee.phone_number,
+        'description': address.description,
+        'level_1': address.level_1,
+        'level_2': address.level_2,
+        'level_3': address.level_3,
+        'point': address.point.json,
     }
 
     return JsonResponse({'success': True, 'employee': employees_display})

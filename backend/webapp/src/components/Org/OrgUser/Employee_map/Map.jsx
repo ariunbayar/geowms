@@ -3,7 +3,7 @@ import { Map, View, Feature } from 'ol'
 
 import { Vector as VectorSource, OSM } from 'ol/source'
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer'
-import { transform as transformCoordinate } from 'ol/proj'
+import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { Point } from 'ol/geom'
@@ -59,6 +59,11 @@ export default class EmployeeMap extends Component {
                 this.setFeatures(this.props.feature)
             }
         }
+        if (prevProps.point !== this.props.point) {
+            if (this.props.point !== {}) {
+                this.setMarker(this.props.point)
+            }
+        }
     }
 
     removeFeatureFromSource(featureID) {
@@ -74,6 +79,16 @@ export default class EmployeeMap extends Component {
                 }
             }
         }
+    }
+
+    fromLonLatToMapCoord(coordinate) {
+        return fromLonLat(coordinate);
+    }
+
+    setMarker(point) {
+        const coordinate = JSON.parse(point).coordinates
+        const coordinates = this.fromLonLatToMapCoord([coordinate[1], coordinate[0]])
+        this.marker.point.setCoordinates(coordinates)
     }
 
     setFeatures(feature) {
@@ -138,7 +153,7 @@ export default class EmployeeMap extends Component {
         const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_data)
         const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-        this.props.sendPoint(coordinate_clicked)
+        this.props.sendPointCoordinate(coordinate_clicked)
 
         this.setState({ coordinate_clicked })
     }

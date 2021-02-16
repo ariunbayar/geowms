@@ -44,7 +44,8 @@ export class UserAdd extends Component {
             feature: {},
             modal_alert_status: "closed",
             description: '',
-            point_coordinate: []
+            point_coordinate: [],
+            point: {},
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -55,19 +56,23 @@ export class UserAdd extends Component {
         this.handleChange = this.handleChange.bind(this)
         this.makeTextAreaValue = this.makeTextAreaValue.bind(this)
         this.getPoint = this.getPoint.bind(this)
+        this.getGeomFromJson = this.getGeomFromJson.bind(this)
     }
 
     componentDidMount() {
-        this.getFeildValues()
         const org_emp = this.props.match.params.emp
         if(org_emp){
             this.handleGetAll(org_emp)
         }
+        else {
+            this.getFeildValues()
+        }
     }
 
     handleGetAll(org_emp){
-        service.employeeDetail(org_emp).then(({ success, employee, description }) => {
+        service.employeeDetail(org_emp).then(({ success, employee }) => {
             if (success) {
+                this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
                 this.setState({
                     form_values: {
                         id: employee.id,
@@ -82,7 +87,8 @@ export class UserAdd extends Component {
                         is_super: employee.is_super,
                         phone_number: employee.phone_number,
                     },
-                    description,
+                    description: employee.description,
+                    point: employee.point,
                 })
             }
         })
@@ -167,12 +173,41 @@ export class UserAdd extends Component {
         )
     }
 
-    getFeildValues() {
+    getGeomFromJson(geo_id, array) {
+        let index
+        array.map((data, idx) => {
+            if (data.geo_id == geo_id) {
+                index = idx
+            }
+        })
+        return index
+    }
+
+    getFeildValues(level_1, level_2, level_3) {
+        let obj = Object()
+        let geo_id
         service
             .formOptions('second')
             .then(({ success, secondOrders }) => {
                 if (success) {
-                    this.setState({ aimag: secondOrders })
+                    if (level_1) {
+                        obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
+                        geo_id = level_1
+                    }
+                    if (level_2) {
+                        const array = secondOrders[obj['aimag_id']].children
+                        obj['sum_id'] = this.getGeomFromJson(level_2, array)
+                        obj['sum'] = array
+                        geo_id = level_2
+                    }
+                    if (level_3) {
+                        const array = secondOrders[obj['aimag_id']].children[obj['sum_id']].children
+                        obj['horoo_id'] = this.getGeomFromJson(level_3, array)
+                        obj['horoo'] = array
+                        geo_id = level_3
+                    }
+                    this.getGeom(geo_id)
+                    this.setState({ aimag: secondOrders, ...obj })
                 }
             })
     }
@@ -188,7 +223,9 @@ export class UserAdd extends Component {
     }
 
     getPoint(point_coordinate) {
-        this.setState({ point_coordinate })
+        const coordinates = point_coordinate.split(',')
+        const coordinate = [coordinates[1], coordinates[0]]
+        this.setState({ point_coordinate: coordinate })
     }
 
     handleChange(e, field, child_field, reset_fields, parent_field) {
@@ -286,7 +323,8 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, description } = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, description, point } = this.state
+
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
@@ -514,7 +552,7 @@ export class UserAdd extends Component {
                                 )}
                             </select>
                         </div>
-                        <EmployeeMap height='75' feature={feature} sendPoint={this.getPoint} />
+                        <EmployeeMap height='75' feature={feature} sendPointCoordinate={this.getPoint} point={point} />
 
                         <div className="form-group">
                             <label htmlFor='id_description'>Гэрийн хаягийн дэлгэрэнгүй:</label>
