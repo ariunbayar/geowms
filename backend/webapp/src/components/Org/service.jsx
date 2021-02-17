@@ -16,6 +16,10 @@ export const service = {
     getBaseLayers,
     formOptions,
     getGeom,
+    getAddresses,
+    getEmpInfo,
+    getErguulegFields,
+    saveErguul,
 }
 
 
@@ -126,4 +130,27 @@ function getGeom(geo_id) {
         body: JSON.stringify({geo_id}),
     }
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+}
+
+function getAddresses(level, id) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
+}
+
+function getEmpInfo(id) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${id}/emp-info/`, opts).then(handleResponse)
+}
+
+function getErguulegFields() {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/erguuleg-fields/`, opts).then(handleResponse)
+}
+
+function saveErguul(values, id, point, photo) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ values, id, point, photo }),
+    }
+    return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
 }

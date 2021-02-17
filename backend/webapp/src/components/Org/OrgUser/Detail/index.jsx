@@ -187,12 +187,16 @@ export class Detail extends Component {
                                 { phone_number }
                             </dd>
                         </dl>
-                        <dl className="row">
-                            <dt className="col-md-3">Гэрийн хаяг:</dt>
-                            <dd className="col-md-9">
-                                {  level_1 + ", " + level_2 + ", " + level_3 + ", " + street + " гудамж " + apartment + " байр, " + door_number + " тоот"}
-                            </dd>
-                        </dl>
+                        {
+                            level_1
+                            &&
+                            <dl className="row">
+                                <dt className="col-md-3">Гэрийн хаяг:</dt>
+                                <dd className="col-md-9">
+                                    { level_1 + ", " + level_2 + ", " + level_3 + ", " + street + " гудамж " + apartment + " байр, " + door_number + " тоот" }
+                                </dd>
+                            </dl>
+                        }
                         { is_admin &&
                             <p>
                                 <i className="fa fa-check-circle-o fa-lg" aria-hidden="true"></i>
