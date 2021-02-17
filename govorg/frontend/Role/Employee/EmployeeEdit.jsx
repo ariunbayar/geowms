@@ -49,7 +49,7 @@ export class EmployeeEdit extends Component {
             model_type_icon: '',
             title: '',
 
-            is_address_map: true,
+            is_address_map: false,
 
             aimag: [],
             sum: [],
@@ -94,6 +94,8 @@ export class EmployeeEdit extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+
+        this.refreshMap = this.refreshMap.bind(this)
     }
 
     componentDidMount() {
@@ -341,15 +343,15 @@ export class EmployeeEdit extends Component {
         let geo_id
         let array
         service
-            .formOptions('second')
-            .then(({ success, secondOrders }) => {
+            .formOptions()
+            .then(({ success, info }) => {
                 if (success) {
                     if (level_1) {
-                        obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
-                        geo_id = secondOrders[obj['aimag_id']].geo_id
+                        obj['aimag_id'] = this.getGeomFromJson(level_1, info)
+                        geo_id = info[obj['aimag_id']].geo_id
                         obj['aimag_geo_id'] = geo_id
                         obj['aimag_name'] = level_1
-                        array = secondOrders[obj['aimag_id']].children
+                        array = info[obj['aimag_id']].children
                         obj['sum'] = array
                     }
                     if (level_2) {
@@ -366,18 +368,18 @@ export class EmployeeEdit extends Component {
                         obj['horoo_geo_id'] = geo_id
                         obj['horoo_name'] = level_3
                     }
-                    this.getGeom(geo_id)
-                    this.setState({ aimag: secondOrders, ...obj })
+                    obj['aimag'] = info
+                    this.getGeom(geo_id, obj)
                 }
             })
     }
 
-    getGeom(geo_id) {
+    getGeom(geo_id, obj={}) {
         service
             .getGeom(geo_id)
             .then(({ feature }) => {
                 if (feature) {
-                    this.setState({ feature, last_geo_id: geo_id })
+                    this.setState({ ...obj, feature, last_geo_id: geo_id })
                 }
             })
     }
@@ -453,6 +455,22 @@ export class EmployeeEdit extends Component {
             }
         })
         return index
+    }
+
+    refreshMap() {
+        const { last_geo_id, is_address_map, is_marker, point } = this.state
+        let obj = Object()
+        obj['is_address_map'] = !is_address_map
+        if (is_address_map) {
+            if (last_geo_id) {
+                obj['is_marker'] = !is_marker
+                obj['point'] = point
+                this.getGeom(last_geo_id, obj)
+            }
+        }
+        else {
+            this.setState({ ...obj })
+        }
     }
 
     render() {
@@ -610,15 +628,7 @@ export class EmployeeEdit extends Component {
                                         </div>
                                         <br/>
                                         <div className="form-group col-md-6">
-                                            <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => {
-                                                if (is_address_map) {
-                                                    if (this.state.last_geo_id) {
-                                                        this.setState({ is_marker: !this.state.is_marker, point: this.state.point })
-                                                        this.getGeom(this.state.last_geo_id)
-                                                    }
-                                                }
-                                                this.setState({ is_address_map: !is_address_map })
-                                            }}>
+                                            <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => this.refreshMap()}>
                                                 {
                                                     !is_address_map ? "Role сонгох" : "Гэрийн хаяг оруулах"
                                                 }

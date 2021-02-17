@@ -36,10 +36,10 @@ export default class SearchSelects extends Component {
 
     getFieldValues() {
         service
-            .formOptions('second')
-            .then(({ success, secondOrders }) => {
+            .formOptions()
+            .then(({ success, info }) => {
                 if (success) {
-                    this.setState({ aimag: secondOrders })
+                    this.setState({ aimag: info })
                 }
             })
     }

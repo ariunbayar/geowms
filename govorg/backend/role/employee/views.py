@@ -292,6 +292,7 @@ def _delete_remove_perm(remove_perms):
 @login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
 
+    can_update = False
     role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
     remove_perms = payload.get('remove_perm')
@@ -304,64 +305,71 @@ def update(request, payload, pk):
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
 
-    get_object_or_404(Employee, user=request.user, is_admin=True)
-    errors = _employee_validation(employee.user, payload)
-    if errors:
+    if employee.user == request.user:
+        can_update = True
+    else:
+        get_object_or_404(Employee, user=request.user, is_admin=True)
+        can_update = True
+
+    if can_update:
+        errors = _employee_validation(employee.user, payload)
+        if errors:
+            return JsonResponse({
+                'success': False,
+                'errors': errors
+            })
+
+        with transaction.atomic():
+            if emp_perm:
+                old_emp_role = emp_perm.emp_role
+                if new_emp_role != old_emp_role:
+                    _delete_old_emp_role(emp_perm)
+                    emp_perm.emp_role = new_emp_role
+                    emp_perm.save()
+            else:
+                user = get_object_or_404(User, employee=employee)
+                emp_perm = EmpPerm()
+                emp_perm.created_by = user
+                emp_perm.emp_role_id = role_id
+                emp_perm.employee_id = employee.id
+                emp_perm.updated_by = user
+                emp_perm.save()
+
+            if remove_perms:
+                _delete_remove_perm(remove_perms)
+
+            if add_perms:
+                obj_array = []
+                for perm in add_perms:
+                    emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
+                    obj_array.append(emp_perm_inspire)
+                EmpPermInspire.objects.bulk_create(obj_array)
+
+            address_qs = EmployeeAddress.objects
+            address_qs = address_qs.filter(employee=employee)
+            if address_qs:
+                address_qs.update(
+                    **address
+                )
+            else:
+                address_qs.create(employee=employee, **address)
+
+
+            user = employee.user
+            _set_user(user, payload)
+
+            employee = employee
+            _set_employee(employee, payload)
+
+            return JsonResponse({
+                'success': True,
+                'info': 'Амжилттай хадгаллаа'
+            })
+    else:
         return JsonResponse({
             'success': False,
-            'errors': errors
+            'info': 'Хадгалахад алдаа гарлаа'
         })
-
-    with transaction.atomic():
-        if emp_perm:
-            old_emp_role = emp_perm.emp_role
-            if new_emp_role != old_emp_role:
-                _delete_old_emp_role(emp_perm)
-                emp_perm.emp_role = new_emp_role
-                emp_perm.save()
-        else:
-            user = get_object_or_404(User, employee=employee)
-            emp_perm = EmpPerm()
-            emp_perm.created_by = user
-            emp_perm.emp_role_id = role_id
-            emp_perm.employee_id = employee.id
-            emp_perm.updated_by = user
-            emp_perm.save()
-
-        if remove_perms:
-            _delete_remove_perm(remove_perms)
-
-        if add_perms:
-            obj_array = []
-            for perm in add_perms:
-                emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
-                obj_array.append(emp_perm_inspire)
-            EmpPermInspire.objects.bulk_create(obj_array)
-
-        address_qs = EmployeeAddress.objects
-        address_qs = address_qs.filter(employee=employee)
-        if address_qs:
-            address_qs.update(
-                **address
-            )
-        else:
-            address_qs.create(employee=employee, **address)
-
-
-        user = employee.user
-        _set_user(user, payload)
-
-        employee = employee
-        _set_employee(employee, payload)
-
-        return JsonResponse({
-            'success': True,
-            'info': 'Амжилттай хадгаллаа'
-        })
-    return JsonResponse({
-        'success': False,
-        'info': 'Хадгалахад алдаа гарлаа'
-    })
 
 
 def _get_emp_perm_display(emp_perm):
@@ -503,7 +511,11 @@ def send_mail(request, payload):
 
 
 def _is_cloned_feature(address_qs):
-    address_qs.employee
+    is_cloned = False
+    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
+    if erguul_id:
+        is_cloned = True
+    return is_cloned
 
 
 @require_GET
@@ -531,7 +543,7 @@ def get_addresses(request):
             point_info['id'] = addresses.employee.id
             point_info['first_name'] = addresses.employee.user.first_name # etseg
             point_info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
-            # point_info['is_cloned'] = _is_cloned_feature(addresses)
+            point_info['is_cloned'] = _is_cloned_feature(addresses)
             if point:
                 feature = utils.get_feature_from_geojson(point.json, properties=point_info)
                 points.append(feature)
@@ -544,8 +556,8 @@ def get_addresses(request):
             point = erguul.point
             erguul_info['id'] = employee.id
             erguul_info['is_erguul'] = True
-            erguul_info['first_name'] = erguul.employee.user.first_name # etseg
-            erguul_info['last_name'] = erguul.employee.user.last_name # onooj ogson ner
+            erguul_info['first_name'] = employee.user.first_name # etseg
+            erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
 
             if point:
                 feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)

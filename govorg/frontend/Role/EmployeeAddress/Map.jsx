@@ -221,7 +221,7 @@ export default class AddressMap extends Component {
         this.translate.setActive(true)
         const feature = event.selected[0]
         if (feature) {
-            if (feature.getGeometry().getType() == 'Point') {
+            if (feature.getGeometry().getType() == 'Point' && this.props.is_admin) {
                 const properties = feature.getProperties()
                 const id = properties.id
                 this.id = id
@@ -388,6 +388,7 @@ export default class AddressMap extends Component {
     }
 
     readFeatures(features) {
+        let has_erguul = false
         const source = this.vector_layer.getSource()
         if (features['features'].length > 0) {
             features['features'].map((feat, idx) => {
@@ -401,6 +402,7 @@ export default class AddressMap extends Component {
                 let style = this.featureWithTextStyle(full_name)
 
                 if (properties.is_erguul) {
+                    has_erguul = true
                     if (!this.props.is_admin) {
                         this.start_coordinate = feature.getGeometry().getCoordinates()
                     }
@@ -414,7 +416,7 @@ export default class AddressMap extends Component {
                 feature.setStyle(style)
                 source.addFeature(feature)
             })
-            if (!this.props.is_admin) {
+            if (!this.props.is_admin && has_erguul) {
                 this.makeLineString()
             }
         }
