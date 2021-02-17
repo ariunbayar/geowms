@@ -1,9 +1,8 @@
 import React, { Component } from "react"
 import {service} from './service'
-import {NavLink} from 'react-router-dom'
 import ModalLimit from "./ModalLimit"
 import ModalAlert from "../ModalAlert"
-
+import BackButton from "@utils/Button/BackButton"
 
 
 export class Дэлгэрэнгүй extends Component {
@@ -133,13 +132,6 @@ export class Дэлгэрэнгүй extends Component {
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-4 mb-4">
-                            <button href="#" className="btn btn-outline-primary btn-block waves-effect waves-light m-1" onClick={this.props.history.goBack}>
-                                Буцах
-                            </button>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-4 mb-4">
                             <p><strong>Системийн ID</strong>: {id} </p>
                             <p><strong>Нэр</strong>: {last_name} {first_name} </p>
                             <p><strong>Хүйс</strong>: {gender} </p>
@@ -195,6 +187,7 @@ export class Дэлгэрэнгүй extends Component {
                         />
                     </div>
                 </div>
+                <BackButton {...this.props} name={'Буцах'}></BackButton>
             </div>
         )
     }
