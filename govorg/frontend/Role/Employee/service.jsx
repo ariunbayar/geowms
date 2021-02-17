@@ -111,11 +111,11 @@ function getAddresses() {
     return fetch(`${prefix}/addresses/`, requestOptions).then(handleResponse)
 }
 
-function formOptions(option) {
+function formOptions() {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`/back/api/org/form-options/${option}/`, requestOptions).then(handleResponse)
+    return fetch(`/api/aimag/`, requestOptions).then(handleResponse)
 }
 
 function getEmpInfo(id) {

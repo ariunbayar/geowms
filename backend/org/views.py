@@ -1330,6 +1330,14 @@ def form_options(request, option):
     return JsonResponse(rsp)
 
 
+def _is_cloned_feature(address_qs):
+    is_cloned = False
+    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
+    if erguul_id:
+        is_cloned = True
+    return is_cloned
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -1349,6 +1357,7 @@ def get_addresses(request, level, pk):
             point_info['id'] = addresses.employee.id
             point_info['first_name'] = addresses.employee.user.first_name # etseg
             point_info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
+            point_info['is_cloned'] = _is_cloned_feature(addresses)
             feature = utils.get_feature_from_geojson(point.json, properties=point_info)
             points.append(feature)
 
@@ -1360,8 +1369,8 @@ def get_addresses(request, level, pk):
             point = erguul.point
             erguul_info['id'] = employee.id
             erguul_info['is_erguul'] = True
-            erguul_info['first_name'] = erguul.employee.user.first_name # etseg
-            erguul_info['last_name'] = erguul.employee.user.last_name # onooj ogson ner
+            erguul_info['first_name'] = employee.user.first_name # etseg
+            erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
 
             feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
             points.append(feature)
@@ -1443,14 +1452,14 @@ def save_erguul(request, payload):
     point = _get_point_for_db(point_coordinate)
     employee = get_object_or_404(Employee, pk=emp_id)
 
-    address = employee.employeeaddress_set.values_list('employeeaddress', flat=True).first()
+    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
     date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
     date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
     part_time = values['part_time'] if 'part_time' in values else ''
 
     with transaction.atomic():
         erguul = EmployeeErguul()
-        erguul.address = address
+        erguul.address_id = address_id
         erguul.level_3 = values['level_3'] if 'level_3' in values else ''
         erguul.street = values['street'] if 'street' in values else ''
         erguul.apartment = values['apartment'] if 'apartment' in values else ''
@@ -1498,7 +1507,31 @@ def save_erguul(request, payload):
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хадгласан',
+        'info': 'Амжилттай хадгалсан',
     }
 
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_erguuls(request):
+
+    points = list()
+    erguuls = EmployeeErguul.objects.all()
+    for erguul in erguuls:
+        data = dict()
+        employee = erguul.address.employee
+        point = erguul.point
+        data['id'] = employee.id
+        data['first_name'] = employee.user.first_name # etseg
+        data['last_name'] = employee.user.last_name # onooj ogson ner
+        feature = utils.get_feature_from_geojson(point.json, properties=data)
+        points.append(feature)
+
+    feature_collection = FeatureCollection(points)
+
+    rsp = {
+        'feature_collection': feature_collection,
+    }
     return JsonResponse(rsp)

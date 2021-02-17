@@ -60,15 +60,12 @@ export default class EmployeeMap extends Component {
             }
         }
         if (prevProps.point !== this.props.point) {
-            if (this.props.point !== {}) {
+            if (this.props.point && this.props.point !== {}) {
                 this.setMarker(this.props.point)
             }
         }
         if (prevProps.is_marker !== this.props.is_marker) {
-            if (this.props.map_coordinate.length > 0) {
-                this.marker.point.setCoordinates(this.props.map_coordinate)
-            }
-            else if (this.props.point !== {}) {
+            if (this.props.point !== {}) {
                 this.setMarker(this.props.point)
             }
         }

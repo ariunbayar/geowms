@@ -6,7 +6,6 @@ import {PolygonPurchase} from './Purchase/PolygonPurchase'
 import {Failed} from './Failed/Failed'
 import {Details} from '../components/history/details'
 
-
 export class App extends Component {
 
     render() {

@@ -31,7 +31,7 @@ export default class UsersAddress extends Component {
             .then(({ success, points }) => {
                 if (success) {
                     let is_empty = false
-                    if (points['features'].length == 0) {
+                    if (points['features'].length < 2) {
                         is_empty = true
                     }
                     this.setState({ points, is_loading: false, is_empty })
