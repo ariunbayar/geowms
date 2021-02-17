@@ -1,9 +1,19 @@
 import React, { Component, Fragment } from 'react'
 import Text from './components/text'
+import Logo from './components/logo'
 
 export class CovidPage extends Component {
 
+    constructor(props) {
+        super(props)
+        this.state = {
+            src1: "/static/assets/image/logo/logo.png",
+            src2: "/static/assets/image/logo/logo-2.png"
+        }
+    }
+
     render() {
+        const { src1, src2 } = this.state
         return (
             <div className="col-ld-12">
                 <div className="row border border-danger">
@@ -16,9 +26,10 @@ export class CovidPage extends Component {
                 </div>
                 <div className="row border border-danger">
                     <div className="col-lg-3 d-flex flex-column border border-danger">
-                        <div className="card">
+                        {/* <div className="card">
                             aaaa22222
-                        </div>
+                        </div> */}
+                        <Logo src={src1}/>
                         <div className="card">
                             aaaa2222
                         </div>
@@ -38,9 +49,10 @@ export class CovidPage extends Component {
                         </div>
                     </div>
                     <div className="col-lg-3 d-flex flex-column border border-danger">
-                        <div className="card">
+                        {/* <div className="card">
                             aaaa44
-                        </div>
+                        </div> */}
+                        <Logo src={src2}/>
                         <div className="card">
                             aaaa44
                         </div>
