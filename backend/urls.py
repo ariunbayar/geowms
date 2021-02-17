@@ -85,7 +85,10 @@ urlpatterns = [
         path('level-<int:level>/<int:pk>/gov-perm/', org_views.get_gov_roles),
         path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.save_gov_roles),
         path('form-options/<str:option>/', org_views.form_options),
-
+        path('<int:level>/<int:pk>/addresses/', org_views.get_addresses),
+        path('<int:pk>/emp-info/', org_views.get_emp_info),
+        path('erguuleg-fields/', org_views.get_erguuleg_fields),
+        path('save-erguul/', org_views.save_erguul),
     ], 'org'))),
 
     path('api/log/', include(([
