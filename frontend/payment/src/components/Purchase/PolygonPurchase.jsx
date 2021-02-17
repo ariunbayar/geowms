@@ -3,7 +3,9 @@ import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
 import ModalAlert from '@utils/Modal/ModalAlert'
 import Modal from '@utils/Modal/Modal'
+import EmailModalForm from './EmailModalForm'
 import {Notif} from '@utils/Notification'
+
 
 export class PolygonPurchase extends Component {
 
@@ -21,14 +23,17 @@ export class PolygonPurchase extends Component {
             purchase_all: [],
             qpay_modal_is: false,
             is_modal_info_open: false,
-            is_modal_open: false,
+            is_modal_open: 'closed',
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
+            email_modal_status: 'closed'
         }
+
         this.qPayClose = this.qPayClose.bind(this)
         this.alertOver = this.alertOver.bind(this)
         this.alertOut = this.alertOut.bind(this)
         this.addNotif = this.addNotif.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
+        this.handleUserEmailCheck = this.handleUserEmailCheck.bind(this)
     }
 
     componentDidMount(){
@@ -70,11 +75,26 @@ export class PolygonPurchase extends Component {
     }
 
     handleModalOpen(){
-        this.setState({ is_modal_open: !this.state.is_modal_open })
+        this.setState({ is_modal_open: 'open' })
     }
 
     handleModalClose(){
-        this.setState({ is_modal_open: false })
+        this.setState({ is_modal_open: 'closed' })
+    }
+
+    handleFormModalOpen(){
+        this.setState({ email_modal_status: 'open' })
+    }
+
+    handleFormModalClose(){
+        this.setState({ email_modal_status: 'closed' })
+    }
+
+    handleUserEmailCheck(){
+        service.userEmailCheck().then(({success}) => {
+            if(success) this.handleModalOpen()
+            else this.handleFormModalOpen()
+        })
     }
 
     handleModalApproveClose(){
@@ -87,7 +107,7 @@ export class PolygonPurchase extends Component {
 
     handleQpay(){
         this.setState(prevState => ({
-            is_modal_open: false,
+            is_modal_open: 'closed',
             qpay_modal_is: !prevState.qpay_modal_is,
         }))
     }
@@ -107,7 +127,7 @@ export class PolygonPurchase extends Component {
     render() {
         const purchase_id = this.props.match.params.id
         const { alert_msg, is_modal_info_open, is_modal_open } = this.state
-        const { items, layers} = this.state
+        const { items, layers, email_modal_status} = this.state
         return (
         <div className="container my-4">
             <div className="row shadow-lg p-3 mb-5 bg-white rounded">
@@ -164,7 +184,7 @@ export class PolygonPurchase extends Component {
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModalOpen()}>
+                            <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleUserEmailCheck()}>
                                 <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
@@ -176,9 +196,14 @@ export class PolygonPurchase extends Component {
                                 title="Анхааруулга"
                                 actionNameDelete="Үргэлжлүүлэх"
                                 model_type_icon="warning"
-                                status={this.state.status}
+                                status={is_modal_open}
                             />
                         }
+                        <EmailModalForm
+                            modalAction={() => this.handleModalOpen()}
+                            modalClose={() => this.handleFormModalClose()}
+                            status={email_modal_status}
+                        />
                     </div>
                 </div>
             </div>

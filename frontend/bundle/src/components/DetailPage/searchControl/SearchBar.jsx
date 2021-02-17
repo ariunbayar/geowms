@@ -23,6 +23,7 @@ class SearchBarComponent extends Component {
             zoom3: 10,
             aimag_id: -1,
             sum_id: -1,
+            horoo_id: -1,
             BA:'',
             BB:'',
             BC:'',
@@ -33,6 +34,7 @@ class SearchBarComponent extends Component {
             error_msg: '',
             aimag: [],
             sum: [],
+            horoo: [],
             feature_ids: [],
             options_scale: [
                {'zoom': '2.9903484967519145', 'scale': 5000000},
@@ -129,25 +131,49 @@ class SearchBarComponent extends Component {
     handleInput(e){
         if(e.target.value){
             const aimag_id = e.target.value
-            this.setState({ aimag_id, sum_id: -1 })
+            if (aimag_id !== '-1') {
+                this.setState({ aimag_id, sum_id: -1, horoo_id: -1 })
 
-            const aimag_data = this.state.aimag[aimag_id]
+                const aimag_data = this.state.aimag[aimag_id]
 
-            this.getGeom(aimag_data.geo_id)
+                this.getGeom(aimag_data.geo_id)
 
-            this.setState({ sum: aimag_data.children })
-
+                this.setState({ sum: aimag_data.children })
+            }
+            else {
+                this.setState({ aimag_id: -1, sum_id: -1, horoo_id: -1 })
+                this.resetButton()
+            }
         }
     }
 
-    handleInputSum(e){
+    handleInputSum(e, field, array){
         if(e.target.value){
-            const sum_id = e.target.value
-            this.setState({ sum_id })
+            const id = e.target.value
+            if (id !== '-1') {
+                this.setState({ [field]: id })
 
-            const sum_data = this.state.sum[sum_id]
+                const data = array[id]
 
-            this.getGeom(sum_data.geo_id)
+                this.getGeom(data.geo_id)
+
+                if (field == 'sum_id') {
+                    this.setState({ horoo: data.children })
+                }
+            }
+            else {
+                var array_name
+                if (field == 'horoo_id') {
+                    this.setState({ [field]: -1 })
+                    array_name = 'sum'
+                }
+                if (field == 'sum_id') {
+                    this.setState({ [field]: -1, horoo_id: -1 })
+                    array_name = 'aimag'
+                }
+                this.getGeom(this.state[array_name][this.state[array_name + '_id']].geo_id)
+
+            }
         }
     }
 
@@ -163,7 +189,7 @@ class SearchBarComponent extends Component {
     }
 
     render() {
-        const {error_msg, sum, aimag, options_scale} = this.state
+        const {error_msg, sum, aimag, options_scale, horoo} = this.state
         return (
             <div>
                 {/* <div className="form-group  rounded shadow-sm p-3 mb-3 bg-white rounded">
@@ -194,13 +220,25 @@ class SearchBarComponent extends Component {
                                     }
                             </select>
                             <select name="center_typ" as="select"
-                                onChange={this.handleInputSum}
+                                onChange={(e) => this.handleInputSum(e, 'sum_id', sum)}
                                 className='form-control'
                                 value={this.state.sum_id}
                             >
                                 <option value="-1">--- Сум/дүүрэг сонгоно уу ---</option>
                                 {
                                     sum.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )
+                                }
+                            </select>
+                            <select name="center_typ" as="select"
+                                onChange={(e) => this.handleInputSum(e, 'horoo_id', horoo)}
+                                className='form-control'
+                                value={this.state.horoo_id}
+                            >
+                                <option value="-1">--- Хороо/Баг сонгоно уу ---</option>
+                                {
+                                    horoo.map((data, idx) =>
                                         <option key={idx} value={idx}>{data.name}</option>
                                     )
                                 }

@@ -8,7 +8,6 @@ re_layer_wfs = re.compile(r'^(.*?<FeatureTypeList[^>]*>)(.*)(</FeatureTypeList>.
 def filter_layers(content, allowed_layers):
     if isinstance(content, bytes):
         content = content.decode()
-
     def _el(root, tag_name, get_all=False):
         items = [
                 el for el in root

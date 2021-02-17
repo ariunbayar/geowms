@@ -29,9 +29,26 @@ def get_connection_conf():
     return conf_geoserver
 
 
+def getCacheHeader():
+
+    conf_geoserver = get_connection_conf()
+
+    AUTH = requests.auth.HTTPBasicAuth(
+        conf_geoserver['geoserver_user'],
+        conf_geoserver['geoserver_pass'],
+    )
+
+    BASE_URL = 'http://{host}:{port}/geoserver/gwc/rest/'.format(
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port'],
+    )
+
+    return BASE_URL, AUTH
+
+
 def getHeader():
 
-    conf_geoserver =get_connection_conf()
+    conf_geoserver = get_connection_conf()
 
     AUTH = requests.auth.HTTPBasicAuth(
         conf_geoserver['geoserver_user'],
@@ -334,6 +351,19 @@ def get_wms_url(wms_name):
     return wms_url
 
 
+def get_wmts_url(wms_name):
+
+    conf_geoserver = get_connection_conf()
+
+    wmts_url = 'http://{host}:{port}/geoserver/{wms_name}/gwc/service/wmts'.format(
+        wms_name=wms_name,
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port']
+    )
+
+    return wmts_url
+
+
 def get_legend_url(wms_id, layer_name):
 
     legend_url = (
@@ -512,4 +542,38 @@ def create_style(values):
     url = 'styles'
     headers = {'Content-type': 'application/vnd.ogc.sld+xml'}
     rsp = requests.post(BASE_URL + url, headers=headers, auth=AUTH, data=payload.encode('utf-8') )
+    return rsp
+
+
+def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache):
+
+    payload='''
+        <seedRequest>
+            <name>{ws_name}:{layer_name}</name>
+            <srs>
+                <number>{srs}</number>
+            </srs>
+            <zoomStart>{zoom_start}</zoomStart>
+            <zoomStop>{zoom_stop}</zoomStop>
+            <format>image/{image_format}</format>
+            <type>{type}</type>
+            <threadCount>{number_of_cache}</threadCount>
+        </seedRequest>
+    '''.format(
+        layer_name=layer_name,
+        ws_name=ws_name,
+        zoom_start=zoom_start,
+        zoom_stop=zoom_stop,
+        image_format=image_format,
+        type=cache_type,
+        number_of_cache=number_of_cache,
+        srs=srs
+    )
+
+
+    BASE_URL, AUTH = getCacheHeader()
+
+    headers = {'Content-type': 'text/xml'}
+    url = BASE_URL +  'seed/' + '{ws_name}:{layer_name}.xml'.format(ws_name=ws_name, layer_name=layer_name)
+    rsp = requests.post(url, headers=headers, auth=AUTH, data=payload)
     return rsp

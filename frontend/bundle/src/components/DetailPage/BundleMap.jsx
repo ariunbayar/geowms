@@ -14,6 +14,8 @@ import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
 import {fromExtent} from 'ol/geom/Polygon';
+import WMTS from 'ol/source/WMTS';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
 
 import { СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
@@ -185,14 +187,35 @@ export default class BundleMap extends Component {
 
     handleMapDataLoaded(base_layer_list, wms_list) {
 
-        const map_wms_list = wms_list.map(({name, url, layers}) => {
+        var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
+        var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
 
+        const map_wms_list = wms_list.map(({name, url, chache_url, wms_or_cache_ur, layers}) => {
             return {
                 name,
                 layers: layers.map((layer) => {
                     return {
                         ...layer,
+                        wms_or_cache_ur,
                         tile: new Tile({
+                            source: new WMTS({
+                                url: chache_url,
+                                layer: layer.code,
+                                matrixSet: "EPSG:4326",
+                                format: 'image/png',
+                                projection: this.state.projection_display,
+                                tileGrid: new WMTSTileGrid({
+                                    tileSize: [256,256],
+                                    extent: [-180.0,-90.0,180.0,90.0],
+                                    origin: [-180.0, 90.0],
+                                    resolutions: resolutions,
+                                    matrixIds: gridNames,
+                                }),
+                                style: '',
+                                wrapX: true,
+                            }),
+                        }),
+                        wms_tile: new Tile({
                             source: new TileWMS({
                                 projection: this.state.projection,
                                 url: url,
@@ -202,7 +225,6 @@ export default class BundleMap extends Component {
                                     'FORMAT': 'image/png',
                                 }
                             }),
-                            code: layer.code
                         })
                     }
                 }),
@@ -212,7 +234,8 @@ export default class BundleMap extends Component {
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) => {
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
-                layer['legend'] = layer.tile.getSource().getLegendUrl()
+                layer.defaultCheck == 0 && layer.wms_tile.setVisible(false)
+                layer['legend'] = layer.wms_tile.getSource().getLegendUrl()
             })
         )
 
@@ -316,7 +339,7 @@ export default class BundleMap extends Component {
                 ...base_layers,
                 ...map_wms_list.reduce((acc_main, wms) =>
                 {
-                        const tiles = wms.layers.map((layer) => layer.tile)
+                        const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
                         return [...acc_main, ...tiles]
                 }, []),
                 vector_layer,
@@ -340,6 +363,7 @@ export default class BundleMap extends Component {
         const closer = this.element_closer
         overlay.setPosition(undefined);
         closer.blur();
+        this.setVisibleMarket(false)
         // this.state.vector_layer.setSource(null)
     }
 
@@ -373,7 +397,7 @@ export default class BundleMap extends Component {
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-            this.setState({coordinate_clicked})
+            this.setState({ coordinate_clicked })
             this.showFeaturesAt(coordinate)
         }
     }
@@ -412,7 +436,7 @@ export default class BundleMap extends Component {
             if (is_visible) {
                 add_layers.map(layer => {
                     this.is_not_visible_layers.push(layer.code)
-                    layer.tile.setVisible(false)
+                    layer.wms_or_cache_ur ? layer.tile.setVisible(false) : layer.wms_tile.setVisible(false)
                 })
             }
             else {
@@ -422,14 +446,14 @@ export default class BundleMap extends Component {
 
                     })
                     this.is_not_visible_layers = filtered
-                    layer.tile.setVisible(false)
+                    layer.wms_or_cache_ur ? layer.tile.setVisible(false) : layer.wms_tile.setVisible(false)
                 })
             }
             const { aimag_name, search_coordinate, sum_name, search_scale } = this.state
             this.getOnlyFeature(aimag_name, search_coordinate, sum_name, search_scale, this.is_not_visible_layers)
         } else {
             add_layers.map(layer => {
-                layer.tile.setVisible(is_visible)
+                layer.wms_or_cache_ur ? layer.tile.setVisible(is_visible) : layer.wms_tile.setVisible(is_visible)
             })
         }
     }
@@ -455,6 +479,7 @@ export default class BundleMap extends Component {
         })
         this.setState({ filtered_wms: undefined, filtered_layer: undefined })
         this.is_not_visible_layers = []
+        this.onClickCloser()
     }
 
     getKiloFromScale(scale) {
@@ -839,10 +864,6 @@ export default class BundleMap extends Component {
                     layer.setVisible(true)
                     this.setState({ filtered_layer: layer })
                 }
-                else {
-                    alert("Ямар нэгэн давхарга нээгээгүй байна")
-                    this.toggleSidebar(false)
-                }
             })
     }
 
@@ -873,6 +894,7 @@ export default class BundleMap extends Component {
     }
 
     toggleSidebar(is_not_open) {
+
         let is_setState = true
         if (is_not_open == this.state.is_sidebar_open) {
             is_setState = false
@@ -882,21 +904,28 @@ export default class BundleMap extends Component {
                 is_sidebar_open: !prevState.is_sidebar_open,
             }))
         }
+
+        var islaod
         if(this.state.is_sidebar_open){
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, true, this.addLayerToSearch)
-        }else{
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, false, this.addLayerToSearch)
+            islaod = true
         }
+
+        else {
+            islaod = false
+        }
+        this.controls.sidebar.showSideBar(this.state.map_wms_list, islaod, this.addLayerToSearch)
+
     }
 
     searchSidebar(event) {
         this.setState(prevState => ({
             is_search_sidebar_open: !prevState.is_search_sidebar_open,
         }))
+
         if(this.state.is_search_sidebar_open){
             this.controls.searchbar.showSideBar(null, true)
-            this.resetFilteredOnlyFeature()
-        }else{
+        }
+        else {
             this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature, this.setFeatureOnMap)
         }
     }

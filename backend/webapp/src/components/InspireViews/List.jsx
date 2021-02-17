@@ -28,7 +28,8 @@ export class List extends Component {
             view_style_name: '',
             geom_type: '',
             is_loading: false,
-            property_loading: false
+            property_loading: false,
+            cache_values: []
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
@@ -56,9 +57,13 @@ export class List extends Component {
     getProperties(fid, tid, fname, event) {
         this.active_view(event)
         this.setState({fid, tid, fname, property_loading: true})
-        service.getPropertyFields(fid).then(({success ,fields, id_list, view_name, url, style_name, geom_type}) => {
+        service.getPropertyFields(fid).then(({success ,fields, id_list, view_name, url, style_name, geom_type, cache_values}) => {
             if(success){
-                this.setState({fields, id_list, view_name, url, view_style_name: style_name, geom_type, property_loading:false})
+                this.setState({
+                        fields, id_list, view_name, url,
+                        view_style_name: style_name, geom_type,
+                        property_loading:false, cache_values
+                    })
             }
             else this.setState({property_loading: false})
         })
@@ -128,7 +133,7 @@ export class List extends Component {
     }
 
     render() {
-        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading} = this.state
+        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading, cache_values} = this.state
         return (
             <div className="row m-0">
                 <div className="col-md-6">
@@ -190,6 +195,7 @@ export class List extends Component {
                             </div>
                         </div>
                     </div>
+                    <Loader is_loading={is_loading}/>
                 </div>
                 <SideBar
                     getAll={this.getAll}
@@ -205,8 +211,8 @@ export class List extends Component {
                     view_style_name={view_style_name}
                     geom_type={geom_type}
                     property_loading={property_loading}
+                    cache_values={cache_values}
                 />
-                <Loader is_loading={is_loading}/>
             </div>
         )
     }

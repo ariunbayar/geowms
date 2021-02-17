@@ -24,7 +24,7 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee
+from .models import Org, Employee, EmployeeAddress
 from govorg.backend.org_request.models import ChangeRequest
 
 from main.decorators import ajax_required
@@ -57,7 +57,14 @@ def all(request, payload, level):
 def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
-    employee = Employee.objects.filter(user=user).first()
+
+    employee = Employee.objects
+    employee = employee.filter(user=user)
+    employee = employee.first()
+
+    address = EmployeeAddress.objects
+    address = address.filter(employee=employee)
+    address = address.first()
 
     employees_display = {
         'id': user.id,
@@ -75,6 +82,14 @@ def employee_detail(request, pk):
         'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+        'phone_number': employee.phone_number,
+        'level_1': address.level_1,
+        'level_2': address.level_2,
+        'level_3': address.level_3,
+        'street': address.street,
+        'apartment': address.apartment,
+        'door_number': address.door_number,
+        'point': address.point.json,
     }
 
     return JsonResponse({'success': True, 'employee': employees_display})
@@ -156,19 +171,34 @@ def _employee_validation(payload, user):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_update(request, payload, pk, level):
-    username = payload.get('username')
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    gender = payload.get('gender')
-    register = payload.get('register')
-    is_admin = payload.get('is_admin')
-    password = payload.get('password')
-    is_super = payload.get('is_super')
-    re_password_mail = payload.get('re_password_mail')
+    payload = payload.get("payload")
+
+    values = payload.get('values')
+    username = values.get('username')
+    position = values.get('position')
+    first_name = values.get('first_name')
+    last_name = values.get('last_name')
+    email = values.get('email')
+    gender = values.get('gender')
+    register = values.get('register')
+    is_admin = values.get('is_admin')
+    password = values.get('password')
+    is_super = values.get('is_super')
+    phone_number = values.get('phone_number')
+    re_password_mail = values.get('re_password_mail')
+
+    address = payload.get('address')
+    level_1 = address.get('level_1')
+    level_2 = address.get('level_2')
+    level_3 = address.get('level_3')
+    street = address.get('street')
+    apartment = address.get('apartment')
+    door_number = address.get('door_number')
+    point_coordinate = address.get('point_coordinate')
+    point = _get_point_for_db(point_coordinate)
+
     user = get_object_or_404(User, pk=pk)
-    errors = _employee_validation(payload, user)
+    errors = _employee_validation(values, user)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
@@ -177,44 +207,87 @@ def employee_update(request, payload, pk, level):
     else:
         is_super = False
 
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = email
-    user.gender = gender
-    user.register = register.upper()
-    user.username = username
-    user.is_superuser = is_super
-    if password:
-        user.set_password(password)
-    user.save()
-    if re_password_mail:
-        subject = 'Геопортал нууц үг солих'
-        text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-        utils.send_approve_email(user, subject, text)
-    Employee.objects.filter(user_id=pk).update(position=position, is_admin=is_admin)
+    with transaction.atomic():
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.gender = gender
+        user.register = register.upper()
+        user.username = username
+        user.is_superuser = is_super
+        if password:
+            user.set_password(password)
+        user.save()
+
+        if re_password_mail:
+            subject = 'Геопортал нууц үг солих'
+            text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+            utils.send_approve_email(user, subject, text)
+
+        employee = Employee.objects
+        employee = employee.filter(user_id=pk)
+        employee.update(
+            position=position,
+            is_admin=is_admin,
+            phone_number=phone_number
+        )
+        employee = employee.first()
+
+        address = EmployeeAddress.objects
+        address = address.filter(employee=employee)
+        address.update(
+            point=point,
+            level_1=level_1,
+            level_2=level_2,
+            level_3=level_3,
+            street=street,
+            apartment=apartment,
+            door_number=door_number,
+        )
 
     return JsonResponse({'success': True, 'errors': errors})
+
+
+def _get_point_for_db(coordinate):
+    if isinstance(coordinate, str):
+        coordinate = coordinate.split(",")
+
+    point = utils.get_geom_for_filter_from_coordinate(coordinate, 'Point')
+    return point
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_add(request, payload, level, pk):
+    payload = payload.get('payload')
 
     org = get_object_or_404(Org, pk=pk, level=level)
 
-    username = payload.get('username')
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    gender = payload.get('gender')
-    register = payload.get('register')
-    is_admin = payload.get('is_admin')
-    is_super = payload.get('is_super')
+    values = payload.get('values')
+    username = values.get('username')
+    position = values.get('position')
+    first_name = values.get('first_name')
+    last_name = values.get('last_name')
+    email = values.get('email')
+    gender = values.get('gender')
+    register = values.get('register')
+    is_admin = values.get('is_admin')
+    is_super = values.get('is_super')
+    phone_number = values.get('phone_number')
+
+    address = payload.get('address')
+    level_1 = address.get('level_1')
+    level_2 = address.get('level_2')
+    level_3 = address.get('level_3')
+    street = address.get('street')
+    apartment = address.get('apartment')
+    door_number = address.get('door_number')
+    point_coordinate = address.get('point_coordinate')
+    point = _get_point_for_db(point_coordinate)
 
     errors = {}
-    errors = _employee_validation(payload, None)
+    errors = _employee_validation(values, None)
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
@@ -239,7 +312,19 @@ def employee_add(request, payload, level, pk):
         employee.user_id = user.id
         employee.is_admin = is_admin
         employee.token = TokenGeneratorEmployee().get()
+        employee.phone_number = phone_number
         employee.save()
+
+        employee_address = EmployeeAddress()
+        employee_address.employee = employee
+        employee_address.level_1 = level_1
+        employee_address.level_2 = level_2
+        employee_address.level_3 = level_3
+        employee_address.street = street
+        employee_address.apartment = apartment
+        employee_address.door_number = door_number
+        employee_address.point = point
+        employee_address.save()
 
         utils.send_approve_email(user)
 
@@ -1217,16 +1302,22 @@ def _get_roles_display():
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def form_options(request):
+def form_options(request, option):
 
     admin_levels = utils.get_administrative_levels()
     roles = _get_roles_display()
 
-    rsp = {
-        'success': True,
-        'secondOrders': admin_levels,
-        'roles': roles,
-        'firstOrder_geom': utils.get_1stOrder_geo_id(),
-    }
+    if option == 'second':
+        rsp = {
+            'success': True,
+            'secondOrders': admin_levels
+        }
+    else:
+        rsp = {
+            'success': True,
+            'secondOrders': admin_levels,
+            'roles': roles,
+            'firstOrder_geom': utils.get_1stOrder_geo_id(),
+        }
 
     return JsonResponse(rsp)

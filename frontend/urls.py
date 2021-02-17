@@ -74,6 +74,8 @@ urlpatterns = [
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
         path('<int:pk>/get-details/', profile_views.get_detail, name='tseg-details'),
+        path('check-email/', profile_views.check_email, name='check-email'),
+        path('set-email/', profile_views.set_email, name='set-email'),
         path('info/', profile_views.user_info),
         path('update-password/', profile_views.user_update_password),
     ], 'profile'))),
