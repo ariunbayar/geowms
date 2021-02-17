@@ -43,7 +43,15 @@ export class CovidPage extends Component {
             text6: '',
             text7: '',
             text8: 'Гарчиг',
-            text9: 'Мэдээллийн эх сурвалж'
+            text9: 'Мэдээллийн эх сурвалж',
+            text10: 'Батлагдсан',
+            text11: 'Эдгэрсэн',
+            color1: "rgb(255, 204, 229)",
+            color2: "rgb(204, 255, 204)",
+            numberplus1: '+13',
+            numberplus1: '+42',
+            numbercount1: '1656',
+            numbercount2: '1211'
         }
     }
 
@@ -60,7 +68,9 @@ export class CovidPage extends Component {
     }
 
     render() {
-        const { src1, src2, src3,text1, text2, text3, text4, text5, text6, text7, text8, text9, count1, count2, count3, count4, count5, count6, count7 } = this.state
+        const { src1, src2, src3,text1, text2, text3, text4, text5, text6, text7, text8, text9, count1, count2, count3, count4, count5, count6, count7, color1, color2,
+            numberplus1, numberplus2,
+            numbercount1, numbercount2 } = this.state
         const {
             emy_logo,
             batlagdsan_tohioldol,
@@ -105,14 +115,10 @@ export class CovidPage extends Component {
                         <Count text={text7} src={src2} count={niit_eruul_mend_baiguullaga_too}/>
                     </div>
                     <div className="col-lg-4 d-flex flex-column border border-danger">
-                        <div className="card">
-                            aaaa6
-                        </div>
+                        <Graphic text={text10} color={color1} numberplus={numberplus1} numbercount={numbercount1}/>
                     </div>
                     <div className="col-lg-4 d-flex flex-column border border-danger">
-                        <div className="card">
-                            aaaa7
-                        </div>
+                        <Graphic text={text10} color={color2} numberplus={numberplus2} numbercount={numbercount2}/>
                     </div>
                     <div className="col-lg-2 d-flex flex-column border border-danger">
                         <Text text={text9}/>
