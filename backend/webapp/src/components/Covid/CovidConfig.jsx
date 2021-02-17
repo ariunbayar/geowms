@@ -16,6 +16,7 @@ const validationSchema = Yup.object().shape({
     emlegiin_too: Yup.string(),
     niit_eruul_mend_baiguullaga_too: Yup.string(),
     gzbgzzg_logo: Yup.string(),
+    title: Yup.string(),
 })
 
 export default class CovidConfig extends Component {
@@ -36,6 +37,7 @@ export default class CovidConfig extends Component {
                 emlegiin_too:'',
                 niit_eruul_mend_baiguullaga_too:'',
                 gzbgzzg_logo:'',
+                title:'',
             },
             values: {},
         }
@@ -131,6 +133,17 @@ export default class CovidConfig extends Component {
                             return (
                                 <Form>
                                     <fieldset disabled={ !is_editing }>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="title">title</label>
+                                                <Field
+                                                    name="title"
+                                                    id="id_title"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="emy_logo">emy_logo</label>

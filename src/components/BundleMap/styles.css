@@ -359,3 +359,29 @@ element.style {
 .borderless th {
     text-transform: lowercase;
 }
+
+.суурь-давхаргууд{
+    right: 8px;
+    position: absolute;
+    bottom: 9px;
+
+}
+.суурь-давхаргууд > .суурь-давхарга{
+    display: block;
+    width: 8rem;
+    height: 4.5rem;
+    overflow: hidden;
+    margin: 1px;
+    border-radius: 2px;
+    float: right;
+    transition: opacity .15s ease-out;
+}
+.суурь-давхаргууд > .суурь-давхарга.active,
+.суурь-давхаргууд:hover > .суурь-давхарга.active:hover,
+.суурь-давхаргууд > .суурь-давхарга:hover {
+    opacity: 1;
+}
+.суурь-давхаргууд > .суурь-давхарга,
+.суурь-давхаргууд:hover > .суурь-давхарга.active {
+    opacity: .7;
+}

@@ -471,6 +471,7 @@ def covid_configs(request):
         'emlegiin_too': '',
         'niit_eruul_mend_baiguullaga_too': '',
         'gzbgzzg_logo': '',
+        'title': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -499,6 +500,7 @@ def covid_configs_save(request, payload):
         'emlegiin_too',
         'niit_eruul_mend_baiguullaga_too',
         'gzbgzzg_logo',
+        'title',
     )
 
     for config_name in config_names:

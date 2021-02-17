@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
     'frontend.secure.apps.SecureConfig',
     'frontend.payment.apps.PaymentConfig',
+    'frontend.covid.apps.CovidConfig',
     'frontend.page.apps.PageConfig',
     'frontend.profile.apps.ProfileConfig',
     'frontend.qpay.apps.QpayConfig',
