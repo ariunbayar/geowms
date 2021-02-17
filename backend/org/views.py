@@ -1340,16 +1340,30 @@ def get_addresses(request, level, pk):
     employees = employees.filter(org=org)
 
     for employee in employees:
-        info = dict()
         addresses = EmployeeAddress.objects
         addresses = addresses.filter(employee=employee)
         addresses = addresses.first()
         if addresses:
+            point_info = dict()
             point = addresses.point
-            info['id'] = addresses.employee.id
-            info['first_name'] = addresses.employee.user.first_name # etseg
-            info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
-            feature = utils.get_feature_from_geojson(point.json, properties=info)
+            point_info['id'] = addresses.employee.id
+            point_info['first_name'] = addresses.employee.user.first_name # etseg
+            point_info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
+            feature = utils.get_feature_from_geojson(point.json, properties=point_info)
+            points.append(feature)
+
+        erguul = EmployeeErguul.objects
+        erguul = erguul.filter(employee=employee)
+        erguul = erguul.first()
+        if erguul:
+            erguul_info = dict()
+            point = erguul.point
+            erguul_info['id'] = erguul.employee.id
+            erguul_info['is_erguul'] = True
+            erguul_info['first_name'] = erguul.employee.user.first_name # etseg
+            erguul_info['last_name'] = erguul.employee.user.last_name # onooj ogson ner
+
+            feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
             points.append(feature)
 
     feature_collection = FeatureCollection(points)

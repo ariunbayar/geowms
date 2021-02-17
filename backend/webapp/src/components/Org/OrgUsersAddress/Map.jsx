@@ -291,7 +291,9 @@ export default class AddressMap extends Component {
         const source = this.vector_layer.getSource()
 
         const start = this.start_coordinate
+        console.log(start);
         const end = this.end_coordinates
+        console.log(end);
         const line_string = new LineString([start, end])
         const line_feature = new Feature(line_string)
         const extent = line_feature.getGeometry().getExtent()
@@ -381,8 +383,15 @@ export default class AddressMap extends Component {
                 dataProjection: this.state.projection_data,
                 featureProjection: this.state.projection_display,
             })[0];
+            const properties = feature.getProperties()
+
             const full_name = this.getFullName(feature)
-            const style = this.featureWithTextStyle(full_name)
+            let style = this.featureWithTextStyle(full_name)
+
+            if (properties.is_erguul) {
+                style = this.featureWithTextStyle(full_name, 'green')
+            }
+
             feature.setStyle(style)
             source.addFeature(feature)
         })
