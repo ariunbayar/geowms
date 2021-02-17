@@ -100,7 +100,7 @@ export class CovidPage extends Component {
                     <div className="col-8 col-lg-8 col-xl-8 mt-4">
                         <div className="card">
                             <div className="card-body">
-                                <InspireMap bundle={{'id': 10}}/>
+                                <InspireMap bundle={{'id': 19}}/>
                             </div>
                         </div>
                     </div>
