@@ -70,7 +70,7 @@ export class CovidPage extends Component {
                             <div className="col-12 mt-4 col-lg-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
-                                        <Logo src={'https://covid19.mohs.mn/static/images/moh.png'}/>
+                                        <Logo src={emy_logo}/>
                                     </div>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@ export class CovidPage extends Component {
                             <div className="col-12 mt-4 col-lg-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
-                                        <Logo src={'https://www.gazar.gov.mn/wave/logov5.png'}/>
+                                        <Logo src={gzbgzzg_logo}/>
                                     </div>
                                 </div>
                             </div>

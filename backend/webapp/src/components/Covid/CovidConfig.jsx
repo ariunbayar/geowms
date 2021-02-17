@@ -135,7 +135,7 @@ export default class CovidConfig extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="title">title</label>
+                                                <label htmlFor="title">Гарчиг</label>
                                                 <Field
                                                     name="title"
                                                     id="id_title"
@@ -146,7 +146,7 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="emy_logo">emy_logo</label>
+                                                <label htmlFor="emy_logo">ЕМЯ logo</label>
                                                 <Field
                                                     name="emy_logo"
                                                     id="id_emy_logo"
@@ -157,7 +157,18 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="batlagdsan_tohioldol">batlagdsan_tohioldol</label>
+                                                <label htmlFor="gzbgzzg_logo">ГЗБГЗЗГ logo</label>
+                                                <Field
+                                                    name="gzbgzzg_logo"
+                                                    id="id_gzbgzzg_logo"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="batlagdsan_tohioldol">Батлагдсан тохиолдол</label>
                                                 <Field
                                                     name="batlagdsan_tohioldol"
                                                     id="id_batlagdsan_tohioldol"
@@ -168,7 +179,7 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="edgersen_humuusiin_too">edgersen_humuusiin_too</label>
+                                                <label htmlFor="edgersen_humuusiin_too">Эдгэрсэн хүмүүсийн тоо</label>
                                                 <Field
                                                     name="edgersen_humuusiin_too"
                                                     id="id_edgersen_humuusiin_too"
@@ -179,7 +190,7 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="emchlegdej_bui_humuus_too">emchlegdej_bui_humuus_too</label>
+                                                <label htmlFor="emchlegdej_bui_humuus_too">Эмчлэгдэж буй хүмүүсийн тоо</label>
                                                 <Field
                                                     name="emchlegdej_bui_humuus_too"
                                                     id="id_emchlegdej_bui_humuus_too"
@@ -190,7 +201,7 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="tusgaarlagdsan_humuusiin_too">tusgaarlagdsan_humuusiin_too</label>
+                                                <label htmlFor="tusgaarlagdsan_humuusiin_too">Тусгаарлагдаж буй хүмүүсийн тоо</label>
                                                 <Field
                                                     name="tusgaarlagdsan_humuusiin_too"
                                                     id="id_tusgaarlagdsan_humuusiin_too"
@@ -201,7 +212,7 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="medeellin_eh_survalj">medeellin_eh_survalj</label>
+                                                <label htmlFor="medeellin_eh_survalj">Мэдээллийн эх сурвалж</label>
                                                 <Field
                                                     name="medeellin_eh_survalj"
                                                     id="id_medeellin_eh_survalj"
@@ -212,7 +223,7 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="emiin_sangiin_too">emiin_sangiin_too</label>
+                                                <label htmlFor="emiin_sangiin_too">Эмийн сангийн тоо</label>
                                                 <Field
                                                     name="emiin_sangiin_too"
                                                     id="id_emiin_sangiin_too"
@@ -223,7 +234,7 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="emlegiin_too">emlegiin_too</label>
+                                                <label htmlFor="emlegiin_too">Эмнэлгийн тоо</label>
                                                 <Field
                                                     name="emlegiin_too"
                                                     id="id_emlegiin_too"
@@ -234,21 +245,10 @@ export default class CovidConfig extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="niit_eruul_mend_baiguullaga_too">niit_eruul_mend_baiguullaga_too</label>
+                                                <label htmlFor="niit_eruul_mend_baiguullaga_too">Нийт эрүүл мэндийн байгуулагын тоо</label>
                                                 <Field
                                                     name="niit_eruul_mend_baiguullaga_too"
                                                     id="id_niit_eruul_mend_baiguullaga_too"
-                                                    type="text"
-                                                    className="form-control"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor="gzbgzzg_logo">gzbgzzg_logo</label>
-                                                <Field
-                                                    name="gzbgzzg_logo"
-                                                    id="id_gzbgzzg_logo"
                                                     type="text"
                                                     className="form-control"
                                                 />
