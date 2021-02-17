@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react'
 import Text from './components/text'
+import TextArea from './components/textarea'
 import Logo from './components/logo'
 import Count from './components/count'
 import {LineGraph} from './components/LineGraph'
@@ -177,7 +178,7 @@ export class CovidPage extends Component {
                     <div className="col-2 mt-4 col-lg-2 col-xl-2 ">
                         <div className="card">
                             <div className="card-body">
-                                <Count text={'Мэдээллийн эх сурвалж'} src={null} count={medeellin_eh_survalj}/>
+                                <TextArea title={'Мэдээллийн эх сурвалж'} text={medeellin_eh_survalj}/>
                             </div>
                         </div>
                     </div>

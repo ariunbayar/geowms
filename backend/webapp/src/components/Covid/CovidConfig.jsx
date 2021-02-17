@@ -216,7 +216,7 @@ export default class CovidConfig extends Component {
                                                 <Field
                                                     name="medeellin_eh_survalj"
                                                     id="id_medeellin_eh_survalj"
-                                                    type="text"
+                                                    as='textarea'
                                                     className="form-control"
                                                 />
                                             </div>
