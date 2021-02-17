@@ -538,33 +538,48 @@ export class UserAdd extends Component {
                             </div>
                             <div className="form-group col-4">
                                 <label htmlFor="street">Гудамж:</label>
-                                <input
-                                    id="street"
-                                    className="form-control"
-                                    onChange={(e) => this.setState({ street: e.target.value })}
-                                    value={street}
-                                    placeholder="Гудамжны нэрийг оруулах"
-                                />
+                                <div className="input-group">
+                                    <input
+                                        id="street"
+                                        className="form-control"
+                                        onChange={(e) => this.setState({ street: e.target.value })}
+                                        value={street}
+                                        placeholder="Гудамжны нэрийг оруулах"
+                                    />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">гудамж</span>
+                                    </div>
+                                </div>
                             </div>
                             <div className="form-group col-4">
                                 <label htmlFor="apartment">Байр:</label>
-                                <input
-                                    id="apartment"
-                                    className="form-control"
-                                    onChange={(e) => this.setState({ apartment: e.target.value })}
-                                    value={apartment}
-                                    placeholder="Байрны дугаарыг оруулах"
-                                />
+                                <div className="input-group">
+                                    <input
+                                        id="apartment"
+                                        className="form-control"
+                                        onChange={(e) => this.setState({ apartment: e.target.value })}
+                                        value={apartment}
+                                        placeholder="Байрны дугаарыг оруулах"
+                                    />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">байр</span>
+                                    </div>
+                                </div>
                             </div>
                             <div className="form-group col-4">
                                 <label htmlFor="door_number">Хаалганы дугаар:</label>
-                                <input
-                                    id="door_number"
-                                    className="form-control"
-                                    onChange={(e) => this.setState({ door_number: e.target.value })}
-                                    value={door_number}
-                                    placeholder="Хаалганы дугаарыг оруулах"
-                                />
+                                <div className="input-group">
+                                    <input
+                                        id="door_number"
+                                        className="form-control"
+                                        onChange={(e) => this.setState({ door_number: e.target.value })}
+                                        value={door_number}
+                                        placeholder="Хаалганы дугаарыг оруулах"
+                                    />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">тоот</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <EmployeeMap height='75' feature={feature} sendPointCoordinate={this.getPoint} point={point} />

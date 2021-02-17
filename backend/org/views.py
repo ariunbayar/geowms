@@ -1,5 +1,8 @@
+import os
+import io
 import json
 from geojson import FeatureCollection
+import PIL.Image as Image
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
@@ -10,6 +13,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
+from django.conf import settings
 
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
@@ -27,7 +31,7 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee, EmployeeAddress
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
 from govorg.backend.org_request.models import ChangeRequest
 
 from main.decorators import ajax_required
@@ -1330,18 +1334,22 @@ def form_options(request, option):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_addresses(request, level, pk):
-    points = []
+    points = list()
     org = get_object_or_404(Org, pk=pk, level=level)
     employees = Employee.objects
     employees = employees.filter(org=org)
 
     for employee in employees:
+        info = dict()
         addresses = EmployeeAddress.objects
         addresses = addresses.filter(employee=employee)
         addresses = addresses.first()
         if addresses:
             point = addresses.point
-            feature = utils.get_feature_from_geojson(point.json)
+            info['id'] = addresses.employee.id
+            info['first_name'] = addresses.employee.user.first_name # etseg
+            info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
+            feature = utils.get_feature_from_geojson(point.json, properties=info)
             points.append(feature)
 
     feature_collection = FeatureCollection(points)
@@ -1353,4 +1361,129 @@ def get_addresses(request, level, pk):
     return JsonResponse(rsp)
 
 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_emp_info(request, pk):
+    info = dict()
+    employee = get_object_or_404(Employee, pk=pk)
+    info['org_name'] = employee.org.name
+    info['last_name'] = employee.user.last_name # ovog
+    info['first_name'] = employee.user.first_name
+    info['phone_number'] = employee.phone_number
+    info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
+    info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
+    info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
+    info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
+    info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
+    info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
 
+    rsp = {
+        'success': True,
+        'info': info,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_erguuleg_fields(request):
+    send_fields = list()
+    for f in EmployeeErguul._meta.get_fields():
+        type_name = f.get_internal_type()
+        not_list = ['ForeignKey', 'AutoField']
+        if type_name not in not_list:
+            not_field = ['created_at']
+            if f.name not in not_field:
+                if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                    field_type = ''
+                    if 'date' in f.name:
+                        field_type = 'date'
+                    send_fields.append({
+                        'origin_name': f.name,
+                        'name': f.verbose_name,
+                        'length': f.max_length,
+                        'choices': f.choices,
+                        'disabled': False,
+                        'type': field_type,
+                    })
+    rsp = {
+        'success': True,
+        'info': send_fields,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def save_erguul(request, payload):
+    hour = ''
+
+    emp_id = payload.get('id')
+    values = payload.get('values')
+    point_coordinate = payload.get('point')
+    photo = payload.get('photo')
+
+    point = _get_point_for_db(point_coordinate)
+    employee = get_object_or_404(Employee, pk=emp_id)
+
+    date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
+    date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
+    part_time = values['part_time'] if 'part_time' in values else ''
+
+    with transaction.atomic():
+        erguul = EmployeeErguul()
+        erguul.employee = employee
+        erguul.level_3 = values['level_3'] if 'level_3' in values else ''
+        erguul.street = values['street'] if 'street' in values else ''
+        erguul.apartment = values['apartment'] if 'apartment' in values else ''
+        erguul.point = point
+        erguul.part_time = part_time
+        erguul.date_start = date_start
+        erguul.date_end = date_end
+        erguul.save()
+
+        if int(part_time) == EmployeeErguul.DAY_TIME:
+            hour = EmployeeErguul.DAY_HOUR
+        if int(part_time) == EmployeeErguul.NIGHT_TIME:
+            hour = EmployeeErguul.NIGHT_HOUR
+
+        photo = photo.split(',')
+        photo = photo[len(photo) - 1]
+        file_name = str(erguul.id) + '.png'
+        folder_name = 'covid_map'
+        path = os.path.join(settings.MEDIA_ROOT, folder_name, file_name)
+        if photo:
+            [image_x2] = utils.resize_b64_to_sizes(photo, [(720, 720)])
+            img_byte = bytearray(image_x2)
+            image = Image.open(io.BytesIO(img_byte))
+            image.save(path)
+
+        subject = 'Худалдан авалт'
+        msg = 'Та энэ заасан газарт ' + utils.datetime_to_string(date_start) + " - " + utils.datetime_to_string(date_end) + " хүртэлх хугацаанд " + hour + " цагийн хооронд эргүүл хийнэ"
+        host_name = utils.get_config('EMAIL_HOST_NAME')
+        linked_path = 'https://' + host_name + "/media/" + folder_name + "/" + file_name
+        to_email = [employee.user.email]
+        attach = '''
+            <body>
+                <dd>
+                    {msg}
+                </dd>
+                <img src={linked_path} />
+                <p>
+                    <b>Ногоон цэг</b> нь таны эргүүл хийх газар
+                    <b>Улаан цэг</b> нь таны гэрийн байршил
+                </p>
+            </body>
+        '''.format(msg=msg, linked_path=linked_path)
+
+        utils.send_email(subject, msg, to_email, attach)
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгласан',
+    }
+
+    return JsonResponse(rsp)

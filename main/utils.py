@@ -283,10 +283,9 @@ def send_approve_email(user, subject=None, text=None):
     return True
 
 
-def send_email(subject, msg, to_email):
-
+def send_email(subject, msg, to_email, attach=None):
     from_email = get_config('EMAIL_HOST_USER')
-    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email), html_message=attach)
 
 
 def get_administrative_levels():
@@ -858,7 +857,7 @@ def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
     return nearest_points
 
 
-def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
+def get_feature_from_geojson(geo_json, get_feature=True, properties=[], srid=4326):
     if isinstance(geo_json, str):
         geo_json = json.loads(geo_json)
 
@@ -871,7 +870,7 @@ def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
     geometry = class_(coordinates, srid=srid)
 
     if get_feature:
-        feature = Feature(geometry=geometry)
+        feature = Feature(geometry=geometry, properties=properties)
     else:
         feature = geometry
 
