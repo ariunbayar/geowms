@@ -4,13 +4,15 @@ export default class Logo extends Component {
 
     render() {
             return (
-                <div className="text-center">
-                    <img
-                        src={this.props.src}
-                        className="logo"
-                        alt="logo"
-                        style={{weight: '100px', height: '100px'}}
-                    />
+                <div className="card-body p-2">
+                    <div className="text-center d-flex justify-content-center">
+                        <img
+                            src={this.props.src}
+                            className="logo"
+                            alt="logo"
+                            style={{weight: '80px', height: '80px'}}
+                        />
+                    </div>
                 </div>
             )
         }
