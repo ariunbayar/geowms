@@ -6,7 +6,16 @@ import {service} from './service'
 
 
 const validationSchema = Yup.object().shape({
-    covid: Yup.string(),
+    emy_logo: Yup.string(),
+    batlagdsan_tohioldol: Yup.string(),
+    edgersen_humuusiin_too: Yup.string(),
+    emchlegdej_bui_humuus_too: Yup.string(),
+    tusgaarlagdsan_humuusiin_too: Yup.string(),
+    medeellin_eh_survalj: Yup.string(),
+    emiin_sangiin_too: Yup.string(),
+    emlegiin_too: Yup.string(),
+    niit_eruul_mend_baiguullaga_too: Yup.string(),
+    gzbgzzg_logo: Yup.string(),
 })
 
 export default class CovidConfig extends Component {
@@ -17,7 +26,16 @@ export default class CovidConfig extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
-                covid:'',
+                emy_logo:'',
+                batlagdsan_tohioldol:'',
+                edgersen_humuusiin_too:'',
+                emchlegdej_bui_humuus_too:'',
+                tusgaarlagdsan_humuusiin_too:'',
+                medeellin_eh_survalj:'',
+                emiin_sangiin_too:'',
+                emlegiin_too:'',
+                niit_eruul_mend_baiguullaga_too:'',
+                gzbgzzg_logo:'',
             },
             values: {},
         }
@@ -27,7 +45,7 @@ export default class CovidConfig extends Component {
     }
 
     componentDidMount() {
-        service.get().then((values) => {
+        service.config.covid.get().then((values) => {
             this.setState({
                 initial_values: values,
                 values,
@@ -48,8 +66,9 @@ export default class CovidConfig extends Component {
     handleSubmit(values, { setStatus, setValues }) {
 
         setStatus('saving')
-        console.log(values)
-        service.set(values)
+
+        service.config.covid
+            .save(values)
             .then(({ success }) => {
 
                 if (success) {
@@ -114,10 +133,109 @@ export default class CovidConfig extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="covid">covid</label>
+                                                <label htmlFor="emy_logo">emy_logo</label>
                                                 <Field
-                                                    name="covid"
-                                                    id="id_covid"
+                                                    name="emy_logo"
+                                                    id="id_emy_logo"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="batlagdsan_tohioldol">batlagdsan_tohioldol</label>
+                                                <Field
+                                                    name="batlagdsan_tohioldol"
+                                                    id="id_batlagdsan_tohioldol"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="edgersen_humuusiin_too">edgersen_humuusiin_too</label>
+                                                <Field
+                                                    name="edgersen_humuusiin_too"
+                                                    id="id_edgersen_humuusiin_too"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="emchlegdej_bui_humuus_too">emchlegdej_bui_humuus_too</label>
+                                                <Field
+                                                    name="emchlegdej_bui_humuus_too"
+                                                    id="id_emchlegdej_bui_humuus_too"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="tusgaarlagdsan_humuusiin_too">tusgaarlagdsan_humuusiin_too</label>
+                                                <Field
+                                                    name="tusgaarlagdsan_humuusiin_too"
+                                                    id="id_tusgaarlagdsan_humuusiin_too"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="medeellin_eh_survalj">medeellin_eh_survalj</label>
+                                                <Field
+                                                    name="medeellin_eh_survalj"
+                                                    id="id_medeellin_eh_survalj"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="emiin_sangiin_too">emiin_sangiin_too</label>
+                                                <Field
+                                                    name="emiin_sangiin_too"
+                                                    id="id_emiin_sangiin_too"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="emlegiin_too">emlegiin_too</label>
+                                                <Field
+                                                    name="emlegiin_too"
+                                                    id="id_emlegiin_too"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="niit_eruul_mend_baiguullaga_too">niit_eruul_mend_baiguullaga_too</label>
+                                                <Field
+                                                    name="niit_eruul_mend_baiguullaga_too"
+                                                    id="id_niit_eruul_mend_baiguullaga_too"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="gzbgzzg_logo">gzbgzzg_logo</label>
+                                                <Field
+                                                    name="gzbgzzg_logo"
+                                                    id="id_gzbgzzg_logo"
                                                     type="text"
                                                     className="form-control"
                                                 />
