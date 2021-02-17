@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {service} from './service'
 import Modal from "../Modal"
+import BackButton from "@utils/Button/BackButton"
 
 
 export class Дэлгэрэнгүй extends Component {
@@ -56,14 +57,6 @@ export class Дэлгэрэнгүй extends Component {
                     title={modalTitle}
                     >
                 </Modal>}
-
-                <div className="row">
-                    <div className="col-md-12 mb-4">
-                        <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
-                            <i className="fa fa-angle-double-left"></i> Буцах
-                        </a>
-                    </div>
-                </div>
                 <div className="row">
 
                     <div className="col-md-12 mb-4">
@@ -83,6 +76,7 @@ export class Дэлгэрэнгүй extends Component {
                     </div>
 
                 </div>
+                <BackButton {...this.props} name={'Буцах'}></BackButton>
             </div>
         )
     }

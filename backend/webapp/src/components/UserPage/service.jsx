@@ -3,7 +3,6 @@ export const service = {
     detail,
     userDetailChange,
     roleCreate,
-    paginatedList
 }
 
 const prefix = '/back/api/user'
@@ -88,13 +87,4 @@ function roleCreate(payload){
         body: JSON.stringify(payload),
     }
     return fetch(`${prefix}/roleCreate/`, opts).then(handleResponse)
-}
-
-function paginatedList(page, per_page, query, sort_name) {
-    const requestOptions = {
-        ..._getPostOptions(),
-        body: JSON.stringify({ page, per_page, query, sort_name }),
-    }
-
-    return fetch(`${prefix}/paginatedList/`, requestOptions).then(handleResponse)
 }

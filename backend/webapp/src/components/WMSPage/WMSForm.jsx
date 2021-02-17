@@ -6,6 +6,8 @@ import WMSCheckFormSort from './WMSCheckFormSort'
 import ModalAlert from '../ModalAlert'
 import {Notif} from '@utils/Notification'
 import './styles.css'
+import BackButton from "@utils/Button/BackButton"
+
 
 export class WMSForm extends Component {
 
@@ -212,13 +214,6 @@ export class WMSForm extends Component {
                     <div className="card">
                         <div className="card-body">
                             <div className="form-group">
-                                <NavLink to={`/back/wms/`}>
-                                    <button className="btn gp-btn-primary btn-block waves-effect waves-light m-1"  >
-                                        Буцах
-                                        </button>
-                                </NavLink>
-                            </div>
-                            <div className="form-group">
                                 <label htmlFor="id_name">Нэр</label>
                                 <input
                                     type="text"
@@ -287,6 +282,7 @@ export class WMSForm extends Component {
                         handleWmsLayerRefresh={this.handleWmsLayerRefresh}>
                     </WMSCheckFormSort>
                 </div>
+                <BackButton {...this.props} name={'Буцах'}></BackButton>
             </div>
         )
     }
