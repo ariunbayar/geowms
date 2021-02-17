@@ -2,9 +2,10 @@ import React, { Component, Fragment } from 'react'
 import Text from './components/text'
 import Logo from './components/logo'
 import Count from './components/count'
+import {LineGraph} from './components/LineGraph'
+import {PieChart} from './components/PieChart'
 import {service} from './service'
 import InspireMap from "@utils/BundleMap"
-
 
 
 export class CovidPage extends Component {
@@ -25,25 +26,6 @@ export class CovidPage extends Component {
                 gzbgzzg_logo:'',
                 title:'',
             },
-            src1: "/static/assets/image/logo/logo.png",
-            src2: "/static/assets/image/logo/logo-2.png",
-            src3: "/static/assets/image/logo/gzbgzzg-logo.jpg",
-            count1: 431,
-            count2: '',
-            count3: '',
-            count4: '',
-            count5: '',
-            count6: '',
-            count7: '',
-            text1: '',
-            text2: '',
-            text3: '',
-            text4: '',
-            text5: '',
-            text6: '',
-            text7: '',
-            text8: 'Гарчиг',
-            text9: 'Мэдээллийн эх сурвалж'
         }
     }
 
@@ -60,7 +42,6 @@ export class CovidPage extends Component {
     }
 
     render() {
-        const { src1, src2, src3,text1, text2, text3, text4, text5, text6, text7, text8, text9, count1, count2, count3, count4, count5, count6, count7 } = this.state
         const {
             emy_logo,
             batlagdsan_tohioldol,
@@ -76,48 +57,118 @@ export class CovidPage extends Component {
         } = this.state.initial_values
 
         return (
-            <div className="col-ld-12">
-                <div className="row border border-danger">
-                    <div className="col-lg-12 d-flex border border-danger">
+            <div className="col-lg-12">
+                <div className="row card mt-3 ml-0 mr-0">
+                    <div className="row card-body">
                         <Text text={title}/>
                     </div>
                 </div>
-                <div className="row border border-danger">
-                    <div className="col-lg-2 d-flex flex-column border border-danger">
-                        <Logo src={src1}/>
-                    </div>
-                    <div className="col-lg-8 border border-danger">
-                        <div className="card">
-                            aaaa33333
-                            <InspireMap bundle={{'id': 10}}/>
 
+                <div className="row">
+                    <div className="col-2 col-lg-2 col-xl-2">
+                        <div className="row">
+                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Logo src={'https://covid19.mohs.mn/static/images/moh.png'}/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Count text={'Батлагдсан тохиолдол'} src={null} count={batlagdsan_tohioldol}/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Count text={'Эдгэрсэн хүмүүсийн тоо'} src={null} count={edgersen_humuusiin_too}/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-12 mt-3 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Count text={'Эмчлэгдэж буй хүмүүсийн тоо'} src={null} count={emchlegdej_bui_humuus_too}/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className="col-lg-2 d-flex flex-column border border-danger">
-                        <Logo src={src3}/>
-                        <Count text={text4} src={src2} count={emiin_sangiin_too}/>
-                        <Count text={text5} src={src2} count={emiin_sangiin_too}/>
-                        <Count text={text6} src={src2} count={emlegiin_too}/>
+                    <div className="col-8 col-lg-8 col-xl-8 mt-4">
+                        <div className="card">
+                            <div className="card-body">
+                                <InspireMap bundle={{'id': 10}}/>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-2 col-lg-2 col-xl-2">
+                        <div className="row">
+                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Logo src={'https://www.gazar.gov.mn/wave/logov5.png'}/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Count text={'Нийт эрүүл мэндийн байгуулагын тоо'} src={null} count={niit_eruul_mend_baiguullaga_too}/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Count text={'Эмнэлгийн тоо'} src={null} count={emlegiin_too}/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Count text={'Эмийн сангийн тоо'} src={null} count={emiin_sangiin_too}/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="row border border-danger">
-                    <div className="col-lg-2 d-flex flex-column border border-danger">
-                        <Count text={text7} src={src2} count={niit_eruul_mend_baiguullaga_too}/>
-                    </div>
-                    <div className="col-lg-4 d-flex flex-column border border-danger">
+
+                <div className="row mb-4">
+                    <div className="col-2 mt-4 col-lg-2 col-xl-2">
                         <div className="card">
-                            aaaa6
+                            <div className="card-body">
+                                <Count text={'Тусгаарлагдаж буй хүмүүсийн тоо'} src={null} count={tusgaarlagdsan_humuusiin_too}/>
+                            </div>
                         </div>
                     </div>
-                    <div className="col-lg-4 d-flex flex-column border border-danger">
-                        <div className="card">
-                            aaaa7
+                    <div className="col-4 mt-4 col-lg-4 col-xl-4">
+                        <div className="card" style={{height: '400px'}}>
+                            <div className="card-body">
+                                <PieChart></PieChart>
+                            </div>
                         </div>
                     </div>
-                    <div className="col-lg-2 d-flex flex-column border border-danger">
-                        <Text text={text9}/>
+                    <div className="col-4 mt-4 col-lg-4 col-xl-4 ">
+                        <div className="card" style={{height: '400px'}}>
+                            <div className="card-body">
+                                <LineGraph></LineGraph>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-2 mt-4 col-lg-2 col-xl-2 ">
+                        <div className="card">
+                            <div className="card-body">
+                                <Count text={'Мэдээллийн эх сурвалж'} src={null} count={medeellin_eh_survalj}/>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         )
     }

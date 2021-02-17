@@ -6,7 +6,7 @@ export default class Text extends Component {
             return (
                 <div className="card-body p-2">
                     <div className="text-center d-flex justify-content-center">
-                        <a>{this.props.text}</a>
+                        <h1>{this.props.text}</h1>
                     </div>
                 </div>
             )

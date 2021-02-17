@@ -6,11 +6,13 @@ export class App extends Component {
 
     render() {
         return (
-          <BrowserRouter>
-              <Switch>
-                <Route path="/covid/" component={CovidPage}/>
-              </Switch>
-          </BrowserRouter>
+          <div className="bg-light">
+            <BrowserRouter>
+                <Switch>
+                  <Route path="/covid/" component={CovidPage}/>
+                </Switch>
+            </BrowserRouter>
+          </div>
         )
     }
 }

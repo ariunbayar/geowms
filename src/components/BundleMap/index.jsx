@@ -947,7 +947,7 @@ export default class InspireMap extends Component {
             <div>
                 <div className="row">
                     <div className="col-md-12 px-0">
-                        <div id="map" style={{height:"calc(90vh - 80px)"}}></div>
+                        <div id="map" style={{height:"calc(90vh - 320px)"}}></div>
                         {
                             is_modal_info_open &&
                             <ModalAlert

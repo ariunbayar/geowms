@@ -5,7 +5,6 @@ import {Purchase} from './Purchase/Purchase'
 import {PolygonPurchase} from './Purchase/PolygonPurchase'
 import {Failed} from './Failed/Failed'
 import {Details} from '../components/history/details'
-import {CovidPage} from './covid/Index'
 
 export class App extends Component {
 
@@ -18,7 +17,6 @@ export class App extends Component {
                 <Route path={"/payment/failed/:id/"} component={Failed} />
                 <Route path={"/payment/history/api/details/:id/"} component={Details} />
                 <Route path="/payment/history/" component={History}/>
-                <Route path="/payment/covid/" component={CovidPage}/>
               </Switch>
           </BrowserRouter>
         )

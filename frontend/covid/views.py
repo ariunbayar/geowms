@@ -9,13 +9,7 @@ from main import utils
 
 
 def index(request):
-    print("ewrwerwerw")
-    print("ewrwerwerw")
-    print("ewrwerwerw")
-    print("ewrwerwerw")
-    print("ewrwerwerw")
-    print("ewrwerwerw")
-    print("ewrwerwerw")
+
     context = {
         'covid': "covid"
     }

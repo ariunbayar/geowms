@@ -1,44 +1,29 @@
 import React, { Component } from "react"
 import { Line } from "react-chartjs-2";
-// import {service} from "../service"
 
 
-export default class Graphic extends Component {
+export class LineGraph extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            user_log_date: [],
-            user_log_date_count: []
+            label: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+            count: [2, 4, 12, 78, 12, 44, 22]
         }
-        // this.handleBrowserCount=this.handleBrowserCount.bind(this)
     }
-    // componentDidMount(){
-    //     this.handleBrowserCount()
+    componentDidMount(){
 
-    // }
-
-    // handleBrowserCount(){
-    //     service.loginDateCount().then(({ user_log_date , user_log_date_count}) => {
-    //         if(user_log_date_count){
-    //             this.setState({user_log_date, user_log_date_count})
-    //         }
-    //     })
-
-    // }
+    }
 
     render() {
-        const {user_log_date , user_log_date_count } = this.state
+        const {label , count } = this.state
         const dataLine = {
-            labels:user_log_date,
+            labels: label,
             datasets: [
                 {
-                    label: this.props.text,
-                    numberplus: this.props.numberplus,
-                    numbercount: this.props.numbercount,
+                    label: "Батлагдсан",
                     fill: true,
                     lineTension: 0.3,
                     backgroundColor: "rgba(184, 185, 210, .3)",
-                    // backgroundColor: this.props.color,
                     borderColor: "rgb(35, 26, 136)",
                     borderCapStyle: "butt",
                     borderDash: [],
@@ -53,13 +38,14 @@ export default class Graphic extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: user_log_date_count
+                    data: count
                 },
             ]
         }
 
         return (
-            <Line width={100} height={30} data={dataLine} options={{ responsive: true }} />
+            <Line  width={100} height={30} data={dataLine} options={{ responsive: true }} />
         )
     }
+
 }
