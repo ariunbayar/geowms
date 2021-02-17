@@ -89,6 +89,7 @@ urlpatterns = [
         path('<int:pk>/emp-info/', org_views.get_emp_info),
         path('erguuleg-fields/', org_views.get_erguuleg_fields),
         path('save-erguul/', org_views.save_erguul),
+        path('get-erguul/', org_views.get_erguuls),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -132,6 +133,8 @@ urlpatterns = [
         path('dan/save/', config_views.dan_configs_save),
         path('payment/', config_views.payment_configs),
         path('payment/save/', config_views.payment_configs_save),
+        path('covid/', config_views.covid_configs),
+        path('covid/save/', config_views.covid_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([

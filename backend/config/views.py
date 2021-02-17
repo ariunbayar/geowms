@@ -453,3 +453,62 @@ def payment_configs_save(request, payload):
         )
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def covid_configs(request):
+
+    default_values = {
+        'emy_logo': '',
+        'batlagdsan_tohioldol': '',
+        'edgersen_humuusiin_too': '',
+        'emchlegdej_bui_humuus_too': '',
+        'tusgaarlagdsan_humuusiin_too': '',
+        'medeellin_eh_survalj': '',
+        'emiin_sangiin_too': '',
+        'emlegiin_too': '',
+        'niit_eruul_mend_baiguullaga_too': '',
+        'gzbgzzg_logo': '',
+        'title': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def covid_configs_save(request, payload):
+
+    config_names = (
+        'emy_logo',
+        'batlagdsan_tohioldol',
+        'edgersen_humuusiin_too',
+        'emchlegdej_bui_humuus_too',
+        'tusgaarlagdsan_humuusiin_too',
+        'medeellin_eh_survalj',
+        'emiin_sangiin_too',
+        'emlegiin_too',
+        'niit_eruul_mend_baiguullaga_too',
+        'gzbgzzg_logo',
+        'title',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
