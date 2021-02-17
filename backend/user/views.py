@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from geoportal_app.models import User
 from geoportal_app.models import Role
 from backend.org.models import Employee
+from main.components import Datatable
 
 
 
@@ -140,41 +141,26 @@ def roleCreate(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def paginatedList(request, payload):
 
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('per_page')
-    sort_name = payload.get('sort_name')
+    def _get_roles(pk):
+        user = User.objects.filter(pk=pk).first()
+        role = user.roles.all().first()
+        return role.get_id_display() if role else ''
 
-    if not sort_name:
-        sort_name = 'id'
+    оруулах_талбарууд = ['id', 'last_name', 'first_name', 'is_superuser', 'email', 'is_active', 'is_sso']
 
-    employee_ids = Employee.objects.all().values_list('user_id', flat=True)
+    datatable = Datatable(
+        model=User,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд,
+    )
 
-    qs = User.objects
-    qs = qs.exclude(pk__in=employee_ids)
-    qs = qs.annotate(search=SearchVector(
-        'last_name',
-        'first_name',
-        'email',
-        'gender')
-        )
-
-    if query:
-        qs = qs.filter(search__contains=query)
-    qs = qs.order_by(sort_name)
-    user_list = qs
-
-    total_items = Paginator(user_list, per_page)
-    items_page = total_items.page(page)
-    items = [
-        _get_user_display(user)
-        for user in items_page.object_list
-    ]
-    total_page = total_items.num_pages
+    items, total_page = datatable.get()
+    for item in items:
+        item['roles'] = _get_roles(item['id'])
 
     rsp = {
         'items': items,
-        'page': page,
+        'page': payload.get("page"),
         'total_page': total_page,
     }
 
