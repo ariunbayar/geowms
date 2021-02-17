@@ -8,7 +8,7 @@ import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
 import { Vector as VectorLayer, Tile } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
-import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
+import { Icon, Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style'
 import { Point, Circle, Polygon } from 'ol/geom'
 import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
@@ -102,6 +102,9 @@ export default class InspireMap extends Component {
         this.writeFeat = this.writeFeat.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
         this.setVisibleMarket = this.setVisibleMarket.bind(this)
+
+        this.readFeatures = this.readFeatures.bind(this)
+        this.readFeature = this.readFeature.bind(this)
     }
 
     initMarker() {
@@ -152,10 +155,77 @@ export default class InspireMap extends Component {
         this.loadMapData(this.state.bundle.id)
     }
 
+    getFullName(feature) {
+        const first_name = feature.getProperties().first_name
+        const last_name = feature.getProperties().last_name
+        const last_name_conv = last_name.charAt(0).toUpperCase()
+        const firt_name_conv = first_name.charAt(0).toUpperCase() + first_name.slice(1)
+        const full_name = last_name_conv + '. ' + firt_name_conv
+        return full_name
+    }
+
+    featureWithTextStyle(text, color='red') {
+        const style = new Style({
+            image: new CircleStyle({
+                radius: 5,
+                fill: new Fill({
+                color: color,
+                }),
+            }),
+            text: new Text({
+              text: text,
+              font: '30px Calibri,sans-serif',
+              stroke: new Stroke({
+                color: 'white',
+                width: 3,
+              }),
+              offsetY: -18
+            }),
+        });
+        return style
+    }
+
+    readFeature(feature) {
+        const id = 'aimag_sum'
+        const { vector_layer } = this.state
+        this.removeFeatureFromSource(id)
+        const feat =  new GeoJSON().readFeatures(feature, {
+            dataProjection: this.state.projection_display,
+            featureProjection: this.state.projection,
+        })[0];
+        vector_layer.getSource().addFeature(feat)
+        feat.setProperties({ id })
+        this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], duration: 2000 })
+    }
+
+    readFeatures(features) {
+        const { vector_layer } = this.state
+        features['features'].map((feat, idx) => {
+            const feature =  new GeoJSON().readFeatures(feat, {
+                dataProjection: this.state.projection_display,
+                featureProjection: this.state.projection,
+            })[0];
+            const full_name = this.getFullName(feature)
+            const style = this.featureWithTextStyle(full_name, 'green')
+            feature.setStyle(style)
+            vector_layer.getSource().addFeature(feature)
+        })
+    }
+
     componentDidUpdate(prevProps, prevState) {
 
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
+        }
+
+        if (prevProps.features !== this.props.features) {
+            this.readFeatures(this.props.features)
+        }
+
+        if (prevProps.feature !== this.props.feature) {
+            if (this.props.feature !== {}) {
+                this.readFeature(this.props.feature)
+            }
         }
 
         if (this.props.bundle.id === prevProps.bundle.id) return
@@ -727,8 +797,8 @@ export default class InspireMap extends Component {
         this.is_empty = true
         this.sendFeatureInfo = []
 
-        const overlay = this.overlay
-        overlay.setPosition(coordinate)
+        // const overlay = this.overlay
+        // overlay.setPosition(coordinate)
 
         this.setState({ pay_modal_check: false })
         this.featureFromUrl(coordinate)

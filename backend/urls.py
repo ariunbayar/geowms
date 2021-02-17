@@ -89,6 +89,7 @@ urlpatterns = [
         path('<int:pk>/emp-info/', org_views.get_emp_info),
         path('erguuleg-fields/', org_views.get_erguuleg_fields),
         path('save-erguul/', org_views.save_erguul),
+        path('get-erguul/', org_views.get_erguuls),
     ], 'org'))),
 
     path('api/log/', include(([

@@ -6,7 +6,7 @@ import {LineGraph} from './components/LineGraph'
 import {PieChart} from './components/PieChart'
 import {service} from './service'
 import InspireMap from "@utils/BundleMap"
-
+import SearchSelects from './components/SearchSelects'
 
 export class CovidPage extends Component {
 
@@ -26,7 +26,10 @@ export class CovidPage extends Component {
                 gzbgzzg_logo:'',
                 title:'',
             },
+            feature_collection: {},
+            feature: {},
         }
+        this.getFeature = this.getFeature.bind(this)
     }
 
     componentDidMount(){
@@ -34,11 +37,20 @@ export class CovidPage extends Component {
     }
 
     getDatas(){
-        service.covidConfigGet().then((values) => {
-            this.setState({
-                initial_values: values
-            })
-        })
+            service
+                .covidConfigGet()
+                .then((values) => {
+                    this.setState({ initial_values: values })
+                })
+            service
+                .getErguulEmployees()
+                .then(({feature_collection}) => {
+                    this.setState({ feature_collection })
+                })
+    }
+
+    getFeature(feature) {
+        this.setState({ feature })
     }
 
     render() {
@@ -56,6 +68,7 @@ export class CovidPage extends Component {
             title
         } = this.state.initial_values
 
+        const { feature_collection, feature } = this.state
         return (
             <div className="col-lg-12">
                 <div className="row card mt-3 ml-0 mr-0">
@@ -100,7 +113,8 @@ export class CovidPage extends Component {
                     <div className="col-8 col-lg-8 col-xl-8 mt-4">
                         <div className="card">
                             <div className="card-body">
-                                <InspireMap bundle={{'id': 19}}/>
+                                <SearchSelects sendFeature={this.getFeature}/>
+                                <InspireMap bundle={{'id': 11}} features={feature_collection} feature={feature}/>
                             </div>
                         </div>
                     </div>
