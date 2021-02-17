@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react'
+import Text from './components/text'
 
 export class CovidPage extends Component {
 
@@ -7,9 +8,10 @@ export class CovidPage extends Component {
             <div className="col-ld-12">
                 <div className="row border border-danger">
                     <div className="col-lg-12 d-flex border border-danger">
-                        <div className="card">
+                        {/* <div className="card">
                             aaaa1111111
-                        </div>
+                        </div> */}
+                        <Text text="Гарчиг"/>
                     </div>
                 </div>
                 <div className="row border border-danger">
@@ -70,9 +72,10 @@ export class CovidPage extends Component {
                         </div>
                     </div>
                     <div className="col-lg-3 d-flex flex-column border border-danger">
-                        <div className="card">
+                        {/* <div className="card">
                             aaaa8
-                        </div>
+                        </div> */}
+                        <Text text="Мэдээллийн эх сурвалж"/>
                     </div>
                 </div>
             </div>
