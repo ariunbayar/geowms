@@ -15,7 +15,7 @@ import {
 import { GeoJSON } from 'ol/format'
 import { showForm } from './controls/form'
 import 'ol/ol.css'
-import { service } from "../service"
+import { service } from "../Employee/service"
 
 export default class AddressMap extends Component {
 
@@ -78,6 +78,7 @@ export default class AddressMap extends Component {
 
         const select = new Select();
         select.on("select", event => this.selectedFeature(event))
+        this.select = select
 
         const translate = new Translate({
             features: select.getFeatures(),
@@ -306,6 +307,9 @@ export default class AddressMap extends Component {
         const extent = line_feature.getGeometry().getExtent()
 
         this.extent = extent
+        if (!this.props.is_admin) {
+            this.map.getView().fit(extent,{ padding: [50, 50, 50, 50], duration: 200 })
+        }
         source.addFeature(line_feature)
     }
 
@@ -385,23 +389,35 @@ export default class AddressMap extends Component {
 
     readFeatures(features) {
         const source = this.vector_layer.getSource()
-        features['features'].map((feat, idx) => {
-            const feature =  new GeoJSON().readFeatures(feat, {
-                dataProjection: this.state.projection_data,
-                featureProjection: this.state.projection_display,
-            })[0];
-            const properties = feature.getProperties()
+        if (features['features'].length > 0) {
+            features['features'].map((feat, idx) => {
+                const feature =  new GeoJSON().readFeatures(feat, {
+                    dataProjection: this.state.projection_data,
+                    featureProjection: this.state.projection_display,
+                })[0];
+                const properties = feature.getProperties()
 
-            const full_name = this.getFullName(feature)
-            let style = this.featureWithTextStyle(full_name)
+                const full_name = this.getFullName(feature)
+                let style = this.featureWithTextStyle(full_name)
 
-            if (properties.is_erguul) {
-                style = this.featureWithTextStyle(full_name, 'green')
+                if (properties.is_erguul) {
+                    if (!this.props.is_admin) {
+                        this.start_coordinate = feature.getGeometry().getCoordinates()
+                    }
+                    style = this.featureWithTextStyle(full_name, 'green')
+                }
+
+                if (!this.props.is_admin && !properties.is_erguul) {
+                    this.end_coordinates = feature.getGeometry().getCoordinates()
+                }
+
+                feature.setStyle(style)
+                source.addFeature(feature)
+            })
+            if (!this.props.is_admin) {
+                this.makeLineString()
             }
-
-            feature.setStyle(style)
-            source.addFeature(feature)
-        })
+        }
     }
 
     render() {

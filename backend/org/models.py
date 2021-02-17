@@ -64,7 +64,7 @@ class EmployeeErguul(models.Model):
         (2, 'Үдээс өмнө'),
     ]
 
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, verbose_name='Ажилтан')
+    address = models.ForeignKey(EmployeeAddress, on_delete=models.CASCADE, verbose_name='Ажилтан')
     level_3 = models.CharField(max_length=100, null=True, verbose_name='Баг/Хороо')
     street = models.CharField(max_length=100, null=True, verbose_name='Гудамж')
     apartment = models.CharField(max_length=100, null=True, verbose_name='Байр')

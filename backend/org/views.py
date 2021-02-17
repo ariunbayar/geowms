@@ -1353,12 +1353,12 @@ def get_addresses(request, level, pk):
             points.append(feature)
 
         erguul = EmployeeErguul.objects
-        erguul = erguul.filter(employee=employee)
+        erguul = erguul.filter(address=addresses)
         erguul = erguul.first()
         if erguul:
             erguul_info = dict()
             point = erguul.point
-            erguul_info['id'] = erguul.employee.id
+            erguul_info['id'] = employee.id
             erguul_info['is_erguul'] = True
             erguul_info['first_name'] = erguul.employee.user.first_name # etseg
             erguul_info['last_name'] = erguul.employee.user.last_name # onooj ogson ner
@@ -1443,13 +1443,14 @@ def save_erguul(request, payload):
     point = _get_point_for_db(point_coordinate)
     employee = get_object_or_404(Employee, pk=emp_id)
 
+    address = employee.employeeaddress_set.values_list('employeeaddress', flat=True).first()
     date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
     date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
     part_time = values['part_time'] if 'part_time' in values else ''
 
     with transaction.atomic():
         erguul = EmployeeErguul()
-        erguul.employee = employee
+        erguul.address = address
         erguul.level_3 = values['level_3'] if 'level_3' in values else ''
         erguul.street = values['street'] if 'street' in values else ''
         erguul.apartment = values['apartment'] if 'apartment' in values else ''

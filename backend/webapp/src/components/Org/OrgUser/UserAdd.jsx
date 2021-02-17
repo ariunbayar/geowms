@@ -41,13 +41,14 @@ export class UserAdd extends Component {
             sum_geo_id: '',
             horoo_geo_id: '',
             feature: {},
-            modal_alert_status: "closed",
             description: '',
             point_coordinate: [],
             point: {},
             street: '',
             apartment: '',
             door_number: '',
+
+            modal_alert_status: "closed",
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
