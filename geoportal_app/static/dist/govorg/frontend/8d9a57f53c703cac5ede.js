@@ -650,4 +650,4 @@
 /*!*******************************************************!*\
   !*** multi babel-polyfill ./govorg/frontend/index.js ***!
   \*******************************************************/
-/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/odk/projects/geoportal/geoWMS/govorg/frontend/index.js */"./govorg/frontend/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./govorg/frontend/index.js?')}},[[5,"manifest","libs"]]]);
+/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/togoldor/workspace/geoWMS/govorg/frontend/index.js */"./govorg/frontend/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./govorg/frontend/index.js?')}},[[5,"manifest","libs"]]]);
