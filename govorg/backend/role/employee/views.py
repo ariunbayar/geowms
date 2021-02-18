@@ -518,21 +518,8 @@ def _is_cloned_feature(address_qs):
     return is_cloned
 
 
-@require_GET
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def get_addresses(request):
-    employee = get_object_or_404(Employee, user=request.user)
-    if employee.is_admin:
-        org = employee.org
-
-        employees = Employee.objects
-        employees = employees.filter(org=org)
-    else:
-        employees = [employee]
-
+def _get_feature_collection(employees):
     points = []
-
     for employee in employees:
         addresses = EmployeeAddress.objects
         addresses = addresses.filter(employee=employee)
@@ -564,6 +551,25 @@ def get_addresses(request):
                 points.append(feature)
 
     feature_collection = FeatureCollection(points)
+    return feature_collection
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_addresses(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    if employee.is_admin:
+        org = employee.org
+
+        employees = Employee.objects
+        employees = employees.filter(org=org)
+    else:
+        raise 404
+
+    points = []
+
+    feature_collection = _get_feature_collection(employees)
 
     rsp = {
         'success': True,
@@ -572,11 +578,35 @@ def get_addresses(request):
     return JsonResponse(rsp)
 
 
+def _get_erguul_qs(employee):
+    tailbar = {}
+    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+    erguul_qs = EmployeeErguul.objects
+    erguul_qs = erguul_qs.filter(address_id=address_id)
+    erguul = erguul_qs.first()
+    if erguul:
+        tailbar = ErguulTailbar.objects
+        tailbar = tailbar.filter(erguul=erguul).values().first()
+    return tailbar
+
+
+def _get_tailbar(tailbar, field):
+    value = ''
+    if tailbar:
+        value = tailbar[field]
+    return value
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_field_tailbar(request):
+    tailbar_id = ''
+    employee = get_object_or_404(Employee, user=request.user)
     send_fields = []
+    tailbar = _get_erguul_qs(employee)
+    if tailbar:
+        tailbar_id = tailbar['id']
     for f in ErguulTailbar._meta.get_fields():
         type_name = f.get_internal_type()
         not_list = ['ForeignKey', 'AutoField']
@@ -585,6 +615,7 @@ def get_field_tailbar(request):
             if f.name not in not_field:
                 if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
                     field_type = ''
+                    value = _get_tailbar(tailbar, f.name)
                     if 'date' in f.name:
                         field_type = 'date'
                     send_fields.append({
@@ -594,11 +625,13 @@ def get_field_tailbar(request):
                         'choices': f.choices,
                         'disabled': False,
                         'type': field_type,
+                        'value': value,
                     })
 
     rsp = {
         'success': True,
         'fields': send_fields,
+        'id': tailbar_id,
     }
     return JsonResponse(rsp)
 
@@ -609,15 +642,35 @@ def get_field_tailbar(request):
 def save_field_tailbar(request, payload):
 
     values = payload.get('values')
-    address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
-    if address_id:
-        address = get_object_or_404(EmployeeAddress, id=address_id)
-        erguul_id = address.erguul.id
-        values['erguul_id'] = erguul_id
-        ErguulTailbar.objects.create(**values)
+    pk = payload.get('id')
+    if pk:
+            erguul_qs = ErguulTailbar.objects
+            erguul_qs = erguul_qs.filter(pk=pk)
+            erguul_qs.update(**values)
+    else:
+        address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
+        if address_id:
+            address = get_object_or_404(EmployeeAddress, id=address_id)
+            erguul_id = address.employeeerguul_set.values_list('id', flat=True).first()
+            values['erguul_id'] = erguul_id
+            ErguulTailbar.objects.create(**values)
 
     rsp = {
         'success': True,
         'info': 'Амжилттай хадглалаа'
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_erguul(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    feature_collection = _get_feature_collection([employee])
+
+    rsp = {
+        'success': True,
+        'points': feature_collection,
     }
     return JsonResponse(rsp)

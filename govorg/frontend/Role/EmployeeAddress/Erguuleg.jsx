@@ -13,6 +13,7 @@ export default class Erguuleg extends Component {
             feature: {},
             is_loading: true,
             is_empty: false,
+            infos: [],
         }
         this.getAddresses = this.getAddresses.bind(this)
         this.saveErguulTailbar = this.saveErguulTailbar.bind(this)
@@ -24,11 +25,11 @@ export default class Erguuleg extends Component {
 
     getAddresses() {
         service
-            .getAddresses()
+            .getErguul()
             .then(({ success, points }) => {
                 if (success) {
                     let is_empty = false
-                    if (points['features'].length < 2) {
+                    if (points.length > 0 || points['features'].length < 2) {
                         is_empty = true
                     }
                     this.setState({ points, is_loading: false, is_empty })
@@ -36,10 +37,10 @@ export default class Erguuleg extends Component {
             })
     }
 
-    saveErguulTailbar(values) {
+    saveErguulTailbar(values, id) {
         this.setState({ is_loading: true })
         service
-            .saveTailbar(values)
+            .saveTailbar(values, id)
             .then(({ success, info }) => {
                 alert(info)
                 this.setState({ is_loading: false })
@@ -51,7 +52,7 @@ export default class Erguuleg extends Component {
     }
 
     render() {
-        const { points, is_loading, is_empty } = this.state
+        const { points, is_loading, is_empty, infos } = this.state
         const { employee } = this.props
 
         const is_admin = employee.is_admin
@@ -64,13 +65,14 @@ export default class Erguuleg extends Component {
                         <div className="col-4">
                             <Form
                                 is_empty={is_empty}
-                                saveErguulTailbar={(val) => this.saveErguulTailbar(val)}
+                                infos={infos}
+                                saveErguulTailbar={(val, id) => this.saveErguulTailbar(val, id)}
                             />
                         </div>
                         <div className="col-8">
                             <AddressMap
                                 features={points}
-                                is_admin={is_admin}
+                                is_admin={false}
                             />
                         </div>
                     </div>

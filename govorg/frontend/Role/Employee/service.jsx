@@ -18,6 +18,7 @@ export const service = {
     saveErguul,
     getFieldTailbar,
     saveTailbar,
+    getErguul,
 }
 
 const prefix = "/gov/api/role/employee"
@@ -147,10 +148,17 @@ function getFieldTailbar() {
     return fetch(`${prefix}/get-field-tailbar/`, requestOptions).then(handleResponse)
 }
 
-function saveTailbar(values) {
+function saveTailbar(values, id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ values }),
+        body: JSON.stringify({ values, id }),
     }
     return fetch(`${prefix}/save-field-tailbar/`, requestOptions).then(handleResponse)
+}
+
+function getErguul() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/get-erguul/`, requestOptions).then(handleResponse)
 }
