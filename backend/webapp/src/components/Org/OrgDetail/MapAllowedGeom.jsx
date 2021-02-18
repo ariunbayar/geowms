@@ -110,7 +110,7 @@ export default class MapAllowedGeom extends Component {
     render() {
         return (
             <div className="🌍">
-                <h5>Хамрах хүрээ:</h5>
+                <h5>Хамрах хүрээ:</h5><br/>
                 <div id="map" ref={ this.mapRef }></div>
             </div>
         )
