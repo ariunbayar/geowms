@@ -386,7 +386,7 @@ export default class AddressMap extends Component {
     readFeatures(features) {
         const source = this.vector_layer.getSource()
         features['features'].map((feat, idx) => {
-            if (feat.length > 0) {
+            if (feat !== {}) {
                 const feature =  new GeoJSON().readFeatures(feat, {
                     dataProjection: this.state.projection_data,
                     featureProjection: this.state.projection_display,

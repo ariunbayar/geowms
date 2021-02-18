@@ -392,7 +392,7 @@ export default class AddressMap extends Component {
         const source = this.vector_layer.getSource()
         if (features['features'].length > 0) {
             features['features'].map((feat, idx) => {
-                if (feat.length > 0) {
+                if (feat !== {}) {
                     const feature =  new GeoJSON().readFeatures(feat, {
                         dataProjection: this.state.projection_data,
                         featureProjection: this.state.projection_display,
