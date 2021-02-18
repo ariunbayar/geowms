@@ -96,7 +96,7 @@ export class OrgForm extends Component {
                                         <i className="fa fa fa-trash-o"></i> Устгах
                                     </button>
                                 </div>
-                        }
+                        }<br/><br/>
                         {
                             is_open
                             ?
