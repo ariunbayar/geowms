@@ -10,6 +10,12 @@ class NewInput extends Component{
         }
     }
 
+    componentDidMount() {
+        if (this.props.value) {
+            this.setState({ input_value: this.props.value })
+        }
+    }
+
     handleOnChange(input_value) {
         const { idx, ix, field, length, origin_name } = this.props
         this.setState({ input_value })
@@ -46,8 +52,8 @@ class NewInput extends Component{
                                 onChange={(e) => this.handleOnChange(e.target.value)}
                                 maxLength={length}
                                 disabled={disabled}
-                                placeholder={value}
-                                value={value}
+                                placeholder={field + ` оруулна уу`}
+                                value={input_value}
                             >
                             </textarea>
                         : length < 1900 && choices == null ?
@@ -56,14 +62,16 @@ class NewInput extends Component{
                                 maxLength={length}
                                 className="form-control"
                                 disabled={disabled}
-                                value={value}
+                                value={input_value}
                                 onChange={(e) => this.handleOnChange(e.target.value)}
                                 placeholder={field + ` оруулна уу`}
                             />
                         : choices !== null ?
                             <select className="form-control"
                                 disabled={disabled}
-                                onChange={(e) => this.handleOnChange(e.target.value)}>
+                                onChange={(e) => this.handleOnChange(e.target.value)}
+                                value={input_value}
+                            >
                                 <option key={idx} value=''>--- Сонгоно уу ---</option>
                                 {choices.map((choice, idx) =>
                                     <option key={idx} value={choice[0]}>{choice[1]}</option>
@@ -83,6 +91,7 @@ export class Form extends Component {
 
         this.state = {
             fields: [],
+            id: '',
             values: {},
         }
         this.getField = this.getField.bind(this)
@@ -96,8 +105,8 @@ export class Form extends Component {
     getField() {
         service
             .getFieldTailbar()
-            .then(({ success, fields}) => {
-                this.setState({ fields })
+            .then(({ success, fields, id }) => {
+                this.setState({ fields, id })
             })
     }
 
@@ -108,7 +117,7 @@ export class Form extends Component {
     }
 
     render() {
-        const { fields, values } = this.state
+        const { fields, values, id } = this.state
         const { is_empty } = this.props
         return (
             <div>
@@ -132,8 +141,9 @@ export class Form extends Component {
                     <button
                         className="btn btn-primary btn-block"
                         disabled={is_empty}
-                        onClick={() => this.props.saveErguulTailbar(values)}>
-                        Хадгалах
+                        onClick={() => this.props.saveErguulTailbar(values, id)}
+                    >
+                        {id ? "Засах" : "Хадгалах"}
                     </button>
                 </div>
             </div>

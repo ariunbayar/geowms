@@ -28,6 +28,7 @@ urlpatterns = [
                 path('<int:pk>/detail/', role_employee_views.detail),
                 path('<int:pk>/delete/', role_employee_views.delete),
                 path('addresses/', role_employee_views.get_addresses),
+                path('get-erguul/', role_employee_views.get_erguul),
                 path('get-field-tailbar/', role_employee_views.get_field_tailbar),
                 path('save-field-tailbar/', role_employee_views.save_field_tailbar),
             ], 'employee'))),
