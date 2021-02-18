@@ -1,4 +1,5 @@
 from os import urandom
+
 from urllib.parse import urlencode
 import base64
 import json
