@@ -26,6 +26,7 @@ export class CovidPage extends Component {
                 niit_eruul_mend_baiguullaga_too:'',
                 gzbgzzg_logo:'',
                 title:'',
+                line_chart_datas: []
             },
             feature_collection: {},
             feature: {},
@@ -66,9 +67,10 @@ export class CovidPage extends Component {
             emlegiin_too,
             niit_eruul_mend_baiguullaga_too,
             gzbgzzg_logo,
-            title
+            title,
+            line_chart_datas
         } = this.state.initial_values
-
+        let labels = ['Батлагдсан тохиолдол', 'Эдгэрсэн хүмүүсийн тоо']
         const { feature_collection, feature } = this.state
         return (
             <div className="col-lg-12">
@@ -164,14 +166,14 @@ export class CovidPage extends Component {
                     <div className="col-4 mt-4 col-lg-4 col-xl-4">
                         <div className="card" style={{height: '400px'}}>
                             <div className="card-body">
-                                <PieChart></PieChart>
+                                <PieChart labels={labels} batlagdsan_tohioldol={batlagdsan_tohioldol} edgersen_humuusiin_too={edgersen_humuusiin_too}></PieChart>
                             </div>
                         </div>
                     </div>
                     <div className="col-4 mt-4 col-lg-4 col-xl-4 ">
                         <div className="card" style={{height: '400px'}}>
                             <div className="card-body">
-                                <LineGraph></LineGraph>
+                                <LineGraph line_chart_datas={line_chart_datas}></LineGraph>
                             </div>
                         </div>
                     </div>

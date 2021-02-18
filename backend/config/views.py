@@ -1,5 +1,6 @@
 import re
 import subprocess
+import json
 
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
@@ -475,10 +476,15 @@ def covid_configs(request):
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
-
+    line_chart_datas = Config.objects.filter(name='line_chart_datas').first()
+    values = []
+    if line_chart_datas:
+        values = line_chart_datas.value
+        values = json.loads(values)
     rsp = {
         **default_values,
         **{conf.name: conf.value for conf in configs},
+        'line_chart_datas': values
     }
 
     return JsonResponse(rsp)
@@ -502,6 +508,17 @@ def covid_configs_save(request, payload):
         'gzbgzzg_logo',
         'title',
     )
+    line_chart_datas = payload.get('line_chart_datas')
+    line_chart_datas_obj = Config.objects.filter(name='line_chart_datas').first()
+
+    if line_chart_datas_obj:
+        line_chart_datas_obj.value = json.dumps(line_chart_datas, ensure_ascii=False)
+        line_chart_datas_obj.save()
+    else:
+        Config.objects.create(
+                name='line_chart_datas',
+                value=json.dumps(line_chart_datas, ensure_ascii=False)
+            )
 
     for config_name in config_names:
         Config.objects.update_or_create(
@@ -512,3 +529,14 @@ def covid_configs_save(request, payload):
         )
 
     return JsonResponse({"success": True})
+
+
+[{'label': '123213', 'datas': '123123'}, 
+{'label': '123123', 'datas': '0123'}, 
+{'label': '123', 'datas': 0},
+{'label': 'ewrwe', 'datas': '4234'}]
+
+[{'label': '123213', 'datas': '123123'}, 
+{'label': '123123', 'datas': '0123'},
+ {'label': '123', 'datas': '234'},
+  {'label': '234', 'datas': '234'}]

@@ -3,19 +3,16 @@ import { Line } from "react-chartjs-2";
 
 
 export class LineGraph extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            label: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
-            count: [2, 4, 12, 78, 12, 44, 22]
-        }
-    }
-    componentDidMount(){
-
-    }
 
     render() {
-        const {label , count } = this.state
+        const {line_chart_datas} = this.props
+        var datas = []
+        var label = []
+        line_chart_datas.map((value) => {
+            label.push(value.label)
+            datas.push(value.datas)
+        })
+
         const dataLine = {
             labels: label,
             datasets: [
@@ -38,7 +35,7 @@ export class LineGraph extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: count
+                    data: datas
                 },
             ]
         }
