@@ -92,7 +92,12 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={employee.is_admin ? "Ажилчидын хаяг" : "Эргүүлэг"}></MenuItem>
+                                {
+                                    employee.is_admin
+                                    &&
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчидын хаяг"}></MenuItem>
+                                }
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлгийн мэдээлэл"}></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
@@ -190,8 +195,10 @@ export class App extends Component {
                             <Route path="/gov/perm/region/" component={Region} />
                             <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
                             <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
                             <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} employee={employee} refreshCount={() => this.requestCount()} />} />
+
+                            <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
+                            <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
 
                             <Route path="/gov/zip-code/" component={ZipCode} />
                             <Route path="/gov/org-request/" component={OrgRequest} />

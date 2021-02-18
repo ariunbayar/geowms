@@ -117,7 +117,7 @@ export class CovidPage extends Component {
                         <div className="card">
                             <div className="card-body">
                                 <SearchSelects sendFeature={this.getFeature}/>
-                                <InspireMap bundle={{'id': 11}} features={feature_collection} feature={feature}/>
+                                <InspireMap bundle={{'id': 19}} features={feature_collection} feature={feature}/>
                             </div>
                         </div>
                     </div>

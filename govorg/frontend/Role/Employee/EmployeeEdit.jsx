@@ -368,18 +368,18 @@ export class EmployeeEdit extends Component {
                         obj['horoo_geo_id'] = geo_id
                         obj['horoo_name'] = level_3
                     }
-                    obj['aimag'] = info
-                    this.getGeom(geo_id, obj)
+                    this.getGeom(geo_id)
+                    this.setState({ aimag: info, ...obj })
                 }
             })
     }
 
-    getGeom(geo_id, obj={}) {
+    getGeom(geo_id) {
         service
             .getGeom(geo_id)
             .then(({ feature }) => {
                 if (feature) {
-                    this.setState({ ...obj, feature, last_geo_id: geo_id })
+                    this.setState({ feature, last_geo_id: geo_id })
                 }
             })
     }
@@ -465,12 +465,10 @@ export class EmployeeEdit extends Component {
             if (last_geo_id) {
                 obj['is_marker'] = !is_marker
                 obj['point'] = point
-                this.getGeom(last_geo_id, obj)
+                this.getGeom(last_geo_id)
             }
         }
-        else {
-            this.setState({ ...obj })
-        }
+        this.setState({ ...obj })
     }
 
     render() {

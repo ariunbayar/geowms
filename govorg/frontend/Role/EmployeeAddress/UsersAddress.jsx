@@ -93,36 +93,15 @@ export default class UsersAddress extends Component {
             <div className="card">
                 <div className="card-body">
                     <Loader is_loading={is_loading}/>
-                    {
-                        is_admin
-                        ?
-                            <div className="col-12">
-                                <Loader is_loading={is_loading}/>
-                                <SearchSelects sendFeature={this.getFeature} />
-                                <AddressMap
-                                    features={points}
-                                    feature={feature}
-                                    saveErguulPlace={(val, id, coord, photo) => this.saveErguulPlace(val, id, coord, photo)}
-                                    is_admin={is_admin}
-                                />
-                            </div>
-                        :
-                            <div className="row">
-                                <div className="col-4">
-                                    <Form
-                                        is_empty={is_empty}
-                                        saveErguulTailbar={(val) => this.saveErguulTailbar(val)}
-                                    />
-                                </div>
-                                <div className="col-8">
-                                    <AddressMap
-                                        features={points}
-                                        saveErguulPlace={(val, id) => this.saveErguulPlace(val, id)}
-                                        is_admin={is_admin}
-                                    />
-                                </div>
-                            </div>
-                    }
+                    <div className="col-12">
+                        <SearchSelects sendFeature={this.getFeature} />
+                        <AddressMap
+                            features={points}
+                            feature={feature}
+                            saveErguulPlace={(val, id, coord, photo) => this.saveErguulPlace(val, id, coord, photo)}
+                            is_admin={is_admin}
+                        />
+                    </div>
                 </div>
             </div>
         )

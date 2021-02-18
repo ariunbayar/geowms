@@ -392,29 +392,31 @@ export default class AddressMap extends Component {
         const source = this.vector_layer.getSource()
         if (features['features'].length > 0) {
             features['features'].map((feat, idx) => {
-                const feature =  new GeoJSON().readFeatures(feat, {
-                    dataProjection: this.state.projection_data,
-                    featureProjection: this.state.projection_display,
-                })[0];
-                const properties = feature.getProperties()
+                if (feat !== {}) {
+                    const feature =  new GeoJSON().readFeatures(feat, {
+                        dataProjection: this.state.projection_data,
+                        featureProjection: this.state.projection_display,
+                    })[0];
+                    const properties = feature.getProperties()
 
-                const full_name = this.getFullName(feature)
-                let style = this.featureWithTextStyle(full_name)
+                    const full_name = this.getFullName(feature)
+                    let style = this.featureWithTextStyle(full_name)
 
-                if (properties.is_erguul) {
-                    has_erguul = true
-                    if (!this.props.is_admin) {
-                        this.start_coordinate = feature.getGeometry().getCoordinates()
+                    if (properties.is_erguul) {
+                        has_erguul = true
+                        if (!this.props.is_admin) {
+                            this.start_coordinate = feature.getGeometry().getCoordinates()
+                        }
+                        style = this.featureWithTextStyle(full_name, 'green')
                     }
-                    style = this.featureWithTextStyle(full_name, 'green')
-                }
 
-                if (!this.props.is_admin && !properties.is_erguul) {
-                    this.end_coordinates = feature.getGeometry().getCoordinates()
-                }
+                    if (!this.props.is_admin && !properties.is_erguul) {
+                        this.end_coordinates = feature.getGeometry().getCoordinates()
+                    }
 
-                feature.setStyle(style)
-                source.addFeature(feature)
+                    feature.setStyle(style)
+                    source.addFeature(feature)
+                }
             })
             if (!this.props.is_admin && has_erguul) {
                 this.makeLineString()

@@ -1386,7 +1386,6 @@ def get_feature_info(request, payload):
 
 @require_POST
 @ajax_required
-@login_required
 def get_geom(request, payload):
     feature = ''
     geo_id = payload.get('geo_id')
