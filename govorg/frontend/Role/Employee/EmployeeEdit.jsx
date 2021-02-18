@@ -465,12 +465,10 @@ export class EmployeeEdit extends Component {
             if (last_geo_id) {
                 obj['is_marker'] = !is_marker
                 obj['point'] = point
-                this.getGeom(last_geo_id, obj)
+                this.getGeom(last_geo_id)
             }
         }
-        else {
-            this.setState({ ...obj })
-        }
+        this.setState({ ...obj })
     }
 
     render() {
