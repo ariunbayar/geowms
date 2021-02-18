@@ -90,13 +90,13 @@ def employee_detail(request, pk):
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
         'phone_number': employee.phone_number,
-        'level_1': address.level_1,
-        'level_2': address.level_2,
-        'level_3': address.level_3,
-        'street': address.street,
-        'apartment': address.apartment,
-        'door_number': address.door_number,
-        'point': address.point.json,
+        'level_1': address.level_1 if hasattr(address, 'level_1') else '',
+        'level_2': address.level_2 if hasattr(address, 'level_2') else '',
+        'level_3': address.level_3 if hasattr(address, 'level_3') else '',
+        'street': address.street if hasattr(address, 'street') else '',
+        'apartment': address.apartment if hasattr(address, 'apartment') else '',
+        'door_number': address.door_number if hasattr(address, 'door_number') else '',
+        'point': address.point.json if hasattr(address, 'point') else '',
     }
 
     return JsonResponse({'success': True, 'employee': employees_display})

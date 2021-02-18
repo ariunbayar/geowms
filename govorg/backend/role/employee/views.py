@@ -611,8 +611,8 @@ def save_field_tailbar(request, payload):
     values = payload.get('values')
     address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
     if address_id:
-        address = get_object_or_404(EmployeeAddress, address_id=address_id)
-        erguul_id = address.employeeerguul_set.values_list("employeeerguul", flat=True).first()
+        address = get_object_or_404(EmployeeAddress, id=address_id)
+        erguul_id = address.erguul.id
         values['erguul_id'] = erguul_id
         ErguulTailbar.objects.create(**values)
 
