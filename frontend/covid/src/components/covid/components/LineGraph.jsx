@@ -16,6 +16,7 @@ export class LineGraph extends Component {
 
     render() {
         const {label , count } = this.state
+        const { graph_color } = this.props
         const dataLine = {
             labels: label,
             datasets: [
@@ -23,13 +24,13 @@ export class LineGraph extends Component {
                     label: "Батлагдсан",
                     fill: true,
                     lineTension: 0.3,
-                    backgroundColor: "rgba(184, 185, 210, .3)",
-                    borderColor: "rgb(35, 26, 136)",
+                    backgroundColor: graph_color + "70",  //fill color
+                    borderColor: graph_color, //border_color
                     borderCapStyle: "butt",
                     borderDash: [],
                     borderDashOffset: 0.0,
                     borderJoinStyle: "miter",
-                    pointBorderColor: "rgb(35, 26, 136)",
+                    pointBorderColor: graph_color, // point-color
                     pointBackgroundColor: "rgb(255, 255, 255)",
                     pointBorderWidth: 10,
                     pointHoverRadius: 5,
