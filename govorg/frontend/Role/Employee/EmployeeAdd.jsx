@@ -183,15 +183,15 @@ export class EmployeeAdd extends Component {
         let geo_id
         let array
         service
-            .formOptions('second')
-            .then(({ success, secondOrders }) => {
+            .formOptions()
+            .then(({ success, info }) => {
                 if (success) {
                     if (level_1) {
-                        obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
-                        geo_id = secondOrders[obj['aimag_id']].geo_id
+                        obj['aimag_id'] = this.getGeomFromJson(level_1, info)
+                        geo_id = info[obj['aimag_id']].geo_id
                         obj['aimag_geo_id'] = geo_id
                         obj['aimag_name'] = level_1
-                        array = secondOrders[obj['aimag_id']].children
+                        array = info[obj['aimag_id']].children
                         obj['sum'] = array
                     }
                     if (level_2) {
@@ -209,7 +209,7 @@ export class EmployeeAdd extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: secondOrders, ...obj })
+                    this.setState({ aimag: info, ...obj })
                 }
             })
     }
