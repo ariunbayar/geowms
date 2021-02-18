@@ -27,6 +27,7 @@ export default class EmployeeMap extends Component {
         this.handleMapClick = this.handleMapClick.bind(this)
         this.setFeatures = this.setFeatures.bind(this)
         this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
+        this.setMarker = this.setMarker.bind(this)
     }
 
     initMarker() {
@@ -60,7 +61,7 @@ export default class EmployeeMap extends Component {
             }
         }
         if (prevProps.point !== this.props.point) {
-            if (this.props.point !== {}) {
+            if (this.props.point && this.props.point !== {}) {
                 this.setMarker(this.props.point)
             }
         }
