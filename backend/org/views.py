@@ -33,6 +33,7 @@ from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
 from govorg.backend.org_request.models import ChangeRequest
+from .forms import EmployeeAddressForm
 
 from main.decorators import ajax_required
 from main import utils
@@ -290,58 +291,67 @@ def employee_add(request, payload, level, pk):
     street = address.get('street')
     apartment = address.get('apartment')
     door_number = address.get('door_number')
-    point_coordinate = address.get('point_coordinate')
+    point_coordinate = address.get('point')
     point = _get_point_for_db(point_coordinate)
+    address['point'] = point
 
     errors = {}
     errors = _employee_validation(values, None)
+    form = EmployeeAddressForm(address)
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
-    with transaction.atomic():
+    if form.is_valid() and not errors:
+        with transaction.atomic():
 
-        user = User()
-        user.username = username
-        user.first_name = first_name
-        user.last_name = last_name
-        user.email = email
-        user.gender = gender
-        user.is_superuser = is_super if org.level == 4 else False
-        user.register = register.upper()
-        user.save()
-        user.roles.add(2)
-        user.save()
+            user = User()
+            user.username = username
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.gender = gender
+            user.is_superuser = is_super if org.level == 4 else False
+            user.register = register.upper()
+            user.save()
+            user.roles.add(2)
+            user.save()
 
-        employee = Employee()
-        employee.position = position
-        employee.org = org
-        employee.user_id = user.id
-        employee.is_admin = is_admin
-        employee.token = TokenGeneratorEmployee().get()
-        employee.phone_number = phone_number
-        employee.save()
+            employee = Employee()
+            employee.position = position
+            employee.org = org
+            employee.user_id = user.id
+            employee.is_admin = is_admin
+            employee.token = TokenGeneratorEmployee().get()
+            employee.phone_number = phone_number
+            employee.save()
 
-        employee_address = EmployeeAddress()
-        employee_address.employee = employee
-        employee_address.level_1 = level_1
-        employee_address.level_2 = level_2
-        employee_address.level_3 = level_3
-        employee_address.street = street
-        employee_address.apartment = apartment
-        employee_address.door_number = door_number
-        employee_address.point = point
-        employee_address.save()
+            employee_address = EmployeeAddress()
+            employee_address.employee = employee
+            employee_address.level_1 = level_1
+            employee_address.level_2 = level_2
+            employee_address.level_3 = level_3
+            employee_address.street = street
+            employee_address.apartment = apartment
+            employee_address.door_number = door_number
+            employee_address.point = point
+            employee_address.save()
 
-        utils.send_approve_email(user)
+            utils.send_approve_email(user)
 
-    rsp = {
-        'success': True,
-        'employee': {
-            'id': employee.id,
-            'user_id': employee.user_id,
+        rsp = {
+            'success': True,
+            'employee': {
+                'id': employee.id,
+                'user_id': employee.user_id,
+            }
         }
-    }
+
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': {**form.errors, **errors},
+        })
 
     return JsonResponse(rsp)
 
