@@ -457,7 +457,6 @@ def payment_configs_save(request, payload):
 
 @require_GET
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def covid_configs(request):
 
     default_values = {
