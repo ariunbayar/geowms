@@ -386,21 +386,23 @@ export default class AddressMap extends Component {
     readFeatures(features) {
         const source = this.vector_layer.getSource()
         features['features'].map((feat, idx) => {
-            const feature =  new GeoJSON().readFeatures(feat, {
-                dataProjection: this.state.projection_data,
-                featureProjection: this.state.projection_display,
-            })[0];
-            const properties = feature.getProperties()
+            if (feat.length > 0) {
+                const feature =  new GeoJSON().readFeatures(feat, {
+                    dataProjection: this.state.projection_data,
+                    featureProjection: this.state.projection_display,
+                })[0];
+                const properties = feature.getProperties()
 
-            const full_name = this.getFullName(feature)
-            let style = this.featureWithTextStyle(full_name)
+                const full_name = this.getFullName(feature)
+                let style = this.featureWithTextStyle(full_name)
 
-            if (properties.is_erguul) {
-                style = this.featureWithTextStyle(full_name, 'green')
+                if (properties.is_erguul) {
+                    style = this.featureWithTextStyle(full_name, 'green')
+                }
+
+                feature.setStyle(style)
+                source.addFeature(feature)
             }
-
-            feature.setStyle(style)
-            source.addFeature(feature)
         })
     }
 
