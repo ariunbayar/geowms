@@ -222,7 +222,7 @@ export class OrgEdit extends Component {
                     const has_error = Object.keys(errors).length > 0
                     return (
                         <div>
-                            <Form className="col-10">
+                            <Form className="col-12">
                                 <Loader is_loading={this.state.is_loading}/>
                                 <div className="form-row">
                                     <div className="form-group col">
