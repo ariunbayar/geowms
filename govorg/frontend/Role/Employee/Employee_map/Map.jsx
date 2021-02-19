@@ -169,7 +169,7 @@ export default class EmployeeMap extends Component {
 
     render() {
         return (
-            <div id="map">
+            <div id="map" className={`${this.props.class}`}>
             </div>
         )
     }

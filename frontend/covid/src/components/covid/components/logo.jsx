@@ -7,7 +7,7 @@ export default class Logo extends Component {
                 <div className="card-body p-2">
                     <div className="text-center d-flex justify-content-center">
                         <img
-                            src={this.props.src}
+                            src={"data:image/png;base64," +  this.props.src}
                             className="logo mw-100"
                             alt="logo"
                             style={{weight: '80px', height: '80px'}}

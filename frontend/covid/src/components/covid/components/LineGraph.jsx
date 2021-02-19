@@ -3,28 +3,25 @@ import { Line } from "react-chartjs-2";
 
 
 export class LineGraph extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            label: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
-            count: [2, 4, 12, 78, 12, 44, 22]
-        }
-    }
-    componentDidMount(){
-
-    }
 
     render() {
-        const {label , count } = this.state
+        const {line_chart_datas} = this.props
+        var datas = []
+        var label = []
+        line_chart_datas.map((value) => {
+            label.push(value.label)
+            datas.push(value.datas)
+        })
+
         const { graph_color } = this.props
         const dataLine = {
             labels: label,
             datasets: [
                 {
-                    label: "Батлагдсан",
+                    label: "Батлагдсан тохиолдол",
                     fill: true,
                     lineTension: 0.3,
-                    backgroundColor: graph_color + "70",  //fill color
+                    backgroundColor: graph_color + "30",  //fill color
                     borderColor: graph_color, //border_color
                     borderCapStyle: "butt",
                     borderDash: [],
@@ -39,13 +36,13 @@ export class LineGraph extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: count
+                    data: datas
                 },
             ]
         }
 
         return (
-            <div class="wrapper">
+            <div className="wrapper">
                 <Line height={72} data={dataLine} options={{ responsive: true }} />
             </div>
         )

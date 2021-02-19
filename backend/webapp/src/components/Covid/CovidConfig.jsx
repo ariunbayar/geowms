@@ -1,13 +1,15 @@
 import React, { Component, Fragment } from "react"
-import { Formik, Form, Field} from 'formik'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
+import ImageUploader from 'react-images-upload'
 
 import {service} from './service'
+import { set } from "ol/transform"
 
 
 const validationSchema = Yup.object().shape({
-    emy_logo: Yup.string(),
-    batlagdsan_tohioldol: Yup.string(),
+    batlagdsan_tohioldol: Yup.string()
+        .required('Хоосон байна!'),
     edgersen_humuusiin_too: Yup.string(),
     emchlegdej_bui_humuus_too: Yup.string(),
     tusgaarlagdsan_humuusiin_too: Yup.string(),
@@ -15,8 +17,10 @@ const validationSchema = Yup.object().shape({
     emiin_sangiin_too: Yup.string(),
     emlegiin_too: Yup.string(),
     niit_eruul_mend_baiguullaga_too: Yup.string(),
-    gzbgzzg_logo: Yup.string(),
     title: Yup.string(),
+    bundle: Yup.string(),
+    shinjilgee_too: Yup.string(),
+    nas_barsan_too: Yup.string(),
 })
 
 export default class CovidConfig extends Component {
@@ -27,7 +31,6 @@ export default class CovidConfig extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
-                emy_logo:'',
                 batlagdsan_tohioldol:'',
                 edgersen_humuusiin_too:'',
                 emchlegdej_bui_humuus_too:'',
@@ -36,14 +39,52 @@ export default class CovidConfig extends Component {
                 emiin_sangiin_too:'',
                 emlegiin_too:'',
                 niit_eruul_mend_baiguullaga_too:'',
-                gzbgzzg_logo:'',
                 title:'',
+                bundle: '1',
+                shinjilgee_too: '',
+                nas_barsan_too: '',
             },
+            emy_logo:'',
+            emy_logo_old:'',
+            gzbgzzg_logo:'',
+            gzbgzzg_logo_old:'',
             values: {},
+            line_chart_datas: [],
+            bundles: []
         }
 
         this.handleEdit = this.handleEdit.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.arrayRemove = this.arrayRemove.bind(this)
+        this.arrayOnChange = this.arrayOnChange.bind(this)
+        this.arrayOnChangeDatas = this.arrayOnChangeDatas.bind(this)
+        this.arrayAdd = this.arrayAdd.bind(this)
+        this.onDrop = this.onDrop.bind(this)
+    }
+
+    arrayRemove(idx){
+
+        const {line_chart_datas} = this.state
+        line_chart_datas.splice(idx, 1);
+        this.setState(line_chart_datas)
+    }
+
+    arrayAdd(){
+        const {line_chart_datas} = this.state
+        line_chart_datas.push({"label": 'Огноо', "datas": 1})
+        this.setState(line_chart_datas)
+    }
+
+    arrayOnChange(idx, value){
+        const {line_chart_datas} = this.state
+        line_chart_datas[idx].label = value
+        this.setState(line_chart_datas)
+    }
+
+    arrayOnChangeDatas(idx, value){
+        const {line_chart_datas} = this.state
+        line_chart_datas[idx].datas = value
+        this.setState(line_chart_datas)
     }
 
     componentDidMount() {
@@ -51,6 +92,12 @@ export default class CovidConfig extends Component {
             this.setState({
                 initial_values: values,
                 values,
+                line_chart_datas: values['line_chart_datas'],
+                emy_logo: values['emy_logo'],
+                emy_logo_old: values['emy_logo'],
+                gzbgzzg_logo: values['gzbgzzg_logo'],
+                gzbgzzg_logo_old: values['gzbgzzg_logo'],
+                bundles: values['bundles'],
             })
         })
     }
@@ -66,11 +113,13 @@ export default class CovidConfig extends Component {
     }
 
     handleSubmit(values, { setStatus, setValues }) {
-
+        const { emy_logo, gzbgzzg_logo, line_chart_datas } = this.state
         setStatus('saving')
-
+        let value = values
+        value['emy_logo'] = emy_logo
+        value['gzbgzzg_logo'] = gzbgzzg_logo
         service.config.covid
-            .save(values)
+            .save(value, line_chart_datas)
             .then(({ success }) => {
 
                 if (success) {
@@ -88,7 +137,16 @@ export default class CovidConfig extends Component {
             .finally(() => {
                 this.setState({ is_editing: false })
             })
+    }
 
+    onDrop([icon], name) {
+        if(icon){
+            let reader = new FileReader();
+            reader.onload = (upload) => {
+                this.setState({[name]: btoa(upload.target.result)})
+            }
+            reader.readAsBinaryString(icon)
+        }
     }
 
     render() {
@@ -96,6 +154,12 @@ export default class CovidConfig extends Component {
         const {
             is_editing,
             initial_values,
+            gzbgzzg_logo,
+            gzbgzzg_logo_old,
+            emy_logo,
+            emy_logo_old,
+            line_chart_datas,
+            bundles
         } = this.state
 
         return (
@@ -135,6 +199,24 @@ export default class CovidConfig extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
+                                                <label htmlFor="bundle">Дэд сан</label>
+                                                {bundles.map((bundle, idx) =>
+                                                    values.bundle == bundle.pk &&
+                                                    <img src={bundle.icon} className="logo-icon" alt="logo icon"></img>
+                                                )}
+                                                <Fragment>
+                                                    <Field name="bundle" as="select"
+                                                    className={'form-control mt-2 ' + (errors.bundle ? 'is-invalid' : '')}>
+                                                        {bundles.map((bundle, idx) =>
+                                                            <option value={bundle.pk}>{bundle.name}</option>
+                                                        )}
+                                                    </Field>
+                                                    <ErrorMessage name="bundle" component="div" className="text-dange"/>
+                                                </Fragment>
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
                                                 <label htmlFor="title">Гарчиг</label>
                                                 <Field
                                                     name="title"
@@ -147,23 +229,35 @@ export default class CovidConfig extends Component {
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="emy_logo">ЕМЯ logo</label>
-                                                <Field
-                                                    name="emy_logo"
-                                                    id="id_emy_logo"
-                                                    type="text"
-                                                    className="form-control"
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'emy_logo')}
+                                                    imgExtension={['.jpeg', '.png']}
+                                                    maxFileSize={2250000}
+                                                    singleImage={true}
+                                                    label=''
                                                 />
+                                                <p>Өмнөх зураг</p><br/>
+                                               <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," + emy_logo_old} style={{height: '150px'}}/>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="gzbgzzg_logo">ГЗБГЗЗГ logo</label>
-                                                <Field
-                                                    name="gzbgzzg_logo"
-                                                    id="id_gzbgzzg_logo"
-                                                    type="text"
-                                                    className="form-control"
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'gzbgzzg_logo')}
+                                                    imgExtension={['.jpeg', '.png']}
+                                                    maxFileSize={2250000}
+                                                    singleImage={true}
+                                                    label=''
                                                 />
+                                                <p>Өмнөх зураг</p><br/>
+                                               <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  gzbgzzg_logo_old} style={{height: '150px'}}/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -172,7 +266,7 @@ export default class CovidConfig extends Component {
                                                 <Field
                                                     name="batlagdsan_tohioldol"
                                                     id="id_batlagdsan_tohioldol"
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control"
                                                 />
                                             </div>
@@ -183,7 +277,7 @@ export default class CovidConfig extends Component {
                                                 <Field
                                                     name="edgersen_humuusiin_too"
                                                     id="id_edgersen_humuusiin_too"
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control"
                                                 />
                                             </div>
@@ -194,7 +288,7 @@ export default class CovidConfig extends Component {
                                                 <Field
                                                     name="emchlegdej_bui_humuus_too"
                                                     id="id_emchlegdej_bui_humuus_too"
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control"
                                                 />
                                             </div>
@@ -205,7 +299,7 @@ export default class CovidConfig extends Component {
                                                 <Field
                                                     name="tusgaarlagdsan_humuusiin_too"
                                                     id="id_tusgaarlagdsan_humuusiin_too"
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control"
                                                 />
                                             </div>
@@ -227,7 +321,7 @@ export default class CovidConfig extends Component {
                                                 <Field
                                                     name="emiin_sangiin_too"
                                                     id="id_emiin_sangiin_too"
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control"
                                                 />
                                             </div>
@@ -238,21 +332,97 @@ export default class CovidConfig extends Component {
                                                 <Field
                                                     name="emlegiin_too"
                                                     id="id_emlegiin_too"
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control"
                                                 />
                                             </div>
                                         </div>
+
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="niit_eruul_mend_baiguullaga_too">Нийт эрүүл мэндийн байгуулагын тоо</label>
                                                 <Field
                                                     name="niit_eruul_mend_baiguullaga_too"
                                                     id="id_niit_eruul_mend_baiguullaga_too"
-                                                    type="text"
+                                                    type="number"
                                                     className="form-control"
                                                 />
                                             </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="id_shinjilgee_too">Шинжилгээ хийсэн тоо</label>
+                                                <Field
+                                                    name="shinjilgee_too"
+                                                    id="id_shinjilgee_too"
+                                                    type="number"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="id_nas_barsan_too">Нас барсан хүмүүсийн тоо</label>
+                                                <Field
+                                                    name="nas_barsan_too"
+                                                    id="id_nas_barsan_too"
+                                                    type="number"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="row mb-2">
+                                            <table className="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th colSpan="4" className="text-center align-center" scope="rowgroup">Line graph утга</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>№</th>
+                                                        <th>Огноо</th>
+                                                        <th>Тоо</th>
+                                                        <th>Хасах</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {line_chart_datas.map((values, idx) =>
+                                                        <tr key={idx}>
+                                                            <td>{idx + 1}</td>
+                                                            <td>
+                                                                <input
+                                                                    onChange={(e) => this.arrayOnChange(idx, e.target.value)}
+                                                                    type="date"
+                                                                    className="form-control"
+                                                                    value={values.label}
+                                                                ></input>
+                                                            </td>
+                                                            <td>
+                                                                <input
+                                                                    onChange={(e) => this.arrayOnChangeDatas(idx, e.target.value)}
+                                                                    type="number"
+                                                                    className="form-control"
+                                                                    value={values.datas}
+                                                                ></input>
+                                                            </td>
+                                                            <td>
+                                                                <a onClick={() => this.arrayRemove(idx)} className="btn btn-outline-primary ">
+                                                                    Хасах
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                    <tr>
+                                                        <td colSpan="4" className="text-center align-center" scope="rowgroup">
+                                                            <a className="text-center" onClick={this.arrayAdd} className="btn btn-outline-primary rounded-circle">
+                                                                Нэмэх
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                         { is_editing &&
                                             <button

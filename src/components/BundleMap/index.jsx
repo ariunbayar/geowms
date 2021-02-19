@@ -228,13 +228,13 @@ export default class InspireMap extends Component {
             }
         }
 
-        if (this.props.bundle.id === prevProps.bundle.id) return
-
-        const {bundle} = this.props
-        this.setState({bundle})
-
-        this.loadMapData(bundle.id)
-
+        if (this.props.bundle.id !== prevProps.bundle.id) {
+            const {bundle} = this.props
+            this.setState({bundle})
+            if (bundle.id) {
+                this.loadMapData(bundle.id)
+            }
+        }
     }
 
     loadMapData(bundle_id) {
@@ -414,6 +414,7 @@ export default class InspireMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        this.props.loadErguul((val) => this.readFeatures(val))
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
 
@@ -1012,24 +1013,11 @@ export default class InspireMap extends Component {
 
 
     render() {
-      const is_modal_info_open = this.state.is_modal_info_open
         return (
-            <div>
-                <div className="row">
-                    <div className="col-md-12 px-0">
-                        <div id="map" style={{height:"calc(90vh - 320px)"}}></div>
-                        {
-                            is_modal_info_open &&
-                            <ModalAlert
-                                modalAction = {() => this.handleModalApproveClose()}
-                                text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
-                                title="Худалдан авалтын мэдээлэл"
-                                status={this.state.status}
-                                actionNameDelete="зөвшөөрөх"
-                            />
-                        }
-                    </div>
-                </div>
+            <div
+                id="map"
+                style={{height:"calc( 80vh - 85px - 15px)"}}
+            >
             </div>
         )
     }
