@@ -228,13 +228,13 @@ export default class InspireMap extends Component {
             }
         }
 
-        if (this.props.bundle.id === prevProps.bundle.id) return
-
-        const {bundle} = this.props
-        this.setState({bundle})
-
-        this.loadMapData(bundle.id)
-
+        if (this.props.bundle.id !== prevProps.bundle.id) {
+            const {bundle} = this.props
+            this.setState({bundle})
+            if (bundle.id) {
+                this.loadMapData(bundle.id)
+            }
+        }
     }
 
     loadMapData(bundle_id) {
@@ -414,6 +414,7 @@ export default class InspireMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        this.props.loadErguul((val) => this.readFeatures(val))
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
 
@@ -1015,7 +1016,7 @@ export default class InspireMap extends Component {
         return (
             <div
                 id="map"
-                className="h-100 d-inline-block"
+                style={{height:"calc( 80vh - 85px - 15px)"}}
             >
             </div>
         )

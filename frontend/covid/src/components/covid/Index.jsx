@@ -26,14 +26,15 @@ export class CovidPage extends Component {
                 niit_eruul_mend_baiguullaga_too:'',
                 gzbgzzg_logo:'',
                 title:'',
+                bundle: '',
                 line_chart_datas: []
             },
             feature_collection: {},
             feature: {},
             graph_color: '#0020C2',
-            id: 11,
         }
         this.getFeature = this.getFeature.bind(this)
+        this.loadData = this.loadData.bind(this)
     }
 
     componentDidMount(){
@@ -41,16 +42,19 @@ export class CovidPage extends Component {
     }
 
     getDatas(){
-            service
-                .covidConfigGet()
-                .then((values) => {
-                    this.setState({ initial_values: values })
-                })
-            service
-                .getErguulEmployees()
-                .then(({feature_collection}) => {
-                    this.setState({ feature_collection })
-                })
+        service
+            .covidConfigGet()
+            .then((values) => {
+                this.setState({ initial_values: values })
+            })
+    }
+
+    loadData(loadErguul) {
+        service
+            .getErguulEmployees()
+            .then(({feature_collection}) => {
+                loadErguul(feature_collection)
+            })
     }
 
     getFeature(feature) {
@@ -70,10 +74,11 @@ export class CovidPage extends Component {
             niit_eruul_mend_baiguullaga_too,
             gzbgzzg_logo,
             title,
-            line_chart_datas
+            line_chart_datas,
+            bundle
         } = this.state.initial_values
         let labels = ['Батлагдсан тохиолдол', 'Эдгэрсэн хүмүүсийн тоо']
-        const { feature_collection, feature, graph_color, id } = this.state
+        const { feature_collection, feature, graph_color } = this.state
 
         return (
             <div className="col-md-12">
@@ -126,12 +131,13 @@ export class CovidPage extends Component {
                     <div className="col-8 col-md-8 col-xl-8 mt-4">
                         <div className="card h-100">
                             <div className="card-body">
-                                <div className="row">
-                                    <div className="col-12">
-                                        <SearchSelects sendFeature={this.getFeature}/>
-                                    </div>
-                                    <InspireMap bundle={{'id': id}} features={feature_collection} feature={feature}/>
-                                </div>
+                                <SearchSelects sendFeature={this.getFeature}/>
+                                <InspireMap
+                                    bundle={{'id': bundle}}
+                                    features={feature_collection}
+                                    feature={feature}
+                                    loadErguul={(func) => this.loadData(func)}
+                                />
                             </div>
                         </div>
                     </div>

@@ -12,7 +12,6 @@ from backend.token.utils import TokenGeneratorEmployee
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from backend.inspire.models import (
-    GovPermInspire,
     EmpRole,
     EmpPerm,
     EmpRoleInspire,
@@ -30,6 +29,8 @@ from govorg.backend.utils import (
     count_property_of_feature,
     get_perm_kind_name
 )
+
+from backend.org.forms import EmployeeAddressForm
 
 
 def _get_employee_display(employee):
@@ -196,6 +197,9 @@ def _employee_validation(user, user_detail):
 
 
 def _get_point_for_db(coordinate):
+    if not coordinate:
+        return ''
+
     if isinstance(coordinate, str):
         coordinate = coordinate.split(",")
 
@@ -220,11 +224,13 @@ def create(request, payload):
     door_number = address.get('door_number')
     point_coordinate = address.get('point_coordinate')
     point = _get_point_for_db(point_coordinate)
+    address['point'] = point
 
     emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
     user = get_object_or_404(User, employee__user=request.user)
     get_object_or_404(Employee, user=request.user, is_admin=True)
+
     errors = _employee_validation(None, user_detail)
     if errors:
         return JsonResponse({
@@ -232,51 +238,59 @@ def create(request, payload):
             'errors': errors
         })
 
-    with transaction.atomic():
+    form = EmployeeAddressForm(address)
 
-        user = User()
-        _set_user(user, user_detail)
+    if form.is_valid() and not errors:
+        with transaction.atomic():
+            user = User()
+            _set_user(user, user_detail)
 
-        employee = Employee()
-        employee.org = org
-        employee.user = user
-        employee.token = TokenGeneratorEmployee().get()
-        _set_employee(employee, user_detail)
+            employee = Employee()
+            employee.org = org
+            employee.user = user
+            employee.token = TokenGeneratorEmployee().get()
+            _set_employee(employee, user_detail)
 
-        emp_perm = EmpPerm()
-        emp_perm.created_by = user
-        emp_perm.emp_role_id = emp_role_id
-        emp_perm.employee_id = employee.id
-        emp_perm.updated_by = user
-        emp_perm.save()
+            emp_perm = EmpPerm()
+            emp_perm.created_by = user
+            emp_perm.emp_role_id = emp_role_id
+            emp_perm.employee_id = employee.id
+            emp_perm.updated_by = user
+            emp_perm.save()
 
-        employee_address = EmployeeAddress()
-        employee_address.employee = employee
-        employee_address.level_1 = level_1
-        employee_address.level_2 = level_2
-        employee_address.level_3 = level_3
-        employee_address.street = street
-        employee_address.apartment = apartment
-        employee_address.door_number = door_number
-        employee_address.point = point
-        employee_address.save()
+            employee_address = EmployeeAddress()
+            employee_address.employee = employee
+            employee_address.level_1 = level_1
+            employee_address.level_2 = level_2
+            employee_address.level_3 = level_3
+            employee_address.street = street
+            employee_address.apartment = apartment
+            employee_address.door_number = door_number
+            employee_address.point = point
+            employee_address.save()
 
-        obj_array = []
-        for role in roles:
-            emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
-            obj_array.append(emp_perm_inspire)
-        EmpPermInspire.objects.bulk_create(obj_array)
+            obj_array = []
+            for role in roles:
+                emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
+                obj_array.append(emp_perm_inspire)
+            EmpPermInspire.objects.bulk_create(obj_array)
 
-        utils.send_approve_email(user)
+            utils.send_approve_email(user)
+
+            return JsonResponse({
+                'success': True,
+                'info': 'Амжилттай хадгаллаа'
+            })
 
         return JsonResponse({
-            'success': True,
-            'info': 'Амжилттай хадгаллаа'
+            'success': False,
+            'info': 'Хадгалахад алдаа гарлаа'
         })
-    return JsonResponse({
-        'success': False,
-        'info': 'Хадгалахад алдаа гарлаа'
-    })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': {**form.errors, **errors},
+        })
 
 
 def _delete_old_emp_role(emp_perm):
@@ -319,51 +333,57 @@ def update(request, payload, pk):
                 'errors': errors
             })
 
-        with transaction.atomic():
-            if emp_perm:
-                old_emp_role = emp_perm.emp_role
-                if new_emp_role != old_emp_role:
-                    _delete_old_emp_role(emp_perm)
-                    emp_perm.emp_role = new_emp_role
+        form = EmployeeAddressForm(address)
+        if form.is_valid() and not errors:
+            with transaction.atomic():
+                if emp_perm:
+                    old_emp_role = emp_perm.emp_role
+                    if new_emp_role != old_emp_role:
+                        _delete_old_emp_role(emp_perm)
+                        emp_perm.emp_role = new_emp_role
+                        emp_perm.save()
+                else:
+                    user = get_object_or_404(User, employee=employee)
+                    emp_perm = EmpPerm()
+                    emp_perm.created_by = user
+                    emp_perm.emp_role_id = role_id
+                    emp_perm.employee_id = employee.id
+                    emp_perm.updated_by = user
                     emp_perm.save()
-            else:
-                user = get_object_or_404(User, employee=employee)
-                emp_perm = EmpPerm()
-                emp_perm.created_by = user
-                emp_perm.emp_role_id = role_id
-                emp_perm.employee_id = employee.id
-                emp_perm.updated_by = user
-                emp_perm.save()
 
-            if remove_perms:
-                _delete_remove_perm(remove_perms)
+                if remove_perms:
+                    _delete_remove_perm(remove_perms)
 
-            if add_perms:
-                obj_array = []
-                for perm in add_perms:
-                    emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
-                    obj_array.append(emp_perm_inspire)
-                EmpPermInspire.objects.bulk_create(obj_array)
+                if add_perms:
+                    obj_array = []
+                    for perm in add_perms:
+                        emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
+                        obj_array.append(emp_perm_inspire)
+                    EmpPermInspire.objects.bulk_create(obj_array)
 
-            address_qs = EmployeeAddress.objects
-            address_qs = address_qs.filter(employee=employee)
-            if address_qs:
-                address_qs.update(
-                    **address
-                )
-            else:
-                address_qs.create(employee=employee, **address)
+                address_qs = EmployeeAddress.objects
+                address_qs = address_qs.filter(employee=employee)
+                if address_qs:
+                    address_qs.update(
+                        **address
+                    )
+                else:
+                    address_qs.create(employee=employee, **address)
 
+                user = employee.user
+                _set_user(user, payload)
 
-            user = employee.user
-            _set_user(user, payload)
+                employee = employee
+                _set_employee(employee, payload)
 
-            employee = employee
-            _set_employee(employee, payload)
-
+                return JsonResponse({
+                    'success': True,
+                    'info': 'Амжилттай хадгаллаа'
+                })
+        else:
             return JsonResponse({
-                'success': True,
-                'info': 'Амжилттай хадгаллаа'
+                'success': False,
+                'errors': {**form.errors, **errors},
             })
     else:
         return JsonResponse({
@@ -528,8 +548,8 @@ def _get_feature_collection(employees):
             point_info = dict()
             point = addresses.point
             point_info['id'] = addresses.employee.id
-            point_info['first_name'] = addresses.employee.user.first_name # etseg
-            point_info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
+            point_info['first_name'] = addresses.employee.user.first_name   # etseg
+            point_info['last_name'] = addresses.employee.user.last_name     # onooj ogson ner
             point_info['is_cloned'] = _is_cloned_feature(addresses)
             if point:
                 feature = utils.get_feature_from_geojson(point.json, properties=point_info)
@@ -543,8 +563,8 @@ def _get_feature_collection(employees):
             point = erguul.point
             erguul_info['id'] = employee.id
             erguul_info['is_erguul'] = True
-            erguul_info['first_name'] = employee.user.first_name # etseg
-            erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+            erguul_info['first_name'] = employee.user.first_name    # etseg
+            erguul_info['last_name'] = employee.user.last_name  # onooj ogson ner
 
             if point:
                 feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
@@ -566,8 +586,6 @@ def get_addresses(request):
         employees = employees.filter(org=org)
     else:
         raise 404
-
-    points = []
 
     feature_collection = _get_feature_collection(employees)
 
@@ -644,9 +662,9 @@ def save_field_tailbar(request, payload):
     values = payload.get('values')
     pk = payload.get('id')
     if pk:
-            erguul_qs = ErguulTailbar.objects
-            erguul_qs = erguul_qs.filter(pk=pk)
-            erguul_qs.update(**values)
+        erguul_qs = ErguulTailbar.objects
+        erguul_qs = erguul_qs.filter(pk=pk)
+        erguul_qs.update(**values)
     else:
         address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
         if address_id:

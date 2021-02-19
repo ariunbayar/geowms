@@ -166,7 +166,7 @@ export default class EmployeeMap extends Component {
     render() {
         return (
             <div id="map"
-                className={`h-${this.props.height} d-inline-block`}
+                className={`h-${this.props.height} d-inline-block ${this.props.class}`}
             >
             </div>
         )
