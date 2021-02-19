@@ -269,13 +269,17 @@ def employee_update(request, payload, pk, level):
                     apartment=apartment,
                     door_number=door_number,
                 )
-        return JsonResponse({'success': True, 'errors': errors})
+        rsp = {
+            'success': True, 'errors': errors
+        }
 
     else:
-        return JsonResponse({
+        rsp = {
             'success': False,
             'errors': {**form.errors, **errors},
-        })
+        }
+
+    return JsonResponse(rsp)
 
 
 def _get_point_for_db(coordinate):
@@ -370,10 +374,10 @@ def employee_add(request, payload, level, pk):
         }
 
     else:
-        return JsonResponse({
+        rsp = {
             'success': False,
             'errors': {**form.errors, **errors},
-        })
+        }
 
     return JsonResponse(rsp)
 
