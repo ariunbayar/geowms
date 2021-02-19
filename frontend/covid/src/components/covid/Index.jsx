@@ -31,7 +31,7 @@ export class CovidPage extends Component {
             feature_collection: {},
             feature: {},
             graph_color: '#0020C2',
-            id: 19,
+            id: 11,
         }
         this.getFeature = this.getFeature.bind(this)
     }
@@ -87,35 +87,35 @@ export class CovidPage extends Component {
                     <div className="col-2 col-md-2 col-xl-2 mt-2">
                         <div className="row">
                             <div className="col-12 mt-3 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Logo src={emy_logo}/>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Count text={'Батлагдсан тохиолдол'} src={null} count={batlagdsan_tohioldol}/>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Count text={'Эдгэрсэн хүмүүсийн тоо'} src={null} count={edgersen_humuusiin_too}/>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-3 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Count text={'Эмчлэгдэж буй хүмүүсийн тоо'} src={null} count={emchlegdej_bui_humuus_too}/>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12  mt-3 col-md-12 col-xl-12 text-wrapp">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Count text={'Тусгаарлагдаж буй хүмүүсийн тоо'} src={null} count={tusgaarlagdsan_humuusiin_too}/>
                                     </div>
@@ -124,38 +124,42 @@ export class CovidPage extends Component {
                         </div>
                     </div>
                     <div className="col-8 col-md-8 col-xl-8 mt-4">
-                        <div className="card">
+                        <div className="card h-100">
                             <div className="card-body">
-                                <SearchSelects sendFeature={this.getFeature}/>
-                                <InspireMap bundle={{'id': id}} features={feature_collection} feature={feature}/>
+                                <div className="row">
+                                    <div className="col-12">
+                                        <SearchSelects sendFeature={this.getFeature}/>
+                                    </div>
+                                    <InspireMap bundle={{'id': id}} features={feature_collection} feature={feature}/>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div className="col-2 col-md-2 col-xl-2">
                         <div className="row">
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Logo src={gzbgzzg_logo}/>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Count text={'Нийт эрүүл мэндийн байгуулагын тоо'} src={null} count={niit_eruul_mend_baiguullaga_too}/>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Count text={'Эмнэлгийн тоо'} src={null} count={emlegiin_too}/>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
-                                <div className="card">
+                                <div className="card h-100">
                                     <div className="card-body">
                                         <Count text={'Эмийн сангийн тоо'} src={null} count={emiin_sangiin_too}/>
                                     </div>
