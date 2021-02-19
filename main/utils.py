@@ -969,3 +969,16 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
         cursor.execute(sql)
 
         return [item[0] for item in cursor.fetchall()]
+
+
+def create_index(model_name, field):
+    with connections['default'].cursor() as cursor:
+        sql = """
+            CREATE INDEX {model_name}_index_{field}
+            ON public.{model_name} USING btree
+                ({field} ASC NULLS LAST)
+            TABLESPACE pg_default;
+        """.format(field=field, model_name=model_name)
+        cursor.execute(sql)
+        return True
+    return False
