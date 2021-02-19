@@ -1552,14 +1552,18 @@ def get_erguuls(request):
     points = list()
     erguuls = EmployeeErguul.objects.all()
     for erguul in erguuls:
-        data = dict()
-        employee = erguul.address.employee
-        point = erguul.point
-        data['id'] = employee.id
-        data['first_name'] = employee.user.first_name # etseg
-        data['last_name'] = employee.user.last_name # onooj ogson ner
-        feature = utils.get_feature_from_geojson(point.json, properties=data)
-        points.append(feature)
+        tailbar = ErguulTailbar.objects
+        tailbar = tailbar.filter(erguul=erguul)
+        tailbar = tailbar.first()
+        if not tailbar:
+            data = dict()
+            employee = erguul.address.employee
+            point = erguul.point
+            data['id'] = employee.id
+            data['first_name'] = employee.user.first_name # etseg
+            data['last_name'] = employee.user.last_name # onooj ogson ner
+            feature = utils.get_feature_from_geojson(point.json, properties=data)
+            points.append(feature)
 
     feature_collection = FeatureCollection(points)
 
