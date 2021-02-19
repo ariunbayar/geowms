@@ -8,6 +8,7 @@ import {PieChart} from './components/PieChart'
 import {service} from './service'
 import InspireMap from "@utils/BundleMap"
 import SearchSelects from './components/SearchSelects'
+import Loader from '@utils/Loader'
 
 export class CovidPage extends Component {
 
@@ -41,6 +42,7 @@ export class CovidPage extends Component {
             emlegiin_ungu: 'info',
             emiin_sangiin_ungu: 'info',
             shinjilgee_ungu: 'info',
+            is_loading: true,
         }
         this.getFeature = this.getFeature.bind(this)
         this.loadData = this.loadData.bind(this)
@@ -54,7 +56,7 @@ export class CovidPage extends Component {
         service
             .covidConfigGet()
             .then((values) => {
-                this.setState({ initial_values: values })
+                this.setState({ initial_values: values, is_loading: false })
             })
     }
 
@@ -101,10 +103,12 @@ export class CovidPage extends Component {
             emlegiin_ungu,
             emiin_sangiin_ungu,
             shinjilgee_ungu,
+            is_loading,
         } = this.state
 
         return (
             <div className="col-md-12">
+                <Loader is_loading={is_loading}/>
                 <div className="row card mt-3 ml-0 mr-0">
                     <div className="row card-body">
                         <Text text={title}/>
