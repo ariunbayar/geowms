@@ -19,6 +19,8 @@ const validationSchema = Yup.object().shape({
     niit_eruul_mend_baiguullaga_too: Yup.string(),
     title: Yup.string(),
     bundle: Yup.string(),
+    shinjilgee_too: Yup.string(),
+    nas_barsan_too: Yup.string(),
 })
 
 export default class CovidConfig extends Component {
@@ -38,7 +40,9 @@ export default class CovidConfig extends Component {
                 emlegiin_too:'',
                 niit_eruul_mend_baiguullaga_too:'',
                 title:'',
-                bundle: '1'
+                bundle: '1',
+                shinjilgee_too: '',
+                nas_barsan_too: '',
             },
             emy_logo:'',
             emy_logo_old:'',
@@ -67,7 +71,7 @@ export default class CovidConfig extends Component {
 
     arrayAdd(){
         const {line_chart_datas} = this.state
-        line_chart_datas.push({"label": 'Нэр', "datas": 1})
+        line_chart_datas.push({"label": 'Огноо', "datas": 1})
         this.setState(line_chart_datas)
     }
 
@@ -333,6 +337,7 @@ export default class CovidConfig extends Component {
                                                 />
                                             </div>
                                         </div>
+
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="niit_eruul_mend_baiguullaga_too">Нийт эрүүл мэндийн байгуулагын тоо</label>
@@ -344,6 +349,31 @@ export default class CovidConfig extends Component {
                                                 />
                                             </div>
                                         </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="id_shinjilgee_too">Шинжилгээ хийсэн тоо</label>
+                                                <Field
+                                                    name="shinjilgee_too"
+                                                    id="id_shinjilgee_too"
+                                                    type="number"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="id_nas_barsan_too">Нас барсан хүмүүсийн тоо</label>
+                                                <Field
+                                                    name="nas_barsan_too"
+                                                    id="id_nas_barsan_too"
+                                                    type="number"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                        </div>
+
                                         <div className="row mb-2">
                                             <table className="table table-bordered">
                                                 <thead>
@@ -352,7 +382,7 @@ export default class CovidConfig extends Component {
                                                     </tr>
                                                     <tr>
                                                         <th>№</th>
-                                                        <th>Нэр</th>
+                                                        <th>Огноо</th>
                                                         <th>Тоо</th>
                                                         <th>Хасах</th>
                                                     </tr>
@@ -364,7 +394,7 @@ export default class CovidConfig extends Component {
                                                             <td>
                                                                 <input
                                                                     onChange={(e) => this.arrayOnChange(idx, e.target.value)}
-                                                                    type="text"
+                                                                    type="date"
                                                                     className="form-control"
                                                                     value={values.label}
                                                                 ></input>
@@ -383,7 +413,6 @@ export default class CovidConfig extends Component {
                                                                 </a>
                                                             </td>
                                                         </tr>
-                                                        
                                                     )}
                                                     <tr>
                                                         <td colSpan="4" className="text-center align-center" scope="rowgroup">

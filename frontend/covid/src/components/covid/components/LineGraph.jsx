@@ -18,7 +18,7 @@ export class LineGraph extends Component {
             labels: label,
             datasets: [
                 {
-                    label: "Батлагдсан",
+                    label: "Батлагдсан тохиолдол",
                     fill: true,
                     lineTension: 0.3,
                     backgroundColor: graph_color + "30",  //fill color
