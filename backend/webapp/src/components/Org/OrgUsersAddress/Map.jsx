@@ -78,6 +78,7 @@ export default class AddressMap extends Component {
 
         const select = new Select();
         select.on("select", event => this.selectedFeature(event))
+        this.select = select
 
         const translate = new Translate({
             features: select.getFeatures(),
@@ -243,40 +244,42 @@ export default class AddressMap extends Component {
         const source = this.vector_layer.getSource()
 
         const feature = event.features.getArray()[0]
-        const featureID = feature.getProperties()['id']
+        if (feature.getGeometry().getType().includes("Point")) {
+            const featureID = feature.getProperties()['id']
 
-        const on_map_features = source.getFeatures();
-        if (on_map_features != null && on_map_features.length > 0) {
-            for (var i = 0; i < on_map_features.length; i++) {
-                const properties = on_map_features[i].getProperties();
-                const id = properties.id;
-                if (id == featureID && too < 2) {
-                    too++
-                }
-                else if(too == 2) {
-                    break
+            const on_map_features = source.getFeatures();
+            if (on_map_features != null && on_map_features.length > 0) {
+                for (var i = 0; i < on_map_features.length; i++) {
+                    const properties = on_map_features[i].getProperties();
+                    const id = properties.id;
+                    if (id == featureID && too < 2) {
+                        too++
+                    }
+                    else if(too == 2) {
+                        break
+                    }
                 }
             }
-        }
 
-        if (too < 2) {
-            const clonedFeature = feature.clone()
-            const full_name = this.getFullName(clonedFeature)
-            const style = this.featureWithTextStyle(full_name)
-            clonedFeature.setStyle(style)
-            clonedFeature.setProperties({ is_cloned: true })
-            source.addFeature(clonedFeature)
-            const start_coordinate = clonedFeature.getGeometry().getCoordinates()
-            this.start_coordinate = start_coordinate
-        }
+            if (too < 2) {
+                const clonedFeature = feature.clone()
+                const full_name = this.getFullName(clonedFeature)
+                const style = this.featureWithTextStyle(full_name)
+                clonedFeature.setStyle(style)
+                clonedFeature.setProperties({ is_cloned: true })
+                source.addFeature(clonedFeature)
+            }
 
-        feature.setProperties({ is_changed: true })
+            feature.setProperties({ is_changed: true })
+        }
     }
 
     translateEnd(event) {
         const feature = event.features.getArray()[0]
         const coordinates = feature.getGeometry().getCoordinates()
-        this.end_coordinates = coordinates
+
+        const id = feature.getProperties()['id']
+        this.removeFeatureFromSource(id)
 
         const projection = this.map.getView().getProjection()
         const map_coord = transformCoordinate(coordinates, projection, this.state.projection_data)
@@ -287,26 +290,74 @@ export default class AddressMap extends Component {
             .getErguulegFields()
             .then(({ success, info }) => {
                 const title = 'Эргүүлд гарах байршил'
-                this.makeLineString()
+                this.makeLineString([feature], 'one')
                 this.controls.form.showForm(success, info, title, (val) => this.sendErguuleg(val, this.id, coordinate_clicked))
             })
     }
 
-    makeLineString() {
+    fromLonLatToMapCoord(coordinate) {
+        return fromLonLat([coordinate[0], coordinate[1]]);
+    }
+
+    makeLineString(features, type="") {
         const source = this.vector_layer.getSource()
 
-        const id = 'line'
-        this.removeFeatureFromSource(id)
+        const map_features = source.getFeatures();
+        if (map_features != null && map_features.length > 0 && features.length > 0) {
+            for (var j = 0; j < map_features.length; j++) {
+                const child_feature = map_features[j]
+                const property = child_feature.getProperties()
+                const feat_id = property.id
 
-        const start = this.start_coordinate
-        const end = this.end_coordinates
-        const line_string = new LineString([start, end])
-        const line_feature = new Feature(line_string)
-        line_feature.setProperties({ id })
-        const extent = line_feature.getGeometry().getExtent()
+                let for_if
+                if (type == 'one') {
+                    for_if = property.is_cloned
+                }
+                else {
+                    for_if = property.is_erguul
+                }
 
-        this.extent = extent
-        source.addFeature(line_feature)
+                if (feat_id && for_if) {
+                    features.map((main_feature, idx) => {
+                        let properties
+                        let feat_for_if
+                        if (type == 'one') {
+                            properties = main_feature.getProperties()
+                            feat_for_if = properties.is_changed
+                        }
+                        else {
+                            properties = main_feature.properties
+                            feat_for_if = properties.is_cloned
+                        }
+
+                        const main_feat_id = properties.id
+                        if (main_feat_id == feat_id && feat_for_if) {
+
+                            let start
+                            if (type == 'one') {
+                                start = main_feature.getGeometry().getCoordinates()
+                            }
+                            else {
+                                start = main_feature.geometry.coordinates
+                                start = this.fromLonLatToMapCoord(start)
+                            }
+
+                            const end = child_feature.getGeometry().getCoordinates()
+
+                            const line_string = new LineString([start, end])
+                            const line_feature = new Feature(line_string)
+
+                            line_feature.setProperties({ id: main_feat_id })
+
+                            const extent = line_feature.getGeometry().getExtent()
+
+                            this.extent = extent
+                            source.addFeature(line_feature)
+                        }
+                    })
+                }
+            }
+        }
     }
 
     downloadImage(val, id, coordinate_clicked) {
@@ -355,15 +406,26 @@ export default class AddressMap extends Component {
         this.downloadImage(val, id, coordinate_clicked)
     }
 
-    removeFeatureFromSource(featureID) {
+    removeFeatureFromSource(featureID, state='') {
         const source = this.vector_layer.getSource()
         const features = source.getFeatures();
         if (features != null && features.length > 0) {
             for (var i = 0; i < features.length; i++) {
                 const properties = features[i].getProperties();
                 const id = properties.id;
+                let remove_feature
+                const type = features[i].getGeometry().getType()
                 if (id == featureID) {
-                    source.removeFeature(features[i]);
+                    if (state == 'only_aimag' && type.includes("Polygon")) {
+                        remove_feature = features[i]
+                    }
+                    else if (!state && type == 'LineString') {
+                        remove_feature = features[i]
+                    }
+                }
+
+                if (remove_feature) {
+                    source.removeFeature(remove_feature);
                     break;
                 }
             }
@@ -372,7 +434,7 @@ export default class AddressMap extends Component {
 
     readFeature(feature) {
         const id = 'aimag_sum'
-        this.removeFeatureFromSource(id)
+        this.removeFeatureFromSource(id, 'only_aimag')
         const source = this.vector_layer.getSource()
         const feat =  new GeoJSON().readFeatures(feature, {
             dataProjection: this.state.projection_data,
@@ -404,6 +466,7 @@ export default class AddressMap extends Component {
                 source.addFeature(feature)
             }
         })
+        this.makeLineString(features['features'])
     }
 
     render() {

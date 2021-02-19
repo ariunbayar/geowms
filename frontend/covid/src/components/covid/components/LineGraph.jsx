@@ -3,19 +3,17 @@ import { Line } from "react-chartjs-2";
 
 
 export class LineGraph extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            label: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
-            count: [2, 4, 12, 78, 12, 44, 22]
-        }
-    }
-    componentDidMount(){
-
-    }
 
     render() {
-        const {label , count } = this.state
+        const {line_chart_datas} = this.props
+        var datas = []
+        var label = []
+        line_chart_datas.map((value) => {
+            label.push(value.label)
+            datas.push(value.datas)
+        })
+
+        const { graph_color } = this.props
         const dataLine = {
             labels: label,
             datasets: [
@@ -23,13 +21,13 @@ export class LineGraph extends Component {
                     label: "Батлагдсан",
                     fill: true,
                     lineTension: 0.3,
-                    backgroundColor: "rgba(184, 185, 210, .3)",
-                    borderColor: "rgb(35, 26, 136)",
+                    backgroundColor: graph_color + "70",  //fill color
+                    borderColor: graph_color, //border_color
                     borderCapStyle: "butt",
                     borderDash: [],
                     borderDashOffset: 0.0,
                     borderJoinStyle: "miter",
-                    pointBorderColor: "rgb(35, 26, 136)",
+                    pointBorderColor: graph_color, // point-color
                     pointBackgroundColor: "rgb(255, 255, 255)",
                     pointBorderWidth: 10,
                     pointHoverRadius: 5,
@@ -38,13 +36,15 @@ export class LineGraph extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: count
+                    data: datas
                 },
             ]
         }
 
         return (
-            <Line  width={100} height={30} data={dataLine} options={{ responsive: true }} />
+            <div class="wrapper">
+                <Line height={72} data={dataLine} options={{ responsive: true }} />
+            </div>
         )
     }
 

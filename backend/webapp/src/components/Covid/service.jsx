@@ -8,7 +8,7 @@ const covid = {
         return fetch('/back/api/config/covid/', requestOptions).then(handleResponse)
     },
 
-    save: function(values) {
+    save: function(values, line_chart_datas) {
         const opts = {
             ...getPostOptions(),
             body: JSON.stringify(values),

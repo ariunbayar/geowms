@@ -6,25 +6,34 @@ export class PieChart extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            labels: ['Батлагдсан', 'Эдгэрсэн'],
-            datas: [1167, 1647]
+            labels: props.labels,
 
         }
     }
 
     render() {
-        const {datas, labels} = this.state
+        let datas = []
+        const { labels} = this.state
+        const {batlagdsan_tohioldol, edgersen_humuusiin_too} = this.props
+        datas.push(parseInt(batlagdsan_tohioldol))
+        datas.push(parseInt(edgersen_humuusiin_too))
         const dataLine = {
             labels: labels,
             datasets: [
                 {
                     data: datas,
                     backgroundColor: ['rgba(184, 185, 210, .3)', "rgb(35, 26, 136)"],
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
+                    },
                 },
             ]
         }
         return (
-            <Pie data={dataLine}></Pie>
+            <div class="wrapper">
+                <Pie data={dataLine}></Pie>
+            </div>
         )
     }
 
