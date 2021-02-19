@@ -49,6 +49,9 @@ export class UserAdd extends Component {
             door_number: '',
 
             modal_alert_status: "closed",
+
+            errors: '',
+
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -115,7 +118,7 @@ export class UserAdd extends Component {
             'level_1': aimag_name,
             'level_2': sum_name,
             'level_3': horoo_name,
-            'point_coordinate': point_coordinate,
+            'point': point_coordinate,
         }
 
         const payload = {
@@ -139,6 +142,7 @@ export class UserAdd extends Component {
                             this.modalCloseTime()
                         } else {
                             setErrors(errors)
+                            this.setState({errors})
                         }
                         setSubmitting(false)
                     })
@@ -160,6 +164,7 @@ export class UserAdd extends Component {
                     }
                     else{
                         setErrors(errors)
+                        this.setState({errors})
                     }
                     setSubmitting(false)
                 })
@@ -301,7 +306,7 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point } = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, errors } = this.state
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -498,7 +503,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="aimag">Аймаг/Хот:</label>
                                 <select
                                     id="aimag"
-                                    className="form-control"
+                                    className={'form-control ' + (errors.level_1 ? 'is-invalid' : '')}
                                     aria-label="Default select example"
                                     onChange={(e) => this.handleChange(e, 'aimag', 'sum', ['sum', 'horoo'], 'mongol')}
                                     value={aimag_id}
@@ -513,7 +518,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="sum">Сум/Дүүрэг:</label>
                                 <select
                                     id="sum"
-                                    className="form-control"
+                                    className={'form-control ' + (errors.level_2 ? 'is-invalid' : '')}
                                     onChange={(e) => this.handleChange(e, 'sum', 'horoo', ['horoo'], 'aimag')}
                                     value={sum_id}
                                 >
@@ -527,7 +532,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="horoo">Хороо/Баг:</label>
                                 <select
                                     id="horoo"
-                                    className="form-control"
+                                    className={'form-control ' + (errors.level_3 ? 'is-invalid' : '')}
                                     onChange={(e) => this.handleChange(e, 'horoo', undefined, [], 'sum')}
                                     value={horoo_id}
                                 >
@@ -542,13 +547,13 @@ export class UserAdd extends Component {
                                 <div className="input-group">
                                     <input
                                         id="street"
-                                        className="form-control"
+                                        className={'form-control ' + (errors.street ? 'is-invalid' : '')}
                                         onChange={(e) => this.setState({ street: e.target.value })}
                                         value={street}
                                         placeholder="Гудамжны нэрийг оруулах"
                                     />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">гудамж</span>
+                                    <div className="input-group-append">
+                                        <span className="input-group-text">гудамж</span>
                                     </div>
                                 </div>
                             </div>
@@ -557,13 +562,13 @@ export class UserAdd extends Component {
                                 <div className="input-group">
                                     <input
                                         id="apartment"
-                                        className="form-control"
+                                        className={'form-control ' + (errors.apartment ? 'is-invalid' : '')}
                                         onChange={(e) => this.setState({ apartment: e.target.value })}
                                         value={apartment}
                                         placeholder="Байрны дугаарыг оруулах"
                                     />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">байр</span>
+                                    <div className="input-group-append">
+                                        <span className="input-group-text">байр</span>
                                     </div>
                                 </div>
                             </div>
@@ -572,18 +577,24 @@ export class UserAdd extends Component {
                                 <div className="input-group">
                                     <input
                                         id="door_number"
-                                        className="form-control"
+                                        className={'form-control ' + (errors.door_number ? 'is-invalid' : '')}
                                         onChange={(e) => this.setState({ door_number: e.target.value })}
                                         value={door_number}
                                         placeholder="Хаалганы дугаарыг оруулах"
                                     />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">тоот</span>
+                                    <div className="input-group-append">
+                                        <span className="input-group-text">тоот</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <EmployeeMap height='75' feature={feature} sendPointCoordinate={this.getPoint} point={point} />
+                        <EmployeeMap
+                            height='75'
+                            feature={feature}
+                            sendPointCoordinate={this.getPoint}
+                            point={point}
+                            class={(errors.point ? 'border border-danger' : '')}
+                        />
                     </div>
                 </div>
                 <ModalAlert
