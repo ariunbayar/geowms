@@ -169,7 +169,7 @@ export default class AddressMap extends Component {
                         }
                     ]
                     const fields = this.makeFields(info, conv)
-                    const title = 'Ажилтаны мэдээлэл'
+                    const title = 'Ажилтны мэдээлэл'
                     this.controls.form.showForm(true, fields, title, undefined, true)
                 }
             })

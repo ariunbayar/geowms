@@ -95,9 +95,9 @@ export class App extends Component {
                                 {
                                     employee.is_admin
                                     &&
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчидын хаяг"}></MenuItem>
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
                                 }
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлгийн мэдээлэл"}></MenuItem>
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>

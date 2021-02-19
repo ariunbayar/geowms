@@ -121,7 +121,7 @@ export class Form extends Component {
         const { is_empty } = this.props
         return (
             <div>
-                <h5 className="text-center">Эргүүлэгт гарсан мэдээлэл</h5>
+                <h5 className="text-center">Эргүүлд гарсан мэдээлэл</h5>
                 {fields.map((field, idx) => {
                     let is_disabled = is_empty ? true : field.disabled
                       return <NewInput key={idx}

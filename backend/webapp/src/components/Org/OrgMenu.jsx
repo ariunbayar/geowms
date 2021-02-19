@@ -116,7 +116,7 @@ export class OrgMenu extends Component {
                             data-toggle="tab"
                         >
                             <i className="fa fa-map-marker"></i>
-                            <span className="hidden-xs"> Ажилчидын хаяг</span>
+                            <span className="hidden-xs"> Ажилчдын хаяг</span>
                         </NavLink>
                     </li>
 
