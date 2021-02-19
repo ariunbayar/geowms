@@ -277,20 +277,17 @@ def create(request, payload):
 
             utils.send_approve_email(user)
 
-            return JsonResponse({
-                'success': True,
-                'info': 'Амжилттай хадгаллаа'
-            })
-
-        return JsonResponse({
-            'success': False,
-            'info': 'Хадгалахад алдаа гарлаа'
-        })
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хадгаллаа'
+        }
     else:
-        return JsonResponse({
-            'success': False,
-            'errors': {**form.errors, **errors},
-        })
+        rsp = {
+                'success': False,
+                'errors': {**form.errors, **errors},
+            }
+
+    return JsonResponse(rsp)
 
 
 def _delete_old_emp_role(emp_perm):
@@ -376,20 +373,21 @@ def update(request, payload, pk):
                 employee = employee
                 _set_employee(employee, payload)
 
-                return JsonResponse({
-                    'success': True,
-                    'info': 'Амжилттай хадгаллаа'
-                })
+            rsp = {
+                'success': True,
+                'info': 'Амжилттай хадгаллаа'
+            }
         else:
-            return JsonResponse({
+            rsp = {
                 'success': False,
                 'errors': {**form.errors, **errors},
-            })
+            }
     else:
-        return JsonResponse({
+        rsp = {
             'success': False,
             'info': 'Хадгалахад алдаа гарлаа'
-        })
+        }
+    return JsonResponse(rsp)
 
 
 def _get_emp_perm_display(emp_perm):
