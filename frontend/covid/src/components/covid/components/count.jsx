@@ -4,29 +4,23 @@ export default class Count extends Component {
 
     render() {
             return (
-                <div className="card-body p-2">
-                    <div className="text-center d-flex justify-content-center">
-                        <div className="col-lg-12">
-                            <div className="row">
-                                <div className="col-lg-12">
-                                    <a>{this.props.text}</a>
-                                </div>
-                            </div>
-                            <div className="row d-flex justify-content-center mt-1">
-                                <div className="col-auto p-0 mt-1">
-                                    {this.props.src &&
-                                    <img
-                                        src={this.props.src}
-                                        className="count"
-                                        alt="count"
-                                        style={{weight: '40px', height: '40px'}}
-                                    />
-                                    }
-                                </div>
-                                <div className="col-auto mt-0 p-0 ml-2">
-                                    <h1>{this.props.count}</h1>
-                                </div>
-                            </div>
+                <div className="row justify-content-center">
+                    <div className="col-md-12 text-center">
+                            <label htmlFor="label" style={{fontSize: '115%'}} className="mw-100 text-wrap align-middle">{this.props.text}</label>
+                    </div>
+                    <div className="row text-center">
+                        <div className="p-0 mt-1 mw-100">
+                            {this.props.src &&
+                            <img
+                                src={this.props.src}
+                                className="count  mw-100"
+                                alt="count"
+                                style={{weight: '40px', height: '40px'}}
+                            />
+                                }
+                        </div>
+                        <div className="mt-0 p-0 ml-2">
+                            <label  htmlFor="h1" style={{fontSize: '115%'}} className="mw-100 text-wrap align-middle"><h4>{this.props.count}</h4></label>
                         </div>
                     </div>
                 </div>
