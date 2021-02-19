@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react"
-import { Formik, Form, Field} from 'formik'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import ImageUploader from 'react-images-upload'
 
@@ -8,7 +8,8 @@ import { set } from "ol/transform"
 
 
 const validationSchema = Yup.object().shape({
-    batlagdsan_tohioldol: Yup.string(),
+    batlagdsan_tohioldol: Yup.string()
+        .required('Хоосон байна!'),
     edgersen_humuusiin_too: Yup.string(),
     emchlegdej_bui_humuus_too: Yup.string(),
     tusgaarlagdsan_humuusiin_too: Yup.string(),
@@ -17,6 +18,7 @@ const validationSchema = Yup.object().shape({
     emlegiin_too: Yup.string(),
     niit_eruul_mend_baiguullaga_too: Yup.string(),
     title: Yup.string(),
+    bundle: Yup.string(),
 })
 
 export default class CovidConfig extends Component {
@@ -36,11 +38,15 @@ export default class CovidConfig extends Component {
                 emlegiin_too:'',
                 niit_eruul_mend_baiguullaga_too:'',
                 title:'',
+                bundle: '1'
             },
             emy_logo:'',
+            emy_logo_old:'',
             gzbgzzg_logo:'',
+            gzbgzzg_logo_old:'',
             values: {},
             line_chart_datas: [],
+            bundles: []
         }
 
         this.handleEdit = this.handleEdit.bind(this)
@@ -84,7 +90,10 @@ export default class CovidConfig extends Component {
                 values,
                 line_chart_datas: values['line_chart_datas'],
                 emy_logo: values['emy_logo'],
+                emy_logo_old: values['emy_logo'],
                 gzbgzzg_logo: values['gzbgzzg_logo'],
+                gzbgzzg_logo_old: values['gzbgzzg_logo'],
+                bundles: values['bundles'],
             })
         })
     }
@@ -142,8 +151,11 @@ export default class CovidConfig extends Component {
             is_editing,
             initial_values,
             gzbgzzg_logo,
+            gzbgzzg_logo_old,
             emy_logo,
-            line_chart_datas
+            emy_logo_old,
+            line_chart_datas,
+            bundles
         } = this.state
 
         return (
@@ -183,6 +195,24 @@ export default class CovidConfig extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
+                                                <label htmlFor="bundle">Дэд сан</label>
+                                                {bundles.map((bundle, idx) =>
+                                                    values.bundle == bundle.pk &&
+                                                    <img src={bundle.icon} className="logo-icon" alt="logo icon"></img>
+                                                )}
+                                                <Fragment>
+                                                    <Field name="bundle" as="select"
+                                                    className={'form-control mt-2 ' + (errors.bundle ? 'is-invalid' : '')}>
+                                                        {bundles.map((bundle, idx) =>
+                                                            <option value={bundle.pk}>{bundle.name}</option>
+                                                        )}
+                                                    </Field>
+                                                    <ErrorMessage name="bundle" component="div" className="text-dange"/>
+                                                </Fragment>
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
                                                 <label htmlFor="title">Гарчиг</label>
                                                 <Field
                                                     name="title"
@@ -206,7 +236,7 @@ export default class CovidConfig extends Component {
                                                     label=''
                                                 />
                                                 <p>Өмнөх зураг</p><br/>
-                                               <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," + emy_logo} style={{height: '150px'}}/>
+                                               <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," + emy_logo_old} style={{height: '150px'}}/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -223,7 +253,7 @@ export default class CovidConfig extends Component {
                                                     label=''
                                                 />
                                                 <p>Өмнөх зураг</p><br/>
-                                               <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  gzbgzzg_logo} style={{height: '150px'}}/>
+                                               <img className="shadow p-3 mb-5 bg-white rounded" src={"data:image/png;base64," +  gzbgzzg_logo_old} style={{height: '150px'}}/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -314,10 +344,12 @@ export default class CovidConfig extends Component {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="row">
-                                            <h5 className="text-center align-center">Line graph утга</h5>
+                                        <div className="row mb-2">
                                             <table className="table table-bordered">
                                                 <thead>
+                                                    <tr>
+                                                        <th colSpan="4" className="text-center align-center" scope="rowgroup">Line graph утга</th>
+                                                    </tr>
                                                     <tr>
                                                         <th>№</th>
                                                         <th>Нэр</th>
@@ -351,11 +383,16 @@ export default class CovidConfig extends Component {
                                                                 </a>
                                                             </td>
                                                         </tr>
+                                                        
                                                     )}
+                                                    <tr>
+                                                        <td colSpan="4" className="text-center align-center" scope="rowgroup">
+                                                            <a className="text-center" onClick={this.arrayAdd} className="btn btn-outline-primary rounded-circle">
+                                                                Нэмэх
+                                                            </a>
+                                                        </td>
+                                                    </tr>
                                                 </tbody>
-                                                    <a className="text-center" onClick={this.arrayAdd} className="btn btn-outline-primary ">
-                                                        Нэмэх
-                                                    </a>
                                             </table>
                                         </div>
                                         { is_editing &&
