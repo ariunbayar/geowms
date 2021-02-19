@@ -550,13 +550,3 @@ def covid_configs_save(request, payload):
 
     return JsonResponse({"success": True})
 
-
-[{'label': '123213', 'datas': '123123'}, 
-{'label': '123123', 'datas': '0123'}, 
-{'label': '123', 'datas': 0},
-{'label': 'ewrwe', 'datas': '4234'}]
-
-[{'label': '123213', 'datas': '123123'}, 
-{'label': '123123', 'datas': '0123'},
- {'label': '123', 'datas': '234'},
-  {'label': '234', 'datas': '234'}]
