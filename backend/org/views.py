@@ -1517,7 +1517,7 @@ def save_erguul(request, payload):
             image = Image.open(io.BytesIO(img_byte))
             image.save(path)
 
-        subject = 'Худалдан авалт'
+        subject = 'Эргүүлд гарах мэдээлэл'
         msg = 'Та энэ заасан газарт ' + utils.datetime_to_string(date_start) + " - " + utils.datetime_to_string(date_end) + " хүртэлх хугацаанд " + hour + " цагийн хооронд эргүүл хийнэ"
         host_name = utils.get_config('EMAIL_HOST_NAME')
         linked_path = 'https://' + host_name + "/media/" + folder_name + "/" + file_name
