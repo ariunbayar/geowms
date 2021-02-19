@@ -283,6 +283,9 @@ def employee_update(request, payload, pk, level):
 
 
 def _get_point_for_db(coordinate):
+    if not coordinate:
+        return ''
+
     if isinstance(coordinate, str):
         coordinate = coordinate.split(",")
 
@@ -319,6 +322,7 @@ def employee_add(request, payload, level, pk):
     door_number = address.get('door_number')
     point_coordinate = address.get('point')
     point = _get_point_for_db(point_coordinate)
+
     address['point'] = point
 
     errors = {}
