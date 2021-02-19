@@ -21,7 +21,7 @@ export class LineGraph extends Component {
                     label: "Батлагдсан",
                     fill: true,
                     lineTension: 0.3,
-                    backgroundColor: graph_color + "70",  //fill color
+                    backgroundColor: graph_color + "30",  //fill color
                     borderColor: graph_color, //border_color
                     borderCapStyle: "butt",
                     borderDash: [],

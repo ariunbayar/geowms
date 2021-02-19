@@ -31,7 +31,14 @@ export class CovidPage extends Component {
             },
             feature_collection: {},
             feature: {},
-            graph_color: '#0020C2',
+            graph_color: '#00B42C',
+            batlagdsan_tohioldol_ungu: 'danger',
+            edgersen_humuusiin_ungu: 'success',
+            emchlegdej_bui_humuus_ungu: 'warning',
+            tusgaarlagdsan_humuusiin_ungu: 'warning',
+            niit_eruul_mend_baiguullaga_ungu: 'info',
+            emlegiin_ungu: 'info',
+            emiin_sangiin_ungu: 'info',
         }
         this.getFeature = this.getFeature.bind(this)
         this.loadData = this.loadData.bind(this)
@@ -78,7 +85,18 @@ export class CovidPage extends Component {
             bundle
         } = this.state.initial_values
         let labels = ['Батлагдсан тохиолдол', 'Эдгэрсэн хүмүүсийн тоо']
-        const { feature_collection, feature, graph_color } = this.state
+        const {
+            feature_collection,
+            feature,
+            graph_color,
+            batlagdsan_tohioldol_ungu,
+            edgersen_humuusiin_ungu,
+            emchlegdej_bui_humuus_ungu,
+            tusgaarlagdsan_humuusiin_ungu,
+            niit_eruul_mend_baiguullaga_ungu,
+            emlegiin_ungu,
+            emiin_sangiin_ungu,
+        } = this.state
 
         return (
             <div className="col-md-12">
@@ -100,29 +118,49 @@ export class CovidPage extends Component {
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card h-100">
-                                    <div className="card-body">
-                                        <Count text={'Батлагдсан тохиолдол'} src={null} count={batlagdsan_tohioldol}/>
+                                    <div className={`card-body border border-${batlagdsan_tohioldol_ungu}`}>
+                                        <Count
+                                            text={'Батлагдсан тохиолдол'}
+                                            src={null}
+                                            count={batlagdsan_tohioldol}
+                                            count_color={batlagdsan_tohioldol_ungu}
+                                        />
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card h-100">
-                                    <div className="card-body">
-                                        <Count text={'Эдгэрсэн хүмүүсийн тоо'} src={null} count={edgersen_humuusiin_too}/>
+                                    <div className={`card-body border border-${edgersen_humuusiin_ungu}`}>
+                                        <Count
+                                            text={'Эдгэрсэн хүмүүсийн тоо'}
+                                            src={null}
+                                            count={edgersen_humuusiin_too}
+                                            count_color={edgersen_humuusiin_ungu}
+                                        />
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12 mt-3 col-md-12 col-xl-12">
                                 <div className="card h-100">
-                                    <div className="card-body">
-                                        <Count text={'Эмчлэгдэж буй хүмүүсийн тоо'} src={null} count={emchlegdej_bui_humuus_too}/>
+                                    <div className={`card-body border border-${emchlegdej_bui_humuus_ungu}`}>
+                                        <Count
+                                            text={'Эмчлэгдэж буй хүмүүсийн тоо'}
+                                            src={null}
+                                            count={emchlegdej_bui_humuus_too}
+                                            count_color={emchlegdej_bui_humuus_ungu}
+                                        />
                                     </div>
                                 </div>
                             </div>
                             <div className="col-12  mt-3 col-md-12 col-xl-12 text-wrapp">
                                 <div className="card h-100">
-                                    <div className="card-body">
-                                        <Count text={'Тусгаарлагдаж буй хүмүүсийн тоо'} src={null} count={tusgaarlagdsan_humuusiin_too}/>
+                                    <div className={`card-body border border-${tusgaarlagdsan_humuusiin_ungu}`}>
+                                        <Count
+                                            text={'Тусгаарлагдаж буй хүмүүсийн тоо'}
+                                            src={null}
+                                            count={tusgaarlagdsan_humuusiin_too}
+                                            count_color={tusgaarlagdsan_humuusiin_ungu}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -152,25 +190,43 @@ export class CovidPage extends Component {
                             </div>
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card h-100">
-                                    <div className="card-body">
-                                        <Count text={'Нийт эрүүл мэндийн байгуулагын тоо'} src={null} count={niit_eruul_mend_baiguullaga_too}/>
+                                    <div className={`card-body border border-${niit_eruul_mend_baiguullaga_ungu}`}>
+                                        <Count
+                                            text={'Нийт эрүүл мэндийн байгуулагын тоо'}
+                                            src={null}
+                                            count={niit_eruul_mend_baiguullaga_too}
+                                            count_color={niit_eruul_mend_baiguullaga_ungu}
+                                        />
                                     </div>
                                 </div>
                             </div>
+
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card h-100">
-                                    <div className="card-body">
-                                        <Count text={'Эмнэлгийн тоо'} src={null} count={emlegiin_too}/>
+                                    <div className={`card-body border border-${emlegiin_ungu}`}>
+                                        <Count
+                                            text={'Эмнэлгийн тоо'}
+                                            src={null}
+                                            count={emlegiin_too}
+                                            count_color={emlegiin_ungu}
+                                        />
                                     </div>
                                 </div>
                             </div>
+
                             <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card h-100">
-                                    <div className="card-body">
-                                        <Count text={'Эмийн сангийн тоо'} src={null} count={emiin_sangiin_too}/>
+                                    <div className={`card-body border border-${emlegiin_ungu}`}>
+                                        <Count
+                                            text={'Эмийн сангийн тоо'}
+                                            src={null}
+                                            count={emiin_sangiin_too}
+                                            count_color={emiin_sangiin_ungu}
+                                        />
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -178,14 +234,18 @@ export class CovidPage extends Component {
                 <div className="row mb-4">
                     <div className="col-4 mt-4 col-md-4 col-xl-4">
                         <div className="card">
-                            <div className="card-body">
-                                <PieChart labels={labels} batlagdsan_tohioldol={batlagdsan_tohioldol} edgersen_humuusiin_too={edgersen_humuusiin_too}></PieChart>
+                            <div className="card-body border border-info">
+                                <PieChart
+                                    labels={labels}
+                                    batlagdsan_tohioldol={batlagdsan_tohioldol}
+                                    edgersen_humuusiin_too={edgersen_humuusiin_too}
+                                />
                             </div>
                         </div>
                     </div>
                     <div className="col-6 mt-4 col-md-8  col-xl-8 mb-4 ">
                         <div className="card">
-                            <div className="card-body">
+                            <div className="card-body border border-info">
                                 <LineGraph
                                     graph_color={graph_color}
                                     line_chart_datas={line_chart_datas}
@@ -194,7 +254,6 @@ export class CovidPage extends Component {
                         </div>
                     </div>
                 </div>
-
             </div>
         )
     }

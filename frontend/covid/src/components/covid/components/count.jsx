@@ -20,7 +20,7 @@ export default class Count extends Component {
                                 }
                         </div>
                         <div className="col-auto px-5" style={{fontSize: 'xx-large', wordBreak: "break-all"}}>
-                            <b >{this.props.count}</b>
+                            <b className={`text-${this.props.count_color}`}>{this.props.count}</b>
                         </div>
                     </div>
                 </div>

@@ -22,7 +22,7 @@ export class PieChart extends Component {
             datasets: [
                 {
                     data: datas,
-                    backgroundColor: ['rgba(184, 185, 210, .3)', "rgb(35, 26, 136)"],
+                    backgroundColor: ['rgba(80, 209, 29, 0.8)', "rgba(226, 42, 36)"],
                     options: {
                         responsive: true,
                         maintainAspectRatio: true
