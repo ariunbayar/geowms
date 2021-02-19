@@ -29,7 +29,8 @@ export class CovidPage extends Component {
             },
             feature_collection: {},
             feature: {},
-            graph_color: '#0020C2'
+            graph_color: '#0020C2',
+            id: 19,
         }
         this.getFeature = this.getFeature.bind(this)
     }
@@ -70,7 +71,7 @@ export class CovidPage extends Component {
             title,
         } = this.state.initial_values
 
-        const { feature_collection, feature, graph_color} = this.state
+        const { feature_collection, feature, graph_color, id} = this.state
         return (
             <div className="col-md-12">
                 <div className="row card mt-3 ml-0 mr-0">
@@ -123,7 +124,7 @@ export class CovidPage extends Component {
                         <div className="card">
                             <div className="card-body">
                                 <SearchSelects sendFeature={this.getFeature}/>
-                                <InspireMap bundle={{'id': 19}} features={feature_collection} feature={feature}/>
+                                <InspireMap bundle={{'id': id}} features={feature_collection} feature={feature}/>
                             </div>
                         </div>
                     </div>
