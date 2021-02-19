@@ -654,7 +654,7 @@ export class EmployeeEdit extends Component {
                                                                 <label htmlFor="aimag">Аймаг/Хот:</label>
                                                                 <select
                                                                     id="aimag"
-                                                                    className="form-control"
+                                                                    className={'form-control ' + (errors.level_1 ? 'is-invalid' : '')}
                                                                     aria-label="Default select example"
                                                                     onChange={(e) => this.handleChange(e, 'aimag', 'sum', ['sum', 'horoo'], 'mongol')}
                                                                     value={aimag_id}
@@ -669,7 +669,7 @@ export class EmployeeEdit extends Component {
                                                                 <label htmlFor="sum">Сум/Дүүрэг:</label>
                                                                 <select
                                                                     id="sum"
-                                                                    className="form-control"
+                                                                    className={'form-control ' + (errors.level_2 ? 'is-invalid' : '')}
                                                                     onChange={(e) => this.handleChange(e, 'sum', 'horoo', ['horoo'], 'aimag')}
                                                                     value={sum_id}
                                                                 >
@@ -683,7 +683,7 @@ export class EmployeeEdit extends Component {
                                                                 <label htmlFor="horoo">Хороо/Баг:</label>
                                                                 <select
                                                                     id="horoo"
-                                                                    className="form-control"
+                                                                    className={'form-control ' + (errors.level_3 ? 'is-invalid' : '')}
                                                                     onChange={(e) => this.handleChange(e, 'horoo', undefined, [], 'sum')}
                                                                     value={horoo_id}
                                                                 >
@@ -698,7 +698,7 @@ export class EmployeeEdit extends Component {
                                                                 <div className="input-group">
                                                                     <input
                                                                         id="street"
-                                                                        className="form-control"
+                                                                        className={'form-control ' + (errors.street ? 'is-invalid' : '')}
                                                                         onChange={(e) => this.setState({ street: e.target.value })}
                                                                         value={street}
                                                                         placeholder="Гудамжны нэрийг оруулах"
@@ -713,7 +713,7 @@ export class EmployeeEdit extends Component {
                                                                 <div className="input-group">
                                                                     <input
                                                                         id="apartment"
-                                                                        className="form-control"
+                                                                        className={'form-control ' + (errors.apartment ? 'is-invalid' : '')}
                                                                         onChange={(e) => this.setState({ apartment: e.target.value })}
                                                                         value={apartment}
                                                                         placeholder="Байрны дугаарыг оруулах"
@@ -728,7 +728,7 @@ export class EmployeeEdit extends Component {
                                                                 <div className="input-group">
                                                                     <input
                                                                         id="door_number"
-                                                                        className="form-control"
+                                                                        className={'form-control ' + (errors.door_number ? 'is-invalid' : '')}
                                                                         onChange={(e) => this.setState({ door_number: e.target.value })}
                                                                         value={door_number}
                                                                         placeholder="Хаалганы дугаарыг оруулах"
@@ -745,6 +745,7 @@ export class EmployeeEdit extends Component {
                                                             map_coordinate={this.state.map_coordinate}
                                                             point={point}
                                                             is_marker={this.state.is_marker}
+                                                            class={(errors.point ? 'border border-danger' : '')}
                                                         />
                                                     </div>
                                             }
