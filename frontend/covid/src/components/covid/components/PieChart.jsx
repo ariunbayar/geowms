@@ -31,7 +31,7 @@ export class PieChart extends Component {
             ]
         }
         return (
-            <div class="wrapper">
+            <div className="wrapper">
                 <Pie data={dataLine}></Pie>
             </div>
         )

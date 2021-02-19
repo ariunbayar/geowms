@@ -42,7 +42,7 @@ export class LineGraph extends Component {
         }
 
         return (
-            <div class="wrapper">
+            <div className="wrapper">
                 <Line height={72} data={dataLine} options={{ responsive: true }} />
             </div>
         )
