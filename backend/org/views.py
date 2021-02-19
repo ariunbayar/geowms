@@ -1426,7 +1426,6 @@ def get_addresses(request, level, pk):
 
 @require_GET
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def get_emp_info(request, pk):
     info = dict()
     employee = get_object_or_404(Employee, pk=pk)
@@ -1450,7 +1449,6 @@ def get_emp_info(request, pk):
 
 @require_GET
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def get_erguuleg_fields(request):
     send_fields = list()
     for f in EmployeeErguul._meta.get_fields():
@@ -1480,7 +1478,6 @@ def get_erguuleg_fields(request):
 
 @require_POST
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def save_erguul(request, payload):
     hour = ''
 
