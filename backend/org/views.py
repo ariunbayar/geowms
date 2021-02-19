@@ -242,15 +242,27 @@ def employee_update(request, payload, pk, level):
 
         address = EmployeeAddress.objects
         address = address.filter(employee=employee)
-        address.update(
-            point=point,
-            level_1=level_1,
-            level_2=level_2,
-            level_3=level_3,
-            street=street,
-            apartment=apartment,
-            door_number=door_number,
-        )
+        if address:
+            address.update(
+                point=point,
+                level_1=level_1,
+                level_2=level_2,
+                level_3=level_3,
+                street=street,
+                apartment=apartment,
+                door_number=door_number,
+            )
+        else:
+            address.create(
+                employee=employee,
+                point=point,
+                level_1=level_1,
+                level_2=level_2,
+                level_3=level_3,
+                street=street,
+                apartment=apartment,
+                door_number=door_number,
+            )
 
     return JsonResponse({'success': True, 'errors': errors})
 
