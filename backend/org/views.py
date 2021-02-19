@@ -202,11 +202,14 @@ def employee_update(request, payload, pk, level):
     street = address.get('street')
     apartment = address.get('apartment')
     door_number = address.get('door_number')
-    point_coordinate = address.get('point_coordinate')
+    point_coordinate = address.get('point')
     point = _get_point_for_db(point_coordinate)
+    address['point'] = point
 
     user = get_object_or_404(User, pk=pk)
     errors = _employee_validation(values, user)
+    form = EmployeeAddressForm(address)
+
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
@@ -215,45 +218,51 @@ def employee_update(request, payload, pk, level):
     else:
         is_super = False
 
-    with transaction.atomic():
-        user.first_name = first_name
-        user.last_name = last_name
-        user.email = email
-        user.gender = gender
-        user.register = register.upper()
-        user.username = username
-        user.is_superuser = is_super
-        if password:
-            user.set_password(password)
-        user.save()
+    if form.is_valid() and not errors:
+        with transaction.atomic():
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.gender = gender
+            user.register = register.upper()
+            user.username = username
+            user.is_superuser = is_super
+            if password:
+                user.set_password(password)
+            user.save()
 
-        if re_password_mail:
-            subject = 'Геопортал нууц үг солих'
-            text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-            utils.send_approve_email(user, subject, text)
+            if re_password_mail:
+                subject = 'Геопортал нууц үг солих'
+                text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+                utils.send_approve_email(user, subject, text)
 
-        employee = Employee.objects
-        employee = employee.filter(user_id=pk)
-        employee.update(
-            position=position,
-            is_admin=is_admin,
-            phone_number=phone_number
-        )
-        employee = employee.first()
+            employee = Employee.objects
+            employee = employee.filter(user_id=pk)
+            employee.update(
+                position=position,
+                is_admin=is_admin,
+                phone_number=phone_number
+            )
+            employee = employee.first()
 
-        address = EmployeeAddress.objects
-        address = address.filter(employee=employee)
-        address.update(
-            point=point,
-            level_1=level_1,
-            level_2=level_2,
-            level_3=level_3,
-            street=street,
-            apartment=apartment,
-            door_number=door_number,
-        )
+            address = EmployeeAddress.objects
+            address = address.filter(employee=employee)
+            address.update(
+                point=point,
+                level_1=level_1,
+                level_2=level_2,
+                level_3=level_3,
+                street=street,
+                apartment=apartment,
+                door_number=door_number,
+            )
+        return JsonResponse({'success': True, 'errors': errors})
 
-    return JsonResponse({'success': True, 'errors': errors})
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': {**form.errors, **errors},
+        })
 
 
 def _get_point_for_db(coordinate):

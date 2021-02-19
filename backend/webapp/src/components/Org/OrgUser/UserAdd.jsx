@@ -142,6 +142,7 @@ export class UserAdd extends Component {
                             this.modalCloseTime()
                         } else {
                             setErrors(errors)
+                            this.setState({errors})
                         }
                         setSubmitting(false)
                     })
