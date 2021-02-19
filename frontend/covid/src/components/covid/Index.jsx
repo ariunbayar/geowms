@@ -29,6 +29,7 @@ export class CovidPage extends Component {
             },
             feature_collection: {},
             feature: {},
+            graph_color: '#0020C2'
         }
         this.getFeature = this.getFeature.bind(this)
     }
@@ -66,12 +67,12 @@ export class CovidPage extends Component {
             emlegiin_too,
             niit_eruul_mend_baiguullaga_too,
             gzbgzzg_logo,
-            title
+            title,
         } = this.state.initial_values
 
-        const { feature_collection, feature } = this.state
+        const { feature_collection, feature, graph_color} = this.state
         return (
-            <div className="col-lg-12">
+            <div className="col-md-12">
                 <div className="row card mt-3 ml-0 mr-0">
                     <div className="row card-body">
                         <Text text={title}/>
@@ -79,39 +80,46 @@ export class CovidPage extends Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-2 col-lg-2 col-xl-2">
+                    <div className="col-2 col-md-2 col-xl-2 mt-2">
                         <div className="row">
-                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-3 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Logo src={emy_logo}/>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Count text={'Батлагдсан тохиолдол'} src={null} count={batlagdsan_tohioldol}/>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Count text={'Эдгэрсэн хүмүүсийн тоо'} src={null} count={edgersen_humuusiin_too}/>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-12 mt-3 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-3 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Count text={'Эмчлэгдэж буй хүмүүсийн тоо'} src={null} count={emchlegdej_bui_humuus_too}/>
                                     </div>
                                 </div>
                             </div>
+                            <div className="col-12  mt-3 col-md-12 col-xl-12 text-wrapp">
+                                <div className="card">
+                                    <div className="card-body">
+                                        <Count text={'Тусгаарлагдаж буй хүмүүсийн тоо'} src={null} count={tusgaarlagdsan_humuusiin_too}/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div className="col-8 col-lg-8 col-xl-8 mt-4">
+                    <div className="col-8 col-md-8 col-xl-8 mt-4">
                         <div className="card">
                             <div className="card-body">
                                 <SearchSelects sendFeature={this.getFeature}/>
@@ -119,30 +127,30 @@ export class CovidPage extends Component {
                             </div>
                         </div>
                     </div>
-                    <div className="col-2 col-lg-2 col-xl-2">
+                    <div className="col-2 col-md-2 col-xl-2">
                         <div className="row">
-                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Logo src={gzbgzzg_logo}/>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Count text={'Нийт эрүүл мэндийн байгуулагын тоо'} src={null} count={niit_eruul_mend_baiguullaga_too}/>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Count text={'Эмнэлгийн тоо'} src={null} count={emlegiin_too}/>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-12 mt-4 col-lg-12 col-xl-12">
+                            <div className="col-12 mt-4 col-md-12 col-xl-12">
                                 <div className="card">
                                     <div className="card-body">
                                         <Count text={'Эмийн сангийн тоо'} src={null} count={emiin_sangiin_too}/>
@@ -154,31 +162,19 @@ export class CovidPage extends Component {
                 </div>
 
                 <div className="row mb-4">
-                    <div className="col-2 mt-4 col-lg-2 col-xl-2">
+                    <div className="col-4 mt-4 col-md-4 col-xl-4">
                         <div className="card">
-                            <div className="card-body">
-                                <Count text={'Тусгаарлагдаж буй хүмүүсийн тоо'} src={null} count={tusgaarlagdsan_humuusiin_too}/>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-4 mt-4 col-lg-4 col-xl-4">
-                        <div className="card" style={{height: '400px'}}>
                             <div className="card-body">
                                 <PieChart></PieChart>
                             </div>
                         </div>
                     </div>
-                    <div className="col-4 mt-4 col-lg-4 col-xl-4 ">
-                        <div className="card" style={{height: '400px'}}>
-                            <div className="card-body">
-                                <LineGraph></LineGraph>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-2 mt-4 col-lg-2 col-xl-2 ">
+                    <div className="col-6 mt-4 col-md-8  col-xl-8 mb-4 ">
                         <div className="card">
                             <div className="card-body">
-                                <TextArea title={'Мэдээллийн эх сурвалж'} text={medeellin_eh_survalj}/>
+                                <LineGraph
+                                    graph_color = {graph_color}
+                                />
                             </div>
                         </div>
                     </div>
