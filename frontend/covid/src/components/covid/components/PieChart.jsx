@@ -20,11 +20,17 @@ export class PieChart extends Component {
                 {
                     data: datas,
                     backgroundColor: ['rgba(184, 185, 210, .3)', "rgb(35, 26, 136)"],
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
+                    },
                 },
             ]
         }
         return (
-            <Pie data={dataLine}></Pie>
+            <div class="wrapper">
+                <Pie data={dataLine}></Pie>
+            </div>
         )
     }
 

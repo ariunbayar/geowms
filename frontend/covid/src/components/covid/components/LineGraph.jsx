@@ -45,7 +45,9 @@ export class LineGraph extends Component {
         }
 
         return (
-            <Line  width={100} height={30} data={dataLine} options={{ responsive: true }} />
+            <div class="wrapper">
+                <Line height={72} data={dataLine} options={{ responsive: true }} />
+            </div>
         )
     }
 

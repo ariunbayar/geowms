@@ -163,14 +163,14 @@ export class CovidPage extends Component {
 
                 <div className="row mb-4">
                     <div className="col-4 mt-4 col-md-4 col-xl-4">
-                        <div className="card" style={{height: '400px'}}>
+                        <div className="card">
                             <div className="card-body">
                                 <PieChart></PieChart>
                             </div>
                         </div>
                     </div>
                     <div className="col-6 mt-4 col-md-8  col-xl-8 mb-4 ">
-                        <div className="card" style={{height: '400px'}}>
+                        <div className="card">
                             <div className="card-body">
                                 <LineGraph
                                     graph_color = {graph_color}
