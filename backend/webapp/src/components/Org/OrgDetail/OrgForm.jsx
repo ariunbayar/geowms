@@ -4,6 +4,7 @@ import {OrgEdit} from './OrgEdit'
 import Modal from "../../Modal"
 import ModalAlert from "../../ModalAlert"
 import {service} from "../service"
+import Loader from "@utils/Loader"
 
 export class OrgForm extends Component {
 
@@ -12,7 +13,8 @@ export class OrgForm extends Component {
         this.state={
             is_open: false,
             modal_status: 'closed',
-            modal_alert_status: 'closed'
+            modal_alert_status: 'closed',
+            is_loading: false,
         }
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
@@ -33,6 +35,7 @@ export class OrgForm extends Component {
             if (success) {
                 this.setState({ msg: "Амжилттай устгалаа", style: 'success' })
                 this.setState({ modal_alert_status: 'open'})
+                this.setState({ is_loading: true })
             }else{
                 this.setState({ msg: "Амжилтгүй боллоо", style: 'danger' })
                 this.setState({ modal_alert_status: 'open'})
@@ -65,7 +68,7 @@ export class OrgForm extends Component {
 
     render() {
         const { allowed_geom } = this.props
-        const { is_open, msg, style } = this.state
+        const { is_open, msg, is_loading, style } = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
@@ -129,6 +132,7 @@ export class OrgForm extends Component {
                     status={this.state.modal_alert_status}
                     modalAction={() => this.modalAlertClose()}
                 />
+                <Loader is_loading={is_loading}/>
             </div>
         )
     }
