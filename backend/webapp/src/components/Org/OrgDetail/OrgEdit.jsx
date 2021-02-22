@@ -178,10 +178,18 @@ export class OrgEdit extends Component {
         }
         service.org_add(org_level, datas).then(({success, errors}) => {
             if (success) {
-                this.setState({modal_alert_status: "open"})
+                this.setState({
+                    modal_alert_status: "open",
+                    form_values: {
+                        org_level: values.org_level,
+                        org_name: values.org_name,
+                        org_role: values.org_role,
+                    }
+                })
                 setStatus('saved')
                 setSubmitting(false)
-                this.modalCloseTime()
+                this.new_level = values.org_level
+                this.modalCloseTime(values.org_level)
             } else {
                 setErrors(errors)
                 setSubmitting(false)
@@ -189,21 +197,21 @@ export class OrgEdit extends Component {
         })
     }
 
-    modalClose(){
-        const org_level = this.props.level
+    modalClose(){ //2 secondees omno modal dr daragdahad ajillah function
         this.props.FormClose()
+        this.props.PushHistory(this.new_level)
+        clearTimeout(this.state.timer) //modalCloseTime dotorh setTimeOutiig arilgah function
     }
 
-    modalCloseTime(){
-        const org_level = this.props.level
+    modalCloseTime(org_level){
         this.state.timer = setTimeout(() => {
             this.props.FormClose()
+            this.props.PushHistory(org_level)
         }, 2000)
     }
 
     render() {
         const {form_values, roles, disabled} = this.state
-
         const org_id = this.props.id
         const org_level = this.props.level
 

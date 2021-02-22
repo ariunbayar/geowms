@@ -22,6 +22,7 @@ export class OrgForm extends Component {
         this.handleUserDelete = this.handleUserDelete.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalAlertClose = this.modalAlertClose.bind(this)
+        this.handleHistoryPush = this.handleHistoryPush.bind(this)
     }
 
     handleFormOpen() {
@@ -66,6 +67,11 @@ export class OrgForm extends Component {
         }, 2000)
     }
 
+    handleHistoryPush(org_level) {
+        const org_id = this.props.match.params.id
+        this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/detail/`)
+    }
+
     render() {
         const { allowed_geom } = this.props
         const { is_open, msg, is_loading, style } = this.state
@@ -107,6 +113,7 @@ export class OrgForm extends Component {
                                     level={org_level}
                                     id={org_id}
                                     FormClose={this.handleFormOpen}
+                                    PushHistory={this.handleHistoryPush}
                                 />
                             :
                                 null
