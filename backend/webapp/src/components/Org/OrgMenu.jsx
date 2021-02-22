@@ -28,7 +28,7 @@ export class OrgMenu extends Component {
 
     componentDidMount() {
         Promise.all([
-            this.getOrgName(),
+            this.getOrgName(this.state.level),
             this.handleSistemCount()
         ])
     }
@@ -40,9 +40,9 @@ export class OrgMenu extends Component {
         })
     }
 
-    getOrgName(){
-        const {level, id} = this.state
-        service.orgAll(level, id).then(({ orgs, count }) => {
+    getOrgName(org_level){
+        const {id} = this.state
+        service.orgAll(org_level, id).then(({ orgs, count }) => {
             if (orgs) {
                 orgs.map(org => this.setState({
                     org_name: org.name,
@@ -94,7 +94,7 @@ export class OrgMenu extends Component {
                 <div className="tab-content">
                     <Switch>
                         <Route path="/back/байгууллага/түвшин/:level/:id/detail/" render={(routeProps) =>
-                            <OrgForm { ...routeProps } allowed_geom={ allowed_geom }/>
+                            <OrgForm { ...routeProps } allowed_geom={ allowed_geom } refresh={ this.getOrgName }/>
                         }/>
                         <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
                         <Route

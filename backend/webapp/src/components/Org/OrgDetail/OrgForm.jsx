@@ -70,6 +70,7 @@ export class OrgForm extends Component {
     handleHistoryPush(org_level) {
         const org_id = this.props.match.params.id
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/detail/`)
+        this.props.refresh(org_level)
     }
 
     render() {
