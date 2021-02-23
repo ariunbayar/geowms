@@ -5,12 +5,14 @@ from django.shortcuts import render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 
 from main.decorators import ajax_required
+from backend.dedsanbutets.models import ViewNames
 
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
 from backend.inspire.models import LThemes
 from main import utils
+from backend.geoserver.models import WmtsCacheConfig
 
 
 def all(request):
@@ -68,12 +70,28 @@ def wms_layers(request, pk):
     qs_layers = bundle.layers.filter(bundlelayer__role_id__in=roles).order_by('wms__created_at', 'sort_order').distinct()
 
     def _layer_to_display(ob):
-
+        code = ob.code.replace('gp_layer_', '')
+        zoom_start = 4
+        zoom_stop = 21
         bundle_layers = BundleLayer.objects.filter(
                 bundle_id=pk,
                 layer_id=ob.id,
                 role_id__in=roles
             )
+
+        view_obj = ViewNames.objects.filter(view_name=code).first()
+        if view_obj:
+            feature_id = view_obj.feature_id
+            wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+            if wmts_obj:
+                if wmts_obj.zoom_start < 4:
+                    zoom_start = 5
+                else:
+                    zoom_start = wmts_obj.zoom_start
+                if wmts_obj.zoom_stop < 13:
+                    zoom_stop = 21
+                else:
+                    zoom_stop = wmts_obj.zoom_stop
         return {
                 'id': ob.pk,
                 'name': ob.name,
@@ -83,8 +101,11 @@ def wms_layers(request, pk):
                 'geodb_table': ob.geodb_table,
                 'geodb_pk_field': ob.geodb_pk_field,
                 'geodb_export_field': ob.geodb_export_field,
+                'zoom_start': zoom_start,
+                'zoom_stop': zoom_stop,
                 'defaultCheck': bundle_layers.values('defaultCheck')[0]['defaultCheck']
             }
+
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         if wms.is_active:
             url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))

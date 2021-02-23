@@ -198,6 +198,8 @@ export default class BundleMap extends Component {
                         ...layer,
                         wms_or_cache_ur,
                         tile: new Tile({
+                            minZoom: layer.zoom_start,
+                            maxZoom: layer.zoom_stop,
                             source: new WMTS({
                                 url: chache_url,
                                 layer: layer.code,
