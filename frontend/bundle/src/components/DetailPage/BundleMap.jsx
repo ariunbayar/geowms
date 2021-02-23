@@ -6,7 +6,7 @@ import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
-import { Vector as VectorLayer, Tile } from 'ol/layer'
+import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
 import { Point, Circle, Polygon } from 'ol/geom'
@@ -16,7 +16,7 @@ import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } fro
 import {fromExtent} from 'ol/geom/Polygon';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
-
+import ImageWMS from 'ol/source/ImageWMS';
 import { СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
 import { Modal } from './controls/Modal'
@@ -259,10 +259,14 @@ export default class BundleMap extends Component {
                     if (base_layer_info.tilename == "wms") {
                         layer = new Tile({
                             source: new TileWMS({
+                                ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
                                     'LAYERS': base_layer_info.layers,
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
                             name: base_layer_name,
@@ -311,6 +315,19 @@ export default class BundleMap extends Component {
         })
         this.marker_layer = marker_layer
 
+        const untiled = new Image({
+            source: new ImageWMS({
+              ratio: 1,
+              url: 'http://localhost:8080/geoserver/gp_hg/wms',
+              params: {
+                    'FORMAT': 'image/png',
+                    'VERSION': '1.1.1',
+                    "STYLES": '',
+                    "LAYERS": 'gp_hg:gp_layer_standing_water_view',
+                    "exceptions": 'application/vnd.ogc.se_inimage',
+              }
+            })
+        })
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -337,6 +354,7 @@ export default class BundleMap extends Component {
             ]),
             layers: [
                 ...base_layers,
+                untiled,
                 ...map_wms_list.reduce((acc_main, wms) =>
                 {
                         const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
