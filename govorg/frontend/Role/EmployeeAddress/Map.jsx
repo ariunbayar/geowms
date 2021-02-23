@@ -351,6 +351,10 @@ export default class AddressMap extends Component {
                             const extent = line_feature.getGeometry().getExtent()
 
                             this.extent = extent
+                            if (!this.props.is_admin) {
+                                this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
+                            }
+
                             source.addFeature(line_feature)
                         }
                     })
