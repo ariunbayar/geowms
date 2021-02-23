@@ -175,7 +175,7 @@ export default class InspireMap extends Component {
                     image: new CircleStyle({
                         radius: 5,
                         fill: new Fill({
-                        color: 'green',
+                            color: this.props.point_color,
                         }),
                     }),
                     text: new Text({
@@ -210,6 +210,7 @@ export default class InspireMap extends Component {
 
     readFeatures(features) {
         const erguul_layer = this.erguul_layer
+        const erguul_source = erguul_layer.getSource()
         features['features'].map((feat, idx) => {
             const feature =  new GeoJSON().readFeatures(feat, {
                 dataProjection: this.state.projection_display,
@@ -217,8 +218,11 @@ export default class InspireMap extends Component {
             })[0];
             const full_name = this.getFullName(feature)
             feature.setProperties({ name: full_name })
-            erguul_layer.getSource().addFeature(feature)
+            erguul_source.addFeature(feature)
         })
+        const style = erguul_layer.getStyle()
+        const fill = style().getImage().getFill()
+        const color = fill.getColor()
         const { map_wms_list } = this.state
         const object = {
             'name': 'Эргүүл',
@@ -227,6 +231,8 @@ export default class InspireMap extends Component {
                     'name': 'Эргүүлд гарсан хүмүүс',
                     'wms_tile': erguul_layer,
                     'defaultCheck': 1,
+                    'is_change_color': true,
+                    'color': color,
                 }
             ]
         }

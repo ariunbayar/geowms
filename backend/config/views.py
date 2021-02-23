@@ -492,6 +492,7 @@ def covid_configs(request):
         'bundle': '',
         'shinjilgee_too': '',
         'nas_barsan_too': '',
+        'erguul_ungu': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -531,6 +532,7 @@ def covid_configs_save(request, payload):
         'bundle',
         'shinjilgee_too',
         'nas_barsan_too',
+        'erguul_ungu',
     )
     line_chart_datas = payload.get('line_chart_datas')
     line_chart_datas_obj = Config.objects.filter(name='line_chart_datas').first()

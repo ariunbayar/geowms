@@ -30,6 +30,7 @@ export class CovidPage extends Component {
                 bundle: '',
                 line_chart_datas: [],
                 nas_barsan_too: '',
+                erguul_ungu: '',
             },
             feature_collection: {},
             feature: {},
@@ -89,6 +90,7 @@ export class CovidPage extends Component {
             bundle,
             shinjilgee_too,
             nas_barsan_too,
+            erguul_ungu,
         } = this.state.initial_values
         let labels = ['Эмчлэгдэж буй хүмүүсийн тоо', 'Эдгэрсэн хүмүүсийн тоо', 'Нас барсан хүмүүсийн тоо']
         const {
@@ -184,6 +186,7 @@ export class CovidPage extends Component {
                                     features={feature_collection}
                                     feature={feature}
                                     loadErguul={(func) => this.loadData(func)}
+                                    point_color={erguul_ungu}
                                 />
                             </div>
                         </div>
