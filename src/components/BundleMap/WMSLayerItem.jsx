@@ -50,11 +50,15 @@ export default class WMSLayerItem extends Component {
                     <label className="custom-control-label" htmlFor={code}>{name}</label>
                     </div>
                 </label>
-                <ul>
-                    <li>
-                        <img className="img" src={legend}/>
-                    </li>
-                </ul>
+                {
+                    legend
+                    &&
+                    <ul>
+                        <li>
+                            <img className="img" src={legend}/>
+                        </li>
+                    </ul>
+                }
             </li>
         )
     }

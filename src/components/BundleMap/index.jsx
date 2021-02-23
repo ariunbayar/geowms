@@ -105,6 +105,7 @@ export default class InspireMap extends Component {
 
         this.readFeatures = this.readFeatures.bind(this)
         this.readFeature = this.readFeature.bind(this)
+        this.getErguulLayer = this.getErguulLayer.bind(this)
     }
 
     initMarker() {
@@ -164,25 +165,34 @@ export default class InspireMap extends Component {
         return full_name
     }
 
-    featureWithTextStyle(text, color='red') {
-        const style = new Style({
-            image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                color: color,
-                }),
-            }),
-            text: new Text({
-              text: text,
-              font: '30px Calibri,sans-serif',
-              stroke: new Stroke({
-                color: 'white',
-                width: 3,
-              }),
-              offsetY: -18
-            }),
-        });
-        return style
+    getErguulLayer() {
+        const erguul_layer_name = 'erguul'
+        const erguul_layer = new VectorLayer({
+            source: new VectorSource({}),
+            style: (feature, resolution) => {
+                const text = resolution < 100 ? feature.get("name") : "";
+                return new Style({
+                    image: new CircleStyle({
+                        radius: 5,
+                        fill: new Fill({
+                        color: 'green',
+                        }),
+                    }),
+                    text: new Text({
+                        text: text,
+                        font: '20px Calibri,sans-serif',
+                        stroke: new Stroke({
+                        color: 'white',
+                        width: 1,
+                        }),
+                        offsetY: -18
+                    }),
+                })
+            },
+            name: erguul_layer_name,
+        })
+        this.map.addLayer(erguul_layer)
+        this.erguul_layer = erguul_layer
     }
 
     readFeature(feature) {
@@ -199,17 +209,28 @@ export default class InspireMap extends Component {
     }
 
     readFeatures(features) {
-        const { vector_layer } = this.state
+        const erguul_layer = this.erguul_layer
         features['features'].map((feat, idx) => {
             const feature =  new GeoJSON().readFeatures(feat, {
                 dataProjection: this.state.projection_display,
                 featureProjection: this.state.projection,
             })[0];
             const full_name = this.getFullName(feature)
-            const style = this.featureWithTextStyle(full_name, 'green')
-            feature.setStyle(style)
-            vector_layer.getSource().addFeature(feature)
+            feature.setProperties({ name: full_name })
+            erguul_layer.getSource().addFeature(feature)
         })
+        const { map_wms_list } = this.state
+        const object = {
+            'name': 'Эргүүл',
+            'layers': [
+                {
+                    'name': 'Эргүүлд гарсан хүмүүс',
+                    'wms_tile': erguul_layer,
+                    'defaultCheck': 1,
+                }
+            ]
+        }
+        map_wms_list.unshift(object)
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -414,6 +435,7 @@ export default class InspireMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        this.getErguulLayer()
         this.props.loadErguul((val) => this.readFeatures(val))
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
