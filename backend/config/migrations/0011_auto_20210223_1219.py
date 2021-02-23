@@ -13,7 +13,7 @@ def _has_value(Model, object):
     return has_value
 
 
-def create_default_configs(apps, schema_editor):
+def create_erguul_ungu_config(apps, schema_editor):
 
     Config = apps.get_model('backend_config', 'Config')
 
@@ -33,5 +33,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_default_configs),
+        migrations.RunPython(create_erguul_ungu_config),
     ]
