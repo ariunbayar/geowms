@@ -6,7 +6,7 @@ import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
-import { Vector as VectorLayer, Tile } from 'ol/layer'
+import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
 import { Point, Circle, Polygon } from 'ol/geom'
@@ -16,7 +16,7 @@ import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } fro
 import {fromExtent} from 'ol/geom/Polygon';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
-
+import ImageWMS from 'ol/source/ImageWMS';
 import { СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
 import { Modal } from './controls/Modal'
@@ -198,6 +198,8 @@ export default class BundleMap extends Component {
                         ...layer,
                         wms_or_cache_ur,
                         tile: new Tile({
+                            minZoom: layer.zoom_start,
+                            maxZoom: layer.zoom_stop,
                             source: new WMTS({
                                 url: chache_url,
                                 layer: layer.code,
@@ -215,14 +217,17 @@ export default class BundleMap extends Component {
                                 wrapX: true,
                             }),
                         }),
-                        wms_tile: new Tile({
-                            source: new TileWMS({
+                        wms_tile: new Image({
+                            source: new ImageWMS({
                                 projection: this.state.projection,
+                                ratio: 1,
                                 url: url,
                                 params: {
                                     'LAYERS': layer.code,
-                                    //'FORMAT': 'image/svg+xml',
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
                         })
@@ -248,6 +253,7 @@ export default class BundleMap extends Component {
 
                     if (base_layer_info.tilename == "xyz") {
                         layer = new Tile({
+                            preload: 6,
                             source: new TileImage({
                                 crossOrigin: 'Anonymous',
                                 url: base_layer_info.url,
@@ -257,12 +263,16 @@ export default class BundleMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Tile({
-                            source: new TileWMS({
+                        layer = new Image({
+                            source: new ImageWMS({
+                                ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
                                     'LAYERS': base_layer_info.layers,
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
                             name: base_layer_name,
@@ -312,6 +322,7 @@ export default class BundleMap extends Component {
         this.marker_layer = marker_layer
 
         const map = new Map({
+            maxTilesLoading: 16,
             target: 'map',
             controls: defaultControls().extend([
                 new FullScreen(),
