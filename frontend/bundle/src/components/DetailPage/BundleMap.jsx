@@ -215,14 +215,17 @@ export default class BundleMap extends Component {
                                 wrapX: true,
                             }),
                         }),
-                        wms_tile: new Tile({
-                            source: new TileWMS({
+                        wms_tile: new Image({
+                            source: new ImageWMS({
                                 projection: this.state.projection,
+                                ratio: 1,
                                 url: url,
                                 params: {
                                     'LAYERS': layer.code,
-                                    //'FORMAT': 'image/svg+xml',
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
                         })
@@ -248,6 +251,7 @@ export default class BundleMap extends Component {
 
                     if (base_layer_info.tilename == "xyz") {
                         layer = new Tile({
+                            preload: 6,
                             source: new TileImage({
                                 crossOrigin: 'Anonymous',
                                 url: base_layer_info.url,
@@ -257,8 +261,8 @@ export default class BundleMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Tile({
-                            source: new TileWMS({
+                        layer = new Image({
+                            source: new ImageWMS({
                                 ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
@@ -315,20 +319,8 @@ export default class BundleMap extends Component {
         })
         this.marker_layer = marker_layer
 
-        const untiled = new Image({
-            source: new ImageWMS({
-              ratio: 1,
-              url: 'http://localhost:8080/geoserver/gp_hg/wms',
-              params: {
-                    'FORMAT': 'image/png',
-                    'VERSION': '1.1.1',
-                    "STYLES": '',
-                    "LAYERS": 'gp_hg:gp_layer_standing_water_view',
-                    "exceptions": 'application/vnd.ogc.se_inimage',
-              }
-            })
-        })
         const map = new Map({
+            maxTilesLoading: 16,
             target: 'map',
             controls: defaultControls().extend([
                 new FullScreen(),
@@ -354,7 +346,6 @@ export default class BundleMap extends Component {
             ]),
             layers: [
                 ...base_layers,
-                untiled,
                 ...map_wms_list.reduce((acc_main, wms) =>
                 {
                         const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
