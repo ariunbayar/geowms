@@ -17,6 +17,7 @@ export default class UsersAddress extends Component {
         this.getAddresses = this.getAddresses.bind(this)
         this.getFeature = this.getFeature.bind(this)
         this.saveErguulPlace = this.saveErguulPlace.bind(this)
+        this.setLoading = this.setLoading.bind(this)
     }
 
     componentDidMount() {
@@ -39,6 +40,10 @@ export default class UsersAddress extends Component {
         this.setState({ feature })
     }
 
+    setLoading(is_true) {
+        this.setState({ is_loading: is_true })
+    }
+
     getPoint(point_coordinate) {
         let coordinates = point_coordinate
         if (typeof point_coordinate == 'string') {
@@ -50,18 +55,17 @@ export default class UsersAddress extends Component {
 
     saveErguulPlace(values, id, coordinates, photo) {
         const coordinate = this.getPoint(coordinates)
-        this.setState({ is_loading: true })
         service
             .saveErguul(values, id, coordinate, photo)
             .then(({ success, info }) => {
                 if (success) {
                     alert(info)
-                    this.setState({ is_loading: false })
+                    this.setLoading(false)
                 }
             })
             .catch(error => {
                 alert("Алдаа гарсан байна")
-                this.setState({ is_loading: false })
+                this.setLoading(false)
             })
     }
 
@@ -78,6 +82,7 @@ export default class UsersAddress extends Component {
                         saveErguulPlace={
                             (...values) => this.saveErguulPlace(...values)
                         }
+                        setLoading={this.setLoading}
                     />
                 </div>
             </div>
