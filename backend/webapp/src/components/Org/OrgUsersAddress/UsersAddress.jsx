@@ -72,7 +72,13 @@ export default class UsersAddress extends Component {
                 <div className="col-12">
                     <Loader is_loading={is_loading}/>
                     <SearchSelects sendFeature={this.getFeature}/>
-                    <AddressMap features={points} feature={feature} saveErguulPlace={(val, id, coord, photo) => this.saveErguulPlace(val, id, coord, photo)}/>
+                    <AddressMap
+                        features={points}
+                        feature={feature}
+                        saveErguulPlace={
+                            (...values) => this.saveErguulPlace(...values)
+                        }
+                    />
                 </div>
             </div>
         )

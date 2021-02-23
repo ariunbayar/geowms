@@ -437,7 +437,7 @@ export default class AddressMap extends Component {
 
     readFeature(feature) {
         const id = 'aimag_sum'
-        this.removeFeatureFromSource(id)
+        this.removeFeatureFromSource(id, 'only_aimag')
         const source = this.vector_layer.getSource()
         const feat =  new GeoJSON().readFeatures(feature, {
             dataProjection: this.state.projection_data,

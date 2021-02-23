@@ -98,7 +98,9 @@ export default class UsersAddress extends Component {
                         <AddressMap
                             features={points}
                             feature={feature}
-                            saveErguulPlace={(val, id, coord, photo) => this.saveErguulPlace(val, id, coord, photo)}
+                            saveErguulPlace={
+                                (...values) => this.saveErguulPlace(...values)
+                            }
                             is_admin={is_admin}
                         />
                     </div>
