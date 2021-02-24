@@ -119,9 +119,10 @@ function formOptions() {
     return fetch(`/api/aimag/`, requestOptions).then(handleResponse)
 }
 
-function getEmpInfo(id) {
+function getEmpInfo(id, is_erguul) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({ is_erguul }),
     }
     return fetch(`/back/api/org/${id}/emp-info/`, requestOptions).then(handleResponse)
 }

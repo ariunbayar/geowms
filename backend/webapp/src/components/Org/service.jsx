@@ -137,9 +137,12 @@ function getAddresses(level, id) {
     return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
 }
 
-function getEmpInfo(id) {
-    const opts = getGetOptions()
-    return fetch(`${prefix}/${id}/emp-info/`, opts).then(handleResponse)
+function getEmpInfo(id, is_erguul) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ is_erguul }),
+    }
+    return fetch(`${prefix}/${id}/emp-info/`, requestOptions).then(handleResponse)
 }
 
 function getErguulegFields() {
