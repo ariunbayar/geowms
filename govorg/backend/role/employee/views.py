@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
@@ -530,7 +530,7 @@ def send_mail(request, payload):
 
 def _is_cloned_feature(address_qs):
     is_cloned = False
-    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
+    erguul_id = address_qs.employeeerguul_set.filter(is_over=False)
     if erguul_id:
         is_cloned = True
     return is_cloned
@@ -555,6 +555,7 @@ def _get_feature_collection(employees):
 
         erguul = EmployeeErguul.objects
         erguul = erguul.filter(address=addresses)
+        erguul = erguul.filter(is_over=False)
         erguul = erguul.first()
         if erguul:
             erguul_info = dict()
@@ -583,7 +584,7 @@ def get_addresses(request):
         employees = Employee.objects
         employees = employees.filter(org=org)
     else:
-        raise 404
+        raise Http404
 
     feature_collection = _get_feature_collection(employees)
 
@@ -596,13 +597,18 @@ def get_addresses(request):
 
 def _get_erguul_qs(employee):
     tailbar = {}
+
     address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+
     erguul_qs = EmployeeErguul.objects
     erguul_qs = erguul_qs.filter(address_id=address_id)
-    erguul = erguul_qs.first()
-    if erguul:
+    erguul_qs = erguul_qs.filter(is_over=False)
+
+    if erguul_qs:
+        erguul = erguul_qs.first()
         tailbar = ErguulTailbar.objects
         tailbar = tailbar.filter(erguul=erguul).values().first()
+
     return tailbar
 
 
@@ -625,7 +631,7 @@ def get_field_tailbar(request):
         tailbar_id = tailbar['id']
     for f in ErguulTailbar._meta.get_fields():
         type_name = f.get_internal_type()
-        not_list = ['ForeignKey', 'AutoField']
+        not_list = ['OneToOneField', 'AutoField']
         if type_name not in not_list:
             not_field = ['created_at']
             if f.name not in not_field:
@@ -659,21 +665,32 @@ def save_field_tailbar(request, payload):
 
     values = payload.get('values')
     pk = payload.get('id')
-    if pk:
-        erguul_qs = ErguulTailbar.objects
-        erguul_qs = erguul_qs.filter(pk=pk)
-        erguul_qs.update(**values)
-    else:
-        address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
-        if address_id:
-            address = get_object_or_404(EmployeeAddress, id=address_id)
-            erguul_id = address.employeeerguul_set.values_list('id', flat=True).first()
-            values['erguul_id'] = erguul_id
-            ErguulTailbar.objects.create(**values)
+
+    with transaction.atomic():
+        if pk:
+            erguul_qs = ErguulTailbar.objects
+            erguul_qs = erguul_qs.filter(pk=pk)
+            erguul_qs.update(**values)
+
+        else:
+            address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
+            if address_id:
+                address = get_object_or_404(EmployeeAddress, id=address_id)
+
+                erguul_qs = EmployeeErguul.objects
+                erguul_qs = erguul_qs.filter(address=address)
+                erguul_qs = erguul_qs.filter(is_over=False)
+                erguul = erguul_qs.first()
+
+                erguul_qs.update(is_over=True)
+
+                values['erguul_id'] = erguul.id
+
+                ErguulTailbar.objects.create(**values)
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хадглалаа'
+        'info': 'Амжилттай хадгаллаа'
     }
     return JsonResponse(rsp)
 

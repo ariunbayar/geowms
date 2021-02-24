@@ -1453,7 +1453,7 @@ def get_erguuleg_fields(request):
     send_fields = list()
     for f in EmployeeErguul._meta.get_fields():
         type_name = f.get_internal_type()
-        not_list = ['ForeignKey', 'AutoField']
+        not_list = ['ForeignKey', 'AutoField', 'BooleanField']
         if type_name not in not_list:
             not_field = ['created_at']
             if f.name not in not_field:
