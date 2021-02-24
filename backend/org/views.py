@@ -1424,25 +1424,44 @@ def get_addresses(request, level, pk):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_emp_info(request, pk):
-    info = dict()
+def get_emp_info(request, payload, pk):
     employee = get_object_or_404(Employee, pk=pk)
+    is_erguul = payload.get("is_erguul")
+    info = dict()
+    title = ''
+
     info['org_name'] = employee.org.name
     info['last_name'] = employee.user.last_name # ovog
     info['first_name'] = employee.user.first_name
-    info['phone_number'] = employee.phone_number
-    info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
-    info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
-    info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
-    info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
-    info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
-    info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
+    info['phone_number'] = employee.phone_number or ''
+
+    if not is_erguul:
+        info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
+        info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
+        info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
+        info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
+        info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
+        info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
+        title = 'Ажилтаны мэдээлэл'
+
+    else:
+        address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+        erguul_qs = EmployeeErguul.objects
+        erguul_qs = erguul_qs.filter(address=address_id)
+        erguul = erguul_qs.first()
+        erguul_address = erguul.level_3 + ", " + erguul.street + " гудамж" + erguul.apartment + " байр"
+        info['erguul'] = erguul_address
+        info['part_time'] = erguul.get_part_time_display()
+        info['date_start'] = utils.datetime_to_string(erguul.date_start)
+        info['date_end'] = utils.datetime_to_string(erguul.date_end)
+        title = 'Эргүүлийн мэдээлэл'
 
     rsp = {
         'success': True,
         'info': info,
+        'title': title
     }
     return JsonResponse(rsp)
 

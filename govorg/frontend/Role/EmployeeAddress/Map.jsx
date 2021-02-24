@@ -131,10 +131,14 @@ export default class AddressMap extends Component {
         return fields
     }
 
-    getEmpInfo(id) {
+    getEmpInfo(id, is_erguul) {
+        if (!is_erguul) {
+            is_erguul = false
+        }
+
         service
-            .getEmpInfo(id)
-            .then(({ success, info }) => {
+            .getEmpInfo(id, is_erguul)
+            .then(({ success, info, title }) => {
                 if (success) {
                     let conv = [
                         {
@@ -166,10 +170,34 @@ export default class AddressMap extends Component {
                             'name': 'Нэр',
                             'disabled': true,
                             'length': 100,
-                        }
+                        },
+                        {
+                            'origin_name': 'date_start',
+                            'name': 'Эхлэх огноо',
+                            'disabled': true,
+                            'length': 100,
+                        },
+                        {
+                            'origin_name': 'date_end',
+                            'name': 'Дуусах огноо',
+                            'disabled': true,
+                            'length': 100,
+                        },
+                        {
+                            'origin_name': 'part_time',
+                            'name': 'Ээлж',
+                            'disabled': true,
+                            'length': 100,
+                        },
+                        {
+                            'origin_name': 'erguul',
+                            'name': 'Эргүүлийн хаяг',
+                            'disabled': true,
+                            'length': 100,
+                            'is_erguul': true
+                        },
                     ]
                     const fields = this.makeFields(info, conv)
-                    const title = 'Ажилтны мэдээлэл'
                     this.controls.form.showForm(true, fields, title, undefined, true)
                 }
             })
@@ -228,7 +256,7 @@ export default class AddressMap extends Component {
                 if (properties.is_cloned) {
                     this.translate.setActive(false)
                 }
-                this.getEmpInfo(id)
+                this.getEmpInfo(id, properties.is_erguul)
             }
             else {
                 this.select.getFeatures().clear();
