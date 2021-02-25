@@ -204,7 +204,38 @@
 
             owl.owlCarousel({
                 items : 10, //10 items above 1000px browser width
-                play: 1000,
+                dots: false,
+                navigation : true,
+                autoplay: true,
+                autoplayTimeout: 2000,
+                autoplayHoverPause:true,
+                loop:true,
+                responsive: {
+                    0: {
+                        items: 3
+                    },
+                    400: {
+                        items: 4
+                    },
+                    500: {
+                        items: 5
+                    },
+                    600: {
+                        items: 6
+                    },
+                    700: {
+                        items: 7
+                    },
+                    800: {
+                        items: 8
+                    },
+                    900: {
+                        items: 9
+                    },
+                    1000: {
+                        items: 10
+                    }
+                }
             });
         });
     </script>
