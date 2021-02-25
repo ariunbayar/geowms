@@ -57,10 +57,10 @@ export default class UsersAddress extends Component {
         this.setState({ is_loading: is_true })
     }
 
-    saveErguulPlace(values, id, coordinates, photo) {
+    saveErguulPlace(values, emp_id, coordinates, photo, erguul_id) {
         const coordinate = this.getPoint(coordinates)
         service
-            .saveErguul(values, id, coordinate, photo)
+            .saveErguul(values, emp_id, coordinate, photo, erguul_id)
             .then(({ success, info }) => {
                 if (success) {
                     alert(info)

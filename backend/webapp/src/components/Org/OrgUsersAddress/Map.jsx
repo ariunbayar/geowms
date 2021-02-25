@@ -124,6 +124,9 @@ export default class AddressMap extends Component {
                     if (field == 'level_1') {
                         mur['value'] = array['level_1'] + ", " + array['level_2'] + ", " + array['level_3'] + ", " + array['street'] + " гудамж " + array['apartment'] + " байр, " + array['door_number'] + " тоот"
                     }
+                    if (conv_field.is_erguul && field == 'level_3') {
+                        mur['value'] = array['level_3'] + ", " + array['street'] + " гудамж " + array['apartment'] + " байр"
+                    }
                     fields.push(mur)
                 }
             })
@@ -190,15 +193,15 @@ export default class AddressMap extends Component {
                             'length': 100,
                         },
                         {
-                            'origin_name': 'erguul',
+                            'origin_name': 'level_3',
                             'name': 'Эргүүлийн хаяг',
                             'disabled': true,
                             'length': 100,
-                            'is_erguul': true
+                            'is_erguul': is_erguul,
                         },
                     ]
                     const fields = this.makeFields(info, conv)
-                    this.controls.form.showForm(true, fields, title, undefined, true)
+                    this.controls.form.showForm(true, fields, title, undefined, '', true)
                 }
             })
     }
@@ -315,11 +318,15 @@ export default class AddressMap extends Component {
 
         this.changedFeatureSetColor()
         service
-            .getErguulegFields()
-            .then(({ success, info }) => {
+            .getErguulegFields(id)
+            .then(({ success, info, erguul_id }) => {
                 const title = 'Эргүүлд гарах байршил'
                 this.makeLineString([feature], 'one')
-                this.controls.form.showForm(success, info, title, (val) => this.sendErguuleg(val, this.id, coordinate_clicked))
+                let button_name = 'Хадгалах'
+                if (erguul_id) {
+                    button_name = 'Засах'
+                }
+                this.controls.form.showForm(success, info, title, (val) => this.sendErguuleg(val, this.id, coordinate_clicked, erguul_id), button_name)
             })
     }
 
@@ -388,7 +395,7 @@ export default class AddressMap extends Component {
         }
     }
 
-    downloadImage(val, id, coordinate_clicked) {
+    downloadImage(val, emp_id, coordinate_clicked, erguul_id) {
         const map = this.map
         let photo
         this.props.setLoading(true)
@@ -425,14 +432,14 @@ export default class AddressMap extends Component {
             } else {
                 photo = mapCanvas.toDataURL()
             }
-            this.props.saveErguulPlace(val, id, coordinate_clicked, photo)
+            this.props.saveErguulPlace(val, emp_id, coordinate_clicked, photo, erguul_id)
         });
     }
 
-    sendErguuleg(val, id, coordinate_clicked) {
+    sendErguuleg(val, emp_id, coordinate_clicked, erguul_id) {
         const extent = this.extent
-        this.map.getView().fit(extent,{ padding: [200, 200, 200, 200]})
-        this.downloadImage(val, id, coordinate_clicked)
+        this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
+        this.downloadImage(val, emp_id, coordinate_clicked, erguul_id)
     }
 
     removeFeatureFromSource(featureID, state='') {

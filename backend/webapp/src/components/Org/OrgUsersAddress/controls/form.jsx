@@ -12,6 +12,12 @@ class NewInput extends Component{
         }
     }
 
+    componentDidUpdate(pP, pS) {
+        if(pP.value !== this.props.value) {
+            this.setState({ input_value: this.props.value })
+        }
+    }
+
     handleOnChange(input_value) {
         const { idx, ix, field, length, origin_name } = this.props
         this.setState({ input_value })
@@ -49,7 +55,7 @@ class NewInput extends Component{
                                 maxLength={length}
                                 disabled={disabled}
                                 placeholder={value}
-                                value={value}
+                                value={input_value}
                             >
                             </textarea>
                         : length < 1900 && choices == null ?
@@ -58,14 +64,16 @@ class NewInput extends Component{
                                 maxLength={length}
                                 className="form-control"
                                 disabled={disabled}
-                                value={value}
+                                value={input_value}
                                 onChange={(e) => this.handleOnChange(e.target.value)}
                                 placeholder={field + ` оруулна уу`}
                             />
                         : choices !== null ?
                             <select className="form-control"
                                 disabled={disabled}
-                                onChange={(e) => this.handleOnChange(e.target.value)}>
+                                onChange={(e) => this.handleOnChange(e.target.value)}
+                                value={input_value}
+                            >
                                 <option key={idx} value=''>--- Сонгоно уу ---</option>
                                 {choices.map((choice, idx) =>
                                     <option key={idx} value={choice[0]}>{choice[1]}</option>
@@ -99,7 +107,7 @@ class ListComponent extends Component {
     }
 
     render() {
-        const { fields, is_detail, title } = this.props
+        const { fields, is_detail, title, button_name } = this.props
         const { values } = this.state
         return (
                 <div>
@@ -134,7 +142,7 @@ class ListComponent extends Component {
                         ?
                             <div className="pb-2">
                                 <button className="btn btn-primary btn-block" onClick={() => this.props.saveErguulPlace(values)}>
-                                    Хадгалах
+                                    {button_name}
                                 </button>
                             </div>
                         :
@@ -189,9 +197,8 @@ export class showForm extends Control {
         ReactDOM.hydrate(<ListComponent {...props}/>, this.element)
     }
 
-    showForm(islaod, fields, title, saveErguulPlace, is_detail=false) {
+    showForm(islaod, fields, title, saveErguulPlace, button_name, is_detail=false ) {
         this.toggleControl(islaod)
-        this.renderComponent({fields, title, is_detail, saveErguulPlace})
+        this.renderComponent({fields, title, is_detail, saveErguulPlace, button_name})
     }
-
 }

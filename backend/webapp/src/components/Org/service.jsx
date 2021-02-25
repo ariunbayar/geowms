@@ -145,15 +145,15 @@ function getEmpInfo(id, is_erguul) {
     return fetch(`${prefix}/${id}/emp-info/`, requestOptions).then(handleResponse)
 }
 
-function getErguulegFields() {
+function getErguulegFields(id) {
     const opts = getGetOptions()
-    return fetch(`${prefix}/erguuleg-fields/`, opts).then(handleResponse)
+    return fetch(`${prefix}/${id}/erguuleg-fields/`, opts).then(handleResponse)
 }
 
-function saveErguul(values, id, point, photo) {
+function saveErguul(values, emp_id, point, photo, erguul_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ values, id, point, photo }),
+        body: JSON.stringify({ values, emp_id, point, photo, erguul_id }),
     }
     return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
 }
