@@ -35,9 +35,6 @@ import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
 
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-
 
 export default class BundleMap extends Component {
 
@@ -266,42 +263,21 @@ export default class BundleMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Tile({
-                            preload: Infinity,
-                            source: new TileWMS({
-                            visible: false,
+                        layer = new Image({
+                            source: new ImageWMS({
+                                ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
-                                    "LAYERS": base_layer_info.layers,
+                                    'LAYERS': base_layer_info.layers,
                                     'FORMAT': 'image/png',
-                                    tiled: true,
+                                    'VERSION': '1.1.1',
                                     "STYLES": '',
                                     "exceptions": 'application/vnd.ogc.se_inimage',
-                                    tilesOrigin: 87.5879287719727 + "," + 42.4366416931152
-                                },
-                                serverType: 'geoserver',
-                                transition: 0,
+                                }
                             }),
+                            name: base_layer_name,
                         })
                     }
-
-                    // if (base_layer_info.tilename == "wms") {
-                    //     layer = new Image({
-                    //         source: new ImageWMS({
-                    //             // visible: false,
-                    //             ratio: 1,
-                    //             url: base_layer_info.url,
-                    //             params: {
-                    //                 "LAYERS": base_layer_info.layers,
-                    //                 'FORMAT': 'image/png',
-                    //                 "STYLES": '',
-                    //                 "exceptions": 'application/vnd.ogc.se_inimage',
-                    //             },
-                    //             // serverType: 'geoserver',
-                    //             // transition: 0,
-                    //         }),
-                    //     })
-                    // }
 
                     acc.base_layers.push(layer)
                     acc.base_layer_controls.push({
@@ -391,55 +367,6 @@ export default class BundleMap extends Component {
         map.on('click', this.handleMapClick)
         this.map = map
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
-
-        // var layers = [
-        //     new Tile({
-        //         source: new TileWMS({
-        //         visible: false,
-        //             url: 'http://localhost:8080/geoserver/gp_bu/wms',
-        //             // url: 'http://127.0.0.1:8000/back/api/%D1%81%D1%83%D1%83%D1%80%D1%8C-%D0%B4%D0%B0%D0%B2%D1%85%D0%B0%D1%80%D0%B3%D0%B0/wms-preview/7/',
-        //             params: {
-        //                 "LAYERS": 'gp_bu:gp_layer_building_view',
-        //                 // "LAYERS": 'gp_layer_building_view',
-        //                 'FORMAT': 'image/png',
-        //                 tiled: true,
-        //                 "STYLES": '',
-        //                 "exceptions": 'application/vnd.ogc.se_inimage',
-        //                 tilesOrigin: 87.5879287719727 + "," + 42.4366416931152
-        //             },
-        //             serverType: 'geoserver',
-        //             transition: 0,
-        //         }),
-        //     }) ];
-
-        // // var layers = [
-        // //     new Image({
-        // //         source: new ImageWMS({
-        // //         visible: false,
-        // //             url: 'http://localhost:8080/geoserver/gp_bu/wms',
-        // //             params: {
-        // //                 "LAYERS": 'gp_layer_building_view',
-        // //                 'FORMAT': 'image/png',
-        // //                 tiled: true,
-        // //                 "STYLES": '',
-        // //                 "exceptions": 'application/vnd.ogc.se_inimage',
-        // //                 tilesOrigin: 87.5879287719727 + "," + 42.4366416931152
-        // //             },
-        // //             serverType: 'geoserver',
-        // //             transition: 0,
-        // //         }),
-        // //     }) ];
-
-        // var map = new Map({
-        //     layers: layers,
-        //     target: 'map',
-        //     view: new View({
-        //         center: [11461613.630815497, 5878656.0228370065],
-        //         zoom: 5,
-        //     })
-        // });
-
-        // this.map = map
     }
 
     onClickCloser(){
