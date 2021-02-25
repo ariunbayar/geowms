@@ -28,17 +28,22 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
         'User-Agent': 'geo 1.0',
     }
 
-    bundle = get_object_or_404(Bundle, pk=bundle_id)
-    wms = get_object_or_404(WMS, pk=wms_id)
+    bundle = Bundle.objects.filter(pk=bundle_id).first()
+    wms = WMS.objects.filter(pk=wms_id).first()
+
+    if wms is None or bundle is None:
+        raise Http404
 
     if not wms.is_active:
         raise Http404
 
     queryargs = request.GET
     headers = {**BASE_HEADERS}
-    requests_url = wms.url
+
     if url_type == 'wmts':
         requests_url = wms.cache_url
+    else:
+        requests_url = wms.url
 
     rsp = requests.get(requests_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
