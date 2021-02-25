@@ -45,7 +45,6 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
-        print("wrewrwerwerw")
         user_roles = _get_user_roles(request.user)
         wms_layers = wms.wmslayer_set.filter(
                 bundlelayer__bundle__pk=bundle_id,
