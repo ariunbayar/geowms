@@ -87,7 +87,7 @@ urlpatterns = [
         path('form-options/<str:option>/', org_views.form_options),
         path('<int:level>/<int:pk>/addresses/', org_views.get_addresses),
         path('<int:pk>/emp-info/', org_views.get_emp_info),
-        path('erguuleg-fields/', org_views.get_erguuleg_fields),
+        path('<int:pk>/erguuleg-fields/', org_views.get_erguuleg_fields),
         path('save-erguul/', org_views.save_erguul),
         path('get-erguul/', org_views.get_erguuls),
     ], 'org'))),
