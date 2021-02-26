@@ -5,7 +5,27 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from .models import TsegUstsan, TsegPersonal, TuuhSoyol, TuuhSoyolPoint, TuuhSoyolHuree, TuuhSoyolAyuulHuree, Mpoint_view, Mpoint2, Mpoint3, Mpoint4, Mpoint5, Mpoint6, Mpoint7, Mpoint8, Mpoint9,Mpoint10, TuuhSoyolHureePol, TuuhSoyolAyuulHureePol, TsegUstsanLog
+from .models import (
+    TsegUstsan,
+    TsegPersonal,
+    TuuhSoyol,
+    TuuhSoyolPoint,
+    TuuhSoyolHuree,
+    TuuhSoyolAyuulHuree,
+    Mpoint_view,
+    Mpoint2,
+    Mpoint3,
+    Mpoint4,
+    Mpoint5,
+    Mpoint6,
+    Mpoint7,
+    Mpoint8,
+    Mpoint9,
+    Mpoint10,
+    TuuhSoyolHureePol,
+    TuuhSoyolAyuulHureePol,
+    TsegUstsanLog,
+)
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
 from geoportal_app.models import User
@@ -689,6 +709,7 @@ def tsegPersonalRemove(request, payload):
     else:
         return JsonResponse({'success': False})
 
+
 @require_POST
 @ajax_required
 def tsegPersonalUpdate(request, payload):
@@ -878,6 +899,19 @@ def findSum(request, payload):
         return JsonResponse(rsp)
 
 
+def _get_point_class_for_mpoint(point_class):
+    obj = {
+        '673': '2', #gnss in baingin ajillagatai
+        '674': '3', #gps iin suljee
+        '675': '4', #trangulyts
+        '676': '5', #polygometer
+        '677': '6', #gravimeter
+        '678': '7', #ulsin geodiez undur suljee
+        '679': '8', #zuraglalliin suljee
+    }
+    return obj[str(point_class)]
+
+
 @require_POST
 @ajax_required
 def tsegPersonal(request):
@@ -907,10 +941,13 @@ def tsegPersonal(request):
     x = float(request.POST.get('latlongx'))
     geom = Point(x, y)
     ondor = request.POST.get('ondor')
+
     if request.POST.get('suljeenii_torol'):
         point_class = int(request.POST.get('suljeenii_torol'))
     else:
         point_class = 0
+
+    point_class_for_mpoint = _get_point_class_for_mpoint(point_class)
 
     def _save_image(request_name, folder_path, request):
         image_name = ''
@@ -971,7 +1008,7 @@ def tsegPersonal(request):
                     objectid="null", point_id=point_id,
                     point_name=request.POST.get('tesgiin_ner'),
                     ondor=ondor,
-                    point_class=point_class,
+                    point_class=point_class_for_mpoint,
                     ondor_type=ondor_type,
                     mclass=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
@@ -1072,7 +1109,7 @@ def tsegPersonal(request):
                     point_name=request.POST.get('tesgiin_ner'),
                     ondor_type=ondor_type,
                     pid=for_db_pdf_name,
-                    point_class=point_class,
+                    point_class=point_class_for_mpoint,
                     mclass=request.POST.get('center_typ'),
                     aimag=request.POST.get('aimag_name'),
                     sum=request.POST.get('sum_name'),
@@ -1710,6 +1747,8 @@ def tsegPersonalSuccess(request, payload):
     point_class = int(payload.get('point_class'))
     t_type = payload.get('t_type')
     data = None
+    Mpoint = None
+
     if t_type == 'g102':
         data = Mpoint2.objects.using('postgis_db').filter(id=objectid).first()
         if data.point_class == 2:
@@ -1751,49 +1790,58 @@ def tsegPersonalSuccess(request, payload):
         if data.point_class == 2:
             point_class = 2
             Mpoint = Mpoint2
-            point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
-            t_type='g102',
+            point_class_name = 'GNSS-ийн байнгын ажиллагаатай станц'
+            t_type = 'g102',
+
         if data.point_class == 3:
             Mpoint = Mpoint3
-            point_class=3
-            point_class_name='GPS-ийн сүлжээний цэг'
-            t_type='g103'
+            point_class = 3
+            point_class_name = 'GPS-ийн сүлжээний цэг'
+            t_type = 'g103'
+
         if data.point_class == 4:
             Mpoint = Mpoint4
-            point_class=4
-            point_class_name='Триангуляцийн сүлжээний цэг'
-            t_type='g104'
+            point_class = 4
+            point_class_name = 'Триангуляцийн сүлжээний цэг'
+            t_type = 'g104'
+
         if data.point_class == 5:
             Mpoint = Mpoint5
-            point_class=5
-            point_class_name='Полигонометрийн сүлжээний цэг'
-            t_type='g105'
+            point_class = 5
+            point_class_name = 'Полигонометрийн сүлжээний цэг'
+            t_type = 'g105'
+
         if data.point_class == 6:
             Mpoint = Mpoint6
-            point_class=6
-            point_class_name='Гравиметрийн сүлжээний цэг'
-            t_type='g106'
+            point_class = 6
+            point_class_name = 'Гравиметрийн сүлжээний цэг'
+            t_type = 'g106'
+
         if data.point_class == 7:
             Mpoint = Mpoint7
-            point_class=7
-            point_class_name='Өндрийн сүлжээний цэг'
-            t_type='g107'
+            point_class = 7
+            point_class_name = 'Өндрийн сүлжээний цэг'
+            t_type = 'g107'
+
         if data.point_class == 8:
             Mpoint = Mpoint8
-            point_class=8
-            point_class_name='Зураглалын сүлжээний цэг'
-            t_type='g108'
+            point_class = 8
+            point_class_name = 'Зураглалын сүлжээний цэг'
+            t_type = 'g108'
+
         if data.point_class == 9:
             Mpoint = Mpoint9
-            point_class=9
-            point_class_name='Шинээр нэмэгдсэн төлөв'
-            t_type='g109'
+            point_class = 9
+            point_class_name = 'Шинээр нэмэгдсэн төлөв'
+            t_type = 'g109'
+
         if data.point_class == 10:
             Mpoint = Mpoint10
-            point_class=10
-            point_class_name='Устсан төлөв'
-            t_type='g110'
+            point_class = 10
+            point_class_name = 'Устсан төлөв'
+            t_type = 'g110'
 
+        print(Mpoint)
         Mpoint.objects.using('postgis_db').create(
             objectid=data.objectid,
             point_id=data.point_id, point_name=data.point_name,
@@ -1804,7 +1852,7 @@ def tsegPersonalSuccess(request, payload):
             sum=data.sum, aimag=data.aimag,
             sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
             ondor=data.ondor, t_type=t_type,
-            geom = data.geom
+            geom=data.geom
         )
 
         data.delete()

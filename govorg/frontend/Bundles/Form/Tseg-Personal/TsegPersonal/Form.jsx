@@ -395,13 +395,10 @@ export  class Forms extends Component {
         form_datas.append('t_type', t_type)
         service.tsegPersonal(form_datas).then(({success, name, ids}) => {
             if (success) {
-                setTimeout(() => {
-                    setStatus('saved')
-                    setSubmitting(false)
-                    this.setState({ modal_alert_status: 'open' })
-                    this.modalCloseTime()
-                    this.props.data.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/')
-                }, 1000)
+                this.setState({ modal_alert_status: 'open' })
+                setStatus('saved')
+                setSubmitting(false)
+                this.modalCloseTime()
             }
             else{
                 setSubmitting(false)
@@ -514,12 +511,14 @@ export  class Forms extends Component {
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
+            this.props.data.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/')
         }, 2000)
     }
 
     modalClose(){
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
+        this.props.data.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/')
     }
 
     render() {

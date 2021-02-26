@@ -22,6 +22,7 @@ export default class FormTable extends Component {
         this.handlePointSetName = this.handlePointSetName.bind(this)
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
+        this.successAndClose = this.successAndClose.bind(this)
     }
 
     handleBoxOver (e){
@@ -46,18 +47,26 @@ export default class FormTable extends Component {
     }
 
     handleModalSuccessClose() {
-        this.setState({is_modal_success_open: false})
+        this.setState({ is_modal_success_open: false })
     }
+
     componentDidMount(){
         this.handlePointSetName('point_class',this.props.values.point_class)
     }
+
     componentDidUpdate(prevProps){
         if(prevProps.values !== this.props.values){
             this.setState({is_modal_delete_open: false, is_modal_success_open: false})
 
-            this.handlePointSetName('point_class',this.props.values.point_class)
+            this.handlePointSetName('point_class', this.props.values.point_class)
         }
     }
+
+    successAndClose() {
+        this.setState({ is_modal_success_open: false })
+        this.props.handleSuccess()
+    }
+
     handlePointSetName(field, id){
         if(id == 3) this.setState({[field]: 'GPS-ийн сүлжээ'})
         if(id == 6) this.setState({[field]: 'Гравиметрийн сүлжээ'})
@@ -69,7 +78,7 @@ export default class FormTable extends Component {
     }
 
     render() {
-        const { id, objectid, point_id, point_name, pid, point_class, point_type, center_typ,aimag, sum, t_type, sheet1, sheet2, sheet3, geom} = this.props.values
+        const { id, objectid, point_id, point_name, pid, point_class, point_type, center_typ, aimag, sum, t_type, sheet1, sheet2, sheet3, geom} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
@@ -100,15 +109,20 @@ export default class FormTable extends Component {
                     }
                 </th>
                 <th>
-                    {t_type[3] != point_class ?
-                        <a className="btn" onClick={this.handleModalSuccessOpen}
-                                    onMouseOver={(e) => this.handleBoxOver(e)}
-                                    onMouseLeave={(e) => this.handleBoxLeave(e)}>
-                            <i className="fa fa-check" aria-hidden="true"></i>
-                        </a>:
-                        <a className="btn">
-                            <i className="fa fa-check text-success" aria-hidden="true"></i>
-                        </a>
+                    {
+                        t_type[3] != point_class
+                        ?
+                            <a className="btn"
+                                onClick={this.handleModalSuccessOpen}
+                                onMouseOver={(e) => this.handleBoxOver(e)}
+                                onMouseLeave={(e) => this.handleBoxLeave(e)}
+                            >
+                                <i className="fa fa-check" aria-hidden="true"></i>
+                            </a>
+                        :
+                            <a className="btn">
+                                <i className="fa fa-check text-success" aria-hidden="true"></i>
+                            </a>
                     }
                     <div className={`alert alert-dark rounded position-absolute d-none`+
                                 `${this.state.showBox ? " d-block" : ""}`}
@@ -121,7 +135,7 @@ export default class FormTable extends Component {
                     {this.state.is_modal_success_open &&
                         <Modal
                             modalClose={(e) => this.handleModalSuccessClose(e)}
-                            modalAction={this.props.handleSuccess}
+                            modalAction={() => this.successAndClose()}
                             text={`Та "${point_name}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
                             title="Баталгаажуулах уу?"
                             actionNameBack="    Үгүй"
