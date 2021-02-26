@@ -6,6 +6,7 @@ from frontend.суурь_давхарга import views as суурь_давха�
 from frontend.secure import views as secure_views
 from frontend.payment import views as payment_views
 from frontend.covid import views as covid_views
+from frontend.open_layer import views as open_layer_views
 from frontend.page import views as page_views
 from frontend.profile import views as profile_views
 from frontend.qpay import views as qpay_views
@@ -83,6 +84,7 @@ urlpatterns = [
 
     re_path('^payment/.*', payment_views.index, name='payment'),
     re_path('^covid/.*', covid_views.index, name='covid'),
+    re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
     re_path('^profile/.*', profile_views.history, name='history'),
 
 ]

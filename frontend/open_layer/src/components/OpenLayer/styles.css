@@ -1,0 +1,18 @@
+.bundle-ol {
+    padding: 1rem 0;
+}
+
+.bundle-ol > a {
+    text-decoration: none;
+    display: block;
+}
+
+#owl-demo .item{
+    padding: 2px 0px;
+    margin: 10px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    text-align: center;
+}
+
