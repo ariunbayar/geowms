@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {service} from './service'
 import {Item} from './Item'
 import {ItemCreate} from './ItemCreate'
-
+import Loader from "@utils/Loader"
 import './style.css'
 
 
@@ -15,16 +15,16 @@ export class Жагсаалт extends Component {
         this.state = {
             items: [],
             wms_list: [],
+            is_loading: false
         }
         this.handleMove = this.handleMove.bind(this)
 
     }
 
     componentDidMount() {
-
+        this.setState({is_loading: true})
         service.getAll().then(({items, wms_list}) => {
-            this.setState({items})
-            this.setState({wms_list})
+            this.setState({items, wms_list, is_loading: false})
         })
 
     }
@@ -38,6 +38,7 @@ export class Жагсаалт extends Component {
             return acc
         }, [])
     }
+
     handleMove(event, id) {
         service.move(event, id).then(({bundle_list, success}) => {
             if (success)
@@ -51,7 +52,7 @@ export class Жагсаалт extends Component {
     }
 
     render() {
-
+        const {is_loading} = this.state
         const item_controls = this.state.items.map((item, idx) =>
             <Item
                 className="col-sm-6"
@@ -70,6 +71,7 @@ export class Жагсаалт extends Component {
 
         return (
             <div className="container my-4">
+                <Loader is_loading={is_loading}/>
                 {rows.map((items, idx) =>
                     <div className="row mb-4" key={idx}>
                         {items}
