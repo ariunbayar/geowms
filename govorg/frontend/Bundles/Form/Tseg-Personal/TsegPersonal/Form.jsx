@@ -94,6 +94,7 @@ export  class Forms extends Component {
         this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getFieldValues = this.getFieldValues.bind(this)
     }
+
     handleBoxOver (e){
         this.setState({ showBox: true })
     }
@@ -177,40 +178,35 @@ export  class Forms extends Component {
         if(this.state.tesgiin_ner == ''){
             alert("Цэгийн нэрийг оруулна уу  !!! ")
             this.setState({
-                checkError:error,
+                checkError: error,
             })
         }
         if(this.state.toviin_dugaar == ''){
             alert("Төвийн дугаарыг оруулна уу !!!")
             this.setState({
-                checkError:error,
+                checkError: error,
             })
         }
 
          if(this.state.hors_shinj_baidal == ''){
             alert(" Хөрсний шинж байдлыг тодорхойлно уу !!!")
             this.setState({
-                checkError:error,
+                checkError: error,
             })
         }
 
         if(this.state.barishil_tuhai.length <50){
             alert("Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна !!!")
             this.setState({
-                checkError:error,
+                checkError: error,
             })
         }
         if(this.state.LA == '' || this.state.LB == '' || this.state.LC == '' || this.state.BA == '' || this.state.BB == '' || this.state.BC == '' ){
             alert("Солбицлын мэдээлэл дутуу байна !!!")
             this.setState({
-                checkError:error
+                checkError: error
             })
         }
-        else{
-            this.setState({modal_alert_status: 'open'})
-            this.modalCloseTime()
-        }
-
     }
 
     handleInput(e){
@@ -398,6 +394,8 @@ export  class Forms extends Component {
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
+                    this.setState({ modal_alert_status: 'open' })
+                    this.modalCloseTime()
                     this.props.data.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/')
                 }, 1000)
             }
@@ -407,18 +405,18 @@ export  class Forms extends Component {
 
             if( name){
                 alert('Энэхүү цэг мэдээллийн санд байна.')
-                this.setState({name_error:true})
+                this.setState({ name_error: true })
             }
-            else{
-                this.setState({name_error:false})
+            else {
+                this.setState({ name_error:false })
             }
 
-            if(ids){
+            if(ids) {
                 alert('Энэхүү төвийн дугаар мэдээллийн санд байна.')
-                this.setState({id_error:true})
+                this.setState({ id_error: true })
             }
-            else{
-                this.setState({id_error:false})
+            else {
+                this.setState({ id_error: false })
             }
 
         })
@@ -1061,14 +1059,6 @@ export  class Forms extends Component {
                                         </tbody>
                                     </table>
                                     <div className="span3 my-3">
-                                        {has_error
-                                            ?
-                                                <p> </p>
-                                            : status == 'saved' && !dirty &&
-                                                <p>
-                                                    Амжилттай нэмэгдлээ
-                                                </p>
-                                        }
                                         <div>
                                         <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}

@@ -1070,10 +1070,6 @@ def _value_types():
 
 
 def make_value_dict(value, properties_qs, is_display=False):
-    print(value)
-    print(value)
-    print(value)
-    print(value)
     for types in _value_types():
         for prop in properties_qs.values():
             for key, val in value.items():
@@ -1081,9 +1077,10 @@ def make_value_dict(value, properties_qs, is_display=False):
                     data = dict()
                     if not is_display:
                         data[types['value_type']] = val
-                        data[prop['property_id']] = prop['property_id']
+                        data['property_id'] = prop['property_id']
                     if is_display:
                         data[prop['property_code']] = val
+
                     yield data
 
 
@@ -1195,7 +1192,6 @@ def get_mdata_values(feature_code, value):
                         value[prop.property_code] = values[field]
         datas = make_value_dict(value, properties_qs, True)
         for data in datas:
-            print(data)
             for key, value in data.items():
                 send_value[key] = value
     return send_value
