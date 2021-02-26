@@ -3,7 +3,6 @@ import React, { Component } from "react"
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
 import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
-import Units, {METERS_PER_UNIT} from 'ol/proj/Units'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
@@ -14,7 +13,6 @@ import { Point, Circle, Polygon } from 'ol/geom'
 import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
-import {fromExtent} from 'ol/geom/Polygon';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import ImageWMS from 'ol/source/ImageWMS';
