@@ -105,9 +105,9 @@ def createPdf(tseg, x, y):
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.ln(70)
     if 'PointNearPhoto' in tseg:
-        pdf.image(settings.MEDIA_ROOT + '/' + tseg['PointNearPhoto'], x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['PointNearPhoto']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
     if 'PointFarPhoto' in tseg:
-        pdf.image(settings.MEDIA_ROOT + '/' + tseg['PointFarPhoto'], x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['PointFarPhoto']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
@@ -122,8 +122,8 @@ def createPdf(tseg, x, y):
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
-        pdf.image(settings.MEDIA_ROOT + '/' + tseg['LocationOverviewMap'], x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
-        pdf.image(settings.MEDIA_ROOT + '/' + tseg['LocationOverviewMap'], x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['LocationOverviewMap']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6
@@ -138,6 +138,7 @@ def createPdf(tseg, x, y):
         date = tseg['date']
     else:
         date = ''
+
     pdf.cell(84, 8, 'Огноо: ' +  date, 1, 0, 'C')
 
     # mor 6
@@ -716,6 +717,7 @@ def tsegPersonalUpdate(request, payload):
         sheet3 = int(data.sheet3)
     else:
         sheet3 = 0
+
     tseg_display.append({
         'latlongx': latlongx if search_cursor_data else '',
         'latlongy': latlongy if search_cursor_data else '',
@@ -727,7 +729,7 @@ def tsegPersonalUpdate(request, payload):
         'BC':BC if search_cursor_data else "",
         'tseg_oiroos_img_url': '/media/' + tseg['PointNearPhoto'] if tseg and 'PointNearPhoto' in tseg else '',
         'tseg_holoos_img_url': '/media/' + tseg['PointFarPhoto'] if tseg and 'PointFarPhoto' in tseg else '',
-        'barishil_tuhai': tseg['Nomenclature'] if tseg else '',
+        'barishil_tuhai': tseg['Nomenclature'] if 'Nomenclature' in tseg else '',
         'bairshil_tseg_oiroos_img_url': '/media/' + tseg['LocationOverviewMap'] if tseg and 'LocationOverviewMap' in tseg else '',
         'bairshil_tseg_holoos_img_url': '/media/' + tseg['LocationOverviewMap'] if tseg and 'LocationOverviewMap' in tseg else '',
         'sudalga_or_shine':  tseg['PointShape'] if 'PointShape' in tseg else '',
@@ -753,10 +755,13 @@ def tsegPersonalUpdate(request, payload):
         'cc': int(data.sheet3) if sheet3 else '',
         't_type': data.t_type if data.t_type else '',
         'ondor': data.ondor if data.ondor else '',
+        'geo_id': tseg['geo_id']
     })
+
     rsp = {
         'tseg_display': tseg_display,
     }
+
     return JsonResponse(rsp)
 
 
@@ -879,12 +884,18 @@ def tsegPersonal(request):
     pk = request.POST.get('idx')
     point_id = request.POST.get('toviin_dugaar')
     ondor_type = request.POST.get('ondor_torol')
-    pointName = request.POST.get('tesgiin_ner')
     t_type = request.POST.get('t_type')
+    geo_id = request.POST.get('geo_id')
 
     tseg_image_url = 'tseg-personal'
     tseg_bairshil_img_url = 'tseg-personal-img'
     tseg_file_url = 'tseg-personal-file'
+
+    create_tseg = True
+    feature_code = 'gnp-gp-gp'
+
+    if pk:
+        create_tseg = False
 
     if(len(point_id)<4):
         point_id.zfill(4)
@@ -901,124 +912,138 @@ def tsegPersonal(request):
     else:
         point_class = 0
 
+    def _save_image(request_name, folder_path, request):
+        image_name = ''
+        if request.POST.get(request_name):
+            [image_x2] = resize_b64_to_sizes(request.POST.get(request_name), [(720, 720)])
+            image_name = utils.save_img_to_folder(image_x2, folder_path, 'img', '.png')
+        return image_name
+
     with transaction.atomic():
-        if pk:
+        if not create_tseg:
             mpoints = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-            search_point_id = mpoints.point_id         #ene id-gaar TsegPersonal-s tuhain hereglegchiin medeelliig awna
-            date = None
-            tseg_personal = TsegPersonal.objects.filter(id=search_point_id).first()
-            if not tseg_personal:
-                TsegPersonal.objects.create(id=pointName)
+            point_id = mpoints.point_id
+            tseg = utils.get_mdata_values(feature_code, point_id)
 
-            if mpoints.t_type == 'g102':
-                point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
-                Mpoint = Mpoint2
+            if not tseg:
+                create_tseg = True
 
-            if mpoints.t_type == 'g103':
-                point_class_name='GPS-ийн сүлжээний цэг'
-                Mpoint = Mpoint3
+            if not create_tseg:
+                if mpoints.t_type == 'g102':
+                    point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
+                    Mpoint = Mpoint2
 
-            if mpoints.t_type == 'g104':
-                point_class_name='Триангуляцийн сүлжээний цэг'
-                Mpoint = Mpoint4
+                if mpoints.t_type == 'g103':
+                    point_class_name='GPS-ийн сүлжээний цэг'
+                    Mpoint = Mpoint3
 
-            if mpoints.t_type == 'g105':
-                point_class_name='Полигонометрийн сүлжээний цэг'
-                Mpoint = Mpoint5
+                if mpoints.t_type == 'g104':
+                    point_class_name='Триангуляцийн сүлжээний цэг'
+                    Mpoint = Mpoint4
 
-            if mpoints.t_type == 'g106':
-                point_class_name='Гравиметрийн сүлжээний цэг'
-                Mpoint = Mpoint6
+                if mpoints.t_type == 'g105':
+                    point_class_name='Полигонометрийн сүлжээний цэг'
+                    Mpoint = Mpoint5
 
-            if mpoints.t_type == 'g107':
-                point_class_name='Өндрийн сүлжээний цэг'
-                Mpoint = Mpoint7
+                if mpoints.t_type == 'g106':
+                    point_class_name='Гравиметрийн сүлжээний цэг'
+                    Mpoint = Mpoint6
 
-            if mpoints.t_type == 'g108':
-                point_class_name='Зураглалын сүлжээний цэг'
-                Mpoint = Mpoint8
+                if mpoints.t_type == 'g107':
+                    point_class_name='Өндрийн сүлжээний цэг'
+                    Mpoint = Mpoint7
 
-            if mpoints.t_type == 'g109':
-                point_class_name='Шинээр нэмэгдсэн төлөв'
-                Mpoint = Mpoint9
+                if mpoints.t_type == 'g108':
+                    point_class_name='Зураглалын сүлжээний цэг'
+                    Mpoint = Mpoint8
 
-            if mpoints.t_type == 'g110':
-                point_class_name='Устсан төлөв'
-                Mpoint = Mpoint10
+                if mpoints.t_type == 'g109':
+                    point_class_name='Шинээр нэмэгдсэн төлөв'
+                    Mpoint = Mpoint9
 
-            Mpoint.objects.using('postgis_db').filter(id=pk, t_type=t_type).update(
-                        objectid="null" ,point_id=point_id,
-                        point_name=request.POST.get('tesgiin_ner'),
-                        ondor=ondor,
-                        point_class=point_class,
-                        ondor_type=ondor_type,
-                        mclass=request.POST.get('center_typ'),
-                        aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                        sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                        sheet3=request.POST.get('cc'),
-                        point_class_name=point_class_name,
-                        geom = geom
-            )
-            TsegPersonal.objects.filter(id=search_point_id).update(
-                        id= point_id,
-                        suljeenii_torol=point_class,
-                        latlongx=x,
-                        latlongy=y,
-                        barishil_tuhai=str(request.POST.get('barishil_tuhai')),
-                        sudalga_or_shine=str(request.POST.get('sudalga_or_shine')),
-                        hors_shinj_baidal=str(request.POST.get('hors_shinj_baidal')),
-                        date=date, hotolson=request.POST.get('hotolson'),
-                        alban_tushaal=request.POST.get('alban_tushaal'),
-                        alban_baiguullga=request.POST.get('alban_baiguullga'),
-            )
-            tseg_personal = TsegPersonal.objects.filter(id=point_id).first()
-            if request.POST.get('tseg_oiroos_img_url') and len(request.POST.get('tseg_oiroos_img_url')) > 2000:
-                if tseg_personal.tseg_oiroos_img_url:
-                    tseg_personal.tseg_oiroos_img_url.delete(save=False)
-                [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_oiroos_img_url'), [(720, 720)])
-                tseg_personal.tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
-                tseg_personal.save()
-                utils.save_img_to_folder(image_x2)
-            if request.POST.get('tseg_holoos_img_url') and len(request.POST.get('tseg_holoos_img_url')) > 2000:
-                if tseg_personal.tseg_holoos_img_url:
-                    tseg_personal.tseg_holoos_img_url.delete(save=False)
-                [image_x2] = resize_b64_to_sizes(request.POST.get('tseg_holoos_img_url'), [(720, 720)])
-                tseg_personal.tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
-                tseg_personal.save()
-            if request.POST.get('bairshil_tseg_oiroos_img_url')  and len(request.POST.get('bairshil_tseg_oiroos_img_url')) > 2000:
-                if tseg_personal.bairshil_tseg_oiroos_img_url:
-                    tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
-                tseg_personal.bairshil_tseg_oiroos_img_url.delete(save=False)
-                [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_oiroos_img_url'), [(720, 720)])
-                tseg_personal.bairshil_tseg_oiroos_img_url = SimpleUploadedFile('icon.png', image_x2)
-                tseg_personal.save()
-            if  request.POST.get('bairshil_tseg_holoos_img_url') and len(request.POST.get('bairshil_tseg_holoos_img_url')) > 2000:
-                if tseg_personal.bairshil_tseg_holoos_img_url:
-                    tseg_personal.bairshil_tseg_holoos_img_url.delete(save=False)
-                [image_x2] = resize_b64_to_sizes(request.POST.get('bairshil_tseg_holoos_img_url'), [(720, 720)])
-                tseg_personal.bairshil_tseg_holoos_img_url = SimpleUploadedFile('icon.png', image_x2)
-                tseg_personal.save()
-            if not request.POST.get('file1'):
-                tseg_personal.file_path1.delete(save=False)
-                tseg_personal.file_path1 = request.FILES['file1']
-                tseg_personal.save()
-            if not request.POST.get('file2'):
-                tseg_personal.file_path2.delete(save=False)
-                tseg_personal.file_path2 = request.FILES['file2']
-                tseg_personal.save()
-            pdf_id = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-            file_name = pdf_id.pid + '.pdf'
-            src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
-            pdf = createPdf(point_id)
-            pdf.output(src_file, 'F')
-            return JsonResponse({'success': True, 'name': False, 'ids':False})
-        else:
+                if mpoints.t_type == 'g110':
+                    point_class_name='Устсан төлөв'
+                    Mpoint = Mpoint10
+
+                mpoint_qs = Mpoint.objects.using('postgis_db')
+                mpoint_qs = mpoint_qs.filter(id=pk, t_type=t_type)
+                mpoint_qs.update(
+                    objectid="null", point_id=point_id,
+                    point_name=request.POST.get('tesgiin_ner'),
+                    ondor=ondor,
+                    point_class=point_class,
+                    ondor_type=ondor_type,
+                    mclass=request.POST.get('center_typ'),
+                    aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
+                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
+                    sheet3=request.POST.get('cc'),
+                    point_class_name=point_class_name,
+                    geom=geom
+                )
+
+                value = dict()
+                value['PointNumber'] = point_id
+                value['GeodeticPointClass'] = point_class
+                value['GeodeticalPointType'] = request.POST.get('center_typ')
+                value['Nomenclature'] = request.POST.get('barishil_tuhai')
+                value['PointShape'] = request.POST.get('sudalga_or_shine')
+                value['SoilDescription'] = request.POST.get('hors_shinj_baidal')
+                value['date'] = date
+                value['EmployeeName'] = request.POST.get('hotolson')
+                # value['file_path1'] = file1_name,
+                # value['file_path2'] = file2_name,
+                value['EmployeePosition'] = request.POST.get('alban_tushaal')
+                value['PointCentreType'] = ondor_type
+                value['CompanyName'] = request.POST.get('alban_baiguullga')
+                value['OperatorName'] = None
+                value['Name'] = request.POST.get('tesgiin_ner')
+                value['ExternalId'] = request.POST.get('tesgiin_ner')
+                value['beginLifespanVersion'] = date
+                value['endLifespanVersion'] = date
+
+                def _remove_and_save(request_name, property_name, tseg, value, folder_path, request):
+                    post_request = request.POST.get(request_name)
+                    if post_request and len(post_request) > 2000:
+                        if property_name in tseg:
+                            os.remove(os.path.join(settings.MEDIA_ROOT, tseg[property_name]))
+
+                        value[property_name] = _save_image(request_name, folder_path, request)
+
+                    return value
+
+                value = _remove_and_save('tseg_oiroos_img_url', 'PointNearPhoto', tseg, value, tseg_image_url, request)
+                value = _remove_and_save('tseg_holoos_img_url', 'PointFarPhoto', tseg, value, tseg_image_url, request)
+                value = _remove_and_save('bairshil_tseg_oiroos_img_url', 'LocationOverviewMap', tseg, value, tseg_bairshil_img_url, request)
+                value = _remove_and_save('bairshil_tseg_holoos_img_url', 'LocationOverviewMap', tseg, value, tseg_bairshil_img_url, request)
+
+                # if not request.POST.get('file1'):
+                #     tseg_personal.file_path1.delete(save=False)
+                #     tseg_personal.file_path1 = request.FILES['file1']
+                #     tseg_personal.save()
+
+                # if not request.POST.get('file2'):
+                #     tseg_personal.file_path2.delete(save=False)
+                #     tseg_personal.file_path2 = request.FILES['file2']
+                #     tseg_personal.save()
+
+                mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0], geo_id=geo_id)
+
+                file_name = mpoints.pid + '.pdf'
+                src_file = os.path.join(settings.FILES_ROOT, tseg_file_url, file_name)
+                pdf = createPdf(value, x, y)
+                pdf.output(src_file, 'F')
+                return JsonResponse({ 'success': True, 'name': False, 'ids': False })
+
+        if create_tseg:
             tesgiin_ner = request.POST.get('tesgiin_ner')
             objectid = request.POST.get('toviin_dugaar')
+
             file_name = 'PDF'+ objectid + '.pdf'
             for_db_pdf_name = 'PDF' + objectid
+
             tesgiin_ner_check = Mpoint_view.objects.using('postgis_db').filter(point_name=tesgiin_ner)
             objectid_check = Mpoint_view.objects.using('postgis_db').filter(point_id=objectid)
+
             if tesgiin_ner_check or objectid_check:
                 name = False
                 ids = False
@@ -1027,6 +1052,7 @@ def tsegPersonal(request):
                 if objectid_check:
                     ids = True
                 return JsonResponse({'success': False, 'name': name, 'ids':ids})
+
             date = None
             file1 = ''
             file2 = ''
@@ -1038,6 +1064,7 @@ def tsegPersonal(request):
                 # file2_name = utils.save_file_to_storage(file2, tseg_file_url)
             if request.POST.get('date'):
                 date = request.POST.get('date')
+
             mpoint = Mpoint9.objects.using('postgis_db').create(
                     objectid='null',
                     point_id=point_id,
@@ -1054,11 +1081,10 @@ def tsegPersonal(request):
                     sheet3=request.POST.get('LA'),
                     t_type='g109',
                     point_class_name='Шинээр нэмэгдсэн төлөв',
-                    geom = geom
+                    geom=geom
             )
 
             point_id = request.POST.get('toviin_dugaar')
-            feature_code = 'gnp-gp-gp'
             value = dict()
             value['PointNumber'] = point_id
             value['GeodeticPointClass'] = point_class
@@ -1078,28 +1104,21 @@ def tsegPersonal(request):
             value['ExternalId'] = request.POST.get('tesgiin_ner')
             value['beginLifespanVersion'] = date
             value['endLifespanVersion'] = date
-            if  request.POST.get('tseg_oiroos_img_url'):
-                [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_oiroos_img_url'), [(720, 720)])
-                image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img', '.png')
-                value['PointNearPhoto'] = image_name
 
-            if  request.POST.get('tseg_holoos_img_url'):
-                [image_x2] = resize_b64_to_sizes( request.POST.get('tseg_holoos_img_url'), [(720, 720)])
-                image_name = utils.save_img_to_folder(image_x2, tseg_image_url, 'img', '.png')
-                value['PointFarPhoto'] = image_name
+            def _make_value(request_name, property_name, folder_path, request, value):
+                image_name = _save_image(request_name, folder_path, request)
+                if image_name:
+                    value[property_name] = image_name
 
-            if  request.POST.get('bairshil_tseg_oiroos_img_url'):
-                [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_oiroos_img_url'), [(720, 720)])
-                image_name = utils.save_img_to_folder(image_x2, tseg_bairshil_img_url, 'img', '.png')
-                value['LocationOverviewMap'] = image_name
+                return value
 
-            if  request.POST.get('bairshil_tseg_holoos_img_url'):
-                [image_x2] = resize_b64_to_sizes( request.POST.get('bairshil_tseg_holoos_img_url'), [(720, 720)])
-                image_name = utils.save_img_to_folder(image_x2, tseg_bairshil_img_url, 'img', '.png')
-                value['LocationOverviewMap'] = image_name
+            value = _make_value('tseg_oiroos_img_url', 'PointNearPhoto', tseg_image_url, request, value)
+            value = _make_value('tseg_holoos_img_url', 'PointFarPhoto', tseg_image_url, request, value)
+            value = _make_value('bairshil_tseg_oiroos_img_url', 'LocationOverviewMap', tseg_bairshil_img_url, request, value)
+            value = _make_value('bairshil_tseg_holoos_img_url', 'LocationOverviewMap', tseg_bairshil_img_url, request, value)
 
             mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0])
-            src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
+            src_file = os.path.join(settings.FILES_ROOT, tseg_file_url, file_name)
             pdf = createPdf(value, x, y)
             pdf.output(src_file, 'F')
 
@@ -1729,7 +1748,6 @@ def tsegPersonalSuccess(request, payload):
             data = None
 
     if data:
-        print(data.point_class)
         if data.point_class == 2:
             point_class = 2
             Mpoint = Mpoint2

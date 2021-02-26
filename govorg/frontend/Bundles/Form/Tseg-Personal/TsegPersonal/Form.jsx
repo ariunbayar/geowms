@@ -76,7 +76,8 @@ export  class Forms extends Component {
             checkNull:[],
             bairshil_error:false,
             modal_alert_status: 'closed',
-            timer: null
+            timer: null,
+            geo_id: '',
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -116,7 +117,6 @@ export  class Forms extends Component {
         const id = this.props.data.match.params.id
         const t_type = this.props.data.match.params.t_type
         if(id) {
-            this.setState({id, t_type})
             this.tsegUpdate(id, t_type)
         }
     }
@@ -355,6 +355,7 @@ export  class Forms extends Component {
         var Bbut=(this.state.BC/3600)+(this.state.BB/60)+this.state.BA-BBB
         var niitB=Bbut+BBB
         const trapetsiin_dugaar = this.state.trapetsiin_dugaar.split(",")[0]
+
         form_datas.append('file1', this.state.file_path1)
         form_datas.append('file2', this.state.file_path2)
         form_datas.append('tesgiin_ner', this.state.tesgiin_ner)
@@ -386,8 +387,11 @@ export  class Forms extends Component {
         form_datas.append('hotolson', this.state.values.hotolson)
         form_datas.append('alban_tushaal', this.state.values.alban_tushaal)
         form_datas.append('alban_baiguullga', this.state.values.alban_baiguullga)
+        form_datas.append('geo_id', this.state.geo_id)
+
         const id = this.props.data.match.params.id
         const t_type = this.props.data.match.params.t_type
+
         form_datas.append('t_type', t_type)
         service.tsegPersonal(form_datas).then(({success, name, ids}) => {
             if (success) {
@@ -423,67 +427,70 @@ export  class Forms extends Component {
     }
 
     tsegUpdate(id, t_type){
-        service.updateTseg(id, t_type).then(({tseg_display}) =>{
-            if(tseg_display){
-                tseg_display.map((item, idx) =>
-                {
-                    const value = item.date
-                    const d = value.split("-")
-                    const daydhkf = parseInt(d[2])+1
-                    if(daydhkf<=10){
-                        var dated = '0' +`${daydhkf}`
-                    }
-                    else{
-                        var dated = `${daydhkf}`
-                    }
-                    const m =d[1]
-                    const y = d[0]
-                    var dateStr = y+ "-" + m + "-" + dated;
-                    this.setState({
-                        values : {
-                            ...this.state.values,
-                            pid: item.pid,
-                            center_typ: item.center_typ,
-                            ondor: item.ondor,
-                            ondor_torol: item.ondor_torol,
-                            suljeenii_torol: item.suljeenii_torol,
-                            sudalga_or_shine: item.sudalga_or_shine,
-                            date: dateStr,
-                            hotolson: item.hotolson,
-                            alban_tushaal: item.alban_tushaal,
-                            alban_baiguullga: item.alban_baiguullga,
-                        },
-                        hors_shinj_baidal: item.hors_shinj_baidal,
-                        toviin_dugaar: item.point_id,
-                        tesgiin_ner: item.point_name,
-                        LA:item.LA,
-                        LB:item.LB,
-                        LC:item.LC,
-                        BA:item.BA,
-                        BB:item.BB,
-                        BC:item.BC,
-                        zone:item.zone,
-                        cc:item.cc,
-                        latlongx: item.latlongx,
-                        latlongy: item.latlongy,
-                        sum_name: item.sum,
-                        aimag_name: item.aimag,
-                        point_class: item.point_class,
-                        trapetsiin_dugaar: item.sheet1,
-                        barishil_tuhai: item.barishil_tuhai,
-                        tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
-                        tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
-                        bairshil_tseg_oiroos_img_url_zurag: item.bairshil_tseg_oiroos_img_url,
-                        bairshil_tseg_holoos_img_url_zurag: item.bairshil_tseg_holoos_img_url,
-                        file_path11: item.file_path1,
-                        file_path22: item.file_path2,
-                    })
-                    }
-                )
-            }
-
-        }
-         )
+        service
+            .updateTseg(id, t_type)
+            .then(({ tseg_display }) => {
+                console.log(tseg_display);
+                if(tseg_display) {
+                    tseg_display.map((item, idx) =>
+                    {
+                        const value = item.date
+                        const d = value.split("-")
+                        const daydhkf = parseInt(d[2]) + 1
+                        if(daydhkf<=10){
+                            var dated = '0' + `${daydhkf}`
+                        }
+                        else{
+                            var dated = `${daydhkf}`
+                        }
+                        const m =d[1]
+                        const y = d[0]
+                        var dateStr = y+ "-" + m + "-" + dated;
+                        this.setState({
+                            values : {
+                                ...this.state.values,
+                                pid: item.pid,
+                                center_typ: item.center_typ,
+                                ondor: item.ondor,
+                                ondor_torol: item.ondor_torol,
+                                suljeenii_torol: item.suljeenii_torol,
+                                sudalga_or_shine: item.sudalga_or_shine,
+                                date: dateStr,
+                                hotolson: item.hotolson,
+                                alban_tushaal: item.alban_tushaal,
+                                alban_baiguullga: item.alban_baiguullga,
+                            },
+                            hors_shinj_baidal: item.hors_shinj_baidal,
+                            toviin_dugaar: item.point_id,
+                            tesgiin_ner: item.point_name,
+                            LA: item.LA,
+                            LB: item.LB,
+                            LC: item.LC,
+                            BA: item.BA,
+                            BB: item.BB,
+                            BC: item.BC,
+                            zone: item.zone,
+                            cc: item.cc,
+                            latlongx: item.latlongx,
+                            latlongy: item.latlongy,
+                            sum_name: item.sum,
+                            aimag_name: item.aimag,
+                            point_class: item.point_class,
+                            trapetsiin_dugaar: item.sheet1,
+                            barishil_tuhai: item.barishil_tuhai,
+                            tseg_oiroos_img_url_zurag: item.tseg_oiroos_img_url,
+                            tseg_holoos_img_url_zurag: item.tseg_holoos_img_url,
+                            bairshil_tseg_oiroos_img_url_zurag: item.bairshil_tseg_oiroos_img_url,
+                            bairshil_tseg_holoos_img_url_zurag: item.bairshil_tseg_holoos_img_url,
+                            file_path11: item.file_path1,
+                            file_path22: item.file_path2,
+                            geo_id: item.geo_id,
+                            id, t_type
+                        })
+                        }
+                    )
+                }
+            })
     }
 
     getItem(){
