@@ -16,8 +16,8 @@ def _get_user_roles(user):
     return roles
 
 
-def _get_service_url(request, bundle, wms):
-    url = reverse('api:service:wms_proxy', args=[bundle.pk, wms.pk])
+def _get_service_url(request, bundle_id, wms):
+    url = reverse('api:service:wms_proxy', args=[bundle_id, wms.pk])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
@@ -28,17 +28,18 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
         'User-Agent': 'geo 1.0',
     }
 
-    bundle = get_object_or_404(Bundle, pk=bundle_id)
-    wms = get_object_or_404(WMS, pk=wms_id)
+    wms = WMS.objects.filter(pk=wms_id).first()
 
-    if not wms.is_active:
+    if wms is None or not wms.is_active:
         raise Http404
 
     queryargs = request.GET
     headers = {**BASE_HEADERS}
-    requests_url = wms.url
+
     if url_type == 'wmts':
         requests_url = wms.cache_url
+    else:
+        requests_url = wms.url
 
     rsp = requests.get(requests_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
@@ -46,14 +47,14 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
     if request.GET.get('REQUEST') == 'GetCapabilities':
         user_roles = _get_user_roles(request.user)
         wms_layers = wms.wmslayer_set.filter(
-                bundlelayer__bundle=bundle,
+                bundlelayer__bundle__pk=bundle_id,
                 bundlelayer__role_id__in=user_roles,
             )
         allowed_layers = set([layer.code for layer in wms_layers])
 
         content = filter_layers(content, allowed_layers)
 
-        service_url = _get_service_url(request, bundle, wms)
+        service_url = _get_service_url(request, bundle_id, wms)
         content = replace_src_url(content, requests_url, service_url)
 
     content_type = rsp.headers.get('content-type')
