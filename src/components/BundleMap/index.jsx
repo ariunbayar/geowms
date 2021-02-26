@@ -210,7 +210,6 @@ export default class InspireMap extends Component {
     }
 
     readFeatures(features) {
-        alert("eter")
         const erguul_layer = this.erguul_layer
         const erguul_source = erguul_layer.getSource()
         features['features'].map((feat, idx) => {
