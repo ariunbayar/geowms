@@ -1,3 +1,9 @@
+import os
+import io
+import json
+from geojson import FeatureCollection
+import PIL.Image as Image
+
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
@@ -7,6 +13,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
+from django.conf import settings
 
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
@@ -24,8 +31,9 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
 from govorg.backend.org_request.models import ChangeRequest
+from .forms import EmployeeAddressForm
 
 from main.decorators import ajax_required
 from main import utils
@@ -57,7 +65,14 @@ def all(request, payload, level):
 def employee_detail(request, pk):
 
     user = get_object_or_404(User, pk=pk)
-    employee = Employee.objects.filter(user=user).first()
+
+    employee = Employee.objects
+    employee = employee.filter(user=user)
+    employee = employee.first()
+
+    address = EmployeeAddress.objects
+    address = address.filter(employee=employee)
+    address = address.first()
 
     employees_display = {
         'id': user.id,
@@ -75,6 +90,14 @@ def employee_detail(request, pk):
         'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+        'phone_number': employee.phone_number,
+        'level_1': address.level_1 if hasattr(address, 'level_1') else '',
+        'level_2': address.level_2 if hasattr(address, 'level_2') else '',
+        'level_3': address.level_3 if hasattr(address, 'level_3') else '',
+        'street': address.street if hasattr(address, 'street') else '',
+        'apartment': address.apartment if hasattr(address, 'apartment') else '',
+        'door_number': address.door_number if hasattr(address, 'door_number') else '',
+        'point': address.point.json if hasattr(address, 'point') else '',
     }
 
     return JsonResponse({'success': True, 'employee': employees_display})
@@ -156,19 +179,37 @@ def _employee_validation(payload, user):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_update(request, payload, pk, level):
-    username = payload.get('username')
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    gender = payload.get('gender')
-    register = payload.get('register')
-    is_admin = payload.get('is_admin')
-    password = payload.get('password')
-    is_super = payload.get('is_super')
-    re_password_mail = payload.get('re_password_mail')
+    payload = payload.get("payload")
+
+    values = payload.get('values')
+    username = values.get('username')
+    position = values.get('position')
+    first_name = values.get('first_name')
+    last_name = values.get('last_name')
+    email = values.get('email')
+    gender = values.get('gender')
+    register = values.get('register')
+    is_admin = values.get('is_admin')
+    password = values.get('password')
+    is_super = values.get('is_super')
+    phone_number = values.get('phone_number')
+    re_password_mail = values.get('re_password_mail')
+
+    address = payload.get('address')
+    level_1 = address.get('level_1')
+    level_2 = address.get('level_2')
+    level_3 = address.get('level_3')
+    street = address.get('street')
+    apartment = address.get('apartment')
+    door_number = address.get('door_number')
+    point_coordinate = address.get('point')
+    point = _get_point_for_db(point_coordinate)
+    address['point'] = point
+
     user = get_object_or_404(User, pk=pk)
-    errors = _employee_validation(payload, user)
+    errors = _employee_validation(values, user)
+    form = EmployeeAddressForm(address)
+
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
@@ -177,79 +218,170 @@ def employee_update(request, payload, pk, level):
     else:
         is_super = False
 
-    user.first_name = first_name
-    user.last_name = last_name
-    user.email = email
-    user.gender = gender
-    user.register = register.upper()
-    user.username = username
-    user.is_superuser = is_super
-    if password:
-        user.set_password(password)
-    user.save()
-    if re_password_mail:
-        subject = 'Геопортал нууц үг солих'
-        text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-        utils.send_approve_email(user, subject, text)
-    Employee.objects.filter(user_id=pk).update(position=position, is_admin=is_admin)
+    if form.is_valid() and not errors:
+        with transaction.atomic():
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.gender = gender
+            user.register = register.upper()
+            user.username = username
+            user.is_superuser = is_super
+            if password:
+                user.set_password(password)
+            user.save()
 
-    return JsonResponse({'success': True, 'errors': errors})
+            if re_password_mail:
+                subject = 'Геопортал нууц үг солих'
+                text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+                utils.send_approve_email(user, subject, text)
+
+            employee = Employee.objects
+            employee = employee.filter(user_id=pk)
+            employee.update(
+                position=position,
+                is_admin=is_admin,
+                phone_number=phone_number
+            )
+            employee = employee.first()
+
+            address = EmployeeAddress.objects
+            address = address.filter(employee=employee)
+
+            if address:
+                address.update(
+                    point=point,
+                    level_1=level_1,
+                    level_2=level_2,
+                    level_3=level_3,
+                    street=street,
+                    apartment=apartment,
+                    door_number=door_number,
+                )
+            else:
+                address.create(
+                    employee=employee,
+                    point=point,
+                    level_1=level_1,
+                    level_2=level_2,
+                    level_3=level_3,
+                    street=street,
+                    apartment=apartment,
+                    door_number=door_number,
+                )
+        rsp = {
+            'success': True, 'errors': errors
+        }
+
+    else:
+        rsp = {
+            'success': False,
+            'errors': {**form.errors, **errors},
+        }
+
+    return JsonResponse(rsp)
+
+
+def _get_point_for_db(coordinate):
+    if not coordinate:
+        return ''
+
+    if isinstance(coordinate, str):
+        coordinate = coordinate.split(",")
+
+    point = utils.get_geom_for_filter_from_coordinate(coordinate, 'Point')
+    return point
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_add(request, payload, level, pk):
+    payload = payload.get('payload')
 
     org = get_object_or_404(Org, pk=pk, level=level)
 
-    username = payload.get('username')
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    gender = payload.get('gender')
-    register = payload.get('register')
-    is_admin = payload.get('is_admin')
-    is_super = payload.get('is_super')
+    values = payload.get('values')
+    username = values.get('username')
+    position = values.get('position')
+    first_name = values.get('first_name')
+    last_name = values.get('last_name')
+    email = values.get('email')
+    gender = values.get('gender')
+    register = values.get('register')
+    is_admin = values.get('is_admin')
+    is_super = values.get('is_super')
+    phone_number = values.get('phone_number')
+
+    address = payload.get('address')
+    level_1 = address.get('level_1')
+    level_2 = address.get('level_2')
+    level_3 = address.get('level_3')
+    street = address.get('street')
+    apartment = address.get('apartment')
+    door_number = address.get('door_number')
+    point_coordinate = address.get('point')
+    point = _get_point_for_db(point_coordinate)
+
+    address['point'] = point
 
     errors = {}
-    errors = _employee_validation(payload, None)
+    errors = _employee_validation(values, None)
+    form = EmployeeAddressForm(address)
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
-    with transaction.atomic():
+    if form.is_valid() and not errors:
+        with transaction.atomic():
 
-        user = User()
-        user.username = username
-        user.first_name = first_name
-        user.last_name = last_name
-        user.email = email
-        user.gender = gender
-        user.is_superuser = is_super if org.level == 4 else False
-        user.register = register.upper()
-        user.save()
-        user.roles.add(2)
-        user.save()
+            user = User()
+            user.username = username
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.gender = gender
+            user.is_superuser = is_super if org.level == 4 else False
+            user.register = register.upper()
+            user.save()
+            user.roles.add(2)
+            user.save()
 
-        employee = Employee()
-        employee.position = position
-        employee.org = org
-        employee.user_id = user.id
-        employee.is_admin = is_admin
-        employee.token = TokenGeneratorEmployee().get()
-        employee.save()
+            employee = Employee()
+            employee.position = position
+            employee.org = org
+            employee.user_id = user.id
+            employee.is_admin = is_admin
+            employee.token = TokenGeneratorEmployee().get()
+            employee.phone_number = phone_number
+            employee.save()
 
-        utils.send_approve_email(user)
+            employee_address = EmployeeAddress()
+            employee_address.employee = employee
+            employee_address.level_1 = level_1
+            employee_address.level_2 = level_2
+            employee_address.level_3 = level_3
+            employee_address.street = street
+            employee_address.apartment = apartment
+            employee_address.door_number = door_number
+            employee_address.point = point
+            employee_address.save()
 
-    rsp = {
-        'success': True,
-        'employee': {
-            'id': employee.id,
-            'user_id': employee.user_id,
+            utils.send_approve_email(user)
+
+        rsp = {
+            'success': True,
+            'employee': {
+                'id': employee.id,
+                'user_id': employee.user_id,
+            }
         }
-    }
+
+    else:
+        rsp = {
+            'success': False,
+            'errors': {**form.errors, **errors},
+        }
 
     return JsonResponse(rsp)
 
@@ -1217,16 +1349,230 @@ def _get_roles_display():
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def form_options(request):
+def form_options(request, option):
 
     admin_levels = utils.get_administrative_levels()
     roles = _get_roles_display()
 
+    if option == 'second':
+        rsp = {
+            'success': True,
+            'secondOrders': admin_levels
+        }
+    else:
+        rsp = {
+            'success': True,
+            'secondOrders': admin_levels,
+            'roles': roles,
+            'firstOrder_geom': utils.get_1stOrder_geo_id(),
+        }
+
+    return JsonResponse(rsp)
+
+
+def _is_cloned_feature(address_qs):
+    is_cloned = False
+    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
+    if erguul_id:
+        is_cloned = True
+    return is_cloned
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_addresses(request, level, pk):
+    points = list()
+    org = get_object_or_404(Org, pk=pk, level=level)
+    employees = Employee.objects
+    employees = employees.filter(org=org)
+
+    for employee in employees:
+        addresses = EmployeeAddress.objects
+        addresses = addresses.filter(employee=employee)
+        addresses = addresses.first()
+        if addresses:
+            point_info = dict()
+            point = addresses.point
+            point_info['id'] = addresses.employee.id
+            point_info['first_name'] = addresses.employee.user.first_name # etseg
+            point_info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
+            point_info['is_cloned'] = _is_cloned_feature(addresses)
+            feature = utils.get_feature_from_geojson(point.json, properties=point_info)
+            points.append(feature)
+
+        erguul = EmployeeErguul.objects
+        erguul = erguul.filter(address=addresses)
+        erguul = erguul.first()
+        if erguul:
+            erguul_info = dict()
+            point = erguul.point
+            erguul_info['id'] = employee.id
+            erguul_info['is_erguul'] = True
+            erguul_info['first_name'] = employee.user.first_name # etseg
+            erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+
+            feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
+            points.append(feature)
+
+    feature_collection = FeatureCollection(points)
+
     rsp = {
         'success': True,
-        'secondOrders': admin_levels,
-        'roles': roles,
-        'firstOrder_geom': utils.get_1stOrder_geo_id(),
+        'points': feature_collection,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_emp_info(request, pk):
+    info = dict()
+    employee = get_object_or_404(Employee, pk=pk)
+    info['org_name'] = employee.org.name
+    info['last_name'] = employee.user.last_name # ovog
+    info['first_name'] = employee.user.first_name
+    info['phone_number'] = employee.phone_number
+    info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
+    info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
+    info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
+    info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
+    info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
+    info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
+
+    rsp = {
+        'success': True,
+        'info': info,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_erguuleg_fields(request):
+    send_fields = list()
+    for f in EmployeeErguul._meta.get_fields():
+        type_name = f.get_internal_type()
+        not_list = ['ForeignKey', 'AutoField']
+        if type_name not in not_list:
+            not_field = ['created_at']
+            if f.name not in not_field:
+                if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                    field_type = ''
+                    if 'date' in f.name:
+                        field_type = 'date'
+                    send_fields.append({
+                        'origin_name': f.name,
+                        'name': f.verbose_name,
+                        'length': f.max_length,
+                        'choices': f.choices,
+                        'disabled': False,
+                        'type': field_type,
+                    })
+    rsp = {
+        'success': True,
+        'info': send_fields,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def save_erguul(request, payload):
+    hour = ''
+
+    emp_id = payload.get('id')
+    values = payload.get('values')
+    point_coordinate = payload.get('point')
+    photo = payload.get('photo')
+
+    point = _get_point_for_db(point_coordinate)
+    employee = get_object_or_404(Employee, pk=emp_id)
+
+    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+    date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
+    date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
+    part_time = values['part_time'] if 'part_time' in values else ''
+
+    with transaction.atomic():
+        erguul = EmployeeErguul()
+        erguul.address_id = address_id
+        erguul.level_3 = values['level_3'] if 'level_3' in values else ''
+        erguul.street = values['street'] if 'street' in values else ''
+        erguul.apartment = values['apartment'] if 'apartment' in values else ''
+        erguul.point = point
+        erguul.part_time = part_time
+        erguul.date_start = date_start
+        erguul.date_end = date_end
+        erguul.save()
+
+        if int(part_time) == EmployeeErguul.DAY_TIME:
+            hour = EmployeeErguul.DAY_HOUR
+        if int(part_time) == EmployeeErguul.NIGHT_TIME:
+            hour = EmployeeErguul.NIGHT_HOUR
+
+        photo = photo.split(',')
+        photo = photo[len(photo) - 1]
+        file_name = str(erguul.id) + '.png'
+        folder_name = 'covid_map'
+        path = os.path.join(settings.MEDIA_ROOT, folder_name, file_name)
+        if photo:
+            [image_x2] = utils.resize_b64_to_sizes(photo, [(720, 720)])
+            img_byte = bytearray(image_x2)
+            image = Image.open(io.BytesIO(img_byte))
+            image.save(path)
+
+        subject = 'Эргүүлд гарах мэдээлэл'
+        msg = 'Та энэ заасан газарт ' + utils.datetime_to_string(date_start) + " - " + utils.datetime_to_string(date_end) + " хүртэлх хугацаанд " + hour + " цагийн хооронд эргүүл хийнэ"
+        host_name = utils.get_config('EMAIL_HOST_NAME')
+        linked_path = 'https://' + host_name + "/media/" + folder_name + "/" + file_name
+        to_email = [employee.user.email]
+        attach = '''
+            <body>
+                <dd>
+                    {msg}
+                </dd>
+                <img src={linked_path} />
+                <p>
+                    <b>Ногоон цэг</b> нь таны эргүүл хийх газар
+                    <b>Улаан цэг</b> нь таны гэрийн байршил
+                </p>
+            </body>
+        '''.format(msg=msg, linked_path=linked_path)
+
+        utils.send_email(subject, msg, to_email, attach)
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгалсан',
     }
 
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_erguuls(request):
+
+    points = list()
+    erguuls = EmployeeErguul.objects.all()
+    for erguul in erguuls:
+        tailbar = ErguulTailbar.objects
+        tailbar = tailbar.filter(erguul=erguul)
+        tailbar = tailbar.first()
+        if not tailbar:
+            data = dict()
+            employee = erguul.address.employee
+            point = erguul.point
+            data['id'] = employee.id
+            data['first_name'] = employee.user.first_name # etseg
+            data['last_name'] = employee.user.last_name # onooj ogson ner
+            feature = utils.get_feature_from_geojson(point.json, properties=data)
+            points.append(feature)
+
+    feature_collection = FeatureCollection(points)
+
+    rsp = {
+        'feature_collection': feature_collection,
+    }
     return JsonResponse(rsp)

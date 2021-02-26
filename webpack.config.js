@@ -27,6 +27,9 @@ module.exports = {
         'frontend/payment':
             hp('frontend/payment/src/index.js'),
 
+        'frontend/covid':
+            hp('frontend/covid/src/index.js'),
+
         'frontend/profile':
             hp('frontend/profile/src/index.js'),
 
@@ -121,6 +124,10 @@ module.exports = {
         hhwp({
             chunks: ['frontend/payment'],
             filename: path.resolve(__dirname, 'frontend/payment/templates/payment/index.dev.html'),
+        }),
+        hhwp({
+            chunks: ['frontend/covid'],
+            filename: path.resolve(__dirname, 'frontend/covid/templates/covid/index.dev.html'),
         }),
         hhwp({
             chunks: ['frontend/profile'],

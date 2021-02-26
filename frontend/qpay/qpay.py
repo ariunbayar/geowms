@@ -10,14 +10,13 @@ class Qpay():
     }
 
 
-    def __init__(self, request, price, purhcase):
+    def __init__(self, request, purhcase):
         self.request = request
         self.purhcase = purhcase
 
         self.access_token = None
         self.token_type = None
         self.token_data = None
-        self.price = price
         self.token_url = 'https://api.qpay.mn/v1/payment/token'
         self.create_url = 'https://api.qpay.mn/v1/bill/create'
         self.check_url = 'https://api.qpay.mn/v1/bill/check'
@@ -69,7 +68,7 @@ class Qpay():
             "bill_no": self.purhcase.geo_unique_number,
             "date":"2019-11-22 14:30",
             "description":self.purhcase.description,
-            "amount": self.price,
+            "amount": self.purhcase.total_amount,
             "btuk_code":"",
             "vat_flag": "0"
         }

@@ -1,121 +1,92 @@
 import React, { Component } from "react"
-import "./style.css"
-import {service} from './service'
-import User from './User'
-import { Pagination } from "@utils/Pagination"
+import { PortalDataTable } from "@utils/DataTable"
+import BackButton from "@utils/Button/BackButton"
+
 
 export class Жагсаалт extends Component {
-
 
     constructor(props) {
 
         super(props)
         this.state = {
-            user_list: [],
-            user_length:null,
-            currentPage:1,
-            usersPerPage:20,
-            searchQuery: '',
-            query_min: false,
-            search_load: false,
+            жагсаалтын_холбоос: '/back/api/user/paginatedList/',
+            талбарууд: [
+                {'field': 'first_name', "title": 'Нэр', 'has_action': true},
+                {'field': 'email', "title": 'Цахим шуудан',},
+                {'field': 'roles', "title": 'roles'},
+                {'field': 'is_active', "title": 'Идэвхтэй эсэх', 'has_action': true},
+                {'field': 'is_sso', "title": 'ДАН системээр баталгаажсан эсэх', 'has_action': true}
+            ],
+            хувьсах_талбарууд: [
+                {
+                    "field": "first_name",
+                    "text": "",
+                    "action": (values) => this.go_link(values),
+                    "action_type": false,
+                },
+                {
+                    "field": "is_active",
+                    "text": "",
+                    "action": this.set_active_color,
+                    "action_type": true,
+                },
+                {
+                    "field": "is_sso",
+                    "text": "",
+                    "component": this.dan_img,
+                    "action_type": false,
+                },
+
+            ],
+            refresh: true,
         }
-        this.paginate = this.paginate.bind(this)
-        this.handleSearch=this.handleSearch.bind(this)
-        this.handleSort = this.handleSort.bind(this)
+
+        this.go_link = this.go_link.bind(this)
+
     }
 
-    handleSort(sort_name, sort_type) {
-        if(sort_type){
-            this.setState({[sort_name]: false, sort_name})
-            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
+    dan_img({values}){
+
+        if(values.is_sso){
+            return(
+                <img className="dan-logo-icon" src="/static/assets/image/logo/dan-logo2.png"/>
+            )
         }else{
-            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
-            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+            return(
+                <p></p>
+            )
         }
     }
 
-    paginate (page, query, sort_name) {
-        const perpage = this.state.usersPerPage
-        this.setState({ currentPage: page })
-            return service
-                .paginatedList(page, perpage, query, sort_name)
-                .then(page => {
-                    this.setState({user_list: page.items , user_length:page.items.length})
-                    return page
-                })
+    set_active_color(boolean){
+        let color = "text-danger fa fa-times"
+        if(boolean) color = "text-success fa fa-check"
+        return color
     }
 
-    handleSearch(field, e) {
-        if(e.target.value.length >= 1)
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
-        }
+    go_link(values){
+        this.props.history.push(`/back/user/${values.id}/дэлгэрэнгүй/`)
     }
 
     render() {
-        const { user_list, user_length, usersPerPage } = this.state
+        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh} = this.state
         return (
             <div className="row">
-                <div className="col-md-12">
+                <div className="col-lg-12">
                     <div className="card">
                         <div className="card-body">
-                            <div className="float-right search-bar mr-3">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="searchQuery"
-                                    placeholder="Хайх"
-                                    onChange={(e) => this.handleSearch('searchQuery', e)}
-                                    value={this.state.searchQuery}
-                                />
-                                <a><i className="icon-magnifier"></i></a>
-                            </div>
-                            <div className="my-4">
-                                <div className="p-3">
-                                    <div className="table-responsive table_wrapper">
-                                        <table className="table table_wrapper_table">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">№</th>
-                                                    <th><a onClick={() => this.handleSort('first_name', this.state.first_name)}>Нэр <i className={this.state.first_name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                                    <th><a onClick={() => this.handleSort('email', this.state.email)}>Цахим шуудан <i className={this.state.email ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                                    <th scope="col">Хэрэглэгчийн эрх</th>
-                                                    <th scope="col">Идэвхтэй эсэх</th>
-                                                    <th scope="col">ДАН системээр баталгаажсан эсэх</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {user_length === 0 ?
-                                                    <tr><td>Хэрэглэгч бүртгэлгүй байна </td></tr>:
-                                                    user_list.map((values,index) =>
-                                                        <User
-                                                            key={values.id}
-                                                            values={values}
-                                                            idx={(this.state.currentPage*usersPerPage)-usersPerPage+index+1}
-                                                        />
-                                                    )
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="pl-4">
-                                <Pagination
-                                    sort_name = {this.state.sort_name}
-                                    paginate = { this.paginate }
-                                    searchQuery = { this.state.searchQuery }
-                                />
-                            </div>
+                            <PortalDataTable
+                                талбарууд={талбарууд}
+                                жагсаалтын_холбоос={жагсаалтын_холбоос}
+                                уншиж_байх_үед_зурвас={"Уншиж байна"}
+                                хувьсах_талбарууд={хувьсах_талбарууд}
+                                нэмэлт_талбарууд={нэмэлт_талбарууд}
+                                refresh={refresh}
+                            />
                         </div>
                     </div>
                 </div>
+                <BackButton {...this.props} name={'Буцах'}></BackButton>
             </div>
         )
     }

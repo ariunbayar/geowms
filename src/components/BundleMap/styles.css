@@ -1,0 +1,387 @@
+element.style {
+    position: relative;
+}
+
+
+.⚙ {
+    position: absolute;
+    top: 1%;
+    right: 70px;
+    bottom: 150px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    overflow-y: auto;
+    background-color: white;
+    -webkit-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    -moz-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    opacity: 1;
+}
+
+.⚙.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .1s linear, visibility 0s linear .1s;
+}
+
+.⚙-search {
+    position: absolute;
+    top: 1%;
+    left: 70px;
+    bottom: 150px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    overflow-y: auto;
+    background-color: white;
+    -webkit-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    -moz-box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    box-shadow: 0px 0px 21px 7px rgba(0,0,0,0.65);
+    opacity: 1;
+}
+.⚙-search.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .1s linear, visibility 0s linear .1s;
+}
+
+
+.⚙-toggle-search{
+    position: absolute;
+    top: 7px;
+    left: 12px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
+}
+.⚙-toggle-search:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle-search:focus{
+    background-color: rgba(0,60,136,0.7);
+
+}
+
+.⚙-toggle-search a{
+    position: absolute;
+    top: -6px;
+    left: 7px;
+    width: 50px;
+    height: 50px;
+
+}
+
+.fa-lg{
+    font-size: 40px;
+    color: white;
+    line-height: unset;
+}
+
+.⚙-toggle{
+    position: absolute;
+    top: 7px;
+    right: 12px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
+}
+.⚙-toggle:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+.⚙-toggle:focus{
+    background-color: rgba(0,60,136,0.7);
+
+}
+
+
+.⚙-toggle a{
+    position: absolute;
+    top: -6px;
+    right: -7px;
+    width: 50px;
+    height: 50px;
+
+}
+.fa-lg{
+    font-size: 40px;
+    color: white;
+    line-height: unset;
+}
+
+.ol-full-screen {
+    right: .5rem;
+    top: 58px;
+    width: 57px;
+    height: 57px;
+
+}
+.ol-full-screen .ol-full-screen-false{
+    width: 50px;
+    height: 50px;
+    font-size: 40px;
+
+}
+.ol-full-screen .ol-full-screen-true{
+    width: 50px;
+    height: 50px;
+    font-size: 40px;
+
+}
+.ol-zoom {
+    width: 57px;
+    height: 107px;
+    left: unset;
+    right: .5rem;
+    top: 110px;
+}
+.ol-zoom  .ol-zoom-out{
+    width: 50px;
+    height: 50px;
+    font-size: 55px;
+
+}
+.ol-zoom .ol-zoom-in{
+    width: 50px;
+    height: 50px;
+    font-size: 55px;
+}
+
+.ol-mouse-position {
+    right: 4rem;
+    background: rgba(0,60,136,0.3);
+    border-radius: 4px;
+    padding: 2px .2rem;
+    font-size: smaller;
+    color: #eee;
+    text-align: center;
+    width: 8.8rem;
+    min-height: 1rem;
+}
+
+.coordinate-copy-control {
+    width: 10rem;
+    left: 2%;
+    top: 0.5rem;
+    opacity: 1;
+}
+.coordinate-copy-control.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s linear, visibility 0s linear .25s;
+}
+
+.ol-scale-line{
+    position: absolute;
+    bottom: 9px;
+}
+
+
+.draw-button {
+    position: absolute;
+    top: 300px;
+    right: 12px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px 5px;
+}
+.draw-button:active{
+    background-color: rgba(0,60,136,0.9);
+
+}
+
+.draw-button .fa-object-ungroup{
+    font-size: 30px;
+    color: white;
+    line-height: unset;
+}
+
+
+.root{
+    padding-top: 50px;
+    padding-right: 30px;
+    padding-bottom: 50px;
+    padding-left: 80px;
+}
+
+
+.cart-size{
+    font-size: 40px;
+    margin-left: 5px;
+    color: white;
+    line-height: unset;
+}
+
+.cart-count{
+    color: rgb(255, 255, 255);
+    margin-top: -40px;
+    margin-left: 15px;
+}
+
+.cart-button{
+    position: absolute;
+    top: 70px;
+    left: 12px;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0,60,136,0.5);
+    border-radius: 4px;
+    padding: 2px;
+}
+.cart-button .card-icon{
+    position: absolute;
+    padding: 9px 3px;
+    font-size: 28px;
+    color: white;
+}
+
+.cart-button .card-count{
+    padding: 0px 27px;
+    font-size: 22px;
+    color: white;
+    position: absolute;
+}
+.cart-list {
+    padding: 2px 3px;
+    position: absolute;
+    left: 10px;
+    top: 130px;
+}
+
+.card-baraa {
+    height: auto;
+    width: auto;
+    background-color: rgba(0,60,136,0.5);
+    margin-top: 7px;
+    padding: 9px 7px;
+}
+.cart{
+    z-index: 1;
+}
+
+.alert-custom-css{
+    width: auto;
+    position: absolute;
+    bottom: 5%;
+}
+
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    min-width: 200px;
+    max-width: 600px;
+    z-index: 1030;
+    min-height: 170px;
+}
+
+.ol-popup:after, .ol-popup:before {
+    top: 135px;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    transform: rotate(90deg);
+    margin-left: -10px;
+    left: -10px;
+}
+
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 10px;
+    transform: rotate(90deg);
+    margin-left: -11px;
+    left: -10px;
+}
+
+.ol-popup-contet {
+    margin-top: 5px;
+    margin-left: 15px;
+    margin-bottom: 5px;
+    margin-right: 15px;
+}
+
+.ol-popup-header-content {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.ol-popup-header{
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    margin: 0;
+    top: 0;
+    padding: 0;
+    background-color:rgba(0,0,0,0.2);
+}
+
+.ol-popup-closer {
+    float: right;
+    text-decoration: none;
+}
+
+.ol-popup-closer:hover {
+    color: red
+}
+
+.ol-popup-table .table td, .ol-popup-table .table td{
+    padding:0px !important;
+}
+
+.borderless td, .borderless th {
+    border: none;
+}
+
+.no-padding td, .no-padding th {
+    padding-left: 10px !important;
+    padding-right: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 5px !important;
+}
+
+.no-padding td {
+    padding-left: 20px !important;
+}
+
+.borderless th {
+    text-transform: lowercase;
+}
+
+.суурь-давхаргууд{
+    right: 8px;
+    position: absolute;
+    bottom: 9px;
+
+}
+.суурь-давхаргууд > .суурь-давхарга{
+    display: block;
+    width: 8rem;
+    height: 4.5rem;
+    overflow: hidden;
+    margin: 1px;
+    border-radius: 2px;
+    float: right;
+    transition: opacity .15s ease-out;
+}
+.суурь-давхаргууд > .суурь-давхарга.active,
+.суурь-давхаргууд:hover > .суурь-давхарга.active:hover,
+.суурь-давхаргууд > .суурь-давхарга:hover {
+    opacity: 1;
+}
+.суурь-давхаргууд > .суурь-давхарга,
+.суурь-давхаргууд:hover > .суурь-давхарга.active {
+    opacity: .7;
+}

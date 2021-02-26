@@ -288,10 +288,9 @@ def send_approve_email(user, subject=None, text=None):
     return True
 
 
-def send_email(subject, msg, to_email):
-
+def send_email(subject, msg, to_email, attach=None):
     from_email = get_config('EMAIL_HOST_USER')
-    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email), html_message=attach)
 
 
 def get_administrative_levels():
@@ -863,22 +862,24 @@ def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
     return nearest_points
 
 
-def get_feature_from_geojson(geo_json, get_feature=True, srid=4326):
-    if isinstance(geo_json, str):
-        geo_json = json.loads(geo_json)
+def get_feature_from_geojson(geo_json, get_feature=True, properties=[], srid=4326):
+    feature = []
+    if geo_json:
+        if isinstance(geo_json, str):
+            geo_json = json.loads(geo_json)
 
-    geom_type = geo_json['type']
-    coordinates = geo_json['coordinates']
+        geom_type = geo_json['type']
+        coordinates = geo_json['coordinates']
 
-    module = importlib.import_module('geojson')
-    class_ = getattr(module, geom_type)
+        module = importlib.import_module('geojson')
+        class_ = getattr(module, geom_type)
 
-    geometry = class_(coordinates, srid=srid)
+        geometry = class_(coordinates, srid=srid)
 
-    if get_feature:
-        feature = Feature(geometry=geometry)
-    else:
-        feature = geometry
+        if get_feature:
+            feature = Feature(geometry=geometry, properties=properties)
+        else:
+            feature = geometry
 
     return feature
 
@@ -907,19 +908,45 @@ def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
     return geom
 
 
-def get_inside_geoms_from_view(geo_json, view_name):
-
+def check_view_name(view_name):
+    view_name = remove_text_from_str(view_name, 'gp_layer_')
+    has_view_name = False
     with connections['default'].cursor() as cursor:
         sql = """
-            SELECT ST_AsGeoJSON(geo_data)
-            FROM {view_name}
-            WHERE (
-                    st_within(geo_data, ST_GeomFromGeoJSON(%s))
-            )
-        """.format(view_name=view_name)
-        cursor.execute(sql, [str(geo_json)])
+            SELECT matviewname as view_name
+            FROM pg_matviews
+            ORDER BY view_name
+        """
+        cursor.execute(sql)
+        for item in cursor.fetchall():
+            if item[0] == view_name:
+                has_view_name = True
+        return has_view_name
 
-        return [item[0] for item in cursor.fetchall()]
+
+def get_inside_geoms_from_view(geo_json, view_name, properties=list()):
+    datas = list()
+
+    if properties:
+        properties = ",".join([prop_code for prop_code in properties])
+        properties = properties + ","
+    else:
+        properties = ''
+
+    has_view_name = check_view_name(view_name)
+    if has_view_name:
+        with connections['default'].cursor() as cursor:
+            sql = """
+                SELECT {properties} ST_AsGeoJSON(geo_data)
+                FROM {view_name}
+                WHERE (
+                        ST_Within(geo_data, ST_GeomFromGeoJSON(%s))
+                )
+            """.format(view_name=view_name, properties=properties)
+            cursor.execute(sql, [str(geo_json)])
+            datas = [item[0] for item in cursor.fetchall()]
+
+    return datas
 
 
 def remove_text_from_str(main_text, remove_text='gp_layer_'):
@@ -975,6 +1002,20 @@ def save_file_to_storage(file, folder_name, file_full_name):
     file = fs.save(file_full_name, file)
     fs.url(file)
     return path
+
+
+def create_index(model_name, field):
+    with connections['default'].cursor() as cursor:
+        sql = """
+            CREATE INDEX {model_name}_index_{field}
+            ON public.{model_name} USING btree
+                ({field} ASC NULLS LAST)
+            TABLESPACE pg_default;
+        """.format(field=field, model_name=model_name)
+        cursor.execute(sql)
+        return True
+    return False
+
 
 # ------------------------------------------------------------------------------------------------
 # feature code oor feature iin qs awah

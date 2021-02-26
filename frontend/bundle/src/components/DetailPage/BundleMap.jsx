@@ -6,7 +6,7 @@ import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
-import { Vector as VectorLayer, Tile } from 'ol/layer'
+import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
 import { Point, Circle, Polygon } from 'ol/geom'
@@ -14,7 +14,9 @@ import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
 import {fromExtent} from 'ol/geom/Polygon';
-
+import WMTS from 'ol/source/WMTS';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import ImageWMS from 'ol/source/ImageWMS';
 import { СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
 import { Modal } from './controls/Modal'
@@ -107,7 +109,7 @@ export default class BundleMap extends Component {
         this.getFeatureInfoFromInspire = this.getFeatureInfoFromInspire.bind(this)
         this.writeFeat = this.writeFeat.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
-        this.hideMarker = this.hideMarker.bind(this)
+        this.setVisibleMarket = this.setVisibleMarket.bind(this)
     }
 
     initMarker() {
@@ -160,14 +162,6 @@ export default class BundleMap extends Component {
 
     componentDidUpdate(prevProps, prevState) {
 
-        if (prevState.filtered_wms !== this.state.filtered_wms) {
-            this.setState({ filtered_wms: this.state.filtered_wms })
-        }
-
-        if (prevState.filtered_layer_name !== this.state.filtered_layer_name) {
-            this.setState({ filtered_layer_name: this.state.filtered_layer_name })
-        }
-
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
@@ -193,24 +187,49 @@ export default class BundleMap extends Component {
 
     handleMapDataLoaded(base_layer_list, wms_list) {
 
-        const map_wms_list = wms_list.map(({name, url, layers}) => {
+        var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
+        var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
 
+        const map_wms_list = wms_list.map(({name, url, chache_url, wms_or_cache_ur, layers}) => {
             return {
                 name,
                 layers: layers.map((layer) => {
                     return {
                         ...layer,
+                        wms_or_cache_ur,
                         tile: new Tile({
-                            source: new TileWMS({
+                            minZoom: layer.zoom_start,
+                            maxZoom: layer.zoom_stop,
+                            source: new WMTS({
+                                url: chache_url,
+                                layer: layer.code,
+                                matrixSet: "EPSG:4326",
+                                format: 'image/png',
+                                projection: this.state.projection_display,
+                                tileGrid: new WMTSTileGrid({
+                                    tileSize: [256,256],
+                                    extent: [-180.0,-90.0,180.0,90.0],
+                                    origin: [-180.0, 90.0],
+                                    resolutions: resolutions,
+                                    matrixIds: gridNames,
+                                }),
+                                style: '',
+                                wrapX: true,
+                            }),
+                        }),
+                        wms_tile: new Image({
+                            source: new ImageWMS({
                                 projection: this.state.projection,
+                                ratio: 1,
                                 url: url,
                                 params: {
                                     'LAYERS': layer.code,
-                                    //'FORMAT': 'image/svg+xml',
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
-                            code: layer.code
                         })
                     }
                 }),
@@ -220,7 +239,8 @@ export default class BundleMap extends Component {
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) => {
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
-                layer['legend'] = layer.tile.getSource().getLegendUrl()
+                layer.defaultCheck == 0 && layer.wms_tile.setVisible(false)
+                layer['legend'] = layer.wms_tile.getSource().getLegendUrl()
             })
         )
 
@@ -233,6 +253,7 @@ export default class BundleMap extends Component {
 
                     if (base_layer_info.tilename == "xyz") {
                         layer = new Tile({
+                            preload: 6,
                             source: new TileImage({
                                 crossOrigin: 'Anonymous',
                                 url: base_layer_info.url,
@@ -242,12 +263,16 @@ export default class BundleMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Tile({
-                            source: new TileWMS({
+                        layer = new Image({
+                            source: new ImageWMS({
+                                ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
                                     'LAYERS': base_layer_info.layers,
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
                             name: base_layer_name,
@@ -297,6 +322,7 @@ export default class BundleMap extends Component {
         this.marker_layer = marker_layer
 
         const map = new Map({
+            maxTilesLoading: 16,
             target: 'map',
             controls: defaultControls().extend([
                 new FullScreen(),
@@ -324,7 +350,7 @@ export default class BundleMap extends Component {
                 ...base_layers,
                 ...map_wms_list.reduce((acc_main, wms) =>
                 {
-                        const tiles = wms.layers.map((layer) => layer.tile)
+                        const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
                         return [...acc_main, ...tiles]
                 }, []),
                 vector_layer,
@@ -348,6 +374,7 @@ export default class BundleMap extends Component {
         const closer = this.element_closer
         overlay.setPosition(undefined);
         closer.blur();
+        this.setVisibleMarket(false)
         // this.state.vector_layer.setSource(null)
     }
 
@@ -381,7 +408,7 @@ export default class BundleMap extends Component {
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
 
-            this.setState({coordinate_clicked})
+            this.setState({ coordinate_clicked })
             this.showFeaturesAt(coordinate)
         }
     }
@@ -420,7 +447,7 @@ export default class BundleMap extends Component {
             if (is_visible) {
                 add_layers.map(layer => {
                     this.is_not_visible_layers.push(layer.code)
-                    layer.tile.setVisible(false)
+                    layer.wms_or_cache_ur ? layer.tile.setVisible(false) : layer.wms_tile.setVisible(false)
                 })
             }
             else {
@@ -430,14 +457,14 @@ export default class BundleMap extends Component {
 
                     })
                     this.is_not_visible_layers = filtered
-                    layer.tile.setVisible(false)
+                    layer.wms_or_cache_ur ? layer.tile.setVisible(false) : layer.wms_tile.setVisible(false)
                 })
             }
             const { aimag_name, search_coordinate, sum_name, search_scale } = this.state
             this.getOnlyFeature(aimag_name, search_coordinate, sum_name, search_scale, this.is_not_visible_layers)
         } else {
             add_layers.map(layer => {
-                layer.tile.setVisible(is_visible)
+                layer.wms_or_cache_ur ? layer.tile.setVisible(is_visible) : layer.wms_tile.setVisible(is_visible)
             })
         }
     }
@@ -463,6 +490,7 @@ export default class BundleMap extends Component {
         })
         this.setState({ filtered_wms: undefined, filtered_layer: undefined })
         this.is_not_visible_layers = []
+        this.onClickCloser()
     }
 
     getKiloFromScale(scale) {
@@ -548,10 +576,11 @@ export default class BundleMap extends Component {
 
     getWMSArray() {
         this.array = []
-        if (this.state.filtered_wms) {
-            this.array = this.state.filtered_wms
-        } else {
+        if (this.state.map_wms_list) {
             this.array = this.state.map_wms_list
+        }
+        else if (this.state.filtered_wms) {
+            this.array = this.state.filtered_wms
         }
         return this.array
     }
@@ -579,10 +608,15 @@ export default class BundleMap extends Component {
             .getPopUpInfo(layer_codes, latlong)
             .then(({ datas }) => {
                 let is_empty = false
+                const is_from_inspire = true
+                if (this.sendFeatureInfo.length > 0) {
+                    this.sendFeatureInfo.map((info, idx) => {
+                        datas.push(info[0])
+                    })
+                }
                 if (datas.length == 0) {
                     is_empty = true
                 }
-                const is_from_inspire = true
                 this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire, false)
             })
     }
@@ -593,7 +627,11 @@ export default class BundleMap extends Component {
         const resolution = view.getResolution()
         const wms_array = this.getWMSArray()
         let not_visible_layers = []
+        let is_not_inspire = true
         this.controls.popup.getData(true)
+
+        this.setVisibleMarket(true)
+
         wms_array.map(({layers}) => {
             if(layers) {
                 layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
@@ -643,6 +681,7 @@ export default class BundleMap extends Component {
                                         })
                                         if(!this.state.is_draw_open){
                                             if(feature_info.length > 0) {
+                                                is_not_inspire = false
                                                 this.is_empty = false
                                                 if(this.sendFeatureInfo.length > 0) {
                                                     this.sendFeatureInfo.map((feat, idx) => {
@@ -659,14 +698,18 @@ export default class BundleMap extends Component {
                                                 }
                                                 if(geodb_table == 'mpoint_view') {
                                                     this.state.vector_layer.setSource(null)
-                                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                }
+                                                if (not_visible_layers.length > 0) {
+                                                    this.getPopUpInfo(coordinate, not_visible_layers)
                                                 }
                                                 else {
                                                     this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
                                                 }
                                             }
                                             else {
-                                                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                if (not_visible_layers.length == 0) {
+                                                    this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                }
                                             }
                                             // if(geodb_table == 'mpoint_view'){
                                             //     if(feature_info.length > 0){
@@ -697,7 +740,9 @@ export default class BundleMap extends Component {
                 })
             }
         })
-        this.getPopUpInfo(coordinate, not_visible_layers)
+        if (is_not_inspire) {
+            this.getPopUpInfo(coordinate, not_visible_layers)
+        }
     }
 
     showFeaturesAt(coordinate) {
@@ -755,13 +800,13 @@ export default class BundleMap extends Component {
         }
     }
 
-    hideMarker() {
-        this.marker_layer.setVisible(false)
+    setVisibleMarket(is_true) {
+        this.marker_layer.setVisible(is_true)
     }
 
     getFeatureInfoFromInspire(feature, point_coordinate, scale) {
         this.onClickCloser()
-        this.hideMarker()
+        this.setVisibleMarket(false)
 
         let parsed_geojson
         let km_scale = null
@@ -811,6 +856,9 @@ export default class BundleMap extends Component {
                             color: 'blue',
                             width: 2,
                         }),
+                        fill: new Fill({
+                            color: 'rgba(0,191,255,0.3)',
+                        }),
                     })
                     const source =  new VectorSource({
                         features: features_col,
@@ -826,10 +874,6 @@ export default class BundleMap extends Component {
                     this.map.addLayer(layer)
                     layer.setVisible(true)
                     this.setState({ filtered_layer: layer })
-                }
-                else {
-                    alert("Ямар нэгэн давхарга нээгээгүй байна")
-                    this.toggleSidebar(false)
                 }
             })
     }
@@ -861,6 +905,7 @@ export default class BundleMap extends Component {
     }
 
     toggleSidebar(is_not_open) {
+
         let is_setState = true
         if (is_not_open == this.state.is_sidebar_open) {
             is_setState = false
@@ -870,21 +915,28 @@ export default class BundleMap extends Component {
                 is_sidebar_open: !prevState.is_sidebar_open,
             }))
         }
+
+        var islaod
         if(this.state.is_sidebar_open){
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, true, this.addLayerToSearch)
-        }else{
-            this.controls.sidebar.showSideBar(this.state.map_wms_list, false, this.addLayerToSearch)
+            islaod = true
         }
+
+        else {
+            islaod = false
+        }
+        this.controls.sidebar.showSideBar(this.state.map_wms_list, islaod, this.addLayerToSearch)
+
     }
 
     searchSidebar(event) {
         this.setState(prevState => ({
             is_search_sidebar_open: !prevState.is_search_sidebar_open,
         }))
+
         if(this.state.is_search_sidebar_open){
             this.controls.searchbar.showSideBar(null, true)
-            this.resetFilteredOnlyFeature()
-        }else{
+        }
+        else {
             this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature, this.setFeatureOnMap)
         }
     }
@@ -900,6 +952,9 @@ export default class BundleMap extends Component {
     toggleDrawed(event){
         this.feature_info_list = []
         this.controls.drawModal.showModal(true)
+        let layer_codes = []
+        let layer_ids = []
+
         const view = this.map.getView()
         const projection = view.getProjection()
         const coordinat = event.feature.getGeometry().getCoordinates()
@@ -922,9 +977,19 @@ export default class BundleMap extends Component {
                 const wms = {
                     name,
                     layers: layers.reduce((acc, { id, code, name, tile }) => {
-                        if(tile) if (tile.getVisible())
-                            acc.push({ id, name, code })
-                        return acc
+                        if(tile) {
+                            if (!tile.getVisible() && this.is_not_visible_layers.length > 0) {
+                                this.is_not_visible_layers.map((layer_code, idx) => {
+                                    if (layer_code == code) {
+                                        acc.push({ id, name, code })
+                                    }
+                                })
+                            }
+                            else {
+                                acc.push({ id, name, code })
+                            }
+                            return acc
+                        }
                     }, []),
                 }
                 if (wms.layers.length)
@@ -932,75 +997,44 @@ export default class BundleMap extends Component {
                 return acc
             }, []),
         }
-        const x1 = event.feature.getGeometry().getExtent()[0]
-        const y1 = event.feature.getGeometry().getExtent()[1]
-        const x2 = event.feature.getGeometry().getExtent()[2]
-        const y2 = event.feature.getGeometry().getExtent()[3]
-        const extent = toLonLat([x1, y1])
-        const extent2 = toLonLat([x2, y2])
-        const full_extent = extent.toString() + ',' + extent2.toString()
-        var list = []
+
         wms_array.map(({ name, layers }, w_idx) => {
             layers.map(({ id, code, tile }, l_idx) => {
                 if (tile.getVisible()) {
                     const {layer_code, is_feature} = this.check_inspire_layer(code)
                     if (is_feature) {
-                        const coordinates = event.feature.getGeometry().getCoordinates()
-                        const trans_coordinates = this.transformToLatLong(coordinates)
-                        service
-                            .getFeatureInfo(layer_code, trans_coordinates)
-                            .then(({ datas }) => {
-                                datas['layer_id'] = id
-                                list.push(datas)
-                            })
+                        layer_codes.push(layer_code)
+                        layer_ids.push([code, id])
                     }
-                    if (!is_feature) {
-                        const main_url = tile.getSource().urls[0]
-                        if(main_url) {
-                            const url =
-                                main_url.slice(0, -1) +
-                                '?service=WFS' +
-                                '&version=1.1.0' +
-                                '&request=GetFeature' +
-                                '&typeName=' + code +
-                                '&bbox=' + full_extent + ',' + this.state.projection_display
-                            fetch(url)
-                                .then((rsp) => rsp.text())
-                                .then((text) => {
-                                    const parser = new WMSGetFeatureInfo()
-                                    const features = parser.readFeatures(text)
-                                    const feature_info = features.map((feature) => {
-                                        const geometry_name = feature.getGeometryName()
-                                        const values =
-                                            feature.getKeys()
-                                                .filter((key) => key != geometry_name)
-                                                .map((key) => [key, feature.get(key)])
-                                        const list_id = feature.getId().split('.')
-                                        const id = list_id[list_id.length - 1]
-                                        return [id, values]
-                                    })
-                                    if(feature_info.length > 0) {
-                                        let feature_id = ''
-                                        var geom_ids = new Array()
-                                        const info = feature_info.map((feature, idx) => {
-                                            feature[1].map((info, idx) => {
-                                                if(info[0] == 'feature_id') {
-                                                    feature_id = info[1]
-                                                }
-                                            })
-                                            return feature[0]
-                                        })
-                                        list.push({'geom_ids': info, 'layer_code': code, 'layer_id': id, 'feature_id': feature_id })
-                                    }
-                                })
-                        }
-                    }
-                    if(w_idx === map_wms_list.length - 1 && layers.length - 1 === l_idx) {
-                        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, list)
-                    }
+                }
+                else if (!tile.getVisible() && this.is_not_visible_layers.length > 0) {
+                        this.is_not_visible_layers.map((layer_code, idx) => {
+                            if (layer_code == code) {
+                                layer_ids.push([code, id])
+                            }
+                        })
                 }
             })
         })
+
+        if (layer_codes.length == 0 && this.is_not_visible_layers.length > 0) {
+            layer_codes = this.is_not_visible_layers
+        }
+
+        const coordinates = event.feature.getGeometry().getCoordinates()
+        const trans_coordinates = this.transformToLatLong(coordinates)
+        service
+            .getFeatureInfo(layer_codes, trans_coordinates)
+            .then(({ datas }) => {
+                layer_ids.map(([layer_code, layer_id], idx) => {
+                    datas.map((data, idx) => {
+                        if (data.layer_code == layer_code) {
+                            datas[idx]['layer_id'] = layer_id
+                        }
+                    })
+                })
+                this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, datas)
+            })
     }
 
     formatArea(polygon) {

@@ -5,7 +5,7 @@ from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
 from django.core.paginator import Paginator
@@ -19,6 +19,7 @@ from geoportal_app.models import User
 from govorg.backend.forms.models import TsegUstsan, Mpoint_view
 from main.utils import resize_b64_to_sizes
 from django.core.files.uploadedfile import SimpleUploadedFile
+from main import utils
 
 
 @require_GET
@@ -287,10 +288,10 @@ def _get_detail_items(payment):
 @require_GET
 @ajax_required
 @login_required
-def getDetail(requist, pk):
+def get_detail(request, pk):
 
-    payment = Payment.objects.filter(pk=pk).first()
-    if payment:
+    payment = get_object_or_404(Payment, pk=pk)
+    if payment.user == request.user:
         if payment.export_kind == Payment.EXPORT_KIND_POINT:
             points = _get_tseg_detail(payment)
             items = _get_detail_items(payment)
@@ -299,6 +300,7 @@ def getDetail(requist, pk):
                 'items': items,
                 'points': points
             }
+
         if payment.export_kind == Payment.EXPORT_KIND_POLYGON:
             polygon = _get_polygon_detail(payment)
             layers = _get_layer_detail(payment)
@@ -310,7 +312,10 @@ def getDetail(requist, pk):
                 'items': items,
             }
     else:
-        rsp = {'success': False}
+        rsp = {
+            'success': False,
+            'info': 'Уучлаарай энэ мэдээлэл олдсонгүй.'
+        }
 
     return JsonResponse(rsp)
 
@@ -364,3 +369,54 @@ def user_update_password(request, payload):
         return JsonResponse({'success': True, 'msg': 'Нууц үг амжилттай хадгалаа.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': 'Нууц үг солиход алдаа гарлаа.'})
+
+
+@require_GET
+@ajax_required
+@login_required
+def check_email(request):
+
+    user = request.user
+
+    if user.email:
+        rsp = {
+            'success': True,
+            'info': 'Email хаяг байна.'
+        }
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Уучлаарай email хаяг хоосон байна.'
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required
+def set_email(request, payload):
+
+    errors = dict()
+    email = payload.get('email')
+
+    if not utils.is_email(email):
+        errors['email'] = 'Email хаяг алдаатай байна.'
+    if User.objects.filter(email=email).first():
+        errors['email'] = 'Email хаяг бүртгэлтэй байна.'
+    if errors:
+        rsp = {
+            'success': False,
+            'errors': errors
+        }
+        return JsonResponse(rsp)
+
+    user = request.user
+    user.email = email
+    user.save()
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай'
+    }
+
+    return JsonResponse(rsp)
