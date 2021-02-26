@@ -366,6 +366,7 @@ export default class AddressMap extends Component {
     downloadImage(val, id, coordinate_clicked) {
         const map = this.map
         let photo
+        this.props.setLoading(true)
         map.once('rendercomplete', () => {
             var mapCanvas = document.createElement('canvas');
             var size = map.getSize();
@@ -437,7 +438,7 @@ export default class AddressMap extends Component {
 
     readFeature(feature) {
         const id = 'aimag_sum'
-        this.removeFeatureFromSource(id)
+        this.removeFeatureFromSource(id, 'only_aimag')
         const source = this.vector_layer.getSource()
         const feat =  new GeoJSON().readFeatures(feature, {
             dataProjection: this.state.projection_data,
