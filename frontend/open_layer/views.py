@@ -85,7 +85,7 @@ def index(request):
         display = {
             'id': bundle.id,
             'name': bundle.ltheme.theme_name,
-            'icon': bundle.icon.url,
+            'icon': bundle.icon.url if bundle.icon else '',
             'wms_list': wms_list
         }
         bundle_displays.append(display)
