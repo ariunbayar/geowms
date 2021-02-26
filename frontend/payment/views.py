@@ -1282,6 +1282,11 @@ def _get_properties_qs(view_qs):
     return viewproperty_ids, property_qs
 
 
+def _radius_formula(radius):
+    radius = radius / 5 # солих шаардлагатай
+    return radius
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1289,7 +1294,8 @@ def get_popup_info(request, payload):
     layers_code = payload.get('layers_code')
     coordinate = payload.get('coordinate')
     radius = int(payload.get('scale_value'))
-    radius = radius / 5
+    radius = _radius_formula(radius)
+
     value_type = None
     property_name = None
     property_code = None
