@@ -1288,8 +1288,8 @@ def _get_properties_qs(view_qs):
 def get_popup_info(request, payload):
     layers_code = payload.get('layers_code')
     coordinate = payload.get('coordinate')
-    radius = 1000
-
+    radius = int(payload.get('scale_value'))
+    radius = radius / 5
     value_type = None
     property_name = None
     property_code = None
