@@ -1841,7 +1841,6 @@ def tsegPersonalSuccess(request, payload):
             point_class_name = 'Устсан төлөв'
             t_type = 'g110'
 
-        print(Mpoint)
         Mpoint.objects.using('postgis_db').create(
             objectid=data.objectid,
             point_id=data.point_id, point_name=data.point_name,
