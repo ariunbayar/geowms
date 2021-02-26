@@ -100,7 +100,8 @@ export class OpenLayerPage extends Component {
                         <h1 className="text-center">{bundle && bundle.name}</h1>
                     </div>
                 </div>
-                {bundle &&
+                {layer_obj &&
+                layer_obj.code &&
                 <div className="row">
                     <CardLink name='WMS' url={wms_url} color='bg-dark'/>
                     <CardLink name='WMTS' url={wmts_url} color='bg-dark'/>
@@ -137,7 +138,8 @@ export class OpenLayerPage extends Component {
                                                     )}
                                                 </div>
                                             </ul>
-                                        )}
+                                        )
+                                        }
                                     </div>
                                 </div>
                             </div>

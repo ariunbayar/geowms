@@ -203,13 +203,14 @@
             var owl = $("#owl-demo");
 
             owl.owlCarousel({
-                items : 10, //10 items above 1000px browser width
+                items : 9, //10 items above 1000px browser width
                 dots: false,
                 navigation : true,
                 autoplay: true,
                 autoplayTimeout: 2000,
                 autoplayHoverPause:true,
-                loop:true,
+                loop:false,
+                rewind: true,
                 responsive: {
                     0: {
                         items: 3
@@ -233,7 +234,7 @@
                         items: 9
                     },
                     1000: {
-                        items: 10
+                        items: 9
                     }
                 }
             });
