@@ -162,10 +162,10 @@ function checkButtonEnableWithId(geo_id) {
     return fetch('/payment/check-enable-pdf-id/', requestOptions).then(handleResponse)
 }
 
-function getPopUpInfo(layers_code, coordinate) {
+function getPopUpInfo(layers_code, coordinate, scale_value) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({layers_code, coordinate})
+        body: JSON.stringify({layers_code, coordinate, scale_value})
     }
     return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
 }

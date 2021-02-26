@@ -3,6 +3,7 @@ import React, { Component } from "react"
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
 import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
+import Units, {METERS_PER_UNIT} from 'ol/proj/Units'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
@@ -321,6 +322,9 @@ export default class BundleMap extends Component {
         })
         this.marker_layer = marker_layer
 
+        const scale_line = new ScaleLine()
+        this.scale_line = scale_line
+
         const map = new Map({
             maxTilesLoading: 16,
             target: 'map',
@@ -335,7 +339,7 @@ export default class BundleMap extends Component {
                 new SidebarButton({toggleSidebar: this.toggleSidebar}),
                 new SearchBarButton({searchSidebar: this.searchSidebar}),
                 new DrawButton({toggleDraw: this.toggleDraw}),
-                new ScaleLine(),
+                scale_line,
                 this.controls.modal,
                 this.controls.shopmodal,
                 this.controls.drawModal,
@@ -601,11 +605,23 @@ export default class BundleMap extends Component {
     return {layer_code, is_feature}
     }
 
+    getMetrScale(scale) {
+        return scale * 1000
+    }
+
     getPopUpInfo(coordinate, layers_code) {
         const latlong = toLonLat(coordinate)
         let layer_codes = layers_code.length > 0 ? layers_code : this.is_not_visible_layers.length > 0 ? this.is_not_visible_layers : []
+
+        const scale = this.scale_line.renderedHTML_.split(' ')
+        let scale_value = scale[0]
+        const scale_unit = scale[1]
+        if (scale_unit == 'km') {
+            scale_value = this.getMetrScale(scale_value)
+        }
+
         service
-            .getPopUpInfo(layer_codes, latlong)
+            .getPopUpInfo(layer_codes, latlong, scale_value)
             .then(({ datas }) => {
                 let is_empty = false
                 const is_from_inspire = true
