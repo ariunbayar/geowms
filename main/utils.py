@@ -766,9 +766,14 @@ def datetime_to_string(date):
     return date.strftime('%Y-%m-%d') if date else ''
 
 
-def date_to_timezone(input_date):
+def date_fix_format(input_date):
     if '/' in input_date:
         input_date = input_date.replace('/', '-')
+    return input_date
+
+
+def date_to_timezone(input_date):
+    date_fix_format(input_date)
     naive_time = datetime.strptime(input_date, '%Y-%m-%d')
     output_date = timezone.make_aware(naive_time)
     return output_date

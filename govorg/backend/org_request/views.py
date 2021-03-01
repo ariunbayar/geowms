@@ -686,7 +686,6 @@ def request_approve(request, payload):
                 r_approve.save()
 
             else:
-                transaction.rollback()
                 rsp = {
                     'success': False,
                     'info': 'Танд баталгаажуулах эрх алга байна.'
