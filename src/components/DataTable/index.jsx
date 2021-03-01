@@ -3,6 +3,7 @@ import {service} from "./service"
 import {TableBody} from './TableBody'
 import { Pagination } from "./Pagination"
 import {NavLink} from "react-router-dom"
+import Loader from "@utils/Loader"
 
 export class PortalDataTable extends Component {
 
@@ -168,6 +169,7 @@ export class PortalDataTable extends Component {
                                     }
                                 </tbody>
                             </table>
+                            <Loader is_loading={уншиж_байгаа_эсэх}/>
                         </div>
                         <Pagination
                             refresh={this.state.refresh}
