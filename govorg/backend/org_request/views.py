@@ -526,6 +526,8 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
             if form['value_type'] == 'date':
                 if data:
                     data = date_to_timezone(data)
+            if form['value_type'] == 'double':
+                form['value_type'] = 'number'
             value_type = 'value_' + form['value_type']
 
         value[value_type] = data
