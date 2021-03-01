@@ -3,6 +3,8 @@ import {service} from './service'
 import {NavLink} from "react-router-dom"
 import Modal from "../Modal"
 import ModalAlert from "../ModalAlert"
+import Loader from "@utils/Loader"
+
 
 export class List extends Component {
 
@@ -19,7 +21,8 @@ export class List extends Component {
             searchQuery: '',
             list_length:null,
             currentPage:1,
-            groupPerPage:20
+            groupPerPage:20,
+            is_loading: false
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -38,8 +41,9 @@ export class List extends Component {
     }
 
     handleListUpdated() {
+        this.setState({is_loading: true})
         service.getgrouplist().then(({group_list}) => {
-            this.setState({group_list, list_length: group_list.length})
+            this.setState({group_list, list_length: group_list.length, is_loading: false})
         })
 
     }
@@ -109,7 +113,7 @@ export class List extends Component {
     }
 
     render() {
-        const {group_list, searchQuery, groupPerPage,currentPage, list_length} = this.state
+        const {group_list, searchQuery, groupPerPage,currentPage, list_length, is_loading} = this.state
         const lastIndex=currentPage*groupPerPage
         const firtsIndex=lastIndex-groupPerPage
         const currentGroups= group_list.slice(firtsIndex,lastIndex)
@@ -118,6 +122,7 @@ export class List extends Component {
             <div className="row justify-content-center">
                 <div className="col-md-12">
                     <div className="row">
+                        <Loader is_loading={is_loading}/>
                         <div className="col-md-6">
                             <div className="float-sm-left search-bar">
                                 <input
@@ -147,6 +152,7 @@ export class List extends Component {
                                 <tr>
                                     <th scope="col"> № </th>
                                     <th scope="col"> Нэр </th>
+                                    <th scope="col">TileCaching</th>
                                     <th scope="col">Засах</th>
                                     <th scope="col">Устгах</th>
                                 </tr>
@@ -162,6 +168,11 @@ export class List extends Component {
                                             </td>
                                             <td>
                                                 {value}
+                                            </td>
+                                            <td>
+                                                <NavLink to={`/back/layer-groups/${value}/tile-caching/`} exact>
+                                                    <i className="fa fa-shopping-basket text-primary" aria-hidden="true"></i>
+                                                </NavLink>
                                             </td>
                                             <td>
                                                 <NavLink to={`/back/layer-groups/${value}/засах/`} exact>
