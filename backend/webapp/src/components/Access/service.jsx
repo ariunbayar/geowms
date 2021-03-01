@@ -11,7 +11,6 @@ export const service = {
     crudDateCount,
     crudList,
     pageList,
-    WMSLogList,
     WMSDateCount,
 }
 
@@ -74,14 +73,6 @@ function crudMethodCount() {
 function crudDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
-}
-
-function WMSLogList(page, perpage, query, sort_name){
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query, sort_name }),
-    }
-    return fetch(`${prefix}/log/wms_log_list/`, requestOptions).then(handleResponse)
 }
 
 function WMSDateCount(){
