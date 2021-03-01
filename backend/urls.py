@@ -171,6 +171,11 @@ urlpatterns = [
 
     path('geoserver/rest/', include(([
         path('layers/', geoserver_views.layers),
+        path('group_list/', geoserver_views.layer_groups),
+        path('remove_layer_group/', geoserver_views.remove_layer_group),
+        path('get_group_detial/', geoserver_views.get_group_detial),
+        path('get_layers/', geoserver_views.get_layer_detial),
+        path('create_layer_group/', geoserver_views.create_layer_group),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

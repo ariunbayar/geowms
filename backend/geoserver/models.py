@@ -16,3 +16,15 @@ class WmtsCacheConfig(models.Model):
     number_of_tasks_to_use = models.IntegerField()
     update_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class GroupLayer(models.Model):
+
+    class Meta:
+        db_table = "geoserver_wmts_group_layer"
+        ordering = ('created_at',)
+
+    name = models.CharField(max_length=50)
+    title = models.CharField(max_length=50)
+    Abstract = models.CharField(max_length=500)
+    update_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)

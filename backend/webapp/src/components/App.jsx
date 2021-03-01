@@ -20,7 +20,9 @@ import {Geoserver} from './Geoserver'
 import {InspireViews} from './InspireViews'
 import {OrgRole} from './OrgRole'
 import {Error500} from './Error500'
+import {LayerGroups} from './Layergroups/index'
 import { PasswordChange } from './Prifile/PasswordChange'
+
 
 export default class App extends Component {
 
@@ -71,6 +73,7 @@ export default class App extends Component {
                         <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан/" text="Дэд сан"></MenuItem>
                         <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан-бүтэц/" text="Бүтэц"></MenuItem>
                         <MenuItem icon="fa fa-circle-o" url="/back/inspire-views/" text="View"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/layer-groups/" text="Layer-Groups"></MenuItem>
                     </ul>
                 </MenuItem>
                 <MenuItem icon="zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
@@ -123,6 +126,7 @@ export default class App extends Component {
               <Route path={"/back/тохиргоо/"} component={ConfigPage} />
               <Route path={"/back/error500/"} component={Error500} />
               <Route path={"/back/дэд-сан/"} component={BundlePage} />
+              <Route path={"/back/layer-groups/"} component={LayerGroups} />
               <Route path={"/back/admin/password/change/"} component={PasswordChange} />
             </Switch>
           </div>

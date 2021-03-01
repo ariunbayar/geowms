@@ -577,3 +577,97 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
     url = BASE_URL +  'seed/' + '{ws_name}:{layer_name}.xml'.format(ws_name=ws_name, layer_name=layer_name)
     rsp = requests.post(url, headers=headers, auth=AUTH, data=payload)
     return rsp
+
+
+def get_layer_groups():
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layergroups'
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        return features.get('layerGroups').get('layerGroup')
+
+
+def get_layer_group_detail(group_name):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layergroups' + '/' + group_name
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        return features.get('layerGroup')
+
+
+def delete_layer_group(group_name):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layergroups/{group_name}?recurse=true'.format(group_name=group_name)
+    rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    return rsp
+
+
+def create_layer_group(group_values, group_layers):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'text/xml'
+    }
+    g_layers = []
+    g_styles = []
+    for i in range(len(group_layers)):
+        style =  '''
+           <style>{style_name}</style>
+            '''.format(
+                style_name=group_layers[i]['style_name']
+            )
+        layer =  '''
+            <layer>{layer_name}</layer>
+            '''.format(
+                layer_name=group_layers[i]['layer_name']
+            )
+        g_layers.insert(i, layer)
+        g_styles.insert(i, style)
+
+    payload = '''
+       <layerGroup>
+        <name>{name}</name>
+        <title>{title}</title>
+        <abstractTxt>{abstract}</abstractTxt>
+        <layers>
+            {layers}
+        </layers>
+        <styles>
+           {styles}
+        </styles>
+        </layerGroup>
+    '''.format(
+        name = group_values.get('name'),
+        title = group_values.get('title'),
+        abstract = group_values.get('abstract'),
+        layers = ''.join(g_layers),
+        styles = ''.join(g_styles)
+    )
+    print(payload)
+    url = 'layergroups/'
+    rsp = requests.post(BASE_URL+ url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
+    return rsp
+
+
+def get_layers():
+
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layers'
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        return features.get('layers').get('layer')
+    return rsp
