@@ -14,6 +14,8 @@ export default class WMSLayerItem extends Component {
             wms_or_cache_ur: props.layer.wms_or_cache_ur,
             is_visible: props.layer.defaultCheck,
             legend: props.layer.legend,
+            is_change_color: props.layer.is_change_color,
+            color: props.layer.color,
 
         }
 
@@ -37,22 +39,31 @@ export default class WMSLayerItem extends Component {
 
     render() {
 
-        const { name, code, is_visible, legend } = this.state
+        const { name, code, is_visible, legend, is_change_color, color } = this.state
         return (
             <li>
                 <label>
                     <div className="custom-control custom-switch">
                         <input
-                        type="checkbox" className="custom-control-input" id={code}
-                        onChange={(e) => this.toggle(e.target.checked)}
-                        checked={is_visible}
-                    />
+                            type="checkbox" className="custom-control-input" id={code}
+                            onChange={(e) => this.toggle(e.target.checked)}
+                            checked={is_visible}
+                        />
                     <label className="custom-control-label" htmlFor={code}>{name}</label>
                     </div>
                 </label>
                 <ul>
                     <li>
-                        <img className="img" src={legend}/>
+                        {
+                            legend
+                            ?
+                                <img className="img" src={legend}/>
+                            :
+                                is_change_color
+                                &&
+                                    <input type="color" value={color} disabled/>
+                        }
+
                     </li>
                 </ul>
             </li>

@@ -442,9 +442,6 @@ export class EmployeeAdd extends Component {
                                                 <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => {
                                                     if (is_address_map) {
                                                         if (this.state.last_geo_id) {
-                                                            if (this.state.map_coordinate.length > 0) {
-                                                                this.setState({ map_coordinate: this.state.map_coordinate, is_marker: !this.state.is_marker })
-                                                            }
                                                             this.getGeom(this.state.last_geo_id)
                                                         }
                                                     }
@@ -568,7 +565,7 @@ export class EmployeeAdd extends Component {
                                                             sendPointCoordinate={this.getPoint}
                                                             map_coordinate={this.state.map_coordinate}
                                                             point={point}
-                                                            is_marker={this.state.is_marker}
+                                                            is_marker={this.state.is_address_map}
                                                             class={(errors.point ? 'border border-danger' : '')}
                                                         />
                                                     </div>

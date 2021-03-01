@@ -19,6 +19,7 @@ export default class UsersAddress extends Component {
         this.getFeature = this.getFeature.bind(this)
         this.saveErguulPlace = this.saveErguulPlace.bind(this)
         this.saveErguulTailbar = this.saveErguulTailbar.bind(this)
+        this.setLoading = this.setLoading.bind(this)
     }
 
     componentDidMount() {
@@ -52,34 +53,39 @@ export default class UsersAddress extends Component {
         return coordinate
     }
 
+    setLoading(is_true) {
+        this.setState({ is_loading: is_true })
+    }
+
     saveErguulPlace(values, id, coordinates, photo) {
         const coordinate = this.getPoint(coordinates)
-        this.setState({ is_loading: true })
         service
             .saveErguul(values, id, coordinate, photo)
             .then(({ success, info }) => {
                 if (success) {
                     alert(info)
-                    this.setState({ is_loading: false })
+                    this.setLoading(false)
                 }
             })
             .catch(error => {
                 alert("Алдаа гарсан байна")
-                this.setState({ is_loading: false })
+                this.setLoading(false)
+
             })
     }
 
     saveErguulTailbar(values) {
-        this.setState({ is_loading: true })
+        this.setLoading(true)
         service
             .saveTailbar(values)
             .then(({ success, info }) => {
                 alert(info)
-                this.setState({ is_loading: false })
+                this.setLoading(false)
+
             })
             .catch(error => {
                 alert("Алдаа гарсан байна")
-                this.setState({ is_loading: false })
+                this.setLoading(false)
             })
     }
 
@@ -98,8 +104,11 @@ export default class UsersAddress extends Component {
                         <AddressMap
                             features={points}
                             feature={feature}
-                            saveErguulPlace={(val, id, coord, photo) => this.saveErguulPlace(val, id, coord, photo)}
+                            saveErguulPlace={
+                                (...values) => this.saveErguulPlace(...values)
+                            }
                             is_admin={is_admin}
+                            setLoading={this.setLoading}
                         />
                     </div>
                 </div>

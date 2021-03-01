@@ -32,7 +32,7 @@ export default class Erguuleg extends Component {
                     if (points.length > 0 || points['features'].length < 2) {
                         is_empty = true
                     }
-                    this.setState({ points, is_loading: false, is_empty })
+                    this.setState({ points, is_empty, is_loading: false })
                 }
             })
     }
@@ -66,7 +66,9 @@ export default class Erguuleg extends Component {
                             <Form
                                 is_empty={is_empty}
                                 infos={infos}
-                                saveErguulTailbar={(val, id) => this.saveErguulTailbar(val, id)}
+                                saveErguulTailbar={
+                                    (...values) => this.saveErguulTailbar(...values)
+                                }
                             />
                         </div>
                         <div className="col-8">

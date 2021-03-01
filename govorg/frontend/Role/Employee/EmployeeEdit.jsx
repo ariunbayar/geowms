@@ -646,6 +646,7 @@ export class EmployeeEdit extends Component {
                                                         role={roles}
                                                         is_inspire_role_null={is_inspire_role_null}
                                                         editable_is_check={this.perms}
+                                                        emp_perms={old_role_id == role_id ? perms : null}
                                                     />
                                                 :
                                                     <div className="col-md-12">

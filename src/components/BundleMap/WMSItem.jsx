@@ -27,8 +27,8 @@ export default class WMSItem extends Component {
     }
 
     render() {
-
         const {tiles, name, layers, is_visible} = this.state
+
         return (
             <Fragment>
 

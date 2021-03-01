@@ -351,6 +351,10 @@ export default class AddressMap extends Component {
                             const extent = line_feature.getGeometry().getExtent()
 
                             this.extent = extent
+                            if (!this.props.is_admin) {
+                                this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
+                            }
+
                             source.addFeature(line_feature)
                         }
                     })
@@ -362,6 +366,7 @@ export default class AddressMap extends Component {
     downloadImage(val, id, coordinate_clicked) {
         const map = this.map
         let photo
+        this.props.setLoading(true)
         map.once('rendercomplete', () => {
             var mapCanvas = document.createElement('canvas');
             var size = map.getSize();
@@ -401,7 +406,7 @@ export default class AddressMap extends Component {
 
     sendErguuleg(val, id, coordinate_clicked) {
         const extent = this.extent
-        this.map.getView().fit(extent,{ padding: [50, 50, 50, 50], duration: 200 })
+        this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
         this.downloadImage(val, id, coordinate_clicked)
     }
 
@@ -433,7 +438,7 @@ export default class AddressMap extends Component {
 
     readFeature(feature) {
         const id = 'aimag_sum'
-        this.removeFeatureFromSource(id)
+        this.removeFeatureFromSource(id, 'only_aimag')
         const source = this.vector_layer.getSource()
         const feat =  new GeoJSON().readFeatures(feature, {
             dataProjection: this.state.projection_data,

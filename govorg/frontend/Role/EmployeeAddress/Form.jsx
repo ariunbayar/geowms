@@ -106,7 +106,9 @@ export class Form extends Component {
         service
             .getFieldTailbar()
             .then(({ success, fields, id }) => {
-                this.setState({ fields, id })
+                if (success) {
+                    this.setState({ fields, id })
+                }
             })
     }
 
@@ -122,20 +124,19 @@ export class Form extends Component {
         return (
             <div>
                 <h5 className="text-center">Эргүүлд гарсан мэдээлэл</h5>
-                {fields.map((field, idx) => {
-                    let is_disabled = is_empty ? true : field.disabled
-                      return <NewInput key={idx}
-                                field={field.name}
-                                length={field.length}
-                                disabled={is_disabled}
-                                idx={idx}
-                                origin_name={field.origin_name}
-                                getValues={this.getValues}
-                                value={field.value}
-                                choices={field.choices}
-                                type={field.type}
-                            />
-                    }
+                {fields.map((field, idx) =>
+                    <NewInput
+                        key={idx}
+                        field={field.name}
+                        length={field.length}
+                        disabled={is_empty ? true : field.disabled}
+                        idx={idx}
+                        origin_name={field.origin_name}
+                        getValues={this.getValues}
+                        value={field.value}
+                        choices={field.choices}
+                        type={field.type}
+                    />
                 )}
                 <div>
                     <button

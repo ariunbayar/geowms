@@ -6,17 +6,16 @@ import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
-import { Vector as VectorLayer, Tile } from 'ol/layer'
+import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
 import { Point, Circle, Polygon } from 'ol/geom'
 import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
-import {fromExtent} from 'ol/geom/Polygon';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
-
+import ImageWMS from 'ol/source/ImageWMS';
 import { СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
 import { Modal } from './controls/Modal'
@@ -198,6 +197,8 @@ export default class BundleMap extends Component {
                         ...layer,
                         wms_or_cache_ur,
                         tile: new Tile({
+                            minZoom: layer.zoom_start,
+                            maxZoom: layer.zoom_stop,
                             source: new WMTS({
                                 url: chache_url,
                                 layer: layer.code,
@@ -215,14 +216,17 @@ export default class BundleMap extends Component {
                                 wrapX: true,
                             }),
                         }),
-                        wms_tile: new Tile({
-                            source: new TileWMS({
+                        wms_tile: new Image({
+                            source: new ImageWMS({
                                 projection: this.state.projection,
+                                ratio: 1,
                                 url: url,
                                 params: {
                                     'LAYERS': layer.code,
-                                    //'FORMAT': 'image/svg+xml',
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
                         })
@@ -248,6 +252,7 @@ export default class BundleMap extends Component {
 
                     if (base_layer_info.tilename == "xyz") {
                         layer = new Tile({
+                            preload: 6,
                             source: new TileImage({
                                 crossOrigin: 'Anonymous',
                                 url: base_layer_info.url,
@@ -257,12 +262,16 @@ export default class BundleMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Tile({
-                            source: new TileWMS({
+                        layer = new Image({
+                            source: new ImageWMS({
+                                ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
                                     'LAYERS': base_layer_info.layers,
                                     'FORMAT': 'image/png',
+                                    'VERSION': '1.1.1',
+                                    "STYLES": '',
+                                    "exceptions": 'application/vnd.ogc.se_inimage',
                                 }
                             }),
                             name: base_layer_name,
@@ -311,7 +320,11 @@ export default class BundleMap extends Component {
         })
         this.marker_layer = marker_layer
 
+        const scale_line = new ScaleLine()
+        this.scale_line = scale_line
+
         const map = new Map({
+            maxTilesLoading: 16,
             target: 'map',
             controls: defaultControls().extend([
                 new FullScreen(),
@@ -324,7 +337,7 @@ export default class BundleMap extends Component {
                 new SidebarButton({toggleSidebar: this.toggleSidebar}),
                 new SearchBarButton({searchSidebar: this.searchSidebar}),
                 new DrawButton({toggleDraw: this.toggleDraw}),
-                new ScaleLine(),
+                scale_line,
                 this.controls.modal,
                 this.controls.shopmodal,
                 this.controls.drawModal,
@@ -590,11 +603,23 @@ export default class BundleMap extends Component {
     return {layer_code, is_feature}
     }
 
+    getMetrScale(scale) {
+        return scale * 1000
+    }
+
     getPopUpInfo(coordinate, layers_code) {
         const latlong = toLonLat(coordinate)
         let layer_codes = layers_code.length > 0 ? layers_code : this.is_not_visible_layers.length > 0 ? this.is_not_visible_layers : []
+
+        const scale = this.scale_line.renderedHTML_.split(' ')
+        let scale_value = scale[0]
+        const scale_unit = scale[1]
+        if (scale_unit == 'km') {
+            scale_value = this.getMetrScale(scale_value)
+        }
+
         service
-            .getPopUpInfo(layer_codes, latlong)
+            .getPopUpInfo(layer_codes, latlong, scale_value)
             .then(({ datas }) => {
                 let is_empty = false
                 const is_from_inspire = true

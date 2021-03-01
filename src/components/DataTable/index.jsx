@@ -3,6 +3,8 @@ import {service} from "./service"
 import {TableBody} from './TableBody'
 import { Pagination } from "./Pagination"
 import {NavLink} from "react-router-dom"
+import Loader from "@utils/Loader"
+
 
 export class PortalDataTable extends Component {
 
@@ -18,7 +20,7 @@ export class PortalDataTable extends Component {
             талбарууд: props.талбарууд,
             жагсаалтын_холбоос: props.жагсаалтын_холбоос,
             хоосон_байх_үед_зурвас: props.хоосон_байх_үед_зурвас || 'Хоосон байна.',
-            уншиж_байх_үед_зурвас: props.уншиж_байх_үед_зурвас || 'Уншиж байна байна.',
+            уншиж_байх_үед_зурвас: props.уншиж_байх_үед_зурвас || 'Уншиж байна.',
             хувьсах_талбарууд: props.хувьсах_талбарууд || [],
             нэмэлт_талбарууд: props.нэмэлт_талбарууд || [],
             нэмэх_товч: props.нэмэх_товч || '',
@@ -149,7 +151,7 @@ export class PortalDataTable extends Component {
                                 </thead>
                                 <tbody>
                                     { уншиж_байгаа_эсэх ?
-                                        <tr><td>{уншиж_байх_үед_зурвас}</td></tr>
+                                        <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
                                         :
                                         (items_length === 0 ?
                                             <tr><td>{хоосон_байх_үед_зурвас}</td></tr>:
@@ -168,6 +170,7 @@ export class PortalDataTable extends Component {
                                     }
                                 </tbody>
                             </table>
+                            <Loader is_loading={уншиж_байгаа_эсэх}/>
                         </div>
                         <Pagination
                             refresh={this.state.refresh}

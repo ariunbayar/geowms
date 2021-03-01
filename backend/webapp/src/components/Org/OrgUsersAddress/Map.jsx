@@ -363,6 +363,7 @@ export default class AddressMap extends Component {
     downloadImage(val, id, coordinate_clicked) {
         const map = this.map
         let photo
+        this.props.setLoading(true)
         map.once('rendercomplete', () => {
             var mapCanvas = document.createElement('canvas');
             var size = map.getSize();
@@ -402,7 +403,7 @@ export default class AddressMap extends Component {
 
     sendErguuleg(val, id, coordinate_clicked) {
         const extent = this.extent
-        this.map.getView().fit(extent,{ padding: [50, 50, 50, 50], duration: 200 })
+        this.map.getView().fit(extent,{ padding: [200, 200, 200, 200]})
         this.downloadImage(val, id, coordinate_clicked)
     }
 

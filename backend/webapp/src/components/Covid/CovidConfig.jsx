@@ -43,6 +43,7 @@ export default class CovidConfig extends Component {
                 bundle: '1',
                 shinjilgee_too: '',
                 nas_barsan_too: '',
+                erguul_ungu: '',
             },
             emy_logo:'',
             emy_logo_old:'',
@@ -371,6 +372,27 @@ export default class CovidConfig extends Component {
                                                     type="number"
                                                     className="form-control"
                                                 />
+                                            </div>
+                                        </div>
+
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor="id_erguul_ungu">Эргүүлд гарсан хүний цэгийн өнгө</label>
+                                                <div className="row">
+                                                    <div className="col-md-8">
+                                                        <Field
+                                                            name="erguul_ungu"
+                                                            id="id_erguul_ungu"
+                                                            type="color"
+                                                            className="form-control"
+                                                        />
+                                                    </div>
+                                                    <div className="col-md-4">
+                                                        <div className={values.erguul_ungu ? "h5" : ''}>
+                                                            {values.erguul_ungu ? values.erguul_ungu : 'өнгө сонгоогүй байна'}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
