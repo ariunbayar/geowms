@@ -16,7 +16,10 @@ export class List extends Component {
             timer: null,
             model_alert_text: '',
             model_type_icon: 'success',
-            searchQuery: ''
+            searchQuery: '',
+            list_length:null,
+            currentPage:1,
+            groupPerPage:20
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
@@ -25,6 +28,8 @@ export class List extends Component {
         this.handleGroupDelete = this.handleGroupDelete.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.nextPage = this.nextPage.bind(this)
+        this.prevPage = this.prevPage.bind(this)
 
     }
 
@@ -34,7 +39,7 @@ export class List extends Component {
 
     handleListUpdated() {
         service.getgrouplist().then(({group_list}) => {
-            this.setState({group_list})
+            this.setState({group_list, list_length: group_list.length})
         })
 
     }
@@ -51,8 +56,19 @@ export class List extends Component {
         this.setState({modal_status: 'closed'})
     }
 
-    handleSearch() {
-        console.log("back-ruu hvselt ywuulanda ")
+    handleSearch(e) {
+        const { group_list } = this.state
+        if (e.target.value.length != "" ) {
+            const filter = group_list.filter(layer => {
+                return layer.toLowerCase().includes(e.target.value.toLowerCase())
+            })
+            this.setState({searchQuery: e.target.value, group_list: filter, list_length: filter.length})
+        }
+        else {
+
+            this.setState({searchQuery: ''})
+            this.handleListUpdated()
+        }
     }
 
     handleGroupDelete(name){
@@ -70,6 +86,22 @@ export class List extends Component {
         })
     }
 
+    nextPage(){
+        if(this.state.currentPage<Math.ceil(this.state.list_length/this.state.groupPerPage)){
+            this.setState({
+                currentPage:this.state.currentPage+1
+            })
+        }
+    }
+
+    prevPage(){
+        if(this.state.currentPage >1){
+            this.setState({
+                currentPage:this.state.currentPage-1
+            })
+        }
+    }
+
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
@@ -77,7 +109,11 @@ export class List extends Component {
     }
 
     render() {
-        const { group_list, searchQuery} = this.state
+        const {group_list, searchQuery, groupPerPage,currentPage, list_length} = this.state
+        const lastIndex=currentPage*groupPerPage
+        const firtsIndex=lastIndex-groupPerPage
+        const currentGroups= group_list.slice(firtsIndex,lastIndex)
+        const totalPages=Math.ceil( list_length/groupPerPage)
         return (
             <div className="row justify-content-center">
                 <div className="col-md-12">
@@ -89,7 +125,7 @@ export class List extends Component {
                                     className="form-control"
                                     id="searchQuery small-input"
                                     placeholder="Хайх"
-                                    onChange={(e) => this.handleSearch('searchQuery', e)}
+                                    onChange={(e) => this.handleSearch(e)}
                                     value={searchQuery}
                                 />
                                 <a><i className="icon-magnifier"></i></a>
@@ -116,39 +152,62 @@ export class List extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {
-                                    group_list.length >0 ?
-                                    group_list.map((value, idx) =>
-                                    <tr key={idx}>
-                                        <td>
-                                            {idx+1}
-                                        </td>
-                                        <td>
-                                            {value}
-                                        </td>
-                                        <td>
-                                            <NavLink to={`/back/layer-groups/${value}/засах/`} exact>
-                                                <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                                            </NavLink>
-                                        </td>
-                                        <td>
-                                            <a href="#" onClick={this.handleModalDeleteOpen}>
-                                                <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                                            </a>
-                                            <Modal
-                                                modalAction={() => this.handleGroupDelete(value)}
-                                                text={`Та "${value}"-г устгахдаа итгэлтэй байна уу?`}
-                                                title="Group-Layer устгах"
-                                                model_type_icon = "danger"
-                                                status={this.state.modal_status}
-                                                modalClose={() => this.handleModalDeleteClose()}
-                                            />
-                                        </td>
-                                    </tr>
-                                    ): null
-                                }
+                                { group_list ===0 ?
+                                        <tr><td>Group list бүртгэлгүй байна</td></tr>:
+
+                                        currentGroups.map((value, idx) =>
+                                            <tr key={idx}>
+                                            <td>
+                                                {idx+1}
+                                            </td>
+                                            <td>
+                                                {value}
+                                            </td>
+                                            <td>
+                                                <NavLink to={`/back/layer-groups/${value}/засах/`} exact>
+                                                    <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                                                </NavLink>
+                                            </td>
+                                            <td>
+                                                <a href="#" onClick={this.handleModalDeleteOpen}>
+                                                    <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                                                </a>
+                                                <Modal
+                                                    modalAction={() => this.handleGroupDelete(value)}
+                                                    text={`Та "${value}"-г устгахдаа итгэлтэй байна уу?`}
+                                                    title="Group-Layer устгах"
+                                                    model_type_icon = "danger"
+                                                    status={this.state.modal_status}
+                                                    modalClose={() => this.handleModalDeleteClose()}
+                                                />
+                                            </td>
+                                        </tr>
+                                    )}
                             </tbody>
                         </table>
+                    </div>
+                    <div className="row">
+                        <div className="col-md-12">
+                            <div className="float-left">
+                                <strong>Хуудас {currentPage}-{totalPages}</strong>
+                            </div>
+                            <div className="float-right">
+                                <button
+                                    type=" button"
+                                    className="btn btn-outline-primary"
+                                    onClick={this.prevPage}
+                                > &laquo; өмнөх
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-primary "
+                                    onClick={this.nextPage}
+                                >
+                                    дараах &raquo;
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <ModalAlert

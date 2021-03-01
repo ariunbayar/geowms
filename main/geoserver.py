@@ -653,7 +653,6 @@ def create_layer_group(group_values, group_layers):
         layers = ''.join(g_layers),
         styles = ''.join(g_styles)
     )
-    print(payload)
     url = 'layergroups/'
     rsp = requests.post(BASE_URL+ url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
     return rsp
