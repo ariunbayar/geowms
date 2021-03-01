@@ -536,7 +536,7 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
                     if types['value_type'] == 'date' and data:
                         data = date_to_timezone(data)
 
-                    value_type = 'value_' + types['value_type']
+                    value_type = types['value_type']
 
         value[value_type] = data
 
