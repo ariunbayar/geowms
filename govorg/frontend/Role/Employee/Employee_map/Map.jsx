@@ -51,22 +51,18 @@ export default class EmployeeMap extends Component {
 
     componentDidMount() {
         this.loadMap()
+        if (this.props.map_coordinate.length !== 0) {
+            this.marker.point.setCoordinates(this.props.map_coordinate)
+        }
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.feature !== this.props.feature) {
             if (this.props.feature !== {}) {
                 this.setFeatures(this.props.feature)
-            }
-        }
-        if (prevProps.point !== this.props.point) {
-            if (this.props.point && this.props.point !== {}) {
-                this.setMarker(this.props.point)
-            }
-        }
-        if (prevProps.is_marker !== this.props.is_marker) {
-            if (this.props.point !== {}) {
-                this.setMarker(this.props.point)
+                if (Object.keys(this.props.point).length !== 0 && this.props.map_coordinate.length == 0) {
+                    this.setMarker(this.props.point)
+                }
             }
         }
     }
@@ -96,7 +92,7 @@ export default class EmployeeMap extends Component {
             const coordinates = point_obj.coordinates
             const coordinate = this.fromLonLatToMapCoord(coordinates)
             this.marker.point.setCoordinates(coordinate)
-            this.props.sendPointCoordinate([coordinates[1], coordinates[0]])
+            this.props.sendPointCoordinate([coordinates[1], coordinates[0]], coordinate)
         }
     }
 

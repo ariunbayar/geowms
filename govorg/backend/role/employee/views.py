@@ -373,21 +373,19 @@ def update(request, payload, pk):
                 employee = employee
                 _set_employee(employee, payload)
 
-            rsp = {
+            return JsonResponse({
                 'success': True,
                 'info': 'Амжилттай хадгаллаа'
-            }
+            })
         else:
-            rsp = {
+            return JsonResponse({
                 'success': False,
                 'errors': {**form.errors, **errors},
-            }
-    else:
-        rsp = {
-            'success': False,
-            'info': 'Хадгалахад алдаа гарлаа'
-        }
-    return JsonResponse(rsp)
+            })
+    return JsonResponse({
+        'success': False,
+        'info': 'Хадгалахад алдаа гарлаа'
+    })
 
 
 def _get_emp_perm_display(emp_perm):

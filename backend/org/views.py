@@ -34,6 +34,7 @@ from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
 from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
+from main.components import Datatable
 
 from main.decorators import ajax_required
 from main import utils
@@ -550,46 +551,26 @@ def org_remove(request, payload, level):
 @user_passes_test(lambda u: u.is_superuser)
 def org_list(request, payload, level):
 
-    page = payload.get('page')
-    query = payload.get('query') or ''
-    per_page = payload.get('perpage')
-    level = payload.get('org_level')
-    orgs_display = []
-    sort_name = payload.get('sort_name')
-
-    if not sort_name:
-        sort_name = 'id'
+    оруулах_талбарууд = ['id', 'name', 'level', 'num_employees', 'num_systems']
 
     qs = Org.objects.filter(level=level)
     qs = qs.annotate(num_employees=Count('employee', distinct=True))
     qs = qs.annotate(num_systems=Count('govorg', distinct=True))
 
-    if query:
-        qs = qs.annotate(search=Func(F('name'), function='LOWER'))
-        qs = qs.filter(search__icontains=query.lower())
-    qs = qs.order_by(sort_name)
-
-    total_items = Paginator(qs, per_page)
-    items_page = total_items.page(page)
-    page_items = items_page.object_list
-
-    for org in page_items:
-        orgs_display.append({
-            'id': org.id,
-            'name': org.name,
-            'level': org.level,
-            'level_display': org.get_level_display(),
-            'num_employees': org.num_employees,
-            'num_systems': org.num_systems,
-        })
-
-    total_page = total_items.num_pages
+    datatable = Datatable(
+        model=Org,
+        initial_qs=qs,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
+    items, total_page = datatable.get()
 
     rsp = {
-        'items': orgs_display,
-        'page': page,
+        'items': items,
+        'page': payload.get('page'),
         'total_page': total_page
     }
+
     return JsonResponse(rsp)
 
 
