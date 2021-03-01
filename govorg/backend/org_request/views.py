@@ -398,13 +398,17 @@ def get_list(request, payload):
 
         else:
             rsp = {
-                'success': False,
+                'items': [],
+                'page': 1,
+                'total_page': 1,
             }
 
     else:
         rsp = {
-                'success': False,
-            }
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
 
     return JsonResponse(rsp)
 
