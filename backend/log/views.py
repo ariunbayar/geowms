@@ -125,6 +125,20 @@ def _get_user_name(user_id, item):
     else:
         return 'Нэвтрээгүй'
 
+def _set_event_type(event_type, item):
+    if event_type == 1:
+        event_type = 'ШИНЭ'
+    elif event_type == 2:
+        event_type = 'ЗАССАН'
+    elif event_type == 3:
+        event_type ='УСТГАСАН'
+    elif event_type == 4:
+        event_type = 'Many-to-Many Change'
+    else:
+        event_type = 'Reverse Many-to-Many Change'
+
+    return event_type
+
 
 @require_POST
 @ajax_required
@@ -133,7 +147,10 @@ def crudList(request, payload):
 
     CRUDEvent = apps.get_model('easyaudit', 'CRUDEvent')
     оруулах_талбарууд = ['id', 'event_type', 'object_id', 'object_repr', 'datetime', 'content_type_id', 'user_id', 'user_pk_as_string', 'changed_fields']
-    хувьсах_талбарууд = [{"field": "user_id", "action": _get_user_name, "new_field": "username"}]
+    хувьсах_талбарууд = [
+        {"field": "user_id", "action": _get_user_name, "new_field": "username"},
+        {"field": "event_type", "action": _set_event_type, "new_field": "event_type"},
+    ]
     datatable = Datatable(
         model=CRUDEvent,
         payload=payload,
