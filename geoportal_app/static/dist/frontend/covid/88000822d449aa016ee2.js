@@ -134,4 +134,4 @@
 /*!**********************************************************!*\
   !*** multi babel-polyfill ./frontend/covid/src/index.js ***!
   \**********************************************************/
-/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/togoldor/workspace/geoWMS/frontend/covid/src/index.js */"./frontend/covid/src/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./frontend/covid/src/index.js?')}},[[4,"manifest","libs"]]]);
+/*! no static exports found */function(module,exports,__webpack_require__){eval('__webpack_require__(/*! babel-polyfill */"./node_modules/babel-polyfill/lib/index.js");\nmodule.exports = __webpack_require__(/*! /home/odk/projects/geoportal/geoWMS/frontend/covid/src/index.js */"./frontend/covid/src/index.js");\n\n\n//# sourceURL=webpack:///multi_babel-polyfill_./frontend/covid/src/index.js?')}},[[4,"manifest","libs"]]]);
