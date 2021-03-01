@@ -636,7 +636,7 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
         overlap_feature_id.append(fid)
         is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id, perm_kind)
         if is_contains:
-            success = False
+            success = True
             info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains]))
 
     return success, info

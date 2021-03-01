@@ -951,7 +951,6 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                             'group_id': main_request_id,
                         }
                         success, info = _make_request(values, request_values)
-                        transaction.savepoint_commit(Sid)
                         if not success:
                             _delete_file(for_delete_items, Sid)
                             break
