@@ -91,6 +91,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/covid/">КОВИД-19</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/open-layer/">Нээлттэй өгөгдөл</a>
+                    </li>
                     <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
                         <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
                     </li>
@@ -195,6 +198,48 @@
     <script src="{% static "assets/bootstrap/js/bootstrap.min.js" %}"></script>
     <!-- owl -->
     <script src="{% static "assets/bootstrap/js/owl.carousel.min.js" %}"></script>
+    <script>
+        $(document).ready(function() {
+            var owl = $("#owl-demo");
+
+            owl.owlCarousel({
+                items : 9, //10 items above 1000px browser width
+                dots: false,
+                navigation : true,
+                autoplay: true,
+                autoplayTimeout: 2000,
+                autoplayHoverPause:true,
+                loop:false,
+                rewind: true,
+                responsive: {
+                    0: {
+                        items: 3
+                    },
+                    400: {
+                        items: 4
+                    },
+                    500: {
+                        items: 5
+                    },
+                    600: {
+                        items: 6
+                    },
+                    700: {
+                        items: 7
+                    },
+                    800: {
+                        items: 8
+                    },
+                    900: {
+                        items: 9
+                    },
+                    1000: {
+                        items: 9
+                    }
+                }
+            });
+        });
+    </script>
     {% block script %}
     {% endblock %}
 
