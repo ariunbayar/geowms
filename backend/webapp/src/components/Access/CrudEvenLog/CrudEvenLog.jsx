@@ -6,7 +6,6 @@ import { PortalDataTable } from "@utils/DataTable/index"
 
 export class CrudEvenLog extends Component {
 
-
     constructor(props) {
         super(props)
         this.state = {
