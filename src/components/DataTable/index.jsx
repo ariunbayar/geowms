@@ -139,7 +139,7 @@ export class PortalDataTable extends Component {
                                     <tr>
                                         <th scope="col" className={`bg-${color}`}>№</th>
                                         {талбарууд.map((item, index) =>
-                                            <th key={index} className={`bg-${color}`}>
+                                            <th key={index} className={`bg-${color} ${item.is_center ? 'text-center' : null}`}>
                                                 {item.title}&nbsp;
                                                 <a onClick={() => this.handleSort(item.field, this.state[item.field])}><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
                                             </th>
