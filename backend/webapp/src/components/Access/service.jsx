@@ -9,7 +9,6 @@ export const service = {
     pageUserCount,
     crudMethodCount,
     crudDateCount,
-    crudList,
     WMSDateCount,
 }
 
@@ -36,14 +35,6 @@ function pageCount() {
 function pageUserCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
-}
-
-function crudList(page, perpage, query, sort_name){
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query, sort_name }),
-    }
-    return fetch(`${prefix}/log/crud-list/`, requestOptions).then(handleResponse)
 }
 
 function loginDateCount() {
