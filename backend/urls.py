@@ -60,7 +60,7 @@ urlpatterns = [
         path('', суурь_давхарга.жагсаалт, name=''),
         path('wms-preview/<int:pk>/', суурь_давхарга.wms_preview, name='wms-preview'),
         path('үүсгэх/', суурь_давхарга.үүсгэх, name='үүсгэх'),
-        path('move/', суурь_давхарга.move, name='move'),
+        path('swap/', суурь_давхарга.swap, name='swap'),
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
