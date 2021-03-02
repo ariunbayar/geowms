@@ -12,22 +12,13 @@ export default class WMSLog extends Component {
             жагсаалтын_холбоос: '/back/api/log/wms_log_list/',
             custom_query: {},
             талбарууд: [
-                {'field': 'qs_all', "title": 'qs_all'},
                 {'field': 'qs_request', "title": 'qs_request'},
                 {'field': 'rsp_status', "title": 'rsp[_status'},
                 {'field': 'rsp_size', "title": 'rsp_size'},
                 {'field': 'created_at', "title": 'Нэвтрэсэн огноо'},
                 {'field': 'system_id', "title": 'Системийн ID'},
                 {'field': 'wms_id', "title": 'WMS ID'},
-            ],
-            хувьсах_талбарууд: [
-                {"field": "qs_all", "text": ""},
-                {"field": "qs_request", "text": ""},
-                {"field": "rsp_status", "text": ""},
-                {"field": "rsp_size", "text": ""},
-                {"field": "created_at", "text": ""},
-                {"field": "system_id", "text": ""},
-                {"field": "wms_id", "text": ""},
+                {'field': 'qs_all', "title": 'qs_all'},
             ],
         }
     }
@@ -59,7 +50,6 @@ export default class WMSLog extends Component {
                     <h5 className="mb-3 text-center text-uppercase">WMS url ашиглан хандалт хийсэн логийн тэмдэглэл</h5>
                     <div className="col-md-12">
                         <PortalDataTable
-                            color={'bg-dark'}
                             талбарууд={талбарууд}
                             жагсаалтын_холбоос={жагсаалтын_холбоос}
                             per_page={20}
