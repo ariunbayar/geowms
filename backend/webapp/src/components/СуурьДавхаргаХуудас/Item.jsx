@@ -6,17 +6,24 @@ export class Item extends Component {
 
     render() {
 
-        const {id, name, order, url, thumbnail_1x, thumbnail_2x} = this.props.values
-        const {className} = this.props
+        const {id, name, order, url, thumbnail_1x, thumbnail_2x, sort_order} = this.props.values
+        const {className, values, index} = this.props
 
         return (
-            <div className={className}>
-                <div className="card shadow-sm">
+            <div className={className}
+            >
+                <div className="card shadow-sm"
+                    key={index}
+                    draggable
+                    onDrop={event => this.props.onDrop(event, values, index)}
+                    onDragOver={event => this.props.onDragOver(event, values, index)}
+                    onDrag={(event) => this.props.onDrag(event, values, index)}
+                >
                     <div className="row no-gutters">
                         <div className="col-md-7">
                             <div className="card-body pb-0">
                                 <p className="card-text mb-0">
-                                    <NavLink className="stretched-link" to={`/back/суурь-давхарга/${id}/дэлгэрэнгүй/`}>
+                                    <NavLink className="" to={`/back/суурь-давхарга/${id}/дэлгэрэнгүй/`}>
                                         <strong>{name}</strong>
                                     </NavLink>
                                 </p>
@@ -26,20 +33,6 @@ export class Item extends Component {
 
                             </div>
                         </div>
-
-                        <div className="col-md-1 d-flex align-items-center d-flex justify-content-center">
-                            <div className="row no-gutters">
-                                <a href="#" onClick={event => this.props.handleMove(id, 'up')}>
-                                    <i className="fa fa-chevron-up" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                            <div className="row no-gutters">
-                                <a href="#" onClick={event => this.props.handleMove(id, 'down')}>
-                                    <i className="fa fa-chevron-down" aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-
                         <div className="col-md-4">
                             <img
                                 className="card-img"

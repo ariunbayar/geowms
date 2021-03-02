@@ -22,6 +22,7 @@ def _get_base_layer_display(base_layer):
         'url': base_layer.url,
         'thumbnail_1x': base_layer.thumbnail_1x.url,
         'thumbnail_2x': base_layer.thumbnail_2x.url,
+        'sort_order': base_layer.sort_order,
     }
 
 
@@ -74,18 +75,13 @@ def wms_preview(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def move(request, payload):
-    baseLayer = get_object_or_404(BaseLayer, pk=payload.get('id'))
-    if payload.get('move') == 'down':
-        temp_sort_order = BaseLayer.objects.filter(sort_order__gt=baseLayer.sort_order).order_by('sort_order').first()
-        if temp_sort_order is not None:
-            BaseLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=baseLayer.sort_order)
-            BaseLayer.objects.filter(pk=baseLayer.id).update(sort_order=temp_sort_order.sort_order)
-    else:
-        temp_sort_order = BaseLayer.objects.filter(sort_order__lt=baseLayer.sort_order).order_by('sort_order').last()
-        if temp_sort_order is not None:
-            BaseLayer.objects.filter(pk=temp_sort_order.id).update(sort_order=baseLayer.sort_order)
-            BaseLayer.objects.filter(pk=baseLayer.id).update(sort_order=temp_sort_order.sort_order)
+def swap(request, payload):
+    swap_one = payload.get("swap_one")
+    swap_two = payload.get("swap_two")
+    baseLayer_one = get_object_or_404(BaseLayer, pk=swap_one)
+    baseLayer_two = get_object_or_404(BaseLayer, pk=swap_two)
+    baseLayer_one.sort_order, baseLayer_two.sort_order = baseLayer_two.sort_order, baseLayer_one.sort_order
+    BaseLayer.objects.bulk_update([baseLayer_one, baseLayer_two], ['sort_order'])
 
     rsp = {
         'success': True,
