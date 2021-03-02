@@ -674,37 +674,28 @@ def count_org(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def perm_get_list(request, payload):
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    list_datas = []
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    gove_roles = GovRole.objects.annotate(search=SearchVector(
-        'id',
-        'name',
-        'description',
-        'created_by'
-    ) + SearchVector('name'),).filter(search__icontains=query).order_by(sort_name)
 
-    total_items = Paginator(gove_roles, per_page)
-    items_page = total_items.page(page)
+    def _get_user_name(event, item):
+        user = User.objects.filter(pk=event).first()
+        return user.username if user else 'Хоосон'
 
-    for list_data in items_page.object_list:
-        list_datas.append({
-            'id': list_data.id,
-            'name': list_data.name,
-            'description': list_data.description,
-            'created_by': list_data.created_by.username
-        })
+    оруулах_талбарууд = ['id', 'name', 'description', 'created_by_id']
+    хувьсах_талбарууд = [
+        {"field": "created_by_id", "action": _get_user_name, "new_field": "created_by"},
+    ]
+    datatable = Datatable(
+        model=GovRole,
+        payload=payload,
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
 
-    total_page = total_items.num_pages
+    items, total_page = datatable.get()
 
     rsp = {
-        'items': list_datas,
-        'page': page,
-        'total_page': total_page,
+        'items': items,
+        'page': payload.get('page'),
+        'total_page': total_page
     }
 
     return JsonResponse(rsp)
