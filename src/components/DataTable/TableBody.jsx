@@ -16,51 +16,52 @@ export class TableBody extends Component {
                 {талбарууд.map((item, idx) =>
                     item.has_action
                     ?
-                    хувьсах_талбарууд.map((хувьс, index) =>
-                        хувьс.field == item.field
-                        &&
-                        <td key={idx}>
-                            {
-                                хувьс.component
-                                ?
-                                <хувьс.component values={values} {...хувьс.props}/>
-                                :
-                                хувьс.action_type
-                                ?
-                                <span className={хувьс.action(values[item.field])}>
-                                    {
-                                    хувьс.text
+                        хувьсах_талбарууд.map((хувьс, index) =>
+                            хувьс.field == item.field
+                            &&
+                            <td key={idx} className={`${item.is_center ? "text-center " : ' '}`}>
+                                {
+                                    хувьс.component
                                     ?
-                                    хувьс.text
+                                        <хувьс.component values={values} {...хувьс.props}/>
                                     :
-                                    values[item.field]
-                                    }
-                                </span>
-                                :
-                                <a role="button" className="text-primary" onClick={() => хувьс.action(values)}>
-                                    {values[item.field]}
-                                </a>
-                            }
-                        </td>
-                    )
+                                        хувьс.action_type
+                                        ?
+                                            <span className={хувьс.action(values[item.field])}>
+                                            {
+                                                хувьс.text
+                                                ?
+                                                    хувьс.text
+                                                :
+                                                    values[item.field]
+                                            }
+                                            </span>
+                                        :
+                                            <a role="button" className="text-primary" onClick={() => хувьс.action(values)}>
+                                                {values[item.field]}
+                                            </a>
+                                }
+                            </td>
+                        )
                     :
-                    <td key={idx}>{values[item.field]}</td>
+                        <td key={idx}>{values[item.field]}</td>
                 )}
                 {нэмэлт_талбарууд.map((item, idx) =>
                     <td key={idx}>
-                        {item.component
+                        {
+                        item.component
                         ?
-                        <item.component values={values} {...item.props}/>
+                            <item.component values={values} {...item.props}/>
                         :
-                        <a role="button" onClick={() => item.action(values)}>
-                            {
-                            item.text
-                            ?
-                            item.text
-                            :
-                            <i className={item.icon}></i>
-                            }
-                        </a>
+                            <a role="button" onClick={() => item.action(values)}>
+                                {
+                                    item.text
+                                    ?
+                                        item.text
+                                    :
+                                        <i className={item.icon}></i>
+                                }
+                            </a>
                         }
                     </td>
                 )}
