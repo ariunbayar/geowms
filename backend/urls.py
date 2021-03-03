@@ -39,7 +39,7 @@ urlpatterns = [
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
         path('update/', bundle_views.update, name='update'),
-        path('move/', bundle_views.move, name='move'),
+        path('swap/', bundle_views.swap, name='swap'),
         path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
         path('get-layer/', bundle_views.get_form_options, name='get-layer'),
         path('role-create/', bundle_views.roleCreate, name='role-create'),
@@ -60,7 +60,7 @@ urlpatterns = [
         path('', суурь_давхарга.жагсаалт, name=''),
         path('wms-preview/<int:pk>/', суурь_давхарга.wms_preview, name='wms-preview'),
         path('үүсгэх/', суурь_давхарга.үүсгэх, name='үүсгэх'),
-        path('move/', суурь_давхарга.move, name='move'),
+        path('swap/', суурь_давхарга.swap, name='swap'),
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
@@ -84,8 +84,12 @@ urlpatterns = [
         path('inspire-roles/<int:pk>/save/', org_views.save_inspire_roles),
         path('level-<int:level>/<int:pk>/gov-perm/', org_views.get_gov_roles),
         path('level-<int:level>/<int:pk>/gov-perm/save/', org_views.save_gov_roles),
-        path('form-options/', org_views.form_options),
-
+        path('form-options/<str:option>/', org_views.form_options),
+        path('<int:level>/<int:pk>/addresses/', org_views.get_addresses),
+        path('<int:pk>/emp-info/', org_views.get_emp_info),
+        path('<int:pk>/erguuleg-fields/', org_views.get_erguuleg_fields),
+        path('save-erguul/', org_views.save_erguul),
+        path('get-erguul/', org_views.get_erguuls),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -127,6 +131,10 @@ urlpatterns = [
         path('qgis/save/', config_views.qgis_configs_save),
         path('dan/', config_views.dan_configs),
         path('dan/save/', config_views.dan_configs_save),
+        path('payment/', config_views.payment_configs),
+        path('payment/save/', config_views.payment_configs_save),
+        path('covid/', config_views.covid_configs),
+        path('covid/save/', config_views.covid_configs_save),
     ], 'config'))),
 
     path('api/error500/', include(([
@@ -134,7 +142,7 @@ urlpatterns = [
     ], 'error500'))),
 
     path('payment/', include(([
-        path('purchase-all/', payment_views.purchaseAll, name='purchase-all'),
+        path('purchase-all/', payment_views.purchase_all, name='purchase-all'),
         path('payment-list/', payment_views.paymentList, name='paymentList'),
         path('purchase-awah/', payment_views.purchase, name='purchase'),
     ], 'payment'))),

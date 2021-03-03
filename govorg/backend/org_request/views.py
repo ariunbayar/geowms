@@ -1,5 +1,5 @@
 import json
-from geojson import Feature, FeatureCollection
+from geojson import FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
 from django.http import JsonResponse
@@ -32,6 +32,7 @@ from main.utils import (
     date_to_timezone,
     get_display_items,
     get_fields,
+    get_feature_from_geojson,
 )
 from main.components import Datatable
 
@@ -56,7 +57,6 @@ def _get_geom(geo_id, fid):
     rows = dict_fetchall(cursor)
     rows = list(rows)
     return rows
-
 
 
 def _get_org_request(ob, employee):
@@ -334,17 +334,17 @@ def _geojson_to_featurecollection(geo_json, item):
     if item['old_geo_id']:
 
         if item['geo_json']:
-            current_geo_json = _get_geoJson(geo_json)
+            current_geo_json = get_feature_from_geojson(geo_json)
             geo_json_list.append(current_geo_json)
 
         old_geo_data = _get_geom(item['old_geo_id'], item['feature_id'])
         if old_geo_data:
             old_geo_data = old_geo_data[0]['geom']
-            old_geo_data = _get_geoJson(old_geo_data)
+            old_geo_data = get_feature_from_geojson(old_geo_data)
             geo_json_list.append(old_geo_data)
 
     elif geo_json and not item['old_geo_id']:
-        geo_json = _get_geoJson(geo_json)
+        geo_json = get_feature_from_geojson(geo_json)
         geo_json_list.append(geo_json)
 
     geo_json = FeatureCollection(geo_json_list)
@@ -398,13 +398,17 @@ def get_list(request, payload):
 
         else:
             rsp = {
-                'success': False,
+                'items': [],
+                'page': 1,
+                'total_page': 1,
             }
 
     else:
         rsp = {
-                'success': False,
-            }
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
 
     return JsonResponse(rsp)
 
@@ -507,6 +511,14 @@ def _get_emp_features(employee):
     return emp_feature
 
 
+def _value_types():
+    return [
+        {'value_type': 'value_number', 'value_names': ['double', 'number']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
+        {'value_type': 'value_date', 'value_names': ['date']},
+    ]
+
+
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
     for form in form_json:
@@ -519,10 +531,12 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
                 if data == code[value_type]:
                     data = code[value_type]
         else:
-            if form['value_type'] == 'date':
-                if data:
-                    data = date_to_timezone(data)
-            value_type = 'value_' + form['value_type']
+            for types in _value_types():
+                if form['value_type'] in types['value_names']:
+                    if types['value_type'] == 'date' and data:
+                        data = date_to_timezone(data)
+
+                    value_type = types['value_type']
 
         value[value_type] = data
 
@@ -682,7 +696,6 @@ def request_approve(request, payload):
                 r_approve.save()
 
             else:
-                transaction.rollback()
                 rsp = {
                     'success': False,
                     'info': 'Танд баталгаажуулах эрх алга байна.'

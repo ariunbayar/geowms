@@ -10,6 +10,8 @@ export default class WMSLayerItem extends Component {
             name: props.layer.name,
             code: props.layer.code,
             tile: props.layer.tile,
+            wms_tile: props.layer.wms_tile,
+            wms_or_cache_ur: props.layer.wms_or_cache_ur,
             is_visible: props.layer.defaultCheck,
             legend: props.layer.legend,
 
@@ -17,11 +19,19 @@ export default class WMSLayerItem extends Component {
 
         this.toggle = this.toggle.bind(this)
     }
-    componentDidMount(){
-        this.state.tile.setVisible(this.props.layer.defaultCheck)
+
+    componentDidMount() {
+        if(this.state.wms_or_cache_ur)
+        {
+            this.state.tile.setVisible(this.props.layer.defaultCheck)
+        }else
+        {
+            this.state.wms_tile.setVisible(this.props.layer.defaultCheck)
+        }
     }
+
     toggle(is_visible) {
-        this.state.tile.setVisible(is_visible)
+        this.props.addLayer([this.props.layer], this.props.name, is_visible)
         this.setState({is_visible})
     }
 

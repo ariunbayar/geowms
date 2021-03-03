@@ -15,6 +15,11 @@ export const service = {
     orgAll,
     getBaseLayers,
     formOptions,
+    getGeom,
+    getAddresses,
+    getEmpInfo,
+    getErguulegFields,
+    saveErguul,
 }
 
 
@@ -59,7 +64,7 @@ function employeeDetail(pk) {
 function employeeAdd(org_level, org_id, payload) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ payload }),
     }
 
     return fetch(`${prefix}/level-${org_level}/${org_id}/employee-add/`, opts).then(handleResponse)
@@ -72,10 +77,10 @@ function employeeRemove(pk) {
     return fetch(`${prefix}/employee-remove-${pk}/`, opts).then(handleResponse)
 }
 
-function employeeUpdate(pk, level, paylaod) {
+function employeeUpdate(pk, level, payload) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify(paylaod),
+        body: JSON.stringify({ payload }),
     }
 
     return fetch(`${prefix}/level-${level}/employee-update-${pk}/`, opts).then(handleResponse)
@@ -109,12 +114,46 @@ function employee_list(page, perpage, query, level, org_id) {
     return fetch(`${prefix}/level-${level}/${org_id}/employeeList/`, requestOptions).then(handleResponse)
 }
 
-function formOptions() {
+function formOptions(option) {
     const opts = getGetOptions()
-    return fetch(`/back/api/org/form-options/`, opts).then(handleResponse)
+    return fetch(`/back/api/org/form-options/${option}/`, opts).then(handleResponse)
 }
 
 function getBaseLayers() {
     const opts = getGetOptions()
     return fetch('/суурь-давхарга/', opts).then(handleResponse)
+}
+
+function getGeom(geo_id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({geo_id}),
+    }
+    return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+}
+
+function getAddresses(level, id) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
+}
+
+function getEmpInfo(id, is_erguul) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ is_erguul }),
+    }
+    return fetch(`${prefix}/${id}/emp-info/`, requestOptions).then(handleResponse)
+}
+
+function getErguulegFields(id) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${id}/erguuleg-fields/`, opts).then(handleResponse)
+}
+
+function saveErguul(values, emp_id, point, photo, erguul_id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ values, emp_id, point, photo, erguul_id }),
+    }
+    return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
 }

@@ -1,5 +1,6 @@
 import re
 import subprocess
+import json
 
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
@@ -9,6 +10,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime
+from backend.bundle.models import Bundle
+from backend.inspire.models import LThemes
 
 from .models import Config
 
@@ -410,3 +413,146 @@ def dan_configs_save(request, payload):
         )
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def payment_configs(request):
+
+    default_values = {
+        'POLYGON_PER_KM_AMOUNT': '',
+        'POLYGON_PER_M_AMOUNT': '',
+        'PROPERTY_PER_AMOUNT': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def payment_configs_save(request, payload):
+
+    config_names = (
+        'POLYGON_PER_KM_AMOUNT',
+        'POLYGON_PER_M_AMOUNT',
+        'PROPERTY_PER_AMOUNT',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
+
+
+def get_bundles():
+    context_list = []
+    bundles = Bundle.objects.all()
+    for bundle in bundles:
+        theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+        bundle_list = {
+            'pk': bundle.id,
+            'icon': bundle.icon.url if bundle.icon else '',
+            'name': theme.theme_name if theme else ''
+        }
+        context_list.append(bundle_list)
+
+    return context_list
+
+
+@require_GET
+@ajax_required
+def covid_configs(request):
+
+    default_values = {
+        'emy_logo': '',
+        'batlagdsan_tohioldol': '',
+        'edgersen_humuusiin_too': '',
+        'emchlegdej_bui_humuus_too': '',
+        'tusgaarlagdsan_humuusiin_too': '',
+        'medeellin_eh_survalj': '',
+        'emiin_sangiin_too': '',
+        'emlegiin_too': '',
+        'niit_eruul_mend_baiguullaga_too': '',
+        'gzbgzzg_logo': '',
+        'title': '',
+        'bundle': '',
+        'shinjilgee_too': '',
+        'nas_barsan_too': '',
+        'erguul_ungu': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+    line_chart_datas = Config.objects.filter(name='line_chart_datas').first()
+    values = []
+    if line_chart_datas:
+        values = line_chart_datas.value
+        values = json.loads(values)
+    bundles = get_bundles() or {}
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+        'line_chart_datas': values,
+        'bundles': bundles
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def covid_configs_save(request, payload):
+
+    config_names = (
+        'emy_logo',
+        'batlagdsan_tohioldol',
+        'edgersen_humuusiin_too',
+        'emchlegdej_bui_humuus_too',
+        'tusgaarlagdsan_humuusiin_too',
+        'medeellin_eh_survalj',
+        'emiin_sangiin_too',
+        'emlegiin_too',
+        'niit_eruul_mend_baiguullaga_too',
+        'gzbgzzg_logo',
+        'title',
+        'bundle',
+        'shinjilgee_too',
+        'nas_barsan_too',
+        'erguul_ungu',
+    )
+    line_chart_datas = payload.get('line_chart_datas')
+    line_chart_datas_obj = Config.objects.filter(name='line_chart_datas').first()
+
+    if line_chart_datas_obj:
+        line_chart_datas_obj.value = json.dumps(line_chart_datas, ensure_ascii=False)
+        line_chart_datas_obj.save()
+    else:
+        Config.objects.create(
+                name='line_chart_datas',
+                value=json.dumps(line_chart_datas, ensure_ascii=False)
+            )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
+

@@ -11,6 +11,12 @@ export const service = {
     getAimags,
     getSum,
     getUser,
+    checkButtonEnableWithPdf,
+    getPopUpInfo,
+    checkButtonEnableWithId,
+    getFeatureInfo,
+    getGeom,
+    getContainGeoms,
 }
 
 function getCookie(name) {
@@ -109,10 +115,10 @@ function paymentCalcPrice(area, layer_list, feature_info_list, selected_type) {
     return fetch('/payment/calc-price/', requestOptions).then(handleResponse)
 }
 
-function purchaseFromCart(data, code){
+function purchaseFromCart(datas) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({data, code})
+        body: JSON.stringify({ datas })
     }
     return fetch('/payment/purchase-from-cart/', requestOptions).then(handleResponse)
 }
@@ -122,7 +128,7 @@ function searchPoint(point_id) {
         ..._getPostOptions(),
         body: JSON.stringify({point_id})
     }
-    return fetch('/back/tuuhen_ov/tseg-personal/find-point/', requestOptions).then(handleResponse)
+    return fetch('/gov/api/tseg-personal/find-point/', requestOptions).then(handleResponse)
 }
 
 function getAimags() {
@@ -138,4 +144,52 @@ function getSum(aimag_name) {
         body: JSON.stringify({aimag_name})
     }
     return fetch('/api/sum/', requestOptions).then(handleResponse)
+}
+
+function checkButtonEnableWithPdf(pdf_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({pdf_id})
+    }
+    return fetch('/payment/check-enable-pdf/', requestOptions).then(handleResponse)
+}
+
+function checkButtonEnableWithId(geo_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({geo_id})
+    }
+    return fetch('/payment/check-enable-pdf-id/', requestOptions).then(handleResponse)
+}
+
+function getPopUpInfo(layers_code, coordinate, scale_value) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layers_code, coordinate, scale_value})
+    }
+    return fetch('/payment/get-popup-info/', requestOptions).then(handleResponse)
+}
+
+function getFeatureInfo(layer_codes, coordinates) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layer_codes, coordinates})
+    }
+    return fetch('/payment/get-feature-info/', requestOptions).then(handleResponse)
+}
+
+function getGeom(geo_id) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({geo_id})
+    }
+    return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+}
+
+function getContainGeoms(layers_code, geometry, km_scale) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({layers_code, geometry, km_scale})
+    }
+    return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
 }

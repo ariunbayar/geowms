@@ -6,6 +6,8 @@ export const service = {
     downloadPurchase,
     getDetails,
     paginatedList,
+    userEmailCheck,
+    setEmail
 }
 
 
@@ -15,7 +17,6 @@ function payment(purchase_all){
     return fetch(`/payment/dictionaryRequest/`, requestOptions).then(handleResponse)
 }
 
-
 function purchaseAll(purchase_id){
     const requestOptions = {
         ...getPostOptions(),
@@ -24,11 +25,11 @@ function purchaseAll(purchase_id){
     return fetch('/back/payment/purchase-all/', requestOptions).then(handleResponse)
 }
 
-function downloadPurchase(id, download_type) {
+function downloadPurchase(id) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`/payment/api/download-purchase/${id}/${download_type}/`, requestOptions).then(handleResponse)
+    return fetch(`/payment/api/download-purchase/${id}/`, requestOptions).then(handleResponse)
 }
 
 function getDetails(id){
@@ -41,6 +42,18 @@ function paginatedList(page, per_page) {
         ...getPostOptions(),
     body: JSON.stringify({ page, per_page }),
     }
-
     return fetch(`/profile/api/all/`, requestOptions).then(handleResponse)
+}
+
+function userEmailCheck(id){
+    const requestOptions = {...getGetOptions()}
+    return fetch(`/profile/api/check-email/`, requestOptions).then(handleResponse)
+}
+
+function setEmail(email) {
+    const requestOptions = {
+        ...getPostOptions(),
+    body: JSON.stringify({ email }),
+    }
+    return fetch(`/profile/api/set-email/`, requestOptions).then(handleResponse)
 }

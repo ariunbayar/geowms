@@ -4,19 +4,19 @@ from io import BytesIO
 import base64
 import re
 import unicodedata
+import importlib
 
-from django.conf import settings
 import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
-from django.contrib.gis.geos import GEOSGeometry
-from geojson import Feature, FeatureCollection
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import GEOSGeometry, Point
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
+from django.contrib.gis.measure import D
+from geojson import Feature
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -240,6 +240,19 @@ def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
 
 
+def _make_connection(from_email):
+    connection = get_connection(
+        username=from_email,
+        password=get_config('EMAIL_HOST_PASSWORD'),
+        port=get_config('EMAIL_PORT'),
+        host=get_config('EMAIL_HOST'),
+        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
+        use_ssl=False,
+        fail_silently=False,
+    )
+    return connection
+
+
 def send_approve_email(user, subject=None, text=None):
 
     if not user.email:
@@ -265,24 +278,14 @@ def send_approve_email(user, subject=None, text=None):
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
 
-    connection = get_connection(
-        username=from_email,
-        password=get_config('EMAIL_HOST_PASSWORD'),
-        port=get_config('EMAIL_PORT'),
-        host=get_config('EMAIL_HOST'),
-        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
-        use_ssl=False,
-        fail_silently=False,
-    )
-    send_mail(subject, msg, from_email, to_email, connection=connection)
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
 
     return True
 
 
-def send_email(subject, msg, to_email):
-
-    from_email = settings.EMAIL_HOST_USER
-    send_mail(subject, msg, from_email, to_email, fail_silently=False)
+def send_email(subject, msg, to_email, attach=None):
+    from_email = get_config('EMAIL_HOST_USER')
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email), html_message=attach)
 
 
 def get_administrative_levels():
@@ -633,7 +636,7 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
         overlap_feature_id.append(fid)
         is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id, perm_kind)
         if is_contains:
-            success = False
+            success = True
             info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains]))
 
     return success, info
@@ -758,13 +761,19 @@ def get_geoJson(data):
         point = MultiPolygon(coordinates)
         return Feature(geometry=point)
 
+
 def datetime_to_string(date):
     return date.strftime('%Y-%m-%d') if date else ''
 
 
-def date_to_timezone(input_date):
+def date_fix_format(input_date):
     if '/' in input_date:
         input_date = input_date.replace('/', '-')
+    return input_date
+
+
+def date_to_timezone(input_date):
+    date_fix_format(input_date)
     naive_time = datetime.strptime(input_date, '%Y-%m-%d')
     output_date = timezone.make_aware(naive_time)
     return output_date
@@ -826,3 +835,155 @@ def get_fields(Model):
         fields.append(name)
 
     return fields
+
+
+def get_key_and_compare(dict, item):
+    value = ''
+    for key in dict.keys():
+        if key == item:
+            value = key
+    return value
+
+
+def lat_long_to_utm(lat, longi):
+    point = Point([lat, longi], srid=4326)
+    utm = point.transform(3857, clone=True)
+    return utm.coords
+
+
+def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
+    point = Point(coordinate, srid=srid)
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(feature_id=feature_id)
+    mgeo_qs = mgeo_qs.filter(geo_data__distance_lte=(point, D(km=km)))
+    mgeo_qs = mgeo_qs.order_by('geo_data')
+    nearest_points = mgeo_qs
+    return nearest_points
+
+
+def get_feature_from_geojson(geo_json, get_feature=True, properties=[], srid=4326):
+    feature = []
+    if geo_json:
+        if isinstance(geo_json, str):
+            geo_json = json.loads(geo_json)
+
+        geom_type = geo_json['type']
+        coordinates = geo_json['coordinates']
+
+        module = importlib.import_module('geojson')
+        class_ = getattr(module, geom_type)
+
+        geometry = class_(coordinates, srid=srid)
+
+        if get_feature:
+            feature = Feature(geometry=geometry, properties=properties)
+        else:
+            feature = geometry
+
+    return feature
+
+
+def get_geom_for_filter_from_coordinate(coordinate, geom_type, srid=4326):
+    module = importlib.import_module('django.contrib.gis.geos')
+    class_ = getattr(module, geom_type)
+    geom = class_([float(coord) for coord in coordinate], srid=srid)
+    return geom
+
+
+def get_geom_for_filter_from_geometry(geometry):
+    if isinstance(geometry, str):
+        geometry = json.loads(geo_json)
+
+    polygonlist = GEOSGeometry(json.dumps(geometry))
+    module = importlib.import_module('django.contrib.gis.geos')
+    class_ = getattr(module, geometry['type'])
+    geom = class_(*polygonlist)
+
+    return geom
+
+
+def check_view_name(view_name):
+    view_name = remove_text_from_str(view_name, 'gp_layer_')
+    has_view_name = False
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT matviewname as view_name
+            FROM pg_matviews
+            ORDER BY view_name
+        """
+        cursor.execute(sql)
+        for item in cursor.fetchall():
+            if item[0] == view_name:
+                has_view_name = True
+        return has_view_name
+
+
+def get_inside_geoms_from_view(geo_json, view_name, properties=list()):
+    datas = list()
+
+    if properties:
+        properties = ",".join([prop_code for prop_code in properties])
+        properties = properties + ","
+    else:
+        properties = ''
+
+    has_view_name = check_view_name(view_name)
+    if has_view_name:
+        with connections['default'].cursor() as cursor:
+            sql = """
+                SELECT {properties} ST_AsGeoJSON(geo_data)
+                FROM {view_name}
+                WHERE (
+                        ST_Within(geo_data, ST_GeomFromGeoJSON(%s))
+                )
+            """.format(view_name=view_name, properties=properties)
+            cursor.execute(sql, [str(geo_json)])
+            datas = [item[0] for item in cursor.fetchall()]
+
+    return datas
+
+
+def remove_text_from_str(main_text, remove_text='gp_layer_'):
+    replaced_text = main_text
+    if remove_text in main_text:
+        replaced_text = main_text.replace(remove_text, '')
+    return replaced_text
+
+
+def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
+    with connections['default'].cursor() as cursor:
+        sql = """
+            SELECT ST_AsGeoJSON(geo_data)
+            FROM {view_name}
+            WHERE (
+                    ST_Dwithin(
+                        geo_data,
+                        ST_SetSRID(
+                            ST_MakePoint({x}, {y})
+                        ,4326)
+                        ,{radius}
+                    )
+            )
+        """.format(
+            view_name=view_name,
+            radius=radius,
+            x=point_coordinates[0],
+            y=point_coordinates[1],
+        )
+        cursor.execute(sql)
+
+        return [item[0] for item in cursor.fetchall()]
+
+
+def create_index(model_name, field):
+    with connections['default'].cursor() as cursor:
+        sql = """
+            CREATE INDEX {model_name}_index_{field}
+            ON public.{model_name} USING btree
+                ({field} ASC NULLS LAST)
+            TABLESPACE pg_default;
+        """.format(field=field, model_name=model_name)
+        cursor.execute(sql)
+        return True
+    return False

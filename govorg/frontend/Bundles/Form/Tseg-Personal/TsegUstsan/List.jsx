@@ -98,7 +98,7 @@ export class List extends Component {
 
     render() {
         return (
-            <div  className="card">
+            <div className="card">
                 <div  className="card-body">
                     <div className="col-md-12">
                         <NavLink className="btn gp-btn-primary float-right my-2" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>

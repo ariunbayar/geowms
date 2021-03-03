@@ -906,7 +906,7 @@ export  class Forms extends Component {
                                             <tr>
                                                 <th style={{textAlign: "center"}} colSpan="2" scope="rowgroup">8. Байршлын тухай: </th>
                                                 <th style={{textAlign: "center"}} colSpan="4" scope="rowgroup">
-                                                    {this.state.barishil_tuhai.length < 50 ? <a className="text-danger float-left">Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна </a> : ''}
+                                                    {this.state.barishil_tuhai.length < 50 ? <small className="text-danger float-left">Цэгийн байршлын тухай мэдээлэл нь багадаа 50 тэмдэгт байна </small> : ''}
                                                     <input
                                                         className={'form-control' + ( this.state.barishil_tuhai.length < 50 ? ' is-invalid' : '')}
                                                         name='barishil_tuhai'

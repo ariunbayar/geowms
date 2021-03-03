@@ -5,10 +5,6 @@ from geoportal_app.models import User
 
 class Payment(models.Model):
 
-    POLYGON_PER_KM_AMOUNT = 1000
-    POLYGON_PER_M_AMOUNT = 1
-    PROPERTY_PER_AMOUNT = 100
-
     KIND_MONGOLBANK = 1
     KIND_QPAY = 2
 
@@ -30,7 +26,7 @@ class Payment(models.Model):
     geo_unique_number = models.CharField(max_length=300, unique=True)
     bank_unique_number = models.CharField(max_length=300)
     description = models.CharField(max_length=500)
-    total_amount = models.PositiveIntegerField()
+    total_amount = models.FloatField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     is_success = models.BooleanField()
     success_at = models.DateTimeField(null=True)
@@ -38,6 +34,7 @@ class Payment(models.Model):
     card_number = models.CharField(max_length=500)
     message = models.CharField(max_length=500)
     code = models.CharField(max_length=100)
+    ext_type = models.CharField(max_length=100, null=True)
     qpay_rsp = models.TextField(null=True)
     mongolbank_rsp = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)

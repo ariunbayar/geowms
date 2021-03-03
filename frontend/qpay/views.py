@@ -17,26 +17,37 @@ from .qpay import Qpay
 @login_required
 def create(request, payload):
 
-    price = payload.get('price')
     purchase_id = payload.get('purchase_id')
     purhcase = Payment.objects.filter(id=purchase_id).first()
-    try:
-        qpay = Qpay(request, price, purhcase)
+
+    if request.user == purhcase.user:
+        qpay = Qpay(request, purhcase)
+
         #Токен үүсгэж байна.
         qpay.authenticate()
         data = qpay.create()
-    except Exception:
-        rsp={
-            'success': False,
-            'msg': "Алдаа гарсан тул дахин оролдоно уу"
-        }
-        return JsonResponse(rsp)
-    json_data = data.json()
-    if data.status_code == 200:
-        return JsonResponse({'qPay_QRimage': json_data['qPay_QRimage'], "error_message": '', 'success': False})
+        json_data = data.json()
+
+        if data.status_code == 200:
+            rsp = {
+                'qPay_QRimage': json_data['qPay_QRimage'],
+                "error_message": '',
+                'success': False,
+            }
+        else:
+            if json_data['name'] == 'INVOICE_PAID':
+                rsp = {
+                    'qPay_QRimage': '',
+                    "error_message": json_data['message'],
+                    'success': True,
+                }
     else:
-        if json_data['name'] == 'INVOICE_PAID':
-            return JsonResponse({'qPay_QRimage': '', "error_message": json_data['message'], 'success': True})
+        rsp =  {
+            'error': True,
+            'error_message': 'Та энэ худалдан авалтыг үүсгээгүй байна'
+        }
+
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -44,10 +55,14 @@ def create(request, payload):
 @login_required
 def check(request, payload):
 
+    success = False
+    msg = ''
+
     purchase_id = payload.get('purchase_id')
     purhcase = Payment.objects.filter(id=purchase_id).first()
+
     if purhcase:
-        qpay = Qpay(request, 0, purhcase)
+        qpay = Qpay(request, purhcase)
         try:
             #Токен үүсгэж байна.
             qpay.authenticate()
@@ -78,35 +93,47 @@ def check(request, payload):
                         card_number = data['payment_info']['transactions'][0]['beneficiary_account_number']
                     else:
                         card_number = ' '
+
                     if not purhcase.is_success:
-                        Payment.objects.filter(id=purchase_id).update(is_success=True, success_at=localtime(now()),bank_unique_number=customer_id , card_number=card_number , code=0, message="Худалдан авалт амжилттай болсон.", qpay_rsp=data)
-                    rsp = {
-                        'success': True,
-                        'msg':'Төлөгдсөн төлбөрийн дугаар'
-                    }
+
+                        msg = 'Худалдан авалт амжилттай болсон.'
+                        success = True
+
+                        payment = Payment.objects
+                        payment = payment.filter(id=purchase_id)
+                        payment = payment.update(
+                            is_success=success,
+                            success_at=localtime(now()),
+                            bank_unique_number=customer_id,
+                            card_number=card_number,
+                            code=0,
+                            message=msg,
+                            qpay_rsp=data
+                        )
+
                 else:
-                    rsp = {
-                        'success': False,
-                        'msg': 'Мэдээлэл олдсонгүй'
-                    }
+                    success = False
+                    msg = 'Мэдээлэл олдсонгүй'
+
             else:
-                rsp = {
-                    'success': False,
-                }
+                success = False
+                msg = 'Мэдээлэл олдсонгүй'
+
         except Exception:
-            rsp = {
-                'success': False,
-                'msg': "Хүсэлт амжилтгүй болсон"
-            }
+            success = False
+            msg = "Хүсэлт амжилтгүй болсон"
+
         except ConnectionError:
-            rsp = {
-                'success': False,
-                'msg': "Шалгах явцад алдаа гарсан тул Дахин оролдоно уу"
-            }
+            success = False
+            msg = "Шалгах явцад алдаа гарсан тул Дахин оролдоно уу"
+
     else:
-        rsp = {
-            'success': False,
-            'msg': 'Мэдээлэл олдсонгүй'
-        }
+        success = False
+        msg = 'Мэдээлэл олдсонгүй'
+
+    rsp = {
+        'success': success,
+        'msg': msg
+    }
     return JsonResponse(rsp)
 

@@ -3,6 +3,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 
 from main.decorators import ajax_required
 from geoportal_app.models import User
@@ -88,15 +89,17 @@ def purchase(request, payload):
 
 @require_POST
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def purchaseAll(request, payload):
+@login_required
+def purchase_all(request, payload):
+    purchase_all = list()
     purchase_id = payload.get('purchase_id')
-    payment = Payment.objects.filter(pk=purchase_id).first()
-    if payment.user_id == request.user.id:
-        user = User.objects.filter(id=payment.user_id).first()
-        pointList = PaymentPoint.objects.filter(payment_id=purchase_id)
-        purchase_all = []
-        point_data = []
+    payment = get_object_or_404(Payment, pk=purchase_id)
+
+    if payment.user == request.user:
+        point_list_qs = PaymentPoint.objects
+        point_list_qs = point_list_qs.filter(payment_id=purchase_id)
+        point_datas = list(point_list_qs.values('point_name', 'amount'))
+
         purchase_all.append({
             'id': payment.id,
             'geo_unique_number': payment.geo_unique_number,
@@ -106,32 +109,30 @@ def purchaseAll(request, payload):
             'failed_at': payment.failed_at,
             'bank_unique_number': payment.bank_unique_number,
             'success_at': payment.success_at,
-            'user_id': user.username,
+            'export_file': payment.export_file,
+            'user_id': request.user.username,
             'total_amount': payment.total_amount,
             'card_number': payment.card_number,
             'is_success': payment.is_success,
         })
-        if len(pointList) > 0:
-            for point in pointList:
-                point_data.append({
-                    'name': point.point_name,
-                    'amount': point.amount,
-                })
+
+        if point_datas:
+            rsp = {
+                'success': True,
+                'purchase_all': purchase_all,
+                'point_data': point_datas,
+            }
+
         else:
             rsp = {
                 'success': False,
                 'msg': "Уучлаарай цэгийн мэдээлэл олдсонгүй"
             }
-            return JsonResponse(rsp)
-        rsp = {
-            'success': True,
-            'purchase_all': purchase_all,
-            'point_data': point_data
-        }
-        return JsonResponse(rsp)
+
     else:
         rsp = {
             'success': False,
-            'msg': 'Алдаа гарсан байна'
+            'msg': 'Мэдээлэл олдсонгүй дахин шалгана уу'
         }
-        return JsonResponse(rsp)
+
+    return JsonResponse(rsp)
