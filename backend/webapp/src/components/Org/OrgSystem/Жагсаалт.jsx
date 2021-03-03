@@ -84,81 +84,29 @@ export class Жагсаалт extends Component {
     }
 
     render() {
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
-        const {currentPage, govorgPerPage, govorg_list, govorg_length}=this.state
+        const {
+            refresh,
+            талбарууд,
+            жагсаалтын_холбоос,
+            хувьсах_талбарууд,
+            custom_query,
+            нэмэх_товч,
+        } = this.state
         return (
-            <div  className="my-4">
-                <div className="row">
-
+            <div className="card">
+                <div className="card-body">
                     <div className="col-md-12">
-
-                        {!this.state.is_form_open &&
-                            <>
-                                <div className="row">
-                                    <div className="col-md-6">
-                                        <div className="float-sm-left search-bar">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="searchQuery small-input"
-                                                placeholder="Хайх"
-                                                onChange={(e) => this.handleSearch('searchQuery', e)}
-                                                value={this.state.searchQuery}
-                                            />
-                                            <a><i className="icon-magnifier"></i></a>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <div className="float-sm-right">
-                                            <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/үүсгэх/`}>
-                                                Нэмэх
-                                            </NavLink>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="table-responsive table_wrapper my-2">
-                                    <table className="table table_wrapper_table">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col"> # </th>
-                                                <th scope="col"> Системүүдийн нэр</th>
-                                                <th scope="col"> Токен </th>
-                                                <th scope="col"> Үүсгэсэн огноо </th>
-                                                <th scope="col"> </th>
-                                                <th scope="col"> </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            { govorg_length === 0 ?
-                                                <tr><td>Систем бүртгэлгүй байна </td></tr>:
-                                                govorg_list.map((values,index) =>
-                                                    <Govorg
-                                                        org_level={org_level}
-                                                        org_id={org_id}
-                                                        key={values.id}
-                                                        idx={(currentPage*govorgPerPage)-govorgPerPage+index+1}
-                                                        values={values}
-                                                        handleRemove={() => this.handleRemove(values.id)}
-                                                        handleEdit={() => this.handleEdit(values)}
-                                                    />
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <Pagination
-                                    paginate = {this.paginate}
-                                    searchQuery = {this.state.searchQuery}
-                                    load = {this.state.load}
-                                />
-                                <ModalAlert
-                                    modalAction={() => this.modalClose()}
-                                    status={this.state.modal_alert_status}
-                                    title="Амжилттай хадгаллаа"
-                                    model_type_icon = "success"
-                                />
-                            </>
-                        }
+                        <PortalDataTable
+                            refresh={refresh}
+                            color={'bg-dark'}
+                            талбарууд={талбарууд}
+                            жагсаалтын_холбоос={жагсаалтын_холбоос}
+                            per_page={20}
+                            уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
+                            хувьсах_талбарууд={хувьсах_талбарууд}
+                            нэмэх_товч={нэмэх_товч}
+                            custom_query={custom_query}
+                        />
                     </div>
                 </div>
             </div>
