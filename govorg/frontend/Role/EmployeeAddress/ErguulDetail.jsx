@@ -13,29 +13,29 @@ export class ErguulDetail extends Component {
                 {'field': 'date_start', "title": 'Эхлэх огноо'},
                 {'field': 'date_end', "title": 'Дуусах огноо'},
             ],
-            жагсаалтын_холбоос: '/gov/api/role/employee/erguul-detail/',
+            жагсаалтын_холбоос: '/gov/api/role/employee/erguul-list/',
             хувьсах_талбарууд: [
                 {
                     "field": "part_time",
-                    "action": this.get_part_time,
+                    "action": this.getPartTime,
                     "action_type": true
                 },
                 {
                     "field": "state",
-                    "action": this.get_state,
+                    "action": this.getState,
                     "action_type": true
                 }
             ]
         }
     }
 
-    get_state(key){
+    getState(key){
         let obj = {"Гараагүй": "text-danger", "Гарсан": "text-success", "Гарч байгаа": "text-warning"}
         return obj[key]
     }
 
-    get_part_time(key){
-        let obj = {"Үдээс хойш": "text-success", "Үдээс өмнө": "text-success"}
+    getPartTime(key){
+        let obj = {"Үдээс хойш": "text-dark", "Үдээс өмнө": "text-dark"}
         return obj[key]
     }
 
@@ -50,6 +50,7 @@ export class ErguulDetail extends Component {
                             жагсаалтын_холбоос={жагсаалтын_холбоос}
                             per_page={100}
                             уншиж_байх_үед_зурвас={"Уншиж байна"}
+                            хоосон_байх_үед_зурвас={"Хоосон байна"}
                             хувьсах_талбарууд={хувьсах_талбарууд}
                         />
                     </div>

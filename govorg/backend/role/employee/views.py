@@ -33,6 +33,11 @@ from govorg.backend.utils import (
 
 from backend.org.forms import EmployeeAddressForm
 
+from backend.org.models import Employee, Org
+from backend.dedsanbutets.models import ViewNames
+from govorg.backend.org_request.models import ChangeRequest
+from govorg.backend.org_request.views import _get_geom
+
 
 def _get_employee_display(employee):
 
@@ -710,50 +715,77 @@ def get_erguul(request):
     return JsonResponse(rsp)
 
 
+def _get_part_time(part_time, item):
+    return "Үдээс хойш" if part_time == 1 else "Үдээс өмнө"
+
+
+def _get_state(state, item):
+    user = ErguulTailbar.objects.filter(erguul=item['id']).first()
+    if user is not None:
+        state = user.state
+        if state == 1:
+            state = "Гарсан"
+        elif state == 2:
+            state = "Гараагүй"
+    else:
+        state = "Гарч байгаа"
+    return state
+
+
+def _get_fullname(address_id, item):
+    address = EmployeeAddress.objects.filter(id=address_id).first()
+    user = address.employee.user
+    fullname = user.first_name + '. ' + user.last_name
+    return fullname
+
+
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def erguul_list(request, payload):
 
-    def _get_part_time(part_time, item):
-        return "Үдээс хойш" if part_time == 1 else "Үдээс өмнө"
+    employee = Employee.objects.filter(user=request.user).first()
+    is_admin = employee.is_admin
+    org_id = employee.org.id
+    emps_org = Employee.objects.filter(org_id=org_id)
 
-    def _get_state(state, item):
-        user = ErguulTailbar.objects.filter(erguul=item['id']).first()
-        if user is not None:
-            state = user.state
-            if state == 1:
-                state = "Гарсан"
-            elif state == 2:
-                state = "Гараагүй"
-        else:
-            state = "Гарч байгаа"
-        return state
+    if is_admin:
+        emp_ids = Employee.objects.filter(org_id=org_id).values_list('id', flat=True)
+        emps_address = EmployeeAddress.objects.filter(employee_id__in=emp_ids).values_list('id', flat=True)
+        emps_erguul = EmployeeErguul.objects.filter(address_id__in=emps_address)
+        qs = emps_erguul
+    else:
+        employee_address = EmployeeAddress.objects.filter(employee=employee).first()
+        qs = EmployeeErguul.objects.filter(address=employee_address)
 
-    def _get_fullname(address_id, item):
-        address = EmployeeAddress.objects.filter(id=address_id).first()
-        user = address.employee.user
-        fullname = user.first_name + '. ' + user.last_name
-        return fullname
-
-    оруулах_талбарууд = ['address_id', 'apartment', 'date_start', 'date_end', 'part_time']
-    хувьсах_талбарууд = [
-        {"field": "part_time", "action": _get_part_time, "new_field": "part_time"},
-        {"field": "apartment", "action": _get_state, "new_field": "state"},
-        {"field": "address_id", "action": _get_fullname, "new_field": "fullname"},
+    if qs:
+        оруулах_талбарууд = ['address_id', 'apartment', 'date_start', 'date_end', 'part_time']
+        хувьсах_талбарууд = [
+            {"field": "part_time", "action": _get_part_time, "new_field": "part_time"},
+            {"field": "apartment", "action": _get_state, "new_field": "state"},
+            {"field": "address_id", "action": _get_fullname, "new_field": "fullname"},
         ]
 
-    datatable = Datatable(
-        model=EmployeeErguul,
-        payload=payload,
-        оруулах_талбарууд=оруулах_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд,
-    )
-    items, total_page = datatable.get()
+        datatable = Datatable(
+            model=EmployeeErguul,
+            payload=payload,
+            initial_qs=qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд,
+        )
+        items, total_page = datatable.get()
 
-    rsp = {
-        'items': items,
-        'page': payload.get("page"),
-        'total_page': total_page,
-    }
+        rsp = {
+            'items': items,
+            'page': payload.get("page"),
+            'total_page': total_page,
+        }
+    else:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1,
+
+        }
 
     return JsonResponse(rsp)
