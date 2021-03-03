@@ -13,7 +13,7 @@ export class TableBody extends Component {
         const { idx, талбарууд, values, хувьсах_талбарууд, нэмэлт_талбарууд } = this.props
         return (
             <tr>
-                <td>{idx}</td>
+                <td style={{width: "40px"}}>{idx}</td>
                 {талбарууд.map((item, idx) =>
                     item.has_action
                     ?
