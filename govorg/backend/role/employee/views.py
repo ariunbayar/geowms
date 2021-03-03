@@ -744,16 +744,14 @@ def _get_fullname(address_id, item):
 @login_required(login_url='/gov/secure/login/')
 def erguul_list(request, payload):
 
-    employee = Employee.objects.filter(user=request.user).first()
+    employee = get_object_or_404(Employee, user=request.user)
     is_admin = employee.is_admin
-    org_id = employee.org.id
-    emps_org = Employee.objects.filter(org_id=org_id)
 
     if is_admin:
+        org_id = employee.org.id
         emp_ids = Employee.objects.filter(org_id=org_id).values_list('id', flat=True)
         emps_address = EmployeeAddress.objects.filter(employee_id__in=emp_ids).values_list('id', flat=True)
-        emps_erguul = EmployeeErguul.objects.filter(address_id__in=emps_address)
-        qs = emps_erguul
+        qs = EmployeeErguul.objects.filter(address_id__in=emps_address)
     else:
         employee_address = EmployeeAddress.objects.filter(employee=employee).first()
         qs = EmployeeErguul.objects.filter(address=employee_address)

@@ -68,21 +68,17 @@ export default class Erguuleg extends Component {
             <div className="card">
                 <div className="card-body">
                     <Loader is_loading={is_loading}/>
-                    {
-                        is_open
-                        ?
-                            <button className="btn gp-outline-primary"
-                                onClick={this.handleOpen}
-                            >
-                                Эргүүлд гарсан мэдээлэл
-                            </button>
-                        :
-                            <button className="btn gp-outline-primary"
-                                onClick={this.handleOpen}
-                            >
-                                Эргүүлд гарсан ажилчдын мэдээлэл
-                            </button>
-                    }<br/><br/>
+                        <button className="btn gp-outline-primary" onClick={this.handleOpen}>
+                            {
+                                is_open
+                                ?
+                                    'Эргүүлд гарсан мэдээлэл'
+                                :
+                                    'Эргүүлд гарсан ажилчдын мэдээлэл'
+
+                            }
+                        </button>
+                    <br/><br/>
                     {
                         is_open
                         ?
