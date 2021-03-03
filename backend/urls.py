@@ -39,7 +39,7 @@ urlpatterns = [
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
         path('update/', bundle_views.update, name='update'),
-        path('move/', bundle_views.move, name='move'),
+        path('swap/', bundle_views.swap, name='swap'),
         path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
         path('get-layer/', bundle_views.get_form_options, name='get-layer'),
         path('role-create/', bundle_views.roleCreate, name='role-create'),
