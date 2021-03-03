@@ -124,9 +124,6 @@ export default class AddressMap extends Component {
                     if (field == 'level_1') {
                         mur['value'] = array['level_1'] + ", " + array['level_2'] + ", " + array['level_3'] + ", " + array['street'] + " гудамж " + array['apartment'] + " байр, " + array['door_number'] + " тоот"
                     }
-                    if (conv_field.is_erguul && field == 'level_3') {
-                        mur['value'] = array['level_3'] + ", " + array['street'] + " гудамж " + array['apartment'] + " байр"
-                    }
                     fields.push(mur)
                 }
             })
@@ -193,11 +190,10 @@ export default class AddressMap extends Component {
                             'length': 100,
                         },
                         {
-                            'origin_name': 'level_3',
+                            'origin_name': 'erguul_address',
                             'name': 'Эргүүлийн хаяг',
                             'disabled': true,
                             'length': 100,
-                            'is_erguul': is_erguul,
                         },
                     ]
                     const fields = this.makeFields(info, conv)

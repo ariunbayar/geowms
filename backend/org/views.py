@@ -1432,9 +1432,9 @@ def get_emp_info(request, payload, pk):
         erguul_qs = EmployeeErguul.objects
         erguul_qs = erguul_qs.filter(address=address_id)
         erguul = erguul_qs.first()
-        info['level_3'] = erguul.level_3
-        info['street'] = erguul.street
-        info['apartment'] = erguul.apartment
+        erguul_address = erguul.level_3 + ", " + erguul.street  + " гудамж " + erguul.apartment + " байр"
+
+        info['erguul_address'] = erguul_address
         info['part_time'] = erguul.get_part_time_display()
         info['date_start'] = utils.datetime_to_string(erguul.date_start)
         info['date_end'] = utils.datetime_to_string(erguul.date_end)
