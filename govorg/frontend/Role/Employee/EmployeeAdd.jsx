@@ -6,8 +6,8 @@ import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
-
 import EmployeeMap from "./Employee_map/Map"
+import BackButton from "@utils/Button/BackButton"
 
 
 export class EmployeeAdd extends Component {
@@ -304,13 +304,6 @@ export class EmployeeAdd extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="text-left">
-                        <NavLink to={`${prefix}`}>
-                            <p className="btn gp-outline-primary">
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </p>
-                        </NavLink>
-                    </div>
                     <div className="row">
                         <Formik
                             enableReinitialize
@@ -590,6 +583,7 @@ export class EmployeeAdd extends Component {
                     title={this.state.title}
                     model_type_icon={this.state.model_type_icon}
                 />
+                <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
             </div>
         )
     }

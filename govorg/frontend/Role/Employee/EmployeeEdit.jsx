@@ -1,7 +1,5 @@
 import React, { Component, Fragment } from "react"
-import { NavLink } from "react-router-dom"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-
 import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import Modal from "@utils/Modal/Modal"
@@ -10,6 +8,7 @@ import Loader from "@utils/Loader"
 import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
 import EmployeeMap from "./Employee_map/Map"
+import BackButton from "@utils/Button/BackButton"
 
 
 export class EmployeeEdit extends Component {
@@ -478,13 +477,6 @@ export class EmployeeEdit extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="text-left">
-                        <NavLink to={`${prefix}${id}/detail/#`}>
-                            <p className="btn gp-outline-primary">
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </p>
-                        </NavLink>
-                    </div>
                     <div className="row">
                         <Formik
                             enableReinitialize
@@ -779,6 +771,7 @@ export class EmployeeEdit extends Component {
                     model_type_icon = {this.state.model_type_icon}
                 />
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
             </div>
         )
     }

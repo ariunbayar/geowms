@@ -6,6 +6,8 @@ import * as Yup from 'yup'
 import { service } from './Role/service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import InsPerms from './Role/GovPerms'
+import BackButton from "@utils/Button/BackButton"
+
 
 const validationSchema = Yup.object().shape({
     role_name: Yup.string()
@@ -130,13 +132,7 @@ export class RoleAdd extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="text-left">
-                        <NavLink to={`/gov/perm/role`}>
-                            <p className="btn gp-outline-primary">
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </p>
-                        </NavLink>
-                    </div>
+                    <BackButton {...this.props} name={'Буцах'} navlink_url={'/gov/perm/role'}></BackButton>
                     <Formik
                         initialValues={initial_values}
                         enableReinitialize
