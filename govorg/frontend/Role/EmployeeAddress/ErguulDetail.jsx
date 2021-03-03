@@ -35,7 +35,7 @@ export class ErguulDetail extends Component {
     }
 
     getPartTime(key){
-        let obj = {"Үдээс хойш": "text-dark", "Үдээс өмнө": "text-dark"}
+        let obj = {"Үдээс хойш": "text-dark", "Үдээс өмнө": "text-warning"}
         return obj[key]
     }
 
