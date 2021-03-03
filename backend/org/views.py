@@ -552,18 +552,20 @@ def org_remove(request, payload, level):
 def org_list(request, payload, level):
 
     оруулах_талбарууд = ['id', 'name', 'level', 'num_employees', 'num_systems']
-
+    items = []
+    total_page = 1
     qs = Org.objects.filter(level=level)
-    qs = qs.annotate(num_employees=Count('employee', distinct=True))
-    qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+    if qs:
+        qs = qs.annotate(num_employees=Count('employee', distinct=True))
+        qs = qs.annotate(num_systems=Count('govorg', distinct=True))
 
-    datatable = Datatable(
-        model=Org,
-        initial_qs=qs,
-        payload=payload,
-        оруулах_талбарууд=оруулах_талбарууд
-    )
-    items, total_page = datatable.get()
+        datatable = Datatable(
+            model=Org,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд
+        )
+        items, total_page = datatable.get()
 
     rsp = {
         'items': items,

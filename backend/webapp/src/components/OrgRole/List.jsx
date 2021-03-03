@@ -41,6 +41,7 @@ export class List extends Component {
                         per_page={20}
                         уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                         хувьсах_талбарууд={хувьсах_талбарууд}
+                        нэмэх_товч={"/back/org-role/add/"}
                     />
                 </div>
             </div>
