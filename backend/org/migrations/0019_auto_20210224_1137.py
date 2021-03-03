@@ -4,6 +4,19 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def _check_tailbar_duplicate(apps, schema_editor):
+    ErguulTailbar = apps.get_model('backend_org', 'ErguulTailbar')
+    tailbar_qs = ErguulTailbar.objects.all()
+    for tailbar in tailbar_qs:
+        qs = ErguulTailbar.objects
+        qs = qs.filter(id=tailbar.id)
+        if len(qs) > 1:
+            first_tailbar = qs.first()
+            exclude_first = qs.exclude(id=first_tailbar.id)
+            for delete_tailbar in exclude_first:
+                delete_tailbar.delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -11,6 +24,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(_check_tailbar_duplicate),
+
         migrations.AddField(
             model_name='employeeerguul',
             name='is_over',
