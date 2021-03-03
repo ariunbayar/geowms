@@ -25,6 +25,7 @@ from govorg.backend.utils import (
     count_property_of_feature,
     get_perm_kind_name
 )
+from main.components import Datatable
 
 
 def _get_role_data_display(role):
@@ -36,22 +37,26 @@ def _get_role_data_display(role):
     }
 
 
-@require_GET
+@require_POST
 @ajax_required
-def list(request):
+def list(request, payload):
 
     org = get_object_or_404(Org, employee__user=request.user)
     gov_perm = get_object_or_404(GovPerm, org=org)
     emp_roles = EmpRole.objects.filter(gov_perm=gov_perm)
 
-    roles = [
-        _get_role_data_display(role)
-        for role in emp_roles
-    ]
-
+    оруулах_талбарууд = ['gov_perm_id', 'id', 'name', 'description']
+    datatable = Datatable(
+        model=EmpRole,
+        initial_qs=emp_roles,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
+    items, total_page = datatable.get()
     rsp = {
-        'success': True,
-        'roles': roles,
+        'items': items,
+        'page': payload.get('page'),
+        'total_page': total_page
     }
 
     return JsonResponse(rsp)
