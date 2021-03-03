@@ -1458,3 +1458,32 @@ def get_contain_geoms(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+
+
+from PIL import Image, ImageFont, ImageDraw
+img = Image.open(os.path.join(settings.MEDIA_ROOT, 'gp_layer_building_view.jpeg'))
+print(img.size)
+x, y = img.size
+plus = 100
+
+new_x = x + plus
+new_y = y + plus
+
+new_img = Image.new('RGBA', (new_x, new_y), 'red')
+
+top = math.floor((new_x - x) / 2)
+left = math.floor((new_y - y) / 2)
+tup = (top, left)
+
+new_img.paste(img, tup)
+# font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=24)
+
+# draw = ImageDraw.Draw(img)
+# text = 'Lol'
+# text2 = 'hahaha'
+
+# draw.text((0, 0), text, (0, 0, 0), font)
+# draw.text((0, 10), text2, (0, 0, 0), font)
+new_img.save('text.png')

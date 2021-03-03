@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 
 import {Info} from './information/info'
 import {Bar} from './tsegPersonal/Index'
+
 export class App extends Component {
 
     render() {
