@@ -3,6 +3,8 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 import ModalAlert from "../../ModalAlert"
+import BackButton from "@utils/Button/BackButton"
+
 
 export class GovorgForm extends Component {
 
@@ -121,14 +123,6 @@ export class GovorgForm extends Component {
 
             <div className="my-4">
                 <div className="row">
-                    <div className="col-md-12 mb-4">
-                        <a href="#" className="btn gp-outline-primary" onClick={this.props.history.goBack}>
-                            <i className="fa fa-angle-double-left"></i> Буцах
-                        </a>
-                    </div>
-                </div>
-                <div className="row">
-
                     <div className="col-md-4">
                         <Formik
                             enableReinitialize
