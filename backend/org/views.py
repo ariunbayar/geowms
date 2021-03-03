@@ -602,7 +602,7 @@ def detail(request, level, pk):
     })
 
 
-def _get_employee_data(employee, filter_from_user):
+def _get_employee(employee, filter_from_user):
     if filter_from_user:
         emp_obj = Employee.objects.filter(user=employee).first()
         id = employee.id
@@ -690,7 +690,7 @@ def employee_list(request, payload, level, pk):
         else:
             filter_from_user = False
 
-        employee_detail = _get_employee_data(employee, filter_from_user)
+        employee_detail = _get_employee(employee, filter_from_user)
         employees_display.append(employee_detail)
 
     total_page = total_items.num_pages
