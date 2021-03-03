@@ -48,7 +48,7 @@ export class TableBody extends Component {
                     <td key={idx}>{values[item.field]}</td>
                 )}
                 {нэмэлт_талбарууд.map((item, idx) =>
-                    <td key={idx}>
+                    <td key={idx} style={{width: item.width ? item.width: null}}>
                         {item.component
                         ?
                         <item.component values={values} {...item.props}/>
