@@ -12,6 +12,7 @@ export class UserTable extends Component {
         this.state = {
             refresh: false,
             жагсаалтын_холбоос: `/back/api/org/level-${props.match.params.level}/${props.match.params.id}/employeeList/`,
+            нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/хэрэглэгч/нэмэх/`,
             custom_query: {},
             талбарууд: [
                 {'field': 'first_name', "title": 'Нэр', 'has_action': true},
@@ -52,6 +53,8 @@ export class UserTable extends Component {
             талбарууд,
             жагсаалтын_холбоос,
             хувьсах_талбарууд,
+            custom_query,
+            нэмэх_товч,
         } = this.state
 
         return (
@@ -66,6 +69,8 @@ export class UserTable extends Component {
                             per_page={20}
                             уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                             хувьсах_талбарууд={хувьсах_талбарууд}
+                            нэмэх_товч={нэмэх_товч}
+                            custom_query={custom_query}
                         />
                     </div>
                 </div>
