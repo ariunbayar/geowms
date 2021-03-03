@@ -13,11 +13,23 @@ export default class Bar extends Component {
 
         this.dragEnd = this.dragEnd.bind(this)
         this.addInputs = this.addInputs.bind(this)
+        this.dragStart = this.dragStart.bind(this)
     }
 
     dragEnd(e) {
-        e.target.style.left = e.clientX + 'px'
-        e.target.style.top = e.clientY + 'px'
+        console.log(e);
+        console.log(e.movementX, 'movementX');
+        console.log(e.movementY, 'movementY');
+        console.log(e.clientX, 'clientX');
+        console.log(e.clientY, 'clientY');
+        console.log(e.pageX, 'pageX');
+        console.log(e.pageY, 'pageY');
+        e.target.style.left = 0 + 'px'
+        e.target.style.top = 10 + 'px'
+    }
+
+    dragStart(e) {
+        console.log(e)
     }
 
     calcPercent(max, per=5) {
@@ -54,14 +66,28 @@ export default class Bar extends Component {
                             border border-dark
                         '
                     >
-                        <img
-                            src={'/media/gp_layer_building_view.jpeg'}
-                            style={
-                                {
-                                    border: '2px solid black'
+                        <div
+                            className="position-relative"
+                        >
+                            <img
+                                src={'/media/gp_layer_building_view.jpeg'}
+                                style={
+                                    {
+                                        border: '2px solid black'
+                                    }
                                 }
-                            }
-                        />
+                            />
+                            <div
+                                draggable='true'
+                                style={{
+                                    height: '200px', width: '200px', backgroundColor: 'red'
+                                }}
+                                className="position-absolute"
+                                onDragEnd={this.dragEnd}
+                                onDragStart={this.dragStart}
+                            >
+                            </div>
+                        </div>
                     </div>
                     <div className="col-md-4 border border-dark">
                         <div>

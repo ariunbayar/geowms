@@ -1472,18 +1472,16 @@ new_x = x + plus
 new_y = y + plus
 
 new_img = Image.new('RGBA', (new_x, new_y), 'red')
-
 top = math.floor((new_x - x) / 2)
 left = math.floor((new_y - y) / 2)
 tup = (top, left)
-
 new_img.paste(img, tup)
-# font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=24)
 
-# draw = ImageDraw.Draw(img)
-# text = 'Lol'
-# text2 = 'hahaha'
+font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=24)
 
-# draw.text((0, 0), text, (0, 0, 0), font)
-# draw.text((0, 10), text2, (0, 0, 0), font)
+draw = ImageDraw.Draw(new_img)
+text = 'Lol'
+
+draw.text((20, 50), text, (100, 255, 255), font)
+draw.point([(10, 10)], fill=(0, 0, 0))
 new_img.save('text.png')
