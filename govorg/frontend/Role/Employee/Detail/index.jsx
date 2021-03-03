@@ -1,11 +1,10 @@
 import React, { Component } from "react"
-
 import { service } from "../service"
 import InsPerms from '../../Role/GovPerms'
-import { ButtonBack } from "./ButtonBack"
 import { ButtonTokenRefresh } from "./ButtonTokenRefresh"
 import { ButtonEdit } from "./ButtonEdit"
 import { ButtonDelete } from "./ButtonDelete"
+import BackButton from "@utils/Button/BackButton"
 
 
 export class Detail extends Component {
@@ -156,10 +155,7 @@ export class Detail extends Component {
                     <div className="container-fluid">
 
                         <div className="row">
-                            <div className="col-md-6 p-0">
-                                <ButtonBack to={prefix}/>
-                            </div>
-                            <div className="col-md-6 p-0 text-right">
+                            <div className="col-md-12 p-0 text-right">
                                 {this.props.employee.is_admin || this.props.employee.username == username ?
                                 <ButtonTokenRefresh
                                     onClick={ this.handleTokenRefresh }
@@ -282,6 +278,7 @@ export class Detail extends Component {
                         }
                     </div>
                 </div>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
             </div>
         )
     }

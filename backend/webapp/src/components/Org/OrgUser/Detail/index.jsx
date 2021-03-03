@@ -111,13 +111,8 @@ export class Detail extends Component {
 
         return (
             <div className="container-fluid">
-
                 <div className="row">
-                    <div className="col-md-6 p-0">
-                        <ButtonBack to={`/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/`}/>
-                    </div>
-
-                    <div className="col-md-6 p-0 text-right">
+                    <div className="col-md-12 p-0 text-right">
                         <ButtonTokenRefresh onClick={ this.handleTokenRefresh } status={ status_token_refresh }/>
                         <ButtonEdit to={`/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/${emp}/засах/`}/>
                         <ButtonDelete

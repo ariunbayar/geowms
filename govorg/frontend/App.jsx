@@ -22,6 +22,7 @@ import { service } from "./service"
 import MenuItem from "@utils/MenuItem"
 import { Role } from './Role';
 
+
 export class App extends Component {
 
     constructor(props) {
