@@ -9,7 +9,7 @@ from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 from django.db.models import Count, F, Func
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
@@ -1398,43 +1398,89 @@ def get_addresses(request, level, pk):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_emp_info(request, pk):
-    info = dict()
+def get_emp_info(request, payload, pk):
     employee = get_object_or_404(Employee, pk=pk)
+    is_erguul = payload.get("is_erguul")
+    info = dict()
+    title = ''
+
     info['org_name'] = employee.org.name
     info['last_name'] = employee.user.last_name # ovog
     info['first_name'] = employee.user.first_name
-    info['phone_number'] = employee.phone_number
-    info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
-    info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
-    info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
-    info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
-    info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
-    info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
+    info['phone_number'] = employee.phone_number or ''
+
+    if not is_erguul:
+        info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
+        info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
+        info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
+        info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
+        info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
+        info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
+        title = 'Ажилтаны мэдээлэл'
+
+    else:
+        address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+        erguul_qs = EmployeeErguul.objects
+        erguul_qs = erguul_qs.filter(address=address_id)
+        erguul = erguul_qs.first()
+        erguul_address = erguul.level_3 + ", " + erguul.street  + " гудамж " + erguul.apartment + " байр"
+
+        info['erguul_address'] = erguul_address
+        info['part_time'] = erguul.get_part_time_display()
+        info['date_start'] = utils.datetime_to_string(erguul.date_start)
+        info['date_end'] = utils.datetime_to_string(erguul.date_end)
+        title = 'Эргүүлийн мэдээлэл'
 
     rsp = {
         'success': True,
         'info': info,
+        'title': title
     }
     return JsonResponse(rsp)
 
 
+def _get_erguul_qs(employee):
+    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+    erguul_qs = EmployeeErguul.objects
+    erguul_qs = erguul_qs.filter(address_id=address_id)
+    erguul_qs = erguul_qs.filter(is_over=False)
+    erguul = erguul_qs.values().first()
+    return erguul
+
+
+def _get_erguul(erguul, field):
+    value = ''
+    if erguul:
+        value = erguul[field]
+    return value
+
+
 @require_GET
 @ajax_required
-def get_erguuleg_fields(request):
+def get_erguuleg_fields(request, pk):
+    erguul_id = ''
     send_fields = list()
+
+    employee = get_object_or_404(Employee, pk=pk)
+    erguul = _get_erguul_qs(employee)
+
+    if erguul:
+        erguul_id = erguul['id']
+
     for f in EmployeeErguul._meta.get_fields():
         type_name = f.get_internal_type()
-        not_list = ['ForeignKey', 'AutoField']
+        not_list = ['ForeignKey', 'AutoField', 'BooleanField', 'PointField']
         if type_name not in not_list:
             not_field = ['created_at']
             if f.name not in not_field:
                 if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                    value = _get_erguul(erguul, f.name)
                     field_type = ''
                     if 'date' in f.name:
                         field_type = 'date'
+                        value = utils.datetime_to_string(value)
                     send_fields.append({
                         'origin_name': f.name,
                         'name': f.verbose_name,
@@ -1442,10 +1488,12 @@ def get_erguuleg_fields(request):
                         'choices': f.choices,
                         'disabled': False,
                         'type': field_type,
+                        'value': value,
                     })
     rsp = {
         'success': True,
         'info': send_fields,
+        'erguul_id': erguul_id,
     }
     return JsonResponse(rsp)
 
@@ -1455,30 +1503,44 @@ def get_erguuleg_fields(request):
 def save_erguul(request, payload):
     hour = ''
 
-    emp_id = payload.get('id')
+    emp_id = payload.get('emp_id')
+    erguul_id = payload.get('erguul_id')
     values = payload.get('values')
-    point_coordinate = payload.get('point')
     photo = payload.get('photo')
 
-    point = _get_point_for_db(point_coordinate)
-    employee = get_object_or_404(Employee, pk=emp_id)
+    employee = get_object_or_404(Employee, id=emp_id)
+    address_qs = EmployeeAddress.objects
+    address_qs = address_qs.filter(employee=employee)
+    address_qs = address_qs.first()
+    address_id = address_qs.id
 
-    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+    point = _get_point_for_db(payload.get('point'))
+    values['point'] = point
     date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
+    values['date_start'] = date_start
     date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
-    part_time = values['part_time'] if 'part_time' in values else ''
+    values['date_end'] = date_end
 
     with transaction.atomic():
-        erguul = EmployeeErguul()
-        erguul.address_id = address_id
-        erguul.level_3 = values['level_3'] if 'level_3' in values else ''
-        erguul.street = values['street'] if 'street' in values else ''
-        erguul.apartment = values['apartment'] if 'apartment' in values else ''
-        erguul.point = point
-        erguul.part_time = part_time
-        erguul.date_start = date_start
-        erguul.date_end = date_end
-        erguul.save()
+        erguul_qs = EmployeeErguul.objects
+        if not erguul_id:
+            erguul_qs = erguul_qs.create(address_id=address_id, **values)
+            erguul_id = erguul_qs.id
+            subject = 'Эргүүлд гарах мэдээлэл'
+            update_msg = ''
+            info = 'Амжилттай хадгалсан'
+        else:
+            erguul_qs = erguul_qs.filter(pk=erguul_id)
+            erguul_qs.update(
+                **values
+            )
+            subject = 'Шинэчилсэн эргүүлд гарах мэдээлэл'
+            update_msg = '<h4>Таны эргүүлд гарах мэдээллийг шинэчилсэн байна</h4>'
+            info = 'Амжилттай зассан'
+
+        part_time = values['part_time'] if 'part_time' in values else ''
+        if not part_time:
+            raise Http404
 
         if int(part_time) == EmployeeErguul.DAY_TIME:
             hour = EmployeeErguul.DAY_HOUR
@@ -1487,7 +1549,7 @@ def save_erguul(request, payload):
 
         photo = photo.split(',')
         photo = photo[len(photo) - 1]
-        file_name = str(erguul.id) + '.png'
+        file_name = str(erguul_id) + '.png'
         folder_name = 'covid_map'
         path = os.path.join(settings.MEDIA_ROOT, folder_name, file_name)
         if photo:
@@ -1496,29 +1558,30 @@ def save_erguul(request, payload):
             image = Image.open(io.BytesIO(img_byte))
             image.save(path)
 
-        subject = 'Эргүүлд гарах мэдээлэл'
         msg = 'Та энэ заасан газарт ' + utils.datetime_to_string(date_start) + " - " + utils.datetime_to_string(date_end) + " хүртэлх хугацаанд " + hour + " цагийн хооронд эргүүл хийнэ"
         host_name = utils.get_config('EMAIL_HOST_NAME')
         linked_path = 'https://' + host_name + "/media/" + folder_name + "/" + file_name
         to_email = [employee.user.email]
         attach = '''
             <body>
+                {update_msg}
                 <dd>
                     {msg}
                 </dd>
-                <img src={linked_path} />
+                <img src={linked_path} alt='erguul'/>
                 <p>
                     <b>Ногоон цэг</b> нь таны эргүүл хийх газар
+                    <br />
                     <b>Улаан цэг</b> нь таны гэрийн байршил
                 </p>
             </body>
-        '''.format(msg=msg, linked_path=linked_path)
+        '''.format(msg=msg, linked_path=linked_path, update_msg=update_msg)
 
         utils.send_email(subject, msg, to_email, attach)
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хадгалсан',
+        'info': info,
     }
 
     return JsonResponse(rsp)

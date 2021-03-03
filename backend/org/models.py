@@ -72,6 +72,7 @@ class EmployeeErguul(models.Model):
     part_time = models.PositiveIntegerField(choices=PART_TIME_CHOICES, db_index=True, verbose_name='Ээлж')
     date_start = models.DateTimeField(verbose_name='Эхлэх огноо')
     date_end = models.DateTimeField(verbose_name='Дуусах огноо')
+    is_over = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Оноосон огноо')
 
 
@@ -84,6 +85,6 @@ class ErguulTailbar(models.Model):
         (2, 'Гараагүй'),
     ]
 
-    erguul = models.ForeignKey(EmployeeErguul, on_delete=models.CASCADE)
+    erguul = models.OneToOneField(EmployeeErguul, on_delete=models.CASCADE)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, verbose_name='Төлөв')
     description = models.CharField(max_length=10000, db_index=True, verbose_name='Тайлбар')
