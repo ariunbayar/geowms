@@ -15,16 +15,24 @@ export default class Bundle extends Component {
 
     render() {
         const {id, name, icon_url, wms_list} = this.props.values
-        const idx=this.props.idx
+        const {idx, values} = this.props
         return (
-            <tr>
+            <tr
+                key={idx}
+                draggable
+                onDrop={event => this.props.onDrop(event, values, idx)}
+                onDragOver={event => this.props.onDragOver(event, values, idx)}
+                onDrag={(event) => this.props.onDrag(event, values, idx)}
+            >
                 <td scope="col" className="text-dark">
                     {idx + 1}
                 </td>
 
                 <td>
-                    <img className="img" src={icon_url}/>
-                    {name}
+                    <NavLink to={`/back/дэд-сан/${id}/засах/`}>
+                        <img className="img" src={icon_url}/>
+                        {name}
+                    </NavLink>
                 </td>
 
                 <td>
@@ -49,22 +57,6 @@ export default class Bundle extends Component {
                             </p>
                         )
                     )}
-                </td>
-                <td>
-                    <NavLink to={`/back/дэд-сан/${id}/засах/`}>
-                            <i className="fa fa-pencil-square-o gp-text-primary" aria-hidden="true"></i>
-                    </NavLink>
-                </td>
-
-                <td>
-                    <a href="#" onClick={event => this.props.handleMove(event, id, 'up')}>
-                        <i className="fa fa-chevron-up gp-text-primary" aria-hidden="true"></i>
-                    </a>
-                </td>
-                <td>
-                    <a href="#" onClick={event => this.props.handleMove(event, id, 'down')}>
-                        <i className="fa fa-chevron-down gp-text-primary" aria-hidden="true"></i>
-                    </a>
                 </td>
             </tr>
         )

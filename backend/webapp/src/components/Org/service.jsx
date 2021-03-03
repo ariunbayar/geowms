@@ -128,20 +128,23 @@ function getAddresses(level, id) {
     return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
 }
 
-function getEmpInfo(id) {
-    const opts = getGetOptions()
-    return fetch(`${prefix}/${id}/emp-info/`, opts).then(handleResponse)
-}
-
-function getErguulegFields() {
-    const opts = getGetOptions()
-    return fetch(`${prefix}/erguuleg-fields/`, opts).then(handleResponse)
-}
-
-function saveErguul(values, id, point, photo) {
+function getEmpInfo(id, is_erguul) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ values, id, point, photo }),
+        body: JSON.stringify({ is_erguul }),
+    }
+    return fetch(`${prefix}/${id}/emp-info/`, requestOptions).then(handleResponse)
+}
+
+function getErguulegFields(id) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${id}/erguuleg-fields/`, opts).then(handleResponse)
+}
+
+function saveErguul(values, emp_id, point, photo, erguul_id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ values, emp_id, point, photo, erguul_id }),
     }
     return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
 }

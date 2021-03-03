@@ -172,7 +172,6 @@ export class PortalDataTable extends Component {
                                     }
                                 </tbody>
                             </table>
-                            <Loader is_loading={уншиж_байгаа_эсэх}/>
                         </div>
                         <Pagination
                             refresh={this.state.refresh}

@@ -1,7 +1,7 @@
 export const service = {
     getAll,
     update,
-    move,
+    swap,
     roleCreate,
     roleRemove,
     defaultCheckUpdate,
@@ -93,13 +93,13 @@ function update(values) {
 }
 
 
-function move(id, move) {
+function swap(swap_one, swap_two) {
     const opts = {
         ..._getPostOptions(),
-        body: JSON.stringify({id, move}),
+        body: JSON.stringify({swap_one, swap_two}),
     }
 
-    return fetch(`${prefix}/bundle/move/`, opts).then(handleResponse)
+    return fetch(`${prefix}/bundle/swap/`, opts).then(handleResponse)
 }
 
 function roleCreate(values) {

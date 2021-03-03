@@ -3,6 +3,7 @@ import AddressMap from './Map'
 import {service} from '../Employee/service'
 import Loader from "@utils/Loader"
 import {Form} from './Form'
+import {ErguulDetail} from "./ErguulDetail"
 
 export default class Erguuleg extends Component {
 
@@ -14,9 +15,11 @@ export default class Erguuleg extends Component {
             is_loading: true,
             is_empty: false,
             infos: [],
+            is_open: false,
         }
         this.getAddresses = this.getAddresses.bind(this)
         this.saveErguulTailbar = this.saveErguulTailbar.bind(this)
+        this.handleOpen = this.handleOpen.bind(this)
     }
 
     componentDidMount() {
@@ -51,8 +54,12 @@ export default class Erguuleg extends Component {
             })
     }
 
+    handleOpen() {
+        this.setState({ is_open: !this.state.is_open })
+    }
+
     render() {
-        const { points, is_loading, is_empty, infos } = this.state
+        const { points, is_loading, is_empty, infos, is_open } = this.state
         const { employee } = this.props
 
         const is_admin = employee.is_admin
@@ -61,23 +68,42 @@ export default class Erguuleg extends Component {
             <div className="card">
                 <div className="card-body">
                     <Loader is_loading={is_loading}/>
-                    <div className="row">
-                        <div className="col-4">
-                            <Form
-                                is_empty={is_empty}
-                                infos={infos}
-                                saveErguulTailbar={
-                                    (...values) => this.saveErguulTailbar(...values)
-                                }
-                            />
-                        </div>
-                        <div className="col-8">
-                            <AddressMap
-                                features={points}
-                                is_admin={false}
-                            />
-                        </div>
-                    </div>
+                        <button className="btn gp-outline-primary" onClick={this.handleOpen}>
+                            {
+                                is_open
+                                ?
+                                    'Эргүүлд гарсан мэдээлэл'
+                                :
+                                    'Эргүүлд гарсан ажилчдын мэдээлэл'
+
+                            }
+                        </button>
+                    <br/><br/>
+                    {
+                        is_open
+                        ?
+                            <ErguulDetail/>
+                        :
+                            <div>
+                                <div className="row">
+                                    <div className="col-4">
+                                        <Form
+                                            is_empty={is_empty}
+                                            infos={infos}
+                                            saveErguulTailbar={
+                                                (...values) => this.saveErguulTailbar(...values)
+                                            }
+                                        />
+                                    </div>
+                                    <div className="col-8">
+                                        <AddressMap
+                                            features={points}
+                                            is_admin={false}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                    }
                 </div>
             </div>
         )

@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import {GPIcon} from "@utils/Tools"
 
 
 
@@ -59,7 +60,7 @@ export class TableBody extends Component {
                                     ?
                                         item.text
                                     :
-                                        <i className={item.icon}></i>
+                                        <GPIcon icon={item.icon}></GPIcon>
                                 }
                             </a>
                         }

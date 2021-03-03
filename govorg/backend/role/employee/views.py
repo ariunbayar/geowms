@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
@@ -11,6 +11,7 @@ from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
+from main.components import Datatable
 from backend.inspire.models import (
     EmpRole,
     EmpPerm,
@@ -31,6 +32,11 @@ from govorg.backend.utils import (
 )
 
 from backend.org.forms import EmployeeAddressForm
+
+from backend.org.models import Employee, Org
+from backend.dedsanbutets.models import ViewNames
+from govorg.backend.org_request.models import ChangeRequest
+from govorg.backend.org_request.views import _get_geom
 
 
 def _get_employee_display(employee):
@@ -528,7 +534,7 @@ def send_mail(request, payload):
 
 def _is_cloned_feature(address_qs):
     is_cloned = False
-    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
+    erguul_id = address_qs.employeeerguul_set.filter(is_over=False)
     if erguul_id:
         is_cloned = True
     return is_cloned
@@ -553,6 +559,7 @@ def _get_feature_collection(employees):
 
         erguul = EmployeeErguul.objects
         erguul = erguul.filter(address=addresses)
+        erguul = erguul.filter(is_over=False)
         erguul = erguul.first()
         if erguul:
             erguul_info = dict()
@@ -581,7 +588,7 @@ def get_addresses(request):
         employees = Employee.objects
         employees = employees.filter(org=org)
     else:
-        raise 404
+        raise Http404
 
     feature_collection = _get_feature_collection(employees)
 
@@ -594,13 +601,18 @@ def get_addresses(request):
 
 def _get_erguul_qs(employee):
     tailbar = {}
+
     address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+
     erguul_qs = EmployeeErguul.objects
     erguul_qs = erguul_qs.filter(address_id=address_id)
-    erguul = erguul_qs.first()
-    if erguul:
+    erguul_qs = erguul_qs.filter(is_over=False)
+
+    if erguul_qs:
+        erguul = erguul_qs.first()
         tailbar = ErguulTailbar.objects
         tailbar = tailbar.filter(erguul=erguul).values().first()
+
     return tailbar
 
 
@@ -623,7 +635,7 @@ def get_field_tailbar(request):
         tailbar_id = tailbar['id']
     for f in ErguulTailbar._meta.get_fields():
         type_name = f.get_internal_type()
-        not_list = ['ForeignKey', 'AutoField']
+        not_list = ['OneToOneField', 'AutoField']
         if type_name not in not_list:
             not_field = ['created_at']
             if f.name not in not_field:
@@ -657,21 +669,32 @@ def save_field_tailbar(request, payload):
 
     values = payload.get('values')
     pk = payload.get('id')
-    if pk:
-        erguul_qs = ErguulTailbar.objects
-        erguul_qs = erguul_qs.filter(pk=pk)
-        erguul_qs.update(**values)
-    else:
-        address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
-        if address_id:
-            address = get_object_or_404(EmployeeAddress, id=address_id)
-            erguul_id = address.employeeerguul_set.values_list('id', flat=True).first()
-            values['erguul_id'] = erguul_id
-            ErguulTailbar.objects.create(**values)
+
+    with transaction.atomic():
+        if pk:
+            erguul_qs = ErguulTailbar.objects
+            erguul_qs = erguul_qs.filter(pk=pk)
+            erguul_qs.update(**values)
+
+        else:
+            address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
+            if address_id:
+                address = get_object_or_404(EmployeeAddress, id=address_id)
+
+                erguul_qs = EmployeeErguul.objects
+                erguul_qs = erguul_qs.filter(address=address)
+                erguul_qs = erguul_qs.filter(is_over=False)
+                erguul = erguul_qs.first()
+
+                erguul_qs.update(is_over=True)
+
+                values['erguul_id'] = erguul.id
+
+                ErguulTailbar.objects.create(**values)
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хадглалаа'
+        'info': 'Амжилттай хадгаллаа'
     }
     return JsonResponse(rsp)
 
@@ -687,4 +710,78 @@ def get_erguul(request):
         'success': True,
         'points': feature_collection,
     }
+    return JsonResponse(rsp)
+
+
+def _get_part_time(part_time, item):
+    return "Үдээс хойш" if part_time == 1 else "Үдээс өмнө"
+
+
+def _get_state(state, item):
+    user = ErguulTailbar.objects.filter(erguul=item['id']).first()
+    if user is not None:
+        state = user.state
+        if state == 1:
+            state = "Гарсан"
+        elif state == 2:
+            state = "Гараагүй"
+    else:
+        state = "Гарч байгаа"
+    return state
+
+
+def _get_fullname(address_id, item):
+    address = EmployeeAddress.objects.filter(id=address_id).first()
+    user = address.employee.user
+    fullname = user.first_name + '. ' + user.last_name
+    return fullname
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def erguul_list(request, payload):
+
+    employee = get_object_or_404(Employee, user=request.user)
+    is_admin = employee.is_admin
+
+    if is_admin:
+        org_id = employee.org.id
+        emp_ids = Employee.objects.filter(org_id=org_id).values_list('id', flat=True)
+        emps_address = EmployeeAddress.objects.filter(employee_id__in=emp_ids).values_list('id', flat=True)
+        qs = EmployeeErguul.objects.filter(address_id__in=emps_address)
+    else:
+        employee_address = EmployeeAddress.objects.filter(employee=employee).first()
+        qs = EmployeeErguul.objects.filter(address=employee_address)
+
+    if qs:
+        оруулах_талбарууд = ['address_id', 'apartment', 'date_start', 'date_end', 'part_time']
+        хувьсах_талбарууд = [
+            {"field": "part_time", "action": _get_part_time, "new_field": "part_time"},
+            {"field": "apartment", "action": _get_state, "new_field": "state"},
+            {"field": "address_id", "action": _get_fullname, "new_field": "fullname"},
+        ]
+
+        datatable = Datatable(
+            model=EmployeeErguul,
+            payload=payload,
+            initial_qs=qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд,
+        )
+        items, total_page = datatable.get()
+
+        rsp = {
+            'items': items,
+            'page': payload.get("page"),
+            'total_page': total_page,
+        }
+    else:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1,
+
+        }
+
     return JsonResponse(rsp)
