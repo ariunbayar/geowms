@@ -112,7 +112,7 @@ urlpatterns = [
         path('<int:pk>/refresh-token/', govorg_views.refresh_token, name='refresh-token'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
-        path('govorgList/', govorg_views.govorgList, name='govorgList'),
+        path('govorgList/<int:org_id>/', govorg_views.govorgList, name='govorgList'),
     ], 'govorg'))),
 
     path('api/config/', include(([
