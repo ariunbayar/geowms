@@ -30,7 +30,7 @@ def _set_is_over(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_org', '0019_auto_20210224_1137'),
+        ('backend_org', '0020_auto_20210224_1137'),
     ]
 
     operations = [

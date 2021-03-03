@@ -6,6 +6,7 @@ import Loader from "@utils/Loader"
 
 import {service} from './service'
 import Modal from "../../Modal"
+import BackButton from "@utils/Button/BackButton"
 
 
 export class Дэлгэрэнгүй extends Component {
@@ -118,13 +119,6 @@ export class Дэлгэрэнгүй extends Component {
 
         return (
             <div className="my-4">
-                <div className="row">
-                    <div className="col-md-12 mb-4">
-                        <NavLink className="btn gp-outline-primary" exact to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`}>
-                            <i className="fa fa-angle-double-left"></i> Буцах
-                        </NavLink>
-                    </div>
-                </div>
                 <div className="row">
                     <Loader is_loading={this.state.is_loading}/>
                     <div className="col-md-12">

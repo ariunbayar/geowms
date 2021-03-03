@@ -7,10 +7,11 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_org', '0018_employeeerguul_erguultailbar'),
+        ('backend_org', '0019_auto_20210303_1553'),
     ]
 
     operations = [
+
         migrations.AddField(
             model_name='employeeerguul',
             name='is_over',
