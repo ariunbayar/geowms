@@ -10,7 +10,6 @@ export const service = {
     employeeUpdate,
     empTokenRefresh,
     sistemCount,
-    employee_list,
     orgList,
     orgAll,
     getBaseLayers,
@@ -104,14 +103,6 @@ function orgList(page, perpage, query, org_level, sort_name) {
 function orgAll(level, id) {
     const requestOptions = {...getGetOptions()}
     return fetch(`/back/api/org/level-${level}/${id}/`, requestOptions).then(handleResponse)
-}
-
-function employee_list(page, perpage, query, level, org_id) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({page, perpage, query, level, org_id}),
-    }
-    return fetch(`${prefix}/level-${level}/${org_id}/employeeList/`, requestOptions).then(handleResponse)
 }
 
 function formOptions(option) {
