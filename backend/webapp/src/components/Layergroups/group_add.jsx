@@ -192,6 +192,7 @@ export class GroupAdd extends Component {
                                                                 name='name'
                                                                 id="name"
                                                                 type="text"
+                                                                disabled={group_name ? true : false}
                                                             />
                                                             <ErrorMessage name="name" component="div" className="text-danger"/>
 
