@@ -143,6 +143,7 @@ export class PortalDataTable extends Component {
                     <div className="col-lg-12">
                         <div className="table-responsive table_wrapper">
                             <table className="table table_wrapper_table">
+                                <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
                                 <thead className={`bg-primary text-${table_head_color}`}>
                                     <tr>
                                         <th scope="col" className={`bg-${color}`}>№</th>
@@ -158,9 +159,7 @@ export class PortalDataTable extends Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    { уншиж_байгаа_эсэх ?
-                                        <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
-                                        :
+                                    { !уншиж_байгаа_эсэх &&
                                         (items_length === 0 ?
                                             <tr><td>{хоосон_байх_үед_зурвас}</td></tr>:
                                             items.map((login, idx) =>
