@@ -34,6 +34,7 @@ export class App extends Component {
             emp_role: {},
             approve: false,
             revoke: false,
+            base_layer_list: []
         }
         this.requestCount = this.requestCount.bind(this)
         this.getEmpRoles = this.getEmpRoles.bind(this)
@@ -44,8 +45,15 @@ export class App extends Component {
         Promise.all([
             this.requestCount(),
             this.getEmpRoles(),
-            this.getApproveAndRevoke()
+            this.getApproveAndRevoke(),
+            this.getBaseLayer()
         ])
+    }
+
+    getBaseLayer(){
+        service.loadBaseLayers().then(({base_layer_list}) => {
+            this.setState({base_layer_list})
+        })
     }
 
     requestCount() {
@@ -76,7 +84,7 @@ export class App extends Component {
 
     render() {
         const { org_role, employee } = this.props.org
-        const { emp_role , approve, revoke } = this.state
+        const { emp_role , approve, revoke, base_layer_list } = this.state
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -196,7 +204,7 @@ export class App extends Component {
                             <Route path="/gov/perm/region/" component={Region} />
                             <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
                             <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} employee={employee} refreshCount={() => this.requestCount()} />} />
+                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} base_layer_list={base_layer_list} employee={employee} refreshCount={() => this.requestCount()} />} />
 
                             <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
                             <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />

@@ -4,15 +4,16 @@ import 'ol/ol.css';
 import {Map, Feature, View, Overlay} from 'ol';
 import {defaults as defaultControls, FullScreen, MousePosition, ScaleLine} from 'ol/control'
 import {Circle as CircleStyle, Fill, Stroke, Style, Text, Icon} from 'ol/style'
-import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer'
+import {Tile as TileLayer, Vector as VectorLayer, Image} from 'ol/layer'
 import {Draw, Modify, Select, Snap, DragBox, MouseWheelZoom} from 'ol/interaction'
-import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
+import {OSM, Vector as VectorSource, TileWMS, TileImage} from 'ol/source'
 import {unByKey} from 'ol/Observable';
 import {GeoJSON} from 'ol/format'
 import {transform as transformCoordinate, toLonLat, fromLonLat} from 'ol/proj'
 import {format as coordinateFormat, toStringHDMS, createStringXY} from 'ol/coordinate'
 import {platformModifierKeyOnly} from 'ol/events/condition';
 import * as geom_type from 'ol/geom'
+import ImageWMS from 'ol/source/ImageWMS';
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo'
 import Tile from 'ol/layer/Tile'
 import {ModifyBarButton} from './controls/Modify/ModifyBarButton'
@@ -39,6 +40,8 @@ import { service } from './service'
 import Маягт from "./Маягт"
 import {Mongolia_boundary} from './MongoliaBorder'
 import "./styles.css"
+import { BaseLayer } from './controls/BaseLayer'
+
 
 export default class BarilgaSuurinGazar extends Component{
 
@@ -178,12 +181,16 @@ export default class BarilgaSuurinGazar extends Component{
       ]).then(([{wms_url, wfs_url}, {api_links}]) => {
         this.setState({wms_url, wfs_url, api_links})
       })
+      this.geomType()
+      this.loadMap()
+    }
 
+    geomType(){
+      const {pid, fid} = this.state
       service.geomType(pid, fid).then(({type}) => {
         this.setState({ type })
         this.loadRows()
       })
-      this.loadMap()
     }
 
     getRole(){
@@ -245,13 +252,16 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({emp_perm_prefix: wms_layer.url})
 
       const map_wms = {
-        tile: new Tile({
-        source: new TileWMS({
+        tile: new Image({
+        source: new ImageWMS({
             projection: this.state.projection,
             url: wms_layer.url,
             params: {
                 'LAYERS': wms_layer.code,
                 'FORMAT': 'image/png',
+                'VERSION': '1.1.1',
+                "STYLES": '',
+                "exceptions": 'application/vnd.ogc.se_inimage',
             }
         }),
       })}
@@ -269,7 +279,60 @@ export default class BarilgaSuurinGazar extends Component{
       this.getRole()
     }
 
+
+
     loadMap(){
+      const base_layer_name = 'base_layer'
+      const {base_layers, base_layer_controls} =
+      this.props.base_layer_list.reduce(
+              (acc, base_layer_info, idx) => {
+
+                  let layer
+
+                  if (base_layer_info.tilename == "xyz") {
+                      layer = new Tile({
+                          preload: 6,
+                          source: new TileImage({
+                              crossOrigin: 'Anonymous',
+                              url: base_layer_info.url,
+                          }),
+                          name: base_layer_name,
+                      })
+                  }
+
+                  if (base_layer_info.tilename == "wms") {
+                      layer = new Image({
+                          source: new ImageWMS({
+                              ratio: 1,
+                              url: base_layer_info.url,
+                              params: {
+                                  'LAYERS': base_layer_info.layers,
+                                  'FORMAT': 'image/png',
+                                  'VERSION': '1.1.1',
+                                  "STYLES": '',
+                                  "exceptions": 'application/vnd.ogc.se_inimage',
+                              }
+                          }),
+                          name: base_layer_name,
+                      })
+                  }
+
+                  acc.base_layers.push(layer)
+                  acc.base_layer_controls.push({
+                      is_active: idx == 0,
+                      thumbnail_1x: base_layer_info.thumbnail_1x,
+                      thumbnail_2x: base_layer_info.thumbnail_2x,
+                      layer: layer,
+                  })
+
+                  return acc
+
+              },
+              {
+                  base_layers: [],
+                  base_layer_controls: []
+              }
+          )
       const vector_layer = new VectorLayer({
         source: new VectorSource(),
         style: new Style({
@@ -284,9 +347,6 @@ export default class BarilgaSuurinGazar extends Component{
       })
       this.setState({vector_layer})
       vector_layer.setZIndex(101)
-      const raster = new TileLayer({
-          source: new OSM(),
-      })
 
       const vector = new VectorLayer({
         source: new VectorSource(),
@@ -318,10 +378,13 @@ export default class BarilgaSuurinGazar extends Component{
       });
       const map = new Map({
         layers: [
-          raster,
+          ...base_layers,
           vector,
           vector_layer
         ],
+        controls: defaultControls().extend([
+          new BaseLayer({layers: base_layer_controls}),
+        ]),
         target: 'map',
         view: new View({
           center: this.state.Mongolia,
@@ -1059,12 +1122,15 @@ export default class BarilgaSuurinGazar extends Component{
             layers: layer_choices.slice(1, layer_choices.length).map((layer) => {
               return {
                 ...layer,
-                tile: new TileLayer({
-                  source: new TileWMS({
+                tile: new Image({
+                  source: new ImageWMS({
                     url: this.state.emp_perm_prefix,
                       params: {
                         'LAYERS': layer.code,
                         'FORMAT': 'image/png',
+                        'VERSION': '1.1.1',
+                        "STYLES": '',
+                        "exceptions": 'application/vnd.ogc.se_inimage',
                     },
                     serverType: 'geoserver',
                     transition: 0,
