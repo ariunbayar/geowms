@@ -19,7 +19,7 @@ export class OrgForm extends Component {
         this.state = {
             level: props.match.params.level || 1,
 
-            жагсаалтын_холбоос: `/back/api/org/level-${this.props.match.params.level}/org-list/`,
+            жагсаалтын_холбоос: `/back/api/org/level-${props.match.params.level}/org-list/`,
             талбарууд: [
                 {'field': 'name', "title": 'Байгууллага нэр', 'has_action': true},
                 {'field': 'num_employees', "title": 'Албан хаагчид',},
@@ -47,7 +47,7 @@ export class OrgForm extends Component {
                     "action": (values) => this.handleRemoveAction(values),
                 }
             ],
-            нэмэх_товч: `/back/байгууллага/түвшин/${this.props.match.params.level}/нэмэх/`,
+            нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/нэмэх/`,
             уншиж_байх_үед_зурвас: "Уншиж байна",
             refresh: true,
             values: {},
@@ -132,7 +132,6 @@ export class OrgForm extends Component {
                         жагсаалтын_холбоос={жагсаалтын_холбоос}
                         хувьсах_талбарууд={хувьсах_талбарууд}
                         нэмэлт_талбарууд={нэмэлт_талбарууд}
-
                         refresh={refresh}
                         уншиж_байх_үед_зурвас={уншиж_байх_үед_зурвас}
                         нэмэх_товч={нэмэх_товч}
