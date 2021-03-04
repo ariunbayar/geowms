@@ -1,7 +1,6 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../components/helpers/service'
 
 export const service = {
-    getListEmployee,
     createEmployee,
     getRole,
     getRoleList,
@@ -23,14 +22,6 @@ export const service = {
 
 const prefix = "/gov/api/role/employee"
 const prefix_role = '/gov/api/role'
-
-function getListEmployee() {
-    const requestOptions = {
-        ...getGetOptions(),
-    }
-
-    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
-}
 
 function createEmployee(user_detail, emp_role_id, roles, address) {
     const requestOptions = {

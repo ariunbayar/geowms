@@ -79,22 +79,43 @@ def _get_employee_display(employee):
     }
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def list(request):
+def list(request, payload):
+
+    # org = get_object_or_404(Org, employee__user=request.user)
+    # employees = Employee.objects.filter(org=org)
+
+    # employee_list = [
+    #     _get_employee_display(employee)
+    #     for employee in employees
+    # ]
+
+    # rsp = {
+    #     'success': True,
+    #     'items': employee_list,
+    # }
 
     org = get_object_or_404(Org, employee__user=request.user)
-    employees = Employee.objects.filter(org=org)
+    qs = Employee.objects.filter(org=org)
+    employees = qs.values_list('user_id', flat=True)
+    users = User.objects.filter(id__in=employees)
 
-    employee_list = [
-        _get_employee_display(employee)
-        for employee in employees
-    ]
+    оруулах_талбарууд = ['first_name', 'last_name', 'email']
+
+    datatable = Datatable(
+        model=User,
+        payload=payload,
+        initial_qs=users,
+        оруулах_талбарууд=оруулах_талбарууд,
+    )
+    items, total_page = datatable.get()
 
     rsp = {
-        'success': True,
-        'employees': employee_list,
+        'items': items,
+        'page': payload.get("page"),
+        'total_page': total_page,
     }
 
     return JsonResponse(rsp)

@@ -1,8 +1,9 @@
 
 import React, { Component } from "react"
-import {EmployeeTable} from './EmployeeTable'
-import { service } from "./service"
-import { NavLink } from "react-router-dom"
+import { PortalDataTable } from "@utils/DataTable/index"
+// import {EmployeeTable} from './EmployeeTable'
+// import { service } from "./service"
+// import { NavLink } from "react-router-dom"
 
 
 export class EmployeeForm extends Component {
@@ -11,65 +12,67 @@ export class EmployeeForm extends Component {
         super(props)
 
         this.state={
-            employees:[],
-            prefix: '/gov/perm/employee',
+            refresh: false,
+            жагсаалтын_холбоос: `/gov/api/role/employee/`,
+            нэмэх_товч: `/gov/perm/employee/add/`,
+            custom_query: {},
+            талбарууд: [
+                {'field': 'first_name', "title": 'Нэр', 'has_action': true},
+                {'field': 'email', "title": 'Цахим шуудан'},
+                {'field': 'position', "title": 'Албан тушаал'},
+                {'field': 'role_name', "title": 'Role'},
+                {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
+            ],
+            хувьсах_талбарууд: [
+                {"field": "first_name", "action": (values) => this.go_link(values)},
+                {"field": "email",  "text": ""},
+                {"field": "position",  "text": ""},
+                {"field": "role_name",  "text": ""},
+                {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
+            ],
         }
-        this.getList = this.getList.bind(this)
     }
 
-    getList() {
-        service
-            .getListEmployee()
-            .then(({ success, employees }) => {
-                if (success) {
-			this.setState({ employees })
-                }
-            })
+    set_icon(value) {
+        var icon
+        if (value) {icon = "fa fa-check-circle-o text-success fa-lg"}
+        else {icon = "fa fa-times-circle-o text-danger fa-lg"}
+
+        return icon
     }
 
-    componentDidMount() {
-        this.getList()
+    go_link(values) {
+        this.props.history.push(`$/gov/perm/employee/${values.id}/detail/`)
     }
+
+
 
     render() {
-        const { employees, prefix } = this.state
-        const { is_admin, username } = this.props.employee
+        const {
+            refresh,
+            талбарууд,
+            жагсаалтын_холбоос,
+            хувьсах_талбарууд,
+            custom_query,
+            нэмэх_товч,
+            нэмэлт_талбарууд,
+        } = this.state
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="row">
-                        <div className="col-md-12">
-                            {is_admin &&
-                            <div className="text-right">
-                                <NavLink className="btn gp-btn-primary waves-effect waves-light m-1" to={`${prefix}/add/`}>
-                                    Нэмэх
-                                </NavLink>
-                            </div>
-                            }
-                            <div className="table-responsive">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">№</th>
-                                            <th scope="col">Овог нэр</th>
-                                            <th scope="col">Имэйл</th >
-                                            <th scope="col">Албан тушаал</th >
-					                        <th scope="col">Role</th>
-                                            <th className="text-center" scope="col">Админ эсэх</th >
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {employees.map((item, idx) =>
-                                            <EmployeeTable key={idx}
-                                                idx={idx + 1}
-                                                values={item}
-                                                prefix={prefix}
-                                            />
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div className="col-md-12">
+                        <PortalDataTable
+                            refresh={refresh}
+                            color={'bg-dark'}
+                            талбарууд={талбарууд}
+                            жагсаалтын_холбоос={жагсаалтын_холбоос}
+                            per_page={20}
+                            уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
+                            хувьсах_талбарууд={хувьсах_талбарууд}
+                            нэмэх_товч={нэмэх_товч}
+                            custom_query={custom_query}
+                            нэмэлт_талбарууд={нэмэлт_талбарууд}
+                        />
                     </div>
                 </div>
             </div>
