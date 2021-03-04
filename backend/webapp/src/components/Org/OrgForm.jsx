@@ -47,7 +47,7 @@ export class OrgForm extends Component {
                     "action": (values) => this.handleRemoveAction(values),
                 }
             ],
-            нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/нэмэх/`,
+            нэмэх_товч: `/back/байгууллага/түвшин/${this.props.match.params.level}/нэмэх/`,
             уншиж_байх_үед_зурвас: "Уншиж байна",
             refresh: true,
             values: {},
@@ -71,7 +71,8 @@ export class OrgForm extends Component {
             this.setState({
                 level: this.props.match.params.level,
                 жагсаалтын_холбоос: `/back/api/org/level-${org_level}/org-list/`,
-                refresh: !this.state.refresh
+                refresh: !this.state.refresh,
+                нэмэх_товч: `/back/байгууллага/түвшин/${org_level}/нэмэх/`
             })
         }
     }

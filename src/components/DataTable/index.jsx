@@ -75,6 +75,9 @@ export class PortalDataTable extends Component {
         if(pp.жагсаалтын_холбоос !== this.props.жагсаалтын_холбоос) {
             this.setState({ жагсаалтын_холбоос: this.props.жагсаалтын_холбоос })
         }
+        if(pp.нэмэх_товч !== this.props.нэмэх_товч) {
+            this.setState({ нэмэх_товч: this.props.нэмэх_товч })
+        }
     }
 
     render() {
