@@ -548,8 +548,7 @@ def create_style(values):
 def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache):
     layer_name = layer_name
     if ws_name:
-        layer=ws_name + ':' + layer_name
-
+        layer_name = ws_name + ':' + layer_name
     payload='''
         <seedRequest>
             <name>{layer_name}</name>

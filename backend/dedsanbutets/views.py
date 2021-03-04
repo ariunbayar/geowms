@@ -745,6 +745,7 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     style_state = values.get('style_state')
     tile_cache_check = values.get('tile_cache_check')
     cache_details = values.get('cache_values')
+    geom_type = values.get('geom_type')
     layer_title = feature.feature_name
 
     if check_layer.status_code == 200:
@@ -762,62 +763,63 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     )
 
     if layer_create.status_code == 201:
-        cache_values = values.get('cache_values')
-        if style_state == 'create_style':
-            style_name = values.get('style_name')
-            if not style_name:
-                return {
-                    'success': False,
-                    'info': 'Style-ийн нэр хоосон байна'
-                }
-            check_style_name = geoserver.check_geoserver_style(style_name)
-            if check_style_name.status_code == 200:
-                return {
-                    'success': False,
-                    'info': 'Style-ийн нэр давхцаж байна'
-                }
-            else:
-                geoserver.create_style(values)
+        if geom_type:
+            cache_values = values.get('cache_values')
+            if style_state == 'create_style':
+                style_name = values.get('style_name')
+                if not style_name:
+                    return {
+                        'success': False,
+                        'info': 'Style-ийн нэр хоосон байна'
+                    }
+                check_style_name = geoserver.check_geoserver_style(style_name)
+                if check_style_name.status_code == 200:
+                    return {
+                        'success': False,
+                        'info': 'Style-ийн нэр давхцаж байна'
+                    }
+                else:
+                    geoserver.create_style(values)
 
-        geoserver.update_layer_style(layer_name, style_name)
-        zoom_stop = cache_details.get('zoom_stop')
-        zoom_start = cache_details.get('zoom_start')
-        image_format = cache_details.get('image_format')
-        number_of_cache = cache_details.get('number_of_cache')
-        cache_type = 'reseed'
-        if tile_cache_check:
-            cache_type = cache_details.get('cache_type')
-        if int(zoom_start) >21 or int(zoom_stop)>21 or int(number_of_cache)>100:
-            return {
-                'success': False,
-                'info': 'TileCache-ийн max утга хэтэрсэн байна'
-            }
-        feature_id = feature.feature_id
-        cache_layer = geoserver.create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache)
-        wmts_url = ''
-        if cache_layer.status_code == 200:
-            cache_field = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
-            if cache_field:
-                WmtsCacheConfig.objects.filter(id=cache_field.id).update(
-                    img_format=image_format,
-                    zoom_start=zoom_start,
-                    zoom_stop=zoom_stop,
-                    type_of_operation=cache_type,
-                    number_of_tasks_to_use=number_of_cache
-                )
-            else:
-                WmtsCacheConfig.objects.create(
-                    feature_id=feature_id,
-                    img_format=image_format,
-                    zoom_start=zoom_start,
-                    zoom_stop=zoom_stop,
-                    type_of_operation=cache_type,
-                    number_of_tasks_to_use=number_of_cache
-                )
+            geoserver.update_layer_style(layer_name, style_name)
 
-            wmts_url = geoserver.get_wmts_url(ws_name)
-            wms.cache_url = wmts_url
-            wms.save()
+            if tile_cache_check:
+                cache_type = cache_details.get('cache_type')
+                zoom_stop = cache_details.get('zoom_stop')
+                zoom_start = cache_details.get('zoom_start')
+                image_format = cache_details.get('image_format')
+                number_of_cache = cache_details.get('number_of_cache')
+                if int(zoom_start) >21 or int(zoom_stop)>21 or int(number_of_cache)>100:
+                    return {
+                        'success': False,
+                        'info': 'TileCache-ийн max утга хэтэрсэн байна'
+                    }
+                feature_id = feature.feature_id
+                cache_layer = geoserver.create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache)
+                wmts_url = ''
+                if cache_layer.status_code == 200:
+                    cache_field = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+                    if cache_field:
+                        WmtsCacheConfig.objects.filter(id=cache_field.id).update(
+                            img_format=image_format,
+                            zoom_start=zoom_start,
+                            zoom_stop=zoom_stop,
+                            type_of_operation=cache_type,
+                            number_of_tasks_to_use=number_of_cache
+                        )
+                    else:
+                        WmtsCacheConfig.objects.create(
+                            feature_id=feature_id,
+                            img_format=image_format,
+                            zoom_start=zoom_start,
+                            zoom_stop=zoom_stop,
+                            type_of_operation=cache_type,
+                            number_of_tasks_to_use=number_of_cache
+                        )
+
+                    wmts_url = geoserver.get_wmts_url(ws_name)
+                    wms.cache_url = wmts_url
+                    wms.save()
 
         return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
