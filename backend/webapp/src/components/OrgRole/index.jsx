@@ -5,7 +5,7 @@ import {List} from './List'
 import {Forms} from './Forms'
 import {Roles} from './Roles'
 
-export class OrgRole extends Component {
+export default class OrgRole extends Component {
 
     constructor(props) {
         super(props)

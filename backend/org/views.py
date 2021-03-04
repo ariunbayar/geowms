@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 from django.conf import settings
+from django.forms.models import model_to_dict
 
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
@@ -604,6 +605,48 @@ def detail(request, level, pk):
     })
 
 
+def _get_employee(employee, filter_from_user):
+    if filter_from_user:
+        emp_obj = Employee.objects.filter(user=employee).first()
+        id = employee.id
+        last_name = employee.last_name
+        first_name = employee.first_name
+        email = employee.email
+        is_active = employee.is_active
+        is_sso = employee.is_sso
+        is_admin = emp_obj.is_admin
+        position = emp_obj.position
+        created_at = emp_obj.created_at.strftime('%Y-%m-%d')
+        updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
+    else:
+        user = User.objects.filter(pk=employee.user_id).first()
+        id = user.id,
+        last_name = user.last_name,
+        first_name = user.first_name,
+        email = user.email,
+        is_active = user.is_active,
+        is_sso = user.is_sso,
+        is_admin = employee.is_admin
+        position = employee.position
+        created_at = employee.created_at.strftime('%Y-%m-%d')
+        updated_at = employee.updated_at.strftime('%Y-%m-%d')
+
+    employee_detail = {
+        'id': id,
+        'last_name': last_name,
+        'first_name': first_name,
+        'email': email,
+        'is_active': is_active,
+        'is_sso': is_sso,
+        'is_admin': is_admin,
+        'position': position,
+        'created_at': created_at,
+        'updated_at': updated_at
+    }
+
+    return employee_detail
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -613,18 +656,28 @@ def employee_list(request, payload, level, pk):
     page = payload.get('page')
     query = payload.get('query') or ''
     per_page = payload.get('perpage')
-    sort_name = payload.get('sort_name')
+    sort_name = payload.get('sort_name') or 'first_name'
 
-    if not sort_name:
-        sort_name = 'last_name'
-
-    qs = User.objects
-    qs = qs.filter(employee__org=org)
-    qs = qs.annotate(search=SearchVector(
-        'last_name',
-        'first_name',
-        'email')
+    if sort_name == 'first_name' or sort_name == '-first_name' or sort_name == 'email' or sort_name == '-email':
+        qs = User.objects
+        qs = qs.filter(employee__org=org)
+        qs = qs.annotate(search=SearchVector(
+                'last_name',
+                'first_name',
+                'email'
+            )
         )
+    else:
+        qs = Employee.objects
+        qs = qs.filter(org=org)
+        qs = qs.annotate(search=SearchVector(
+                'position',
+                'is_admin',
+                'created_at',
+                'updated_at'
+            )
+        )
+
     if query:
         qs = qs.filter(search__contains=query)
     qs = qs.order_by(sort_name)
@@ -633,20 +686,16 @@ def employee_list(request, payload, level, pk):
     total_items = Paginator(emp_list, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
-    for employe in page_items:
-        emp_obj = Employee.objects.filter(user=employe).first()
-        employees_display.append({
-            'id': employe.id,
-            'last_name': employe.last_name,
-            'first_name': employe.first_name,
-            'email': employe.email,
-            'is_active': employe.is_active,
-            'is_sso': employe.is_sso,
-            'is_admin': emp_obj.is_admin,
-            'position': emp_obj.position,
-            'created_at': emp_obj.created_at.strftime('%Y-%m-%d'),
-            'updated_at': emp_obj.updated_at.strftime('%Y-%m-%d'),
-        })
+
+    for employee in page_items:
+        if sort_name == 'first_name' or sort_name == '-first_name' or sort_name == 'email' or sort_name == '-email':
+            filter_from_user = True
+        else:
+            filter_from_user = False
+
+        employee_detail = _get_employee(employee, filter_from_user)
+        employees_display.append(employee_detail)
+
     total_page = total_items.num_pages
     rsp = {
         'items': employees_display,
@@ -1509,21 +1558,26 @@ def save_erguul(request, payload):
     photo = payload.get('photo')
 
     employee = get_object_or_404(Employee, id=emp_id)
-    address_qs = EmployeeAddress.objects
-    address_qs = address_qs.filter(employee=employee)
-    address_qs = address_qs.first()
-    address_id = address_qs.id
 
     point = _get_point_for_db(payload.get('point'))
     values['point'] = point
-    date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
-    values['date_start'] = date_start
-    date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
-    values['date_end'] = date_end
+
+    if 'date_start' in values:
+        date_start = utils.date_to_timezone(values['date_start'])
+        values['date_start'] = date_start
+
+    if 'date_end' in values:
+        date_end = utils.date_to_timezone(values['date_end'])
+        values['date_end'] = date_end
 
     with transaction.atomic():
         erguul_qs = EmployeeErguul.objects
         if not erguul_id:
+            address_qs = EmployeeAddress.objects
+            address_qs = address_qs.filter(employee=employee)
+            address_qs = address_qs.first()
+            address_id = address_qs.id
+
             erguul_qs = erguul_qs.create(address_id=address_id, **values)
             erguul_id = erguul_qs.id
             subject = 'Эргүүлд гарах мэдээлэл'
@@ -1534,13 +1588,23 @@ def save_erguul(request, payload):
             erguul_qs.update(
                 **values
             )
+            erguul_qs = erguul_qs.first()
             subject = 'Шинэчилсэн эргүүлд гарах мэдээлэл'
             update_msg = '<h4>Таны эргүүлд гарах мэдээллийг шинэчилсэн байна</h4>'
             info = 'Амжилттай зассан'
 
-        part_time = values['part_time'] if 'part_time' in values else ''
-        if not part_time:
-            raise Http404
+        def _get_mail_info(item):
+            if item in values:
+                value = values[item]
+            else:
+                erguul_dict = model_to_dict(erguul_qs)
+                value = erguul_dict[item]
+
+            return value
+
+        part_time = _get_mail_info('part_time')
+        date_start = _get_mail_info('date_start')
+        date_end = _get_mail_info('date_end')
 
         if int(part_time) == EmployeeErguul.DAY_TIME:
             hour = EmployeeErguul.DAY_HOUR

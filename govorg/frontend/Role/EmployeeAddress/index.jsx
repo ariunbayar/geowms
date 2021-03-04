@@ -4,7 +4,7 @@ import {Switch, Route} from "react-router-dom"
 import Erguuleg from './Erguuleg'
 import UsersAddress from './UsersAddress'
 
-export class Addresses extends Component {
+export default class Addresses extends Component {
     render() {
         const { employee } = this.props
         return (

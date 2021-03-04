@@ -72,6 +72,12 @@ export class PortalDataTable extends Component {
         if(pp.custom_query !== this.props.custom_query){
             this.setState({ custom_query: this.props.custom_query })
         }
+        if(pp.жагсаалтын_холбоос !== this.props.жагсаалтын_холбоос) {
+            this.setState({ жагсаалтын_холбоос: this.props.жагсаалтын_холбоос })
+        }
+        if(pp.нэмэх_товч !== this.props.нэмэх_товч) {
+            this.setState({ нэмэх_товч: this.props.нэмэх_товч })
+        }
     }
 
     render() {
@@ -87,34 +93,36 @@ export class PortalDataTable extends Component {
                null
                :
                 <div className="row">
-                    {хайлт == "open" &&
-                        <div className="col-3">
-                            <div className="float-sm-left search-bar">
+                    {
+                        хайлт == "open" &&
+                            <div className="search-bar">
                                 <input
                                     type="text"
                                     className="form-control"
-                                    id="searchQuery small-input"
                                     placeholder="Хайх"
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
                                 <a><i className="icon-magnifier"></i></a>
                             </div>
-                        </div>
                     }
                     {
                         max_data == 'open' &&
                             <div className="col">
-                                <div className="float-sm-right input-group">
-                                    <strong className={`mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
-                                    <select className="form-control form-control-sm col-2" value={per_page} onChange={(e) => this.setState({per_page: e.target.value})}>
-                                        <option value="10">10</option>
-                                        <option value="20">20</option>
-                                        <option value="30">30</option>
-                                        <option value="40">40</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
+                                <div className="row text-right">
+                                    <div className="col">
+                                        <strong className={`text-right mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
+                                    </div>
+                                    <div className="row">
+                                        <select className="form-control form-control-sm" value={per_page} onChange={(e) => this.setState({per_page: e.target.value})}>
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                            <option value="40">40</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                     }
@@ -135,13 +143,14 @@ export class PortalDataTable extends Component {
                     <div className="col-lg-12">
                         <div className="table-responsive table_wrapper">
                             <table className="table table_wrapper_table">
+                                <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
                                 <thead className={`bg-primary text-${table_head_color}`}>
                                     <tr>
                                         <th scope="col" className={`bg-${color}`}>№</th>
                                         {талбарууд.map((item, index) =>
-                                            <th key={index} className={`bg-${color}`}>
+                                            <th onClick={() => this.handleSort(item.field, this.state[item.field])} key={index} className={`bg-${color} ${item.is_center ? 'text-center' : null}`}>
                                                 {item.title}&nbsp;
-                                                <a onClick={() => this.handleSort(item.field, this.state[item.field])}><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
+                                                <a><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
                                             </th>
                                         )}
                                         {нэмэлт_талбарууд && нэмэлт_талбарууд.map((item, index) =>
@@ -150,9 +159,7 @@ export class PortalDataTable extends Component {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    { уншиж_байгаа_эсэх ?
-                                        <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
-                                        :
+                                    { !уншиж_байгаа_эсэх &&
                                         (items_length === 0 ?
                                             <tr><td>{хоосон_байх_үед_зурвас}</td></tr>:
                                             items.map((login, idx) =>

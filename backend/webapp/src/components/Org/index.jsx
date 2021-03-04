@@ -6,7 +6,7 @@ import {OrgAdd} from './OrgAdd'
 import {OrgMenu} from './OrgMenu'
 
 
-export class Org extends Component {
+export default class Org extends Component {
 
     constructor(props) {
         super(props)

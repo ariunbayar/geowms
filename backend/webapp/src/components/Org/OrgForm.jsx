@@ -53,7 +53,7 @@ export class OrgForm extends Component {
             values: {},
             modal_status: 'closed',
             action_modal_status: 'closed',
-            is_loading: false
+            is_loading: false,
         }
 
         this.modalClose = this.modalClose.bind(this)
@@ -63,6 +63,18 @@ export class OrgForm extends Component {
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
 
+    }
+
+    componentDidUpdate(pp, ps) {
+        if (this.props.match.params.level !==  ps.level) {
+            const org_level = this.props.match.params.level
+            this.setState({
+                level: this.props.match.params.level,
+                жагсаалтын_холбоос: `/back/api/org/level-${org_level}/org-list/`,
+                refresh: !this.state.refresh,
+                нэмэх_товч: `/back/байгууллага/түвшин/${org_level}/нэмэх/`
+            })
+        }
     }
 
     handleRemoveAction(values){
@@ -120,7 +132,6 @@ export class OrgForm extends Component {
                         жагсаалтын_холбоос={жагсаалтын_холбоос}
                         хувьсах_талбарууд={хувьсах_талбарууд}
                         нэмэлт_талбарууд={нэмэлт_талбарууд}
-
                         refresh={refresh}
                         уншиж_байх_үед_зурвас={уншиж_байх_үед_зурвас}
                         нэмэх_товч={нэмэх_товч}

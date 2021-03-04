@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 import RevokeRequestForm from './RevokeRequestForm'
 
-export class RevokeRequest extends Component {
+export default class RevokeRequest extends Component {
 
     render() {
         return (
