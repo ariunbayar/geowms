@@ -37,9 +37,30 @@ def _get_role_data_display(role):
     }
 
 
+@require_GET
+@ajax_required
+def list(request):
+
+    org = get_object_or_404(Org, employee__user=request.user)
+    gov_perm = get_object_or_404(GovPerm, org=org)
+    emp_roles = EmpRole.objects.filter(gov_perm=gov_perm)
+
+    roles = [
+        _get_role_data_display(role)
+        for role in emp_roles
+    ]
+
+    rsp = {
+        'success': True,
+        'roles': roles,
+    }
+
+    return JsonResponse(rsp)
+
+
 @require_POST
 @ajax_required
-def list(request, payload):
+def role_list(request, payload):
 
     org = get_object_or_404(Org, employee__user=request.user)
     gov_perm = get_object_or_404(GovPerm, org=org)

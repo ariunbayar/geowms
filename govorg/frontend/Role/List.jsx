@@ -13,7 +13,7 @@ export class List extends Component {
             modal_status: "closed",
             alert_modal_status: "closed",
             refresh: false,
-            жагсаалтын_холбоос: '/gov/api/role/',
+            жагсаалтын_холбоос: '/gov/api/role/role-list/',
             нэмэх_товч: '/gov/perm/role/add/',
             custom_query: {},
             талбарууд: [
