@@ -79,42 +79,55 @@ def _get_employee_display(employee):
     }
 
 
+def _get_name_or_email(state, item):
+    user = User.objects.filter(pk=item['user_id']).first()
+    name_or_email = ''
+
+    if user is not None:
+        if type(state) == int:
+            name_or_email = user.last_name
+        else:
+            name_or_email = user.email
+
+    return name_or_email
+
+
+def _get_role_name(state, item):
+    role = EmpPerm.objects.filter(employee=item['id']).first()
+    role_name = ''
+
+    if role and role.emp_role:
+        role_name = role.emp_role.name
+    return role_name
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def list(request, payload):
 
-    # org = get_object_or_404(Org, employee__user=request.user)
-    # employees = Employee.objects.filter(org=org)
-
-    # employee_list = [
-    #     _get_employee_display(employee)
-    #     for employee in employees
-    # ]
-
-    # rsp = {
-    #     'success': True,
-    #     'items': employee_list,
-    # }
-
     org = get_object_or_404(Org, employee__user=request.user)
     qs = Employee.objects.filter(org=org)
-    employees = qs.values_list('user_id', flat=True)
-    users = User.objects.filter(id__in=employees)
 
-    оруулах_талбарууд = ['first_name', 'last_name', 'email']
+    оруулах_талбарууд = ['id', 'position', 'is_admin', 'org_id', 'user_id', 'token']
+    хувьсах_талбарууд = [
+        {"field": "org_id", "action": _get_name_or_email, "new_field": "org_id"},
+        {"field": "token", "action": _get_name_or_email, "new_field": "token"},
+        {"field": "user_id", "action": _get_role_name, "new_field": "user_id"},
+    ]
 
     datatable = Datatable(
-        model=User,
+        model=Employee,
         payload=payload,
-        initial_qs=users,
+        initial_qs=qs,
         оруулах_талбарууд=оруулах_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд
     )
     items, total_page = datatable.get()
 
     rsp = {
         'items': items,
-        'page': payload.get("page"),
+        'page': payload.get('page'),
         'total_page': total_page,
     }
 

@@ -17,17 +17,17 @@ export class EmployeeForm extends Component {
             нэмэх_товч: `/gov/perm/employee/add/`,
             custom_query: {},
             талбарууд: [
-                {'field': 'first_name', "title": 'Нэр', 'has_action': true},
-                {'field': 'email', "title": 'Цахим шуудан'},
+                {'field': 'org_id', "title": 'Нэр', 'has_action': true},
+                {'field': 'token', "title": 'Цахим шуудан'},
                 {'field': 'position', "title": 'Албан тушаал'},
-                {'field': 'role_name', "title": 'Role'},
+                {'field': 'user_id', "title": 'Role'},
                 {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
             ],
             хувьсах_талбарууд: [
-                {"field": "first_name", "action": (values) => this.go_link(values)},
-                {"field": "email",  "text": ""},
+                {"field": "org_id", "action": (values) => this.go_link(values)},
+                {"field": "token",  "text": ""},
                 {"field": "position",  "text": ""},
-                {"field": "role_name",  "text": ""},
+                {"field": "user_id",  "text": ""},
                 {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
         }
@@ -42,7 +42,7 @@ export class EmployeeForm extends Component {
     }
 
     go_link(values) {
-        this.props.history.push(`$/gov/perm/employee/${values.id}/detail/`)
+        this.props.history.push(`/gov/perm/employee/${values.id}/detail/`)
     }
 
 
