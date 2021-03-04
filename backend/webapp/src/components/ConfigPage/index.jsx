@@ -12,7 +12,7 @@ import ConfigDan from './ConfigDan'
 import ConfigPayment from './ConfigPayment'
 
 
-export class ConfigPage extends Component {
+export default class ConfigPage extends Component {
 
     render() {
         return (

@@ -4,7 +4,7 @@ import {Switch, Route,  NavLink} from 'react-router-dom'
 import CovidConfig from './CovidConfig'
 
 
-export class Covid extends Component {
+export default class Covid extends Component {
 
     render() {
         return (
