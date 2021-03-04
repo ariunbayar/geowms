@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 from django.conf import settings
+from django.forms.models import model_to_dict
 
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
@@ -1557,21 +1558,26 @@ def save_erguul(request, payload):
     photo = payload.get('photo')
 
     employee = get_object_or_404(Employee, id=emp_id)
-    address_qs = EmployeeAddress.objects
-    address_qs = address_qs.filter(employee=employee)
-    address_qs = address_qs.first()
-    address_id = address_qs.id
 
     point = _get_point_for_db(payload.get('point'))
     values['point'] = point
-    date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
-    values['date_start'] = date_start
-    date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
-    values['date_end'] = date_end
+
+    if 'date_start' in values:
+        date_start = utils.date_to_timezone(values['date_start'])
+        values['date_start'] = date_start
+
+    if 'date_end' in values:
+        date_end = utils.date_to_timezone(values['date_end'])
+        values['date_end'] = date_end
 
     with transaction.atomic():
         erguul_qs = EmployeeErguul.objects
         if not erguul_id:
+            address_qs = EmployeeAddress.objects
+            address_qs = address_qs.filter(employee=employee)
+            address_qs = address_qs.first()
+            address_id = address_qs.id
+
             erguul_qs = erguul_qs.create(address_id=address_id, **values)
             erguul_id = erguul_qs.id
             subject = 'Эргүүлд гарах мэдээлэл'
@@ -1582,13 +1588,23 @@ def save_erguul(request, payload):
             erguul_qs.update(
                 **values
             )
+            erguul_qs = erguul_qs.first()
             subject = 'Шинэчилсэн эргүүлд гарах мэдээлэл'
             update_msg = '<h4>Таны эргүүлд гарах мэдээллийг шинэчилсэн байна</h4>'
             info = 'Амжилттай зассан'
 
-        part_time = values['part_time'] if 'part_time' in values else ''
-        if not part_time:
-            raise Http404
+        def _get_mail_info(item):
+            if item in values:
+                value = values[item]
+            else:
+                erguul_dict = model_to_dict(erguul_qs)
+                value = erguul_dict[item]
+
+            return value
+
+        part_time = _get_mail_info('part_time')
+        date_start = _get_mail_info('date_start')
+        date_end = _get_mail_info('date_end')
 
         if int(part_time) == EmployeeErguul.DAY_TIME:
             hour = EmployeeErguul.DAY_HOUR
