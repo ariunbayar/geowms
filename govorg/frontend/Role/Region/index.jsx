@@ -3,7 +3,7 @@ import { Switch, Route } from "react-router-dom"
 
 import MapRegion from './MapRegion'
 
-export class Region extends Component {
+export default class Region extends Component {
 
     constructor(props) {
         super(props)

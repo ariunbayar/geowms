@@ -3,7 +3,7 @@ import {Switch, Route, Link, NavLink} from "react-router-dom"
 
 import {Forms} from './Form'
 
-export class ZipCode extends Component {
+export default class ZipCode extends Component {
 
     constructor(props) {
         super(props)

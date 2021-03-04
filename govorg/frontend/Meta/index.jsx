@@ -4,7 +4,7 @@ import { MetaDetail } from './MetaDetail'
 import { MetaEdit } from "./MetaEdit"
 import { List } from "./List"
 
-export class Meta extends Component {
+export default class Meta extends Component {
 
     render() {
         return (

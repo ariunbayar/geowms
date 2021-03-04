@@ -4,7 +4,7 @@ import {Switch, Route} from "react-router-dom"
 import {Detail} from './Detail'
 import {List} from './List'
 
-export class System extends Component {
+export default class System extends Component {
 
     constructor(props) {
         super(props)
