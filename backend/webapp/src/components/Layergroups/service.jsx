@@ -4,7 +4,9 @@ export const service ={
     remove_layer_group,
     getGroupDetial,
     getLayers,
-    createLayerGroup
+    createLayerGroup,
+    getGroupCacheList,
+    createGroupCache
 }
 
 const prefix = '/back'
@@ -16,12 +18,29 @@ function getgrouplist() {
     return fetch(`${prefix}/geoserver/rest/group_list/`, opts).then(handleResponse)
 }
 
+
+function getGroupCacheList(group_name) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ group_name }),
+    }
+    return fetch(`${prefix}/geoserver/rest/get_group_cache_list/`, opts).then(handleResponse)
+}
+
 function remove_layer_group(group_name) {
     const opts = {
         ...getPostOptions(),
         body: JSON.stringify({ group_name }),
     }
     return fetch(`${prefix}/geoserver/rest/remove_layer_group/`, opts).then(handleResponse)
+}
+
+function createGroupCache(values, group_name) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ values }),
+    }
+    return fetch(`${prefix}/geoserver/rest/create_group_cache/${group_name}/`, opts).then(handleResponse)
 }
 
 function getGroupDetial(group_name) {
@@ -39,10 +58,10 @@ function getLayers() {
     return fetch(`${prefix}/geoserver/rest/get_layers/`, opts).then(handleResponse)
 }
 
-function createLayerGroup(values, layer_list) {
+function createLayerGroup(values, layer_list, group_state) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ values, layer_list }),
+        body: JSON.stringify({ values, layer_list, group_state}),
     }
     return fetch(`${prefix}/geoserver/rest/create_layer_group/`, opts).then(handleResponse)
 }

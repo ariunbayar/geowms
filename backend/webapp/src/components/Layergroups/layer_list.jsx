@@ -4,7 +4,7 @@ import {NavLink} from "react-router-dom"
 import Modal from "../Modal"
 import ModalAlert from "../ModalAlert"
 import Loader from "@utils/Loader"
-
+import GroupList from './list'
 
 export class List extends Component {
 
@@ -14,20 +14,17 @@ export class List extends Component {
         this.state = {
             group_list: [],
             modal_alert_status: "closed",
-            modal_status: 'closed',
             timer: null,
             model_alert_text: '',
             model_type_icon: 'success',
             searchQuery: '',
-            list_length:null,
-            currentPage:1,
-            groupPerPage:20,
+            list_length: null,
+            currentPage: 1,
+            groupPerPage: 2,
             is_loading: false
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
         this.handleGroupDelete = this.handleGroupDelete.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
@@ -48,16 +45,8 @@ export class List extends Component {
 
     }
 
-    handleModalDeleteOpen() {
-        this.setState({modal_status: 'open'})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({modal_status: 'closed'})
-    }
-
     modalClose(){
-        this.setState({modal_status: 'closed'})
+        this.setState({modal_alert_status: 'closed'})
     }
 
     handleSearch(e) {
@@ -78,14 +67,11 @@ export class List extends Component {
     handleGroupDelete(name){
         service.remove_layer_group(name).then(({success, info}) =>{
             if (success) {
-                this.setState({ model_alert_text: info, model_type_icon: 'success'})
-                this.setState({ modal_alert_status: 'open'})
-                this.handleListUpdated()
+                this.setState({ model_alert_text: info, model_type_icon: 'success', modal_alert_status: 'open'})
             }else{
-                this.setState({ model_alert_text: info, model_type_icon: 'danger' })
-                this.setState({ modal_alert_status: 'open'})
+                this.setState({ model_alert_text: info, model_type_icon: 'danger', modal_alert_status: 'open'})
             }
-
+            this.handleListUpdated()
             this.modalCloseTime()
         })
     }
@@ -113,7 +99,7 @@ export class List extends Component {
     }
 
     render() {
-        const {group_list, searchQuery, groupPerPage,currentPage, list_length, is_loading} = this.state
+        const {group_list, searchQuery, groupPerPage,currentPage, list_length, is_loading, modal_status} = this.state
         const lastIndex=currentPage*groupPerPage
         const firtsIndex=lastIndex-groupPerPage
         const currentGroups= group_list.slice(firtsIndex,lastIndex)
@@ -162,37 +148,11 @@ export class List extends Component {
                                         <tr><td>Group list бүртгэлгүй байна</td></tr>:
 
                                         currentGroups.map((value, idx) =>
-                                            <tr key={idx}>
-                                            <td>
-                                                {idx+1}
-                                            </td>
-                                            <td>
-                                                {value}
-                                            </td>
-                                            <td>
-                                                <NavLink to={`/back/layer-groups/${value}/tile-caching/`} exact>
-                                                    <i className="fa fa-shopping-basket text-primary" aria-hidden="true"></i>
-                                                </NavLink>
-                                            </td>
-                                            <td>
-                                                <NavLink to={`/back/layer-groups/${value}/засах/`} exact>
-                                                    <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                                                </NavLink>
-                                            </td>
-                                            <td>
-                                                <a href="#" onClick={this.handleModalDeleteOpen}>
-                                                    <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                                                </a>
-                                                <Modal
-                                                    modalAction={() => this.handleGroupDelete(value)}
-                                                    text={`Та "${value}"-г устгахдаа итгэлтэй байна уу?`}
-                                                    title="Group-Layer устгах"
-                                                    model_type_icon = "danger"
-                                                    status={this.state.modal_status}
-                                                    modalClose={() => this.handleModalDeleteClose()}
+                                                <GroupList
+                                                    idx={(currentPage*groupPerPage)-groupPerPage+idx+1}
+                                                    value={value}
+                                                    handleRemove={() => this.handleGroupDelete(value)}
                                                 />
-                                            </td>
-                                        </tr>
                                     )}
                             </tbody>
                         </table>
@@ -222,10 +182,10 @@ export class List extends Component {
                     </div>
                 </div>
                 <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай устгалаа"
-                    model_type_icon="success"
+                    modalAction = {() => this.modalClose()}
+                    status = {this.state.modal_alert_status}
+                    title = {this.state.model_alert_text}
+                    model_type_icon = {this.state.model_type_icon}
                 />
         </div>
         )

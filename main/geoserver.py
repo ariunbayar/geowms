@@ -303,7 +303,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 srs=srs,
                 attributes=''.join(attributes_hoho),
             )
-    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
+    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
 
     return rsp
 
@@ -546,10 +546,13 @@ def create_style(values):
 
 
 def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache):
+    layer_name = layer_name
+    if ws_name:
+        layer=ws_name + ':' + layer_name
 
     payload='''
         <seedRequest>
-            <name>{ws_name}:{layer_name}</name>
+            <name>{layer_name}</name>
             <srs>
                 <number>{srs}</number>
             </srs>
@@ -561,7 +564,6 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
         </seedRequest>
     '''.format(
         layer_name=layer_name,
-        ws_name=ws_name,
         zoom_start=zoom_start,
         zoom_stop=zoom_stop,
         image_format=image_format,
@@ -574,8 +576,8 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
     BASE_URL, AUTH = getCacheHeader()
 
     headers = {'Content-type': 'text/xml'}
-    url = BASE_URL +  'seed/' + '{ws_name}:{layer_name}.xml'.format(ws_name=ws_name, layer_name=layer_name)
-    rsp = requests.post(url, headers=headers, auth=AUTH, data=payload)
+    url = BASE_URL +  'seed/' + '{layer_name}.xml'.format(layer_name=layer_name)
+    rsp = requests.post(url, headers=headers, auth=AUTH, data=payload.encode('utf-8'))
     return rsp
 
 
@@ -588,7 +590,8 @@ def get_layer_groups():
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     if rsp.status_code == 200:
         features = rsp.json()
-        return features.get('layerGroups').get('layerGroup')
+        if features.get('layerGroups'):
+            return features.get('layerGroups').get('layerGroup')
 
 
 def get_layer_group_detail(group_name):

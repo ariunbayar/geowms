@@ -53,7 +53,6 @@ export default class ModelSelectLayer extends Component {
         setTimeout(() => {
             this.setState({status: "closed"})
             this.props.modalClose()
-            this.props.getAll()
         }, 150)
     }
 
@@ -73,8 +72,8 @@ export default class ModelSelectLayer extends Component {
         const {layer_list } = this.props
         return (
             <Fragment>
-                <div className={className + " ml-3 mb-3 mt-3 rounded text-wrap col-md-3"} style={{height:"calc( 53vh - 45px - 7px)", top: "40%", left: "38%"}}>
-                    <div className="col-md-12">
+                <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-absolute w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
+                    <div className="col-md-12 modal-dialog modal-dialog-centered">
                         <div className="modal-content animated row" >
                             <div className="col-md-12">
                                 <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
@@ -89,7 +88,7 @@ export default class ModelSelectLayer extends Component {
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-12 overflow-auto text-justify" style={{height:"calc( 53vh - 45px - 7px)"}}>
+                                    <div className="col-md-12 overflow-auto text-justify" style={{height:"calc( 40vh - 35px - 7px)"}}>
                                         <table className="table table_wrapper_table">
                                             <thead>
                                                 <tr>
