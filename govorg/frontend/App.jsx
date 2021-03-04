@@ -16,7 +16,7 @@ const RevokeRequest = React.lazy(() => import('./RevokeRequest'));
 const Password = React.lazy(() => import('./User/Password'));
 const Profile = React.lazy(() => import('./User/Profile'));
 const Employee = React.lazy(() => import('./Role/Employee'));
-const Region = React.lazy(() => import('./Role/Region'));
+const MapRegion = React.lazy(() => import('./Role/Region'));
 const TuuhenOv = React.lazy(() => import('./Bundles/TuuhenOv'));
 const Forms = React.lazy(() => import('./Bundles/Form'));
 const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
@@ -203,7 +203,7 @@ export class App extends Component {
                                 <Route path="/gov/revoke-request/" component={RevokeRequest} />
                                 <Route path="/gov/meta/" component={Meta} />
 
-                                <Route path="/gov/perm/region/" component={Region} />
+                                <Route path="/gov/perm/region/" component={MapRegion} />
                                 <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
                                 <Route path="/gov/role/role/" component={Role} />
                                 <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} base_layer_list={base_layer_list} employee={employee} refreshCount={() => this.requestCount()} />} />
