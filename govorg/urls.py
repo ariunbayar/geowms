@@ -35,6 +35,7 @@ urlpatterns = [
             ], 'employee'))),
             path('', include(([
                 path('', role_views.list),
+                path('role-list/', role_views.role_list),
                 path('create/', role_views.create),
                 path('<int:pk>/update/', role_views.update),
                 path('<int:pk>/detail/', role_views.detail),
