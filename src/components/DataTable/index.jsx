@@ -72,6 +72,12 @@ export class PortalDataTable extends Component {
         if(pp.custom_query !== this.props.custom_query){
             this.setState({ custom_query: this.props.custom_query })
         }
+        if(pp.жагсаалтын_холбоос !== this.props.жагсаалтын_холбоос) {
+            this.setState({ жагсаалтын_холбоос: this.props.жагсаалтын_холбоос })
+        }
+        if(pp.нэмэх_товч !== this.props.нэмэх_товч) {
+            this.setState({ нэмэх_товч: this.props.нэмэх_товч })
+        }
     }
 
     render() {

@@ -19,7 +19,7 @@ export class OrgForm extends Component {
         this.state = {
             level: props.match.params.level || 1,
 
-            жагсаалтын_холбоос: `/back/api/org/level-${props.match.params.level}/org-list/`,
+            жагсаалтын_холбоос: `/back/api/org/level-${this.props.match.params.level}/org-list/`,
             талбарууд: [
                 {'field': 'name', "title": 'Байгууллага нэр', 'has_action': true},
                 {'field': 'num_employees', "title": 'Албан хаагчид',},
@@ -47,13 +47,13 @@ export class OrgForm extends Component {
                     "action": (values) => this.handleRemoveAction(values),
                 }
             ],
-            нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/нэмэх/`,
+            нэмэх_товч: `/back/байгууллага/түвшин/${this.props.match.params.level}/нэмэх/`,
             уншиж_байх_үед_зурвас: "Уншиж байна",
             refresh: true,
             values: {},
             modal_status: 'closed',
             action_modal_status: 'closed',
-            is_loading: false
+            is_loading: false,
         }
 
         this.modalClose = this.modalClose.bind(this)
@@ -63,6 +63,18 @@ export class OrgForm extends Component {
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
 
+    }
+
+    componentDidUpdate(pp, ps) {
+        if (this.props.match.params.level !==  ps.level) {
+            const org_level = this.props.match.params.level
+            this.setState({
+                level: this.props.match.params.level,
+                жагсаалтын_холбоос: `/back/api/org/level-${org_level}/org-list/`,
+                refresh: !this.state.refresh,
+                нэмэх_товч: `/back/байгууллага/түвшин/${org_level}/нэмэх/`
+            })
+        }
     }
 
     handleRemoveAction(values){
