@@ -17,19 +17,33 @@ export default class Bar extends Component {
     }
 
     dragEnd(e) {
-        console.log(e);
-        console.log(e.movementX, 'movementX');
-        console.log(e.movementY, 'movementY');
-        console.log(e.clientX, 'clientX');
-        console.log(e.clientY, 'clientY');
-        console.log(e.pageX, 'pageX');
-        console.log(e.pageY, 'pageY');
-        e.target.style.left = 0 + 'px'
-        e.target.style.top = 10 + 'px'
+        e.preventDefault();
+
+        let me = e.target.getBoundingClientRect()
+        let parent = e.target.parentElement.getBoundingClientRect()
+
+        let left = e.clientX - parent.left
+        if (left < 0) {
+            left = 0
+        }
+        if (e.clientX > parent.right) {
+            left = parent.width - me.width
+        }
+
+        let top = e.clientY - parent.top
+        if (top < 0) {
+            top = 0
+        }
+        if (e.clientY > parent.bottom) {
+            top = parent.height - me.height
+        }
+
+        e.target.style.left = left + 'px'
+        e.target.style.top = top + 'px'
     }
 
     dragStart(e) {
-        console.log(e)
+        e.preventDefault();
     }
 
     calcPercent(max, per=5) {

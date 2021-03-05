@@ -1460,28 +1460,44 @@ def get_contain_geoms(request, payload):
     return JsonResponse(rsp)
 
 
+def _set_text_to_image(texts, image):
+    draw = ImageDraw.Draw(image)
+    for text in texts:
+        font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=text['size'])
+        draw.text(tuple(text['xy']), text['text'], tuple(text['rgb']), font)
 
+    return image
+
+
+def _copy_image(img, plus):
+    x, y = img.size
+
+    new_x = x + plus
+    new_y = y + plus
+
+    new_img = Image.new('RGBA', (new_x, new_y), 'red')
+    top = math.floor((new_x - x) / 2)
+    left = math.floor((new_y - y) / 2)
+    tup = (top, left)
+    new_img.paste(img, tup)
+
+    return new_img
 
 from PIL import Image, ImageFont, ImageDraw
 img = Image.open(os.path.join(settings.MEDIA_ROOT, 'gp_layer_building_view.jpeg'))
-print(img.size)
-x, y = img.size
+texts = [
+    {
+        'text': 'odko',
+        'xy': [-20, 5],
+        'rgb': [100, 255, 255],
+        'size': 24,
+    }
+]
 plus = 100
 
-new_x = x + plus
-new_y = y + plus
+new_img = _copy_image(img, plus)
+new_img = _set_text_to_image(texts, new_img)
+new_img.show()
+# new_img.save('text.png')
 
-new_img = Image.new('RGBA', (new_x, new_y), 'red')
-top = math.floor((new_x - x) / 2)
-left = math.floor((new_y - y) / 2)
-tup = (top, left)
-new_img.paste(img, tup)
 
-font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=24)
-
-draw = ImageDraw.Draw(new_img)
-text = 'Lol'
-
-draw.text((20, 50), text, (100, 255, 255), font)
-draw.point([(10, 10)], fill=(0, 0, 0))
-new_img.save('text.png')
