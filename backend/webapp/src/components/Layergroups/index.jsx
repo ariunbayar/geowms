@@ -4,7 +4,7 @@ import {List} from "./layer_list"
 import { GroupAdd } from "./group_add"
 import { TileCaching } from "./tile_caching"
 
-export class LayerGroups extends Component {
+export default class LayerGroups extends Component {
 
     constructor(props) {
         super(props)
