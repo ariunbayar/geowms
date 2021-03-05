@@ -33,6 +33,12 @@ export class OrgMenu extends Component {
         ])
     }
 
+    componentDidUpdate(pP, Ps) {
+        if (pP.allowed_geom != this.props.allowed_geom) {
+            this.setState({allowed_geom: this.props.allowed_geom})
+        }
+    }
+
     handleSistemCount(){
         const id = this.props.match.params.id
         service.sistemCount(id).then(({ count }) => {

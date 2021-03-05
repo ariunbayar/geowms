@@ -331,8 +331,6 @@ export class OrgEdit extends Component {
                                 </table>
                                 <div className="form-group">
                                     <button type="submit" className="btn gp-btn-primary" style={{float: 'right'}} disabled={isSubmitting}>
-                                        {/* {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                        {isSubmitting && <a className="text-light">Шалгаж байна.</a>} */}
                                         Хадгалах
                                     </button>
                                 </div>
