@@ -1,9 +1,9 @@
 import {handleResponse,getGetOptions, getPostOptions, getCookie} from '../../components/helpers/service'
 export const service = {
-    getBaseLayers,
+    getRegion,
 }
 
-function getBaseLayers() {
+function getRegion() {
     const opts = getGetOptions()
     return fetch('/gov/api/role/region/', opts).then(handleResponse)
 }

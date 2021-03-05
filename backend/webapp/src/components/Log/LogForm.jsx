@@ -54,6 +54,7 @@ export class LogForm extends Component {
                 <div className="card-body">
                     <div className="col-md-12">
                         <PortalDataTable
+                            refresh={refresh}
                             color={'bg-dark'}
                             талбарууд={талбарууд}
                             жагсаалтын_холбоос={жагсаалтын_холбоос}

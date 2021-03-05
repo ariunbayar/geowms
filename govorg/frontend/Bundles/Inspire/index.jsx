@@ -53,6 +53,7 @@ export default class Bundles extends Component {
                             addNotif={ this.addNotif }
                             refreshCount={this.props.refreshCount}
                             employee={this.props.employee}
+                            base_layer_list={this.props.base_layer_list}
                         />
                     }/>
                 </Switch>

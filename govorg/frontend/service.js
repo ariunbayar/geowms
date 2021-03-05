@@ -11,6 +11,14 @@ export const service = {
     updatePassword,
     getEmpRoles,
     getApproveAndRevoke,
+    loadBaseLayers
+}
+
+function loadBaseLayers() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }
 
 function tableListTeevriinSuljee() {

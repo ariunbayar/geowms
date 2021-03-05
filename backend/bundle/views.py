@@ -193,23 +193,16 @@ def update(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def move(request, payload):
-
-    bundle1 = get_object_or_404(Bundle, pk=payload.get('id'))
-    if payload.get('move') == 'down':
-        bundle2 = Bundle.objects.filter(sort_order__gt=bundle1.sort_order).order_by('sort_order').first()
-    else:
-        bundle2 = Bundle.objects.filter(sort_order__lt=bundle1.sort_order).order_by('sort_order').last()
-    if bundle2 is None:
-        return JsonResponse({'success': False})
+def swap(request, payload):
+    swap_one = payload.get("swap_one")
+    swap_two = payload.get("swap_two")
+    bundle1 = get_object_or_404(Bundle, pk=swap_one)
+    bundle2 = get_object_or_404(Bundle, pk=swap_two)
     bundle1.sort_order, bundle2.sort_order = bundle2.sort_order, bundle1.sort_order
     Bundle.objects.bulk_update([bundle1, bundle2], ['sort_order'])
 
-    bundle_list = [_get_bundle_display(ob) for ob in Bundle.objects.all()]
-
     rsp = {
         'success': True,
-        'bundle_list': bundle_list,
     }
 
     return JsonResponse(rsp)

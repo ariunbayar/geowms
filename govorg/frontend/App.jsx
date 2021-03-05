@@ -1,26 +1,28 @@
-import React, { Component } from 'react'
+import React, { Component, Suspense } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
-import { System } from "./System"
-import { Meta } from './Meta'
-import { RevokeRequest } from './RevokeRequest'
-import { Password } from './User/Password'
-import { Profile } from './User/Profile'
-import InsPerms from './Role/Role/GovPerms'
-import Gov from './Role/Gov/index'
-import { Employee } from './Role/Employee'
-import { Region } from './Role/Region'
-import Bundles from './Bundles/Inspire'
-import { TuuhenOv } from './Bundles/TuuhenOv'
-import { Forms } from './Bundles/Form'
-import { ZipCode } from './Bundles/Zipcode'
-import OrgRequest from './OrgRequest'
-import ChangeRequest from './Bundles/Inspire/ChangeRequest'
-import {Addresses} from './Role/EmployeeAddress'
-
-import { Help } from './Help'
 import { service } from "./service"
 import MenuItem from "@utils/MenuItem"
-import { Role } from './Role';
+import SuspenseLoader from "@utils/Loader/SuspenseLoader"
+
+const InsPerms  = React.lazy(() => import('./Role/Role/GovPerms'));
+const Gov  = React.lazy(() => import('./Role/Gov/index'));
+const OrgRequest  = React.lazy(() => import('./OrgRequest'));
+const ChangeRequest  = React.lazy(() => import('./Bundles/Inspire/ChangeRequest'));
+const Bundles  = React.lazy(() => import('./Bundles/Inspire'));
+
+const System = React.lazy(() => import("./System"));
+const Meta = React.lazy(() => import('./Meta'));
+const RevokeRequest = React.lazy(() => import('./RevokeRequest'));
+const Password = React.lazy(() => import('./User/Password'));
+const Profile = React.lazy(() => import('./User/Profile'));
+const Employee = React.lazy(() => import('./Role/Employee'));
+const MapRegion = React.lazy(() => import('./Role/Region'));
+const TuuhenOv = React.lazy(() => import('./Bundles/TuuhenOv'));
+const Forms = React.lazy(() => import('./Bundles/Form'));
+const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
+const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
+const Help = React.lazy(() => import('./Help'));
+const Role = React.lazy(() => import('./Role'));
 
 export class App extends Component {
 
@@ -33,6 +35,7 @@ export class App extends Component {
             emp_role: {},
             approve: false,
             revoke: false,
+            base_layer_list: []
         }
         this.requestCount = this.requestCount.bind(this)
         this.getEmpRoles = this.getEmpRoles.bind(this)
@@ -43,8 +46,15 @@ export class App extends Component {
         Promise.all([
             this.requestCount(),
             this.getEmpRoles(),
-            this.getApproveAndRevoke()
+            this.getApproveAndRevoke(),
+            this.getBaseLayer()
         ])
+    }
+
+    getBaseLayer(){
+        service.loadBaseLayers().then(({base_layer_list}) => {
+            this.setState({base_layer_list})
+        })
     }
 
     requestCount() {
@@ -75,7 +85,7 @@ export class App extends Component {
 
     render() {
         const { org_role, employee } = this.props.org
-        const { emp_role , approve, revoke } = this.state
+        const { emp_role , approve, revoke, base_layer_list } = this.state
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -185,31 +195,33 @@ export class App extends Component {
 
                 <div className="clearfix">
                     <div className="content-wrapper">
-                        <Switch>
-                            <Route path={"/gov/froms/"} component={Forms} />
-                            <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
-                            <Route path="/gov/system/" component={System} />
-                            <Route path="/gov/revoke-request/" component={RevokeRequest} />
-                            <Route path="/gov/meta/" component={Meta} />
+                        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачаалж байна."}/>}>
+                            <Switch>
+                                <Route path={"/gov/froms/"} component={Forms} />
+                                <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
+                                <Route path="/gov/system/" component={System} />
+                                <Route path="/gov/revoke-request/" component={RevokeRequest} />
+                                <Route path="/gov/meta/" component={Meta} />
 
-                            <Route path="/gov/perm/region/" component={Region} />
-                            <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
-                            <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} employee={employee} refreshCount={() => this.requestCount()} />} />
+                                <Route path="/gov/perm/region/" component={MapRegion} />
+                                <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
+                                <Route path="/gov/role/role/" component={Role} />
+                                <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} base_layer_list={base_layer_list} employee={employee} refreshCount={() => this.requestCount()} />} />
 
-                            <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
-                            <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
+                                <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
+                                <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
 
-                            <Route path="/gov/zip-code/" component={ZipCode} />
-                            <Route path="/gov/org-request/" component={OrgRequest} />
-                            <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
-                            <Route exact path="/gov/perm/org/" component={Gov} />
-                            <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} employee={employee} getEmpRoles={this.getEmpRoles}/>}/>
-                            <Route exact path="/gov/help/" component={Help} />
-                            <Route exact path="/gov/profile/" component={Profile} />
-                            <Route exact path="/gov/profile/password/" component={Password} />
-                        </Switch>
+                                <Route path="/gov/zip-code/" component={ZipCode} />
+                                <Route path="/gov/org-request/" component={OrgRequest} />
+                                <Route path="/gov/history/" component={ChangeRequest} />
+                                <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                                <Route exact path="/gov/perm/org/" component={Gov} />
+                                <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} employee={employee} getEmpRoles={this.getEmpRoles}/>}/>
+                                <Route exact path="/gov/help/" component={Help} />
+                                <Route exact path="/gov/profile/" component={Profile} />
+                                <Route exact path="/gov/profile/password/" component={Password} />
+                            </Switch>
+                        </Suspense>
                     </div>
                 </div>
             </BrowserRouter>

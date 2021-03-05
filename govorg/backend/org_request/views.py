@@ -511,6 +511,14 @@ def _get_emp_features(employee):
     return emp_feature
 
 
+def _value_types():
+    return [
+        {'value_type': 'value_number', 'value_names': ['double', 'number']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
+        {'value_type': 'value_date', 'value_names': ['date']},
+    ]
+
+
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
     for form in form_json:
@@ -523,10 +531,12 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
                 if data == code[value_type]:
                     data = code[value_type]
         else:
-            if form['value_type'] == 'date':
-                if data:
-                    data = date_to_timezone(data)
-            value_type = 'value_' + form['value_type']
+            for types in _value_types():
+                if form['value_type'] in types['value_names']:
+                    if types['value_type'] == 'date' and data:
+                        data = date_to_timezone(data)
+
+                    value_type = types['value_type']
 
         value[value_type] = data
 
@@ -686,7 +696,6 @@ def request_approve(request, payload):
                 r_approve.save()
 
             else:
-                transaction.rollback()
                 rsp = {
                     'success': False,
                     'info': 'Танд баталгаажуулах эрх алга байна.'

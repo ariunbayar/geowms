@@ -26,7 +26,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                             onClick={() => handleModalOpen(
                                 'reject',
                                 `Та ${
-                                    get_modal_reject_text(values.kind)
+                                    get_modal_text(values.kind)
                                 }
                                 татгалзахдаа итгэлтэй байна уу ?`,
                                 "Тохиргоог татгалзах",

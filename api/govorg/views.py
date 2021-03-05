@@ -111,7 +111,7 @@ def json_proxy(request, token, code):
     else:
         queryargs = {
             'service': 'WFS',
-            'version': '1.3.0',
+            'version': '1.0.0',
             'request': 'GetFeature',
             'typeName': code,
             'outputFormat': 'application/json',

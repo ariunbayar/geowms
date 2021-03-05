@@ -175,6 +175,7 @@ def _new_revoke_request(employee, payload):
     change_request.package_id = package_id
     change_request.feature_id = feature_id
     change_request.employee = employee
+    change_request.org = employee.org
     change_request.state = ChangeRequest.STATE_NEW
     change_request.kind = ChangeRequest.KIND_REVOKE
     change_request.form_json = form_json

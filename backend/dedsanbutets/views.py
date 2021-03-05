@@ -56,6 +56,7 @@ def _check_gp_design():
     ds_name = ws_name
     table_name = 'geoserver_desing_view'
     design_space = geoserver.getWorkspace(ws_name)
+    _create_design_view()
     if design_space.status_code == 404:
         geoserver.create_space(ws_name)
 
@@ -66,7 +67,6 @@ def _check_gp_design():
             ds_name,
             ds_name,
         )
-        _create_design_view()
 
     layer_name = 'gp_layer_' + table_name
     check_layer = geoserver.getDataStoreLayer(

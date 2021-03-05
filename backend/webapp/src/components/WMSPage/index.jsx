@@ -6,7 +6,7 @@ import {WMSForm} from './WMSForm'
 import GeoData from './GeoData'
 
 
-export class WMSPage extends Component {
+export default class WMSPage extends Component {
 
     constructor(props) {
         super(props)

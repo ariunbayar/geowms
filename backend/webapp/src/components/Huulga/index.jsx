@@ -4,7 +4,7 @@ import {Switch, Route} from "react-router-dom"
 import {HuulgaForm} from './HuulgaForm'
 
 
-export class Huulga extends Component {
+export default class Huulga extends Component {
 
     constructor(props) {
         super(props)

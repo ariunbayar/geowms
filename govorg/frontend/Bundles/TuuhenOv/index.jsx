@@ -6,7 +6,7 @@ import {FormList} from './FormList'
 import {AddForm} from './AddForm'
 import {DursgaltGazar} from './DursgaltGazar'
 
-export class TuuhenOv extends Component {
+export default class TuuhenOv extends Component {
 
     render() {
         return (
