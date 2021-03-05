@@ -150,9 +150,9 @@ def create_store(workspace_name, ds_name, ds_desc):
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
 
-def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes):
+
+def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes, layer_state):
     BASE_URL, AUTH = getHeader()
-    url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name = datastore_name)
     attributes_hoho = []
     geom_type = ''
     for i in range(len(attribute_name)):
@@ -303,7 +303,13 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 srs=srs,
                 attributes=''.join(attributes_hoho),
             )
-    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
+    if layer_state:
+        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=workspace_name, datastore_name = datastore_name, layer_name = layer_name)
+        rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
+    else:
+
+        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name = datastore_name)
+        rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
 
     return rsp
 

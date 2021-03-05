@@ -1,5 +1,7 @@
 import { compose } from "ol/transform"
 import React, {Component, Fragment} from "react"
+import { GSPaginate } from "./geo_pagination"
+
 
 export default class ModelSelectLayer extends Component {
 
@@ -7,12 +9,19 @@ export default class ModelSelectLayer extends Component {
         super(props)
         this.state = {
             status: this.props.status || "initial",
-            is_loading: false
+            layer_list: props.layer_list,
+            searchQuery: '',
+            current_page: 1,
+            layerPerPage: 10,
+            current_layers: [],
+            search_name: ''
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleIsload = this.handleIsload.bind(this)
         this.handleProceed = this.handleProceed.bind(this)
+        this.handleSearch = this.handleSearch.bind(this)
+        this.paginate = this.paginate.bind(this)
     }
 
     componentDidMount() {
@@ -25,17 +34,33 @@ export default class ModelSelectLayer extends Component {
         this.setState({is_loading: status})
     }
 
+    handleSearch(e) {
+        if (e.target.value.length >= 1) {
+            this.setState({searchQuery: e.target.value})
+        }
+        else {
+            this.setState({searchQuery: '', layer_list: this.props.layer_list})
+        }
+    }
+
+    paginate(current_layers, current_page, searchQuery) {
+        this.setState({ current_layers, current_page, searchQuery })
+    }
 
     componentDidUpdate(prevProps) {
         if (this.props.status != prevProps.status) {
-            if (["initial", "open"].includes(this.props.status)) {
+            if (["initial", "open"].includes(cthis.props.status)) {
                 this.handleOpen()
             }
             if (["closing", "closed"].includes(this.props.status)) {
                 this.handleClose()
             }
         }
+        if (this.props.layer_list != prevProps.layer_list) {
+            this.setState({layer_list: this.props.layer_list})
+        }
     }
+
     handleProceed(event, values) {
         this.props.modalAction(values)
     }
@@ -69,7 +94,7 @@ export default class ModelSelectLayer extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const {layer_list } = this.props
+        const {layer_list, current_layers, searchQuery, layerPerPage, current_page} = this.state
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-absolute w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
@@ -88,7 +113,20 @@ export default class ModelSelectLayer extends Component {
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-12 overflow-auto text-justify" style={{height:"calc( 40vh - 35px - 7px)"}}>
+                                    <div className="col-3 col-md-3 col-xl-3">
+                                        <div className="float-sm-left search-bar">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="small-input"
+                                                    placeholder="Хайх"
+                                                    onChange={(e) => this.handleSearch(e)}
+                                                    value={searchQuery}
+                                                />
+                                                <a><i className="icon-magnifier"></i></a>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-12 overflow-auto text-justify" style={{height:"calc( 30vh - 35px - 7px)"}}>
                                         <table className="table table_wrapper_table">
                                             <thead>
                                                 <tr>
@@ -98,21 +136,31 @@ export default class ModelSelectLayer extends Component {
                                             </thead>
                                             <tbody>
                                                 {
-                                                    layer_list.length >0 ?
-                                                    layer_list.map((value, idx) =>
-                                                    <tr key={idx}>
+                                                    current_layers.length > 0 ?
+                                                    current_layers.map((value, idx) =>
+                                                    <tr key={(current_page*layerPerPage)-layerPerPage+idx+1}>
                                                         <td>
-                                                            {idx+1}
+                                                            {(current_page*layerPerPage)-layerPerPage+idx+1}
                                                         </td>
                                                         <td>
                                                             <a href="#" onClick={(e) => this.handleProceed(e, value)}>{value.layer_name}</a>
                                                         </td>
                                                     </tr>
-                                                    ): null
+                                                    ): <tr><td>geoserver дээр давхарга бүртгэлгүй байна</td></tr>
                                                 }
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                                <div className="mb-4">
+                                    <GSPaginate
+                                        paginate = {this.paginate}
+                                        item_list ={layer_list}
+                                        searchQuery = {searchQuery}
+                                        per_page = {layerPerPage}
+                                        page = {current_page}
+                                        filter_name={'layer_name'}
+                                    />
                                 </div>
                             </div>
                         </div>

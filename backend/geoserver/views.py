@@ -124,10 +124,10 @@ def get_group_detial(request, payload):
         for i in range(len(glayers)):
             styel_name = ''
             if isinstance(glayers, list):
-                style_name = styles[0].get('name') if not isinstance(styles[0], str)  else ''
+                style_name = styles[i].get('name') if not isinstance(styles[i], str)  else ''
 
             elif isinstance(glayers, dict):
-                style_name = styles[i].get('name')
+                style_name = styles[0].get('name') if not isinstance(styles[i], str)  else ''
 
             layer_detial.append({
                 'type': glayers[i].get('@type') if glayers[i] else '',

@@ -5,6 +5,7 @@ import Modal from "../Modal"
 import ModalAlert from "../ModalAlert"
 import Loader from "@utils/Loader"
 import GroupList from './list'
+import { GSPaginate } from "./geo_pagination"
 
 export class List extends Component {
 
@@ -18,18 +19,17 @@ export class List extends Component {
             model_alert_text: '',
             model_type_icon: 'success',
             searchQuery: '',
-            list_length: null,
             currentPage: 1,
-            groupPerPage: 2,
-            is_loading: false
+            groupPerPage: 20,
+            is_loading: false,
+            currentGroups: []
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleGroupDelete = this.handleGroupDelete.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
-        this.nextPage = this.nextPage.bind(this)
-        this.prevPage = this.prevPage.bind(this)
+        this.paginate = this.paginate.bind(this)
 
     }
 
@@ -40,7 +40,9 @@ export class List extends Component {
     handleListUpdated() {
         this.setState({is_loading: true})
         service.getgrouplist().then(({group_list}) => {
-            this.setState({group_list, list_length: group_list.length, is_loading: false})
+            this.setState({
+                group_list,
+                is_loading: false})
         })
 
     }
@@ -50,18 +52,17 @@ export class List extends Component {
     }
 
     handleSearch(e) {
-        const { group_list } = this.state
         if (e.target.value.length != "" ) {
-            const filter = group_list.filter(layer => {
-                return layer.toLowerCase().includes(e.target.value.toLowerCase())
-            })
-            this.setState({searchQuery: e.target.value, group_list: filter, list_length: filter.length})
+            this.setState({searchQuery: e.target.value})
         }
         else {
-
             this.setState({searchQuery: ''})
             this.handleListUpdated()
         }
+    }
+
+    paginate(currentGroups, currentPage, searchQuery) {
+        this.setState({currentPage, currentGroups, searchQuery})
     }
 
     handleGroupDelete(name){
@@ -76,22 +77,6 @@ export class List extends Component {
         })
     }
 
-    nextPage(){
-        if(this.state.currentPage<Math.ceil(this.state.list_length/this.state.groupPerPage)){
-            this.setState({
-                currentPage:this.state.currentPage+1
-            })
-        }
-    }
-
-    prevPage(){
-        if(this.state.currentPage >1){
-            this.setState({
-                currentPage:this.state.currentPage-1
-            })
-        }
-    }
-
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
@@ -99,16 +84,12 @@ export class List extends Component {
     }
 
     render() {
-        const {group_list, searchQuery, groupPerPage,currentPage, list_length, is_loading, modal_status} = this.state
-        const lastIndex=currentPage*groupPerPage
-        const firtsIndex=lastIndex-groupPerPage
-        const currentGroups= group_list.slice(firtsIndex,lastIndex)
-        const totalPages=Math.ceil( list_length/groupPerPage)
+        const {group_list, currentGroups, searchQuery, groupPerPage, currentPage, is_loading, modal_status} = this.state
         return (
             <div className="row justify-content-center">
                 <div className="col-md-12">
                     <div className="row">
-                        <Loader is_loading={is_loading}/>
+                    <Loader is_loading={is_loading}/>
                         <div className="col-md-6">
                             <div className="float-sm-left search-bar">
                                 <input
@@ -144,8 +125,8 @@ export class List extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                { group_list ===0 ?
-                                        <tr><td>Group list бүртгэлгүй байна</td></tr>:
+                                { currentGroups.length ===0 ?
+                                        <tr><td>geoserver дээр group бүртгэлгүй байна</td></tr>:
 
                                         currentGroups.map((value, idx) =>
                                                 <GroupList
@@ -157,29 +138,13 @@ export class List extends Component {
                             </tbody>
                         </table>
                     </div>
-                    <div className="row">
-                        <div className="col-md-12">
-                            <div className="float-left">
-                                <strong>Хуудас {currentPage}-{totalPages}</strong>
-                            </div>
-                            <div className="float-right">
-                                <button
-                                    type=" button"
-                                    className="btn btn-outline-primary"
-                                    onClick={this.prevPage}
-                                > &laquo; өмнөх
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-primary "
-                                    onClick={this.nextPage}
-                                >
-                                    дараах &raquo;
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <GSPaginate
+                        paginate = {this.paginate}
+                        item_list ={group_list}
+                        searchQuery = {searchQuery}
+                        per_page = {groupPerPage}
+                        page = {currentPage}
+                    />
                 </div>
                 <ModalAlert
                     modalAction = {() => this.modalClose()}

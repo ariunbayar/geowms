@@ -63,6 +63,11 @@ export class GroupAdd extends Component {
         })
 
     }
+    componentDidUpdate(pP, pS) {
+        if (pS.layer_detail != this.state.layer_detail) {
+            this.setState({layer_detail: this.state.layer_detail})
+        }
+    }
 
     getDetialAll(group_name) {
         service.getGroupDetial(group_name).then(({detial_list, layer_list}) => {
@@ -192,7 +197,6 @@ export class GroupAdd extends Component {
                                                                 name='name'
                                                                 id="name"
                                                                 type="text"
-                                                                disabled={group_name ? true : false}
                                                             />
                                                             <ErrorMessage name="name" component="div" className="text-danger"/>
 

@@ -90,7 +90,8 @@ def _check_gp_design():
                         table_name,
                         srs,
                         geom_att,
-                        extends
+                        extends,
+                        False
         )
 
 @require_GET
@@ -749,20 +750,32 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     layer_title = feature.feature_name
 
     if check_layer.status_code == 200:
+        layer_create = geoserver.create_layer(
+                            ws_name,
+                            ds_name,
+                            layer_name,
+                            layer_title,
+                            table_name,
+                            srs,
+                            geom_att,
+                            extends,
+                            True
+        )
+
+    else:
         geoserver.deleteLayerName(ws_name, ds_name, layer_name)
-
-    layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends
-    )
-
-    if layer_create.status_code == 201:
+        layer_create = geoserver.create_layer(
+                            ws_name,
+                            ds_name,
+                            layer_name,
+                            layer_title,
+                            table_name,
+                            srs,
+                            geom_att,
+                            extends,
+                            False
+        )
+    if layer_create.status_code == 201 or layer_create.status_code == 200:
         if geom_type:
             cache_values = values.get('cache_values')
             if style_state == 'create_style':
@@ -780,9 +793,7 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                     }
                 else:
                     geoserver.create_style(values)
-
             geoserver.update_layer_style(layer_name, style_name)
-
             if tile_cache_check:
                 cache_type = cache_details.get('cache_type')
                 zoom_stop = cache_details.get('zoom_stop')
