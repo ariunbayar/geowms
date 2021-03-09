@@ -59,6 +59,7 @@ class Qpay():
         #         "phone_number":"99888899",
         #         "note" : "davaa"
         # }
+
         body = {
             "template_id": settings.QPAY['TEMPLATE_ID'],
             "merchant_id": settings.QPAY['MERCHANT_ID'],
