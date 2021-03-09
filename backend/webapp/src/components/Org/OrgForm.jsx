@@ -1,9 +1,11 @@
 import React, { Component } from "react"
-import {OrgFormTable} from './OrgFormTable'
-import {NavLink} from "react-router-dom"
 import {service} from "./service"
-import { Pagination } from "@utils/Pagination"
 import ModalAlert from "../ModalAlert"
+import { PortalDataTable } from "@utils/DataTable"
+import BackButton from "@utils/Button/BackButton"
+import Modal from "../Modal"
+import Loader from "@utils/Loader"
+
 
 export class OrgForm extends Component {
 
@@ -15,171 +17,141 @@ export class OrgForm extends Component {
         }
 
         this.state = {
-            level: this.props.match.params.level || 1,
-            orgs: [],
-            org_length:null,
-            currentPage: this.initials.currentPage,
-            orgPerPage:20,
-            searchQuery: '',
-            query_min: false,
-            search_load: false,
-            load: 0,
-            modal_alert_status: 'closed',
-            timer: null,
+            level: props.match.params.level || 1,
+
+            жагсаалтын_холбоос: `/back/api/org/level-${props.match.params.level}/org-list/`,
+            талбарууд: [
+                {'field': 'name', "title": 'Байгууллага нэр', 'has_action': true},
+                {'field': 'num_employees', "title": 'Албан хаагчид',},
+                {'field': 'num_systems', "title": 'Систем'},
+            ],
+            хувьсах_талбарууд: [
+                {
+                    "field": "name",
+                    "text": "",
+                    "action": (values) => this.go_link(values),
+                    "action_type": false,
+                },
+            ],
+            нэмэлт_талбарууд: [
+                {
+                    "title": 'Засах',
+                    "text": '', "icon":
+                    'fa fa-pencil-square-o text-success',
+                    "action": (values) => this.go_edit_link(values),
+                },
+                {
+                    "title": 'Устгах',
+                    "text": '',
+                    "icon": 'fa fa-trash-o text-danger',
+                    "action": (values) => this.handleRemoveAction(values),
+                }
+            ],
+            нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/нэмэх/`,
+            уншиж_байх_үед_зурвас: "Уншиж байна",
+            refresh: true,
+            values: {},
+            modal_status: 'closed',
+            action_modal_status: 'closed',
+            is_loading: false,
         }
-        this.paginate = this.paginate.bind(this)
-        this.handleSearch = this.handleSearch.bind(this)
+
         this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
-        this.handleSort = this.handleSort.bind(this)
+        this.modalOpen = this.modalOpen.bind(this)
+        this.go_link = this.go_link.bind(this)
+        this.go_edit_link = this.go_edit_link.bind(this)
+        this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
 
     }
-    handleSort(sort_name, sort_type) {
-        if(sort_type){
-            this.setState({[sort_name]: false, sort_name})
-            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
-        }else{
-            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
-            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
+
+    componentDidUpdate(pp, ps) {
+        if (this.props.match.params.level !==  ps.level) {
+            const org_level = this.props.match.params.level
+            this.setState({
+                level: this.props.match.params.level,
+                жагсаалтын_холбоос: `/back/api/org/level-${org_level}/org-list/`,
+                refresh: !this.state.refresh,
+                нэмэх_товч: `/back/байгууллага/түвшин/${org_level}/нэмэх/`
+            })
         }
     }
-    componentDidUpdate(prevProp){
-        if(this.props.match.params.level !== prevProp.match.params.level ){
-            this.setState({ level: this.props.match.params.level })
-            const level = this.props.match.params.level
-            this.paginate(1, "", level)
-        }
+
+    handleRemoveAction(values){
+        this.setState({values})
+        this.modalOpen('action_modal_status')
     }
 
-    paginate (page, query, level, org_id, sort_name) {
-        const perpage = this.state.orgPerPage
-        this.setState({ currentPage: page })
-            return service
-                .orgList(page, perpage, query, level, org_id, sort_name)
-                .then(page => {
-                    this.setState({ orgs: page.items, org_length: page.items.length })
-                    return page
-                })
+    go_link(values){
+        const {level} = this.state
+        this.props.history.push(`/back/байгууллага/түвшин/${level}/${values.id}/хэрэглэгч/`)
     }
 
-    handleSearch(field, e) {
+    go_edit_link(values){
+        const {level} = this.state
+        this.props.history.push(`/back/байгууллага/түвшин/${level}/${values.id}/засах`)
+    }
+
+    modalClose(name) {
+        this.setState({[name]: "closed", msg: '', style: ''})
+    }
+
+    modalOpen(name) {
+        this.setState({[name]: "open"})
+    }
+
+    handleRemove() {
+        this.setState({is_loading: true})
+        const { load, values } = this.state
         const level = this.props.match.params.level
-        const org_id = this.props.match.params.org_id
-        if(e.target.value.length >= 1)
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value, level, org_id)
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value, level, org_id)
-        }
-    }
-
-    handleUserDelete(id){
-        const { load, searchQuery } = this.state
-        const level = this.props.match.params.level
-        const org_id = this.props.match.params.org_id
-        service.org_remove(this.state.level,id).then(({ success }) => {
+        service.org_remove(level, values.id).then(({ success }) => {
             var a = load
             a++
             if (success) {
-                this.setState({ load: a, msg: "Амжилттай боллоо", style: 'success' })
-                this.paginate(1, searchQuery, level, org_id)
-                this.setState({ modal_alert_status: 'open'})
+                this.setState({ is_loading: false, load: a, msg: "Амжилттай устлаа.", style: 'success', modal_status: 'open', refresh: !this.state.refresh})
             }else{
-                this.setState({ load: a, msg: "Амжилтгүй боллоо", style: 'danger' })
-                this.paginate(1, searchQuery, level, org_id)
-                this.setState({ modal_alert_status: 'open'})
+                this.setState({ is_loading: false, load: a, msg: "Амжилтгүй устлаа.", style: 'danger', modal_status: 'open', refresh: !this.state.refresh})
             }
-            this.modalCloseTime()
+        }).catch(() => {
+            this.setState({is_loading: false})
         })
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
-    }
-
-    modalClose() {
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
-    }
-
     render() {
-        const {orgs, currentPage, org_length, msg, style} = this.state
+        const { msg, style, modal_status,
+            талбарууд, жагсаалтын_холбоос,
+            хувьсах_талбарууд, нэмэлт_талбарууд, refresh,
+            нэмэх_товч, уншиж_байх_үед_зурвас,
+            action_modal_status, values, is_loading
+        } = this.state
         return (
             <div className="main-content">
                 <div className="page-container">
-                    <div className="row">
-                        <div className="col-md-6">
-                            <div className="float-sm-left search-bar">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="searchQuery small-input"
-                                    placeholder="Хайх"
-                                    onChange={(e) => this.handleSearch('searchQuery', e)}
-                                    value={this.state.searchQuery}
-                                />
-                                <a><i className="icon-magnifier"></i></a>
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <div className="float-sm-right">
-                                <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm" to={`/back/байгууллага/түвшин/${this.state.level}/нэмэх/`}>
-                                    Нэмэх
-                                </NavLink>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mb-2 mt-2">
-                        <div className="table-responsive table_wrapper">
-                            <table className="table example table_wrapper_table" id="example">
-                                <thead>
-                                    <tr>
-                                        <th><a>№</a></th>
-                                        <th><a onClick={() => this.handleSort('name', this.state.name)}>Байгууллага нэр <i className={this.state.name ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th scope="col">Албан хаагчид</th>
-                                        <th scope="col">Систем</th>
-                                        <th scope="col">Засах</th>
-                                        <th scope="col">Устгах</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    { org_length ===0 ?
-                                        <tr><td>Байгууллага бүртгэлгүй байна</td></tr> :
-                                        orgs.map((org, idx) =>
-                                            <OrgFormTable
-                                                key={idx}
-                                                idx={(currentPage*20)-20+idx+1}
-                                                org_level={this.state.level}
-                                                org={org}
-                                                handleUserDelete={() => this.handleUserDelete(org.id)}
-                                            >
-                                            </OrgFormTable>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <Pagination
-                        paginate = {this.paginate}
-                        searchQuery = {this.state.searchQuery}
-                        org_level = {this.props.match.params.level}
-                        load = { this.state.load }
-                        sort_name = {this.state.sort_name}
+                    <PortalDataTable
+                        талбарууд={талбарууд}
+                        жагсаалтын_холбоос={жагсаалтын_холбоос}
+                        хувьсах_талбарууд={хувьсах_талбарууд}
+                        нэмэлт_талбарууд={нэмэлт_талбарууд}
+                        refresh={refresh}
+                        уншиж_байх_үед_зурвас={уншиж_байх_үед_зурвас}
+                        нэмэх_товч={нэмэх_товч}
                     />
                 </div>
+                <Modal
+                    modalAction={() => this.modalClose('action_modal_status')}
+                    text={`Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                    title="Байгууллага устгах"
+                    model_type_icon = "success"
+                    status={action_modal_status}
+                    modalClose={() => this.handleRemove()}
+                />
                 <ModalAlert
                     title={msg}
                     model_type_icon={style}
-                    status={this.state.modal_alert_status}
-                    modalAction={() => this.modalClose()}
+                    status={modal_status}
+                    modalAction={() => this.modalClose('modal_status')}
                 />
+                <Loader is_loading={is_loading}/>
             </div>
         )
 

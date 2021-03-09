@@ -13,7 +13,7 @@ from main.decorators import ajax_required
 from django.contrib.auth.decorators import user_passes_test
 from geojson import FeatureCollection
 from backend.bundle.models import Bundle
-from geoportal_app.models import User
+from backend.geoserver.models import WmtsCacheConfig
 
 from backend.bundle.models import BundleLayer, Bundle
 from backend.wmslayer.models import WMSLayer
@@ -56,6 +56,7 @@ def _check_gp_design():
     ds_name = ws_name
     table_name = 'geoserver_desing_view'
     design_space = geoserver.getWorkspace(ws_name)
+    _create_design_view()
     if design_space.status_code == 404:
         geoserver.create_space(ws_name)
 
@@ -66,7 +67,6 @@ def _check_gp_design():
             ds_name,
             ds_name,
         )
-        _create_design_view()
 
     layer_name = 'gp_layer_' + table_name
     check_layer = geoserver.getDataStoreLayer(
@@ -374,6 +374,16 @@ def getFields(request, payload):
 def propertyFields(request, fid):
     view_name = ViewNames.objects.filter(feature_id=fid).first()
     geom = MGeoDatas.objects.filter(feature_id=fid).first()
+    cache_values = []
+    wmts = WmtsCacheConfig.objects.filter(feature_id=fid).first()
+    if wmts:
+        cache_values.append({
+            'image_format': wmts.img_format,
+            'zoom_start': wmts.zoom_start,
+            'zoom_stop': wmts.zoom_stop,
+            'cache_type': wmts.type_of_operation,
+            'number_of_cache': wmts.number_of_tasks_to_use,
+        })
     if not view_name == None:
         id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
         url = reverse('api:service:geo_design_proxy', args=[view_name.view_name])
@@ -384,16 +394,18 @@ def propertyFields(request, fid):
             'view_name': view_name.view_name,
             'url': request.build_absolute_uri(url),
             'style_name': geoserver.get_layer_style('gp_layer_'+view_name.view_name),
-            'geom_type': geom.geo_data.geom_type if  geom else ''
-
+            'geom_type': geom.geo_data.geom_type if  geom else '',
+            'cache_values': cache_values
         }
+
     else:
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': [],
             'view_name': '',
-            'geom_type': geom.geo_data.geom_type if  geom else ''
+            'geom_type': geom.geo_data.geom_type if  geom else '',
+            'cache_values': cache_values
 
         }
     return JsonResponse(rsp)
@@ -721,7 +733,7 @@ def get_colName_type(view_name, data):
 
     return geom_att, some_attributes
 
-def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values):
+def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
 
     geom_att, extends = get_colName_type(table_name, 'geo_data')
     if extends:
@@ -731,6 +743,9 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
 
     style_name = values.get('style_name')
     style_state = values.get('style_state')
+    tile_cache_check = values.get('tile_cache_check')
+    cache_details = values.get('cache_values')
+    layer_title = feature.feature_name
 
     if check_layer.status_code == 200:
         geoserver.deleteLayerName(ws_name, ds_name, layer_name)
@@ -747,8 +762,14 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     )
 
     if layer_create.status_code == 201:
+        cache_values = values.get('cache_values')
         if style_state == 'create_style':
             style_name = values.get('style_name')
+            if not style_name:
+                return {
+                    'success': False,
+                    'info': 'Style-ийн нэр хоосон байна'
+                }
             check_style_name = geoserver.check_geoserver_style(style_name)
             if check_style_name.status_code == 200:
                 return {
@@ -759,6 +780,44 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                 geoserver.create_style(values)
 
         geoserver.update_layer_style(layer_name, style_name)
+        zoom_stop = cache_details.get('zoom_stop')
+        zoom_start = cache_details.get('zoom_start')
+        image_format = cache_details.get('image_format')
+        number_of_cache = cache_details.get('number_of_cache')
+        cache_type = 'reseed'
+        if tile_cache_check:
+            cache_type = cache_details.get('cache_type')
+        if int(zoom_start) >21 or int(zoom_stop)>21 or int(number_of_cache)>100:
+            return {
+                'success': False,
+                'info': 'TileCache-ийн max утга хэтэрсэн байна'
+            }
+        feature_id = feature.feature_id
+        cache_layer = geoserver.create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache)
+        wmts_url = ''
+        if cache_layer.status_code == 200:
+            cache_field = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+            if cache_field:
+                WmtsCacheConfig.objects.filter(id=cache_field.id).update(
+                    img_format=image_format,
+                    zoom_start=zoom_start,
+                    zoom_stop=zoom_stop,
+                    type_of_operation=cache_type,
+                    number_of_tasks_to_use=number_of_cache
+                )
+            else:
+                WmtsCacheConfig.objects.create(
+                    feature_id=feature_id,
+                    img_format=image_format,
+                    zoom_start=zoom_start,
+                    zoom_stop=zoom_stop,
+                    type_of_operation=cache_type,
+                    number_of_tasks_to_use=number_of_cache
+                )
+
+            wmts_url = geoserver.get_wmts_url(ws_name)
+            wms.cache_url = wmts_url
+            wms.save()
 
         return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
@@ -803,7 +862,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
         ds_name,
         layer_name
     )
-    layer_responce = _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, layer_title, values)
+    layer_responce = _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms)
     wms_id = wms.id
     wms_layer = wms.wmslayer_set.filter(code=layer_name).first()
     if not wms_layer:
@@ -835,7 +894,7 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2 limit 10000'::text)
+            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(

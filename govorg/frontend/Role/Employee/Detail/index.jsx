@@ -1,11 +1,10 @@
 import React, { Component } from "react"
-
 import { service } from "../service"
 import InsPerms from '../../Role/GovPerms'
-import { ButtonBack } from "./ButtonBack"
 import { ButtonTokenRefresh } from "./ButtonTokenRefresh"
 import { ButtonEdit } from "./ButtonEdit"
 import { ButtonDelete } from "./ButtonDelete"
+import BackButton from "@utils/Button/BackButton"
 
 
 export class Detail extends Component {
@@ -135,6 +134,12 @@ export class Detail extends Component {
             token,
             created_at,
             updated_at,
+            level_1,
+            level_2,
+            level_3,
+            street,
+            apartment,
+            door_number,
         } = this.state.employee
 
         const {
@@ -150,10 +155,7 @@ export class Detail extends Component {
                     <div className="container-fluid">
 
                         <div className="row">
-                            <div className="col-md-6 p-0">
-                                <ButtonBack to={prefix}/>
-                            </div>
-                            <div className="col-md-6 p-0 text-right">
+                            <div className="col-md-12 p-0 text-right">
                                 {this.props.employee.is_admin || this.props.employee.username == username ?
                                 <ButtonTokenRefresh
                                     onClick={ this.handleTokenRefresh }
@@ -233,6 +235,16 @@ export class Detail extends Component {
                                         { role_name }
                                     </dd>
                                 </dl>
+                                {
+                                    level_1
+                                    &&
+                                    <dl className="row">
+                                        <dt className="col-md-3">Гэрийн хаяг:</dt>
+                                        <dd className="col-md-9">
+                                            { level_1 + ", " + level_2 + ", " + level_3 + ", " + street + " гудамж " + apartment + " байр, " + door_number + " тоот" }
+                                        </dd>
+                                    </dl>
+                                }
                                 { is_admin &&
                                     <p>
                                         <i className="fa fa-check-circle-o fa-lg" aria-hidden="true"></i>
@@ -266,6 +278,7 @@ export class Detail extends Component {
                         }
                     </div>
                 </div>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
             </div>
         )
     }

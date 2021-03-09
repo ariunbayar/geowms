@@ -5,6 +5,7 @@ import { service } from "../service"
 import ModalAlert from "../../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
+import EmployeeMap from "./Employee_map/Map"
 
 
 export class UserAdd extends Component {
@@ -24,15 +25,44 @@ export class UserAdd extends Component {
                 register:'',
                 is_admin: false,
                 is_super: false,
-                re_password_mail: false
+                re_password_mail: false,
+                phone_number: '',
             },
+            aimag: [],
+            sum: [],
+            horoo: [],
+            aimag_id: -1,
+            sum_id: -1,
+            horoo_id: -1,
+            aimag_name: '',
+            sum_name: '',
+            horoo_name: '',
+            aimag_geo_id: '',
+            sum_geo_id: '',
+            horoo_geo_id: '',
+            feature: {},
+            description: '',
+            point_coordinate: [],
+            point: {},
+            street: '',
+            apartment: '',
+            door_number: '',
+
             modal_alert_status: "closed",
+
+            errors: '',
+
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
         this.modalClose = this.modalClose.bind(this)
+        this.getFeildValues = this.getFeildValues.bind(this)
+        this.handleChange = this.handleChange.bind(this)
+        this.getPoint = this.getPoint.bind(this)
+        this.getGeomFromJson = this.getGeomFromJson.bind(this)
+        this.getGeom = this.getGeom.bind(this)
     }
 
     componentDidMount() {
@@ -40,25 +70,38 @@ export class UserAdd extends Component {
         if(org_emp){
             this.handleGetAll(org_emp)
         }
+        else {
+            this.getFeildValues()
+        }
     }
 
     handleGetAll(org_emp){
-        service.employeeDetail(org_emp).then(({ success, employee }) => {
-            if (success) {
-                this.setState({form_values: {
-                    id: employee.id,
-                    username: employee.username,
-                    first_name: employee.first_name,
-                    last_name: employee.last_name,
-                    email: employee.email,
-                    gender: employee.gender,
-                    register:employee.register,
-                    position: employee.position,
-                    is_admin: employee.is_admin,
-                    is_super:employee.is_super
-                }})
-            }
-        })
+        service
+            .employeeDetail(org_emp)
+            .then(({ success, employee }) => {
+                if (success) {
+                    this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
+                    this.setState({
+                        form_values: {
+                            id: employee.id,
+                            username: employee.username,
+                            first_name: employee.first_name,
+                            last_name: employee.last_name,
+                            email: employee.email,
+                            gender: employee.gender,
+                            register:employee.register,
+                            position: employee.position,
+                            is_admin: employee.is_admin,
+                            is_super: employee.is_super,
+                            phone_number: employee.phone_number,
+                        },
+                        point: employee.point,
+                        street: employee.street,
+                        apartment: employee.apartment,
+                        door_number: employee.door_number,
+                    })
+                }
+            })
     }
 
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
@@ -66,40 +109,69 @@ export class UserAdd extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
+
+        const { street, apartment, door_number, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
+        const address = {
+            'street': street,
+            'apartment': apartment,
+            'door_number': door_number,
+            'level_1': aimag_name,
+            'level_2': sum_name,
+            'level_3': horoo_name,
+            'point': point_coordinate,
+        }
+
+        const payload = {
+            'values': values,
+            'address': address,
+        }
+
         if(org_emp){
             if(values.re_password !== values.password)
             {
                 setErrors({'re_password': 'Нууц үг адил биш байна.'})
                 setSubmitting(false)
             }
-            else{
-                service.employeeUpdate(org_emp, org_level, values).then(({ success, errors }) => {
-                    if (success) {
-                        this.setState({modal_alert_status: "open"})
-                        setStatus('saved')
+            else {
+                service
+                    .employeeUpdate(org_emp, org_level, payload)
+                    .then(({ success, errors }) => {
+                        if (success) {
+                            this.setState({modal_alert_status: "open"})
+                            setStatus('saved')
+                            this.modalCloseTime()
+                        } else {
+                            setErrors(errors)
+                            this.setState({errors})
+                        }
                         setSubmitting(false)
-                        this.modalCloseTime()
-                    } else {
-                        setErrors(errors)
+                    })
+                    .catch((error) => {
+                        alert("Алдаа гарсан байна")
                         setSubmitting(false)
-                    }
-                })
+                    })
             }
 
         }
         else{
-            service.employeeAdd(org_level, org_id, values).then(({ success, errors, employee }) => {
-                if (success) {
-                    this.setState({modal_alert_status: "open"})
-                    setStatus('saved')
+            service
+                .employeeAdd(org_level, org_id, payload)
+                .then(({ success, errors, employee }) => {
+                    if (success) {
+                        this.setState({modal_alert_status: "open"})
+                        setStatus('saved')
+                        this.modalCloseTime(employee.user_id)
+                    }
+                    else{
+                        setErrors(errors)
+                        this.setState({errors})
+                    }
                     setSubmitting(false)
-                    this.modalCloseTime(employee.user_id)
-                }
-                else{
-                    setErrors(errors)
+                })
+                .catch((error) => {
+                    alert("Алдаа гарсан байна")
                     setSubmitting(false)
-                }
-            })
+                })
         }
     }
 
@@ -115,8 +187,127 @@ export class UserAdd extends Component {
         )
     }
 
+    getGeomFromJson(geom_name, array) {
+        let index
+        array.map((data, idx) => {
+            if (data.name == geom_name) {
+                index = idx
+            }
+        })
+        return index
+    }
+
+    getFeildValues(level_1, level_2, level_3) {
+        let obj = Object()
+        let geo_id
+        let array
+        service
+            .formOptions('second')
+            .then(({ success, secondOrders }) => {
+                if (success) {
+                    if (level_1) {
+                        obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
+                        geo_id = secondOrders[obj['aimag_id']].geo_id
+                        obj['aimag_geo_id'] = geo_id
+                        obj['aimag_name'] = level_1
+                        array = secondOrders[obj['aimag_id']].children
+                        obj['sum'] = array
+                    }
+                    if (level_2) {
+                        obj['sum_id'] = this.getGeomFromJson(level_2, array)
+                        geo_id = array[obj['sum_id']].geo_id
+                        obj['sum_geo_id'] = geo_id
+                        array = array[obj['sum_id']].children
+                        obj['horoo'] = array
+                        obj['sum_name'] = level_2
+                    }
+                    if (level_3) {
+                        obj['horoo_id'] = this.getGeomFromJson(level_3, array)
+                        geo_id = array[obj['horoo_id']].geo_id
+                        obj['horoo_geo_id'] = geo_id
+                        obj['horoo_name'] = level_3
+                    }
+                    this.getGeom(geo_id)
+                    this.setState({ aimag: secondOrders, ...obj })
+                }
+            })
+    }
+
+    getGeom(geo_id) {
+        service
+            .getGeom(geo_id)
+            .then(({ feature }) => {
+                if (feature) {
+                    this.setState({ feature })
+                }
+            })
+    }
+
+    getPoint(point_coordinate) {
+        let coordinates = point_coordinate
+        if (typeof point_coordinate == 'string') {
+            coordinates = point_coordinate.split(',')
+        }
+        const coordinate = [coordinates[1], coordinates[0]]
+        this.setState({ point_coordinate: coordinate })
+    }
+
+    handleChange(e, field, child_field, reset_fields, parent_field) {
+        const field_id = field + '_id'
+        const field_geo_id = field + '_geo_id'
+        const field_name = field + '_name'
+        const idx = e.target.value
+        let obj = Object()
+        let geo_id
+        if (idx !== '-1') {
+            const value = this.state[field][idx]
+            this.setState({ [child_field]: value.children })
+            if (child_field) {
+                obj[child_field] = value.children
+            }
+            geo_id = value.geo_id
+            reset_fields.map((r_field, idx) => {
+                const r_field_id = r_field + '_id'
+                const r_field_geo_id = r_field + '_geo_id'
+                const r_field_name = r_field + '_name'
+                obj[r_field_id] = -1
+                obj[r_field_geo_id] = ''
+                obj[r_field_name] = ''
+            })
+            obj[field_geo_id] = geo_id
+            obj[field_name] = value.name
+            this.getGeom(geo_id)
+        }
+        else {
+            if (reset_fields.length > 0) {
+                reset_fields.map((r_field, idx) => {
+                    const r_field_id = r_field + '_id'
+                    const r_field_geo_id = r_field + '_geo_id'
+                    const r_field_name = r_field + '_name'
+                    obj[r_field] = []
+                    obj[r_field_id] = -1
+                    obj[r_field_geo_id] = ''
+                    obj[r_field_name] = ''
+                })
+            }
+            if (parent_field !== 'mongol') {
+                const parent_field_id = parent_field + '_id'
+                const parent_idx = this.state[parent_field_id]
+                const parent_obj = this.state[parent_field][parent_idx]
+                geo_id = parent_obj.geo_id
+            }
+            else {
+                geo_id = 'au_496'
+            }
+            obj[field_geo_id] = geo_id
+            this.getGeom(geo_id)
+        }
+        this.setState({ [field_id]: idx, ...obj })
+    }
+
     render() {
-        const {form_values} = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, errors } = this.state
+
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
@@ -125,19 +316,9 @@ export class UserAdd extends Component {
         const url_detail = `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${org_emp}/дэлгэрэнгүй/`
 
         return (
-            <div className="col-6">
+            <div className="ml-3">
                 <div className="row">
-                    <div className="col-md-12">
-                        <NavLink
-                            to={ org_emp ? url_detail : url_list }
-                            className="btn gp-outline-primary m-1"
-                        >
-                            <i className="fa fa-angle-double-left"></i>
-                            {} Буцах
-                        </NavLink>
-                    </div>
-
-                    <div className="col-md-12">
+                    <div className="col-md-4">
                         <Formik
                             enableReinitialize
                             initialValues={form_values}
@@ -150,10 +331,10 @@ export class UserAdd extends Component {
                         }) => {
                             const has_error = Object.keys(errors).length > 0
                             return (
-                                <Form className="col-12">
+                                <Form>
                                     <div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-8">
+                                            <div className="form-group col-12">
                                                 <div className="position-relative has-icon-right">
                                                     <label htmlFor="id_name" >Нэвтрэх нэр:</label>
                                                     <Field
@@ -168,7 +349,7 @@ export class UserAdd extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-4">
+                                            <div className="form-group col-6">
                                                 <label htmlFor="first_name">Овог:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
@@ -179,7 +360,7 @@ export class UserAdd extends Component {
                                                 />
                                                 <ErrorMessage name="last_name" component="div" className="text-danger"/>
                                             </div>
-                                            <div className="form-group col-md-4">
+                                            <div className="form-group col-6">
                                                 <label htmlFor="first_name">Нэр:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
@@ -192,7 +373,7 @@ export class UserAdd extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-8">
+                                            <div className="form-group col-12">
                                                 <label htmlFor="position">Албан тушаал:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.position ? 'is-invalid' : '')}
@@ -205,7 +386,7 @@ export class UserAdd extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-8">
+                                            <div className="form-group col-12">
                                                 <label htmlFor="email">E-Mail</label>
                                                 <Field
                                                     className={'form-control ' + (errors.email ? 'is-invalid' : '')}
@@ -218,11 +399,12 @@ export class UserAdd extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-8">
+                                            <div className="form-group col-12">
                                                 <label htmlFor="gender">Хүйс:</label>
                                                 <Fragment>
-                                                    <Field name="gender" as="select" className="form-control"
-                                                    className={'form-control ' + (errors.gender ? 'is-invalid' : '')}>
+                                                    <Field name="gender" as="select"
+                                                        className={'form-control ' + (errors.gender ? 'is-invalid' : '')}
+                                                    >
                                                         <option>Эрэгтэй</option>
                                                         <option>Эмэгтэй</option>
                                                     </Field>
@@ -231,7 +413,18 @@ export class UserAdd extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-8">
+                                            <div className="form-group col-6">
+                                                <label htmlFor="phone_number">Утасны дугаар:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                    name='phone_number'
+                                                    id="id_phone_number"
+                                                    type="text"
+                                                    placeholder="Утасны дугаар"
+                                                />
+                                                <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                            </div>
+                                            <div className="form-group col-6">
                                                 <label htmlFor="register">Регистер:</label>
                                                 <Field
                                                     className={'form-control ' + (errors.register ? 'is-invalid' : '')}
@@ -243,22 +436,24 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="register" component="div" className="text-danger"/>
                                             </div>
                                         </div>
-                                        {org_emp &&
-                                        <div className="form-row">
-                                           <div className="form-group col-md-8">
-                                                <label htmlFor='id_re_password_mail'>Нууц үг солих e-mail илгээх</label>
-                                                <Field
-                                                    className="ml-2"
-                                                    name='re_password_mail'
-                                                    id="id_re_password_mail"
-                                                    type="checkbox"
-                                                />
-                                                <ErrorMessage name="re_password_mail" component="div" className="text-danger"/>
-                                            </div>
-                                        </div>
+                                        {
+                                            org_emp
+                                            &&
+                                                <div className="form-row">
+                                                    <div className="form-group col-12">
+                                                        <label htmlFor='id_re_password_mail'>Нууц үг солих e-mail илгээх</label>
+                                                        <Field
+                                                            className="ml-2"
+                                                            name='re_password_mail'
+                                                            id="id_re_password_mail"
+                                                            type="checkbox"
+                                                        />
+                                                        <ErrorMessage name="re_password_mail" component="div" className="text-danger"/>
+                                                    </div>
+                                                </div>
                                         }
                                         <div className='form-row'>
-                                            <div className="form-group col-md-8">
+                                            <div className="form-group col-12">
                                                 <label htmlFor='id_is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
@@ -271,7 +466,7 @@ export class UserAdd extends Component {
                                         </div>
                                         {org_level ==4 &&
                                             <div className='form-row'>
-                                                <div className="form-group col-md-8">
+                                                <div className="form-group col-12">
                                                     <label htmlFor='is_super'>Системийн админ</label>
                                                     <Field
                                                         className="ml-2"
@@ -295,12 +490,111 @@ export class UserAdd extends Component {
                                 )}}
                         </Formik>
                     </div>
+                    <div className="col-md-8">
+                        <div className="form-row p-1">
+                            <div className="form-group col-4">
+                                <label htmlFor="aimag">Аймаг/Хот:</label>
+                                <select
+                                    id="aimag"
+                                    className={'form-control ' + (errors.level_1 ? 'is-invalid' : '')}
+                                    aria-label="Default select example"
+                                    onChange={(e) => this.handleChange(e, 'aimag', 'sum', ['sum', 'horoo'], 'mongol')}
+                                    value={aimag_id}
+                                >
+                                    <option value='-1'>--- Аймаг/Хот сонгох ---</option>
+                                    {aimag.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="sum">Сум/Дүүрэг:</label>
+                                <select
+                                    id="sum"
+                                    className={'form-control ' + (errors.level_2 ? 'is-invalid' : '')}
+                                    onChange={(e) => this.handleChange(e, 'sum', 'horoo', ['horoo'], 'aimag')}
+                                    value={sum_id}
+                                >
+                                    <option value='-1'>--- Сум/Дүүрэг сонгох ---</option>
+                                    {sum.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="horoo">Хороо/Баг:</label>
+                                <select
+                                    id="horoo"
+                                    className={'form-control ' + (errors.level_3 ? 'is-invalid' : '')}
+                                    onChange={(e) => this.handleChange(e, 'horoo', undefined, [], 'sum')}
+                                    value={horoo_id}
+                                >
+                                    <option value='-1'>--- Баг/Хороо сонгох ---</option>
+                                    {horoo.map((data, idx) =>
+                                        <option key={idx} value={idx}>{data.name}</option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="street">Гудамж:</label>
+                                <div className="input-group">
+                                    <input
+                                        id="street"
+                                        className={'form-control ' + (errors.street ? 'is-invalid' : '')}
+                                        onChange={(e) => this.setState({ street: e.target.value })}
+                                        value={street}
+                                        placeholder="Гудамжны нэрийг оруулах"
+                                    />
+                                    <div className="input-group-append">
+                                        <span className="input-group-text">гудамж</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="apartment">Байр:</label>
+                                <div className="input-group">
+                                    <input
+                                        id="apartment"
+                                        className={'form-control ' + (errors.apartment ? 'is-invalid' : '')}
+                                        onChange={(e) => this.setState({ apartment: e.target.value })}
+                                        value={apartment}
+                                        placeholder="Байрны дугаарыг оруулах"
+                                    />
+                                    <div className="input-group-append">
+                                        <span className="input-group-text">байр</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor="door_number">Хаалганы дугаар:</label>
+                                <div className="input-group">
+                                    <input
+                                        id="door_number"
+                                        className={'form-control ' + (errors.door_number ? 'is-invalid' : '')}
+                                        onChange={(e) => this.setState({ door_number: e.target.value })}
+                                        value={door_number}
+                                        placeholder="Хаалганы дугаарыг оруулах"
+                                    />
+                                    <div className="input-group-append">
+                                        <span className="input-group-text">тоот</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <EmployeeMap
+                            height='75'
+                            feature={feature}
+                            sendPointCoordinate={this.getPoint}
+                            point={point}
+                            class={(errors.point ? 'border border-danger' : '')}
+                        />
+                    </div>
                 </div>
                 <ModalAlert
                     modalAction={() => this.modalClose()}
                     status={this.state.modal_alert_status}
                     title="Амжилттай хадгаллаа"
-                    model_type_icon = "success"
+                    model_type_icon="success"
                 />
             </div>
         )

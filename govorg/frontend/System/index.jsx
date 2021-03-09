@@ -2,9 +2,9 @@ import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
 
 import {Detail} from './Detail'
-import {Form} from './Form'
+import {List} from './List'
 
-export class System extends Component {
+export default class System extends Component {
 
     constructor(props) {
         super(props)
@@ -13,7 +13,7 @@ export class System extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path="/gov/system/" component={Form} />
+                <Route exact path="/gov/system/" component={List} />
                 <Route exact path={"/gov/system/:system_id/дэлгэрэнгүй/"} component={Detail}/>
             </Switch>
         )

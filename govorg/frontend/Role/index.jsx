@@ -6,7 +6,7 @@ import { RoleEdit } from "./RoleEdit"
 import { RoleAdd } from './RoleAdd'
 import { RoleDetail } from './RoleDetail'
 
-export class Role extends Component {
+export default class Role extends Component {
 
     render() {
         const { org_roles, employee } = this.props

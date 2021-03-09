@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {service} from '../service'
 import ModalAlert from "../../../backend/webapp/src/components/ModalAlert"
 
-export class Password extends Component {
+export default class Password extends Component {
     constructor(props) {
         super(props)
         this.state = {

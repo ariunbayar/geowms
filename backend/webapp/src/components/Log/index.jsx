@@ -4,7 +4,7 @@ import {Switch, Route} from "react-router-dom"
 import {LogForm} from './LogForm'
 
 
-export class Log extends Component {
+export default class Log extends Component {
 
     constructor(props) {
         super(props)

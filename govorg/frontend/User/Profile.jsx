@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import {service} from '../service'
 
-export class Profile extends Component {
+export default class Profile extends Component {
     constructor(props) {
         super(props);
 

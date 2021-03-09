@@ -95,6 +95,13 @@ export class Detail extends Component {
             token,
             created_at,
             updated_at,
+            phone_number,
+            level_1,
+            level_2,
+            level_3,
+            street,
+            apartment,
+            door_number,
         } = this.state.employee
 
         const {
@@ -104,13 +111,8 @@ export class Detail extends Component {
 
         return (
             <div className="container-fluid">
-
                 <div className="row">
-                    <div className="col-md-6 p-0">
-                        <ButtonBack to={`/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/`}/>
-                    </div>
-
-                    <div className="col-md-6 p-0 text-right">
+                    <div className="col-md-12 p-0 text-right">
                         <ButtonTokenRefresh onClick={ this.handleTokenRefresh } status={ status_token_refresh }/>
                         <ButtonEdit to={`/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/${emp}/засах/`}/>
                         <ButtonDelete
@@ -174,7 +176,22 @@ export class Detail extends Component {
                             <dd className="col-md-9">
                                 { register }
                             </dd>
+
+                            <dt className="col-md-3">Утасны дугаар:</dt>
+                            <dd className="col-md-9">
+                                { phone_number }
+                            </dd>
                         </dl>
+                        {
+                            level_1
+                            &&
+                            <dl className="row">
+                                <dt className="col-md-3">Гэрийн хаяг:</dt>
+                                <dd className="col-md-9">
+                                    { level_1 + ", " + level_2 + ", " + level_3 + ", " + street + " гудамж " + apartment + " байр, " + door_number + " тоот" }
+                                </dd>
+                            </dl>
+                        }
                         { is_admin &&
                             <p>
                                 <i className="fa fa-check-circle-o fa-lg" aria-hidden="true"></i>

@@ -1,113 +1,70 @@
 import React, { Component } from "react"
-import {LogFormTable} from './LogFormTable'
-import {service} from './service'
-import { Pagination } from "@utils/Pagination/index"
+import { PortalDataTable } from "@utils/DataTable/index"
+
+
 export class LogForm extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            payment_all:[],
-            pay_legth:null,
-            currentPage:1,
-            payPerPage:100,
-            searchQuery:'',
-        }
-        this.paginate = this.paginate.bind(this)
-        this.handleSort = this.handleSort.bind(this)
-    }
-
-    paginate (page, query, sort_name) {
-        const perpage = this.state.payPerPage
-        this.setState({ currentPage: page })
-            return service
-                .payList(page, perpage, query, sort_name)
-                .then(page => {
-                    this.setState({ payment_all: page.items, pay_legth: page.items.length})
-                    return page
-                })
-    }
-
-    handleSearch(field, e) {
-        if(e.target.value.length >= 1)
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value, 'total_amount')
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value, 'total_amount')
+            refresh: false,
+            жагсаалтын_холбоос: '/back/payment/payment-list/',
+            custom_query: {},
+            талбарууд: [
+                {'field': 'user_firstname', "title": 'Хэрэглэгч', 'has_action': true},
+                {'field': 'is_success', "title": 'Төлөв'},
+                {'field': 'total_amount', "title": 'Нийт дүн'},
+                {'field': 'description', "title": 'Тодорхойлолт'},
+                {'field': 'code', "title": 'Код'},
+                {'field': 'message', "title": 'Мэдэгдэл'},
+                {'field': 'data_id', "title": 'Дата ID'},
+                {'field': 'bank_unique_number', "title": 'Банкны дугаар'},
+                {'field': 'geo_unique_number', "title": 'Гео дугаар'},
+                {'field': 'created_at', "title": 'Огноо'},
+            ],
+            хувьсах_талбарууд: [
+                {"field": "user_firstname", "action": (values) => this.go_link(values)},
+                {"field": "is_success",  "text": ""},
+                {"field": "total_amount",  "text": ""},
+                {"field": "description",  "text": ""},
+                {"field": "code",  "text": ""},
+                {"field": "message",  "text": ""},
+                {"field": "data_id",  "text": ""},
+                {"field": "bank_unique_number",  "text": ""},
+                {"field": "geo_unique_number",  "text": ""},
+                {"field": "created_at",  "text": ""},
+            ],
         }
     }
 
-    handleSort(sort_name, sort_type) {
-        if(sort_type){
-            this.setState({[sort_name]: false, sort_name})
-            this.paginate(this.state.currentPage, this.state.searchQuery, sort_name)
-        }else{
-            this.setState({[sort_name]: true, sort_name: '-'+sort_name})
-            this.paginate(this.state.currentPage, this.state.searchQuery, '-'+sort_name)
-        }
+    go_link(values){
+        this.props.history.push(`/back/user/${values.user_id}/дэлгэрэнгүй/`)
     }
 
     render() {
-        const {payment_all, pay_legth } = this.state
-        return (
-                <div className="card">
-                    <div className="card-body">
-                        <div className="row justify-content-between">
-                            <h5 className="mb-4 ml-4">Гүйлгээний хуулга</h5>
-                            <div className="mb-1 mr-3 search-bar">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="searchQuery"
-                                    placeholder="Хайх"
-                                    onChange={(e) => this.handleSearch('searchQuery', e)}
-                                    value={this.state.searchQuery}
-                                />
-                                <a><i className="icon-magnifier"></i></a>
+        const {
+            refresh,
+            талбарууд,
+            жагсаалтын_холбоос,
+            хувьсах_талбарууд,
+        } = this.state
 
-                            </div>
-                        </div>
-                        <div className="table-responsive table_wrapper">
-                            <table className="table table_wrapper_table">
-                                <thead>
-                                    <tr>
-                                        <th><a>№</a></th>
-                                        <th><a onClick={() => this.handleSort('user_id', this.state.user_id)}>Хэрэглэгч <i className={this.state.user_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a>Төлөв</a></th>
-                                        <th><a onClick={() => this.handleSort('total_amount' ,this.state.total_amount)}>Нийт дүн <i className={this.state.total_amount ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('description' ,this.state.description)}>Тодорхойлолт <i className={this.state.description ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('code' ,this.state.code)}>Код <i className={this.state.code ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('message' ,this.state.message)}>Мэдэгдэл <i className={this.state.message ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('data_id' ,this.state.data_id)}>Дата ID <i className={this.state.data_id ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('bank_unique_number' ,this.state.bank_unique_number)}>Банкны дугаар <i className={this.state.bank_unique_number ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('geo_unique_number' ,this.state.geo_unique_number)}>Гео дугаар <i className={this.state.geo_unique_number ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                        <th><a onClick={() => this.handleSort('success_at' ,this.state.success_at)}>Огноо <i className={this.state.success_at ? "fa fa-angle-up" : "fa fa-angle-down"} aria-hidden="true"></i></a></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pay_legth === 0 ?
-                                    <tr><td>Мэдээлэл байхгүй байна</td></tr>:
-                                    payment_all.map((pay, idx) =>
-                                        <LogFormTable
-                                            key = {idx}
-                                            idx = {idx}
-                                            values={pay}>
-                                        </LogFormTable>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                        <Pagination
-                            paginate = {this.paginate}
-                            sort_name = {this.state.sort_name}
-                            searchQuery = {this.state.searchQuery}
+        return (
+            <div className="card">
+                <div className="card-body">
+                    <div className="col-md-12">
+                        <PortalDataTable
+                            refresh={refresh}
+                            color={'bg-dark'}
+                            талбарууд={талбарууд}
+                            жагсаалтын_холбоос={жагсаалтын_холбоос}
+                            per_page={20}
+                            уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
+                            хувьсах_талбарууд={хувьсах_талбарууд}
                         />
                     </div>
                 </div>
+            </div>
         )
     }
 }

@@ -14,7 +14,7 @@ def all(request):
         theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
         bundle_list = {
             'id': bundle.id,
-            'icon': bundle.icon.url,
+            'icon': bundle.icon.url if bundle.icon else '',
             'name': theme.theme_name if theme else ''
         }
         context_list.append(bundle_list)

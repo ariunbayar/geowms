@@ -13,7 +13,7 @@ import ConfigPayment from './ConfigPayment'
 import ConfigQpay from './ConfigQpay'
 
 
-export class ConfigPage extends Component {
+export default class ConfigPage extends Component {
 
     render() {
         return (

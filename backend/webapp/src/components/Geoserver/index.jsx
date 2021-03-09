@@ -4,7 +4,7 @@ import {Switch, Route} from "react-router-dom"
 import {Layers} from './Layers'
 
 
-export class Geoserver extends Component {
+export default class Geoserver extends Component {
 
     constructor(props) {
         super(props)

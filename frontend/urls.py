@@ -5,6 +5,8 @@ from frontend.mobile import views as mobile_views
 from frontend.суурь_давхарга import views as суурь_давхарга
 from frontend.secure import views as secure_views
 from frontend.payment import views as payment_views
+from frontend.covid import views as covid_views
+from frontend.open_layer import views as open_layer_views
 from frontend.page import views as page_views
 from frontend.profile import views as profile_views
 from frontend.qpay import views as qpay_views
@@ -74,11 +76,15 @@ urlpatterns = [
         path('tseg-ustsan/search/', profile_views.tsegSearch, name='tseg-search'),
         path('tseg-ustsan/add/', profile_views.tsegAdd, name='tseg-add'),
         path('<int:pk>/get-details/', profile_views.get_detail, name='tseg-details'),
+        path('check-email/', profile_views.check_email, name='check-email'),
+        path('set-email/', profile_views.set_email, name='set-email'),
         path('info/', profile_views.user_info),
         path('update-password/', profile_views.user_update_password),
     ], 'profile'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
+    re_path('^covid/.*', covid_views.index, name='covid'),
+    re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
     re_path('^profile/.*', profile_views.history, name='history'),
 
 ]

@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {service} from './service'
 import {Item} from './Item'
 import {ItemCreate} from './ItemCreate'
-
+import Loader from "@utils/Loader"
 import './style.css'
 
 
@@ -15,16 +15,20 @@ export class Жагсаалт extends Component {
         this.state = {
             items: [],
             wms_list: [],
+            is_loading: false,
+            firt_item: {},
+            firt_item_idx: null,
         }
-        this.handleMove = this.handleMove.bind(this)
-
+        this.handleSwap = this.handleSwap.bind(this)
+        this.onDrag = this.onDrag.bind(this)
+        this.onDrop = this.onDrop.bind(this)
+        this.onDragOver = this.onDragOver.bind(this)
     }
 
     componentDidMount() {
-
+        this.setState({is_loading: true})
         service.getAll().then(({items, wms_list}) => {
-            this.setState({items})
-            this.setState({wms_list})
+            this.setState({items, wms_list, is_loading: false})
         })
 
     }
@@ -38,26 +42,45 @@ export class Жагсаалт extends Component {
             return acc
         }, [])
     }
-    handleMove(event, id) {
-        service.move(event, id).then(({bundle_list, success}) => {
-            if (success)
-            {
-                service.getAll().then(({items, wms_list}) => {
-                    this.setState({items})
-                    this.setState({wms_list})
-                })
-            }
-        })
+
+    handleSwap(swap_one, swap_two) {
+        service.swap(swap_one, swap_two)
+    }
+
+    onDrag(event, item, idx){
+        event.preventDefault();
+        this.setState({
+            firt_item: item,
+            firt_item_idx: idx
+        });
+    }
+
+    onDragOver(event, todo, idx){
+        event.preventDefault();
+    }
+
+    onDrop(event, item, idx){
+        event.preventDefault();
+        const {items, firt_item, firt_item_idx} = this.state
+        let array = items
+        array[idx] = firt_item
+        array[firt_item_idx] = item
+        this.handleSwap(firt_item.id, item.id)
+        this.setState({items: array})
+
     }
 
     render() {
-
+        const {is_loading} = this.state
         const item_controls = this.state.items.map((item, idx) =>
             <Item
                 className="col-sm-6"
                 values={item}
                 key={idx}
-                handleMove={this.handleMove}
+                index={idx}
+                onDrag={this.onDrag}
+                onDragOver={this.onDragOver}
+                onDrop={this.onDrop}
             />
         ).concat(
             <ItemCreate
@@ -70,6 +93,7 @@ export class Жагсаалт extends Component {
 
         return (
             <div className="container my-4">
+                <Loader is_loading={is_loading}/>
                 {rows.map((items, idx) =>
                     <div className="row mb-4" key={idx}>
                         {items}

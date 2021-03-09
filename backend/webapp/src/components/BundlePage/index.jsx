@@ -3,7 +3,7 @@ import {Switch, Route, NavLink} from "react-router-dom"
 import {BundleList} from './BundleList'
 import {BundleForms} from './BundleForms'
 
-export class BundlePage extends Component {
+export default class BundlePage extends Component {
 
 
     constructor(props) {

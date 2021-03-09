@@ -5,6 +5,8 @@ import ModalAlert from "../ModalAlert"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 import Loader from "@utils/Loader"
+import BackButton from "@utils/Button/BackButton"
+
 
 export class OrgAdd extends Component {
 
@@ -225,13 +227,6 @@ export class OrgAdd extends Component {
                     const has_error = Object.keys(errors).length > 0
                     return (
                         <div>
-                            <div className="text-left">
-                                <NavLink to={`/back/байгууллага/түвшин/${org_level}/`}>
-                                    <p className="btn gp-outline-primary">
-                                        <i className="fa fa-angle-double-left"></i> Буцах
-                                    </p>
-                                </NavLink>
-                            </div>
                             <Form className="col-4">
                                 <Loader is_loading={this.state.is_loading}/>
                                 <div className="form-row">
@@ -348,6 +343,7 @@ export class OrgAdd extends Component {
                     title="Амжилттай хадгаллаа"
                     model_type_icon = "success"
                 />
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/байгууллага/түвшин/${org_level}/`}></BackButton>
             </div>
         )
     }

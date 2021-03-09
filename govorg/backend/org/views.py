@@ -206,6 +206,7 @@ def emp_role(request):
 
     return JsonResponse(rsp)
 
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')

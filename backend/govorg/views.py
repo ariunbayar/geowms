@@ -13,6 +13,7 @@ from main.decorators import ajax_required
 from main import utils
 from .models import GovOrg
 from .forms import SystemForm
+from main.components import Datatable
 
 
 def _get_govorg_display(govorg):
@@ -186,31 +187,24 @@ def тоо(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def govorgList(request, payload):
+def govorgList(request, payload, org_id):
+    qs = GovOrg.objects.filter(org_id=org_id, deleted_by__isnull=True)
+    оруулах_талбарууд = ['id', 'name', 'token', 'created_at', 'updated_at', 'org_id', 'website']
+    items = []
+    total_page = 1
 
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    query = payload.get('query')
-    org_id = payload.get('org_id')
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    if not query:
-        query = ''
-    govorg_list = GovOrg.objects.all().annotate(search=SearchVector(
-        'name')).filter(search__contains=query, org_id = org_id, deleted_by__isnull=True).order_by(sort_name)
-
-    total_items = Paginator(govorg_list, per_page)
-    items_page = total_items.page(page)
-    items = [
-        _get_govorg_display(govorg)
-        for govorg in items_page.object_list
-    ]
-    total_page = total_items.num_pages
+    if qs:
+        datatable = Datatable(
+            model=GovOrg,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд,
+            initial_qs=qs
+        )
+        items, total_page = datatable.get()
 
     rsp = {
         'items': items,
-        'page': page,
+        'page': payload.get('page'),
         'total_page': total_page,
     }
     return JsonResponse(rsp)

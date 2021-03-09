@@ -9,9 +9,6 @@ export const service = {
     pageUserCount,
     crudMethodCount,
     crudDateCount,
-    crudList,
-    pageList,
-    WMSLogList,
     WMSDateCount,
 }
 
@@ -40,22 +37,6 @@ function pageUserCount() {
     return fetch(`${prefix}/log/page-user-count/`, requestOptions).then(handleResponse)
 }
 
-function pageList(page, perpage, query, sort_name){
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query, sort_name }),
-    }
-    return fetch(`${prefix}/log/page-list/`, requestOptions).then(handleResponse)
-}
-
-function crudList(page, perpage, query, sort_name){
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query, sort_name }),
-    }
-    return fetch(`${prefix}/log/crud-list/`, requestOptions).then(handleResponse)
-}
-
 function loginDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/login-date-count/`, requestOptions).then(handleResponse)
@@ -74,14 +55,6 @@ function crudMethodCount() {
 function crudDateCount() {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/log/crud-date-count/`, requestOptions).then(handleResponse)
-}
-
-function WMSLogList(page, perpage, query, sort_name){
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query, sort_name }),
-    }
-    return fetch(`${prefix}/log/wms_log_list/`, requestOptions).then(handleResponse)
 }
 
 function WMSDateCount(){

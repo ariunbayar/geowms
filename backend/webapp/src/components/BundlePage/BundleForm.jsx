@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import ImageUploader from 'react-images-upload'
 import {NavLink} from "react-router-dom"
 import { service } from "./service"
+import BackButton from "@utils/Button/BackButton"
 
 
 export default class BundleForm extends Component {
@@ -173,11 +174,7 @@ export default class BundleForm extends Component {
                         Хадгал
                     </button>
                 </div>
-                <div>
-                    <NavLink className="btn gp-btn-primary btn-block waves-effect waves-light" to={`/back/дэд-сан/`}>
-                            Буцах
-                    </NavLink>
-                </div>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/дэд-сан/`}></BackButton>
             </>
         )
     }
