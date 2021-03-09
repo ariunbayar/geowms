@@ -6,7 +6,6 @@ export const service = {
     remove,
     detail,
     getWMSList,
-    govorgList,
     tokenRefresh
 }
 
@@ -65,13 +64,4 @@ function getWMSList() {
     }
 
     return fetch(`/back/wms/all/`, opts).then(handleResponse)
-}
-
-
-function govorgList(page, perpage, query, org_id) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({page, perpage, query, org_id}),
-    }
-    return fetch(`/back/api/систем/govorgList/`, requestOptions).then(handleResponse)
 }
