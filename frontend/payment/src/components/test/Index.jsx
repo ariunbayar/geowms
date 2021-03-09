@@ -13,7 +13,7 @@ export default class Bar extends Component {
 
         this.dragEnd = this.dragEnd.bind(this)
         this.addInputs = this.addInputs.bind(this)
-        this.dragStart = this.dragStart.bind(this)
+        this.dragOver = this.dragOver.bind(this)
     }
 
     dragEnd(e) {
@@ -42,8 +42,8 @@ export default class Bar extends Component {
         e.target.style.top = top + 'px'
     }
 
-    dragStart(e) {
-        e.preventDefault();
+    dragOver(e) {
+        e.preventDefault()
     }
 
     calcPercent(max, per=5) {
@@ -93,12 +93,18 @@ export default class Bar extends Component {
                             />
                             <div
                                 draggable='true'
-                                style={{
-                                    height: '200px', width: '200px', backgroundColor: 'red'
-                                }}
+                                style={
+                                    {
+                                        height: '200px',
+                                        width: '200px',
+                                        backgroundColor: 'red',
+                                        resize: 'both',
+                                        overflow: 'auto',
+                                    }
+                                }
                                 className="position-absolute"
                                 onDragEnd={this.dragEnd}
-                                onDragStart={this.dragStart}
+                                onDragOver={this.dragOver}
                             >
                             </div>
                         </div>

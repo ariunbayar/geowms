@@ -1499,7 +1499,7 @@ plus = 100
 new_img = _copy_image(img, plus)
 new_img = _set_text_to_image(texts, new_img)
 
-new_img.show()
+# new_img.show()
 
 new_img.save('text.png')
 
