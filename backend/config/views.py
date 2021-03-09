@@ -458,6 +458,21 @@ def payment_configs_save(request, payload):
     return JsonResponse({"success": True})
 
 
+def get_bundles():
+    context_list = []
+    bundles = Bundle.objects.all()
+    for bundle in bundles:
+        theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+        bundle_list = {
+            'pk': bundle.id,
+            'icon': bundle.icon.url if bundle.icon else '',
+            'name': theme.theme_name if theme else ''
+        }
+        context_list.append(bundle_list)
+
+    return context_list
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -477,19 +492,9 @@ def qpay_configs(request):
     rsp = {
         **default_values,
         **{conf.name: conf.value for conf in configs},
-def get_bundles():
-    context_list = []
-    bundles = Bundle.objects.all()
-    for bundle in bundles:
-        theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
-        bundle_list = {
-            'pk': bundle.id,
-            'icon': bundle.icon.url if bundle.icon else '',
-            'name': theme.theme_name if theme else ''
-        }
-        context_list.append(bundle_list)
+    }
 
-    return context_list
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -505,6 +510,16 @@ def qpay_configs_save(request, payload):
         'phone_number',
         'note',
     )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
 
 
 @require_GET
