@@ -26,8 +26,8 @@ export class GroupAdd extends Component {
                 minx: '',
                 maxx: '',
                 miny: '',
-                maxy:'',
-                projection:''
+                maxy: '',
+                projection: ''
             },
             errors: '',
             layer_list: [],
@@ -186,7 +186,6 @@ export class GroupAdd extends Component {
                                         errors,
                                         isSubmitting,
                                     }) => {
-                                    const has_error = Object.keys(errors).length > 0
                                     return (
                                         <Form>
                                             <div className="form-row col-md-12">
@@ -346,10 +345,10 @@ export class GroupAdd extends Component {
                     </div>
                     {select_layer_status &&
                         <ModelSelectLayer
-                            modalClose={this.modalClose}
-                            modalAction={this.handleSelectedLayers}
+                            modalClose = {this.modalClose}
+                            modalAction = {this.handleSelectedLayers}
                             layer_list = {layer_detail}
-                            title="Давхаргууд"
+                            title = "Давхаргууд"
                         />
                     }
                 </div>

@@ -32,7 +32,7 @@ export class GSPaginate extends Component {
     componentDidUpdate(pP, pS) {
         const { page, per_page, item_list, search_query, filter_name} = this.props
         if (
-                pP.item_list !== this.props.item_list ||
+                pP.item_list != this.props.item_list ||
                 pP.page != page ||
                 pP.search_query != search_query ||
                 pP.filter_name != filter_name

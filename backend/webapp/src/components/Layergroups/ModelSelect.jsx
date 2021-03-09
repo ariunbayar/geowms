@@ -92,7 +92,7 @@ export default class ModelSelectLayer extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const {layer_list, current_layers, search_query, layerPerPage, current_page} = this.state
+        const { layer_list, current_layers, search_query, layerPerPage, current_page } = this.state
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-absolute w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
@@ -152,11 +152,11 @@ export default class ModelSelectLayer extends Component {
                                 </div>
                                 <div className="mb-4">
                                     <GSPaginate
-                                        paginate = {this.paginate}
-                                        item_list ={layer_list}
-                                        search_query = {search_query}
-                                        per_page = {layerPerPage}
-                                        page = {current_page}
+                                        paginate={this.paginate}
+                                        item_list={layer_list}
+                                        search_query={search_query}
+                                        per_page={layerPerPage}
+                                        page={current_page}
                                         filter_name={'layer_name'}
                                     />
                                 </div>

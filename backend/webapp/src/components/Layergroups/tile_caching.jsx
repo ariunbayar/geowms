@@ -117,7 +117,6 @@ export class TileCaching extends Component {
                             errors,
                             isSubmitting,
                         }) => {
-                            const has_error = Object.keys(errors).length > 0
                             return (
                                 <Form>
                                     <div className="form-row col-md-8">
@@ -205,10 +204,10 @@ export class TileCaching extends Component {
                     </div>
                 </div>
                 <ModalAlert
-                    modalAction = {() => this.modalClose()}
-                    status = {modal_alert_status}
-                    title = {model_alert_text}
-                    model_type_icon = {model_alert_icon}
+                    modalAction={() => this.modalClose()}
+                    status={modal_alert_status}
+                    title={model_alert_text}
+                    model_type_icon={model_alert_icon}
                 />
             </div>
         )

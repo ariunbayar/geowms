@@ -82,7 +82,12 @@ export class List extends Component {
     }
 
     render() {
-        const {group_list, currentGroups, search_query, groupPerPage, currentPage, is_loading, modal_status} = this.state
+        const {
+            group_list, currentGroups, search_query,
+            groupPerPage, currentPage, is_loading,
+            modal_alert_status, model_alert_text,
+            model_type_icon
+        } = this.state
         return (
             <div className="row justify-content-center">
                 <div className="col-md-12">
@@ -137,18 +142,18 @@ export class List extends Component {
                         </table>
                     </div>
                     <GSPaginate
-                        paginate = {this.paginate}
-                        item_list ={group_list}
-                        search_query = {search_query}
-                        per_page = {groupPerPage}
-                        page = {currentPage}
+                        paginate={ this.paginate }
+                        item_list={ group_list }
+                        search_query={ search_query }
+                        per_page={ groupPerPage }
+                        page={ currentPage }
                     />
                 </div>
                 <ModalAlert
-                    modalAction = {() => this.modalClose()}
-                    status = {this.state.modal_alert_status}
-                    title = {this.state.model_alert_text}
-                    model_type_icon = {this.state.model_type_icon}
+                    modalAction={() => this.modalClose()}
+                    status={ modal_alert_status }
+                    title={ model_alert_text }
+                    model_type_icon={ model_type_icon }
                 />
         </div>
         )

@@ -62,6 +62,7 @@ def layers(request):
 @user_passes_test(lambda u: u.is_superuser)
 def layer_groups(request):
     layer_group_names = []
+
     layer_group_lists = geoserver.get_layer_groups()
     if layer_group_lists:
         for layer in layer_group_lists:
@@ -82,6 +83,7 @@ def remove_layer_group(request, payload):
     group_name = payload.get('group_name')
     group_status = True
     info = ''
+
     rsp = geoserver.delete_layer_group(group_name)
     if rsp.status_code != 200:
 
@@ -89,10 +91,10 @@ def remove_layer_group(request, payload):
             'success': False,
             'info': 'Layer Group үүсэхэд алдаа гарлаа'
         })
+
     cache_layer = WmtsCacheConfig.objects.filter(group_name=group_name).first()
     if cache_layer:
         cache_layer.delete()
-
 
     wms_url = geoserver.get_wms_url(group_name)
     wms = WMS.objects.filter(url=wms_url).first()
@@ -119,6 +121,7 @@ def get_group_detial(request, payload):
     detial_list = geoserver.get_layer_group_detail(group_name)
     glayers = detial_list.get('publishables').get('published')
     styles = detial_list.get('styles').get('style')
+
     if isinstance(glayers, list):
 
         for i in range(len(glayers)):
@@ -134,6 +137,7 @@ def get_group_detial(request, payload):
                 'layer_name': glayers[i].get('name') if glayers[i] else '',
                 'style_name': style_name
             })
+
     elif isinstance(glayers, dict):
         layer_detial.append({
                 'type': glayers.get('@type') if glayers else '',
@@ -152,6 +156,7 @@ def get_group_detial(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def get_layer_detial(request):
     layer_list = []
+
     w_layers = geoserver.get_layers()
     for layer in w_layers:
         layer_name = layer.get('name')
@@ -161,6 +166,8 @@ def get_layer_detial(request):
             'style_name': style_name,
             'type': 'layer'
         })
+
+
     return JsonResponse({
         'layer_list': layer_list,
     })
@@ -196,7 +203,7 @@ def create_layer_group(request, payload):
                 'errors': errors
             })
 
-    hoho_delete = geoserver.delete_layer_group(group_old_name)
+    geoserver.delete_layer_group(group_old_name)
 
     rsp = geoserver.create_layer_group(group_values, group_layers)
     if rsp.status_code != 201:
@@ -249,6 +256,7 @@ def create_layer_group(request, payload):
 def get_group_cache(request, payload):
     cache_list = []
     group_name = payload.get('group_name')
+
     group_cache = WmtsCacheConfig.objects.filter(group_name=group_name).first()
     if group_cache:
         cache_list.append({

@@ -30,7 +30,7 @@ export default class GroupList extends Component {
     }
 
     render() {
-        const {value, idx} = this.props
+        const { value, idx } = this.props
         return (
             <tr key={idx}>
                 <td>
@@ -56,7 +56,7 @@ export default class GroupList extends Component {
                     <Modal
                         text={`Та "${value}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
                         title="Тохиргоог устгах"
-                        model_type_icon = "success"
+                        model_type_icon="success"
                         status={this.state.modal_status}
                         modalClose={this.handleModalDeleteClose}
                         modalAction={() => this.modalClose()}
