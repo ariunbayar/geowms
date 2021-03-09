@@ -176,14 +176,17 @@ def create_layer_group(request, payload):
     group_name = group_values.get('name')
     group_title = group_values.get('title')
     group_state = payload.get('group_state')
+    group_old_name = payload.get('old_name') or group_name
 
     user = User.objects.filter(username=request.user).first()
     errors = {}
+
     if not group_layers:
         return JsonResponse({
             'success': False,
             'info': 'Layer сонгоно уу.'
         })
+
     check_layer = geoserver.get_layer_group_detail(group_name)
     if check_layer:
         if not group_state:
@@ -192,8 +195,8 @@ def create_layer_group(request, payload):
                 'success': False,
                 'errors': errors
             })
-        else:
-            geoserver.delete_layer_group(group_name)
+
+    hoho_delete = geoserver.delete_layer_group(group_old_name)
 
     rsp = geoserver.create_layer_group(group_values, group_layers)
     if rsp.status_code != 201:
@@ -202,13 +205,14 @@ def create_layer_group(request, payload):
             'info': "Layer group үүсгэхэд алдаа гарлаа"
         })
 
+    check_wms_url = geoserver.get_wms_url(group_old_name)
+    wms = WMS.objects.filter(url=check_wms_url).first()
     wms_url = geoserver.get_wms_url(group_name)
-    wms = WMS.objects.filter(url=wms_url).first()
 
     if wms:
-        if group_title != wms.name:
-            wms.name = group_title
-            wms.save()
+        wms.url = wms_url
+        wms.name = group_title
+        wms.save()
 
     else:
         wms = WMS.objects.create(
@@ -217,11 +221,12 @@ def create_layer_group(request, payload):
                 created_by_id = user.id
         )
 
-    wms_layer = wms.wmslayer_set.filter(code=group_name).first()
+    wms_layer = wms.wmslayer_set.filter(wms=wms).first()
     if wms_layer:
-        if wms_layer.title != group_title:
-            wms_layer.title = group_title
-            wms_layer.save()
+        wms_layer.title = group_title
+        wms_layer.code = group_name
+        wms_layer.name = group_title
+        wms_layer.save()
 
     else:
         wms_layer = WMSLayer.objects.create(

@@ -58,10 +58,10 @@ function getLayers() {
     return fetch(`${prefix}/geoserver/rest/get_layers/`, opts).then(handleResponse)
 }
 
-function createLayerGroup(values, layer_list, group_state) {
+function createLayerGroup(values, layer_list, group_state, old_name) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ values, layer_list, group_state}),
+        body: JSON.stringify({ values, layer_list, group_state, old_name}),
     }
     return fetch(`${prefix}/geoserver/rest/create_layer_group/`, opts).then(handleResponse)
 }

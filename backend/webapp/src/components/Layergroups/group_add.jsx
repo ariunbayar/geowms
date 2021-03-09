@@ -37,6 +37,7 @@ export class GroupAdd extends Component {
             model_alert_text: '',
             model_alert_icon: 'success',
             timer: null,
+            old_name: props.match.params.group_name || ''
         }
         this.getDetialAll = this.getDetialAll.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -128,12 +129,12 @@ export class GroupAdd extends Component {
     }
 
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
-        const { layer_list } = this.state
+        const { layer_list, old_name} = this.state
         var group_state = false
         const group_name = this.props.match.params.group_name
         if (group_name) group_state = true
         service
-            .createLayerGroup(values, layer_list, group_state)
+            .createLayerGroup(values, layer_list, group_state, old_name)
             .then(({ success, info, errors }) => {
                 if (success) {
                     this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'success'})
