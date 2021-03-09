@@ -261,12 +261,12 @@ def get_group_cache(request, payload):
 
 def _cache_value_validation(zoom_start, zoom_stop, number_of_cache):
     errors = {}
-    if zoom_start > 100:
+    if zoom_start > 21:
         errors['zoom_start'] = 'Томруулах эхний утга нь хэтэрсэн байна !'
 
-    elif zoom_stop > 100:
+    elif zoom_stop > 21:
         errors['zoom_stop'] = 'Томруулах сүүлчийн утга нь хэтэрсэн байна !'
-    elif number_of_cache > 100:
+    elif number_of_cache > 21:
         errors['number_of_cache'] = 'Хэрэглэх таскуудын утга хэтэрсэн байна !'
     return errors
 
