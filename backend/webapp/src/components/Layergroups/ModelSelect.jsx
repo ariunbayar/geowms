@@ -124,7 +124,7 @@ export default class ModelSelectLayer extends Component {
                                                 <a><i className="icon-magnifier"></i></a>
                                         </div>
                                     </div>
-                                    <div className="col-md-12 overflow-auto text-justify" style={{height:"calc( 30vh - 35px - 7px)"}}>
+                                    <div className="col-md-12 overflow-auto text-justify my-2" style={{height:"calc( 40vh - 35px - 7px)"}}>
                                         <table className="table table_wrapper_table">
                                             <thead>
                                                 <tr>

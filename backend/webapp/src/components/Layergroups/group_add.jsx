@@ -168,7 +168,7 @@ export class GroupAdd extends Component {
         } = this.state
         const group_name = this.props.match.params.group_name
         return (
-            <div className="col-md-12" style={{height:"calc( 85vh - 60px - 7px)"}}>
+            <div className="col-md-8"  style={{ minHeight: '72vh'}}>
                 <div className="row">
                     <div className="col-4 col-md-4 col-xl-4">
                         <div className="row">
