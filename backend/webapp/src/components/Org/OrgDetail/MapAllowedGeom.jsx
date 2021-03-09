@@ -92,7 +92,7 @@ export default class MapAllowedGeom extends Component {
         });
         feature[0].setProperties({ id })
         this.vector_layer.getSource().addFeature(feature[0])
-        this.map.getView().fit(feature[0].getGeometry(),{ padding: [200, 200, 200, 200]})
+        this.map.getView().fit(feature[0].getGeometry(),{ padding: [25, 25, 25, 25]})
     }
     render() {
         return (
