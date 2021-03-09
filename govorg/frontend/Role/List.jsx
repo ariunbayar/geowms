@@ -1,111 +1,138 @@
 import React, { Component } from "react"
-import { NavLink } from "react-router-dom"
-
 import {service} from './Role/service'
 import ModalAlert from "@utils/Modal/ModalAlert"
-import Rows from './Rows'
+import { PortalDataTable } from "@utils/DataTable/index"
+import Modal from "@utils/Modal/Modal"
 
 
 export class List extends Component {
     constructor(props) {
         super(props)
-            this.state = {
-            roles: [],
-            alert: false,
+        this.state = {
             perms: props.perms,
-            modal_alert_status: "closed",
-            is_loading: false,
+            modal_status: "closed",
+            alert_modal_status: "closed",
+            refresh: false,
+            жагсаалтын_холбоос: '/gov/api/role/role-list/',
+            нэмэх_товч: '/gov/perm/role/add/',
+            custom_query: {},
+            талбарууд: [
+                {'field': 'name', "title": 'Нэр', 'has_action': true},
+            ],
+            хувьсах_талбарууд: [
+                {"field": "name", "action": (values) => this.detai_go_link(values)},
+            ],
+            нэмэлт_талбарууд: [
+                {
+                    "title": 'Засах',
+                    "text": '', "icon":
+                    'fa fa-pencil-square-o text-success',
+                    "action": (values) => this.go_link(values),
+                    "width": "100px"
+                },
+                {
+                    "title": 'Устгах',
+                    "text": '',
+                    "icon": 'fa fa-trash-o text-danger',
+                    "action": (values) => this.handleRemoveAction(values),
+                    "width": "100px"
+                }
+            ],
+            values: {},
+            title: "",
+            icon: ""
         }
         this.handleRemove = this.handleRemove.bind(this)
-        this.getRolesList = this.getRolesList.bind(this)
+        this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+        this.modalClose = this.modalClose.bind(this)
+        this.modalOpen = this.modalOpen.bind(this)
     }
 
-    modalClose() {
-        this.setState({ modal_alert_status: "closed" })
+    modalClose(){
+        this.setState({alert_modal_status: 'closed'})
     }
 
-    componentDidMount(){
-        this.getRolesList()
+    modalOpen(title, icon){
+        this.setState({alert_modal_status: 'open', title, icon})
     }
 
-    getRolesList() {
-        this.setState({ is_loading: false })
-        service
-            .getRoleList()
-            .then(({ success, roles }) => {
-                if(success) {
-                    this.setState({ is_loading: true, roles })
-                }
-            })
+    handleRemoveAction(values){
+        this.setState({values})
+        this.handleModalOpen()
     }
 
-    handleRemove(id) {
-        service
-            .deleteRole(id)
-            .then(({ success }) => {
-                if (success) {
-                    this.getRolesList()
-                }
-            })
+    handleModalOpen(){
+        this.setState({modal_status: 'open'})
+    }
+
+    handleModalClose(){
+        this.setState({modal_status: 'closed'})
+    }
+
+    detai_go_link(values){
+        this.props.history.push(`/gov/perm/role/${values.id}/detail/`)
+    }
+
+    go_link(values){
+        this.props.history.push(`/gov/perm/role/${values.id}/edit/`)
+    }
+
+    handleRemove() {
+        const { id } = this.state.values
+        service.deleteRole(id).then(({ success }) => {
+            if(success){
+                this.setState({refresh: !this.state.refresh})
+                this.modalOpen("Амжилттай устлаа", "success")
+            }else{
+                this.modalOpen("Алдаа гарлаа", "danger")
+            }
+        })
     }
 
     render() {
-        const { roles, is_loading } = this.state
-        const { is_admin, username } = this.props.employee
+        const {
+            refresh,
+            талбарууд,
+            жагсаалтын_холбоос,
+            хувьсах_талбарууд,
+            нэмэх_товч,
+            нэмэлт_талбарууд,
+            modal_status,
+            values,
+            alert_modal_status,
+            title, icon
+        } = this.state
         return (
             <div className="card">
                 <div className="card-body">
-                    {
-                        !is_loading
-                        ?
-                            <div className="d-flex justify-content-center">
-                                <div className="spinner-border gp-text-primary" role="status"></div>
-                            </div>
-                        :
-                            <div className="row">
-                                <div className="col-md-12">
-                                    {is_admin &&
-                                    <div className="text-right">
-                                        <NavLink
-                                            className="btn gp-btn-primary waves-effect waves-light m-1"
-                                            to={`/gov/perm/role/add/`}>
-                                            Нэмэх
-                                        </NavLink>
-                                    </div>
-                                    }
-                                    <div className="table-responsive">
-                                        <table className="table ">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">№</th>
-                                                    <th scope="col">title</th>
-                                                    {is_admin && <th scope="col">Засах</th>}
-                                                    {is_admin && <th scope="col">Устгах</th>}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    roles.map((p, idx) =>
-                                                        <Rows key={idx}
-                                                            index={idx + 1}
-                                                            values={p}
-                                                            handleRemove={() => this.handleRemove(p.role_id)}
-                                                            employee={this.props.employee}
-                                                        />
-                                                    )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <ModalAlert
-                                        modalAction={() => this.modalClose()}
-                                        status={this.state.modal_alert_status}
-                                        title="Амжилттай устгалаа"
-                                        model_type_icon="success"
-                                    />
-                                </div>
-                            </div>
-                    }
+                    <PortalDataTable
+                        талбарууд={талбарууд}
+                        жагсаалтын_холбоос={жагсаалтын_холбоос}
+                        per_page={20}
+                        уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
+                        хувьсах_талбарууд={хувьсах_талбарууд}
+                        нэмэх_товч={нэмэх_товч}
+                        нэмэлт_талбарууд={нэмэлт_талбарууд}
+                        color={'primary'}
+                        refresh={refresh}
+                    />
                 </div>
+                <Modal
+                    text={`Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                    title={'Тохиргоог устгах'}
+                    model_type_icon={'success'}
+                    status={modal_status}
+                    modalClose={this.handleModalClose}
+                    modalAction={this.handleRemove}
+                />
+                <ModalAlert
+                    modalAction={() => this.modalClose()}
+                    status={alert_modal_status}
+                    title={title}
+                    model_type_icon={icon}
+                />
             </div>
         );
     }

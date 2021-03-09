@@ -14,7 +14,7 @@ const hhwp = ({ chunks, filename }) => new HtmlWebpackPlugin({
 })
 
 module.exports = {
-    mode: "development",
+    mode: "production",
     entry: {
         'backend/webapp':
             hp('backend/webapp/src/index.js'),
