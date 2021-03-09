@@ -12,16 +12,16 @@ import {Vector as VectorLayer} from 'ol/layer';
 
 export default class MapAllowedGeom extends Component {
     constructor(props) {
-            super(props)
-            this.state = {
-                dataProjection: 'EPSG:4326',
-                featureProjection: 'EPSG:3857',
-                geom: props.geom
-            }
-            this.loadMapData = this.loadMapData.bind(this)
-            this.loadMap = this.loadMap.bind(this)
-            this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
+        super(props)
+        this.state = {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857',
+            geom: props.geom
         }
+        this.loadMapData = this.loadMapData.bind(this)
+        this.loadMap = this.loadMap.bind(this)
+        this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
+    }
 
     componentDidMount() {
         this.loadMap()
@@ -94,6 +94,7 @@ export default class MapAllowedGeom extends Component {
         this.vector_layer.getSource().addFeature(feature[0])
         this.map.getView().fit(feature[0].getGeometry(),{ padding: [25, 25, 25, 25]})
     }
+
     render() {
         return (
             <div className="🌍">
