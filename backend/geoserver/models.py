@@ -8,7 +8,8 @@ class WmtsCacheConfig(models.Model):
         db_table = "geoserver_wmts_cache_config"
         ordering = ('created_at',)
 
-    feature_id = models.IntegerField()
+    feature_id = models.IntegerField(null=True)
+    group_name = models.CharField(max_length=100, null=True)
     img_format = models.CharField(max_length=50)
     zoom_start = models.IntegerField(null=True)
     zoom_stop = models.IntegerField()

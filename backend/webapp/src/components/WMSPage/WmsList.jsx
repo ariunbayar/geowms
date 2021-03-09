@@ -42,7 +42,6 @@ export class WmsList extends Component {
             modal_status: "closed",
             values: {}
         }
-
         this.handleRemove = this.handleRemove.bind(this)
         this.go_link = this.go_link.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)

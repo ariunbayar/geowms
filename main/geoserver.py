@@ -151,9 +151,9 @@ def create_store(workspace_name, ds_name, ds_desc):
     rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload)
     return rsp
 
-def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes):
+
+def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_name, srs, attribute_name, some_attributes, layer_state):
     BASE_URL, AUTH = getHeader()
-    url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name = datastore_name)
     attributes_hoho = []
     geom_type = ''
     for i in range(len(attribute_name)):
@@ -304,7 +304,12 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 srs=srs,
                 attributes=''.join(attributes_hoho),
             )
-    rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
+    if layer_state:
+        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=workspace_name, datastore_name = datastore_name, layer_name = layer_name)
+        rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
+    else:
+        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name = datastore_name)
+        rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
 
     return rsp
 
@@ -547,10 +552,12 @@ def create_style(values):
 
 
 def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache):
-
+    layer_name = layer_name
+    if ws_name:
+        layer_name = ws_name + ':' + layer_name
     payload='''
         <seedRequest>
-            <name>{ws_name}:{layer_name}</name>
+            <name>{layer_name}</name>
             <srs>
                 <number>{srs}</number>
             </srs>
@@ -562,7 +569,6 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
         </seedRequest>
     '''.format(
         layer_name=layer_name,
-        ws_name=ws_name,
         zoom_start=zoom_start,
         zoom_stop=zoom_stop,
         image_format=image_format,
@@ -575,6 +581,100 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
     BASE_URL, AUTH = getCacheHeader()
 
     headers = {'Content-type': 'text/xml'}
-    url = BASE_URL +  'seed/' + '{ws_name}:{layer_name}.xml'.format(ws_name=ws_name, layer_name=layer_name)
-    rsp = requests.post(url, headers=headers, auth=AUTH, data=payload)
+    url = BASE_URL +  'seed/' + '{layer_name}.xml'.format(layer_name=layer_name)
+    rsp = requests.post(url, headers=headers, auth=AUTH, data=payload.encode('utf-8'))
+    return rsp
+
+
+def get_layer_groups():
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layergroups'
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        if features.get('layerGroups'):
+            return features.get('layerGroups').get('layerGroup')
+
+
+def get_layer_group_detail(group_name):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layergroups' + '/' + group_name
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        return features.get('layerGroup')
+
+
+def delete_layer_group(group_name):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layergroups/{group_name}?recurse=true'.format(group_name=group_name)
+    rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    return rsp
+
+
+def create_layer_group(group_values, group_layers):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'text/xml'
+    }
+    g_layers = []
+    g_styles = []
+    for i in range(len(group_layers)):
+        style =  '''
+           <style>{style_name}</style>
+            '''.format(
+                style_name=group_layers[i]['style_name']
+            )
+        layer =  '''
+            <layer>{layer_name}</layer>
+            '''.format(
+                layer_name=group_layers[i]['layer_name']
+            )
+        g_layers.insert(i, layer)
+        g_styles.insert(i, style)
+
+    payload = '''
+       <layerGroup>
+        <name>{name}</name>
+        <title>{title}</title>
+        <abstractTxt>{abstract}</abstractTxt>
+        <layers>
+            {layers}
+        </layers>
+        <styles>
+           {styles}
+        </styles>
+        </layerGroup>
+    '''.format(
+        name = group_values.get('name'),
+        title = group_values.get('title'),
+        abstract = group_values.get('abstract'),
+        layers = ''.join(g_layers),
+        styles = ''.join(g_styles)
+    )
+    url = 'layergroups/'
+    rsp = requests.post(BASE_URL+ url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
+    return rsp
+
+
+def get_layers():
+
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'layers'
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        return features.get('layers').get('layer')
     return rsp
