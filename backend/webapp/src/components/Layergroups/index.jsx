@@ -24,7 +24,5 @@ export default class LayerGroups extends Component {
                 </div>
             </div>
         )
-
     }
-
 }

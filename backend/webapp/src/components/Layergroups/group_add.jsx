@@ -1,13 +1,10 @@
 import React, { Component } from "react"
-import {Switch, Route, NavLink} from "react-router-dom"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
 import { service } from './service'
 import ModelSelectLayer from "./ModelSelect"
 import ModalAlert from "../ModalAlert"
-import { cmpPos } from "codemirror"
 import {GPIcon} from "@utils/Tools"
-
 
 const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -15,7 +12,6 @@ const validationSchema = Yup.object().shape({
     title: Yup.string(),
     abstract: Yup.string(),
 })
-
 
 export class GroupAdd extends Component {
 
@@ -109,6 +105,7 @@ export class GroupAdd extends Component {
         }
         this.setState({layer_list: array})
     }
+
     handleMoveUp(e, index) {
         var arr = [...this.state.layer_list]
         if (index > 0) {
@@ -122,6 +119,7 @@ export class GroupAdd extends Component {
             this.handleSwap(arr, index, index + 1);
         }
     }
+
     handleSwap(obj, prop1, prop2) {
         var tmp = obj[prop1];
         obj[prop1] = obj[prop2];
@@ -163,9 +161,10 @@ export class GroupAdd extends Component {
 
     render() {
         const {
-                form_values, layer_list, layer_detail,
-                select_layer_status, modal_alert_status, model_alert_text, model_alert_icon
-            } = this.state
+            form_values, layer_list, layer_detail,
+            select_layer_status, modal_alert_status,
+            model_alert_text, model_alert_icon
+        } = this.state
         const group_name = this.props.match.params.group_name
         return (
             <div className="col-md-12" style={{height:"calc( 85vh - 60px - 7px)"}}>

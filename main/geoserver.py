@@ -307,7 +307,6 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
         url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=workspace_name, datastore_name = datastore_name, layer_name = layer_name)
         rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
     else:
-
         url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name = datastore_name)
         rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
 

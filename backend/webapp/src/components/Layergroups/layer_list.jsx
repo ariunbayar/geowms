@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {NavLink} from "react-router-dom"
-import Modal from "../Modal"
 import ModalAlert from "../ModalAlert"
 import Loader from "@utils/Loader"
 import GroupList from './list'
@@ -18,7 +17,7 @@ export class List extends Component {
             timer: null,
             model_alert_text: '',
             model_type_icon: 'success',
-            searchQuery: '',
+            search_query: '',
             currentPage: 1,
             groupPerPage: 20,
             is_loading: false,
@@ -44,7 +43,6 @@ export class List extends Component {
                 group_list,
                 is_loading: false})
         })
-
     }
 
     modalClose(){
@@ -53,16 +51,16 @@ export class List extends Component {
 
     handleSearch(e) {
         if (e.target.value.length != "" ) {
-            this.setState({searchQuery: e.target.value})
+            this.setState({search_query: e.target.value})
         }
         else {
-            this.setState({searchQuery: ''})
+            this.setState({search_query: ''})
             this.handleListUpdated()
         }
     }
 
-    paginate(currentGroups, currentPage, searchQuery) {
-        this.setState({currentPage, currentGroups, searchQuery})
+    paginate(currentGroups, currentPage, search_query) {
+        this.setState({currentPage, currentGroups, search_query})
     }
 
     handleGroupDelete(name){
@@ -84,7 +82,7 @@ export class List extends Component {
     }
 
     render() {
-        const {group_list, currentGroups, searchQuery, groupPerPage, currentPage, is_loading, modal_status} = this.state
+        const {group_list, currentGroups, search_query, groupPerPage, currentPage, is_loading, modal_status} = this.state
         return (
             <div className="row justify-content-center">
                 <div className="col-md-12">
@@ -95,10 +93,10 @@ export class List extends Component {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    id="searchQuery small-input"
+                                    id="search_query small-input"
                                     placeholder="Хайх"
                                     onChange={(e) => this.handleSearch(e)}
-                                    value={searchQuery}
+                                    value={search_query}
                                 />
                                 <a><i className="icon-magnifier"></i></a>
                             </div>
@@ -141,7 +139,7 @@ export class List extends Component {
                     <GSPaginate
                         paginate = {this.paginate}
                         item_list ={group_list}
-                        searchQuery = {searchQuery}
+                        search_query = {search_query}
                         per_page = {groupPerPage}
                         page = {currentPage}
                     />

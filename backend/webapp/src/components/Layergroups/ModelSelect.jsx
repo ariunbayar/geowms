@@ -1,7 +1,5 @@
-import { compose } from "ol/transform"
 import React, {Component, Fragment} from "react"
 import { GSPaginate } from "./geo_pagination"
-
 
 export default class ModelSelectLayer extends Component {
 
@@ -10,7 +8,7 @@ export default class ModelSelectLayer extends Component {
         this.state = {
             status: this.props.status || "initial",
             layer_list: props.layer_list,
-            searchQuery: '',
+            search_query: '',
             current_page: 1,
             layerPerPage: 10,
             current_layers: [],
@@ -36,15 +34,15 @@ export default class ModelSelectLayer extends Component {
 
     handleSearch(e) {
         if (e.target.value.length >= 1) {
-            this.setState({searchQuery: e.target.value})
+            this.setState({search_query: e.target.value})
         }
         else {
-            this.setState({searchQuery: '', layer_list: this.props.layer_list})
+            this.setState({search_query: '', layer_list: this.props.layer_list})
         }
     }
 
-    paginate(current_layers, current_page, searchQuery) {
-        this.setState({ current_layers, current_page, searchQuery })
+    paginate(current_layers, current_page, search_query) {
+        this.setState({ current_layers, current_page, search_query })
     }
 
     componentDidUpdate(prevProps) {
@@ -94,7 +92,7 @@ export default class ModelSelectLayer extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const {layer_list, current_layers, searchQuery, layerPerPage, current_page} = this.state
+        const {layer_list, current_layers, search_query, layerPerPage, current_page} = this.state
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-absolute w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
@@ -121,7 +119,7 @@ export default class ModelSelectLayer extends Component {
                                                     id="small-input"
                                                     placeholder="Хайх"
                                                     onChange={(e) => this.handleSearch(e)}
-                                                    value={searchQuery}
+                                                    value={search_query}
                                                 />
                                                 <a><i className="icon-magnifier"></i></a>
                                         </div>
@@ -156,7 +154,7 @@ export default class ModelSelectLayer extends Component {
                                     <GSPaginate
                                         paginate = {this.paginate}
                                         item_list ={layer_list}
-                                        searchQuery = {searchQuery}
+                                        search_query = {search_query}
                                         per_page = {layerPerPage}
                                         page = {current_page}
                                         filter_name={'layer_name'}
@@ -170,5 +168,4 @@ export default class ModelSelectLayer extends Component {
             </Fragment>
         )
     }
-
 }

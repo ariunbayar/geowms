@@ -3,7 +3,6 @@ import {NavLink} from "react-router-dom"
 import Modal from "../Modal"
 import {GPIcon} from "@utils/Tools"
 
-
 export default class GroupList extends Component {
 
     constructor(props) {
@@ -34,7 +33,6 @@ export default class GroupList extends Component {
         const {value, idx} = this.props
         return (
             <tr key={idx}>
-
                 <td>
                     {idx}
                 </td>
