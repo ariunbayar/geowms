@@ -47,18 +47,19 @@ def getCacheHeader():
 
 
 def getHeader():
-
+    BASE_URL = ''
+    AUTH = ''
     conf_geoserver = get_connection_conf()
-
-    AUTH = requests.auth.HTTPBasicAuth(
-        conf_geoserver['geoserver_user'],
-        conf_geoserver['geoserver_pass'],
-    )
-
-    BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port'],
-    )
+    if conf_geoserver['geoserver_user'] and conf_geoserver['geoserver_pass']:
+        AUTH = requests.auth.HTTPBasicAuth(
+            conf_geoserver['geoserver_user'],
+            conf_geoserver['geoserver_pass'],
+        )
+    if conf_geoserver['geoserver_host'] and conf_geoserver['geoserver_port']:
+        BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port'],
+        )
 
     return BASE_URL, AUTH
 
