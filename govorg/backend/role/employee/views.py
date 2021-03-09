@@ -89,20 +89,11 @@ def _get_email(user_id, item):
     return user.email
 
 
-def _get_role_name(token, item):
-    role = EmpPerm.objects.filter(employee=item['id']).first()
+def _get_role_name(item):
     role_name = ''
-
+    role = EmpPerm.objects.filter(employee=item['id']).first()
     if role and role.emp_role:
         role_name = role.emp_role.name
-    return role_name
-
-
-def _get_role_name(qs, values):
-    role_name = ''
-    obj = qs.empperm_set.first()
-    if obj and obj.emp_role:
-        role_name = obj.emp_role.name
     return role_name
 
 
@@ -113,14 +104,13 @@ def list(request, payload):
     org = get_object_or_404(Org, employee__user=request.user)
     qs = Employee.objects.filter(org=org)
 
-
     оруулах_талбарууд = ['id', 'position', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
         {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": _get_email, "new_field": "user__email"},
     ]
     нэмэлт_талбарууд = [
-        {"field": CharField(max_length=1000), "action": _get_role_name, "new_field": "role_name"},
+        {"field": "role_name", "action": _get_role_name},
     ]
 
     datatable = Datatable(
@@ -128,7 +118,8 @@ def list(request, payload):
         payload=payload,
         initial_qs=qs,
         оруулах_талбарууд=оруулах_талбарууд,
-        нэмэлт_талбарууд=нэмэлт_талбарууд
+        нэмэлт_талбарууд=нэмэлт_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд
     )
     items, total_page = datatable.get()
     rsp = {
@@ -139,7 +130,8 @@ def list(request, payload):
 
     return JsonResponse(rsp)
 
-
+suda = Employee.objects.all().extra(select = {'qweqw': 0})
+# print(suda.values())
 def _set_user(user, user_detail):
 
     user.username = user_detail['username']

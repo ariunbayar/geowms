@@ -45,28 +45,6 @@ class Datatable():
 
         self.search_qs = search_qs
 
-    def set_field(self):
-        нэмэлт_талбарууд = self.нэмэлт_талбарууд
-        search_qs = self.search_qs
-
-        for нэмэлт_талбар in нэмэлт_талбарууд:
-            obj = {
-                    нэмэлт_талбар['new_field']: Value(None, output_field=нэмэлт_талбар['field'])
-                }
-            search_qs = search_qs.annotate(**obj)
-
-            self.оруулах_талбарууд.append(нэмэлт_талбар['new_field'])
-            for qs in search_qs:
-                action = нэмэлт_талбар['action']
-                return_data = action(qs, нэмэлт_талбар)
-                qs.role_name = return_data
-                qs.save()
-        for qs in search_qs:
-            print(qs.role_name)
-
-
-        self.search_qs = search_qs
-
     def sort(self):
         self.search_qs = self.search_qs.order_by(self.sort_name)
 
@@ -78,9 +56,7 @@ class Datatable():
 
     def get(self):
         self.search()
-        self.set_field()
         self.sort()
         self.paginator()
-        items = get_display_items(self.items_page, self.оруулах_талбарууд, self.хувьсах_талбарууд)
-
+        items = get_display_items(self.items_page, self.оруулах_талбарууд, self.хувьсах_талбарууд, self.нэмэлт_талбарууд)
         return items, self.total_page
