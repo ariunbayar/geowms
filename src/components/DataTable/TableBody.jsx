@@ -12,7 +12,7 @@ export class TableBody extends Component {
     render() {
         const { idx, талбарууд, values, хувьсах_талбарууд, нэмэлт_талбарууд } = this.props
         return (
-            <tr>
+            <tr className="tr-hover">
                 <td style={{width: "40px"}}>{idx}</td>
                 {талбарууд.map((item, idx) =>
                     item.has_action
@@ -60,7 +60,7 @@ export class TableBody extends Component {
                                     ?
                                         item.text
                                     :
-                                        <GPIcon icon={item.icon}></GPIcon>
+                                        <GPIcon icon={item.icon} hover_color={'white'}></GPIcon>
                                 }
                             </a>
                         }

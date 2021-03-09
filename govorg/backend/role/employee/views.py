@@ -4,7 +4,7 @@ from django.http import JsonResponse, Http404
 from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import CharField, Value
 from geoportal_app.models import User
 from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
 from main.decorators import ajax_required
@@ -79,20 +79,17 @@ def _get_employee_display(employee):
     }
 
 
-def _get_name_or_email(state, item):
-    user = User.objects.filter(pk=item['user_id']).first()
-    name_or_email = ''
-
-    if user is not None:
-        if type(state) == int:
-            name_or_email = user.last_name
-        else:
-            name_or_email = user.email
-
-    return name_or_email
+def _get_name(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    return user.first_name
 
 
-def _get_role_name(state, item):
+def _get_email(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    return user.email
+
+
+def _get_role_name(token, item):
     role = EmpPerm.objects.filter(employee=item['id']).first()
     role_name = ''
 
@@ -101,19 +98,29 @@ def _get_role_name(state, item):
     return role_name
 
 
+def _get_role_name(qs, values):
+    role_name = ''
+    obj = qs.empperm_set.first()
+    if obj and obj.emp_role:
+        role_name = obj.emp_role.name
+    return role_name
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def list(request, payload):
-
     org = get_object_or_404(Org, employee__user=request.user)
     qs = Employee.objects.filter(org=org)
 
-    оруулах_талбарууд = ['id', 'position', 'is_admin', 'org_id', 'user_id', 'token']
+
+    оруулах_талбарууд = ['id', 'position', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
-        {"field": "org_id", "action": _get_name_or_email, "new_field": "org_id"},
-        {"field": "token", "action": _get_name_or_email, "new_field": "token"},
-        {"field": "user_id", "action": _get_role_name, "new_field": "user_id"},
+        {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
+        {"field": "user_id", "action": _get_email, "new_field": "user__email"},
+    ]
+    нэмэлт_талбарууд = [
+        {"field": CharField(max_length=1000), "action": _get_role_name, "new_field": "role_name"},
     ]
 
     datatable = Datatable(
@@ -121,10 +128,9 @@ def list(request, payload):
         payload=payload,
         initial_qs=qs,
         оруулах_талбарууд=оруулах_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд
+        нэмэлт_талбарууд=нэмэлт_талбарууд
     )
     items, total_page = datatable.get()
-
     rsp = {
         'items': items,
         'page': payload.get('page'),
