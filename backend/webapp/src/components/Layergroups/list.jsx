@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import Modal from "../Modal"
+import {GPIcon} from "@utils/Tools"
+
 
 export default class GroupList extends Component {
 
@@ -41,17 +43,17 @@ export default class GroupList extends Component {
                 </td>
                 <td>
                     <NavLink to={`/back/layer-groups/${value}/tile-caching/`} exact>
-                        <i className="fa fa-shopping-basket text-primary" aria-hidden="true"></i>
+                        <GPIcon icon={"fa fa-shopping-basket"}/>
                     </NavLink>
                 </td>
                 <td>
                     <NavLink  className="text-primary" to={`/back/layer-groups/${value}/засах/`}>
-                        <i className="fa fa-pencil-square-o" aria-hidden="true"></i>
+                        <GPIcon icon={"fa fa-pencil-square-o"}/>
                     </NavLink>
                 </td>
                 <td>
                     <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                        <GPIcon icon={"fa fa-trash-o text-danger"}/>
                     </a>
                     <Modal
                         text={`Та "${value}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}

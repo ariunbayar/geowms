@@ -6,6 +6,7 @@ import { service } from './service'
 import ModelSelectLayer from "./ModelSelect"
 import ModalAlert from "../ModalAlert"
 import { cmpPos } from "codemirror"
+import {GPIcon} from "@utils/Tools"
 
 
 const validationSchema = Yup.object().shape({
@@ -300,14 +301,16 @@ export class GroupAdd extends Component {
                                                                             <td>{value.type}</td>
                                                                             <td>{value.style_name}</td>
                                                                             <td className="text-center">
-                                                                            <a href="#">
-                                                                                <i className="fa fa-arrow-up text-primary mr-2" aria-hidden="true"  onClick={(e) => this.handleMoveUp(e, idx)}></i>
-                                                                                <i className="fa fa-arrow-down text-primary" aria-hidden="true"  onClick={(e) => this.handleMoveDown(e, idx)}></i>
+                                                                            <a href="#" onClick={(e) => this.handleMoveUp(e, idx)}>
+                                                                                <GPIcon icon={"fa fa-arrow-up text-primary"}/>
+                                                                            </a>
+                                                                            <a href="#" onClick={(e) => this.handleMoveDown(e, idx)}>
+                                                                                <GPIcon icon={"fa fa-arrow-down text-primary"}/>
                                                                             </a>
                                                                             </td>
                                                                             <td className="text-center">
                                                                                 <a href="#" onClick={(e) => this.removeLayer(e, value)}>
-                                                                                    <i className="fa fa-minus-circle text-danger" aria-hidden="true"></i>
+                                                                                    <GPIcon icon={"fa fa-minus-circle text-danger"}/>
                                                                                 </a>
                                                                             </td>
                                                                         </tr>
@@ -319,7 +322,7 @@ export class GroupAdd extends Component {
                                                         <div className="form-group col-md-12">
                                                             <div className="form-group col-md-12">
                                                                 <a href="#" onClick={(e) => this.setState({ select_layer_status: true})}>
-                                                                    <i className="fa fa-plus-circle text-success mr-2 mt-2" aria-hidden="true"></i>
+                                                                    <GPIcon icon={"fa fa-plus-circle text-success mr-4 mt-2"}/>
                                                                     Давхарга нэмэх
                                                                 </a>
                                                             </div>
