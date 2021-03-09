@@ -779,7 +779,7 @@ def date_to_timezone(input_date):
     return output_date
 
 
-def get_display_items(items, fields, хувьсах_талбарууд=[]):
+def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
     display = list()
     for item in items.values():
         obj = dict()
@@ -792,6 +792,11 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
                 if хувьсах_талбар['field'] == field:
                     action = хувьсах_талбар['action']
                     obj[хувьсах_талбар['new_field']] = action(item[field], item)
+
+        for нэмэлт_талбар in нэмэлт_талбарууд:
+            action = нэмэлт_талбар['action']
+            result_data = action(item)
+            obj[нэмэлт_талбар['field']] = result_data or None
 
         display.append(obj)
 
