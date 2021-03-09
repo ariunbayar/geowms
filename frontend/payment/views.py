@@ -1484,7 +1484,8 @@ def _copy_image(img, plus):
     return new_img
 
 from PIL import Image, ImageFont, ImageDraw
-img = Image.open(os.path.join(settings.MEDIA_ROOT, 'gp_layer_building_view.jpeg'))
+image_path = 'gp_layer_building_view.jpeg'
+img = Image.open(os.path.join(settings.MEDIA_ROOT, image_path))
 texts = [
     {
         'text': 'odko',
@@ -1497,7 +1498,9 @@ plus = 100
 
 new_img = _copy_image(img, plus)
 new_img = _set_text_to_image(texts, new_img)
+
 new_img.show()
-# new_img.save('text.png')
+
+new_img.save('text.png')
 
 
