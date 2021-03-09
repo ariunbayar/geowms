@@ -1,7 +1,6 @@
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 from main.utils import get_display_items, get_fields
-from django.db.models import CharField, Value
 
 
 class Datatable():
