@@ -1,39 +1,42 @@
-from PIL import Image
-from collections import namedtuple
-from io import BytesIO
+import io
 import base64
 import re
 import unicodedata
 import importlib
-
+import zipfile
 import json
+
+from PIL import Image
+from collections import namedtuple
+from datetime import timedelta, datetime
+from geojson import Feature
+
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry, Point
 from django.db import connections
-from backend.dedsanbutets.models import ViewNames
-from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 from django.contrib.gis.measure import D
-from geojson import Feature
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+
 from backend.config.models import Config
 from backend.token.utils import TokenGeneratorUserValidationEmail
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from backend.dedsanbutets.models import ViewNames
 
 
 def resize_b64_to_sizes(src_b64, sizes):
 
     src_bytes = base64.b64decode(src_b64)
-    src_io = BytesIO(src_bytes)
+    src_io = io.BytesIO(src_bytes)
 
     def _resize(image, size):
-        dst = BytesIO()
+        dst = io.BytesIO()
         image.thumbnail(size)
         image.save(dst, format='PNG')
         return dst
@@ -987,3 +990,21 @@ def create_index(model_name, field):
         cursor.execute(sql)
         return True
     return False
+
+
+def unzip(path_zip_file, extract_path):
+    is_unzipped = False
+
+    with zipfile.ZipFile(path_zip_file, 'r') as zip_ref:
+        is_unzipped = True
+        zip_ref.extractall(extract_path)
+
+    return is_unzipped
+
+
+def image_to_byte_array(image_path):
+    image = Image.open(image_path)
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format=image.format)
+    img_byte_arr = img_byte_arr.getvalue()
+    return img_byte_arr
