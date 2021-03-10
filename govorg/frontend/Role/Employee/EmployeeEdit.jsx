@@ -30,6 +30,7 @@ export class EmployeeEdit extends Component {
                 email: '',
                 gender: '',
                 register: '',
+                phone_number: '',
                 is_admin: false,
             },
             modal_status: 'closed',
@@ -122,6 +123,7 @@ export class EmployeeEdit extends Component {
                             email: employee_detail.email,
                             gender: employee_detail.gender,
                             register: employee_detail.register,
+                            phone_number: employee_detail.phone_number,
                             is_admin: employee_detail.is_admin,
                         },
                         point: employee_detail.point,
@@ -241,6 +243,7 @@ export class EmployeeEdit extends Component {
         const email = form_values.email
         const gender = form_values.gender
         const register = form_values.register
+        const phone_number = form_values.phone_number
         const is_admin = form_values.is_admin
         const {id, role_id} = this.state
 
@@ -257,7 +260,7 @@ export class EmployeeEdit extends Component {
 
         this.checkRoleAndPerm()
         service
-            .updateEmployee(username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, this.perms, this.remove_perms, address)
+            .updateEmployee(username, first_name, last_name, position, email, gender, register, phone_number, is_admin, role_id, id, this.perms, this.remove_perms, address)
             .then(({ success, info, errors }) => {
                 if(success) {
                     setStatus('saved')
@@ -593,6 +596,21 @@ export class EmployeeEdit extends Component {
                                                     )}
                                                 </select>
                                             </div>}
+                                        </div>
+                                        <div className='form-row'>
+                                            <div className="form-group col-md-6">
+                                                <div className="position-relative has-icon-right">
+                                                    <label htmlFor="phone_number" >Утасны дугаар:</label>
+                                                    <Field
+                                                        className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                        name='phone_number'
+                                                        id="id_phone_number"
+                                                        type="text"
+                                                        placeholder="Утасны дугаар"
+                                                    />
+                                                    <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className='form-row'>
                                             {this.props.employee.is_admin &&
