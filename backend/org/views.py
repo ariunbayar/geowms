@@ -615,7 +615,7 @@ def _get_employee(employee, filter_from_user):
         is_active = employee.is_active
         is_sso = employee.is_sso
         is_admin = emp_obj.is_admin
-        position = emp_obj.position
+        position = emp_obj.position.name
         created_at = emp_obj.created_at.strftime('%Y-%m-%d')
         updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
     else:
@@ -627,7 +627,7 @@ def _get_employee(employee, filter_from_user):
         is_active = user.is_active,
         is_sso = user.is_sso,
         is_admin = employee.is_admin
-        position = employee.position
+        position = employee.position.name
         created_at = employee.created_at.strftime('%Y-%m-%d')
         updated_at = employee.updated_at.strftime('%Y-%m-%d')
 
@@ -671,7 +671,6 @@ def employee_list(request, payload, level, pk):
         qs = Employee.objects
         qs = qs.filter(org=org)
         qs = qs.annotate(search=SearchVector(
-                'position',
                 'is_admin',
                 'created_at',
                 'updated_at'
