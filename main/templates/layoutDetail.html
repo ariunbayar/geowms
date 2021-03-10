@@ -24,6 +24,9 @@
     <div class="container">
       <div class="ml-auto mt-2 mt-lg-0">
         {% if user.is_authenticated %}
+          {% if user and not user.is_sso %}
+          <a href="{% url "org:frontend" %}" class=" btn gp-btn-primary">Байгууллага</a>
+          {% endif %}
           {% if user.is_superuser %}
           <span class="btn gp-btn-primary">
               Нэвтэрсэн хэрэглэгч: {{user.username}}
@@ -33,10 +36,6 @@
               Нэвтэрсэн хэрэглэгч: {{user.last_name|first}}.{{user.first_name}}
             </span>
 
-          {% endif %}
-          {% if user.is_authenticated and user %}
-            <a href="{% url "org:frontend" %}" class="btn gp-btn-primary">БАЙГУУЛЛАГЫН ХЭСЭГ</a>
-            </a>
           {% endif %}
           <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
         {% else %}
