@@ -27,6 +27,7 @@ export class EmployeeAdd extends Component {
                 email: '',
                 gender: 'Эрэгтэй',
                 register: '',
+                phone_number: '',
                 is_admin: false,
                 choose_role: '',
             },
@@ -420,8 +421,19 @@ export class EmployeeAdd extends Component {
                                                 <ErrorMessage name="choose_role" component="div" className="text-danger"/>
                                             </div>
                                         </div>
-                                        <div className='form-row'>
+                                        <div className="form-row">
                                             <div className="form-group col-md-6">
+                                                <label htmlFor="phone_number">Утасны дугаар:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                    name='phone_number'
+                                                    id="id_phone_number"
+                                                    type="text"
+                                                    placeholder="Утасны дугаар"
+                                                />
+                                                <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                            </div>
+                                            <div className="form-group col-md-6 mt-1 text-center"><br/>
                                                 <label htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
@@ -431,7 +443,9 @@ export class EmployeeAdd extends Component {
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
-                                            <div className="form-group col-md-6">
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
                                                 <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => {
                                                     if (is_address_map) {
                                                         if (this.state.last_geo_id) {

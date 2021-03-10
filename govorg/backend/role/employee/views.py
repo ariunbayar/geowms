@@ -56,6 +56,7 @@ def _get_employee_display(employee):
         'id': employee.id,
         'position': employee.position,
         'is_admin': employee.is_admin,
+        'phone_number': employee.phone_number,
 
         'token': employee.token,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
@@ -140,6 +141,7 @@ def _set_user(user, user_detail):
     user.email = user_detail['email']
     user.gender = user_detail['gender']
     user.register = user_detail['register']
+    user.phone_number = user_detail['phone_number']
     user.save()
 
 
@@ -147,6 +149,7 @@ def _set_employee(employee, user_detail):
 
     employee.position = user_detail['position']
     employee.is_admin = user_detail['is_admin']
+    employee.phone_number = user_detail['phone_number']
     employee.save()
 
 
@@ -190,6 +193,7 @@ def _employee_validation(user, user_detail):
     position = user_detail['position']
     email = user_detail['email']
     register = user_detail['register']
+    phone_number = user_detail['phone_number']
     if not username:
         errors['username'] = 'Хоосон байна утга оруулна уу.'
     elif len(username) > 150:
@@ -212,6 +216,12 @@ def _employee_validation(user, user_detail):
         errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
     if not register:
         errors['register'] = 'Хоосон байна утга оруулна уу.'
+    if not phone_number:
+        errors['phone_number'] = 'Хоосон байна утга оруулна уу.'
+    elif len(phone_number) > 8:
+        errors['phone_number'] = '8-с илүүгүй урттай утга оруулна уу!'
+    elif len(phone_number) < 8:
+        errors['phone_number'] = '8 урттай утга оруулна уу!'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():
