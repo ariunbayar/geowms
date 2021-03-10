@@ -32,6 +32,10 @@
                     </span>
 
                     {% endif %}
+                    {% if user.is_authenticated and user %}
+                        <a href="{% url "org:frontend" %}" class="btn gp-btn-primary">БАЙГУУЛЛАГЫН ХЭСЭГ</a>
+                        </a>
+                    {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
                 <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
