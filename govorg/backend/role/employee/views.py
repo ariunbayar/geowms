@@ -188,6 +188,8 @@ def _employee_validation(user, user_detail):
         errors['phone_number'] = 'Хоосон байна утга оруулна уу.'
     elif len(phone_number) > 8:
         errors['phone_number'] = '8-с илүүгүй урттай утга оруулна уу!'
+    elif len(phone_number) < 8:
+        errors['phone_number'] = '8 урттай утга оруулна уу!'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():

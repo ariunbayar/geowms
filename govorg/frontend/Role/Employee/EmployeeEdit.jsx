@@ -611,10 +611,8 @@ export class EmployeeEdit extends Component {
                                                     <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className='form-row'>
                                             {this.props.employee.is_admin &&
-                                            <div className="form-group col-md-6">
+                                            <div className="form-group col-md-3 mt-1 text-center"><br/>
                                                 <label htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
@@ -626,7 +624,7 @@ export class EmployeeEdit extends Component {
                                             </div>
                                             }
                                             {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
-                                            <div className="col-md-6">
+                                            <div className="col-md-3 mt-1 text-center"><br/>
                                                 <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
                                                     {} Нууц үг солих имэйл илгээх
                                                 </button>
@@ -634,8 +632,7 @@ export class EmployeeEdit extends Component {
                                             : null
                                             }
                                         </div>
-                                        <br/>
-                                        <div className="form-group col-md-6">
+                                        <div className="form-group col-md-12">
                                             <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => this.refreshMap()}>
                                                 {
                                                     !is_address_map ? "Role сонгох" : "Гэрийн хаяг оруулах"

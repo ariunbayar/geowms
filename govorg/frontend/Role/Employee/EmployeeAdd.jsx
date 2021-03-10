@@ -433,7 +433,7 @@ export class EmployeeAdd extends Component {
                                                 />
                                                 <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                             </div>
-                                            <div className="form-group col-md-6"><br/>
+                                            <div className="form-group col-md-6 mt-1 text-center"><br/>
                                                 <label htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
@@ -445,7 +445,7 @@ export class EmployeeAdd extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-6">
+                                            <div className="form-group col-md-12">
                                                 <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => {
                                                     if (is_address_map) {
                                                         if (this.state.last_geo_id) {
