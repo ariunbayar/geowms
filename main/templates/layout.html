@@ -23,7 +23,8 @@
             <div class="ml-auto mt-2 mt-lg-0">
                 {% if user.is_authenticated %}
                     {% if user and not user.is_sso %}
-                        <a href="{% url "org:frontend" %}" class=" btn gp-btn-primary">Байгууллага</a>
+                        <a href="{% url "org:frontend" %}" class="btn gp-btn-primary">Байгууллага</a>
+                        |
                     {% endif %}
                     {% if user.is_superuser %}
                     <span class="btn gp-btn-primary">
