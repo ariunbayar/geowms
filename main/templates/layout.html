@@ -38,7 +38,7 @@
                     {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
-                <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                    <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
                 {% endif %}
             </div>
         </div>
@@ -63,15 +63,15 @@
                 <div class="login-reg float-right">
                     <div class="ml-auto mt-2 mt-lg-0">
                         {% if user.is_authenticated and user %}
-                        {% if not user %}
-                        <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
-                        {% endif %}
-                        {% else %}
-                        <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
-                        <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
+                            {% if not user %}
+                                <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
+                            {% endif %}
+                            {% else %}
+                                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
+                                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
                         {% endif %}
                     </div>
-                    {#              <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a>#}
+                        {# <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a> #}
 
                 </div>
             </div>
