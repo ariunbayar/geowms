@@ -14,10 +14,17 @@ class Org(models.Model):
     level = models.PositiveIntegerField(choices=LEVEL_CHOICES, db_index=True)
 
 
+class DefaultPosition(models.Model):
+    class Meta:
+        db_table = "backend_org_default_positions"
+
+    name = models.CharField(max_length=250, verbose_name='Албан тушаалын нэр')
+
+
 class Employee(models.Model):
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    position = models.CharField(max_length=250)
+    position = models.ForeignKey(DefaultPosition, on_delete=models.PROTECT, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_admin = models.BooleanField(default=False)
