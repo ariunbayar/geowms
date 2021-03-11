@@ -102,6 +102,7 @@ export class Detail extends Component {
             street,
             apartment,
             door_number,
+            state,
         } = this.state.employee
 
         const {
@@ -180,6 +181,11 @@ export class Detail extends Component {
                             <dt className="col-md-3">Утасны дугаар:</dt>
                             <dd className="col-md-9">
                                 { phone_number }
+                            </dd>
+
+                            <dt className="col-md-3">Төлөв:</dt>
+                            <dd className="col-md-9">
+                                { state }
                             </dd>
                         </dl>
                         {

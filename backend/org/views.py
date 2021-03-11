@@ -89,6 +89,8 @@ def employee_detail(request, pk):
         'is_sso': user.is_sso,
         'position': employee.position.name,
         'position_id': employee.position.id,
+        'state': employee.get_state_display(),
+        'state_id': employee.state,
         'is_admin': employee.is_admin,
         'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
@@ -187,6 +189,7 @@ def employee_update(request, payload, pk, level):
     values = payload.get('values')
     username = values.get('username')
     position = int(values.get('position'))
+    state = int(values.get('state'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -244,7 +247,8 @@ def employee_update(request, payload, pk, level):
             employee.update(
                 position=position,
                 is_admin=is_admin,
-                phone_number=phone_number
+                phone_number=phone_number,
+                state=state,
             )
             employee = employee.first()
 
@@ -307,6 +311,7 @@ def employee_add(request, payload, level, pk):
     values = payload.get('values')
     username = values.get('username')
     position = int(values.get('position'))
+    state = int(values.get('state'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -352,6 +357,7 @@ def employee_add(request, payload, level, pk):
 
             employee = Employee()
             employee.position_id = position
+            employee.state = state
             employee.org = org
             employee.user_id = user.id
             employee.is_admin = is_admin

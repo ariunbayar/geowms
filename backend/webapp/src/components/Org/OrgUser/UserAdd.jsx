@@ -97,7 +97,7 @@ export class UserAdd extends Component {
                             is_admin: employee.is_admin,
                             is_super: employee.is_super,
                             phone_number: employee.phone_number,
-                            state: employee.state,
+                            state: employee.state_id,
                         },
                         point: employee.point,
                         street: employee.street,
