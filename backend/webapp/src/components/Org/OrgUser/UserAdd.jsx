@@ -390,7 +390,8 @@ export class UserAdd extends Component {
                                             <div className="form-group col-12">
                                                 <label htmlFor="position">Албан тушаал:</label>
                                                 <Field name="position" as="select" id="position"
-                                                    className={'form-control ' + (errors.position ? 'is-invalid' : '')}
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.position ? 'is-invalid' : '')}
                                                 >
                                                     <option value="">--- Албан тушаал сонгоно уу ---</option>
                                                     {
