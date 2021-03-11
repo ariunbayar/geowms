@@ -13,11 +13,23 @@ export class OrgUser extends Component {
         super(props)
 
         this.state = {
+            select_values: [],
         }
-
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
+        this.getSelectValue()
+    }
+
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, values }) => {
+                if (success) {
+                    this.setState({ select_values: values })
+                }
+            })
     }
 
     render() {
@@ -27,14 +39,14 @@ export class OrgUser extends Component {
                 <Route
                     exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/нэмэх/"
                     component={(props) =>
-                        <UserAdd {...props} refreshCount={this.props.refreshCount}/>
+                        <UserAdd {...props} refreshCount={this.props.refreshCount} select_values={this.state.select_values}/>
                     }
                 />
                 <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/дэлгэрэнгүй/" component={ Detail }/>
                 <Route
                     exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/засах/"
                     component={(props) =>
-                        <UserAdd {...props} refreshCount={this.props.refreshCount}/>
+                        <UserAdd {...props} refreshCount={this.props.refreshCount} select_values={this.state.select_values}/>
                     }
                 />
             </Switch>

@@ -7,6 +7,7 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 import EmployeeMap from "./Employee_map/Map"
 
+import Loader from "@utils/Loader"
 
 export class UserAdd extends Component {
 
@@ -49,11 +50,9 @@ export class UserAdd extends Component {
             door_number: '',
 
             modal_alert_status: "closed",
+            is_loading: true,
 
             errors: '',
-
-            select_values: [],
-
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -65,12 +64,10 @@ export class UserAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
-        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
-        this.getSelectValue()
         if(org_emp){
             this.handleGetAll(org_emp)
         }
@@ -79,15 +76,6 @@ export class UserAdd extends Component {
         }
     }
 
-    getSelectValue() {
-        service
-            .getSelectValue()
-            .then(({ success, values }) => {
-                if (success) {
-                    this.setState({ select_values: values })
-                }
-            })
-    }
 
     handleGetAll(org_emp){
         service
@@ -242,7 +230,7 @@ export class UserAdd extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: secondOrders, ...obj })
+                    this.setState({ aimag: secondOrders, ...obj, is_loading: false })
                 }
             })
     }
@@ -320,7 +308,11 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, errors, select_values } = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, is_loading,
+            feature, street, apartment, door_number, point, errors
+        } = this.state
+
+        const { select_values } = this.props
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -331,6 +323,7 @@ export class UserAdd extends Component {
 
         return (
             <div className="ml-3">
+                <Loader is_loading={is_loading}/>
                 <div className="row">
                     <div className="col-md-4">
                         <Formik
