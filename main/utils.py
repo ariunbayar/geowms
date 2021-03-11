@@ -819,8 +819,11 @@ def geojson_to_geom(geo_json):
     geo_json = str(geo_json).replace("\'", "\"")
     geo_data = geoJsonConvertGeom(geo_json)
     geom = ''.join(geo_data)
-    geom = GEOSGeometry(geom)
-
+    print("geom")
+    print("geom", geom)
+    dim = GEOSGeometry(geom).dims
+    dim = 2
+    print("polygon", geom)
     geom_type = GEOSGeometry(geom).geom_type
     if geom_type == 'Point':
         geom = MultiPoint(geom, srid=4326)
@@ -828,6 +831,9 @@ def geojson_to_geom(geo_json):
         geom = MultiLineString(geom, srid=4326)
     if geom_type == 'Polygon':
         geom = MultiPolygon(geom, srid=4326)
+        print("polygon")
+        print("polygon")
+        print("polygon", geom)
     return geom
 
 
