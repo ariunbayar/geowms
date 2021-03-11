@@ -32,7 +32,7 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
@@ -87,7 +87,8 @@ def employee_detail(request, pk):
         'token': employee.token,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
-        'position': employee.position,
+        'position': employee.position.name,
+        'position_id': employee.position.id,
         'is_admin': employee.is_admin,
         'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
@@ -185,7 +186,7 @@ def employee_update(request, payload, pk, level):
 
     values = payload.get('values')
     username = values.get('username')
-    position = values.get('position')
+    position = int(values.get('position'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -305,7 +306,7 @@ def employee_add(request, payload, level, pk):
 
     values = payload.get('values')
     username = values.get('username')
-    position = values.get('position')
+    position = int(values.get('position'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -350,7 +351,7 @@ def employee_add(request, payload, level, pk):
             user.save()
 
             employee = Employee()
-            employee.position = position
+            employee.position_id = position
             employee.org = org
             employee.user_id = user.id
             employee.is_admin = is_admin
@@ -1674,5 +1675,20 @@ def get_erguuls(request):
 
     rsp = {
         'feature_collection': feature_collection,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_select_values(request):
+
+    qs = DefaultPosition.objects
+    qs = qs.all()
+    values = list(qs.values())
+
+    rsp = {
+        'success': True,
+        'values': values,
     }
     return JsonResponse(rsp)

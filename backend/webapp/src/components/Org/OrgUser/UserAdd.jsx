@@ -52,6 +52,8 @@ export class UserAdd extends Component {
 
             errors: '',
 
+            select_values: [],
+
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -63,16 +65,28 @@ export class UserAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
+        this.getSelectValue()
         if(org_emp){
             this.handleGetAll(org_emp)
         }
         else {
             this.getFeildValues()
         }
+    }
+
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, values }) => {
+                if (success) {
+                    this.setState({ select_values: values })
+                }
+            })
     }
 
     handleGetAll(org_emp){
@@ -89,8 +103,8 @@ export class UserAdd extends Component {
                             last_name: employee.last_name,
                             email: employee.email,
                             gender: employee.gender,
-                            register:employee.register,
-                            position: employee.position,
+                            register: employee.register,
+                            position: employee.position_id,
                             is_admin: employee.is_admin,
                             is_super: employee.is_super,
                             phone_number: employee.phone_number,
@@ -306,7 +320,7 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, errors } = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, errors, select_values } = this.state
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -327,9 +341,9 @@ export class UserAdd extends Component {
                         >
                         {({
                             errors,
+                            values,
                             isSubmitting,
                         }) => {
-                            const has_error = Object.keys(errors).length > 0
                             return (
                                 <Form>
                                     <div>
@@ -344,7 +358,7 @@ export class UserAdd extends Component {
                                                         type="text"
                                                         placeholder="Нэвтрэх нэр"
                                                     />
-                                                    <ErrorMessage name="username" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="username" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -358,7 +372,7 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Овог"
                                                 />
-                                                <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                                <ErrorMessage name="last_name" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-6">
                                                 <label htmlFor="first_name">Нэр:</label>
@@ -369,20 +383,23 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Нэр"
                                                 />
-                                                <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                                <ErrorMessage name="first_name" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-12">
                                                 <label htmlFor="position">Албан тушаал:</label>
-                                                <Field
+                                                <Field name="position" as="select" id="position"
                                                     className={'form-control ' + (errors.position ? 'is-invalid' : '')}
-                                                    name='position'
-                                                    id="id_position"
-                                                    type="text"
-                                                    placeholder="Албан тушаал"
-                                                />
-                                                <ErrorMessage name="position" component="div" className="text-danger"/>
+                                                >
+                                                    <option value="">--- Албан тушаал сонгоно уу ---</option>
+                                                    {
+                                                        select_values.map((item, idx) =>
+                                                            <option key={idx} value={item.id}>{item.name}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="position" component="span" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -395,7 +412,7 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="E-Mail"
                                                 />
-                                                <ErrorMessage name="email" component="div" className="text-danger"/>
+                                                <ErrorMessage name="email" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -422,7 +439,7 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Утасны дугаар"
                                                 />
-                                                <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                <ErrorMessage name="phone_number" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-6">
                                                 <label htmlFor="register">Регистер:</label>
@@ -433,7 +450,7 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Регистер"
                                                 />
-                                                <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                <ErrorMessage name="register" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {
@@ -448,7 +465,7 @@ export class UserAdd extends Component {
                                                             id="id_re_password_mail"
                                                             type="checkbox"
                                                         />
-                                                        <ErrorMessage name="re_password_mail" component="div" className="text-danger"/>
+                                                        <ErrorMessage name="re_password_mail" component="div" className="invalid-feedback"/>
                                                     </div>
                                                 </div>
                                         }
@@ -461,7 +478,7 @@ export class UserAdd extends Component {
                                                     id="id_is_admin"
                                                     type="checkbox"
                                                 />
-                                                <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                <ErrorMessage name="is_admin" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {org_level ==4 &&
@@ -474,7 +491,7 @@ export class UserAdd extends Component {
                                                         id="id_is_super"
                                                         type="checkbox"
                                                     />
-                                                    <ErrorMessage name="is_super" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="is_super" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                         }
