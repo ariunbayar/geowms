@@ -31,7 +31,10 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
         'User-Agent': 'geo 1.0',
     }
 
-    wms = WMS.objects.filter(pk=wms_id).first()
+    wms = cache.get('proxy_{}'.format(wms_id))
+    if not wms:
+        wms = WMS.objects.filter(pk=wms_id).first()
+        cache.set('proxy_{}'.format(wms_id), wms, 300)
 
     if wms is None or not wms.is_active:
         raise Http404
