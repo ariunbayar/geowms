@@ -582,7 +582,6 @@ export class UserAdd extends Component {
                             </div>
                         </div>
                         <EmployeeMap
-                            height='75'
                             feature={feature}
                             sendPointCoordinate={this.getPoint}
                             point={point}

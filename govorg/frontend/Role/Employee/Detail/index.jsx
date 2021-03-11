@@ -22,6 +22,7 @@ export class Detail extends Component {
                 email: '',
                 gender: '',
                 register: '',
+                phone_number: '',
                 position: '',
                 is_admin: false,
                 is_super: false,
@@ -148,6 +149,7 @@ export class Detail extends Component {
             email,
             gender,
             register,
+            phone_number,
             is_admin,
             is_active,
             token,
@@ -246,6 +248,11 @@ export class Detail extends Component {
                                     <dt className="col-md-3">Регистр:</dt>
                                     <dd className="col-md-9">
                                         { register }
+                                    </dd>
+
+                                    <dt className="col-md-3">Утасны дугаар:</dt>
+                                    <dd className="col-md-9">
+                                        { phone_number }
                                     </dd>
 
                                     <dt className="col-md-3">Эрх:</dt>

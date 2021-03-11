@@ -4,7 +4,7 @@ from django.http import JsonResponse, Http404
 from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import CharField, Value
 from geoportal_app.models import User
 from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
 from main.decorators import ajax_required
@@ -56,6 +56,7 @@ def _get_employee_display(employee):
         'id': employee.id,
         'position': employee.position,
         'is_admin': employee.is_admin,
+        'phone_number': employee.phone_number,
 
         'token': employee.token,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
@@ -79,27 +80,59 @@ def _get_employee_display(employee):
     }
 
 
-@require_GET
+def _get_name(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    return user.first_name
+
+
+def _get_email(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    return user.email
+
+
+def _get_role_name(item):
+    role_name = ''
+    role = EmpPerm.objects.filter(employee=item['id']).first()
+    if role and role.emp_role:
+        role_name = role.emp_role.name
+    return role_name
+
+
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def list(request):
-
+def list(request, payload):
     org = get_object_or_404(Org, employee__user=request.user)
-    employees = Employee.objects.filter(org=org)
+    qs = Employee.objects.filter(org=org)
 
-    employee_list = [
-        _get_employee_display(employee)
-        for employee in employees
+    оруулах_талбарууд = ['id', 'position', 'is_admin', 'user_id', 'token']
+    хувьсах_талбарууд = [
+        {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
+        {"field": "user_id", "action": _get_email, "new_field": "user__email"},
+    ]
+    нэмэлт_талбарууд = [
+        {"field": "role_name", "action": _get_role_name},
     ]
 
+    datatable = Datatable(
+        model=Employee,
+        payload=payload,
+        initial_qs=qs,
+        оруулах_талбарууд=оруулах_талбарууд,
+        нэмэлт_талбарууд=нэмэлт_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд
+    )
+    items, total_page = datatable.get()
     rsp = {
-        'success': True,
-        'employees': employee_list,
+        'items': items,
+        'page': payload.get('page'),
+        'total_page': total_page,
     }
 
     return JsonResponse(rsp)
 
-
+suda = Employee.objects.all().extra(select = {'qweqw': 0})
+# print(suda.values())
 def _set_user(user, user_detail):
 
     user.username = user_detail['username']
@@ -108,6 +141,7 @@ def _set_user(user, user_detail):
     user.email = user_detail['email']
     user.gender = user_detail['gender']
     user.register = user_detail['register']
+    user.phone_number = user_detail['phone_number']
     user.save()
 
 
@@ -115,6 +149,7 @@ def _set_employee(employee, user_detail):
 
     employee.position = user_detail['position']
     employee.is_admin = user_detail['is_admin']
+    employee.phone_number = user_detail['phone_number']
     employee.save()
 
 
@@ -158,6 +193,7 @@ def _employee_validation(user, user_detail):
     position = user_detail['position']
     email = user_detail['email']
     register = user_detail['register']
+    phone_number = user_detail['phone_number']
     if not username:
         errors['username'] = 'Хоосон байна утга оруулна уу.'
     elif len(username) > 150:
@@ -180,6 +216,12 @@ def _employee_validation(user, user_detail):
         errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
     if not register:
         errors['register'] = 'Хоосон байна утга оруулна уу.'
+    if not phone_number:
+        errors['phone_number'] = 'Хоосон байна утга оруулна уу.'
+    elif len(phone_number) > 8:
+        errors['phone_number'] = '8-с илүүгүй урттай утга оруулна уу!'
+    elif len(phone_number) < 8:
+        errors['phone_number'] = '8 урттай утга оруулна уу!'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():

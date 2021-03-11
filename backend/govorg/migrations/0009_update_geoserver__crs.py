@@ -31,14 +31,15 @@ def _update_layer(layer_name, url):
 def _get_detail_geoserver(url):
 
     BASE_URL, AUTH = getHeader()
-    HEADERS = {
-        'accept': 'application/json',
-        'Content-type': 'application/json',
-    }
-    url = BASE_URL + url
-    rsp = requests.get(url, headers=HEADERS, auth=AUTH)
-    if rsp.status_code ==200:
-        return rsp.json()
+    if BASE_URL and AUTH:
+        HEADERS = {
+            'accept': 'application/json',
+            'Content-type': 'application/json',
+        }
+        url = BASE_URL + url
+        rsp = requests.get(url, headers=HEADERS, auth=AUTH)
+        if rsp.status_code ==200:
+            return rsp.json()
 
 
 def update_geoserver_layer_crs(apps, schema_editor):
