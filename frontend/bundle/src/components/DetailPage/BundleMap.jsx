@@ -277,7 +277,26 @@ export default class BundleMap extends Component {
                             name: base_layer_name,
                         })
                     }
-
+                    if (base_layer_info.tilename == "wmts") {
+                        layer = new Tile({
+                            source: new WMTS({
+                                url: base_layer_info.url,
+                                layer: base_layer_info.layers,
+                                matrixSet: "EPSG:4326",
+                                format: 'image/png',
+                                projection: this.state.projection_display,
+                                tileGrid: new WMTSTileGrid({
+                                    tileSize: [256,256],
+                                    extent: [-180.0,-90.0,180.0,90.0],
+                                    origin: [-180.0, 90.0],
+                                    resolutions: resolutions,
+                                    matrixIds: gridNames,
+                                }),
+                                style: '',
+                                wrapX: true,
+                            }),
+                        })
+                    }
                     acc.base_layers.push(layer)
                     acc.base_layer_controls.push({
                         is_active: idx == 0,
