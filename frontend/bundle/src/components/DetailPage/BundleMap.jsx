@@ -33,7 +33,7 @@ import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
-
+import SideBar from "./SideBar"
 
 export default class BundleMap extends Component {
 
@@ -368,6 +368,7 @@ export default class BundleMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        window.map = map
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
 
@@ -1133,7 +1134,9 @@ export default class BundleMap extends Component {
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
-                            <div id="map"></div>
+                            <div id="map">
+                                <SideBar/>
+                            </div>
                             {
                              is_modal_info_open &&
                                 <ModalAlert
