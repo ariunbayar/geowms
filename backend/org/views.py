@@ -1679,16 +1679,27 @@ def get_erguuls(request):
     return JsonResponse(rsp)
 
 
+def _get_choices(Model, field_name):
+    choices = list()
+    for f in Model._meta.get_fields():
+        if f.name == field_name:
+            choices = f.choices
+    return choices
+
+
 @require_GET
 @ajax_required
 def get_select_values(request):
 
     qs = DefaultPosition.objects
     qs = qs.all()
-    values = list(qs.values())
+    positions = list(qs.values())
+
+    states = _get_choices(Employee, 'state')
 
     rsp = {
         'success': True,
-        'values': values,
+        'positions': positions,
+        'states': states,
     }
     return JsonResponse(rsp)

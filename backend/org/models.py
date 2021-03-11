@@ -22,6 +22,18 @@ class DefaultPosition(models.Model):
 
 
 class Employee(models.Model):
+    STATE_WORKING = 'Ажиллаж байгаа'
+    STATE_BREAK = 'Чөлөөтэй'
+    STATE_FIRED = 'Чөлөөлөгдсөн'
+    STATE_SICK = 'Өвчтэй'
+
+    STATE_CHOICES = [
+        (1, STATE_WORKING),
+        (2, STATE_BREAK),
+        (3, STATE_FIRED),
+        (4, STATE_SICK),
+    ]
+
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     position = models.ForeignKey(DefaultPosition, on_delete=models.PROTECT, null=True)
@@ -30,6 +42,7 @@ class Employee(models.Model):
     is_admin = models.BooleanField(default=False)
     phone_number = models.CharField(max_length=8, null=True)
     token = models.CharField(max_length=250, unique=True, null=True)
+    state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True)
 
 
 class OrgRole(models.Model):

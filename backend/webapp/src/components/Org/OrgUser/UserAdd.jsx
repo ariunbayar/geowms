@@ -28,6 +28,7 @@ export class UserAdd extends Component {
                 is_super: false,
                 re_password_mail: false,
                 phone_number: '',
+                state: '',
             },
             aimag: [],
             sum: [],
@@ -96,6 +97,7 @@ export class UserAdd extends Component {
                             is_admin: employee.is_admin,
                             is_super: employee.is_super,
                             phone_number: employee.phone_number,
+                            state: employee.state,
                         },
                         point: employee.point,
                         street: employee.street,
@@ -312,7 +314,7 @@ export class UserAdd extends Component {
             feature, street, apartment, door_number, point, errors
         } = this.state
 
-        const { select_values } = this.props
+        const { positions, states } = this.props
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -388,7 +390,7 @@ export class UserAdd extends Component {
                                                 >
                                                     <option value="">--- Албан тушаал сонгоно уу ---</option>
                                                     {
-                                                        select_values.map((item, idx) =>
+                                                        positions.map((item, idx) =>
                                                             <option key={idx} value={item.id}>{item.name}</option>
                                                         )
                                                     }
@@ -445,6 +447,23 @@ export class UserAdd extends Component {
                                                     placeholder="Регистер"
                                                 />
                                                 <ErrorMessage name="register" component="div" className="invalid-feedback"/>
+                                            </div>
+                                        </div>
+                                        <div className='form-row'>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_state'>Төлөв</label>
+                                                <Field name="state" as="select" id="state"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                >
+                                                    <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
+                                                    {
+                                                        states.map((item, idx) =>
+                                                            <option key={idx} value={item[0]}>{item[1]}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="state" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {

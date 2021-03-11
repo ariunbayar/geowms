@@ -13,7 +13,8 @@ export class OrgUser extends Component {
         super(props)
 
         this.state = {
-            select_values: [],
+            positions: [],
+            states: [],
         }
         this.getSelectValue = this.getSelectValue.bind(this)
     }
@@ -25,9 +26,9 @@ export class OrgUser extends Component {
     getSelectValue() {
         service
             .getSelectValue()
-            .then(({ success, values }) => {
+            .then(({ success, positions, states }) => {
                 if (success) {
-                    this.setState({ select_values: values })
+                    this.setState({ positions, states })
                 }
             })
     }
@@ -39,14 +40,24 @@ export class OrgUser extends Component {
                 <Route
                     exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/нэмэх/"
                     component={(props) =>
-                        <UserAdd {...props} refreshCount={this.props.refreshCount} select_values={this.state.select_values}/>
+                        <UserAdd
+                            {...props}
+                            refreshCount={this.props.refreshCount}
+                            positions={this.state.positions}
+                            states={this.state.states}
+                        />
                     }
                 />
                 <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/дэлгэрэнгүй/" component={ Detail }/>
                 <Route
                     exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/засах/"
                     component={(props) =>
-                        <UserAdd {...props} refreshCount={this.props.refreshCount} select_values={this.state.select_values}/>
+                        <UserAdd
+                            {...props}
+                            refreshCount={this.props.refreshCount}
+                            positions={this.state.positions}
+                            states={this.state.states}
+                        />
                     }
                 />
             </Switch>
