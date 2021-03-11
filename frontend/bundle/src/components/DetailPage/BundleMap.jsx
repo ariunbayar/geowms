@@ -1137,6 +1137,9 @@ export default class BundleMap extends Component {
                             {
                              is_modal_info_open &&
                                 <ModalAlert
+                                    modal_icon="fa fa-exclamation-circle"
+                                    icon_color="warning"
+                                    has_button={false}
                                     modalAction = {() => this.handleModalApproveClose()}
                                     text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
                                     title="Худалдан авалтын мэдээлэл"

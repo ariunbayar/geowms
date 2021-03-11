@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import { service } from './service'
-import ModalAlert from "@utils/Modal/ModalAlert"
 import Modal from "@utils/Modal/Modal"
 import {Notif} from '@utils/Notification'
 import Loader from "@utils/Loader"
@@ -43,10 +42,6 @@ export class EmployeeEdit extends Component {
             prefix: '/gov/perm/employee/',
             id: this.props.match.params.id,
             role_list: [],
-            modal_alert_status: 'closed',
-            timer: null,
-            model_type_icon: '',
-            title: '',
 
             is_address_map: false,
 
@@ -81,8 +76,6 @@ export class EmployeeEdit extends Component {
         this.removeItemFromArray = this.removeItemFromArray.bind(this)
         this.removeItemFromRemoveRoles = this.removeItemFromRemoveRoles.bind(this)
         this.checkRoleAndPerm = this.checkRoleAndPerm.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.addNotif = this.addNotif.bind(this)
@@ -95,6 +88,10 @@ export class EmployeeEdit extends Component {
         this.getGeom = this.getGeom.bind(this)
 
         this.refreshMap = this.refreshMap.bind(this)
+
+        this.modalChange=  this.modalChange.bind(this)
+        this.handleChangeMail=  this.handleChangeMail.bind(this)
+        this.handleHistory = this.handleHistory.bind(this)
     }
 
     componentDidMount() {
@@ -261,9 +258,14 @@ export class EmployeeEdit extends Component {
             .then(({ success, info, errors }) => {
                 if(success) {
                     setStatus('saved')
-                    this.setState({model_type_icon: 'success', modal_alert_status: 'open', title: info})
-                    this.modalCloseTime()
-                    this.props.getEmpRoles()
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        "success",
+                        'Амжилттай хадгалаа',
+                        '',
+                        false,
+                        this.handleHistory
+                    )
                 } else {
                     if (errors) {
                         setErrors(errors)
@@ -290,23 +292,10 @@ export class EmployeeEdit extends Component {
         })
     }
 
-    modalClose() {
-        this.setState({ handleSaveIsLoad: false })
-        this.props.history.push(this.state.prefix)
-        this.setState({ modal_alert_status: 'closed' })
-        clearTimeout(this.state.timer)
-    }
-
-    modalCloseTime() {
-        setTimeout(() => {
-            this.setState({ handleSaveIsLoad: false })
-            this.props.history.push(this.state.prefix)
-            this.setState({ modal_alert_status: 'closed' })
-        }, 2000)
-    }
-
     handleModalOpen(){
-        this.setState({modal_status: 'open'})
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     handleModalClose(){
@@ -324,7 +313,6 @@ export class EmployeeEdit extends Component {
     }
 
     handleSendMail(){
-        this.setState({modal_status: 'closed'})
         this.setState({ is_loading: true })
         const username = this.state.form_values.username
         service
@@ -470,6 +458,35 @@ export class EmployeeEdit extends Component {
         this.setState({ ...obj })
     }
 
+    modalChange(modal_icon, icon_color, title, text, has_button, modalClose) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            modalClose: modalClose
+        })
+        this.handleModalOpen()
+
+    }
+
+    handleChangeMail() {
+        this.modalChange(
+            'fa fa-exclamation-circle',
+            "warning",
+            'Та нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?',
+            '',
+            true,
+            null
+        )
+    }
+
+    handleHistory() {
+        this.props.getEmpRoles
+        this.props.history.push(this.state.prefix)
+    }
+
     render() {
         const {form_values, roles, role_list, prefix, is_inspire_role, is_inspire_role_null, perms, old_role_id, role_id, id, is_address_map } = this.state
         const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point } = this.state
@@ -609,7 +626,7 @@ export class EmployeeEdit extends Component {
                                             }
                                             {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
                                             <div className="col-md-6">
-                                                <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleChangeMail}>
                                                     {} Нууц үг солих имэйл илгээх
                                                 </button>
                                             </div>
@@ -757,18 +774,15 @@ export class EmployeeEdit extends Component {
                     </div>
                 </div>
                 <Modal
-                    title="Та нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?"
-                    model_type_icon = "warning"
-                    status={this.state.modal_status}
-                    modalClose={this.handleModalClose}
-                    modalAction={() => this.handleSendMail()}
-                    actionNameDelete='Илгээх'
-                />
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status = {this.state.modal_alert_status}
-                    title = {this.state.title}
-                    model_type_icon = {this.state.model_type_icon}
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    has_button={this.state.has_button}
+                    text={this.state.text}
+                    modalAction={this.handleSendMail}
+                    modalClose={this.state.modalClose}
+                    actionNameDelete="Шинэчлэх"
                 />
                 <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
                 <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>

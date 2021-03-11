@@ -12,17 +12,15 @@ export default class HureeFormTable extends Component {
             id: props.values.id,
             x: 0,
             y: 0,
-            is_modal_delete_open: false,
             tuuh_soyl_huree_id: props.tuuh_soyl_huree_id,
             disable: false,
             save_is_load: false,
             save_is_error: false,
-            modal_alert_status: 'closed',
-            timer: null
+
+            modal_status: 'closed',
         }
 
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.updateData = this.updateData.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInput = this.handleInput.bind(this)
@@ -30,9 +28,11 @@ export default class HureeFormTable extends Component {
         this.modalCloseTime = this.modalCloseTime.bind(this)
 
     }
+
     handleInput(field, e) {
         this.setState({ [field]: e.target.value })
     }
+
     componentDidMount(){
         this.updateData()
     }
@@ -45,16 +45,14 @@ export default class HureeFormTable extends Component {
         })
     }
 
-    handleModalDeleteOpen(event) {
+    handleModalOpen(event) {
         event.preventDefault()
-        this.setState({is_modal_delete_open: true})
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
-    }
     componentDidUpdate(prevProps){
-        if(prevProps.values !== this.props.values) this.setState({is_modal_delete_open: false})
         if(prevProps.values !== this.props.values)
         {
             this.setState({
@@ -64,6 +62,7 @@ export default class HureeFormTable extends Component {
             })
         }
     }
+
     handleSubmit() {
 
         if(this.state.disable)
@@ -146,18 +145,19 @@ export default class HureeFormTable extends Component {
                     {this.state.save_is_error ? <a className="text-danger">Хоосон байж болохгүй</a> : null}
                 </td>
                 <td>
-                    <a onClick={this.handleModalDeleteOpen}>
+                    <a onClick={this.handleModalOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-                    {this.state.is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та "${this.state.x}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                            model_type_icon="success"
-                        />
-                    }
+                    <Modal
+                        modal_status={this.state.modal_status}
+                        modal_icon='fa fa-exclamation-circle'
+                        icon_color='warning'
+                        title='Тохиргоог устгах'
+                        has_button={true}
+                        text={`Та "${this.state.x}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
+                        modalAction={this.props.handleRemove}
+                        actionNameDelete="Устгах"
+                    />
                 </td>
             </tr>
         )

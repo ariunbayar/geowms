@@ -6,7 +6,7 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {service} from '../../service'
 import {validationSchema} from './validationSchema'
 import Maps from '../../../../components/map/Map'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export  class Forms extends Component {
@@ -75,8 +75,8 @@ export  class Forms extends Component {
             hors_shinj_baidal_list:[],
             checkNull:[],
             bairshil_error:false,
-            modal_alert_status: 'closed',
-            timer: null
+
+            modal_status: 'closed',
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -90,8 +90,7 @@ export  class Forms extends Component {
         this.handleCoordinatCheck = this.handleCoordinatCheck.bind(this)
         this.handleSearchWithName = this.handleSearchWithName.bind(this)
         this.checkError = this.checkError.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
     handleBoxOver (e){
         this.setState({ showBox: true })
@@ -197,10 +196,15 @@ export  class Forms extends Component {
             })
         }
         else{
-            this.setState({modal_alert_status: 'open'})
-            this.modalCloseTime()
+            console.log('aldaa alga');
         }
 
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     handleInput(e){
@@ -385,6 +389,7 @@ export  class Forms extends Component {
         form_datas.append('t_type', t_type)
         service.tsegPersonal(form_datas).then(({success, name, ids}) => {
             if (success) {
+                this.handleModalOpen()
                 setTimeout(() => {
                     setStatus('saved')
                     setSubmitting(false)
@@ -494,17 +499,6 @@ export  class Forms extends Component {
 
         }
 
-    }
-
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
-    }
-
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
     }
 
     render() {
@@ -1122,11 +1116,13 @@ export  class Forms extends Component {
                                 </div>
                             </div>
                         </div>
-                        <ModalAlert
-                            modalAction={() => this.modalClose()}
-                            status={this.state.modal_alert_status}
+                        <Modal
+                            modal_status={this.state.modal_status}
                             title="Амжилттай нэмлээ"
-                            model_type_icon = "success"
+                            modal_icon = "fa fa-check-circle"
+                            icon_color='success'
+                            has_button={false}
+                            text=""
                         />
                     </div>
                  </Form>

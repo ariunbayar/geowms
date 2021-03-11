@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 
 import { service } from './service'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
 import EmployeeMap from "./Employee_map/Map"
@@ -33,9 +33,7 @@ export class EmployeeAdd extends Component {
             role_list: [],
             emp_role_id: null,
             roles: {},
-            modal_alert_status: "closed",
-            model_type_icon: '',
-            title: '',
+            modal_status: "closed",
             prefix: '/gov/perm/employee/',
             is_inspire_role: false,
             is_inspire_role_null: true,
@@ -156,10 +154,8 @@ export class EmployeeAdd extends Component {
             .then(({ success, errors, info }) => {
                 if(success) {
                     setStatus('saved')
-                    this.setState({
-                        model_type_icon: 'success',
-                        modal_alert_status: 'open',
-                        title: info
+                    this.setState({ modal_status: 'open' }, () => {
+                        this.setState({ modal_status: 'initial' })
                     })
                 } else {
                     if (errors) {
@@ -577,11 +573,13 @@ export class EmployeeAdd extends Component {
                         </Formik>
                     </div>
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title={this.state.title}
-                    model_type_icon={this.state.model_type_icon}
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon='fa fa-check-circle'
+                    icon_color='success'
+                    title='Амжилттай нэмлээ'
+                    has_button={false}
+                    text=''
                 />
                 <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
             </div>

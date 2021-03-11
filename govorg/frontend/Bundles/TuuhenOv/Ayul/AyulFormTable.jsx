@@ -13,14 +13,14 @@ export default class AyulFormTable extends Component {
             id: props.values.id,
             x: 0,
             y: 0,
-            is_modal_delete_open: false,
             disable: false,
             save_is_load: false,
             save_is_error: false,
+
+            modal_status: 'closed'
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
         this.updateData = this.updateData.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInput = this.handleInput.bind(this)
@@ -43,16 +43,14 @@ export default class AyulFormTable extends Component {
 
     handleModalDeleteOpen(event) {
         event.preventDefault()
-        this.setState({is_modal_delete_open: true})
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
-    }
+
     componentDidUpdate(prevProps){
-        if(prevProps.values !== this.props.values) this.setState({is_modal_delete_open: false})
-        if(prevProps.values !== this.props.values)
-        {
+        if(prevProps.values !== this.props.values) {
             this.setState({
                 id: this.props.values.id,
                 x: this.props.values.x,
@@ -138,15 +136,16 @@ export default class AyulFormTable extends Component {
                         <a onClick={this.handleModalDeleteOpen}>
                             <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                         </a>
-                        {this.state.is_modal_delete_open &&
-                            <Modal
-                                modalClose={this.handleModalDeleteClose}
-                                modalAction={this.props.handleRemove}
-                                text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
-                                title="Тохиргоог устгах"
-                                model_type_icon="success"
-                            />
-                        }
+                        <Modal
+                            modal_status={this.state.modal_status}
+                            modal_icon='fa fa-exclamation-circle'
+                            icon_color='warning'
+                            title='Тохиргоог устгах'
+                            has_button={true}
+                            text={`Та "${this.state.y}", "${this.state.y}" координатыг устгахдаа итгэлтэй байна уу?`}
+                            modalAction={this.props.handleRemove}
+                            actionNameDelete="Устгах"
+                        />
                     </td>
                 }
             </tr>
