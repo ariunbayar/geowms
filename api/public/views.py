@@ -10,6 +10,7 @@ from backend.wms.models import WMS
 from django.utils.timezone import localtime, now
 import main.geoserver as geoserver
 from geoportal_app.models import Role
+from django.core.cache import cache
 
 
 def _get_user_roles(user):
