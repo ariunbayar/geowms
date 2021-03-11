@@ -6,12 +6,13 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from main.decorators import ajax_required
-from main import geoserver
+from main import geoserver, update_cache_layer
 from .models import WmtsCacheConfig
 from geoportal_app.models import User
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
+from django.views.decorators.csrf import csrf_exempt
 
 
 @require_GET
@@ -346,3 +347,10 @@ def create_group_cache(request, payload, group_name):
         'success': True,
         'info': 'Амжилттай хадгалагдлаа'
     })
+
+
+@require_GET
+@csrf_exempt
+def update_geo_cache(request):
+    update_cache_layer.update_web_cache()
+    return JsonResponse({'success': True})
