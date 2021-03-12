@@ -32,8 +32,7 @@ import { DrawButton } from './controls/Draw'
 import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
-import ModalAlert from "@utils/Modal/ModalAlert"
-
+import {default as ModalAlert} from "@utils/Modal/Modal"
 
 export default class BundleMap extends Component {
 
@@ -50,7 +49,6 @@ export default class BundleMap extends Component {
             map_wms_list: [],
             is_sidebar_open: true,
             is_search_sidebar_open: true,
-            is_modal_info_open: false,
             coordinate_clicked: null,
             vector_layer: null,
             is_draw_open: false,
@@ -61,6 +59,8 @@ export default class BundleMap extends Component {
             y: null,
             x: null,
             format: new GeoJSON(),
+
+            modal_status: 'closed',
         }
 
         this.controls = {
@@ -93,7 +93,6 @@ export default class BundleMap extends Component {
         this.getElement = this.getElement.bind(this)
         this.setSourceInPopUp = this.setSourceInPopUp.bind(this)
         this.formatArea = this.formatArea.bind(this)
-        this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
         this.getOnlyFeature = this.getOnlyFeature.bind(this)
         this.resetFilteredOnlyFeature = this.resetFilteredOnlyFeature.bind(this)
         this.allLayerVisible = this.allLayerVisible.bind(this)
@@ -109,6 +108,7 @@ export default class BundleMap extends Component {
         this.writeFeat = this.writeFeat.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
         this.setVisibleMarket = this.setVisibleMarket.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     initMarker() {
@@ -129,10 +129,6 @@ export default class BundleMap extends Component {
         feature.setStyle(style)
 
         return {feature: feature, point: point}
-    }
-
-    handleModalApproveClose(){
-      this.setState({'is_modal_info_open': false})
     }
 
     cartButton(is_cart, point_name, code, point_id, is_again_clicked, geom_name, pdf_id){
@@ -1141,34 +1137,35 @@ export default class BundleMap extends Component {
           }
         }
         else{
-          this.setState({'is_modal_info_open': true})
+          this.handleModalOpen()
         }
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
     render() {
-      const is_modal_info_open = this.state.is_modal_info_open
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
                             <div id="map"></div>
-                            {
-                             is_modal_info_open &&
-                                <ModalAlert
-                                    modal_icon="fa fa-exclamation-circle"
-                                    icon_color="warning"
-                                    has_button={false}
-                                    modalAction = {() => this.handleModalApproveClose()}
-                                    text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү.'
-                                    title="Худалдан авалтын мэдээлэл"
-                                    status={this.state.status}
-                                    actionNameDelete="зөвшөөрөх"
-                                />
-                            }
                         </div>
                     </div>
                 </div>
+                <ModalAlert
+                    modal_status={this.state.modal_status}
+                    modal_icon="fa fa-exclamation-circle"
+                    icon_color="warning"
+                    title="Худалдан авалтын мэдээлэл"
+                    text='Төрийн ДАН системээр нэвтэрч худалдан авалт хийнэ үү!'
+                    has_button={false}
+                    modalAction={null}
+                />
             </div>
         )
     }

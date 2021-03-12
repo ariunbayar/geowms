@@ -4,7 +4,7 @@ import {NavLink} from "react-router-dom"
 import ListTable from "./ListTable"
 import {service} from './service'
 import {Pagination} from '../../../../components/pagination/pagination'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class List extends Component {
@@ -20,16 +20,16 @@ export class List extends Component {
             searchQuery: '',
             list: [],
             list_length: null,
-            modal_alert_status: 'closed',
-            timer: null,
-            modal_text: '',
-            modal_icon: ''
+            modal_status: 'closed',
+            modal_icon: '',
+            icon_color: '',
+            title: '',
         }
         this.paginate = this.paginate.bind(this)
         this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     paginate (page, query) {
@@ -59,41 +59,56 @@ export class List extends Component {
     handleTsegSuccess(id){
         service.tseg_success(id).then(({ success }) => {
             if (success) {
-                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
-                this.paginate(1,"")
-                this.modalCloseTime()
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    'Амжилттай баталгаажлаа'
+                )
             }
             else{
-                this.setState({modal_alert_status: 'open', modal_text: 'Баталгаажуулахад алдаа гарлаа', modal_icon: 'danger'})
-                this.paginate(1,"")
-                this.modalCloseTime()
+                this.modalChange(
+                    'fa fa-times-circle',
+                    'danger',
+                    'Баталгаажуулахад алдаа гарлаа'
+                )
             }
+            this.paginate(1,"")
         })
     }
 
     handleRemove(id){
         service.tseg_remove(id).then(({ success }) => {
             if (success) {
-                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай утсгалаа', modal_icon: 'success'})
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    'Амжилттай утсгалаа'
+                )
                 this.paginate(1,"")
-                this.modalCloseTime()
             }
             else {
-                this.setState({modal_alert_status: 'open', modal_text: 'Утгахад алдаа гарлаа', modal_icon: 'danger'})
-                this.modalCloseTime()
+                this.modalChange(
+                    'fa fa-times-circle',
+                    'danger',
+                    'Утгахад алдаа гарлаа'
+                )
             }
         })
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
+    modalChange(modal_icon, icon_color, title) {
+        this.setState({
+            modal_icon,
+            icon_color,
+            title,
+        })
+        this.handleModalOpen()
     }
 
     render() {
@@ -149,11 +164,14 @@ export class List extends Component {
                             paginate = {this.paginate}
                             searchQuery = {this.state.searchQuery}
                         />
-                        <ModalAlert
-                            modalAction={() => this.modalClose()}
-                            status={this.state.modal_alert_status}
-                            title={`${this.state.modal_text}`}
-                            model_type_icon = {`${this.state.modal_icon}`}
+                        <Modal
+                            modal_status={this.state.modal_status}
+                            modal_icon={this.state.modal_icon}
+                            icon_color={this.state.icon_color}
+                            title={this.state.title}
+                            text=''
+                            has_button={false}
+                            modalAction={null}
                         />
                     </div>
                 </div>

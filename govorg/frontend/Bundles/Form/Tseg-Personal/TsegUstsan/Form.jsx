@@ -5,7 +5,7 @@ import { Formik, Form, Field, ErrorMessage} from 'formik'
 
 import {service} from './service'
 import {validationSchemaAdmin} from './validationSchema'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class FormTseg extends Component {
@@ -54,8 +54,7 @@ export class FormTseg extends Component {
             ners:'',
             showMore: false,
             showTsegAlert: true,
-            modal_alert_status: 'closed',
-            timer: null,
+            modal_status: 'closed',
         }
         this.handleInput = this.handleInput.bind(this)
         this.handleInputEmail = this.handleInputEmail.bind(this)
@@ -70,8 +69,7 @@ export class FormTseg extends Component {
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
         this.showMore = this.showMore.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidMount(){
@@ -212,8 +210,7 @@ export class FormTseg extends Component {
             if (success) {
                 setStatus('saved')
                 setSubmitting(false)
-                this.setState({modal_alert_status: 'open'})
-                this.modalCloseTime()
+                this.handleModalOpen()
             }
         })
     }
@@ -283,17 +280,10 @@ export class FormTseg extends Component {
         }
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-            this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
-        }, 2000)
-    }
-
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
-        this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -771,12 +761,17 @@ export class FormTseg extends Component {
                                     </datalist>
                             </div>
                         </div>
-                        <ModalAlert
-                            modalAction={() => this.modalClose()}
-                            status={this.state.modal_alert_status}
+                        <Modal
+                            modal_status={this.state.modal_status}
+                            modal_icon="fa fa-check-circle"
+                            icon_color="success"
                             title="Амжилттай нэмлээ"
-                            model_type_icon = "success"
+                            text=''
+                            has_button={false}
+                            modalAction={null}
+                            modalClose={() => this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)}
                         />
+
                     </div>
                     </Form>
                 )}

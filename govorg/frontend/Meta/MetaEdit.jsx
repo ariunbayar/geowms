@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { NavLink } from "react-router-dom"
 
 import { service } from "./service"
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 class HandleInput extends Component {
@@ -81,16 +81,13 @@ export class MetaEdit extends Component {
             edit: false,
             handleSaveIsLoad: false,
             is_loading: false,
-            modal_alert_status: "closed",
-            timer: null,
-            text: '',
+            modal_status: "closed",
             id: this.props.match.params.id,
-            modal_open: false,
             geom_ids: [],
         }
         this.handleSave = this.handleSave.bind(this)
         this.getValues = this.getValues.bind(this)
-        this.modalClose = this.modalClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     handleSave() {
@@ -100,22 +97,16 @@ export class MetaEdit extends Component {
             .setEdit(id, this.values, geom_ids)
             .then(({success}) => {
                 if (success) {
-                    this.setState({ handleSaveIsLoad: false, modal_open: true, modal_alert_status: 'open' })
+                    this.setState({ handleSaveIsLoad: false })
+                    this.handleModalOpen()
                 }
             })
     }
 
-    modalClose() {
-        this.setState({ modal_alert_status: "closed", handleSaveIsLoad: false, modal_open: false })
-        clearTimeout(this.state.timer)
-        this.props.history.push(`/gov/meta/`)
-    }
-
-    modalCloseTime() {
-        this.state.timer = setTimeout(() => {
-            this.setState({ modal_alert_status: "closed", handleSaveIsLoad: false, modal_open: false })
-            this.props.history.push(`/gov/meta/`)
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     componentDidMount() {
@@ -175,7 +166,7 @@ export class MetaEdit extends Component {
     }
 
     render() {
-        const {  is_loading, data_field, fields, geo_data_field, meta_data, geo_data_list, text, modal_open } = this.state
+        const {  is_loading, data_field, fields, geo_data_field, meta_data, geo_data_list, text } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -274,22 +265,20 @@ export class MetaEdit extends Component {
                                         Хадгалах
                                 </button>
                                 }
-                                {
-                                    modal_open
-                                    ?
-                                    <ModalAlert
-                                        modalAction={() => this.modalClose()}
-                                        status={this.state.modal_alert_status}
-                                        title="Амжилттай хадгаллаа"
-                                        model_type_icon="success"
-                                    />
-                                    :
-                                    null
-                                }
                             </div>
                         </div>
                     </div>
                 </div>
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon='fa fa-check-circle'
+                    icon_color='success'
+                    title='Амжилттай хадгаллаа'
+                    text=''
+                    has_button={false}
+                    modalAction={null}
+                    modalClose={() => this.props.history.push(`/gov/meta/`)}
+                />
             </div>
         )
     }

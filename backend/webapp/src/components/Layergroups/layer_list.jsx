@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {service} from './service'
 import {NavLink} from "react-router-dom"
-import ModalAlert from "../ModalAlert"
+import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader"
 import GroupList from './list'
 import { GSPaginate } from "./geo_pagination"
@@ -13,23 +13,20 @@ export class List extends Component {
         super(props)
         this.state = {
             group_list: [],
-            modal_alert_status: "closed",
-            timer: null,
-            model_alert_text: '',
-            model_type_icon: 'success',
             search_query: '',
             currentPage: 1,
             groupPerPage: 20,
             is_loading: false,
-            currentGroups: []
+            currentGroups: [],
+
+            modal_status: "closed",
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
         this.handleGroupDelete = this.handleGroupDelete.bind(this)
-        this.modalClose = this.modalClose.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.paginate = this.paginate.bind(this)
-
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidMount() {
@@ -43,10 +40,6 @@ export class List extends Component {
                 group_list,
                 is_loading: false})
         })
-    }
-
-    modalClose(){
-        this.setState({modal_alert_status: 'closed'})
     }
 
     handleSearch(e) {
@@ -66,27 +59,41 @@ export class List extends Component {
     handleGroupDelete(name){
         service.remove_layer_group(name).then(({success, info}) =>{
             if (success) {
-                this.setState({ model_alert_text: info, model_type_icon: 'success', modal_alert_status: 'open'})
-            }else{
-                this.setState({ model_alert_text: info, model_type_icon: 'danger', modal_alert_status: 'open'})
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    info
+                )
+            } else {
+                this.modalChange(
+                    'fa fa-times-circle',
+                    'danger',
+                    info
+                )
             }
             this.handleListUpdated()
-            this.modalCloseTime()
         })
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, icon_color, title) {
+        this.setState({
+            modal_icon,
+            icon_color,
+            title,
+        })
+        this.handleModalOpen()
     }
 
     render() {
         const {
             group_list, currentGroups, search_query,
             groupPerPage, currentPage, is_loading,
-            modal_alert_status, model_alert_text,
-            model_type_icon
         } = this.state
         return (
             <div className="row justify-content-center">
@@ -149,11 +156,14 @@ export class List extends Component {
                         page={ currentPage }
                     />
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={ modal_alert_status }
-                    title={ model_alert_text }
-                    model_type_icon={ model_type_icon }
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    text=''
+                    has_button={false}
+                    modalAction={null}
                 />
         </div>
         )

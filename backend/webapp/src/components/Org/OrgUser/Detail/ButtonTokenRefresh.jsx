@@ -36,11 +36,11 @@ export class ButtonTokenRefresh extends Component {
 
     modalChange(modal_icon, icon_color, title, text, has_button) {
         this.setState({
-            modal_icon: modal_icon,
-            icon_color: icon_color,
-            title: title,
-            text: text,
-            has_button: has_button,
+            modal_icon,
+            icon_color,
+            title,
+            text,
+            has_button,
         })
         this.handleModalOpen()
 
