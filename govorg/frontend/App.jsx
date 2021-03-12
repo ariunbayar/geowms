@@ -4,11 +4,12 @@ import { service } from "./service"
 import MenuItem from "@utils/MenuItem"
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
 
+import Bundles from "./Bundles/Inspire"
+
 const InsPerms  = React.lazy(() => import('./Role/Role/GovPerms'));
 const Gov  = React.lazy(() => import('./Role/Gov/index'));
 const OrgRequest  = React.lazy(() => import('./OrgRequest'));
 const ChangeRequest  = React.lazy(() => import('./Bundles/Inspire/ChangeRequest'));
-const Bundles  = React.lazy(() => import('./Bundles/Inspire'));
 
 const System = React.lazy(() => import("./System"));
 const Meta = React.lazy(() => import('./Meta'));
