@@ -14,6 +14,7 @@ export default class Bundles extends Component {
         this.too = 0
         this.state = {
             show: false,
+            org_geom: this.props.org_geom
         }
         this.addNotif = this.addNotif.bind(this)
     }
@@ -39,6 +40,11 @@ export default class Bundles extends Component {
             const {tid, pid, fid} = this.props.match.params
             this.props.history.push(`/gov/org/map/${tid}/${pid}/${fid}/map/`)
         }
+
+        if(pP.org_geom !== this.props.org_geom)
+        {
+            this.setState({org_geom: this.props.org_geom})
+        }
     }
 
 
@@ -54,6 +60,7 @@ export default class Bundles extends Component {
                             refreshCount={this.props.refreshCount}
                             employee={this.props.employee}
                             base_layer_list={this.props.base_layer_list}
+                            allowed_geom = {this.state.org_geom}
                         />
                     }/>
                 </Switch>

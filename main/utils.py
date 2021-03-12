@@ -819,8 +819,6 @@ def geojson_to_geom(geo_json):
     geo_json = str(geo_json).replace("\'", "\"")
     geo_data = geoJsonConvertGeom(geo_json)
     geom = ''.join(geo_data)
-    geom = GEOSGeometry(geom)
-
     geom_type = GEOSGeometry(geom).geom_type
     if geom_type == 'Point':
         geom = MultiPoint(geom, srid=4326)
@@ -992,3 +990,23 @@ def create_index(model_name, field):
         cursor.execute(sql)
         return True
     return False
+
+
+def get_2d_data(geo_id):
+    cursor = connections['default'].cursor()
+    sql = """
+        SELECT
+            ST_AsText(ST_Transform(st_force2d(geo_data),4326)) as geom
+        FROM
+            m_geo_datas
+        WHERE
+            geo_id='{geo_id}'
+    """.format(
+        geo_id=geo_id
+    )
+
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    data = rows[0]['geom']
+    return data
