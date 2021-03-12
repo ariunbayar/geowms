@@ -24,6 +24,8 @@ const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
 
+const Tseg = React.lazy(() => import('./Bundles/TsegPersonal'));
+
 export class App extends Component {
 
     constructor(props) {
@@ -142,6 +144,16 @@ export class App extends Component {
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
                                     </ul>
                                 </MenuItem>
+                                <MenuItem
+                                    icon="gp-text-primary fa fa-circle-o"
+                                    url="/gov/tseg-personal/"
+                                    text="Шинэчилж байгаа Цэгийн мэдээлэл"
+                                >
+                                    <ul className="sidebar-submenu">
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tseg-personal/list/" text="Шинэ цэг"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tseg-personal/tseg-ustsan/list/" text="Цэг устгах"></MenuItem>
+                                    </ul>
+                                </MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
 
                                     {
@@ -199,6 +211,9 @@ export class App extends Component {
                             <Switch>
                                 <Route path={"/gov/froms/"} component={Forms} />
                                 <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
+
+                                <Route path={"/gov/tseg-personal/"} component={Tseg} />
+
                                 <Route path="/gov/system/" component={System} />
                                 <Route path="/gov/revoke-request/" component={RevokeRequest} />
                                 <Route path="/gov/meta/" component={Meta} />
