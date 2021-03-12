@@ -17,6 +17,7 @@ from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 import main.geoserver as geoserver
+from django.core.cache import cache
 
 
 def _get_service_url(request, token):
@@ -237,7 +238,10 @@ def _get_cql_filter(geo_id):
 
 def _get_request_content(base_url, request, geo_id, headers):
     if request.GET.get('REQUEST') == 'GetMap' and geo_id != 'au_496':
-        cql_filter = _get_cql_filter(geo_id)
+        cql_filter = cache.get('{}'.format(geo_id))
+        if not cql_filter:
+            cql_filter = _get_cql_filter(geo_id)
+            cache.set('{}'.format(geo_id), cql_filter, 20000)
         queryargs = {
             **request.GET,
             'cql_filter': cql_filter,
@@ -258,14 +262,28 @@ def qgis_proxy(request, token):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
+    employee = cache.get('employe_{}'.format(token))
+    allowed_layers = cache.get('allowed_layer_{}'.format(token))
+    if not employee:
+        employee = Employee.objects.filter(token=token).first()
+        allowed_layers = _get_layer_name(employee)
+        cache.set('employe_{}'.format(token), employee, 300)
+        cache.set('allowed_layer_{}'.format(token), allowed_layers, 300)
 
-    employee = get_object_or_404(Employee, token=token)
-    allowed_layers = _get_layer_name(employee)
-    conf_geoserver = geoserver.get_connection_conf()
+    if not employee:
+        raise Http404
+
+
+    conf_geoserver = cache.get('geoserver_config')
+    if not conf_geoserver:
+        conf_geoserver = geoserver.get_connection_conf()
+        cache.set('geoserver_config', conf_geoserver, 86400)
+
     base_url = 'http://{host}:{port}/geoserver/ows'.format(
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port'],
+        host="localhost",
+        port="8080",
     )
+
     headers = {**BASE_HEADERS}
     geo_id = employee.org.geo_id
 
