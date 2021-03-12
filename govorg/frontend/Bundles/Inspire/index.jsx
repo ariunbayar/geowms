@@ -60,7 +60,7 @@ export default class Bundles extends Component {
                             refreshCount={this.props.refreshCount}
                             employee={this.props.employee}
                             base_layer_list={this.props.base_layer_list}
-                            allawed_geom = {this.state.org_geom}
+                            allowed_geom = {this.state.org_geom}
                         />
                     }/>
                 </Switch>

@@ -399,7 +399,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.snap(vector)
       this.setState({ type: 'Point' })
       this.modifyE.funct()
-      const geom = this.props.allawed_geom
+      const geom = this.props.allowed_geom
       if (geom) {
 
           const features = new GeoJSON({

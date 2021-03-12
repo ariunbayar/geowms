@@ -7,16 +7,14 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrg as System
-from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire, MGeoDatas
+from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
 from backend.org.models import Employee
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
-from django.conf import settings
 from main import utils
 import main.geoserver as geoserver
 
