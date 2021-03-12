@@ -12,6 +12,7 @@ from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
 from govorg.backend.revoke_request import views as revoke_request_views
 from govorg.backend.secure import views as secure_views
+from govorg.backend.tseg import views as tseg_view
 
 urlpatterns = [
     path('api/', include(([
@@ -43,11 +44,16 @@ urlpatterns = [
             ], 'role'))),
         ], 'role'))),
 
+        path('tseg/', include(([
+            path('', tseg_view.tseg_personal),
+        ], 'tseg'))),
+
         path('system/', include(([
             path('', system_views.systemList, name='system'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
         ], 'system'))),
+
 
         path('inspire/', include(([
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),

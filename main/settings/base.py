@@ -88,7 +88,7 @@ INSTALLED_APPS = [
     'govorg.backend.meta_data.apps.MetaDataConfig',
     'govorg.backend.revoke_request.apps.RevokeRequestConfig',
     'govorg.backend.secure.apps.SecureConfig',
-    'govorg.backend.tseg_temdegt.apps.TsegTemdegtConfig',
+    'govorg.backend.tseg.apps.TsegConfig',
 ]
 
 REST_FRAMEWORK = {
