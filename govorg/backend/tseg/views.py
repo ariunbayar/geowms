@@ -71,8 +71,6 @@ keys = ['property_id']
 property_values = _search_model_values(keys, data_type_config_values, LProperties)
 
 
-for property_value in property_values:
-    print(property_value)
 
 _check_len(property_values)
 
