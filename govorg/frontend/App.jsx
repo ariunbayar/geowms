@@ -84,7 +84,7 @@ export class App extends Component {
     }
 
     render() {
-        const { org_role, employee } = this.props.org
+        const { org_role, employee, allowed_geom} = this.props.org
         const { emp_role , approve, revoke, base_layer_list } = this.state
         return (
             <BrowserRouter>
@@ -206,7 +206,17 @@ export class App extends Component {
                                 <Route path="/gov/perm/region/" component={MapRegion} />
                                 <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
                                 <Route path="/gov/role/role/" component={Role} />
-                                <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} base_layer_list={base_layer_list} employee={employee} refreshCount={() => this.requestCount()} />} />
+                                <Route
+                                    path="/gov/org/map/:tid/:pid/:fid/"
+                                    component=
+                                        {
+                                            (props) => <Bundles {...props}
+                                            base_layer_list={base_layer_list}
+                                            employee={employee} refreshCount={() => this.requestCount()}
+                                            org_geom = {allowed_geom}
+                                        />
+                                        }
+                                    />
 
                                 <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
                                 <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />

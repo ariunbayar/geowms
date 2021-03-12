@@ -27,14 +27,6 @@ from main.utils import (
     geojson_to_geom
 )
 
-hoho = {
-    "type": "Polygon",
-    "coordinates": [[[107.14817924449386, 47.76860294810484], [107.23215832471983, 47.81708294518407], [107.305587269239, 47.79327386154955], [107.3435677577834, 47.73597400357636], [107.28111095439927, 47.723768360468], [107.18151767332729, 47.73739307875661], [107.14817924449386, 47.76860294810484]]]
-    }
-hoho = geojson_to_geom(hoho)
-
-
-
 
 def _get_service_url(request, token):
     url = reverse('api:service:system_proxy', args=[token])
@@ -246,53 +238,27 @@ def _get_layer_name(employee):
     return allowed_layers
 
 
-
-def _get_org_extent(employee):
-    org_contains = MGeoDatas.objects.filter(geo_id=employee.org.geo_id).first().geo_data
-    # f = open("demofile2.txt", 'w')
-    # f.write(str(org_contains)[25:])
-    # f.close()
-    org_contains = str(org_contains.extent).replace("(", "").replace(")", "")
-
-    cursor = connections['default'].cursor()
-
-    sql =  '''SELECT ST_AsText(ST_MakeEnvelope({extent}, 4326))'''.format(extent=org_contains)
-    cursor.execute(sql)
-    for i, value in enumerate(cursor.fetchone()):
-        polygon = value
-    print("polygon", polygon)
-    cql_filter = 'WITHIN(geo_data,{polygon})'.format(polygon = polygon)
-
-    return cql_filter
-
-
-
-def _get_org_data(employee):
-
+def _get_org_data(geo_id):
+    cql_data = []
     cursor = connections['default'].cursor()
     sql = """
         SELECT
-            ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
+            ST_AsText(ST_Transform(st_force2d(geo_data),4326)) as geom
         FROM
             m_geo_datas
         WHERE
             geo_id='{geo_id}'
     """.format(
-        geo_id=employee.org.geo_id,
+        geo_id=geo_id
     )
+
     cursor.execute(sql)
     rows = dict_fetchall(cursor)
     rows = list(rows)
+    data = rows[0]['geom']
 
-    old_geo_data = rows[0]['geom']
-    data = json.loads(old_geo_data)
-    point = []
-    point = utils.get_geom_for_filter_from_geometry(data)
-    f = open("demofile2.txt", 'w')
-    f.write(str(point))
-    f.close()
+    return data
 
-    return point
 
 @require_GET
 def qgis_proxy(request, token):
@@ -301,42 +267,28 @@ def qgis_proxy(request, token):
     }
 
     employee = get_object_or_404(Employee, token=token)
-    org_contains = MGeoDatas.objects.filter(geo_id=employee.org.geo_id).first().geo_data
-    # multi_polygon = str(org_contains)[25:]
-    # hoho = _get_org_data(employee)
-    # f = open((settings.BASE_DIR + '/demofile2.txt'), 'r')
-    # data = f.read()
-
     allowed_layers = _get_layer_name(employee)
     conf_geoserver = geoserver.get_connection_conf()
     base_url = 'http://{host}:{port}/geoserver/ows'.format(
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
     )
-    queryargs = request.GET
     headers = {**BASE_HEADERS}
-    cql_filter = _get_org_extent(employee)
-    # polygon = MULTIPOLYGON (
-        # ((107.42850000000004 47.43263888900009 0, 107.48858333400005 47.43622222200008 0,107.55383333400005 47.33088888900005 0,107.41786111100004 47.302194444000065 0,107.40313888900005 47.32100000000008 0,107.34700000000004 47.39752777800004 0,107.35686111100006 47.42422222200008 0,107.40166666700003 47.44011111100008 0,107.42850000000004 47.43263888900009 0)))
-    # cql_filter = 'WITHIN(geo_data, {polygon})'.format(polygon = cql_filter)
+    geo_id = employee.org.geo_id
+    if request.GET.get('REQUEST') == 'GetMap' and geo_id != 'au_496':
+        cql_data = _get_org_data(geo_id)
+        cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data = cql_data)
+        queryargs = {
+            **request.GET,
+            'cql_filter': cql_filter,
+        }
 
+        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5)
 
-    queryargs = {
-        'SERVICE': request.GET.get('SERVICE'),
-        'VERSION': request.GET.get('VERSION'),
-        'REQUEST': request.GET.get('REQUEST'),
-        'TRANSPARENT': request.GET.get('TRANSPARENT'),
-        'LAYERS': request.GET.get('LAYERS'),
-        'exceptions': request.GET.get('exceptions'),
-        'SRS': request.GET.get('SRS'),
-        'STYLES': request.GET.get('STYLES'),
-        'FORMAT': request.GET.get('FORMAT'),
-        'WIDTH': request.GET.get('WIDTH'),
-        'HEIGHT': request.GET.get('HEIGHT'),
-        'BBOX': request.GET.get('BBOX'),
-        'cql_filter':cql_filter
-    }
-    rsp = requests.post(base_url, queryargs, headers=headers, timeout=5)
+    else:
+        queryargs = request.GET
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':

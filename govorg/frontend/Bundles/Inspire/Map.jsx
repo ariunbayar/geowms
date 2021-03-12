@@ -399,6 +399,15 @@ export default class BarilgaSuurinGazar extends Component{
       this.snap(vector)
       this.setState({ type: 'Point' })
       this.modifyE.funct()
+      const geom = this.props.allawed_geom
+      if (geom) {
+
+          const features = new GeoJSON({
+              dataProjection: this.state.dataProjection,
+              featureProjection: this.state.featureProjection,
+          }).readFeatures(geom)
+          this.map.getView().fit(features[0].getGeometry(),{ padding: [50, 50, 50, 50], duration: 3000 })
+      }
     }
 
     handleMapClick(event) {

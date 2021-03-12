@@ -24,6 +24,7 @@ from govorg.backend.utils import (
     get_perm_list
 )
 
+from main import utils
 
 def _get_properties_by_feature(initial_qs, feature_ids):
 
@@ -177,7 +178,7 @@ def frontend(request):
 
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
-
+    geom = utils.get_geom(org.geo_id, 'MultiPolygon')
     context = {
         'org': {
             "org_name": org.name.upper(),
@@ -186,7 +187,8 @@ def frontend(request):
             'employee': {
                 'is_admin': employee.is_admin,
                 'username': employee.user.username
-            }
+            },
+            'allowed_geom': geom.json if geom else None
         },
     }
 
