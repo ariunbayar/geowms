@@ -1,3 +1,5 @@
+import json
+
 from django.http import JsonResponse
 
 from django.shortcuts import get_object_or_404
@@ -16,20 +18,7 @@ from backend.inspire.models import (
     LFeatureConfigs,
     LDataTypeConfigs,
 )
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def tseg_personal(request, payload):
-
-    fields = []
-
-    rsp = {
-        'success': True,
-        'fields': fields,
-    }
-    return JsonResponse(rsp)
+from backend.config.models import Config
 
 
 def _get_model_qs(Model, search):
@@ -56,22 +45,51 @@ def _check_len(array):
     print(len(list(array)))
 
 
-values = [{
-    'package_code' :'gnp-gp'
-}]
-keys = ['package_code']
-package_values = _search_model_values(keys, values, LPackages)
-keys = ['package_id']
-feature_values = _search_model_values(keys, package_values, LFeatures)
-keys = ['feature_id']
-feature_config_values = _search_model_values(keys, feature_values, LFeatureConfigs)
-keys = ['data_type_id']
-data_type_config_values = _search_model_values(keys, feature_config_values, LDataTypeConfigs)
-keys = ['property_id']
-property_values = _search_model_values(keys, data_type_config_values, LProperties)
+def _get_config():
+    value_type_config = Config.objects
+    value_type_config = value_type_config.filter(name='value_types')
+    value_type_config = value_type_config.first()
+    return value_type_config
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def tseg_personal(request, payload):
+
+    values = [{
+        'package_code': 'gnp-gp'
+    }]
+    keys = ['package_code']
+    package_values = _search_model_values(keys, values, LPackages)
+    keys = ['package_id']
+    feature_values = _search_model_values(keys, package_values, LFeatures)
+    keys = ['feature_id']
+    feature_config_values = _search_model_values(keys, feature_values, LFeatureConfigs)
+    keys = ['data_type_id']
+    data_type_config_values = _search_model_values(keys, feature_config_values, LDataTypeConfigs)
+    keys = ['property_id']
+    property_values = _search_model_values(keys, data_type_config_values, LProperties)
+
+    value_type_config = _get_config()
+
+    for idx in range(0, len(property_values)):
+        obj = json.loads(value_type_config.value)
+        property_values[idx]['value_type_id'] = obj[property_values[idx]['value_type_id']]
+
+    rsp = {
+        'success': True,
+        'fields': property_values,
+    }
+    return JsonResponse(rsp)
 
 
 
-_check_len(property_values)
+
+
+
+
+
+
 
 
