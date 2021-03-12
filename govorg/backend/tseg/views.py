@@ -10,13 +10,13 @@ from backend.inspire.models import (
     LThemes,
     LPackages,
     LFeatures,
+    LProperties,
     MGeoDatas,
     MDatas,
+    LFeatureConfigs,
+    LDataTypeConfigs,
 )
 
-print("hahahaha")
-print("hahahaha")
-print("hahahaha")
 
 @require_POST
 @ajax_required
@@ -32,24 +32,48 @@ def tseg_personal(request, payload):
     return JsonResponse(rsp)
 
 
-def _get_package(search):
-    package_qs = LPackages.objects
-    package_qs = package_qs.filter(**search)
+def _get_model_qs(Model, search):
+    qs = Model.objects
+    qs = qs.filter(**search)
+    return qs
 
-    return package_qs
+
+def _search_model_values(search_keys, values, Model):
+    search = dict()
+    searchs = list()
+    for key in search_keys:
+        for value in values:
+            search[key] = value[key]
+            qs = _get_model_qs(Model, search)
+            qs_valuies = qs.values()
+            for qs_value in qs_valuies:
+                searchs.append(qs_value)
+
+    return searchs
 
 
-def _get_feature(search):
-    feature_qs = LFeatures.objects
-    feature_qs = feature_qs.filter(**search)
+def _check_len(array):
+    print(len(list(array)))
 
-    return feature_qs
 
-package_code_search = {'package_code': 'gnp-gp'}
-package_qs = _get_package(package_code_search)
+values = [{
+    'package_code' :'gnp-gp'
+}]
+keys = ['package_code']
+package_values = _search_model_values(keys, values, LPackages)
+keys = ['package_id']
+feature_values = _search_model_values(keys, package_values, LFeatures)
+keys = ['feature_id']
+feature_config_values = _search_model_values(keys, feature_values, LFeatureConfigs)
+keys = ['data_type_id']
+data_type_config_values = _search_model_values(keys, feature_config_values, LDataTypeConfigs)
+keys = ['property_id']
+property_values = _search_model_values(keys, data_type_config_values, LProperties)
 
-package_id_search = {'package_id': package_qs.first().package_id}
-feature_qs = _get_feature(package_id_search)
 
-for feat in feature_qs:
-    print(feat)
+for property_value in property_values:
+    print(property_value)
+
+_check_len(property_values)
+
+
