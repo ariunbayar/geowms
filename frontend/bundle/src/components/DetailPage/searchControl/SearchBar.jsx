@@ -7,7 +7,7 @@ import {CLASS_CONTROL, CLASS_HIDDEN} from 'ol/css.js'
 import { service } from "../service"
 
 
-class SearchBarComponent extends Component {
+export class SearchBarComponent extends Component {
 
     constructor(props) {
 
@@ -392,41 +392,41 @@ class SearchBarComponent extends Component {
     }
 }
 
-export class SearchBar extends Control {
+// export class SearchBar extends Control {
 
-    constructor(opt_options) {
+//     constructor(opt_options) {
 
-        const options = opt_options || {}
+//         const options = opt_options || {}
 
-        super({
-            element: document.createElement('div'),
-            target: options.target,
-        })
+//         super({
+//             element: document.createElement('div'),
+//             target: options.target,
+//         })
 
-        this.is_component_initialized = false
-        const cssClasses = `col-md-3 ⚙-search rounded bg-light ${CLASS_HIDDEN}`
+//         this.is_component_initialized = false
+//         const cssClasses = `col-md-3 ⚙-search rounded bg-light ${CLASS_HIDDEN}`
 
-        this.element.className = cssClasses
-        this.renderComponent = this.renderComponent.bind(this)
-        this.toggleControl = this.toggleControl.bind(this)
-    }
+//         this.element.className = cssClasses
+//         this.renderComponent = this.renderComponent.bind(this)
+//         this.toggleControl = this.toggleControl.bind(this)
+//     }
 
-    toggleControl(is_visible) {
-        this.element.classList.toggle(CLASS_HIDDEN, is_visible)
+//     toggleControl(is_visible) {
+//         this.element.classList.toggle(CLASS_HIDDEN, is_visible)
 
-    }
+//     }
 
-    renderComponent(props) {
-        if (!this.is_component_initialized) {
-            ReactDOM.render(<SearchBarComponent {...props}/>, this.element)
-            this.is_component_initialized = true
-        }
+//     renderComponent(props) {
+//         if (!this.is_component_initialized) {
+//             ReactDOM.render(<SearchBarComponent {...props}/>, this.element)
+//             this.is_component_initialized = true
+//         }
 
-        ReactDOM.hydrate(<SearchBarComponent {...props}/>, this.element)
-    }
+//         ReactDOM.hydrate(<SearchBarComponent {...props}/>, this.element)
+//     }
 
-    showSideBar(handleSetCenter, islaod, showOnlyArea, resetShowArea, setFeatureOnMap) {
-        this.toggleControl(islaod)
-        this.renderComponent({ handleSetCenter, showOnlyArea, resetShowArea, setFeatureOnMap })
-    }
-}
+//     showSideBar(handleSetCenter, islaod, showOnlyArea, resetShowArea, setFeatureOnMap) {
+//         this.toggleControl(islaod)
+//         this.renderComponent({ handleSetCenter, showOnlyArea, resetShowArea, setFeatureOnMap })
+//     }
+// }
