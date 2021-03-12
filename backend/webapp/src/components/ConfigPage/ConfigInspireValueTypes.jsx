@@ -123,6 +123,7 @@ export default class ConfigValueTypes extends Component {
                                                         name={item.value_type_id}
                                                         id={`id_${item.value_type_id}`}
                                                     >
+                                                        <option value="">--- Сонгоно уу ---</option>
                                                         {
                                                             input_types.map((item, idx) =>
                                                                 <option key={idx} value={item}>{item}</option>
