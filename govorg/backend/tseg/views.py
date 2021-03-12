@@ -17,6 +17,7 @@ from backend.inspire.models import (
     MDatas,
     LFeatureConfigs,
     LDataTypeConfigs,
+    LCodeListConfigs,
 )
 from backend.config.models import Config
 
@@ -41,6 +42,7 @@ def _search_model_values(search_keys, values, Model):
     return searchs
 
 
+
 def _check_len(array):
     print(len(list(array)))
 
@@ -50,6 +52,14 @@ def _get_config():
     value_type_config = value_type_config.filter(name='value_types')
     value_type_config = value_type_config.first()
     return value_type_config
+
+
+def _check_select(value_type_id, property_id):
+    data_list = list()
+    if value_type_id == 'select' :
+        code_list_values = utils.get_code_list_from_property_id(property_id)
+
+    return data_list
 
 
 @require_POST
@@ -72,10 +82,14 @@ def tseg_personal(request, payload):
     property_values = _search_model_values(keys, data_type_config_values, LProperties)
 
     value_type_config = _get_config()
-
     for idx in range(0, len(property_values)):
         obj = json.loads(value_type_config.value)
-        property_values[idx]['value_type_id'] = obj[property_values[idx]['value_type_id']]
+        index = property_values[idx]
+        data_list = _check_select(index['value_type_id'], index['property_id'])
+
+        property_values[idx]['data_list'] = data_list
+        index['value_type_id'] = obj[index['value_type_id']]
+        print(property_values)
 
     rsp = {
         'success': True,
@@ -84,7 +98,31 @@ def tseg_personal(request, payload):
     return JsonResponse(rsp)
 
 
+values = [{
+    'package_code': 'gnp-gp'
+}]
+keys = ['package_code']
+package_values = _search_model_values(keys, values, LPackages)
+keys = ['package_id']
+feature_values = _search_model_values(keys, package_values, LFeatures)
+keys = ['feature_id']
+feature_config_values = _search_model_values(keys, feature_values, LFeatureConfigs)
+keys = ['data_type_id']
+data_type_config_values = _search_model_values(keys, feature_config_values, LDataTypeConfigs)
+keys = ['property_id']
+property_values = _search_model_values(keys, data_type_config_values, LProperties)
 
+value_type_config = _get_config()
+for idx in range(0, len(property_values)):
+    obj = json.loads(value_type_config.value)
+    index = property_values[idx]
+    data_list = _check_select(index['value_type_id'], index['property_id'])
+
+    property_values[idx]['data_list'] = data_list
+    index['value_type_id'] = obj[index['value_type_id']]
+    print(property_values[idx]['value_type_id'])
+    print(property_values[idx])
+    print("--------------------------")
 
 
 
