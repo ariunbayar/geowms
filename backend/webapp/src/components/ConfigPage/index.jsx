@@ -34,8 +34,8 @@ export default class ConfigPage extends Component {
                         <ConfigGeoserver/>
                     </div>
                     <div className="col-lg-4">
-                        <ConfigEmail/>
                         <ConfigDan/>
+                        <ConfigEmail/>
                     </div>
                     <div className="col-lg-4">
                         <ConfigValueTypes/>
