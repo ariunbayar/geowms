@@ -227,7 +227,6 @@ export default class BundleMap extends Component {
                 }),
             }
         })
-        this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) => {
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
@@ -235,6 +234,7 @@ export default class BundleMap extends Component {
                 layer['legend'] = layer.wms_tile.getSource().getLegendUrl()
             })
         )
+        this.setState({map_wms_list})
 
         const base_layer_name = 'base_layer'
         const {base_layers, base_layer_controls} =
