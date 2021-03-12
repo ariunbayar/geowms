@@ -327,7 +327,7 @@ export default class BarilgaSuurinGazar extends Component{
                               layer: base_layer_info.layers,
                               matrixSet: "EPSG:4326",
                               format: 'image/png',
-                              projection: this.state.projection_display,
+                              projection: this.state.dataProjection,
                               tileGrid: new WMTSTileGrid({
                                   tileSize: [256,256],
                                   extent: [-180.0,-90.0,180.0,90.0],
