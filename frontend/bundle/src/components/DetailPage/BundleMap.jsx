@@ -24,15 +24,15 @@ import { ShopCart } from './ShopControls/ShopCart'
 import { DrawPayModal } from './controls/DrawPayModal'
 import "./styles.css"
 import { service } from './service'
-import { SidebarButton } from './SidebarButton'
-import { Sidebar } from './Sidebar'
-import { SearchBar } from './searchControl/SearchBar'
-import { SearchBarButton } from './searchControl/SearchBarButton'
+import { SearchBarComponent } from './searchControl/SearchBar'
 import { DrawButton } from './controls/Draw'
 import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import {default as ModalAlert} from "@utils/Modal/Modal"
+import SideBar from "./SideBar"
+import WMSItem from './WMSItem'
+
 
 export default class BundleMap extends Component {
 
@@ -47,8 +47,6 @@ export default class BundleMap extends Component {
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
-            is_sidebar_open: true,
-            is_search_sidebar_open: true,
             coordinate_clicked: null,
             vector_layer: null,
             is_draw_open: false,
@@ -69,8 +67,6 @@ export default class BundleMap extends Component {
             shopmodal: new ShopModal(),
             cart: new ShopCart(),
             drawModal: new DrawPayModal(),
-            sidebar: new Sidebar(),
-            searchbar: new SearchBar(),
             alertBox: new AlertRoot(), // this.controls.alertBox.showAlert(true, "....")
             popup: new PopUp(),
         }
@@ -81,8 +77,6 @@ export default class BundleMap extends Component {
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.handleMapClick = this.handleMapClick.bind(this)
         this.handleSetCenter = this.handleSetCenter.bind(this)
-        this.toggleSidebar = this.toggleSidebar.bind(this)
-        this.searchSidebar = this.searchSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.toggleDraw = this.toggleDraw.bind(this)
@@ -349,16 +343,12 @@ export default class BundleMap extends Component {
                     undefinedHTML: '',
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
-                new SidebarButton({toggleSidebar: this.toggleSidebar}),
-                new SearchBarButton({searchSidebar: this.searchSidebar}),
                 new DrawButton({toggleDraw: this.toggleDraw}),
                 scale_line,
                 this.controls.modal,
                 this.controls.shopmodal,
                 this.controls.drawModal,
                 this.controls.coordinateCopy,
-                this.controls.sidebar,
-                this.controls.searchbar,
                 this.controls.cart,
                 this.controls.alertBox,
                 this.controls.popup,
@@ -383,6 +373,7 @@ export default class BundleMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        window.map = map
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
 
@@ -933,43 +924,6 @@ export default class BundleMap extends Component {
         this.getFeatureInfoFromInspire(feature, point_coordinate, scale)
     }
 
-    toggleSidebar(is_not_open) {
-
-        let is_setState = true
-        if (is_not_open == this.state.is_sidebar_open) {
-            is_setState = false
-        }
-        if (is_setState) {
-            this.setState(prevState => ({
-                is_sidebar_open: !prevState.is_sidebar_open,
-            }))
-        }
-
-        var islaod
-        if(this.state.is_sidebar_open){
-            islaod = true
-        }
-
-        else {
-            islaod = false
-        }
-        this.controls.sidebar.showSideBar(this.state.map_wms_list, islaod, this.addLayerToSearch)
-
-    }
-
-    searchSidebar(event) {
-        this.setState(prevState => ({
-            is_search_sidebar_open: !prevState.is_search_sidebar_open,
-        }))
-
-        if(this.state.is_search_sidebar_open){
-            this.controls.searchbar.showSideBar(null, true)
-        }
-        else {
-            this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature, this.setFeatureOnMap)
-        }
-    }
-
     transformToLatLong(coordinateList) {
         const geom = coordinateList[0].map((coord, idx) => {
             const map_coord = transformCoordinate(coord, this.state.projection, this.state.projection_display)
@@ -1148,12 +1102,62 @@ export default class BundleMap extends Component {
     }
 
     render() {
+        const Menu_comp = () => {
+            return (
+                <div>
+                    {this.state.map_wms_list.map((wms, idx) =>
+                        <WMSItem wms={wms} key={idx} addLayer={this.addLayerToSearch}/>
+                    )}
+                </div>
+            )
+        }
+        const Search_comp = () => {
+            return (
+                <div>
+                    <SearchBarComponent
+                        handleSetCenter={this.handleSetCenter}
+                        getOnlyFeature={this.getOnlyFeature}
+                        resetFilteredOnlyFeature={this.resetFilteredOnlyFeature}
+                        setFeatureOnMap={this.setFeatureOnMap}
+                    />
+                </div>
+            )
+        }
+        const settings_component = () => {
+            return(
+                <div>
+                    <h4>Тун удахгүй</h4>
+                </div>
+            )
+        }
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
-                            <div id="map"></div>
+                            <div id="map">
+                                <SideBar
+                                items = {[
+                                    {
+                                        "key": "menus",
+                                        "icon": "fa fa-bars",
+                                        "title": "Давхаргууд",
+                                        "component": Menu_comp,
+                                    },
+                                    {
+                                        "key": "search",
+                                        "icon": "fa fa-search",
+                                        "component": Search_comp
+                                    },
+                                    {
+                                        "key": "settings",
+                                        "icon": "fa fa-gear",
+                                        "component": settings_component,
+                                        "bottom": true
+                                    },
+                                ]}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
