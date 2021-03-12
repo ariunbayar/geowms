@@ -271,6 +271,7 @@ export default class BundleMap extends Component {
                         })
                     }
                     if (base_layer_info.tilename == "wmts") {
+                        console.log(JSON.stringify(base_layer_info))
                         layer = new Tile({
                             source: new WMTS({
                                 url: base_layer_info.url,
