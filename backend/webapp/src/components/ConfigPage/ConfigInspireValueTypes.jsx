@@ -18,7 +18,7 @@ export default class ConfigValueTypes extends Component {
             is_editing: false,
             value_types: [],
             values: {},
-            input_types: ['text', 'number', 'date', 'checkbox', 'radio', 'password', 'range', 'url', 'color', 'file']
+            input_types: ['text', 'number', 'date', 'checkbox', 'radio', 'password', 'range', 'url', 'color', 'file', 'select', 'textarea']
         }
 
         this.handleEdit = this.handleEdit.bind(this)
