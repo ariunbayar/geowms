@@ -39,7 +39,7 @@ urlpatterns = [
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
         path('update/', bundle_views.update, name='update'),
-        path('move/', bundle_views.move, name='move'),
+        path('swap/', bundle_views.swap, name='swap'),
         path('<int:pk>/update-detail/', bundle_views.detail, name='update-detail'),
         path('get-layer/', bundle_views.get_form_options, name='get-layer'),
         path('role-create/', bundle_views.roleCreate, name='role-create'),
@@ -60,7 +60,7 @@ urlpatterns = [
         path('', суурь_давхарга.жагсаалт, name=''),
         path('wms-preview/<int:pk>/', суурь_давхарга.wms_preview, name='wms-preview'),
         path('үүсгэх/', суурь_давхарга.үүсгэх, name='үүсгэх'),
-        path('move/', суурь_давхарга.move, name='move'),
+        path('swap/', суурь_давхарга.swap, name='swap'),
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),
         path('<int:pk>/устгах/', суурь_давхарга.устгах, name='устгах'),
     ], 'суурь-давхарга'))),
@@ -87,7 +87,7 @@ urlpatterns = [
         path('form-options/<str:option>/', org_views.form_options),
         path('<int:level>/<int:pk>/addresses/', org_views.get_addresses),
         path('<int:pk>/emp-info/', org_views.get_emp_info),
-        path('erguuleg-fields/', org_views.get_erguuleg_fields),
+        path('<int:pk>/erguuleg-fields/', org_views.get_erguuleg_fields),
         path('save-erguul/', org_views.save_erguul),
         path('get-erguul/', org_views.get_erguuls),
     ], 'org'))),
@@ -112,7 +112,7 @@ urlpatterns = [
         path('<int:pk>/refresh-token/', govorg_views.refresh_token, name='refresh-token'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),
-        path('govorgList/', govorg_views.govorgList, name='govorgList'),
+        path('govorgList/<int:org_id>/', govorg_views.govorgList, name='govorgList'),
     ], 'govorg'))),
 
     path('api/config/', include(([
@@ -171,6 +171,13 @@ urlpatterns = [
 
     path('geoserver/rest/', include(([
         path('layers/', geoserver_views.layers),
+        path('group_list/', geoserver_views.layer_groups),
+        path('remove_layer_group/', geoserver_views.remove_layer_group),
+        path('get_group_detial/', geoserver_views.get_group_detial),
+        path('get_layers/', geoserver_views.get_layer_detial),
+        path('create_layer_group/', geoserver_views.create_layer_group),
+        path('get_group_cache_list/', geoserver_views.get_group_cache),
+        path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

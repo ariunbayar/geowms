@@ -641,7 +641,7 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
         overlap_feature_id.append(fid)
         is_contains = _geom_contains_feature_geoms(geo_json, overlap_feature_id, perm_kind)
         if is_contains:
-            success = False
+            success = True
             info = '''{feature_ids} дугааруудтай geom-той давхцаж байна.'''.format(feature_ids=', '.join(['{}'.format(f['geo_id']) for f in is_contains]))
 
     return success, info
@@ -771,15 +771,20 @@ def datetime_to_string(date):
     return date.strftime('%Y-%m-%d') if date else ''
 
 
-def date_to_timezone(input_date):
+def date_fix_format(input_date):
     if '/' in input_date:
         input_date = input_date.replace('/', '-')
+    return input_date
+
+
+def date_to_timezone(input_date):
+    date_fix_format(input_date)
     naive_time = datetime.strptime(input_date, '%Y-%m-%d')
     output_date = timezone.make_aware(naive_time)
     return output_date
 
 
-def get_display_items(items, fields, хувьсах_талбарууд=[]):
+def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
     display = list()
     for item in items.values():
         obj = dict()
@@ -792,6 +797,11 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
                 if хувьсах_талбар['field'] == field:
                     action = хувьсах_талбар['action']
                     obj[хувьсах_талбар['new_field']] = action(item[field], item)
+
+        for нэмэлт_талбар in нэмэлт_талбарууд:
+            action = нэмэлт_талбар['action']
+            result_data = action(item)
+            obj[нэмэлт_талбар['field']] = result_data or None
 
         display.append(obj)
 

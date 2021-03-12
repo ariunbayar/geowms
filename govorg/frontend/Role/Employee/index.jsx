@@ -6,7 +6,7 @@ import { EmployeeAdd } from "./EmployeeAdd"
 import { EmployeeEdit } from "./EmployeeEdit"
 import { Detail } from './Detail'
 
-export class Employee extends Component {
+export default class Employee extends Component {
     constructor(props) {
         super(props)
     }

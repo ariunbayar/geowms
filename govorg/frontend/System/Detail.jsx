@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import {NavLink} from 'react-router-dom'
 import {service} from './service'
 import {Notif} from '@utils/Notification'
+import BackButton from "@utils/Button/BackButton"
 
 
 export class Detail extends Component {
@@ -70,13 +71,7 @@ export class Detail extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="row">
-                        <div className="col-md-12 mb-4">
-                            <NavLink className="btn gp-outline-primary" exact to={`/gov/system/`}>
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </NavLink>
-                        </div>
-                    </div>
+                    <BackButton {...this.props} name={'Буцах'}></BackButton>
                     <div className="row">
                         <div className="col-md-12">
                             <h5>{name}</h5>

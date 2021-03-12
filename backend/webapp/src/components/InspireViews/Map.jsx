@@ -239,8 +239,8 @@ export default class StyleMap extends Component {
     render() {
         return (
             <div className="row">
-                <div className="col-md-12 px-0">
-                    <div id="map"></div>
+                <div className="col-md-12 m-1 h-100 w-100">
+                    <div id="map" style={{height:"calc( 49vh - 34px - 7px)"}}></div>
                 </div>
                 {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>

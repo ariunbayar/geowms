@@ -9,6 +9,7 @@ app_name = 'api'
 urlpatterns = [
     path('service/', include(([
         path('WMS/<int:bundle_id>/<int:wms_id>/<str:url_type>/', public_views.proxy, name='wms_proxy'),
+        path('<int:bundle_id>/<int:wms_id>/<int:layer_id>/file-download/<str:types>/', public_views.file_download, name='file-download'),
         path('<str:token>/all/', govorg_views.proxy, name='system_proxy'),
         path('net-local/<str:token>/all/', govorg_views.proxy, name='local_system_proxy'),
         path('<str:token>/<str:code>.geojson', govorg_views.json_proxy, name='system_json_proxy'),

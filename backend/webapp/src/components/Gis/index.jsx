@@ -5,7 +5,7 @@ import {Жагсаалт} from './Жагсаалт'
 import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
 
 
-export class Gis extends Component {
+export default class Gis extends Component {
 
     constructor(props) {
         super(props)

@@ -76,6 +76,10 @@
     background: white;
 }
 
+.tr-hover:hover{
+    box-shadow: 0 0 0 3px #f1f3f4;
+}
+
 .table_wrapper .table_wrapper_table{
     border-collapse: collapse;
 }

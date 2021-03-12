@@ -22,6 +22,10 @@
         <div class="container">
             <div class="ml-auto mt-2 mt-lg-0">
                 {% if user.is_authenticated %}
+                    {% if user and not user.is_sso %}
+                        <a href="{% url "org:frontend" %}" class="btn gp-btn-primary">Байгууллага</a>
+                        |
+                    {% endif %}
                     {% if user.is_superuser %}
                     <span class="btn gp-btn-primary">
                         Нэвтэрсэн хэрэглэгч: {{user.username}}
@@ -34,7 +38,7 @@
                     {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
-                <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                    <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
                 {% endif %}
             </div>
         </div>
@@ -58,16 +62,16 @@
             <div class="col-md-4 align-self-center">
                 <div class="login-reg float-right">
                     <div class="ml-auto mt-2 mt-lg-0">
-                        {% if user.is_authenticated and user.is_superuser%}
-                        {% if not user.is_superuser %}
-                        <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
-                        {% endif %}
-                        {% else %}
-                        <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
-                        <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
+                        {% if user.is_authenticated and user %}
+                            {% if not user %}
+                                <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
+                            {% endif %}
+                            {% else %}
+                                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
+                                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
                         {% endif %}
                     </div>
-                    {#              <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a>#}
+                        {# <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a> #}
 
                 </div>
             </div>
@@ -90,6 +94,9 @@
                 <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" href="/covid/">КОВИД-19</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/open-layer/">Нээлттэй өгөгдөл</a>
                     </li>
                     <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
                         <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
@@ -195,6 +202,48 @@
     <script src="{% static "assets/bootstrap/js/bootstrap.min.js" %}"></script>
     <!-- owl -->
     <script src="{% static "assets/bootstrap/js/owl.carousel.min.js" %}"></script>
+    <script>
+        $(document).ready(function() {
+            var owl = $("#owl-demo");
+
+            owl.owlCarousel({
+                items : 9, //10 items above 1000px browser width
+                dots: false,
+                navigation : true,
+                autoplay: true,
+                autoplayTimeout: 2000,
+                autoplayHoverPause:true,
+                loop:false,
+                rewind: true,
+                responsive: {
+                    0: {
+                        items: 3
+                    },
+                    400: {
+                        items: 4
+                    },
+                    500: {
+                        items: 5
+                    },
+                    600: {
+                        items: 6
+                    },
+                    700: {
+                        items: 7
+                    },
+                    800: {
+                        items: 8
+                    },
+                    900: {
+                        items: 9
+                    },
+                    1000: {
+                        items: 9
+                    }
+                }
+            });
+        });
+    </script>
     {% block script %}
     {% endblock %}
 

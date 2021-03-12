@@ -6,8 +6,8 @@ import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import InsPerms from '../Role/GovPerms'
 import {validationSchema} from '../../../../backend/webapp/src/components/Org/OrgUser/validationSchema'
-
 import EmployeeMap from "./Employee_map/Map"
+import BackButton from "@utils/Button/BackButton"
 
 
 export class EmployeeAdd extends Component {
@@ -27,6 +27,7 @@ export class EmployeeAdd extends Component {
                 email: '',
                 gender: 'Эрэгтэй',
                 register: '',
+                phone_number: '',
                 is_admin: false,
                 choose_role: '',
             },
@@ -304,13 +305,6 @@ export class EmployeeAdd extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="text-left">
-                        <NavLink to={`${prefix}`}>
-                            <p className="btn gp-outline-primary">
-                                <i className="fa fa-angle-double-left"></i> Буцах
-                            </p>
-                        </NavLink>
-                    </div>
                     <div className="row">
                         <Formik
                             enableReinitialize
@@ -427,8 +421,19 @@ export class EmployeeAdd extends Component {
                                                 <ErrorMessage name="choose_role" component="div" className="text-danger"/>
                                             </div>
                                         </div>
-                                        <div className='form-row'>
+                                        <div className="form-row">
                                             <div className="form-group col-md-6">
+                                                <label htmlFor="phone_number">Утасны дугаар:</label>
+                                                <Field
+                                                    className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                    name='phone_number'
+                                                    id="id_phone_number"
+                                                    type="text"
+                                                    placeholder="Утасны дугаар"
+                                                />
+                                                <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                            </div>
+                                            <div className="form-group col-md-6 mt-1 text-center"><br/>
                                                 <label htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
@@ -438,13 +443,12 @@ export class EmployeeAdd extends Component {
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
-                                            <div className="form-group col-md-6">
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-12">
                                                 <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => {
                                                     if (is_address_map) {
                                                         if (this.state.last_geo_id) {
-                                                            if (this.state.map_coordinate.length > 0) {
-                                                                this.setState({ map_coordinate: this.state.map_coordinate, is_marker: !this.state.is_marker })
-                                                            }
                                                             this.getGeom(this.state.last_geo_id)
                                                         }
                                                     }
@@ -568,7 +572,7 @@ export class EmployeeAdd extends Component {
                                                             sendPointCoordinate={this.getPoint}
                                                             map_coordinate={this.state.map_coordinate}
                                                             point={point}
-                                                            is_marker={this.state.is_marker}
+                                                            is_marker={this.state.is_address_map}
                                                             class={(errors.point ? 'border border-danger' : '')}
                                                         />
                                                     </div>
@@ -593,6 +597,7 @@ export class EmployeeAdd extends Component {
                     title={this.state.title}
                     model_type_icon={this.state.model_type_icon}
                 />
+                <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
             </div>
         )
     }

@@ -17,7 +17,7 @@ class LinkExternal extends Component {
 }
 
 
-export class Help extends Component {
+export default class Help extends Component {
 
     render() {
         return (

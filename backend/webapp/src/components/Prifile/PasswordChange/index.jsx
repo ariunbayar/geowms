@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { service } from './service'
 
-export class PasswordChange extends Component {
+export default class PasswordChange extends Component {
 
     constructor(props) {
 

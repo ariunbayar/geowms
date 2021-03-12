@@ -5,7 +5,7 @@ from main.utils import get_display_items, get_fields
 
 class Datatable():
 
-    def __init__(self, model, initial_qs=None, payload=None, оруулах_талбарууд=[], хасах_талбарууд=[], хувьсах_талбарууд=[]):
+    def __init__(self, model, initial_qs=None, payload=None, оруулах_талбарууд=[], хасах_талбарууд=[], хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
         self.Model = model
         self.payload = payload
         self.оруулах_талбарууд = оруулах_талбарууд
@@ -19,6 +19,7 @@ class Datatable():
         self.search_qs = initial_qs or model.objects
         self.items_page = None
         self.total_page = None
+        self.нэмэлт_талбарууд = нэмэлт_талбарууд
 
     @property
     def хасах_талбарууд(self):
@@ -56,6 +57,5 @@ class Datatable():
         self.search()
         self.sort()
         self.paginator()
-        items = get_display_items(self.items_page, self.оруулах_талбарууд, self.хувьсах_талбарууд)
-
+        items = get_display_items(self.items_page, self.оруулах_талбарууд, self.хувьсах_талбарууд, self.нэмэлт_талбарууд)
         return items, self.total_page

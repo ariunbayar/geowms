@@ -9,6 +9,7 @@ from backend.govorg.models import GovOrg
 from backend.wms.models import WMS
 from main import utils
 from django.contrib.auth.decorators import login_required
+from main.components import Datatable
 
 
 def _get_govorg_display(govorg):
@@ -30,30 +31,23 @@ def _get_govorg_display(govorg):
 @login_required(login_url='/gov/secure/login/')
 def systemList(request, payload):
     org = Org.objects.filter(employee__user=request.user).first()
-    page = payload.get('page')
-    per_page = payload.get('per_page')
-    query = payload.get('query') or ''
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    system_list = GovOrg.objects.all().annotate(search=SearchVector(
-        'name')).filter(search__contains=query, org_id = org.id, deleted_by__isnull=True).order_by(sort_name)
-
-    total_items = Paginator(system_list, per_page)
-    items_page = total_items.page(page)
-    items = [
-        _get_govorg_display(govorg)
-        for govorg in items_page.object_list
-    ]
-    total_page = total_items.num_pages
-
+    qs = GovOrg.objects.filter(org_id=org.id)
+    оруулах_талбарууд = ['id', 'name', 'token', 'created_at']
+    datatable = Datatable(
+        model=GovOrg,
+        initial_qs=qs,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
+    items, total_page = datatable.get()
     rsp = {
         'items': items,
-        'page': page,
-        'total_page': total_page,
+        'page': payload.get('page'),
+        'total_page': total_page
     }
 
     return JsonResponse(rsp)
+
 
 def _get_wmslayer(request, system, wms):
     layer_list = []

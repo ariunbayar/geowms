@@ -14,7 +14,7 @@ const hhwp = ({ chunks, filename }) => new HtmlWebpackPlugin({
 })
 
 module.exports = {
-    mode: "development",
+    mode: "production",
     entry: {
         'backend/webapp':
             hp('backend/webapp/src/index.js'),
@@ -30,6 +30,9 @@ module.exports = {
 
         'frontend/covid':
             hp('frontend/covid/src/index.js'),
+
+        'frontend/open_layer':
+            hp('frontend/open_layer/src/index.js'),
 
         'frontend/profile':
             hp('frontend/profile/src/index.js'),
@@ -126,6 +129,10 @@ module.exports = {
         hhwp({
             chunks: ['frontend/covid'],
             filename: path.resolve(__dirname, 'frontend/covid/templates/covid/index.prod.html'),
+        }),
+        hhwp({
+            chunks: ['frontend/open_layer'],
+            filename: path.resolve(__dirname, 'frontend/open_layer/templates/open_layer/index.prod.html'),
         }),
         hhwp({
             chunks: ['frontend/profile'],

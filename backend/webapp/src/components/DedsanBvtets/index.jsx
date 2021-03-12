@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch, Route, NavLink} from "react-router-dom"
 import {List} from './List'
 
-export class DedsanBvtets extends Component {
+export default class DedsanBvtets extends Component {
 
 
     constructor(props) {

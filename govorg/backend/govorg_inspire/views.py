@@ -46,6 +46,7 @@ from main.utils import has_employee_perm
 from main.utils import refreshMaterializedView
 from main.utils import get_emp_property_roles
 from main.utils import get_feature_from_geojson
+from main import utils
 from main.inspire import GEoIdGenerator
 
 
@@ -669,34 +670,39 @@ def control_to_remove(request, payload):
 def _check_and_make_form_json(feature_id, values):
     form_json_list = list()
     code_list_values = ""
-    with transaction.atomic():
-        view = get_object_or_404(ViewNames, feature_id=feature_id)
-        view_props = ViewProperties.objects.filter(view=view)
 
-        for view_prop in view_props:
-            prop_qs = LProperties.objects
-            prop_qs = prop_qs.filter(property_id=view_prop.property_id)
-            prop_qs = prop_qs.first()
+    view_qs = ViewNames.objects
+    view_qs = view_qs.filter(feature_id=feature_id)
+    view = view_qs.first()
 
-            form_json = dict()
-            form_json['property_name'] = prop_qs.property_name
-            form_json['property_id'] = prop_qs.property_id
-            form_json['property_code'] = prop_qs.property_code
-            form_json['property_definition'] = prop_qs.property_definition
-            if prop_qs.value_type_id == 'single-select':
-                code_list_values = _code_list_display(prop_qs.property_id)
-            form_json['value_type_id'] = prop_qs.value_type_id
-            form_json['value_type'] = prop_qs.value_type_id
-            form_json['data_list'] = code_list_values
-            form_json['data'] = ''
+    view_props = ViewProperties.objects.filter(view=view)
 
-            for p_code, value in values.items():
-                if p_code.lower() in prop_qs.property_name.lower():
-                    form_json['data'] = value
+    for view_prop in view_props:
+        prop_qs = LProperties.objects
+        prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+        prop_qs = prop_qs.first()
 
-            form_json_list.append(form_json)
+        form_json = dict()
+        form_json['property_name'] = prop_qs.property_name
+        form_json['property_id'] = prop_qs.property_id
+        form_json['property_code'] = prop_qs.property_code
+        form_json['property_definition'] = prop_qs.property_definition
+        if prop_qs.value_type_id == 'single-select':
+            code_list_values = _code_list_display(prop_qs.property_id)
+        form_json['value_type_id'] = prop_qs.value_type_id
+        form_json['value_type'] = prop_qs.value_type_id
+        form_json['data_list'] = code_list_values
+        form_json['data'] = ''
 
-    form_json_list = json.dumps(form_json_list)
+        for p_code, value in values.items():
+            if p_code.lower() in prop_qs.property_name.lower():
+                form_json['data'] = value
+                if prop_qs.value_type_id == 'date':
+                    form_json['data'] = utils.date_fix_format(value)
+
+        form_json_list.append(form_json)
+
+    form_json_list = json.dumps(form_json_list, ensure_ascii=False)
     return form_json_list
 
 
@@ -709,12 +715,13 @@ def _create_request(request_datas):
     change_request.package_id = request_datas['package_id']
     change_request.feature_id = request_datas['feature_id']
     change_request.employee = request_datas['employee']
+    change_request.org_id = request_datas['employee'].org.id
     change_request.state = request_datas['state']
     change_request.kind = request_datas['kind']
     change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
     change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
     change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
-    change_request.order_at = request_datas['order_at'] if 'order_at' in request_datas else None
+    change_request.order_at = utils.date_to_timezone(request_datas['order_at']) if 'order_at' in request_datas else None
     change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
 
     change_request.save()
@@ -747,8 +754,10 @@ def _make_request(values, request_values):
     return success, info
 
 
-def _delete_file(for_delete_items):
-    transaction.rollback()
+def _delete_file(for_delete_items, Sid=None):
+    if Sid:
+        transaction.savepoint_rollback(Sid)
+
     fileList = glob.glob(
         os.path.join(
             settings.BASE_DIR,
@@ -880,8 +889,9 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 
         layer = ds[0]
         if layer:
-            with transaction.atomic():
-                if len(layer) > 1:
+            if len(layer) > 1:
+                with transaction.atomic():
+                    Sid = transaction.savepoint()
                     request_datas = {
                         'theme_id': tid,
                         'package_id': pid,
@@ -893,64 +903,62 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                         'order_no': order_no,
                     }
                     main_request_id = _create_request(request_datas)
+                    for val in layer:
+                        values = dict()
+                        for name in range(0, len(layer.fields)):
+                            field_name = val[name].name  # field name
+                            value = val.get(name)  # value ni
 
-                for val in layer:
-                    values = dict()
-                    for name in range(0, len(layer.fields)):
-                        field_name = val[name].name  # field name
-                        value = val.get(name)  # value ni
+                            if name == 0:
 
-                        if name == 0:
+                                # geo_id = _make_geo_id(feature_id)
+                                geo_json = val.geom.json  # goemetry json
 
-                            # geo_id = _make_geo_id(feature_id)
-                            geo_json = val.geom.json  # goemetry json
+                                if geo_json:
+                                    success, info, request_kind = _check_perm(
+                                        employee,
+                                        feature_id,
+                                        geo_json
+                                    )
 
-                            if geo_json:
-                                success, info, request_kind = _check_perm(
-                                    employee,
-                                    feature_id,
-                                    geo_json
-                                )
+                                    if not success:
+                                        _delete_file(for_delete_items, Sid)
+                                        rsp = {
+                                            'success': success,
+                                            'info': info,
+                                        }
+                                        return JsonResponse(rsp)
 
-                                if not success:
-                                    _delete_file(for_delete_items)
+                                else:
+                                    _delete_file(for_delete_items, Sid)
                                     rsp = {
-                                        'success': success,
-                                        'info': info,
+                                        'success': False,
+                                        'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
                                     }
                                     return JsonResponse(rsp)
 
-                            else:
-                                _delete_file(for_delete_items)
-                                rsp = {
-                                    'success': False,
-                                    'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
-                                }
-                                return JsonResponse(rsp)
+                            values[field_name] = value
 
-                        values[field_name] = value
+                        request_values = {
+                            'theme_id': tid,
+                            'package_id': pid,
+                            'feature_id': fid,
+                            'employee': employee,
+                            'geo_json': geo_json,
+                            'kind': request_kind,
+                            'order_at': order_at,
+                            'order_no': order_no,
+                            'group_id': main_request_id,
+                        }
+                        success, info = _make_request(values, request_values)
+                        if not success:
+                            _delete_file(for_delete_items, Sid)
+                            break
 
-                    request_values = {
-                        'theme_id': tid,
-                        'package_id': pid,
-                        'feature_id': fid,
-                        'employee': employee,
-                        'geo_json': geo_json,
-                        'kind': request_kind,
-                        'order_at': order_at,
-                        'order_no': order_no,
-                        'group_id': main_request_id,
+                    rsp = {
+                        'success': success,
+                        'info': info
                     }
-                    success, info = _make_request(values, request_values)
-
-                    if not success:
-                        _delete_file(for_delete_items)
-                        break
-
-                rsp = {
-                    'success': success,
-                    'info': info
-                }
 
     else:
         rsp = {
