@@ -19,13 +19,6 @@ from govorg.backend.org_request.models import ChangeRequest
 from django.conf import settings
 from main import utils
 import main.geoserver as geoserver
-from main.utils import (
-    dict_fetchall,
-    slugifyWord,
-    get_geoJson,
-    geoJsonConvertGeom,
-    geojson_to_geom
-)
 
 
 def _get_service_url(request, token):
@@ -238,30 +231,32 @@ def _get_layer_name(employee):
     return allowed_layers
 
 
-def _get_org_data(geo_id):
-    cql_data = []
-    cursor = connections['default'].cursor()
-    sql = """
-        SELECT
-            ST_AsText(ST_Transform(st_force2d(geo_data),4326)) as geom
-        FROM
-            m_geo_datas
-        WHERE
-            geo_id='{geo_id}'
-    """.format(
-        geo_id=geo_id
-    )
+def _get_cql_filter(geo_id):
+    cql_data = utils.get_2d_data(geo_id)
+    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data = cql_data)
+    return cql_filter if cql_data else ''
 
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
-    rows = list(rows)
-    data = rows[0]['geom']
 
-    return data
+def _get_request_content(base_url, request, geo_id, headers):
+    if request.GET.get('REQUEST') == 'GetMap' and geo_id != 'au_496':
+        cql_filter = _get_cql_filter(geo_id)
+        queryargs = {
+            **request.GET,
+            'cql_filter': cql_filter,
+        }
+
+        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5)
+
+    else:
+        queryargs = request.GET
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+
+    return rsp, queryargs
 
 
 @require_GET
 def qgis_proxy(request, token):
+
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -275,20 +270,8 @@ def qgis_proxy(request, token):
     )
     headers = {**BASE_HEADERS}
     geo_id = employee.org.geo_id
-    if request.GET.get('REQUEST') == 'GetMap' and geo_id != 'au_496':
-        cql_data = _get_org_data(geo_id)
-        cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data = cql_data)
-        queryargs = {
-            **request.GET,
-            'cql_filter': cql_filter,
-        }
 
-        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5)
-
-    else:
-        queryargs = request.GET
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
-
+    rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
