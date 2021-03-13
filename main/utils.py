@@ -1136,27 +1136,25 @@ def get_code_list_from_property_id(property_id):
     LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
     code_list_values = []
     code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
-    if code_list_configs:
-        for code_list_config in code_list_configs:
-            property_id = code_list_config.property_id
-            to_property_id = code_list_config.to_property_id
-            if property_id == to_property_id:
-                to_property_id += 1
-            x_range = range(property_id, to_property_id)
-            for property_id_up in x_range:
-                code_lists = LCodeLists.objects.filter(property_id=property_id_up)
-                if code_lists:
-                    for code_list in code_lists:
-                        value = dict()
-                        if code_list.top_code_list_id:
-                            value['top_code_list_id'] = code_list.top_code_list_id
+    for code_list_config in code_list_configs:
+        property_id = code_list_config.property_id
+        to_property_id = code_list_config.to_property_id
+        if property_id == to_property_id:
+            to_property_id += 1
+        x_range = range(property_id, to_property_id)
+        for property_id_up in x_range:
+            code_lists = LCodeLists.objects.filter(property_id=property_id_up)
+            for code_list in code_lists:
+                value = dict()
+                if code_list.top_code_list_id:
+                    value['top_code_list_id'] = code_list.top_code_list_id
 
-                        value['code_list_id'] = code_list.code_list_id
-                        value['property_id'] = code_list.property_id
-                        value['code_list_code'] = code_list.code_list_code
-                        value['code_list_name'] = code_list.code_list_name
-                        value['code_list_definition'] = code_list.code_list_definition
-                        code_list_values.append(value)
+                value['code_list_id'] = code_list.code_list_id
+                value['property_id'] = code_list.property_id
+                value['code_list_code'] = code_list.code_list_code
+                value['code_list_name'] = code_list.code_list_name
+                value['code_list_definition'] = code_list.code_list_definition
+                code_list_values.append(value)
 
     return code_list_values
 

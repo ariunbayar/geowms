@@ -42,7 +42,6 @@ def _search_model_values(search_keys, values, Model):
     return searchs
 
 
-
 def _check_len(array):
     print(len(list(array)))
 
@@ -56,8 +55,8 @@ def _get_config():
 
 def _check_select(value_type_id, property_id):
     data_list = list()
-    if value_type_id == 'select' :
-        code_list_values = utils.get_code_list_from_property_id(property_id)
+    if value_type_id == 'select':
+        data_list = utils.get_code_list_from_property_id(int(property_id))
 
     return data_list
 
@@ -66,6 +65,16 @@ def _check_select(value_type_id, property_id):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal(request, payload):
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_tseg_fields(request):
 
     values = [{
         'package_code': 'gnp-gp'
@@ -84,50 +93,13 @@ def tseg_personal(request, payload):
     value_type_config = _get_config()
     for idx in range(0, len(property_values)):
         obj = json.loads(value_type_config.value)
-        index = property_values[idx]
-        data_list = _check_select(index['value_type_id'], index['property_id'])
 
+        property_values[idx]['value_type_id'] = obj[property_values[idx]['value_type_id']]
+        data_list = _check_select(property_values[idx]['value_type_id'], property_values[idx]['property_id'])
         property_values[idx]['data_list'] = data_list
-        index['value_type_id'] = obj[index['value_type_id']]
-        print(property_values)
 
     rsp = {
         'success': True,
         'fields': property_values,
     }
     return JsonResponse(rsp)
-
-
-values = [{
-    'package_code': 'gnp-gp'
-}]
-keys = ['package_code']
-package_values = _search_model_values(keys, values, LPackages)
-keys = ['package_id']
-feature_values = _search_model_values(keys, package_values, LFeatures)
-keys = ['feature_id']
-feature_config_values = _search_model_values(keys, feature_values, LFeatureConfigs)
-keys = ['data_type_id']
-data_type_config_values = _search_model_values(keys, feature_config_values, LDataTypeConfigs)
-keys = ['property_id']
-property_values = _search_model_values(keys, data_type_config_values, LProperties)
-
-value_type_config = _get_config()
-for idx in range(0, len(property_values)):
-    obj = json.loads(value_type_config.value)
-    index = property_values[idx]
-    data_list = _check_select(index['value_type_id'], index['property_id'])
-
-    property_values[idx]['data_list'] = data_list
-    index['value_type_id'] = obj[index['value_type_id']]
-    print(property_values[idx]['value_type_id'])
-    print(property_values[idx])
-    print("--------------------------")
-
-
-
-
-
-
-
-

@@ -46,6 +46,7 @@ urlpatterns = [
 
         path('tseg/', include(([
             path('', tseg_view.tseg_personal),
+            path('get-fields/', tseg_view.get_tseg_fields),
         ], 'tseg'))),
 
         path('system/', include(([
