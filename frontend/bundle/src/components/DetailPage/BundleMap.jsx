@@ -644,6 +644,16 @@ export default class BundleMap extends Component {
             })
     }
 
+    checkTile(wms_tile, tile) {
+        let pop_tile = wms_tile
+        if (wms_tile.getVisible() || tile.getVisible()) {
+            if (tile.getVisible()) {
+                pop_tile = tile
+            }
+        }
+        return pop_tile
+    }
+
     featureFromUrl(coordinate) {
         const view = this.map.getView()
         const projection = view.getProjection()
@@ -657,14 +667,15 @@ export default class BundleMap extends Component {
 
         wms_array.map(({layers}) => {
             if(layers) {
-                layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
-                    if (tile.getVisible()) {
+                layers.map(({tile, wms_tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                    const pop_tile = this.checkTile(wms_tile, tile)
+                    if (pop_tile.getVisible()) {
                         const {layer_code, is_feature} = this.check_inspire_layer(code)
                         if (is_feature) {
                             not_visible_layers.push(layer_code)
                         }
                         if (!is_feature) {
-                            const wms_source = tile.getSource()
+                            const wms_source = pop_tile.getSource()
                             const url = wms_source.getFeatureInfoUrl(
                                 coordinate,
                                 resolution,
@@ -845,6 +856,7 @@ export default class BundleMap extends Component {
 
         const wms_array = this.getWMSArray()
         wms_array.map(({ layers }, w_idx) => {
+            console.log(layers);
             if(layers) {
                 layers.map(({tile, code}, idx) => {
                     if (tile.getVisible()) {
