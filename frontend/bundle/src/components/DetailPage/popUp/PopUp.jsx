@@ -129,9 +129,11 @@ class PopUpCmp extends Component {
     setNowData(number, datas, mode, code, geom_name) {
         let data
         this.is_from_inspire = true
+
         if (this.props.is_from_inspire) data = [datas[number - 1]]
         else data = datas[number - 1]
-        if (!code.startsWith("gp_layer_")) {
+
+        if (code != "gp_layer_geodetical_point_view") {
             this.is_from_inspire = false
         }
         this.setState({ data, mode, datas, code, geom_name })

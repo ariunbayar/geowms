@@ -1,18 +1,13 @@
 import React, { Component, Fragment } from 'react'
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
-
 import {service} from './service'
 import {TextField} from '../../helpers/forms'
-
 import 'ol/ol.css'
-
 import {Map, View} from 'ol'
 import Tile from 'ol/layer/Tile'
 import TileImage from 'ol/source/TileImage'
-
 import TileWMS from 'ol/source/TileWMS';
-import ImageWMS from 'ol/source/ImageWMS';
 
 
 export class Үүсгэх extends Component {
@@ -133,13 +128,19 @@ export class Үүсгэх extends Component {
         this.setState({snapshot_timeout})
     }
 
-    handleURLChangeWMS(event, setFieldValue) {
+    handleURLChangeWMS(event, setFieldValue, type) {
         const wms = this.state.wms_list[event.target.value]
         if (wms) {
             this.tileWMS.updateParams({'LAYERS': wms.layers.join()})
             this.tileWMS.setUrl(wms.url)
-            setFieldValue('url', wms.url)
-            setFieldValue('wms', event.target.value)
+            if(type == "wms"){
+                setFieldValue('url', wms.url)
+                setFieldValue('wms', event.target.value)
+            }
+            else{
+                setFieldValue('url', wms.cache_url)
+                setFieldValue('wmts', event.target.value)
+            }
         }
     }
 
@@ -155,6 +156,9 @@ export class Үүсгэх extends Component {
             this.tile.setSource(this.tileImage)
         }
         if (tilename == 'wms') {
+            this.tile.setSource(this.tileWMS)
+        }
+        if (tilename == 'wmts') {
             this.tile.setSource(this.tileWMS)
         }
     }
@@ -221,6 +225,16 @@ export class Үүсгэх extends Component {
                                                 WMS tile service:
                                             </label>
                                         </div>
+                                        <div className="form-check">
+                                            <label className="form-check-label">
+                                                <input className="form-check-input" type="radio" name="tilename"
+                                                    checked={values.tilename === 'wmts'}
+                                                    onBlur={handleBlur}
+                                                    onChange={e => this.handleTileChange(e, 'wmts', setFieldValue)}
+                                                />
+                                                WMTS tile service:
+                                            </label>
+                                        </div>
 
                                         {values.tilename == 'xyz' &&
                                             <TextField
@@ -234,11 +248,26 @@ export class Үүсгэх extends Component {
                                         {values.tilename == 'wms' &&
                                             <Fragment>
                                                 <Field name="wms" as="select" className="form-control"
-                                                    onChange={(e) => this.handleURLChangeWMS(e, setFieldValue)}
+                                                    onChange={(e) => this.handleURLChangeWMS(e, setFieldValue, 'wms')}
                                                 >
                                                     <option value="" key={this.state.wms_list.length}>---------</option>
                                                     {this.state.wms_list.map((wms, index) =>
                                                         <option key={index} value={index}> {wms.name} ({wms.url}) </option>
+                                                    )}
+                                                </Field>
+                                                <ErrorMessage name="url" component="div" className="invalid-feedback"/>
+                                            </Fragment>
+                                        }
+
+                                        {values.tilename == 'wmts' &&
+                                            <Fragment>
+                                                <Field name="wmts" as="select" className="form-control"
+                                                    onChange={(e) => this.handleURLChangeWMS(e, setFieldValue, 'wmts')}
+                                                >
+                                                    <option value="" key={this.state.wms_list.length}>---------</option>
+                                                    {this.state.wms_list.map((wms, index) =>
+                                                        wms.wms_or_wmts &&
+                                                        <option key={index} value={index}> {wms.name} ({wms.cache_url}) </option>
                                                     )}
                                                 </Field>
                                                 <ErrorMessage name="url" component="div" className="invalid-feedback"/>

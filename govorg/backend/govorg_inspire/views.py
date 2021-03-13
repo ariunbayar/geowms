@@ -502,7 +502,6 @@ def create(request, payload):
 
     form_json = check_form_json(fid, form_json, employee)
     geo_json = json.dumps(geo_json, ensure_ascii=False)
-
     ChangeRequest.objects.create(
             old_geo_id=None,
             new_geo_id=None,

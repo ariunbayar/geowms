@@ -24,15 +24,14 @@ import { ShopCart } from './ShopControls/ShopCart'
 import { DrawPayModal } from './controls/DrawPayModal'
 import "./styles.css"
 import { service } from './service'
-import { SidebarButton } from './SidebarButton'
-import { Sidebar } from './Sidebar'
-import { SearchBar } from './searchControl/SearchBar'
-import { SearchBarButton } from './searchControl/SearchBarButton'
+import { SearchBarComponent } from './searchControl/SearchBar'
 import { DrawButton } from './controls/Draw'
 import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
+import SideBar from "./SideBar"
+import WMSItem from './WMSItem'
 
 
 export default class BundleMap extends Component {
@@ -48,8 +47,6 @@ export default class BundleMap extends Component {
             projection_display: 'EPSG:4326',
             bundle: props.bundle,
             map_wms_list: [],
-            is_sidebar_open: true,
-            is_search_sidebar_open: true,
             is_modal_info_open: false,
             coordinate_clicked: null,
             vector_layer: null,
@@ -69,8 +66,6 @@ export default class BundleMap extends Component {
             shopmodal: new ShopModal(),
             cart: new ShopCart(),
             drawModal: new DrawPayModal(),
-            sidebar: new Sidebar(),
-            searchbar: new SearchBar(),
             alertBox: new AlertRoot(), // this.controls.alertBox.showAlert(true, "....")
             popup: new PopUp(),
         }
@@ -81,8 +76,6 @@ export default class BundleMap extends Component {
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.handleMapClick = this.handleMapClick.bind(this)
         this.handleSetCenter = this.handleSetCenter.bind(this)
-        this.toggleSidebar = this.toggleSidebar.bind(this)
-        this.searchSidebar = this.searchSidebar.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.toggleDraw = this.toggleDraw.bind(this)
@@ -234,7 +227,6 @@ export default class BundleMap extends Component {
                 }),
             }
         })
-        this.setState({map_wms_list})
         map_wms_list.map((wms, idx) =>
             wms.layers.map((layer, idx) => {
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
@@ -242,6 +234,7 @@ export default class BundleMap extends Component {
                 layer['legend'] = layer.wms_tile.getSource().getLegendUrl()
             })
         )
+        this.setState({map_wms_list})
 
         const base_layer_name = 'base_layer'
         const {base_layers, base_layer_controls} =
@@ -353,16 +346,12 @@ export default class BundleMap extends Component {
                     undefinedHTML: '',
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
-                new SidebarButton({toggleSidebar: this.toggleSidebar}),
-                new SearchBarButton({searchSidebar: this.searchSidebar}),
                 new DrawButton({toggleDraw: this.toggleDraw}),
                 scale_line,
                 this.controls.modal,
                 this.controls.shopmodal,
                 this.controls.drawModal,
                 this.controls.coordinateCopy,
-                this.controls.sidebar,
-                this.controls.searchbar,
                 this.controls.cart,
                 this.controls.alertBox,
                 this.controls.popup,
@@ -387,6 +376,7 @@ export default class BundleMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        window.map = map
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
 
@@ -654,6 +644,16 @@ export default class BundleMap extends Component {
             })
     }
 
+    checkTile(wms_tile, tile) {
+        let pop_tile = wms_tile
+        if (wms_tile.getVisible() || tile.getVisible()) {
+            if (tile.getVisible()) {
+                pop_tile = tile
+            }
+        }
+        return pop_tile
+    }
+
     featureFromUrl(coordinate) {
         const view = this.map.getView()
         const projection = view.getProjection()
@@ -667,14 +667,15 @@ export default class BundleMap extends Component {
 
         wms_array.map(({layers}) => {
             if(layers) {
-                layers.map(({tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
-                    if (tile.getVisible()) {
+                layers.map(({tile, wms_tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                    const pop_tile = this.checkTile(wms_tile, tile)
+                    if (pop_tile.getVisible()) {
                         const {layer_code, is_feature} = this.check_inspire_layer(code)
                         if (is_feature) {
                             not_visible_layers.push(layer_code)
                         }
                         if (!is_feature) {
-                            const wms_source = tile.getSource()
+                            const wms_source = pop_tile.getSource()
                             const url = wms_source.getFeatureInfoUrl(
                                 coordinate,
                                 resolution,
@@ -855,6 +856,7 @@ export default class BundleMap extends Component {
 
         const wms_array = this.getWMSArray()
         wms_array.map(({ layers }, w_idx) => {
+            console.log(layers);
             if(layers) {
                 layers.map(({tile, code}, idx) => {
                     if (tile.getVisible()) {
@@ -935,43 +937,6 @@ export default class BundleMap extends Component {
             this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
         }
         this.getFeatureInfoFromInspire(feature, point_coordinate, scale)
-    }
-
-    toggleSidebar(is_not_open) {
-
-        let is_setState = true
-        if (is_not_open == this.state.is_sidebar_open) {
-            is_setState = false
-        }
-        if (is_setState) {
-            this.setState(prevState => ({
-                is_sidebar_open: !prevState.is_sidebar_open,
-            }))
-        }
-
-        var islaod
-        if(this.state.is_sidebar_open){
-            islaod = true
-        }
-
-        else {
-            islaod = false
-        }
-        this.controls.sidebar.showSideBar(this.state.map_wms_list, islaod, this.addLayerToSearch)
-
-    }
-
-    searchSidebar(event) {
-        this.setState(prevState => ({
-            is_search_sidebar_open: !prevState.is_search_sidebar_open,
-        }))
-
-        if(this.state.is_search_sidebar_open){
-            this.controls.searchbar.showSideBar(null, true)
-        }
-        else {
-            this.controls.searchbar.showSideBar(this.handleSetCenter, false, this.getOnlyFeature, this.resetFilteredOnlyFeature, this.setFeatureOnMap)
-        }
     }
 
     transformToLatLong(coordinateList) {
@@ -1146,13 +1111,63 @@ export default class BundleMap extends Component {
     }
 
     render() {
-      const is_modal_info_open = this.state.is_modal_info_open
+        const { is_modal_info_open} = this.state
+        const Menu_comp = () => {
+            return (
+                <div>
+                    {this.state.map_wms_list.map((wms, idx) =>
+                        <WMSItem wms={wms} key={idx} addLayer={this.addLayerToSearch}/>
+                    )}
+                </div>
+            )
+        }
+        const Search_comp = () => {
+            return (
+                <div>
+                    <SearchBarComponent
+                        handleSetCenter={this.handleSetCenter}
+                        getOnlyFeature={this.getOnlyFeature}
+                        resetFilteredOnlyFeature={this.resetFilteredOnlyFeature}
+                        setFeatureOnMap={this.setFeatureOnMap}
+                    />
+                </div>
+            )
+        }
+        const settings_component = () => {
+            return(
+                <div>
+                    <h4>Тун удахгүй</h4>
+                </div>
+            )
+        }
         return (
             <div>
                 <div className="row">
                     <div className="col-md-12">
                         <div className="🌍">
-                            <div id="map"></div>
+                            <div id="map">
+                                <SideBar
+                                items = {[
+                                    {
+                                        "key": "menus",
+                                        "icon": "fa fa-bars",
+                                        "title": "Давхаргууд",
+                                        "component": Menu_comp,
+                                    },
+                                    {
+                                        "key": "search",
+                                        "icon": "fa fa-search",
+                                        "component": Search_comp
+                                    },
+                                    {
+                                        "key": "settings",
+                                        "icon": "fa fa-gear",
+                                        "component": settings_component,
+                                        "bottom": true
+                                    },
+                                ]}
+                                />
+                            </div>
                             {
                              is_modal_info_open &&
                                 <ModalAlert
