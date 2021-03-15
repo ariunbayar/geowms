@@ -1743,46 +1743,34 @@ def get_select_values(request):
     return JsonResponse(rsp)
 
 
-# @require_GET
-# @ajax_required
-# def emp_age_count(request):
+@require_GET
+@ajax_required
+def emp_gender_count(request):
+    genderCount = User.objects.all()
 
-#     RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
+    rsp = {
+        'count_male': genderCount.filter(gender='Эрэгтэй').count(),
+        'count_female': genderCount.filter(gender='Эмэгтэй').count()
+    }
 
-#     page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
-#     page_date = []
-#     page_date_count = []
-#     for page in page_all:
-#         page_date.append(page.datetime.strftime('%Y-%m-%d'))
-#         page_date_count.append(RequestEvent.objects.filter(datetime__date=page.datetime).count())
-
-#     rsp = {
-#         'page_date': page_date,
-#         'page_date_count': page_date_count,
-#     }
-#     return JsonResponse(rsp)
+    return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
-def emp_gender_count(request):
+def emp_age_count(request):
 
-    # countMale = User.objects.filter(gender='Эрэгтэй').count()
-    # print(countMale)
-    # countFemale = User.objects.filter(gender='Эмэгтэй').count()
-    # print(countFemale)
+    RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
 
-    # rsp = {
-    #     'count_male': countMale,
-    #     'count_female': countFemale
-    # }
-
-    # RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
-    genderCount = User.objects.all()
+    page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
+    page_date = []
+    page_date_count = []
+    for page in page_all:
+        page_date.append(page.datetime.strftime('%Y-%m-%d'))
+        page_date_count.append(RequestEvent.objects.filter(datetime__date=page.datetime).count())
 
     rsp = {
-        'user_count': genderCount.objects.filter(gender='Эрэгтэй').count(),
-        'user_count_null': genderCount.objects.filter(gender='Эмэгтэй').count()
+        'page_date': page_date,
+        'page_date_count': page_date_count,
     }
-
     return JsonResponse(rsp)

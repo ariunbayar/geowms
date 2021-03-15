@@ -15,12 +15,12 @@ export class Graph extends Component {
             <div className="card">
                 <div className="card-body">
                     <div className="row">
-                        {/* <div className="col-md-6">
+                        <div className="col-md-6">
                             <h5 className="text-uppercase text-center">
                                 Албан хаагчдын насаар
                             </h5>
                             <Charts></Charts>
-                        </div> */}
+                        </div>
                         <div className="col-md-6">
                             <h5 className="text-uppercase text-center">
                                 Албан хаагчдын хүйсээр
