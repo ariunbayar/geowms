@@ -62,6 +62,16 @@ class OrgRole(models.Model):
 
 
 class EmployeeAddress(models.Model):
+    STATE_REGULER_CODE = 1
+    STATE_SHORT_CODE = 1
+
+    STATE_REGULER = 'Байнгын оршин суугаа хаяг'
+    STATE_SHORT = 'Түр оршин суугаа хаяг'
+
+    STATE_CHOICES = [
+        (STATE_REGULER_CODE, STATE_REGULER),
+        (STATE_SHORT_CODE, STATE_SHORT),
+    ]
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     level_1 = models.CharField(max_length=100, null=True)
     level_2 = models.CharField(max_length=100, null=True)
@@ -70,6 +80,7 @@ class EmployeeAddress(models.Model):
     apartment = models.CharField(max_length=100, null=True)
     door_number = models.CharField(max_length=100, null=True)
     point = models.PointField(srid=4326)
+    address_state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True)
 
 
 class EmployeeErguul(models.Model):

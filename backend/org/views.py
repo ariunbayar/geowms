@@ -103,6 +103,8 @@ def employee_detail(request, pk):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
+        'address_state': address.address_state,
+        'address_state_display': EmployeeAddress.STATE_REGULER if address.address_state == EmployeeAddress.STATE_REGULER_CODE else EmployeeAddress.STATE_SHORT,
     }
 
     return JsonResponse({'success': True, 'employee': employees_display})
@@ -209,6 +211,7 @@ def employee_update(request, payload, pk, level):
     apartment = address.get('apartment')
     door_number = address.get('door_number')
     point_coordinate = address.get('point')
+    address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
 
@@ -255,6 +258,11 @@ def employee_update(request, payload, pk, level):
             address = EmployeeAddress.objects
             address = address.filter(employee=employee)
 
+            if address_state:
+                address_state = EmployeeAddress.STATE_REGULER_CODE
+            else:
+                address_state = EmployeeAddress.STATE_SHORT_CODE
+
             if address:
                 address.update(
                     point=point,
@@ -264,6 +272,7 @@ def employee_update(request, payload, pk, level):
                     street=street,
                     apartment=apartment,
                     door_number=door_number,
+                    address_state=address_state,
                 )
             else:
                 address.create(
@@ -275,6 +284,7 @@ def employee_update(request, payload, pk, level):
                     street=street,
                     apartment=apartment,
                     door_number=door_number,
+                    address_state=address_state,
                 )
         rsp = {
             'success': True, 'errors': errors

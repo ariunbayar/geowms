@@ -103,6 +103,7 @@ export class Detail extends Component {
             apartment,
             door_number,
             state,
+            address_state_display,
         } = this.state.employee
 
         const {
@@ -195,6 +196,13 @@ export class Detail extends Component {
                                 <dt className="col-md-3">Гэрийн хаяг:</dt>
                                 <dd className="col-md-9">
                                     { level_1 + ", " + level_2 + ", " + level_3 + ", " + street + " гудамж " + apartment + " байр, " + door_number + " тоот" }
+                                </dd>
+
+                                <dt className="col-md-3">
+                                    Төлөв:
+                                </dt>
+                                <dd className="col-md-9">
+                                    { address_state_display }
                                 </dd>
                             </dl>
                         }

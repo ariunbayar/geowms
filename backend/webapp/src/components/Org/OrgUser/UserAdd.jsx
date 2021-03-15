@@ -43,12 +43,14 @@ export class UserAdd extends Component {
             sum_geo_id: '',
             horoo_geo_id: '',
             feature: {},
+
             description: '',
             point_coordinate: [],
             point: {},
             street: '',
             apartment: '',
             door_number: '',
+            address_state: true,
 
             modal_alert_status: "closed",
             is_loading: true,
@@ -103,6 +105,7 @@ export class UserAdd extends Component {
                         street: employee.street,
                         apartment: employee.apartment,
                         door_number: employee.door_number,
+                        address_state: employee.address_state,
                     })
                 }
             })
@@ -114,7 +117,7 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
 
-        const { street, apartment, door_number, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
+        const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
         const address = {
             'street': street,
             'apartment': apartment,
@@ -123,6 +126,7 @@ export class UserAdd extends Component {
             'level_2': sum_name,
             'level_3': horoo_name,
             'point': point_coordinate,
+            'address_state': address_state,
         }
 
         const payload = {
@@ -208,6 +212,7 @@ export class UserAdd extends Component {
         service
             .formOptions('second')
             .then(({ success, secondOrders }) => {
+                console.log(secondOrders);
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
@@ -311,8 +316,10 @@ export class UserAdd extends Component {
 
     render() {
         const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, is_loading,
-            feature, street, apartment, door_number, point, errors
+            feature, street, apartment, door_number, point, errors, address_state
         } = this.state
+
+        console.log(address_state);
 
         const { positions, states } = this.props
 
@@ -526,7 +533,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="aimag">Аймаг/Хот:</label>
                                 <select
                                     id="aimag"
-                                    className={'form-control ' + (errors.level_1 ? 'is-invalid' : '')}
+                                    className={'custom-select ' + (errors.level_1 ? 'is-invalid' : '')}
                                     aria-label="Default select example"
                                     onChange={(e) => this.handleChange(e, 'aimag', 'sum', ['sum', 'horoo'], 'mongol')}
                                     value={aimag_id}
@@ -541,7 +548,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="sum">Сум/Дүүрэг:</label>
                                 <select
                                     id="sum"
-                                    className={'form-control ' + (errors.level_2 ? 'is-invalid' : '')}
+                                    className={'custom-select ' + (errors.level_2 ? 'is-invalid' : '')}
                                     onChange={(e) => this.handleChange(e, 'sum', 'horoo', ['horoo'], 'aimag')}
                                     value={sum_id}
                                 >
@@ -555,7 +562,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="horoo">Хороо/Баг:</label>
                                 <select
                                     id="horoo"
-                                    className={'form-control ' + (errors.level_3 ? 'is-invalid' : '')}
+                                    className={'custom-select ' + (errors.level_3 ? 'is-invalid' : '')}
                                     onChange={(e) => this.handleChange(e, 'horoo', undefined, [], 'sum')}
                                     value={horoo_id}
                                 >
@@ -580,7 +587,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="form-group col-4">
+                            <div className="form-group col-2">
                                 <label htmlFor="apartment">Байр:</label>
                                 <div className="input-group">
                                     <input
@@ -595,7 +602,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="form-group col-4">
+                            <div className="form-group col-2">
                                 <label htmlFor="door_number">Хаалганы дугаар:</label>
                                 <div className="input-group">
                                     <input
@@ -609,6 +616,17 @@ export class UserAdd extends Component {
                                         <span className="input-group-text">тоот</span>
                                     </div>
                                 </div>
+                            </div>
+                            <div className="form-group col-4">
+                                <label htmlFor='id_address_state'>Байнгын оршин суугаа хаяг</label>
+                                <input
+                                    className={'form-control ' + (errors.address_state ? 'is-invalid' : '')}
+                                    onChange={(e) => this.setState({ address_state: e.target.checked })}
+                                    name='address_state'
+                                    id="id_address_state"
+                                    type="checkbox"
+                                    checked={address_state}
+                                />
                             </div>
                         </div>
                         <EmployeeMap
