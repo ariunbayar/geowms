@@ -84,8 +84,6 @@ def employee_detail(request, pk):
     address = address.filter(employee=employee)
     address = address.first()
 
-    print('haha', address.address_state )
-    print('haha', type(address.address_state) )
     employees_display = {
         'id': user.id,
         'last_name': user.last_name,
@@ -279,9 +277,7 @@ def employee_update(request, payload, pk, level):
 
             address = EmployeeAddress.objects
             address = address.filter(employee=employee)
-            print(address_state)
             address_state = _get_address_state_code(address_state)
-            print(address_state)
             if address:
                 address.update(
                     point=point,
