@@ -347,7 +347,7 @@ def employee_add(request, payload, level, pk):
     last_name = values.get('last_name')
     email = values.get('email')
     gender = values.get('gender')
-    pro_class = int(values.get('pro_class'))
+    pro_class = values.get('pro_class')
     register = values.get('register')
     is_admin = values.get('is_admin')
     is_super = values.get('is_super')
@@ -387,6 +387,11 @@ def employee_add(request, payload, level, pk):
             user.save()
             user.roles.add(2)
             user.save()
+
+            if pro_class:
+                pro_class = int(pro_class)
+            else:
+                pro_class = None
 
             employee = Employee()
             employee.position_id = position
