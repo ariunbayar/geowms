@@ -574,72 +574,116 @@ export class EmployeeEdit extends Component {
                                                 </Fragment>
                                             </div>
                                         </div>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="register">Регистер:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.register ? 'is-invalid' : '')}
-                                                    name='register'
-                                                    id="id_register"
-                                                    type="text"
-                                                    placeholder="Регистер"
-                                                />
-                                                <ErrorMessage name="register" component="div" className="text-danger"/>
-                                            </div>
-                                            {this.props.employee.is_admin &&
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="choose_role">Role: </label>
-                                                <select className='form-control' id="choose_role" name='choose_role' value={this.state.role_id} onChange={(e) => this.getRole(e.target.value)}>
-                                                    <option value="">--- Role сонгоно уу ---</option>
-                                                    {role_list.length > 0 && role_list.map((role, idx) =>
-                                                        <option key={idx} value={role.role_id}>{role.role_name}</option>
-                                                    )}
-                                                </select>
-                                            </div>}
-                                        </div>
-                                        <div className='form-row'>
-                                            <div className="form-group col-md-6">
-                                                <div className="position-relative has-icon-right">
-                                                    <label htmlFor="phone_number" >Утасны дугаар:</label>
-                                                    <Field
-                                                        className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
-                                                        name='phone_number'
-                                                        id="id_phone_number"
-                                                        type="text"
-                                                        placeholder="Утасны дугаар"
-                                                    />
-                                                    <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                        {this.props.employee.is_admin
+                                        ?
+                                            <div>
+                                                <div className="form-row">
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="register">Регистер:</label>
+                                                        <Field
+                                                            className={'form-control ' + (errors.register ? 'is-invalid' : '')}
+                                                            name='register'
+                                                            id="id_register"
+                                                            type="text"
+                                                            placeholder="Регистер"
+                                                        />
+                                                        <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                    </div>
+                                                    {this.props.employee.is_admin &&
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="choose_role">Role: </label>
+                                                        <select className='form-control' id="choose_role" name='choose_role' value={this.state.role_id} onChange={(e) => this.getRole(e.target.value)}>
+                                                            <option value="">--- Role сонгоно уу ---</option>
+                                                            {role_list.length > 0 && role_list.map((role, idx) =>
+                                                                <option key={idx} value={role.role_id}>{role.role_name}</option>
+                                                            )}
+                                                        </select>
+                                                    </div>}
+                                                </div>
+                                                <div className='form-row'>
+                                                    <div className="form-group col-md-6">
+                                                        <div className="position-relative has-icon-right">
+                                                            <label htmlFor="phone_number" >Утасны дугаар:</label>
+                                                            <Field
+                                                                className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                                name='phone_number'
+                                                                id="id_phone_number"
+                                                                type="text"
+                                                                placeholder="Утасны дугаар"
+                                                            />
+                                                            <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                        </div>
+                                                    </div>
+                                                    {this.props.employee.is_admin &&
+                                                    <div className="form-group col-md-3 mt-1 text-center"><br/>
+                                                        <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                                        <Field
+                                                            className="ml-2"
+                                                            name='is_admin'
+                                                            id="id_is_admin"
+                                                            type="checkbox"
+                                                        />
+                                                        <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                    </div>
+                                                    }
+                                                    {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
+                                                    <div className="col-md-3 mt-1 text-center"><br/>
+                                                        <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                            {} Нууц үг солих имэйл илгээх
+                                                        </button>
+                                                    </div>
+                                                    : null
+                                                    }
                                                 </div>
                                             </div>
-                                            {this.props.employee.is_admin &&
-                                            <div className="form-group col-md-3 mt-1 text-center"><br/>
-                                                <label htmlFor='is_admin'>Байгууллагын админ</label>
-                                                <Field
-                                                    className="ml-2"
-                                                    name='is_admin'
-                                                    id="id_is_admin"
-                                                    type="checkbox"
-                                                />
-                                                <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                        :
+                                            <div>
+                                                <div className="form-row">
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="register">Регистер:</label>
+                                                        <Field
+                                                            className={'form-control ' + (errors.register ? 'is-invalid' : '')}
+                                                            name='register'
+                                                            id="id_register"
+                                                            type="text"
+                                                            placeholder="Регистер"
+                                                        />
+                                                        <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                    </div>
+                                                    <div className="form-group col-md-6">
+                                                        <div className="position-relative has-icon-right">
+                                                            <label htmlFor="phone_number" >Утасны дугаар:</label>
+                                                            <Field
+                                                                className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                                name='phone_number'
+                                                                id="id_phone_number"
+                                                                type="text"
+                                                                placeholder="Утасны дугаар"
+                                                            />
+                                                            <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
+                                                    <div className="col-md-3 mt-1">
+                                                        <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                            {} Нууц үг солих имэйл илгээх
+                                                        </button>
+                                                    </div>
+                                                    : null
+                                                    }
+                                                </div><br/>
                                             </div>
-                                            }
-                                            {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
-                                            <div className="col-md-3 mt-1 text-center"><br/>
-                                                <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
-                                                    {} Нууц үг солих имэйл илгээх
-                                                </button>
-                                            </div>
-                                            : null
-                                            }
-                                        </div>
+                                        }
+                                        {this.props.employee.is_admin &&
                                         <div className="form-group col-md-12">
                                             <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => this.refreshMap()}>
                                                 {
                                                     !is_address_map ? "Role сонгох" : "Гэрийн хаяг оруулах"
                                                 }
                                             </button>
-                                        </div>
-
+                                        </div>}
                                         <div>
                                             {
                                                 is_address_map && (is_inspire_role || is_inspire_role_null)
