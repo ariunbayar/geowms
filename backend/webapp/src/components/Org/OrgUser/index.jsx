@@ -15,6 +15,7 @@ export class OrgUser extends Component {
         this.state = {
             positions: [],
             states: [],
+            pro_classes: [],
         }
         this.getSelectValue = this.getSelectValue.bind(this)
     }
@@ -26,9 +27,9 @@ export class OrgUser extends Component {
     getSelectValue() {
         service
             .getSelectValue()
-            .then(({ success, positions, states }) => {
+            .then(({ success, positions, states, pro_classes }) => {
                 if (success) {
-                    this.setState({ positions, states })
+                    this.setState({ positions, states, pro_classes })
                 }
             })
     }
@@ -45,6 +46,7 @@ export class OrgUser extends Component {
                             refreshCount={this.props.refreshCount}
                             positions={this.state.positions}
                             states={this.state.states}
+                            pro_classes={this.state.pro_classes}
                         />
                     }
                 />
@@ -57,6 +59,7 @@ export class OrgUser extends Component {
                             refreshCount={this.props.refreshCount}
                             positions={this.state.positions}
                             states={this.state.states}
+                            pro_classes={this.state.pro_classes}
                         />
                     }
                 />

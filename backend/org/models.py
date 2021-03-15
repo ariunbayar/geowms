@@ -34,6 +34,16 @@ class Employee(models.Model):
         (4, STATE_SICK),
     ]
 
+    ANGIIN_DARGA = 'Ангийн дарга'
+    GISHUUN = 'Гишүүн'
+    NARIIN_BICHGIIN_DARGA = 'Нарийн бичгийн дарга'
+
+    CLASS_CHOICES = [
+        (1, ANGIIN_DARGA),
+        (2, GISHUUN),
+        (3, NARIIN_BICHGIIN_DARGA),
+    ]
+
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     position = models.ForeignKey(DefaultPosition, on_delete=models.PROTECT, null=True)
@@ -43,6 +53,7 @@ class Employee(models.Model):
     phone_number = models.CharField(max_length=8, null=True)
     token = models.CharField(max_length=250, unique=True, null=True)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True)
+    pro_class = models.PositiveIntegerField(choices=CLASS_CHOICES, null=True)
 
 
 class OrgRole(models.Model):

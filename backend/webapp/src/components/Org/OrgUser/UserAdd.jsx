@@ -29,6 +29,7 @@ export class UserAdd extends Component {
                 re_password_mail: false,
                 phone_number: '',
                 state: '',
+                pro_class: '',
             },
             aimag: [],
             sum: [],
@@ -102,6 +103,7 @@ export class UserAdd extends Component {
                             is_super: employee.is_super,
                             phone_number: employee.phone_number,
                             state: employee.state_id,
+                            pro_class: employee.pro_class_id,
                         },
                         point: employee.point,
                         street: employee.street,
@@ -135,8 +137,6 @@ export class UserAdd extends Component {
             'values': values,
             'address': address,
         }
-
-        console.log(payload);
 
         if(org_emp){
             if(values.re_password !== values.password)
@@ -216,7 +216,6 @@ export class UserAdd extends Component {
         service
             .formOptions('second')
             .then(({ success, secondOrders }) => {
-                console.log(secondOrders);
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
@@ -323,9 +322,7 @@ export class UserAdd extends Component {
             feature, street, apartment, door_number, point, errors, address_state
         } = this.state
 
-        console.log(address_state);
-
-        const { positions, states } = this.props
+        const { positions, states, pro_classes } = this.props
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -462,7 +459,7 @@ export class UserAdd extends Component {
                                         </div>
                                         <div className='form-row'>
                                             <div className="form-group col-12">
-                                                <label htmlFor='id_state'>Төлөв</label>
+                                                <label htmlFor='id_state'>Төлөв:</label>
                                                 <Field name="state" as="select" id="state"
                                                     style={{ fontSize: '0.8rem' }}
                                                     className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
@@ -475,6 +472,23 @@ export class UserAdd extends Component {
                                                     }
                                                 </Field>
                                                 <ErrorMessage name="state" component="div" className="invalid-feedback"/>
+                                            </div>
+                                        </div>
+                                        <div className='form-row'>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>
+                                                <Field name="pro_class" as="select" id="pro_class"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.pro_class ? 'is-invalid' : '')}
+                                                >
+                                                    <option value="">--- Мэргэжлийн ангийн бүрэлдэхүүн ---</option>
+                                                    {
+                                                        pro_classes.map((item, idx) =>
+                                                            <option key={idx} value={item[0]}>{item[1]}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {
