@@ -40,6 +40,7 @@ export class App extends Component {
         this.requestCount = this.requestCount.bind(this)
         this.getEmpRoles = this.getEmpRoles.bind(this)
         this.getApproveAndRevoke = this.getApproveAndRevoke.bind(this)
+        this.getBaseLayer = this.getBaseLayer.bind(this)
     }
 
     componentDidMount() {
