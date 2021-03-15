@@ -1447,6 +1447,68 @@ def get_addresses(request, level, pk):
     return JsonResponse(rsp)
 
 
+# def _get_employee_display(employee):
+
+#     user = employee.user
+#     role = EmpPerm.objects.filter(employee=employee).first()
+
+#     address = EmployeeAddress.objects.filter(employee=employee).first()
+
+#     return {
+#         'id': employee.id,
+#         'point': address.point.json if hasattr(address, 'point') else '',
+#     }
+
+
+@require_GET
+@ajax_required
+def get_address(request, level, pk):
+    points = list()
+    org = get_object_or_404(Org, pk=pk, level=level)
+    employees = Employee.objects.filter(org=org)
+
+    for employee in employees:
+        addresses = EmployeeAddress.objects.filter(employee=employee).first()
+        if addresses:
+            point_info = dict()
+            point = addresses.point
+            point_info['id'] = addresses.employee.id
+            point_info['first_name'] = addresses.employee.user.first_name  # etseg
+            point_info['last_name'] = addresses.employee.user.last_name  # onooj ogson ner
+            point_info['is_cloned'] = _is_cloned_feature(addresses)
+            feature = utils.get_feature_from_geojson(point.json, properties=point_info)
+            points.append(feature)
+
+        erguul = EmployeeErguul.objects.filter(address=addresses).first()
+        if erguul:
+            erguul_info = dict()
+            point = erguul.point
+            erguul_info['id'] = employee.id
+            erguul_info['is_erguul'] = True
+            erguul_info['first_name'] = employee.user.first_name # etseg
+            erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+
+            feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
+            points.append(feature)
+
+    feature_collection = FeatureCollection(points)
+
+    rsp = {
+        'success': True,
+        'points': feature_collection,
+    }
+    return JsonResponse(rsp)
+    # employee = get_object_or_404(Employee, user=request.user)
+    # feature_collection = _get_feature_collection([employee])
+    # print(feature_collection, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+    # rsp = {
+    #     'success': True,
+    #     'points': feature_collection,
+    # }
+    # return JsonResponse(rsp)
+
+
 @require_POST
 @ajax_required
 def get_emp_info(request, payload, pk):

@@ -16,6 +16,7 @@ export const service = {
     formOptions,
     getGeom,
     getAddresses,
+    getAddress,
     getEmpInfo,
     getErguulegFields,
     saveErguul,
@@ -126,6 +127,13 @@ function getGeom(geo_id) {
 function getAddresses(level, id) {
     const opts = getGetOptions()
     return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
+}
+
+function getAddress(level, id) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${level}/${id}/address/`, requestOptions).then(handleResponse)
 }
 
 function getEmpInfo(id, is_erguul) {
