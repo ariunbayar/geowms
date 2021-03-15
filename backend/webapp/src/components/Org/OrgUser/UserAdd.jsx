@@ -85,7 +85,9 @@ export class UserAdd extends Component {
             .employeeDetail(org_emp)
             .then(({ success, employee }) => {
                 if (success) {
-                    this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
+                    if (org_emp) {
+                        this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
+                    }
                     this.setState({
                         form_values: {
                             id: employee.id,
@@ -133,6 +135,8 @@ export class UserAdd extends Component {
             'values': values,
             'address': address,
         }
+
+        console.log(payload);
 
         if(org_emp){
             if(values.re_password !== values.password)
@@ -617,16 +621,19 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="form-group col-4">
-                                <label htmlFor='id_address_state'>Байнгын оршин суугаа хаяг</label>
-                                <input
-                                    className={'form-control ' + (errors.address_state ? 'is-invalid' : '')}
-                                    onChange={(e) => this.setState({ address_state: e.target.checked })}
-                                    name='address_state'
-                                    id="id_address_state"
-                                    type="checkbox"
-                                    checked={address_state}
-                                />
+                            <div className="form-group mt-4">
+                                <div className="form-check">
+                                    <label className="form-check-label" htmlFor="id_address_state">
+                                        Байнгын оршин суугаа хаяг
+                                    </label>
+                                    <input
+                                        onChange={(e) => this.setState({ address_state: e.target.checked })}
+                                        className={'form-check-input col-4 ' + (errors.address_state ? 'is-invalid' : '')}
+                                        type="checkbox"
+                                        id="id_address_state"
+                                        checked={address_state}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <EmployeeMap

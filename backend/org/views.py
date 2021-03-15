@@ -258,9 +258,8 @@ def employee_update(request, payload, pk, level):
             address = EmployeeAddress.objects
             address = address.filter(employee=employee)
 
-            if address_state:
-                address_state = EmployeeAddress.STATE_REGULER_CODE
-            else:
+            address_state = EmployeeAddress.STATE_REGULER_CODE
+            if not address_state:
                 address_state = EmployeeAddress.STATE_SHORT_CODE
 
             if address:
