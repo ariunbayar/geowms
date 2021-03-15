@@ -82,7 +82,8 @@ def _get_employee_display(employee):
 
 def _get_name(user_id, item):
     user = User.objects.filter(pk=user_id).first()
-    return user.first_name
+    full_name = user.last_name[0] + '.' + user.first_name
+    return full_name
 
 
 def _get_email(user_id, item):
@@ -131,8 +132,7 @@ def list(request, payload):
 
     return JsonResponse(rsp)
 
-suda = Employee.objects.all().extra(select = {'qweqw': 0})
-# print(suda.values())
+
 def _set_user(user, user_detail):
 
     user.username = user_detail['username']
