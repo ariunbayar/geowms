@@ -646,11 +646,6 @@ export default class BundleMap extends Component {
 
     checkTile(wms_tile, tile) {
         let pop_tile = wms_tile
-        if (wms_tile.getVisible() || tile.getVisible()) {
-            if (tile.getVisible()) {
-                pop_tile = tile
-            }
-        }
         return pop_tile
     }
 
@@ -667,7 +662,8 @@ export default class BundleMap extends Component {
 
         wms_array.map(({layers}) => {
             if(layers) {
-                layers.map(({tile, wms_tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                console.log(layers);
+                layers.map(({tile, wms_tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code, wms_or_cache_ur}) => {
                     const pop_tile = this.checkTile(wms_tile, tile)
                     if (pop_tile.getVisible()) {
                         const {layer_code, is_feature} = this.check_inspire_layer(code)
@@ -676,6 +672,7 @@ export default class BundleMap extends Component {
                         }
                         if (!is_feature) {
                             const wms_source = pop_tile.getSource()
+                            console.log(wms_source);
                             const url = wms_source.getFeatureInfoUrl(
                                 coordinate,
                                 resolution,
