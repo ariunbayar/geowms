@@ -219,7 +219,7 @@ def employee_update(request, payload, pk, level):
     is_admin = values.get('is_admin')
     password = values.get('password')
     is_super = values.get('is_super')
-    pro_class = int(values.get('pro_class'))
+    pro_class = values.get('pro_class')
     phone_number = values.get('phone_number')
     re_password_mail = values.get('re_password_mail')
 
@@ -264,6 +264,11 @@ def employee_update(request, payload, pk, level):
                 subject = 'Геопортал нууц үг солих'
                 text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
                 utils.send_approve_email(user, subject, text)
+
+            if pro_class:
+                pro_class = int(pro_class)
+            else:
+                pro_class = None
 
             employee = Employee.objects
             employee = employee.filter(user_id=pk)
