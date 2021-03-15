@@ -82,7 +82,7 @@ def _get_employee_display(employee):
 
 def _get_name(user_id, item):
     user = User.objects.filter(pk=user_id).first()
-    full_name = user.last_name[0] + '.' + user.first_name
+    full_name = user.last_name + '. ' + user.first_name
     return full_name
 
 
