@@ -61,6 +61,14 @@ def all(request, payload, level):
     })
 
 
+def _get_address_state_db_value(address_state):
+    if address_state == EmployeeAddress.STATE_REGULER_CODE:
+        address_state = True
+    else:
+        address_state = False
+    return address_state
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -76,6 +84,8 @@ def employee_detail(request, pk):
     address = address.filter(employee=employee)
     address = address.first()
 
+    print('haha', address.address_state )
+    print('haha', type(address.address_state) )
     employees_display = {
         'id': user.id,
         'last_name': user.last_name,
@@ -107,7 +117,7 @@ def employee_detail(request, pk):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
-        'address_state': address.address_state if hasattr(address, 'address_state') else '',
+        'address_state': _get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
         'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
@@ -144,8 +154,6 @@ def _employee_validation(payload, user):
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
         errors['position'] = 'Хоосон байна утга оруулна уу!'
-    elif len(position) > 250:
-        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
         errors['first_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(first_name) > 30:
@@ -187,8 +195,9 @@ def _employee_validation(payload, user):
 
 
 def _get_address_state_code(address_state):
-    address_state = EmployeeAddress.STATE_REGULER_CODE
-    if not address_state:
+    if address_state:
+        address_state = EmployeeAddress.STATE_REGULER_CODE
+    elif not address_state:
         address_state = EmployeeAddress.STATE_SHORT_CODE
     return address_state
 
@@ -270,9 +279,9 @@ def employee_update(request, payload, pk, level):
 
             address = EmployeeAddress.objects
             address = address.filter(employee=employee)
-
+            print(address_state)
             address_state = _get_address_state_code(address_state)
-
+            print(address_state)
             if address:
                 address.update(
                     point=point,
