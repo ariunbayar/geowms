@@ -13,9 +13,22 @@ def _clear_erguuls(erguuls, Model):
                 erguul.delete()
 
 
+def _check_tailbar_duplicate(ErguulTailbar):
+    tailbar_qs = ErguulTailbar.objects.all()
+    for tailbar in tailbar_qs:
+        qs = ErguulTailbar.objects
+        qs = qs.filter(id=tailbar.id)
+        if len(qs) > 1:
+            first_tailbar = qs.first()
+            exclude_first = qs.exclude(id=first_tailbar.id)
+            for delete_tailbar in exclude_first:
+                delete_tailbar.delete()
+
+
 def _set_is_over(apps, schema_editor):
     EmployeeErguul = apps.get_model('backend_org', 'EmployeeErguul')
     ErguulTailbar = apps.get_model('backend_org', 'ErguulTailbar')
+    _check_tailbar_duplicate(ErguulTailbar)
     erguuls = EmployeeErguul.objects.all()
     for erguul in erguuls:
         tailbar = ErguulTailbar.objects
@@ -30,7 +43,7 @@ def _set_is_over(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_org', '0020_auto_20210224_1137'),
+        ('backend_org', '0019_auto_20210224_1137'),
     ]
 
     operations = [
