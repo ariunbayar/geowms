@@ -20,6 +20,8 @@ export const service = {
     getErguulegFields,
     saveErguul,
     getSelectValue,
+    genderCount,
+    ageCount,
 }
 
 
@@ -155,4 +157,14 @@ function getSelectValue() {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/get-select-values/`, requestOptions).then(handleResponse)
+}
+
+function genderCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/emp-gender-count/`, requestOptions).then(handleResponse)
+}
+
+function ageCount() {
+    const requestOptions = {...getGetOptions()}
+    return fetch(`${prefix}/emp-age-count/`, requestOptions).then(handleResponse)
 }
