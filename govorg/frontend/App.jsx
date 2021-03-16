@@ -24,6 +24,7 @@ const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
 const Nema = React.lazy(() => import('./Nema'));
+const NemaMap = React.lazy(() => import('./Nema/Map'));
 
 export class App extends Component {
 
@@ -241,7 +242,7 @@ export class App extends Component {
                                 <Route exact path="/gov/profile/" component={Profile} />
                                 <Route exact path="/gov/profile/password/" component={Password} />
                                 <Route path="/gov/nema/" component={Nema} />
-                                <Route path="/gov/nema/map/" component={Nema} />
+                                <Route path="/gov/nema/map" component={NemaMap} />
                             </Switch>
                         </Suspense>
                     </div>

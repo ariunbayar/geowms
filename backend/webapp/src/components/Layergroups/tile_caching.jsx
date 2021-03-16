@@ -130,7 +130,7 @@ export class TileCaching extends Component {
                                             </div>
                                             <div className="form-row col-md-12 mb-2">
                                                     <label htmlFor="image_format" className="col-md-6 my-2"> Зургийн формат</label>
-                                                       <Field
+                                                    <Field
                                                             name='image_format'
                                                             id='image_format'
                                                             as="select"
@@ -145,7 +145,7 @@ export class TileCaching extends Component {
                                             </div>
                                             <div className="form-row col-md-12 mb-4 mt-2">
                                                     <label htmlFor="" className="col-md-6">Үйлдлийн төрөл</label>
-                                                       <Field
+                                                    <Field
                                                         name='cache_type'
                                                         id='cache_type'
                                                         as="select"

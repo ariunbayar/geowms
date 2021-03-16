@@ -14,6 +14,8 @@ export class NemaTable extends Component {
             талбарууд: [
                 {'field': 'code', "title": 'layer code'},
                 {'field': 'is_open', "title": 'is_open'},
+                {'field': 'created_at', "title": 'Огноо'},
+                {'field': 'created_by', "title": 'Үүсгэсэн'},
             ],
             хувьсах_талбарууд: [
                 {
@@ -57,7 +59,7 @@ export class NemaTable extends Component {
     }
 
     go_link(values){
-        this.props.history.push(`/back/nema/${values.id}/засах/`)
+        this.props.history.push(`/gov/nema/${values.id}/засах/`)
     }
 
     handleRemove() {
@@ -97,7 +99,6 @@ export class NemaTable extends Component {
                     нэмэх_товч={'/gov/nema/үүсгэх/'}
                     refresh={refresh}
                 />
-            
         )
     }
 }

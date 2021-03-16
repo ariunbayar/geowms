@@ -150,8 +150,9 @@ urlpatterns = [
         ], 'revoke_request'))),
 
         path('nema/', include(([
-            path('', govorg_inspire_views.nema_list, name='nema'),
-            path('create/', govorg_inspire_views.create_nema, name='nema'),
+            path('', govorg_inspire_views.nema_list, name='nema_list'),
+            path('create/', govorg_inspire_views.create_nema, name='nema_create'),
+            path('<int:pk>/detail/', govorg_inspire_views.nema_detail, name='nema_detail'),
         ], 'nema'))),
 
     ], 'back_org'))),

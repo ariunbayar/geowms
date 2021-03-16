@@ -2,6 +2,9 @@ import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
 import { service } from './service'
+import ModalAlert from "@utils/Modal/ModalAlert"
+import InspireMap from "@utils/BundleMap"
+
 
 const validationSchema = Yup.object().shape({
     code: Yup.string()
@@ -15,8 +18,13 @@ export class ModelAddNema extends Component {
         this.state = {
             form_values: {
                 code: '',
-                is_open: 1
+                is_open: 1,
+                layer_name: '',
+                created_by: '',
+                created_at: '',
+                user_id: '',
             },
+
             modal_alert_status: 'closed',
             model_alert_text: '',
             model_alert_icon: 'success',
@@ -42,11 +50,17 @@ export class ModelAddNema extends Component {
     }
 
     getDetialAll(id) {
-        service.getGroupDetial(id).then(({nema_detail}) => {
-            if( nema_detail ) {
+        service.getDetialAll(id).then(({nema_detail_list}) => {
+            if( nema_detail_list.length >0 ) {
+                nema_detail_list = nema_detail_list[0]
                 this.setState({
                     form_values: {
-                        code: nema_detail.code
+                        code: nema_detail_list.code,
+                        is_open: nema_detail_list.is_open,
+                        layer_name: nema_detail_list.layer_name,
+                        created_by: nema_detail_list.created_by,
+                        created_at: nema_detail_list.created_at,
+                        user_id: nema_detail_list.user_id,
                     },
                 })
             }
@@ -54,14 +68,15 @@ export class ModelAddNema extends Component {
     }
 
     modalClose(){
-        this.setState({select_layer_status: false})
+        this.setState({modal_alert_status: false})
     }
 
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
         const id = this.props.match.params.id
         service
-            .create_nema_layer(values)
+            .create_nema_layer(values, id)
             .then(({ success, info, errors }) => {
+                console.log(success, info, errors)
                 if (success) {
                     this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'success'})
                     setStatus('saved')
@@ -118,19 +133,34 @@ export class ModelAddNema extends Component {
                                                 <div className="form-row col-md-12 d-inline-block text-dark">
                                                     <div className="form-row col-md-12">
                                                         <label htmlFor="" className="col-md-12">
-                                                            <strong>Давхаргын нэр</strong>
+                                                            <strong>Давхаргын code</strong>
                                                         </label>
                                                         <Field
-                                                            type="code"
+                                                            type="text"
                                                             name='code'
                                                             id='code'
                                                             className={'form-control col-12' + (errors.code ? 'is-invalid' : '')}
                                                         />
                                                         <ErrorMessage name="code" component="div" className="text-danger"/>
                                                     </div>
+
+                                                    {
+                                                        id &&
+                                                        <div className="form-row col-md-12 my-2">
+                                                            <label htmlFor="" className="col-md-12">
+                                                                <strong>Давхаргын Нэр</strong>
+                                                            </label>
+                                                            <Field
+                                                                type="text"
+                                                                name='layer_name'
+                                                                id='layer_name'
+                                                                className={'form-control col-12'}
+                                                            />
+                                                        </div>
+                                                    }
                                                 </div>
                                                 <div className="form-row col-md-12 mb-4 mt-2">
-                                                    <label htmlFor="" className="col-md-6">Давхаргын харагдац</label>
+                                                    <label htmlFor="" className="col-md-6 pt-2">Давхаргын статус</label>
                                                         <Field
                                                                 name='is_open'
                                                                 id='is_open'
@@ -144,6 +174,30 @@ export class ModelAddNema extends Component {
                                                             }
                                                         </Field>
                                                 </div>
+                                                {
+                                                    id &&
+                                                    <div className="form-row col-md-12 mb-4 mt-2">
+                                                        <div className="form-group col-md-6 mb-2">
+                                                            <label htmlFor="">Үүсгэсэн</label>
+                                                            <Field
+                                                                className={'form-control'}
+                                                                name='created_by'
+                                                                id="created_by"
+                                                                type="text"
+                                                            />
+                                                        </div>
+                                                        <div className="form-group col-md-6 mb-2">
+                                                            <label htmlFor="">Үүссэн</label>
+                                                            <Field
+                                                                className={'form-control'}
+                                                                name='created_at'
+                                                                id="created_at"
+                                                                type="text"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                }
                                                 <div className="form-group">
                                                     <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting}>
                                                         {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
@@ -160,9 +214,20 @@ export class ModelAddNema extends Component {
                         </div>
                     </div>
                     <div>
-                        <h1>hoho</h1>
+                        <InspireMap
+                            bundle={{'id': 5}}
+                        />
                     </div>
                 </div>
+                {
+                    modal_alert_status &&
+                    <ModalAlert
+                        modalAction={() => this.modalClose()}
+                        status={modal_alert_status}
+                        title={model_alert_text}
+                        model_type_icon={model_alert_icon}
+                    />
+                }
             </div>
         )
 

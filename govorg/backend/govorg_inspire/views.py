@@ -1004,10 +1004,44 @@ def get_api_url(request):
     return JsonResponse(rsp)
 
 
-def _get_layer_name(layer_code):
-    nemas = NemaWMS.objects.all()
+def _get_nema_code(code):
+    rows = []
+    cursor = connections['nema'].cursor()
+    sql = """
+      select layer_name from _layer where layer_id = '{code}'
+    """.format(
+        code=code
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    return rows
 
-    return nemas
+
+def _check_nema_details(nema_detial_list):
+    layer_name = ''
+    if isinstance(nema_detial_list, list):
+        layer_name = nema_detial_list[0].get('layer_name')
+    elif isinstance(nema_detial_list, dict):
+        layer_name = nema_detial_list.get('layer_name')
+    return layer_name
+
+
+def _get_layer_names(item):
+    nema_code_list = []
+    layer_code = item.get('code') if isinstance(item, dict) else item[0].get('code')
+    nema_base_layer = _get_nema_code(layer_code)
+    if(nema_base_layer):
+        layer_name = _check_nema_details(nema_base_layer)
+
+    return layer_name
+
+
+def _get_nema_status(item):
+    id = item.get('id') if isinstance(item, dict) else item[0].get('id')
+    nema_items = NemaWMS.objects.filter(id=id).first()
+    nema_status = nema_items.get_is_open_display()
+    return nema_status
 
 
 @require_POST
@@ -1017,12 +1051,14 @@ def nema_list(request, payload):
     оруулах_талбарууд = ['id', 'code', 'created_at', 'is_open', 'created_by']
 
     нэмэлт_талбарууд = [
-        {"field": "layer_name", "action": _get_role_name},
+        {"field": "is_open", "action": _get_nema_status},
     ]
+
     datatable = Datatable(
         model=NemaWMS,
         payload=payload,
-        оруулах_талбарууд=оруулах_талбарууд
+        оруулах_талбарууд=оруулах_талбарууд,
+        нэмэлт_талбарууд=нэмэлт_талбарууд
     )
 
     items, total_page = datatable.get()
@@ -1033,21 +1069,6 @@ def nema_list(request, payload):
     }
 
     return JsonResponse(rsp)
-from django.db import connections
-
-
-def _check_nema_code(code):
-    rows = []
-    cursor = connections['nema'].cursor()
-    sql = """
-      select * from _layer where layer_id = '{code}'
-    """.format(
-        code=code
-    )
-    cursor.execute(sql)
-    rows = dict_fetchall(cursor)
-    rows = list(rows)
-    return rows
 
 
 
@@ -1058,6 +1079,8 @@ def create_nema(request, payload):
     values = payload.get('values')
     layer_code = values.get('code')
     is_open = values.get('is_open')
+    id = payload.get('id')
+
     user = User.objects.filter(username=request.user).first()
     errors = {}
 
@@ -1069,18 +1092,28 @@ def create_nema(request, payload):
             'errors': errors
         })
 
-    layer_name = ''
-    nema_detial_list = _check_nema_code(layer_code)
+    nema_detial_list = _get_nema_code(layer_code)
     if not nema_detial_list:
         return JsonResponse({
             'success': False,
-            'info': '{code} нэртэй давхаргын code олдсонгүй!!!.'.format(code=layer_code),
+            'info': '{code} нэртэй давхаргын code олдсонгүй !!!.'.format(code=layer_code),
         })
 
-    if isinstance(nema_detial_list, list):
-        layer_name = nema_detial_list[0].get('layer_name')
-    elif isinstance(nema_detial_list, dict):
-        layer_name = nema_detial_list.get('layer_name')
+    layer_state = False
+    nema = NemaWMS.objects.filter(id=id).first()
+    if not id:
+        if nema:
+            layer_state = True
+
+    if (nema and nema.code != layer_code) or layer_state:
+        if name:
+            return JsonResponse({
+                'success': False,
+                'info': '{code} нэртэй давхарга бүртгэлтэй байна !!!.'.format(code=layer_code),
+            })
+
+
+    layer_name = _check_nema_details(nema_detial_list)
 
     wms = WMS.objects.filter(name__iexact='NEMA').first()
     if not wms:
@@ -1100,13 +1133,12 @@ def create_nema(request, payload):
     else:
         wms_layer = WMSLayer.objects.create(
                         name=layer_name,
-                        code=layer_name,
+                        code=layer_code,
                         wms=wms,
                         title=layer_name,
                         feature_price=0,
         )
 
-    nema = NemaWMS.objects.filter(code=layer_code).first()
     if not nema:
         NemaWMS.objects.create(
             code=layer_code,
@@ -1120,3 +1152,22 @@ def create_nema(request, payload):
     })
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def nema_detail(request, pk):
+    nema_detail_list = []
+    nema_detail = list(NemaWMS.objects.filter(id=pk).values('code', 'id', 'created_by', 'created_at', 'is_open'))
+    user_id = nema_detail[0]['created_by']
+    nema_detail_list.append({
+        'code': nema_detail[0]['code'],
+        'layer_name': _get_layer_names(nema_detail),
+        'is_open': nema_detail[0]['is_open'],
+        'created_by': User.objects.filter(id=user_id).first().username,
+        'created_at': utils.datetime_to_string(nema_detail[0]['created_at']),
+        'user_id': user_id,
+    })
+
+    return JsonResponse({'nema_detail_list':nema_detail_list})
