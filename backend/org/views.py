@@ -657,7 +657,7 @@ def _get_employee(employee, filter_from_user):
         emp_obj = Employee.objects.filter(user=employee).first()
         id = employee.id
         last_name = employee.last_name
-        first_name = employee.first_name
+        first_name = employee.last_name[0].upper() + '.' + employee.first_name.upper()
         email = employee.email
         is_active = employee.is_active
         is_sso = employee.is_sso
@@ -667,12 +667,12 @@ def _get_employee(employee, filter_from_user):
         updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
     else:
         user = User.objects.filter(pk=employee.user_id).first()
-        id = user.id,
-        last_name = user.last_name,
-        first_name = user.first_name,
-        email = user.email,
-        is_active = user.is_active,
-        is_sso = user.is_sso,
+        id = user.id
+        last_name = user.last_name
+        first_name = user.last_name[0].upper() + '.' + user.first_name.upper()
+        email = user.email
+        is_active = user.is_active
+        is_sso = user.is_sso
         is_admin = employee.is_admin
         position = employee.position.name
         created_at = employee.created_at.strftime('%Y-%m-%d')
