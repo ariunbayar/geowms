@@ -7,8 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_wms', '0007_make_id_index'),
-        ('backend_org', '0021_auto_20210224_1138'),
+        ('backend_org', '0024_employee_pro_class'),
     ]
 
     operations = [
@@ -20,7 +19,6 @@ class Migration(migrations.Migration):
                 ('is_open', models.PositiveIntegerField(choices=[(1, 'Нээлттэй'), (2, 'Хаалттай')], db_index=True)),
                 ('created_by', models.IntegerField()),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('wms', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='backend_wms.WMS')),
             ],
         ),
     ]
