@@ -105,7 +105,7 @@ def _get_employee_display(employee):
 
 def _get_name(user_id, item):
     user = User.objects.filter(pk=user_id).first()
-    full_name = user.last_name + '. ' + user.first_name
+    full_name = user.last_name[0].upper() + '.' + user.first_name.upper()
     return full_name
 
 
@@ -811,7 +811,7 @@ def _get_state(state, item):
 def _get_fullname(address_id, item):
     address = EmployeeAddress.objects.filter(id=address_id).first()
     user = address.employee.user
-    fullname = user.first_name + '. ' + user.last_name
+    fullname = user.last_name[0].upper() + '.' + user.first_name.upper()
     return fullname
 
 
