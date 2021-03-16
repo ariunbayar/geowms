@@ -4,7 +4,8 @@ import {handleResponse, getPostOptions, getGetOptions} from '../components/helpe
 
 export const service = {
     create_nema_layer,
-    getDetialAll
+    getDetialAll,
+    getNema
 }
 
 const prefix = '/gov/api/nema'
@@ -20,4 +21,12 @@ function create_nema_layer(values, id){
 function getDetialAll(id) {
     const requestOptions = {...getGetOptions()}
     return fetch(`${prefix}/${id}/detail/`, requestOptions).then(handleResponse)
+}
+
+
+function getNema() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch('/covid/get-nema/', requestOptions).then(handleResponse)
 }
