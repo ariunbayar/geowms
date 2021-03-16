@@ -667,12 +667,12 @@ def _get_employee(employee, filter_from_user):
         updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
     else:
         user = User.objects.filter(pk=employee.user_id).first()
-        id = user.id,
-        last_name = user.last_name,
+        id = user.id
+        last_name = user.last_name
         first_name = user.last_name[0].upper() + '.' + user.first_name.upper()
-        email = user.email,
-        is_active = user.is_active,
-        is_sso = user.is_sso,
+        email = user.email
+        is_active = user.is_active
+        is_sso = user.is_sso
         is_admin = employee.is_admin
         position = employee.position.name
         created_at = employee.created_at.strftime('%Y-%m-%d')
