@@ -30,6 +30,8 @@ export class EmployeeAdd extends Component {
                 phone_number: '',
                 is_admin: false,
                 choose_role: '',
+                state: '',
+                pro_class: '',
             },
             role_list: [],
             emp_role_id: null,
@@ -55,6 +57,7 @@ export class EmployeeAdd extends Component {
             horoo_geo_id: '',
             feature: {},
             description: '',
+
             point_coordinate: [],
             point: {},
             street: '',
@@ -62,6 +65,7 @@ export class EmployeeAdd extends Component {
             door_number: '',
             map_coordinate: [],
             is_marker: true,
+            address_state: true,
 
             is_address_map: true,
         }
@@ -141,7 +145,7 @@ export class EmployeeAdd extends Component {
     handleSubmit(user_detail, { setStatus, setSubmitting, setErrors }){
         const { emp_role_id } = this.state
 
-        const { street, apartment, door_number, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
+        const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
         const address = {
             'street': street,
             'apartment': apartment,
@@ -150,6 +154,7 @@ export class EmployeeAdd extends Component {
             'level_2': sum_name,
             'level_3': horoo_name,
             'point_coordinate': point_coordinate,
+            'address_state': address_state,
         }
 
         service
@@ -300,8 +305,8 @@ export class EmployeeAdd extends Component {
 
     render() {
         const { form_values, roles, role_list, emp_role_id, prefix, is_inspire_role, is_inspire_role_null } = this.state
-        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, is_address_map } = this.state
-        const { org_roles } = this.props
+        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, address_state, is_address_map } = this.state
+        const { positions, states, pro_classes, org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
@@ -364,14 +369,18 @@ export class EmployeeAdd extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="position">Албан тушаал:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.position ? 'is-invalid' : '')}
-                                                    name='position'
-                                                    id="id_position"
-                                                    type="text"
-                                                    placeholder="Албан тушаал"
-                                                />
-                                                <ErrorMessage name="position" component="div" className="text-danger"/>
+                                                <Field name="position" as="select" id="position"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.position ? 'is-invalid' : '')}
+                                                >
+                                                    <option value="">--- Албан тушаал сонгоно уу ---</option>
+                                                    {
+                                                        positions.map((item, idx) =>
+                                                            <option key={idx} value={item.id}>{item.name}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="position" component="span" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -442,6 +451,38 @@ export class EmployeeAdd extends Component {
                                                     type="checkbox"
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                            </div>
+                                        </div>
+                                        <div className="form-row">
+                                            <div className="form-group col-md-6">
+                                                    <label htmlFor='id_state'>Төлөв:</label>
+                                                    <Field name="state" as="select" id="state"
+                                                        style={{ fontSize: '0.8rem' }}
+                                                        className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                    >
+                                                        <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
+                                                        {
+                                                            states.map((item, idx) =>
+                                                                <option key={idx} value={item[0]}>{item[1]}</option>
+                                                            )
+                                                        }
+                                                    </Field>
+                                                    <ErrorMessage name="state" component="div" className="invalid-feedback"/>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>
+                                                    <Field name="pro_class" as="select" id="pro_class"
+                                                        style={{ fontSize: '0.8rem' }}
+                                                        className={'custom-select ' + (errors.pro_class ? 'is-invalid' : '')}
+                                                    >
+                                                        <option value="">--- Мэргэжлийн ангийн бүрэлдэхүүн ---</option>
+                                                        {
+                                                            pro_classes.map((item, idx) =>
+                                                                <option key={idx} value={item[0]}>{item[1]}</option>
+                                                            )
+                                                        }
+                                                    </Field>
+                                                    <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -536,7 +577,7 @@ export class EmployeeAdd extends Component {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="form-group col-4">
+                                                            <div className="form-group col-2">
                                                                 <label htmlFor="apartment">Байр:</label>
                                                                 <div className="input-group">
                                                                     <input
@@ -551,7 +592,7 @@ export class EmployeeAdd extends Component {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="form-group col-4">
+                                                            <div className="form-group col-2">
                                                                 <label htmlFor="door_number">Хаалганы дугаар:</label>
                                                                 <div className="input-group">
                                                                     <input
@@ -564,6 +605,20 @@ export class EmployeeAdd extends Component {
                                                                     <div className="input-group-append">
                                                                         <span className="input-group-text">тоот</span>
                                                                     </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="form-group mt-4">
+                                                                <div className="form-check">
+                                                                    <label className="form-check-label" htmlFor="id_address_state">
+                                                                        Байнгын оршин суугаа хаяг
+                                                                    </label>
+                                                                    <input
+                                                                        onChange={(e) => this.setState({ address_state: e.target.checked })}
+                                                                        className={'form-check-input col-4 ' + (errors.address_state ? 'is-invalid' : '')}
+                                                                        type="checkbox"
+                                                                        id="id_address_state"
+                                                                        checked={address_state}
+                                                                    />
                                                                 </div>
                                                             </div>
                                                         </div>
