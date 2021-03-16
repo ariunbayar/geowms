@@ -1004,12 +1004,21 @@ def get_api_url(request):
     return JsonResponse(rsp)
 
 
+def _get_layer_name(layer_code):
+    nemas = NemaWMS.objects.all()
+
+    return nemas
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def nema_list(request, payload):
     оруулах_талбарууд = ['id', 'code', 'created_at', 'is_open', 'created_by']
 
+    нэмэлт_талбарууд = [
+        {"field": "layer_name", "action": _get_role_name},
+    ]
     datatable = Datatable(
         model=NemaWMS,
         payload=payload,
@@ -1040,6 +1049,8 @@ def _check_nema_code(code):
     rows = list(rows)
     return rows
 
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1059,7 +1070,7 @@ def create_nema(request, payload):
         })
 
     layer_name = ''
-    nema_detial_list = _check_nema_code('c2352')
+    nema_detial_list = _check_nema_code(layer_code)
     if not nema_detial_list:
         return JsonResponse({
             'success': False,
