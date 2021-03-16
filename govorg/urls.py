@@ -149,6 +149,11 @@ urlpatterns = [
             path('revoke-search/', revoke_request_views.revoke_paginate),
         ], 'revoke_request'))),
 
+        path('nema/', include(([
+            path('', govorg_inspire_views.nema_list, name='nema'),
+            path('create/', govorg_inspire_views.create_nema, name='nema'),
+        ], 'nema'))),
+
     ], 'back_org'))),
 
     path('secure/', include(([

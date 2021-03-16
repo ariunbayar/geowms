@@ -29,7 +29,7 @@ from backend.inspire.models import LProperties
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
-from backend.org.models import Employee, Org
+from backend.org.models import Employee, Org, NemaWMS
 
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
@@ -48,6 +48,11 @@ from main.utils import get_emp_property_roles
 from main.utils import get_feature_from_geojson
 from main import utils
 from main.inspire import GEoIdGenerator
+from backend.wms.models import WMS
+from backend.wmslayer.models import WMSLayer
+from main.components import Datatable
+from geoportal_app.models import User
+
 
 
 def _get_changeset_display(ob):
@@ -996,4 +1001,111 @@ def get_api_url(request):
             'select': request.build_absolute_uri(reverse('api:inspire:select'))
         }
     }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def nema_list(request, payload):
+    оруулах_талбарууд = ['id', 'code', 'created_at', 'is_open', 'created_by']
+
+    datatable = Datatable(
+        model=NemaWMS,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
+
+    items, total_page = datatable.get()
+    rsp = {
+        'items': items,
+        'page': payload.get("page"),
+        'total_page': total_page
+    }
+
+    return JsonResponse(rsp)
+from django.db import connections
+
+
+def _check_nema_code(code):
+    rows = []
+    cursor = connections['nema'].cursor()
+    sql = """
+      select * from _layer where layer_id = '{code}'
+    """.format(
+        code=code
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    return rows
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def create_nema(request, payload):
+    values = payload.get('values')
+    layer_code = values.get('code')
+    is_open = values.get('is_open')
+    user = User.objects.filter(username=request.user).first()
+    errors = {}
+
+    if not layer_code:
+        errors['code'] = 'Давхаргын code оруулна уу'
+        return JsonResponse({
+            'success': False,
+            'info': 'Давхаргын code оруулна уу',
+            'errors': errors
+        })
+
+    layer_name = ''
+    nema_detial_list = _check_nema_code('c2352')
+    if not nema_detial_list:
+        return JsonResponse({
+            'success': False,
+            'info': '{code} нэртэй давхаргын code олдсонгүй!!!.'.format(code=layer_code),
+        })
+
+    if isinstance(nema_detial_list, list):
+        layer_name = nema_detial_list[0].get('layer_name')
+    elif isinstance(nema_detial_list, dict):
+        layer_name = nema_detial_list.get('layer_name')
+
+    wms = WMS.objects.filter(name__iexact='NEMA').first()
+    if not wms:
+        return JsonResponse({
+            'success': False,
+            'info': 'Геопортал дээр WMS бүртгэлгүй байна !!!.',
+        })
+
+    wms_layer = wms.wmslayer_set.filter(wms=wms).first()
+
+    if wms_layer:
+        wms_layer.title = layer_name
+        wms_layer.code = layer_code
+        wms_layer.name = layer_name
+        wms_layer.save()
+
+    else:
+        wms_layer = WMSLayer.objects.create(
+                        name=layer_name,
+                        code=layer_name,
+                        wms=wms,
+                        title=layer_name,
+                        feature_price=0,
+        )
+
+    nema = NemaWMS.objects.filter(code=layer_code).first()
+    if not nema:
+        NemaWMS.objects.create(
+            code=layer_code,
+            is_open=is_open,
+            created_by=user.id
+        )
+
+    return JsonResponse({
+        'success': True,
+        'info': "Амжилттай хадгалагдлаа"
+    })
+
     return JsonResponse(rsp)

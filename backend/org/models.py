@@ -96,5 +96,6 @@ class NemaWMS(models.Model):
         (2, 'Хаалттай'),
     ]
     code = models.CharField(max_length=250)
-    wms = models.ForeignKey('backend_wms.WMS', on_delete=models.PROTECT)
     is_open = models.PositiveIntegerField(choices=IS_OPEN, db_index=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

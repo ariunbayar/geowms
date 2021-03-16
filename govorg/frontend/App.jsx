@@ -23,6 +23,7 @@ const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
+const Nema = React.lazy(() => import('./Nema'));
 
 export class App extends Component {
 
@@ -84,7 +85,7 @@ export class App extends Component {
     }
 
     render() {
-        const { org_role, employee, allowed_geom} = this.props.org
+        const { org_role, employee, allowed_geom, obeg_employee} = this.props.org
         const { emp_role , approve, revoke, base_layer_list } = this.state
         return (
             <BrowserRouter>
@@ -112,6 +113,15 @@ export class App extends Component {
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
+                        {
+                            obeg_employee &&
+                            <MenuItem icon="gp-text-primary fa fa-star-o" url="/gov/nema/" text="Covid">
+                                <ul className="sidebar-submenu">
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/" text="Бүртгэл"></MenuItem>
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/map/" text="Газрын зураг"></MenuItem>
+                                </ul>
+                            </MenuItem>
+                        }
                         { revoke &&
                             <MenuItem
                                 icon="gp-text-primary fa fa-times-circle"
@@ -230,6 +240,8 @@ export class App extends Component {
                                 <Route exact path="/gov/help/" component={Help} />
                                 <Route exact path="/gov/profile/" component={Profile} />
                                 <Route exact path="/gov/profile/password/" component={Password} />
+                                <Route path="/gov/nema/" component={Nema} />
+                                <Route path="/gov/nema/map/" component={Nema} />
                             </Switch>
                         </Suspense>
                     </div>
