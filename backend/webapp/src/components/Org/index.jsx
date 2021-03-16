@@ -16,7 +16,6 @@ export default class Org extends Component {
         this.state = {
             user_count: 0,
         }
-
     }
 
     componentDidMount() {
@@ -33,8 +32,6 @@ export default class Org extends Component {
 
 
     render() {
-        const { user_count } = this.state;
-        const org_level = this.props.match.params.level
         return (
             <div className="card">
                 <div className="card-body row">
