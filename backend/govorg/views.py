@@ -14,6 +14,8 @@ from main import utils
 from .models import GovOrg
 from .forms import SystemForm
 from main.components import Datatable
+import requests
+import json
 
 
 def _get_govorg_display(govorg):
@@ -89,7 +91,23 @@ def хадгалах(request, payload, pk=None):
         })
 
 
-def _get_wmslayer(request, govorg, wms):
+def _get_attribute(request, wms):
+
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    base_url = wms.url + '?service=wfs&version=2.0.0&request=DescribeFeatureType&outputFormat=application/json'
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    if rsp.status_code == 200:
+        content = rsp.content.decode("utf-8")
+        content = json.loads(content)
+        return content
+    return []
+
+
+def _get_wmslayers(request, govorg, wms):
     layer_list = []
     system_local_base_url = utils.get_config('system_local_base_url')
     for wmslayer in wms.wmslayer_set.all():
@@ -111,7 +129,8 @@ def _get_govorg_detail_display(request, govorg):
             'name': wms.name,
             'is_active': wms.is_active,
             'url': wms.url,
-            'layer_list': _get_wmslayer(request, govorg, wms),
+            'layer_list': _get_wmslayers(request, govorg, wms),
+            'attributes': _get_attribute(request, wms),
         }
         for wms in WMS.objects.all()
     ]

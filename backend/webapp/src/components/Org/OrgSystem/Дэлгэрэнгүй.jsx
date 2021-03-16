@@ -35,6 +35,13 @@ export class Дэлгэрэнгүй extends Component {
         this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
         this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
         this.handleModalActionClose = this.handleModalActionClose.bind(this)
+        this.setAttribute = this.setAttribute.bind(this)
+    }
+
+    setAttribute(e, id, name){
+
+        console.log(e.target.checked, id, name)
+
     }
 
     addNotif(style, msg, icon){
@@ -187,6 +194,21 @@ export class Дэлгэрэнгүй extends Component {
                                                     </button>
                                                 </span>
                                             </div>
+                                            <ul>
+                                                {wms.attributes.featureTypes.map((attribute, idx) => 
+                                                attribute.typeName == layer.code &&
+                                                    attribute.properties.map((property, index) =>
+                                                        <li>
+                                                            <div class="icheck-primary">
+                                                                <input type="checkbox" id={`active-delete-${layer.code}-${index}`}
+                                                                onChange={(e) => this.setAttribute(e, layer.id, property.name)}
+                                                                />
+                                                                <label for={`active-delete-${layer.code}-${index}`}>&nbsp;{property.name}</label>
+                                                            </div>
+                                                        </li>
+                                                    )
+                                                )}
+                                            </ul>
                                         </li>
                                     )}
                                 </ul>
