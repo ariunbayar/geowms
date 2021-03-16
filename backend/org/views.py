@@ -6,6 +6,7 @@ import PIL.Image as Image
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, F, Func
 from django.db import transaction
@@ -32,7 +33,7 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
@@ -61,6 +62,14 @@ def all(request, payload, level):
     })
 
 
+def _get_address_state_db_value(address_state):
+    if address_state == EmployeeAddress.STATE_REGULER_CODE:
+        address_state = True
+    else:
+        address_state = False
+    return address_state
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -84,15 +93,22 @@ def employee_detail(request, pk):
         'email': user.email,
         'register': user.register,
         'gender': user.gender,
-        'token': employee.token,
+        'is_super': user.is_superuser,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
-        'position': employee.position,
+
+        'token': employee.token,
+        'position': employee.position.name,
+        'position_id': employee.position.id,
+        'state': employee.get_state_display(),
+        'state_id': employee.state,
+        'pro_class_id': employee.pro_class,
+        'pro_class': employee.get_pro_class_display(),
         'is_admin': employee.is_admin,
-        'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
         'phone_number': employee.phone_number,
+
         'level_1': address.level_1 if hasattr(address, 'level_1') else '',
         'level_2': address.level_2 if hasattr(address, 'level_2') else '',
         'level_3': address.level_3 if hasattr(address, 'level_3') else '',
@@ -100,6 +116,8 @@ def employee_detail(request, pk):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
+        'address_state': _get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
+        'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
     return JsonResponse({'success': True, 'employee': employees_display})
@@ -135,8 +153,6 @@ def _employee_validation(payload, user):
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
         errors['position'] = 'Хоосон байна утга оруулна уу!'
-    elif len(position) > 250:
-        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
         errors['first_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(first_name) > 30:
@@ -177,6 +193,14 @@ def _employee_validation(payload, user):
     return errors
 
 
+def _get_address_state_code(address_state):
+    if address_state:
+        address_state = EmployeeAddress.STATE_REGULER_CODE
+    elif not address_state:
+        address_state = EmployeeAddress.STATE_SHORT_CODE
+    return address_state
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -185,7 +209,8 @@ def employee_update(request, payload, pk, level):
 
     values = payload.get('values')
     username = values.get('username')
-    position = values.get('position')
+    position = int(values.get('position'))
+    state = int(values.get('state'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -194,6 +219,7 @@ def employee_update(request, payload, pk, level):
     is_admin = values.get('is_admin')
     password = values.get('password')
     is_super = values.get('is_super')
+    pro_class = values.get('pro_class')
     phone_number = values.get('phone_number')
     re_password_mail = values.get('re_password_mail')
 
@@ -205,6 +231,7 @@ def employee_update(request, payload, pk, level):
     apartment = address.get('apartment')
     door_number = address.get('door_number')
     point_coordinate = address.get('point')
+    address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
 
@@ -238,18 +265,25 @@ def employee_update(request, payload, pk, level):
                 text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
                 utils.send_approve_email(user, subject, text)
 
+            if pro_class:
+                pro_class = int(pro_class)
+            else:
+                pro_class = None
+
             employee = Employee.objects
             employee = employee.filter(user_id=pk)
             employee.update(
                 position=position,
                 is_admin=is_admin,
-                phone_number=phone_number
+                phone_number=phone_number,
+                state=state,
+                pro_class=pro_class,
             )
             employee = employee.first()
 
             address = EmployeeAddress.objects
             address = address.filter(employee=employee)
-
+            address_state = _get_address_state_code(address_state)
             if address:
                 address.update(
                     point=point,
@@ -259,6 +293,7 @@ def employee_update(request, payload, pk, level):
                     street=street,
                     apartment=apartment,
                     door_number=door_number,
+                    address_state=address_state,
                 )
             else:
                 address.create(
@@ -270,6 +305,7 @@ def employee_update(request, payload, pk, level):
                     street=street,
                     apartment=apartment,
                     door_number=door_number,
+                    address_state=address_state,
                 )
         rsp = {
             'success': True, 'errors': errors
@@ -305,11 +341,13 @@ def employee_add(request, payload, level, pk):
 
     values = payload.get('values')
     username = values.get('username')
-    position = values.get('position')
+    position = int(values.get('position'))
+    state = int(values.get('state'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
     gender = values.get('gender')
+    pro_class = values.get('pro_class')
     register = values.get('register')
     is_admin = values.get('is_admin')
     is_super = values.get('is_super')
@@ -321,6 +359,7 @@ def employee_add(request, payload, level, pk):
     level_3 = address.get('level_3')
     street = address.get('street')
     apartment = address.get('apartment')
+    address_state = address.get('address_state')
     door_number = address.get('door_number')
     point_coordinate = address.get('point')
     point = _get_point_for_db(point_coordinate)
@@ -349,13 +388,20 @@ def employee_add(request, payload, level, pk):
             user.roles.add(2)
             user.save()
 
+            if pro_class:
+                pro_class = int(pro_class)
+            else:
+                pro_class = None
+
             employee = Employee()
-            employee.position = position
+            employee.position_id = position
+            employee.state = state
             employee.org = org
             employee.user_id = user.id
             employee.is_admin = is_admin
             employee.token = TokenGeneratorEmployee().get()
             employee.phone_number = phone_number
+            employee.pro_class = pro_class
             employee.save()
 
             employee_address = EmployeeAddress()
@@ -367,6 +413,7 @@ def employee_add(request, payload, level, pk):
             employee_address.apartment = apartment
             employee_address.door_number = door_number
             employee_address.point = point
+            employee_address.address_state = _get_address_state_code(address_state)
             employee_address.save()
 
             utils.send_approve_email(user)
@@ -615,7 +662,7 @@ def _get_employee(employee, filter_from_user):
         is_active = employee.is_active
         is_sso = employee.is_sso
         is_admin = emp_obj.is_admin
-        position = emp_obj.position
+        position = emp_obj.position.name
         created_at = emp_obj.created_at.strftime('%Y-%m-%d')
         updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
     else:
@@ -628,7 +675,7 @@ def _get_employee(employee, filter_from_user):
         is_active = user.is_active,
         is_sso = user.is_sso,
         is_admin = employee.is_admin
-        position = employee.position
+        position = employee.position.name
         created_at = employee.created_at.strftime('%Y-%m-%d')
         updated_at = employee.updated_at.strftime('%Y-%m-%d')
 
@@ -672,7 +719,6 @@ def employee_list(request, payload, level, pk):
         qs = Employee.objects
         qs = qs.filter(org=org)
         qs = qs.annotate(search=SearchVector(
-                'position',
                 'is_admin',
                 'created_at',
                 'updated_at'
@@ -1676,5 +1722,33 @@ def get_erguuls(request):
 
     rsp = {
         'feature_collection': feature_collection,
+    }
+    return JsonResponse(rsp)
+
+
+def _get_choices(Model, field_name):
+    choices = list()
+    for f in Model._meta.get_fields():
+        if f.name == field_name:
+            choices = f.choices
+    return choices
+
+
+@require_GET
+@ajax_required
+def get_select_values(request):
+
+    qs = DefaultPosition.objects
+    qs = qs.all()
+    positions = list(qs.values())
+
+    states = _get_choices(Employee, 'state')
+    pro_classes = _get_choices(Employee, 'pro_class')
+
+    rsp = {
+        'success': True,
+        'positions': positions,
+        'states': states,
+        'pro_classes': pro_classes,
     }
     return JsonResponse(rsp)

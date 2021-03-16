@@ -14,15 +14,46 @@ class Org(models.Model):
     level = models.PositiveIntegerField(choices=LEVEL_CHOICES, db_index=True)
 
 
+class DefaultPosition(models.Model):
+    class Meta:
+        db_table = "backend_org_default_positions"
+
+    name = models.CharField(max_length=250, verbose_name='Албан тушаалын нэр')
+
+
 class Employee(models.Model):
+    STATE_WORKING = 'Ажиллаж байгаа'
+    STATE_BREAK = 'Чөлөөтэй'
+    STATE_FIRED = 'Чөлөөлөгдсөн'
+    STATE_SICK = 'Өвчтэй'
+
+    STATE_CHOICES = [
+        (1, STATE_WORKING),
+        (2, STATE_BREAK),
+        (3, STATE_FIRED),
+        (4, STATE_SICK),
+    ]
+
+    ANGIIN_DARGA = 'Ангийн дарга'
+    GISHUUN = 'Гишүүн'
+    NARIIN_BICHGIIN_DARGA = 'Нарийн бичгийн дарга'
+
+    CLASS_CHOICES = [
+        (1, ANGIIN_DARGA),
+        (2, GISHUUN),
+        (3, NARIIN_BICHGIIN_DARGA),
+    ]
+
     org = models.ForeignKey(Org, on_delete=models.PROTECT)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    position = models.CharField(max_length=250)
+    position = models.ForeignKey(DefaultPosition, on_delete=models.PROTECT, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_admin = models.BooleanField(default=False)
     phone_number = models.CharField(max_length=8, null=True)
     token = models.CharField(max_length=250, unique=True, null=True)
+    state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True)
+    pro_class = models.PositiveIntegerField(choices=CLASS_CHOICES, null=True)
 
 
 class OrgRole(models.Model):
@@ -42,6 +73,17 @@ class OrgRole(models.Model):
 
 
 class EmployeeAddress(models.Model):
+    STATE_REGULER_CODE = 1
+    STATE_SHORT_CODE = 2
+
+    STATE_REGULER = 'Байнгын оршин суугаа хаяг'
+    STATE_SHORT = 'Түр оршин суугаа хаяг'
+
+    STATE_CHOICES = [
+        (STATE_REGULER_CODE, STATE_REGULER),
+        (STATE_SHORT_CODE, STATE_SHORT),
+    ]
+
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     level_1 = models.CharField(max_length=100, null=True)
     level_2 = models.CharField(max_length=100, null=True)
@@ -50,6 +92,7 @@ class EmployeeAddress(models.Model):
     apartment = models.CharField(max_length=100, null=True)
     door_number = models.CharField(max_length=100, null=True)
     point = models.PointField(srid=4326)
+    address_state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True)
 
 
 class EmployeeErguul(models.Model):

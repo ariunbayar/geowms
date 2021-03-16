@@ -6,7 +6,7 @@ from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, Value
 from geoportal_app.models import User
-from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
+from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from govorg.backend.org_request.models import ChangeRequest
@@ -39,6 +39,22 @@ from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 
 
+def _get_address_state_db_value(address_state):
+    if address_state == EmployeeAddress.STATE_REGULER_CODE:
+        address_state = True
+    else:
+        address_state = False
+    return address_state
+
+
+def _get_address_state_code(address_state):
+    if address_state:
+        address_state = EmployeeAddress.STATE_REGULER_CODE
+    elif not address_state:
+        address_state = EmployeeAddress.STATE_SHORT_CODE
+    return address_state
+
+
 def _get_employee_display(employee):
 
     user = employee.user
@@ -54,13 +70,18 @@ def _get_employee_display(employee):
     return {
         'username': user.username,
         'id': employee.id,
-        'position': employee.position,
         'is_admin': employee.is_admin,
         'phone_number': employee.phone_number,
 
         'token': employee.token,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+        'position': employee.position.name,
+        'position_id': employee.position.id,
+        'state': employee.get_state_display(),
+        'state_id': employee.state,
+        'pro_class_id': employee.pro_class,
+        'pro_class': employee.get_pro_class_display(),
 
         'last_name': user.last_name,
         'first_name': user.first_name,
@@ -77,6 +98,8 @@ def _get_employee_display(employee):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
+        'address_state': _get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
+        'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
 
@@ -99,6 +122,12 @@ def _get_role_name(item):
     return role_name
 
 
+def _get_position_name(postition_id, item):
+    position = DefaultPosition.objects.filter(id=postition_id).first()
+    position_name = position.name
+    return position_name
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -106,10 +135,11 @@ def list(request, payload):
     org = get_object_or_404(Org, employee__user=request.user)
     qs = Employee.objects.filter(org=org)
 
-    оруулах_талбарууд = ['id', 'position', 'is_admin', 'user_id', 'token']
+    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
         {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": _get_email, "new_field": "user__email"},
+        {"field": "position_id", "action": _get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [
         {"field": "role_name", "action": _get_role_name},
@@ -146,10 +176,12 @@ def _set_user(user, user_detail):
 
 
 def _set_employee(employee, user_detail):
-
-    employee.position = user_detail['position']
+    employee.position_id = int(user_detail['position'])
+    employee.state = int(user_detail['state']) if user_detail['state'] else None
+    employee.pro_class = int(user_detail['pro_class']) if user_detail['pro_class'] else None
     employee.is_admin = user_detail['is_admin']
     employee.phone_number = user_detail['phone_number']
+
     employee.save()
 
 
@@ -200,8 +232,6 @@ def _employee_validation(user, user_detail):
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
         errors['position'] = 'Хоосон байна утга оруулна уу.'
-    elif len(position) > 250:
-        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
         errors['first_name'] = 'Хоосон байна утга оруулна уу.'
     elif len(first_name) > 30:
@@ -271,6 +301,7 @@ def create(request, payload):
     apartment = address.get('apartment')
     door_number = address.get('door_number')
     point_coordinate = address.get('point_coordinate')
+    address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
 
@@ -315,6 +346,7 @@ def create(request, payload):
             employee_address.apartment = apartment
             employee_address.door_number = door_number
             employee_address.point = point
+            employee_address.address_state = _get_address_state_code(address_state)
             employee_address.save()
 
             obj_array = []
@@ -363,6 +395,10 @@ def update(request, payload, pk):
     point_coordinate = address.get('point')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
+
+    address_state = address.get('address_state')
+    address_state = _get_address_state_code(address_state)
+    address['address_state'] = address_state
 
     if employee.user == request.user:
         can_update = True
