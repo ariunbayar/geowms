@@ -209,8 +209,8 @@ export default class BundleMap extends Component {
                                 wrapX: true,
                             }),
                         }),
-                        wms_tile: new Image({
-                            source: new ImageWMS({
+                        wms_tile: new Tile({
+                            source: new TileWMS({
                                 projection: this.state.projection,
                                 ratio: 1,
                                 url: url,
@@ -255,8 +255,8 @@ export default class BundleMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Image({
-                            source: new ImageWMS({
+                        layer = new Tile({
+                            source: new TileWMS({
                                 ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
