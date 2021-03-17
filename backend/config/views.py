@@ -482,6 +482,16 @@ def _get_orgs():
     return orgs
 
 
+def _get_line_chart_org(name):
+    org_id = None
+    qs = CovidConfig.objects
+    qs = qs.filter(name=name)
+    qs = qs.first()
+    if qs:
+        org_id = qs.org_id
+    return org_id
+
+
 @require_GET
 @ajax_required
 def covid_configs(request):
@@ -519,6 +529,7 @@ def covid_configs(request):
         **default_values,
         **{conf.name: conf.value for conf in configs},
         'line_chart_datas': values,
+        'line_graph_org': _get_line_chart_org('line_chart_datas'),
         'bundles': bundles,
         'orgs': orgs,
     }
@@ -614,11 +625,16 @@ def covid_configs_save(request, payload):
             }
         )
         for config_org_id in config_org_ids:
-            splited = config_org_id.split("_org")
-            conf_name = splited[0]
-            if conf_name == config_name:
+            if config_org_id != 'line_graph_org':
+                splited = config_org_id.split("_org")
+                conf_name = splited[0]
+                if conf_name == config_name:
+                    qs = CovidConfig.objects
+                    qs = qs.filter(name=config_name)
+                    qs.update(org=payload.get(config_org_id))
+            else:
                 qs = CovidConfig.objects
-                qs = qs.filter(name=config_name)
+                qs = qs.filter(name='line_chart_datas')
                 qs.update(org=payload.get(config_org_id))
 
     return JsonResponse({"success": True})

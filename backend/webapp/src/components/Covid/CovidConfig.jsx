@@ -106,6 +106,7 @@ export default class CovidConfig extends Component {
                 initial_values: values,
                 values,
                 line_chart_datas: values['line_chart_datas'],
+                line_graph_org: values['line_graph_org'],
                 emy_logo: values['emy_logo'],
                 emy_logo_old: values['emy_logo'],
                 gzbgzzg_logo: values['gzbgzzg_logo'],

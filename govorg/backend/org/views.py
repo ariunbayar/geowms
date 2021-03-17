@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
 from django.contrib.auth.decorators import login_required
@@ -251,6 +253,8 @@ def set_config(request, payload):
 
     for config_name in config_names:
         config_name.value = names[config_name.name]
+        if config_name.name == 'line_chart_datas':
+            config_name.value = json.dumps(names[config_name.name], ensure_ascii=False)
         config_name.save()
 
     rsp = {
