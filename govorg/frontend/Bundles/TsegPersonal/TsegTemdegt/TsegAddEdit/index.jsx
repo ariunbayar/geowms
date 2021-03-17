@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 
 import { service } from '../../service'
+import { GPInput } from '@utils/Tools/'
 
 export default class TsegAdd extends Component {
 
@@ -28,10 +29,21 @@ export default class TsegAdd extends Component {
     }
 
     render() {
-        console.log('tseg nemeh');
+        const { fields } = this.state
         return (
-            <div>
+            <div className="card-body">
                 <h1>Nemeh bolon zasah</h1>
+                {
+                    fields.map((field, idx) =>
+                        <GPInput key={idx}
+                            mn_name={field.property_name}
+                            name={field.property_code}
+                            placeholder={field.property_name}
+                            type={field.value_type_id}
+                            sendValue={this.getValue}
+                        />
+                    )
+                }
             </div>
         )
     }

@@ -9,7 +9,7 @@ export default class TsegTemdegt extends Component {
 
     render() {
         return (
-            <div>
+            <div className='card-body'>
                 <h1>hello</h1>
                 <NavLink className="btn btn-block btn-primary" to={`/gov/tseg-personal/add/`}>nemeh</NavLink>
             </div>
