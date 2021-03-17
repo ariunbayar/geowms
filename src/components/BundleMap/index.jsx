@@ -343,30 +343,29 @@ export default class InspireMap extends Component {
                 return {
                     name,
                     layers: layers.map((layer) => {
-                        console.log(layer)
                         return {
                             ...layer,
-                            // wms_or_cache_ur,
-                            // tile: new Tile({
-                            //     minZoom: layer.zoom_start,
-                            //     maxZoom: layer.zoom_stop,
-                            //     source: new WMTS({
-                            //         url: chache_url,
-                            //         layer: layer.code,
-                            //         matrixSet: "EPSG:4326",
-                            //         format: 'image/png',
-                            //         projection: this.state.projection_display,
-                            //         tileGrid: new WMTSTileGrid({
-                            //             tileSize: [256,256],
-                            //             extent: [-180.0,-90.0,180.0,90.0],
-                            //             origin: [-180.0, 90.0],
-                            //             resolutions: resolutions,
-                            //             matrixIds: gridNames,
-                            //         }),
-                            //         style: '',
-                            //         wrapX: true,
-                            //     }),
-                            // }),
+                            wms_or_cache_ur,
+                            tile: new Tile({
+                                minZoom: layer.zoom_start,
+                                maxZoom: layer.zoom_stop,
+                                source: new WMTS({
+                                    url: chache_url,
+                                    layer: layer.code,
+                                    matrixSet: "EPSG:4326",
+                                    format: 'image/png',
+                                    projection: this.state.projection_display,
+                                    tileGrid: new WMTSTileGrid({
+                                        tileSize: [256,256],
+                                        extent: [-180.0,-90.0,180.0,90.0],
+                                        origin: [-180.0, 90.0],
+                                        resolutions: resolutions,
+                                        matrixIds: gridNames,
+                                    }),
+                                    style: '',
+                                    wrapX: true,
+                                }),
+                            }),
                             wms_tile: new Image({
                                 source: new ImageWMS({
                                     projection: this.state.projection,
