@@ -388,7 +388,6 @@ export default class InspireMap extends Component {
                 _map_wms_list.map((layer, idx) => {
                     map_wms_list.push(layer)
                 })
-                console.log('map_wms_list', map_wms_list)
                 this.setState({ map_wms_list: map_wms_list })
 
             }
