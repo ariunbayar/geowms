@@ -71,7 +71,7 @@ urlpatterns = [
     ], 'qpay'))),
 
     path('covid/', include(([
-        path('get-nema/', covid_views.get_nema),
+        path('get-nema/<int:bundle_id>/', covid_views.get_nema),
     ], 'covid'))),
 
     path('profile/api/', include(([

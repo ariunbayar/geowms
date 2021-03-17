@@ -68,7 +68,6 @@ def wms_layers(request, pk):
     bundle = get_object_or_404(Bundle, pk=pk)
     wms_list = []
     qs_layers = bundle.layers.filter(bundlelayer__role_id__in=roles).order_by('wms__created_at', 'sort_order').distinct()
-
     def _layer_to_display(ob):
         code = ob.code.replace('gp_layer_', '')
         zoom_start = 4
@@ -118,7 +117,11 @@ def wms_layers(request, pk):
                 'wms_or_cache_ur': True if wms.cache_url else False
             }
             wms_list.append(wms_data)
-
+    print("hoho")
+    print("hoho")
+    print("hoho")
+    print("hoho")
+    print("hoho", wms_list)
     rsp = {
         'bundle': {'id': bundle.id},
         'wms_list': wms_list,
