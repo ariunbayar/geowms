@@ -157,6 +157,13 @@ urlpatterns = [
             path('revoke-search/', revoke_request_views.revoke_paginate),
         ], 'revoke_request'))),
 
+        path('nema/', include(([
+            path('', govorg_inspire_views.nema_list, name='nema_list'),
+            path('create/', govorg_inspire_views.create_nema, name='nema_create'),
+            path('<int:pk>/detail/', govorg_inspire_views.nema_detail, name='nema_detail'),
+            path('remove/<int:pk>/', govorg_inspire_views.nema_remove, name='nema_remove'),
+        ], 'nema'))),
+
     ], 'back_org'))),
 
     path('secure/', include(([
@@ -169,6 +176,7 @@ urlpatterns = [
         path('', org_views.frontend, name='frontend'),
         path('emp-role/', org_views.emp_role, name='emp-role'),
         path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
+        path('set-config/', org_views.set_config)
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

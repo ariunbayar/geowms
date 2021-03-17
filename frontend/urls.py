@@ -70,6 +70,10 @@ urlpatterns = [
         path('check/', qpay_views.check, name='check'),
     ], 'qpay'))),
 
+    path('covid/', include(([
+        path('get-nema/', covid_views.get_nema),
+    ], 'covid'))),
+
     path('profile/api/', include(([
         path('', profile_views.history, name='history'),
         path('all/', profile_views.all, name='all'),

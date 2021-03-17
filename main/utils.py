@@ -26,7 +26,7 @@ from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
 from main.inspire import GEoIdGenerator
-from backend.config.models import Config
+from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 import uuid
@@ -543,10 +543,10 @@ def _is_domain(domain):
 
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
-def get_config(config_name):
+def get_config(config_name, Model=Config):
 
     default_values = {config_name: ''}
-    configs = Config.objects.filter(name__in=default_values.keys()).first()
+    configs = Model.objects.filter(name__in=default_values.keys()).first()
 
     return configs.value if configs else ''
 
@@ -1238,4 +1238,13 @@ def get_2d_data(geo_id):
     rows = dict_fetchall(cursor)
     rows = list(rows)
     data = rows[0]['geom']
+    return data
+
+
+def search_dict_from_object(objs, key='name', value='value'):
+    data = dict()
+    for obj in objs:
+        data_key = obj[key]
+        data_value = obj[value]
+        data[data_key] = data_value
     return data
