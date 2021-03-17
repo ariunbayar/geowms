@@ -47,6 +47,7 @@ export class CovidPage extends Component {
         }
         this.getFeature = this.getFeature.bind(this)
         this.loadData = this.loadData.bind(this)
+        this.loadNema = this.loadNema.bind(this)
     }
 
     componentDidMount(){
@@ -58,6 +59,21 @@ export class CovidPage extends Component {
             .covidConfigGet()
             .then((values) => {
                 this.setState({ initial_values: values, is_loading: false })
+            })
+    }
+
+    loadNema(addNema) {
+        service
+            .getNema()
+            .then(({ success, info, wms_list }) => {
+                if (success) {
+                    if (wms_list.length > 0) {
+                        addNema(wms_list)
+                    }
+                }
+                else {
+                    alert(info)
+                }
             })
     }
 
@@ -186,6 +202,7 @@ export class CovidPage extends Component {
                                     features={feature_collection}
                                     feature={feature}
                                     loadErguul={(func) => this.loadData(func)}
+                                    loadNema={(func) => this.loadNema(func)}
                                     point_color={erguul_ungu}
                                 />
                             </div>

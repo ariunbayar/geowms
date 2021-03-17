@@ -22,7 +22,7 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
-from backend.config.models import Config
+from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 
@@ -538,10 +538,10 @@ def _is_domain(domain):
 
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
-def get_config(config_name):
+def get_config(config_name, Model=Config):
 
     default_values = {config_name: ''}
-    configs = Config.objects.filter(name__in=default_values.keys()).first()
+    configs = Model.objects.filter(name__in=default_values.keys()).first()
 
     return configs.value if configs else ''
 

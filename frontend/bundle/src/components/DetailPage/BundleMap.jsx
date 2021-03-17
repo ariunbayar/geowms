@@ -853,7 +853,6 @@ export default class BundleMap extends Component {
 
         const wms_array = this.getWMSArray()
         wms_array.map(({ layers }, w_idx) => {
-            console.log(layers);
             if(layers) {
                 layers.map(({tile, code}, idx) => {
                     if (tile.getVisible()) {

@@ -131,3 +131,14 @@ class ErguulTailbar(models.Model):
     erguul = models.OneToOneField(EmployeeErguul, on_delete=models.CASCADE)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, verbose_name='Төлөв')
     description = models.CharField(max_length=10000, db_index=True, verbose_name='Тайлбар')
+
+
+class NemaWMS(models.Model):
+    IS_OPEN = [
+        (1, 'Нээлттэй'),
+        (2, 'Хаалттай'),
+    ]
+    code = models.CharField(max_length=250)
+    is_open = models.PositiveIntegerField(choices=IS_OPEN, db_index=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

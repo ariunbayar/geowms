@@ -201,8 +201,9 @@ def frontend(request):
                 'is_admin': employee.is_admin,
                 'username': employee.user.username
             },
+            'allowed_geom': geom.json if geom else None,
+            'obeg_employee': True if employee.org.name.lower() == 'обег' else False,
             'covid_configs': covid_configs,
-            'allowed_geom': geom.json if geom else None
         },
     }
 
