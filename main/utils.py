@@ -1010,3 +1010,12 @@ def get_2d_data(geo_id):
     rows = list(rows)
     data = rows[0]['geom']
     return data
+
+
+def search_dict_from_object(objs, key='name', value='value'):
+    data = dict()
+    for obj in objs:
+        data_key = obj[key]
+        data_value = obj[value]
+        data[data_key] = data_value
+    return data

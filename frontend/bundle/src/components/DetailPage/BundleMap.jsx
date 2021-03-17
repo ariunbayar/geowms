@@ -2,10 +2,11 @@ import React, { Component } from "react"
 
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
-import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
+import { transform as transformCoordinate, fromLonLat, Projection } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
 import { toLonLat } from 'ol/proj';
+import OSM from 'ol/source/OSM';
 import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
@@ -193,7 +194,7 @@ export default class BundleMap extends Component {
                             minZoom: layer.zoom_start,
                             maxZoom: layer.zoom_stop,
                             source: new WMTS({
-                                url: chache_url,
+                                url: url,
                                 layer: layer.code,
                                 matrixSet: "EPSG:4326",
                                 format: 'image/png',
@@ -209,9 +210,9 @@ export default class BundleMap extends Component {
                                 wrapX: true,
                             }),
                         }),
-                        wms_tile: new Image({
-                            source: new ImageWMS({
-                                projection: this.state.projection,
+                        wms_tile: new Tile({
+                            source: new TileWMS({
+                                projection: this.state.projection_display,
                                 ratio: 1,
                                 url: url,
                                 params: {
@@ -247,17 +248,18 @@ export default class BundleMap extends Component {
                         layer = new Tile({
                             preload: 6,
                             source: new TileImage({
-                                crossOrigin: 'Anonymous',
+                                projection: this.state.projection,
                                 url: base_layer_info.url,
+                                crossOrigin: 'Anonymous',
                             }),
-                            name: base_layer_name,
                         })
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Image({
-                            source: new ImageWMS({
+                        layer = new Tile({
+                            source: new TileWMS({
                                 ratio: 1,
+                                projection: this.state.projection_display,
                                 url: base_layer_info.url,
                                 params: {
                                     'LAYERS': base_layer_info.layers,
@@ -367,9 +369,9 @@ export default class BundleMap extends Component {
                 marker_layer,
             ],
             view: new View({
-                projection: this.state.projection,
-                center: [11461613.630815497, 5878656.0228370065],
-                zoom: 5.041301562246971,
+                projection: this.state.projection_display,
+                center: [104.22667701377826,46.65575592313776],
+                zoom: 6.041301562246971,
                 minZoom: 1,
             })
         })
@@ -517,7 +519,7 @@ export default class BundleMap extends Component {
         const { vector_layer } = this.state
         const features = (this.state.format.readFeatures(buffer_feature, {
             dataProjection: this.state.projection_display,
-            featureProjection: this.state.projection,
+            featureProjection: this.state.projection_display,
         }))
         features[0].setProperties({ id: 'buffer' })
         vector_layer.getSource().addFeature(features[0])
@@ -554,7 +556,7 @@ export default class BundleMap extends Component {
                             }
                             const tile = new Tile ({
                                 source: new TileWMS({
-                                    projection: this.state.projection,
+                                    projection: this.state.projection_display,
                                     url: main_url,
                                     params: {
                                         'LAYERS': layer.code,
@@ -873,7 +875,7 @@ export default class BundleMap extends Component {
                     this.is_not_visible_layers = layers_code
                     const features_col = (this.state.format.readFeatures(features, {
                         dataProjection: this.state.projection_display,
-                        featureProjection: this.state.projection,
+                        featureProjection: this.state.projection_display,
                     }))
                     const style = new Style({
                         image: new CircleStyle({
@@ -912,7 +914,7 @@ export default class BundleMap extends Component {
         const {format} = this.state
         const data = format.writeFeatureObject(features, {
             dataProjection: this.state.projection_display,
-            featureProjection: this.state.projection,
+            featureProjection: this.state.projection_display,
         })
         const changedFeature = JSON.stringify(data)
         return changedFeature
@@ -925,7 +927,7 @@ export default class BundleMap extends Component {
             this.removeFeatureFromSource(id)
             var feature =  new GeoJSON().readFeatures(feature, {
                 dataProjection: this.state.projection_display,
-                featureProjection: this.state.projection,
+                featureProjection: this.state.projection_display,
             });
             feature[0].setProperties({ id })
             vector_layer.getSource().addFeature(feature[0])
@@ -936,7 +938,7 @@ export default class BundleMap extends Component {
 
     transformToLatLong(coordinateList) {
         const geom = coordinateList[0].map((coord, idx) => {
-            const map_coord = transformCoordinate(coord, this.state.projection, this.state.projection_display)
+            const map_coord = transformCoordinate(coord, this.state.projection_display, this.state.projection_display)
               return map_coord
         })
         return geom
