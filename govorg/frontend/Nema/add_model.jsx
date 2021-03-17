@@ -76,7 +76,6 @@ export class ModelAddNema extends Component {
         service
             .create_nema_layer(values, id)
             .then(({ success, info, errors }) => {
-                console.log(success, info, errors)
                 if (success) {
                     this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'success'})
                     setStatus('saved')
