@@ -50,6 +50,7 @@ from main import utils
 from main.inspire import GEoIdGenerator
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
+from backend.bundle.models import BundleLayer
 from main.components import Datatable
 from geoportal_app.models import User
 
@@ -1100,17 +1101,21 @@ def create_nema(request, payload):
         })
 
     layer_state = False
-    nema = NemaWMS.objects.filter(id=id).first()
+    nema = NemaWMS.objects.filter(code=layer_code).first()
     if not id:
         if nema:
-            layer_state = True
-
-    if (nema and nema.code != layer_code) or layer_state:
-        if name:
             return JsonResponse({
-                'success': False,
-                'info': '{code} нэртэй давхарга бүртгэлтэй байна !!!.'.format(code=layer_code),
-            })
+                    'success': False,
+                    'info': '{code} нэртэй давхарга бүртгэлтэй байна !!!.'.format(code=layer_code),
+                })
+    if id:
+        nema = NemaWMS.objects.filter(id=id).first()
+        if nema.code !=layer_code:
+            if nema:
+                return JsonResponse({
+                    'success': False,
+                    'info': '{code} нэртэй давхарга бүртгэлтэй байна !!!.'.format(code=layer_code),
+                })
 
 
     layer_name = _check_nema_details(nema_detial_list)
@@ -1141,10 +1146,14 @@ def create_nema(request, payload):
 
     if not nema:
         NemaWMS.objects.create(
-            code=layer_code,
             is_open=is_open,
+            code=layer_code,
             created_by=user.id
         )
+    else:
+        nema.code=layer_code
+        nema.is_open=is_open
+        nema.save()
 
     return JsonResponse({
         'success': True,
@@ -1171,3 +1180,22 @@ def nema_detail(request, pk):
     })
 
     return JsonResponse({'nema_detail_list':nema_detail_list})
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def nema_remove(request, pk):
+
+    nema = NemaWMS.objects.filter(id=pk).first()
+    wms = WMS.objects.filter(name__iexact='NEMA').first()
+
+    wms_layer = get_object_or_404(WMSLayer, code=nema.code, wms=wms)
+    BundleLayer.objects.filter(layer=wms_layer).delete()
+    wms_layer.delete()
+    nema.delete()
+
+    return JsonResponse({
+        'success': True,
+        'info': 'Ажилттай устлаа'
+    })

@@ -1,7 +1,9 @@
 import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 import { PortalDataTable } from "@utils/DataTable"
+import Modal from "@utils/Modal/Modal"
 import { ModelAddNema } from './add_model'
+import { service } from './service'
 
 
 export class NemaTable extends Component {
@@ -89,16 +91,27 @@ export class NemaTable extends Component {
     render() {
         const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status} = this.state
         return (
-
-                <PortalDataTable
-                    талбарууд={талбарууд}
-                    жагсаалтын_холбоос={жагсаалтын_холбоос}
-                    уншиж_байх_үед_зурвас={"Уншиж байна"}
-                    хувьсах_талбарууд={хувьсах_талбарууд}
-                    нэмэлт_талбарууд={нэмэлт_талбарууд}
-                    нэмэх_товч={'/gov/nema/үүсгэх/'}
-                    refresh={refresh}
+            <div className="row">
+                <div className="col-lg-12">
+                        <PortalDataTable
+                            талбарууд={талбарууд}
+                            жагсаалтын_холбоос={жагсаалтын_холбоос}
+                            уншиж_байх_үед_зурвас={"Уншиж байна"}
+                            хувьсах_талбарууд={хувьсах_талбарууд}
+                            нэмэлт_талбарууд={нэмэлт_талбарууд}
+                            нэмэх_товч={'/gov/nema/үүсгэх/'}
+                            refresh={refresh}
+                        />
+                </div>
+                <Modal
+                    text={`Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                    title={'Тохиргоог устгах'}
+                    model_type_icon={'success'}
+                    status={modal_status}
+                    modalClose={this.handleModalClose}
+                    modalAction={this.handleRemove}
                 />
+            </div>
         )
     }
 }

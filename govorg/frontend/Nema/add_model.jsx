@@ -98,7 +98,7 @@ export class ModelAddNema extends Component {
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
         }, 2000)
-        this.props.history.push("/gov/nema/")
+        this.props.history.push("/gov/nema/list/")
     }
 
     render() {
@@ -214,9 +214,6 @@ export class ModelAddNema extends Component {
                         </div>
                     </div>
                     <div>
-                        <InspireMap
-                            bundle={{'id': 5}}
-                        />
                     </div>
                 </div>
                 {

@@ -200,7 +200,7 @@ def frontend(request):
                 'username': employee.user.username
             },
             'allowed_geom': geom.json if geom else None,
-            'obeg_employee': True if employee.org.name.lower() == 'обег' else False
+            'obeg_employee': True if employee.org.name.lower() == 'обег' else False,
             'covid_configs': covid_configs,
         },
     }

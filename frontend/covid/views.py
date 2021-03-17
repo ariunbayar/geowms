@@ -10,6 +10,7 @@ from main import utils
 
 from backend.org.models import EmployeeErguul
 from backend.org.models import NemaWMS
+from backend.config.models import CovidConfig
 from backend.wms.models import WMS
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
@@ -44,7 +45,8 @@ def get_nema(request):
     wms_values = wms_qs.values('name', 'url')
     wms = wms_values.first()
 
-    bundle = utils.get_config('bundle')
+    bundle = utils.get_config('bundle', CovidConfig)
+
     wms_list = list()
 
     def _layer_to_display(code):
@@ -53,11 +55,9 @@ def get_nema(request):
 
         zoom_start = 4
         zoom_stop = 21
-
         if layer_qs:
             layer = layer_qs.first()
             code = layer.code.replace('gp_layer_', '')
-
             bundle_qs = BundleLayer.objects
             bundle_layers = bundle_qs.filter(
                 bundle_id=bundle,
@@ -81,17 +81,13 @@ def get_nema(request):
     for wms in wms_qs:
         if wms.is_active:
             url = reverse('api:service:wms_proxy', args=(bundle, wms.pk, 'wms'))
-            chache_url = reverse('api:service:wms_proxy', args=(bundle, wms.pk, 'wmts'))
             wms_data = {
                 'name': wms.name,
                 'url': request.build_absolute_uri(url),
-                'chache_url': request.build_absolute_uri(chache_url),
                 'layers': [_layer_to_display(code) for code in layer_codes],
-                'wms_or_cache_ur': True if wms.cache_url else False
             }
             if wms_data['layers']:
                 wms_list.append(wms_data)
-
     rsp = {
         'success': True,
         'layer_codes': layer_codes,

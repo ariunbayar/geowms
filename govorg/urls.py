@@ -153,6 +153,7 @@ urlpatterns = [
             path('', govorg_inspire_views.nema_list, name='nema_list'),
             path('create/', govorg_inspire_views.create_nema, name='nema_create'),
             path('<int:pk>/detail/', govorg_inspire_views.nema_detail, name='nema_detail'),
+            path('remove/<int:pk>/', govorg_inspire_views.nema_remove, name='nema_remove'),
         ], 'nema'))),
 
     ], 'back_org'))),

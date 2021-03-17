@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 import { NemaTable } from './nema_layer_list'
 import { ModelAddNema } from './add_model'
+import NemaMap from "./Map"
 
 export default class Nema extends Component {
 
@@ -12,11 +13,11 @@ export default class Nema extends Component {
                     <div className="card">
                         <div className="card-body">
                             <Switch>
-                                <Route exact path="/gov/nema/" component={NemaTable} />
+                                <Route exact path="/gov/nema/list/" component={NemaTable} />
+                                <Route exact path="/gov/nema/map/" component={NemaMap} />
                                 <Route exact path="/gov/nema/үүсгэх/" component={ModelAddNema} />
                                 <Route exact path="/gov/nema/:id/засах/" component={ModelAddNema} />
                             </Switch>
-
                         </div>
                     </div>
                 </div>

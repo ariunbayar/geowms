@@ -25,7 +25,6 @@ const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
 const Nema = React.lazy(() => import('./Nema'));
-const NemaMap = React.lazy(() => import('./Nema/Map'));
 const CovidConfig = React.lazy(() => import('./Help/CovidConfigs'));
 
 export class App extends Component {
@@ -121,7 +120,7 @@ export class App extends Component {
                             obeg_employee &&
                             <MenuItem icon="gp-text-primary fa fa-star-o" url="/gov/nema/" text="Covid">
                                 <ul className="sidebar-submenu">
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/" text="Бүртгэл"></MenuItem>
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/list/" text="Бүртгэл"></MenuItem>
                                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/map/" text="Газрын зураг"></MenuItem>
                                 </ul>
                             </MenuItem>
@@ -159,7 +158,7 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
 
                                     {
-                                       Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
+                                    Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
                                         <MenuItem
                                             key={idx}
                                             icon="gp-text-primary fa fa-circle-o"
@@ -250,7 +249,6 @@ export class App extends Component {
                                 <Route exact path="/gov/profile/" component={Profile} />
                                 <Route exact path="/gov/profile/password/" component={Password} />
                                 <Route path="/gov/nema/" component={Nema} />
-                                <Route path="/gov/nema/map" component={NemaMap} />
                                 <Route path="/gov/covid-config/" component={(props) => <CovidConfig {...props} covid_configs={covid_configs}/>} />
                             </Switch>
                         </Suspense>
