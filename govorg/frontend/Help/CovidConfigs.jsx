@@ -18,10 +18,10 @@ class Input extends Component {
 
     render() {
         const { value } = this.state
-        const { name } = this.props
+        const { name, mn_name } = this.props
         return (
             <div className="form-group">
-                <label htmlFor={`id_${name}`}>{name}</label>
+                <label htmlFor={`id_${name}`}>{mn_name}</label>
                 <input
                     className="form-control"
                     value={value}
@@ -91,6 +91,7 @@ class CovidConfigs extends Component {
                                 value={item.value}
                                 name={item.name}
                                 setValue={this.setValue}
+                                mn_name={item.mn_name}
                             />
                         )
                     }

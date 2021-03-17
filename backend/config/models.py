@@ -26,7 +26,7 @@ class CovidConfig(models.Model):
     name = models.CharField(max_length=250, db_index=True, verbose_name='Гарчиг')
     value = models.TextField(verbose_name='Товч агуулга')
     org = models.ForeignKey(Org, on_delete=models.PROTECT, null=True, verbose_name="Байгууллага")
-    mn_name = models.CharField(max_length=250, db_index=True, verbose_name='Монгол нэр')
+    mn_name = models.CharField(max_length=250, db_index=True, verbose_name='Монгол нэр', null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

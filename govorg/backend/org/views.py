@@ -179,7 +179,7 @@ def _get_covid_configs(org):
     qs = CovidConfig.objects
     qs = qs.filter(org=org)
     if qs:
-        configs = list(qs.values('name', 'value'))
+        configs = list(qs.values('name', 'value', 'mn_name'))
     return configs
 
 
@@ -242,7 +242,7 @@ def get_approve_and_revoke(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def set_config(request, payload):
-    employee = get_object_or_404(user=request.user, is_admin=True)
+    employee = get_object_or_404(Employee, user=request.user, is_admin=True)
     values = payload.get("values")
     names = utils.search_dict_from_object(values)
 
