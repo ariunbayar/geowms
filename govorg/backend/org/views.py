@@ -242,6 +242,7 @@ def get_approve_and_revoke(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def set_config(request, payload):
+    employee = get_object_or_404(user=request.user, is_admin=True)
     values = payload.get("values")
     names = utils.search_dict_from_object(values)
 

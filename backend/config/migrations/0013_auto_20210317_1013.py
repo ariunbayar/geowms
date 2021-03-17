@@ -8,22 +8,22 @@ def _move_datas(apps, schema):
     CovidConfig = apps.get_model('backend_config', 'CovidConfig')
 
     default_values = {
-        'emy_logo': '',
-        'batlagdsan_tohioldol': '',
-        'edgersen_humuusiin_too': '',
-        'emchlegdej_bui_humuus_too': '',
-        'tusgaarlagdsan_humuusiin_too': '',
-        'medeellin_eh_survalj': '',
-        'emiin_sangiin_too': '',
-        'emlegiin_too': '',
-        'niit_eruul_mend_baiguullaga_too': '',
-        'gzbgzzg_logo': '',
-        'title': '',
-        'bundle': '',
-        'shinjilgee_too': '',
-        'nas_barsan_too': '',
-        'erguul_ungu': '',
-        'line_chart_datas': '',
+        'emy_logo': 'Эрүүл мэндийн яамны лого',
+        'batlagdsan_tohioldol': 'Батлагдсан тохиолдол',
+        'edgersen_humuusiin_too': 'Эдгэрсэн хүмүүсийн тоо',
+        'emchlegdej_bui_humuus_too': 'Эмчлэгдэж буй хүмүүсийн тоо',
+        'tusgaarlagdsan_humuusiin_too': 'Тусгаарлагдаж буй хүмүүсийн тоо',
+        'medeellin_eh_survalj': 'Мэдээллийн эх сурвалж',
+        'emiin_sangiin_too': 'Эмийн сангийн тоо',
+        'emlegiin_too': 'Эмнэлэгийн тоо',
+        'niit_eruul_mend_baiguullaga_too': 'Нийт эрүүл мэндийн байгууллагын тоо',
+        'gzbgzzg_logo': 'ГЗБГЗЗГ лого',
+        'title': 'Гарчиг',
+        'bundle': 'Дэд сан',
+        'shinjilgee_too': 'Шинжилгээ хийсэн тоо',
+        'nas_barsan_too': 'Нас барсан хүмүүсийн тоо',
+        'erguul_ungu': 'Эргүүлд гарч буй хүний өнгө',
+        'line_chart_datas': 'Line Chart',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -31,6 +31,7 @@ def _move_datas(apps, schema):
         data = dict()
         data['name'] = config.name
         data['value'] = config.value
+        data['mn_name'] = default_values[config.name]
         CovidConfig.objects.create(**data)
         config.delete()
 

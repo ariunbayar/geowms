@@ -87,7 +87,7 @@ export class App extends Component {
     }
 
     render() {
-        const { org_role, employee, allowed_geom, covid_configs} = this.props.org
+        const { org_role, employee, allowed_geom, covid_configs } = this.props.org
         const { emp_role , approve, revoke, base_layer_list } = this.state
         return (
             <BrowserRouter>
@@ -192,7 +192,11 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                             </ul>
                         </MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-config/" text="Covid Тохиргоо"></MenuItem>
+                        {
+                            employee.is_admin
+                            &&
+                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-config/" text="Covid Тохиргоо"></MenuItem>
+                        }
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/help/" text="Тусламж"></MenuItem>
                     </ul>
                 </div>
