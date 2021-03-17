@@ -7,8 +7,7 @@ export default class NemaMap extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            wms_list: [],
-            bundle:'',
+            bundle: '',
             is_loading: false,
         }
         this.loadNema = this.loadNema.bind(this)
@@ -29,19 +28,13 @@ export default class NemaMap extends Component {
             })
     }
 
-    componentDidUpdate(pP, pS) {
-        if (this.state.bundle != pS.bundle) {
-            this.loadNema(this.state.bundle)
-        }
-    }
-
-    loadNema(bundle_id) {
+    loadNema(addNema) {
         service
-            .getNema(bundle_id)
+            .getNema()
             .then(({ success, info, wms_list }) => {
                 if (success) {
                     if (wms_list.length > 0) {
-                        this.setState({wms_list})
+                        addNema(wms_list)
                     }
                 }
                 else {
@@ -51,11 +44,12 @@ export default class NemaMap extends Component {
     }
 
     render() {
-        const { wms_list } = this.state
+        const { bundle } = this.state
         return (
             <div className="col-lg-12">
                 <InspireMap
-                    wms_list={wms_list}
+                    bundle={{'id': bundle}}
+                    loadNema={(func) => this.loadNema(func)}
                 />
             </div>
         )
