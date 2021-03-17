@@ -133,7 +133,6 @@ export default class CovidConfig extends Component {
         value['emy_logo'] = emy_logo
         value['gzbgzzg_logo'] = gzbgzzg_logo
 
-        console.log(values);
         service.config.covid
             .save(value, line_chart_datas)
             .then(({ success }) => {
@@ -178,7 +177,6 @@ export default class CovidConfig extends Component {
             bundles,
             orgs,
         } = this.state
-        console.log(orgs);
         return (
             <div className="card">
 
@@ -219,13 +217,13 @@ export default class CovidConfig extends Component {
                                                 <label htmlFor="bundle">Дэд сан</label>
                                                 {bundles.map((bundle, idx) =>
                                                     values.bundle == bundle.pk &&
-                                                    <img src={bundle.icon} className="logo-icon" alt="logo icon"></img>
+                                                    <img key={idx} src={bundle.icon} className="logo-icon" alt="logo icon"></img>
                                                 )}
                                                 <Fragment>
                                                     <Field name="bundle" as="select"
                                                     className={'form-control mt-2 ' + (errors.bundle ? 'is-invalid' : '')}>
                                                         {bundles.map((bundle, idx) =>
-                                                            <option value={bundle.pk}>{bundle.name}</option>
+                                                            <option key={idx} value={bundle.pk}>{bundle.name}</option>
                                                         )}
                                                     </Field>
                                                     <ErrorMessage name="bundle" component="div" className="text-dange"/>
@@ -357,10 +355,10 @@ export default class CovidConfig extends Component {
                                                 />
                                             </div>
                                             <div className="col-md-2">
-                                                <label htmlFor="tusgaarlagdsan_humuusiin_org">
+                                                <label htmlFor="tusgaarlagdsan_humuusiin_too_org">
                                                     Байгууллага
                                                 </label>
-                                                <Field name="tusgaarlagdsan_humuusiin_org" as="select"
+                                                <Field name="tusgaarlagdsan_humuusiin_too_org" as="select"
                                                     className={'form-control'}>
                                                     <option value=""> --- Байгууллага --- </option>
                                                     {orgs.map((org, idx) =>

@@ -513,6 +513,8 @@ def covid_configs(request):
         values = json.loads(values)
     bundles = _get_bundles() or {}
     orgs = _get_orgs()
+    default_values = _get_org_id(default_values)
+
     rsp = {
         **default_values,
         **{conf.name: conf.value for conf in configs},
@@ -522,6 +524,39 @@ def covid_configs(request):
     }
 
     return JsonResponse(rsp)
+
+
+def _get_org_id(default_values):
+    datas = list()
+    org_datas = dict()
+
+    config_org_ids = {
+        'line_graph_org',
+        'nas_barsan_too_org',
+        'shinjilgee_too_org',
+        'niit_eruul_mend_baiguullaga_too_org',
+        'emlegiin_too_org',
+        'emiin_sangiin_too_org',
+        'tusgaarlagdsan_humuusiin_too_org',
+        'emchlegdej_bui_humuus_too_org',
+        'edgersen_humuusiin_too_org',
+        'batlagdsan_tohioldol_org',
+    }
+
+    for default_value in default_values:
+        qs = CovidConfig.objects
+        qs = qs.filter(name=default_value)
+        org = qs.first().org
+        for config_org_id in config_org_ids:
+            splited = config_org_id.split("_org")
+            conf_name = splited[0]
+            if conf_name == default_value:
+                if org:
+                    org_datas[config_org_id] = org.id
+
+    for key, value in org_datas.items():
+        default_values[key] = value
+    return default_values
 
 
 @require_POST
@@ -553,7 +588,7 @@ def covid_configs_save(request, payload):
         'niit_eruul_mend_baiguullaga_too_org',
         'emlegiin_too_org',
         'emiin_sangiin_too_org',
-        'tusgaarlagdsan_humuusiin_org',
+        'tusgaarlagdsan_humuusiin_too_org',
         'emchlegdej_bui_humuus_too_org',
         'edgersen_humuusiin_too_org',
         'batlagdsan_tohioldol_org',
