@@ -51,8 +51,8 @@ def get_nema(request):
 
     def _layer_to_display(code):
         layer_qs = WMSLayer.objects
-        layer_qs = layer_qs.filter(code__exact=code)
-
+        
+        layer_qs = layer_qs.filter(code=code)
         zoom_start = 4
         zoom_stop = 21
         if layer_qs:
@@ -81,13 +81,17 @@ def get_nema(request):
     for wms in wms_qs:
         if wms.is_active:
             url = reverse('api:service:wms_proxy', args=(bundle, wms.pk, 'wms'))
+            layers = list()
+            for code in layer_codes:
+                layer = _layer_to_display(code)
+                if layer:
+                    layers.append(layer)
             wms_data = {
                 'name': wms.name,
                 'url': request.build_absolute_uri(url),
-                'layers': [_layer_to_display(code) for code in layer_codes],
+                'layers': layers,
             }
-            if wms_data['layers']:
-                wms_list.append(wms_data)
+            wms_list.append(wms_data)
     rsp = {
         'success': True,
         'layer_codes': layer_codes,
