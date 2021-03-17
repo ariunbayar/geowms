@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from backend.org.models import Org, Employee
 from main.decorators import ajax_required
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPerm
@@ -14,6 +14,7 @@ from backend.inspire.models import LThemes
 from backend.inspire.models import LPackages
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MGeoDatas
+from backend.config.models import CovidConfig
 
 from govorg.backend.utils import (
     get_package_features_data_display,
@@ -173,12 +174,22 @@ def _emp_role(org, user):
     }
 
 
+def _get_covid_configs(org):
+    configs = list()
+    qs = CovidConfig.objects
+    qs = qs.filter(org=org)
+    if qs:
+        configs = list(qs.values('name', 'value'))
+    return configs
+
+
 @login_required(login_url='/gov/secure/login/')
 def frontend(request):
 
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
+    covid_configs = _get_covid_configs(org)
     context = {
         'org': {
             "org_name": org.name.upper(),
@@ -188,6 +199,7 @@ def frontend(request):
                 'is_admin': employee.is_admin,
                 'username': employee.user.username
             },
+            'covid_configs': covid_configs,
             'allowed_geom': geom.json if geom else None
         },
     }
@@ -223,4 +235,26 @@ def get_approve_and_revoke(request):
         'approve': True if approve else False,
         'revoke': True if revoke else False,
     }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def set_config(request, payload):
+    values = payload.get("values")
+    names = utils.search_dict_from_object(values)
+
+    qs = CovidConfig.objects
+    config_names = qs.filter(name__in=names.keys())
+
+    for config_name in config_names:
+        config_name.value = names[config_name.name]
+        config_name.save()
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгаллаа'
+    }
+
     return JsonResponse(rsp)
