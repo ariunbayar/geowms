@@ -14,7 +14,9 @@ from backend.bundle.models import Bundle
 from backend.inspire.models import LThemes
 
 from .models import Config
+from .models import CovidConfig
 
+from backend.org.models import Org
 from backend.config.models import Error500
 from main.decorators import ajax_required
 from main import geoserver
@@ -458,7 +460,7 @@ def payment_configs_save(request, payload):
     return JsonResponse({"success": True})
 
 
-def get_bundles():
+def _get_bundles():
     context_list = []
     bundles = Bundle.objects.all()
     for bundle in bundles:
@@ -471,6 +473,13 @@ def get_bundles():
         context_list.append(bundle_list)
 
     return context_list
+
+
+def _get_orgs():
+    org_qs = Org.objects
+    org_qs = org_qs.filter(level=3)
+    orgs = list(org_qs.values('id', 'name'))
+    return orgs
 
 
 @require_GET
@@ -495,18 +504,21 @@ def covid_configs(request):
         'erguul_ungu': '',
     }
 
-    configs = Config.objects.filter(name__in=default_values.keys())
-    line_chart_datas = Config.objects.filter(name='line_chart_datas').first()
+    configs = CovidConfig.objects.filter(name__in=default_values.keys())
+    line_chart_datas = CovidConfig.objects.filter(name='line_chart_datas').first()
+
     values = []
     if line_chart_datas:
         values = line_chart_datas.value
         values = json.loads(values)
-    bundles = get_bundles() or {}
+    bundles = _get_bundles() or {}
+    orgs = _get_orgs()
     rsp = {
         **default_values,
         **{conf.name: conf.value for conf in configs},
         'line_chart_datas': values,
-        'bundles': bundles
+        'bundles': bundles,
+        'orgs': orgs,
     }
 
     return JsonResponse(rsp)
@@ -516,7 +528,6 @@ def covid_configs(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def covid_configs_save(request, payload):
-
     config_names = (
         'emy_logo',
         'batlagdsan_tohioldol',
@@ -534,8 +545,22 @@ def covid_configs_save(request, payload):
         'nas_barsan_too',
         'erguul_ungu',
     )
+
+    config_org_ids = {
+        'line_graph_org',
+        'nas_barsan_too_org',
+        'shinjilgee_too_org',
+        'niit_eruul_mend_baiguullaga_too_org',
+        'emlegiin_too_org',
+        'emiin_sangiin_too_org',
+        'tusgaarlagdsan_humuusiin_org',
+        'emchlegdej_bui_humuus_too_org',
+        'edgersen_humuusiin_too_org',
+        'batlagdsan_tohioldol_org',
+    }
+
     line_chart_datas = payload.get('line_chart_datas')
-    line_chart_datas_obj = Config.objects.filter(name='line_chart_datas').first()
+    line_chart_datas_obj = CovidConfig.objects.filter(name='line_chart_datas').first()
 
     if line_chart_datas_obj:
         line_chart_datas_obj.value = json.dumps(line_chart_datas, ensure_ascii=False)
@@ -547,12 +572,18 @@ def covid_configs_save(request, payload):
             )
 
     for config_name in config_names:
-        Config.objects.update_or_create(
+        CovidConfig.objects.update_or_create(
             name=config_name,
             defaults={
-                'value': payload.get(config_name, '')
+                'value': payload.get(config_name, ''),
             }
         )
+        for config_org_id in config_org_ids:
+            splited = config_org_id.split("_org")
+            conf_name = splited[0]
+            if conf_name == config_name:
+                qs = CovidConfig.objects
+                qs = qs.filter(name=config_name)
+                qs.update(org=payload.get(config_org_id))
 
     return JsonResponse({"success": True})
-
