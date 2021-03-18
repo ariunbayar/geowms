@@ -281,16 +281,11 @@ export default class InspireMap extends Component {
         })
     }
 
-    loadWmsLayers(bundle_id) {
-        this.setState({is_loading: true})
-        Promise.all([
-            service.loadWMSLayers(bundle_id),
-        ]).then(([{ wms_list }]) => {
-            this.addWmsLayers(wms_list)
-            this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
-            let is_nema = true
-            this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
-        })
+    loadWmsLayers(wms_list) {
+        this.addWmsLayers(wms_list)
+        this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
+        let is_nema = true
+        this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
     }
 
     oneLayerAdd(url, code){
