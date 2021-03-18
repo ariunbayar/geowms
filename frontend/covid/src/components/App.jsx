@@ -3,7 +3,6 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import {CovidPage} from './covid/Index'
 import CovidDashboard from './covid_dashboard'
 
-
 export class App extends Component {
 
     render() {

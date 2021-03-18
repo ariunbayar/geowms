@@ -108,3 +108,13 @@ def get_nema(request):
         'bundle': {"id": bundle},
     }
     return JsonResponse(rsp)
+
+
+
+@require_GET
+@ajax_required
+def get_nema(request):
+    print("eqweqwe")
+    print("eqweqwe")
+    print("eqweqwe")
+    return True
