@@ -87,7 +87,8 @@ urlpatterns = [
     ], 'profile'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
-    re_path('^covid/.*', covid_views.index, name='covid'),
+    re_path('^covid/.*', covid_views.covid_index, name='covid'),
+    re_path('^covid_dashboard/.*', covid_views.dashboard_index, name='covid_dashboard'),
     re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
     re_path('^profile/.*', profile_views.history, name='history'),
 
