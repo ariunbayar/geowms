@@ -40,9 +40,10 @@ function getDetialAll(id) {
 }
 
 
-function getNema(bundle_id) {
+function getNema(bundle_id, choice_list){
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({choice_list}),
     }
     return fetch(`/covid/get-nema/${bundle_id}/all/`, requestOptions).then(handleResponse)
 }

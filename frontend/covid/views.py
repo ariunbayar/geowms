@@ -174,11 +174,16 @@ def get_nema(request, bundle_id):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_nema_all(request, bundle_id):
-    wms_list=[]
-    wms_qs, qs = _get_nema_layers()
+def get_nema_all(request, payload, bundle_id):
+    choice_list = payload.get('choice_list')
+    wms_list = []
+    if len(choice_list) == 1:
+        wms_qs, qs = _get_nema_layers(int(choice_list[0]))
+    else:
+        wms_qs, qs = _get_nema_layers()
+
     if not wms_qs:
         rsp = {
             'success': False,
