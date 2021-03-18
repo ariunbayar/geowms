@@ -116,6 +116,8 @@ def json_proxy(request, token, code):
             'request': 'GetFeature',
             'typeName': code,
             'outputFormat': 'application/json',
+            "propertyName": 'inspire_id,beginlifespanversion,geo_data',
+            'maxFeatures': 10
         }
 
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)

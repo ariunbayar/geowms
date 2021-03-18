@@ -110,6 +110,7 @@ urlpatterns = [
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('үүсгэх/', govorg_views.хадгалах),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах),
+        path('<int:pk>/att-save/', govorg_views.set_attributes),
         path('<int:pk>/refresh-token/', govorg_views.refresh_token, name='refresh-token'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),

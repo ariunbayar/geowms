@@ -21,7 +21,7 @@ import json
 def _get_govorg_display(govorg):
 
     layers = list(govorg.wms_layers.all().values_list('pk', flat=True))
-
+    print(layers)
     return {
         'id': govorg.pk,
         'name': govorg.name,
@@ -91,6 +91,23 @@ def хадгалах(request, payload, pk=None):
         })
 
 
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def set_attributes(request, payload, pk):
+    array = payload.get('array')
+    system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
+    print(array)
+    print(system)
+    system.attributes = json.dumps(array, ensure_ascii=False)
+    system.save()
+
+    return JsonResponse({
+        'success': True,
+        'info': 'Амжилттай хадгаллаа.'
+    })
+
+
 def _get_attribute(request, wms):
 
     BASE_HEADERS = {
@@ -99,7 +116,7 @@ def _get_attribute(request, wms):
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     base_url = wms.url + '?service=wfs&version=2.0.0&request=DescribeFeatureType&outputFormat=application/json'
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=20)
     if rsp.status_code == 200:
         content = rsp.content.decode("utf-8")
         content = json.loads(content)
@@ -111,8 +128,13 @@ def _get_wmslayers(request, govorg, wms):
     layer_list = []
     system_local_base_url = utils.get_config('system_local_base_url')
     for wmslayer in wms.wmslayer_set.all():
+        # attributes = json.loads(wmslayer.attributes)
+        # print(attributes)
+        print(wmslayer.govorgs.values())
+        print(wmslayer.wms_layers)
         layer_list.append({
             'id': wmslayer.id,
+            'attributes': [],
             'code': wmslayer.code,
             'name': wmslayer.name,
             'title': wmslayer.title,
