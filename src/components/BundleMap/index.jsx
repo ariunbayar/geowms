@@ -270,6 +270,10 @@ export default class InspireMap extends Component {
             this.oneLayerAdd(url, code)
             this.setState({is_loading: true})
         }
+
+        if (this.state.map_wms_list !== prevState.map_wms_list) {
+            this.setState({map_wms_list: this.state.map_wms_list})
+        }
     }
 
     loadMapData() {
@@ -281,11 +285,14 @@ export default class InspireMap extends Component {
     }
 
     loadWmsLayers(bundle_id) {
-        this.setState({is_loading:true})
+        this.setState({is_loading: true})
         Promise.all([
             service.loadWMSLayers(bundle_id),
-        ]).then(([{wms_list}]) => {
+        ]).then(([{ wms_list }]) => {
             this.addWmsLayers(wms_list)
+            this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
+            let is_nema = true
+            this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
         })
     }
 
@@ -377,7 +384,16 @@ export default class InspireMap extends Component {
                     }),
                 }
             })
-            this.setState({map_wms_list: _map_wms_list})
+            if (map_wms_list.length > 0) {
+                _map_wms_list.map((layer, idx) => {
+                    map_wms_list.push(layer)
+                })
+                this.setState({ map_wms_list: map_wms_list })
+
+            }
+            else {
+                this.setState({ map_wms_list: _map_wms_list })
+            }
             _map_wms_list.map((wms, idx) =>
                 wms.layers.map((layer, idx) => {
                     layer.defaultCheck == 0 && layer.tile.setVisible(false)
@@ -401,8 +417,6 @@ export default class InspireMap extends Component {
                 this.setState({is_loading: false})
             }, 500);
         }
-        this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
-
     }
 
 
@@ -756,7 +770,7 @@ export default class InspireMap extends Component {
                 }
             }
         })
-    return {layer_code, is_feature}
+        return {layer_code, is_feature}
     }
 
     getPopUpInfo(coordinate, layers_code) {

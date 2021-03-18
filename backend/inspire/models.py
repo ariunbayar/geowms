@@ -296,7 +296,6 @@ class MDatas(models.Model):
         db_table = 'm_datas'
         managed = False
 
-    id = models.BigAutoField(primary_key=True)
     geo_id = models.CharField(max_length=100, null=True)
     feature_config_id = models.IntegerField(null=True)
     data_type_id = models.IntegerField(null=True)

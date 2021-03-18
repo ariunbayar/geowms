@@ -5,6 +5,7 @@ export const service = {
     getErguulEmployees,
     formOptions,
     getGeom,
+    getNema,
 }
 
 function covidConfigGet() {
@@ -34,4 +35,11 @@ function getGeom(geo_id) {
         body: JSON.stringify({geo_id}),
     }
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
+}
+
+function getNema() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch('/covid/get-nema/', requestOptions).then(handleResponse)
 }
