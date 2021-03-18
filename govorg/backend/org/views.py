@@ -3,10 +3,10 @@ import json
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
 from django.contrib.auth.decorators import login_required
-from backend.org.models import Org, Employee
-from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+
+from backend.org.models import Org, Employee
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPerm
@@ -18,6 +18,8 @@ from backend.inspire.models import LFeatures
 from backend.inspire.models import MGeoDatas
 from backend.config.models import CovidConfig
 
+from frontend.covid.models import CovidDashboard
+
 from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
@@ -27,6 +29,7 @@ from govorg.backend.utils import (
     get_perm_list
 )
 
+from main.decorators import ajax_required
 from main import utils
 
 def _get_properties_by_feature(initial_qs, feature_ids):
@@ -185,6 +188,57 @@ def _get_covid_configs(org):
     return configs
 
 
+def _for_dashb_list():
+    return [
+        'batlagdsan_tohioldol_too',
+        'edgersen_humuus_too',
+        'emchlegdej_bui_humuus_too',
+        'nas_barsan_hunii_too',
+        'tusgaarlagdaj_bui_humuus_too',
+        'niit_eruul_mendiin_baiguullaga_too',
+        'emnelegiin_too',
+        'emiin_sangiin_too',
+        'shinjilgee_hiisen_too'
+    ]
+
+
+def _get_form_fields(Model):
+    send_fields = []
+    for f in Model._meta.get_fields():
+        if f.name != 'id' and not 'create' in f.name and not 'update' in f.name:
+            if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                send_fields.append({
+                    'origin_name': f.name,
+                    'name': f.verbose_name,
+                    'length': f.max_length,
+                })
+    rsp = {
+        'success': True,
+        'fields': send_fields
+    }
+
+
+def _make_json_for_dashb(initial_qs, items):
+    data = dict()
+    for item in items:
+        parent_id = item.id
+        children = initial_qs.filter(parent_id=parent_id)
+        for name in _for_dashb_list():
+            print(name)
+    return children
+
+
+def _get_covid_dashboard():
+    initial_qs = CovidDashboard.objects
+    data = dict()
+    parents = initial_qs.filter(parent_id__isnull=True)
+    children = _make_json_for_dashb(initial_qs, parents)
+    fields = _get_form_fields(CovidDashboard)
+    return 'haha'
+
+_get_covid_dashboard()
+
+
 @login_required(login_url='/gov/secure/login/')
 def frontend(request):
 
@@ -192,6 +246,7 @@ def frontend(request):
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
     covid_configs = _get_covid_configs(org)
+    covid_dashboard = _get_covid_dashboard()
     context = {
         'org': {
             "org_name": org.name.upper(),
@@ -204,6 +259,7 @@ def frontend(request):
             'allowed_geom': geom.json if geom else None,
             'obeg_employee': True if employee.org.name.lower() == 'обег' else False,
             'covid_configs': covid_configs,
+            'covid_dashboard': covid_dashboard,
         },
     }
 

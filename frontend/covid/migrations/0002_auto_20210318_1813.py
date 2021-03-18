@@ -11,24 +11,25 @@ def _insert_datas(apps, schema):
 
     CovidDashboard = apps.get_model('frontend_covid', 'CovidDashboard')
     parent_id = None
+    big_parent_id = None
 
     covid_qs = CovidDashboard.objects
     for item in admin_levels:
         data = dict()
         for key, value in item.items():
             if key != 'children':
-                data['parent_id'] = parent_id
+                data['parent_id'] = None
                 data[key] = value
             elif key == 'children':
                 new_covid = covid_qs.create(
                     **data
                 )
-                parent_id = new_covid.id
+                big_parent_id = new_covid.id
                 for val in value:
                     child = dict()
                     for child_key, child_value in val.items():
                         if child_key != 'children':
-                            child['parent_id'] = parent_id
+                            child['parent_id'] = big_parent_id
                             child[child_key] = child_value
                         elif child_key == 'children':
                             new_covid = covid_qs.create(
@@ -43,7 +44,6 @@ def _insert_datas(apps, schema):
                                 covid_qs.create(
                                     **child_child
                                 )
-        parent_id = None
 
 
 class Migration(migrations.Migration):
