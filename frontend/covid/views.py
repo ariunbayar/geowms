@@ -17,13 +17,22 @@ from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
 
 
-def index(request):
+def covid_index(request):
 
     context = {
         'covid': "covid"
     }
 
     return render(request, 'covid/index.html', context)
+
+
+def dashboard_index(request):
+
+    context = {
+        'covid_dashboard': "covid_dashboard"
+    }
+
+    return render(request, 'covid_dashboard/index.html', context)
 
 
 @require_GET
