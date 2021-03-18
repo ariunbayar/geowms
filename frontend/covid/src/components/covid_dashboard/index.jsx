@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
+import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import Navbar from "./components/Navbar"
-
+import Graph from "./components/Graph"
 
 class CovidDashboard extends PureComponent {
     constructor(props) {
@@ -30,8 +31,11 @@ class CovidDashboard extends PureComponent {
                                     <Navbar />
                                 </div>
                                 <div className="col-md-12 border border-danger" style={{height: '950px'}}>
-                                    MAP
+                                    <Switch>
+                                        <Route path={"/covid_dashboard/graph/"} component={Graph} />
+                                    </Switch>
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
