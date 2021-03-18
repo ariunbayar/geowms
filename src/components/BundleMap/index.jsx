@@ -373,7 +373,11 @@ export default class InspireMap extends Component {
             this.setState({map_wms_list})
             map_wms_list.map(( wms) => {
                 const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
-                this.map.addLayer(...tiles)
+                if (tiles){
+                    tiles.map((hoho) => {
+                        this.map.addLayer(hoho)
+                    })
+                }
             })
             this.map.addControl(new SidebarButton({toggleSidebar: this.toggleSidebar}))
             this.map.addControl(this.controls.sidebar)
