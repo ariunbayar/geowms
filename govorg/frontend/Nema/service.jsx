@@ -44,5 +44,5 @@ function getNema(bundle_id) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`/covid/get-nema/${bundle_id}/`, requestOptions).then(handleResponse)
+    return fetch(`/covid/get-nema/${bundle_id}/all/`, requestOptions).then(handleResponse)
 }

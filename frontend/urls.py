@@ -72,6 +72,7 @@ urlpatterns = [
 
     path('covid/', include(([
         path('get-nema/<int:bundle_id>/', covid_views.get_nema),
+        path('get-nema/<int:bundle_id>/all/', covid_views.get_nema_all),
     ], 'covid'))),
 
     path('profile/api/', include(([

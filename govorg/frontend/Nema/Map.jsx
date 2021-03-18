@@ -56,6 +56,8 @@ export default class NemaMap extends Component {
             <div className="col-lg-12">
                 <InspireMap
                     wms_list={wms_list}
+                    height="80vh"
+                    base_layer={true}
                 />
             </div>
         )
