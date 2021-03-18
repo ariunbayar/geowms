@@ -241,7 +241,7 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { wms_list } = this.props
+        const {wms_list} = this.props
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
@@ -255,11 +255,13 @@ export default class InspireMap extends Component {
                 this.readFeature(this.props.feature)
             }
         }
+
         if (wms_list !== prevProps.wms_list) {
-                this.setState({is_sidebar_open: false})
-                this.controls.sidebar.showSideBar([], true, this.addLayerToSearch)
-                this.loadWmsLayers(wms_list)
+            this.setState({is_sidebar_open: false})
+            this.controls.sidebar.showSideBar([], true, this.addLayerToSearch)
+            this.loadWmsLayers(wms_list)
         }
+
         if (this.props.code !== prevProps.code) {
             const {code, url} = this.props
             this.oneLayerAdd(url, code)
@@ -279,9 +281,16 @@ export default class InspireMap extends Component {
         })
     }
 
-    loadWmsLayers(wms_list) {
+    loadWmsLayers(bundle_id) {
+        this.setState({is_loading: true})
+        Promise.all([
+            service.loadWMSLayers(bundle_id),
+        ]).then(([{ wms_list }]) => {
             this.addWmsLayers(wms_list)
             this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
+            let is_nema = true
+            this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
+        })
     }
 
     oneLayerAdd(url, code){
