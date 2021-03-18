@@ -6,7 +6,7 @@ from main import utils
 
 
 def _insert_datas(apps, schema):
-    print("\nУншиж байна")
+    print("\nУншиж байна...")
     admin_levels = utils.get_administrative_levels()
 
     CovidDashboard = apps.get_model('frontend_covid', 'CovidDashboard')
