@@ -1197,7 +1197,7 @@ def nema_remove(request, pk):
     nema = NemaWMS.objects.filter(id=pk).first()
     wms = WMS.objects.filter(name__iexact='NEMA').first()
 
-    wms_layer = get_object_or_404(WMSLayer, code=nema.code, wms=wms)
+    wms_layer = WMSLayer.objects.filter(code=nema.code, wms=wms).first()
     BundleLayer.objects.filter(layer=wms_layer).delete()
     wms_layer.delete()
     nema.delete()
