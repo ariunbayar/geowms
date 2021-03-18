@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react';
 import Navbar from "./components/Navbar"
+import {Menu} from "./components/Menu"
+import {Countries} from "./components/Countries"
 
 
 class CovidDashboard extends PureComponent {
@@ -21,7 +23,8 @@ class CovidDashboard extends PureComponent {
                         </div>
 
                         <div className="col-md-3 border border-danger" style={{height: '1000px'}}>
-                            MENU
+                            <Menu/><br/>
+                            {/* <Countries/> */}
                         </div>
 
                         <div className="col-md-9 border border-danger" style={{height: '1000px'}}>
