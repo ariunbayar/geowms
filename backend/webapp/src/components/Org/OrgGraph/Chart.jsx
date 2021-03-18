@@ -1,25 +1,28 @@
 import React, { Component } from "react"
 import { Line } from "react-chartjs-2";
-import {service} from "../../Access/service"
+import {service} from "../service"
+// import {service} from "../../Access/service"
 
 export default class Charts extends Component {
     constructor(props) {
         super(props)
         this.state = {
             page_date: [],
-            page_date_count: []
+            page_date_count: [],
+            org_id: props.org_id
         }
         this.handlePageCount=this.handlePageCount.bind(this)
     }
     componentDidMount(){
         this.handlePageCount()
-
     }
 
     handlePageCount(){
-        service.pageCount().then(({ page_date , page_date_count}) => {
+        service
+            .ageCount(this.state.org_id)
+            .then(({ page_date, page_date_count }) => {
             if(page_date_count){
-                this.setState({page_date, page_date_count})
+                this.setState({ page_date, page_date_count })
             }
         })
 

@@ -7,8 +7,8 @@ export default class PieChart extends Component {
         super(props)
         this.state = {
             count_male: 0,
-            count_female: 0
-
+            count_female: 0,
+            org_id: props.org_id
         }
         this.countGender=this.countGender.bind(this)
     }
@@ -19,7 +19,7 @@ export default class PieChart extends Component {
 
     countGender(){
         service
-            .genderCount()
+            .genderCount(this.state.org_id)
             .then(({ count_male, count_female }) => {
                 this.setState({ count_male, count_female })
             })

@@ -91,8 +91,8 @@ urlpatterns = [
         path('save-erguul/', org_views.save_erguul),
         path('get-erguul/', org_views.get_erguuls),
         path('get-select-values/', org_views.get_select_values),
-        path('emp-gender-count/', org_views.emp_gender_count),
-        path('emp-age-count/', org_views.emp_age_count),
+        path('<int:pk>/emp-gender-count/', org_views.emp_gender_count),
+        # path('<int:pk>/emp-age-count/', org_views.emp_age_count),
     ], 'org'))),
 
     path('api/log/', include(([

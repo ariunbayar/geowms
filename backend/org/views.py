@@ -3,12 +3,14 @@ import io
 import json
 from geojson import FeatureCollection
 import PIL.Image as Image
+import datetime
+from django.apps import apps
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count, F, Func
+from django.db.models import Count, F, Func, Q
 from django.db import transaction
 from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404
@@ -80,6 +82,7 @@ def employee_detail(request, pk):
     employee = Employee.objects
     employee = employee.filter(user=user)
     employee = employee.first()
+    print(employee)
 
     address = EmployeeAddress.objects
     address = address.filter(employee=employee)
@@ -1755,12 +1758,34 @@ def get_select_values(request):
 
 @require_GET
 @ajax_required
-def emp_gender_count(request):
-    genderCount = User.objects.all()
+def emp_gender_count(request, pk):
+
+    qs = Org.objects
+    qs = qs.filter(id=pk)
+
+    qs = qs.annotate(
+        male_count=Count('employee', filter=Q(employee__user__gender='Эрэгтэй'))
+    )
+    qs = qs.annotate(
+        female_count=Count('employee', filter=Q(employee__user__gender='Эмэгтэй'))
+    )
+    item = qs.first()
+    male_count = item.male_count
+    female_count = item.female_count
+
+    # qs = Employee.objects.filter(org_id=pk)
+    #     users = []
+    #     for employee in qs:
+    #         users.append(employee.user.id)
+
+    #     male_count = User.objects.filter(pk__in=users, gender='Эрэгтэй').count()
+    #     print(male_count)
+    #     famale_count = User.objects.filter(pk__in=users, gender='Эмэгтэй').count()
+    #     print(famale_count)
 
     rsp = {
-        'count_male': genderCount.filter(gender='Эрэгтэй').count(),
-        'count_female': genderCount.filter(gender='Эмэгтэй').count()
+        'count_male': male_count,
+        'count_female': female_count
     }
 
     return JsonResponse(rsp)
@@ -1768,19 +1793,44 @@ def emp_gender_count(request):
 
 @require_GET
 @ajax_required
-def emp_age_count(request):
+def emp_age_count(request, pk):
 
     RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
 
     page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
     page_date = []
-    page_date_count = []
+    count_emps = []
     for page in page_all:
         page_date.append(page.datetime.strftime('%Y-%m-%d'))
-        page_date_count.append(RequestEvent.objects.filter(datetime__date=page.datetime).count())
+        count_emps.append(RequestEvent.objects.filter(datetime__date=page.datetime).count())
 
     rsp = {
-        'page_date': page_date,
-        'page_date_count': page_date_count,
+        'page_date': page_date,  # nas
+        'count_emps': count_emps,  # ajilchdiin too
     }
     return JsonResponse(rsp)
+
+
+# dateNow = datetime.datetime.now()
+# year = dateNow.year
+# yearCut = str(dateNow.year)[2:4]
+# print(year, 'year')
+# print(yearCut, 'yearCut')
+
+# qs = Employee.objects.filter(org_id=9)
+# emp = []
+# for employee in qs:
+#     emp.append(employee.user.register)
+#     print(qs)
+#     emps.append
+
+#     register = employee.user.register
+#     registerCut = register[2:4]
+#     print(registerCut, 'registerCut')
+#     if -1 < int(registerCut) and int(registerCut) < int(yearCut):
+#         age = int(yearCut) - int(registerCut)
+#         print(age, '2000 onoos omnoh uyiinhen')
+#     else:
+#         birthYear = str(19) + registerCut
+#         age = int(year) - int(birthYear)
+#         print(age, '2000 onoos hoish uy')
