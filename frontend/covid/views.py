@@ -1,23 +1,23 @@
 
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, reverse
+from itertools import groupby
+
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
 from geojson import FeatureCollection
-from itertools import groupby
 
 from main.decorators import ajax_required
 from main import utils
 
 from backend.org.models import EmployeeErguul
+from backend.dedsanbutets.models import ViewNames
 from backend.org.models import NemaWMS
 from backend.config.models import CovidConfig
-from backend.wms.models import WMS
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer, Bundle
 from backend.geoserver.models import WmtsCacheConfig
-from backend.dedsanbutets.models import ViewNames
 
 
 def index(request):
@@ -135,7 +135,7 @@ def _layer_to_display_nema_codes(code, bundle_id):
 def _get_wms_list_of_nema(wms_list, wms_qs, bundle_id, layer_codes, request):
     for wms in wms_qs:
         if wms.is_active:
-            url = reverse('api:service:wms_proxy', args=(bundle_id, wms.pk, 'wms'))
+            url = reverse('api:service:wms_proxy', args=(bundle, wms.pk, 'wms'))
             layers = list()
             for code in layer_codes:
                 layer = _layer_to_display_nema_codes(code, bundle_id)
@@ -169,7 +169,7 @@ def get_nema(request, bundle_id):
         'success': True,
         'layer_codes': layer_codes,
         'wms_list': wms_list,
-        'bundle': {"id": bundle_id},
+        'bundle': {"id": bundle},
     }
     return JsonResponse(rsp)
 

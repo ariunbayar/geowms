@@ -8,8 +8,7 @@ export default class NemaMap extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            wms_list: [],
-            bundle:'',
+            bundle: '',
             is_loading: false,
             choice_list: []
         }
@@ -32,7 +31,7 @@ export default class NemaMap extends Component {
             })
     }
 
-    componentDidUpdate(pP, pS) {
+  componentDidUpdate(pP, pS) {
         const { choice_list, bundle} = this.state
         if ( bundle != pS.bundle ) {
             this.loadNema( bundle, choice_list )
@@ -77,7 +76,7 @@ export default class NemaMap extends Component {
 
 
     render() {
-        const { wms_list } = this.state
+        const { bundle ,wms_list} = this.state
         return (
             <div className="col-lg-12">
                 <div className="col-12 col-md-12 col-xl-12 d-flex justify-content-center">
