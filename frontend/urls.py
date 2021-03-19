@@ -72,6 +72,7 @@ urlpatterns = [
 
     path('covid/', include(([
         path('get-nema/', covid_views.get_nema),
+        path('get-covid-state/<str:geo_id>/', covid_views.get_covid_state),
     ], 'covid'))),
 
     path('profile/api/', include(([

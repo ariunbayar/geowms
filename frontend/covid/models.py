@@ -44,5 +44,5 @@ class CovidDashboardLog(models.Model):
     emnelegiin_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Эмнэлэгийн тоо")
     emiin_sangiin_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Эмийн сангийн тоо")
     shinjilgee_hiisen_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Шинжилгээ хийсэн тоо")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True, verbose_name="Бүртгэсэн ажилтан")
-    created_at = models.DateTimeField(auto_now=True, verbose_name="Бүртгэсэн огноо")
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True, verbose_name="Бүртгэсэн ажилтан")
+    updated_at = models.DateTimeField(auto_now=False, verbose_name="Бүртгэсэн огноо")

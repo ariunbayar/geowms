@@ -5,6 +5,8 @@ export const service = {
     getDashboardFromId,
     formOptions,
     saveDashboard,
+    saveDashboardLog,
+    removeDashBoard,
 }
 
 const prefix = '/gov'
@@ -36,5 +38,20 @@ function saveDashboard(values, geo_id) {
         body: JSON.stringify({ values, geo_id })
     }
     return fetch(`${prefix}/save-covid-dashboard/`, requestOptions).then(handleResponse)
+}
+
+function saveDashboardLog(values, geo_id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ values, geo_id })
+    }
+    return fetch(`${prefix}/save-covid-dashboard-log/`, requestOptions).then(handleResponse)
+}
+
+function removeDashBoard(id) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/remove-dashboard/${id}/`, requestOptions).then(handleResponse)
 }
 
