@@ -42,7 +42,13 @@ class Graph extends PureComponent {
                         <h4 className="text-center">{name} өнөөдрийн байдлаар</h4>
                     </div>
                     {count_datas.map((data, idx) =>
-                        <Card idx={idx} color={data.color} head_text={data.name} body_text={data.data} footer_text={data.data}/>
+                        <Card
+                            idx={idx}
+                            color={data.color}
+                            head_text={data.name}
+                            body_text={data.data}
+                            prev_data={data.prev_data}
+                        />
                     )}
                 </div>
                 <div className="row">

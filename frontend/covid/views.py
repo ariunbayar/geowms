@@ -118,6 +118,7 @@ def get_covid_state(request, geo_id):
     qs = CovidDashboard.objects.filter(geo_id=geo_id)
     covid_datas = qs.values()
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)
+    last_day_data = qs_log.order_by('-updated_at').values()
     count_datas = []
     for f in CovidDashboard._meta.get_fields():
         if f.name != 'id' and f.name != 'updated_by' and not 'updated_at' in f.name and not 'name' in f.name and not 'parent_id' in f.name and not 'org' in f.name and not 'geo_id' in f.name:
@@ -139,6 +140,7 @@ def get_covid_state(request, geo_id):
                         'origin_name': f.name,
                         'name': f.verbose_name,
                         'data': covid_data[f.name],
+                        'prev_data': last_day_data[0][f.name],
                         'color': color
                     })
     covid_data_ogj = qs.first()
