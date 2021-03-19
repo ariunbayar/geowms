@@ -9,7 +9,7 @@ export default class CovidMap extends Component {
         super(props)
 
         this.state = {
-            geo_id: props.geo_id ? props.geo_id : 'au_11',
+            geo_id: props.geo_id ? props.geo_id : 'au_496',
             geo_data: [],
             form_datas: [],
         }

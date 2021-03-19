@@ -12,8 +12,7 @@ class Graph extends PureComponent {
     constructor(props) {
         super(props)
         this.state = {
-            geo_id: 'au_11',
-            name: 'Улаанбаатар',
+            geo_id: props.geo_id ? props.geo_id : 'au_496',
             count_datas: [],
             charts: {}
         }
@@ -21,14 +20,21 @@ class Graph extends PureComponent {
     }
 
     componentDidMount(){
-        this.getState()
+        const {geo_id} = this.state
+        this.getState(geo_id)
     }
 
-    getState(){
-        const {geo_id} = this.state
-        service.getState(geo_id).then(({success, count_datas, charts}) =>{
+    componentDidUpdate(pP) {
+        if (pP.geo_id !== this.props.geo_id) {
+            this.setState({ geo_id: this.props.geo_id })
+            this.getState(this.props.geo_id)
+        }
+    }
+
+    getState(geo_id){
+        service.getState(geo_id).then(({success, count_datas, charts, name}) =>{
             if(success){
-                this.setState({count_datas, charts})
+                this.setState({count_datas, charts, name})
             }
         })
     }
