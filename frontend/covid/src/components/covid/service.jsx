@@ -37,9 +37,9 @@ function getGeom(geo_id) {
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }
 
-function getNema() {
+function getNema(bundle_id) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch('/covid/get-nema/', requestOptions).then(handleResponse)
+    return fetch(`/covid/get-nema/${bundle_id}/`, requestOptions).then(handleResponse)
 }

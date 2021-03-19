@@ -103,7 +103,6 @@ export default class SearchSelects extends Component {
 
     render() {
         const { aimag, sum, horoo, aimag_id, sum_id, horoo_id } = this.state
-
         return (
             <div className="form-row">
                 <div className="form-group col-4">

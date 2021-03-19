@@ -53,6 +53,7 @@ from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
 from main.components import Datatable
 from geoportal_app.models import User
+from backend.config.models import CovidConfig
 
 
 
@@ -1127,7 +1128,7 @@ def create_nema(request, payload):
             'info': 'Геопортал дээр WMS бүртгэлгүй байна !!!.',
         })
 
-    wms_layer = wms.wmslayer_set.filter(wms=wms).first()
+    wms_layer = wms.wmslayer_set.filter(code=layer_code).first()
 
     if wms_layer:
         wms_layer.title = layer_name
@@ -1168,7 +1169,10 @@ def create_nema(request, payload):
 @login_required(login_url='/gov/secure/login/')
 def nema_detail(request, pk):
     nema_detail_list = []
+    bundle = utils.get_config('bundle', CovidConfig)
+    wms_qs = WMS.objects.filter(name__exact='nema').first()
     nema_detail = list(NemaWMS.objects.filter(id=pk).values('code', 'id', 'created_by', 'created_at', 'is_open'))
+    url = reverse('api:service:wms_proxy', args=(bundle, wms_qs.pk, 'wms'))
     user_id = nema_detail[0]['created_by']
     nema_detail_list.append({
         'code': nema_detail[0]['code'],
@@ -1179,7 +1183,10 @@ def nema_detail(request, pk):
         'user_id': user_id,
     })
 
-    return JsonResponse({'nema_detail_list':nema_detail_list})
+    return JsonResponse({
+        'nema_detail_list':nema_detail_list,
+        'url': url
+        })
 
 
 @require_GET
@@ -1190,12 +1197,12 @@ def nema_remove(request, pk):
     nema = NemaWMS.objects.filter(id=pk).first()
     wms = WMS.objects.filter(name__iexact='NEMA').first()
 
-    wms_layer = get_object_or_404(WMSLayer, code=nema.code, wms=wms)
+    wms_layer = WMSLayer.objects.filter(code=nema.code, wms=wms).first()
     BundleLayer.objects.filter(layer=wms_layer).delete()
     wms_layer.delete()
     nema.delete()
 
     return JsonResponse({
         'success': True,
-        'info': 'Ажилттай устлаа'
+        'info': 'Ажилттай устгалаа'
     })
