@@ -44,15 +44,13 @@ export default class CovidMap extends Component {
     render() {
         const { geo_data, form_datas} = this.state
         return (
-            <div className="col-lg-12">
-                <div className="col-12 col-md-12 col-xl-12">
+                <div className="col-12 col-md-12 col-xl-12 my-3" style={{width: '250vh'}}>
                     <InspireMap
-                        height="100vh"
+                        height="80vh"
                         vector_source={geo_data}
                         form_datas={form_datas}
                     />
                 </div>
-            </div>
         )
     }
 }

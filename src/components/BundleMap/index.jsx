@@ -329,7 +329,7 @@ export default class InspireMap extends Component {
     loadWmsLayers(bundle_id) {
         this.setState({is_loading: true})
         Promise.all([
-            service.loadWMSLayers(bundle_id),
+            service.loadWMSLayers(bundle_id)
         ]).then(([{ wms_list }]) => {
             this.addWmsLayers(wms_list)
             this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
@@ -579,6 +579,7 @@ export default class InspireMap extends Component {
         map.on('click', this.handleMapClick)
         this.map = map
         this.getErguulLayer()
+        this.map.addControl(this.controls.popup)
         this.setState({is_loading: false})
 
     }
@@ -1059,6 +1060,7 @@ export default class InspireMap extends Component {
                 <div
                     id="map"
                     style={{height:"calc( 80vh - 85px - 15px)"}}
+                    className="mw-100"
                 >
                 </div>
             </div>

@@ -189,7 +189,7 @@ class PopUpCmp extends Component {
         const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, form_datas} = this.state
         const { is_empty, is_from_inspire } = this.props
         return (
-                <div className="d-flex flex-column justify-content-center align-items text-center" style={{minHeight:'10vh'}}>
+                <div className="d-flex flex-column posit" style={{minHeight:'10vh'}}>
                     {
                         form_datas.length > 0 ?
                         <div className="row">
