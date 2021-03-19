@@ -295,7 +295,7 @@ export default class InspireMap extends Component {
     addVectorSource(vector_source) {
 
         const { projection, projection_display, form_datas} = this.state
-        if (Object.keys(vector_source).length >0) {
+        if (Object.keys(vector_source).length > 0) {
             const features = new GeoJSON({
                 dataProjection: projection_display,
                 featureProjection: projection,
@@ -304,19 +304,19 @@ export default class InspireMap extends Component {
                 features: features
             });
             const vector_layer = new VectorLayer({
-            source: vectorSource,
-            style: new Style({
-                stroke: new Stroke({
-                    color: 'rgba(100, 255, 0, 1)',
-                    width: 2
+                source: vectorSource,
+                style: new Style({
+                    stroke: new Stroke({
+                        color: 'rgba(100, 255, 0, 1)',
+                        width: 2
+                    }),
+                    fill: new Fill({
+                        color: 'rgba(100, 255, 0, 0.3)'
+                    })
                 }),
-                fill: new Fill({
-                    color: 'rgba(100, 255, 0, 0.3)'
-                })
-            }),
             })
             this.map.addLayer(vector_layer)
-            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 4000})
+            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
             this.controls.popup.getFormdata(true, form_datas)
 
         }

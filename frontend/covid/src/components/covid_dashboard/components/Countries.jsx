@@ -24,7 +24,6 @@ export  class Countries extends Component {
 
     activeView(event, region, geo_id) {
         const check = this.state.datas
-        console.log("re", region)
         if (region == 'theme') {
             this.props.getGeoID(geo_id)
         }
@@ -93,7 +92,6 @@ export  class Countries extends Component {
 
     render() {
         const { datas } = this.state
-        console.log(datas);
         return (
             <div className="row">
                 <div className="col-md-12">
