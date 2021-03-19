@@ -13,11 +13,11 @@ class Navbar extends PureComponent {
                                     className="nav-link"
                                     activeClassName="active"
                                 >
-                                    CASES
+                                    Cases
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to={"/covid_dashboard/"}
+                                <NavLink to={"/covid_dashboard/vaccine/"}
                                     className="nav-link"
                                     activeClassName="active"
                                 >
