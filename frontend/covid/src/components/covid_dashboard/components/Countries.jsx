@@ -73,10 +73,25 @@ export  class Countries extends Component {
     }
 
     getGeoId(){
-        console.log(this.state.datas);
+        
+
+        
     }
 
-    activeView(event){
+    activeView(event, name) {
+        const check = this.state.datas
+        if (name == 'theme') {
+            check.map((feature, idx) =>
+                console.log((feature.geo_id)))
+        }
+        else if (name == 'package') {
+            check.map((features, idx) =>
+                // console.log(features.children)
+                features.children.map((lol, idx) =>
+                console.log(lol)
+                )
+            )
+        }
         this.setState({fields: [], id_list: [], view_name: ''})
         const id = event.id
         const prev_event = this.state.prev_event
@@ -147,7 +162,7 @@ export  class Countries extends Component {
                                     data-target={`#collapse-theme${theme_idx}`}
                                     aria-expanded="false"
                                     aria-controls={`collapse-theme${theme_idx}`}
-                                    onClick={(e) => this.activeView(e.currentTarget)}>
+                                    onClick={(e) => this.activeView(e.currentTarget, 'theme')}>
                                     <i className="icon expand-icon fa fa-plus" id={`${theme_idx}`}></i>
                                     &nbsp;&nbsp;{theme.name}
                                     <div className="col-auto float-right">{theme.batlagdsan_tohioldol_too}</div>
@@ -162,7 +177,7 @@ export  class Countries extends Component {
                                                      data-target={`#collapse-packages${theme_idx}${pack_idx}`}
                                                     aria-expanded="false"
                                                     aria-controls={`collapse-packages${theme_idx}${pack_idx}`}
-                                                    onClick={(e) => this.activeView(e.currentTarget)}>
+                                                    onClick={(e) => this.activeView(e.currentTarget, 'package')}>
                                                     <i className="icon expand-icon fa fa-plus ml-4" id={`${theme_idx}-${pack_idx}`}></i>
                                                     &nbsp;&nbsp;{packages.name}
                                                     <div className="col-auto float-right">{packages.batlagdsan_tohioldol_too}</div>
