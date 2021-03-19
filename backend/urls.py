@@ -58,7 +58,7 @@ urlpatterns = [
 
     path('api/суурь-давхарга/', include(([
         path('', суурь_давхарга.жагсаалт, name=''),
-        path('wms-preview/<int:pk>/', суурь_давхарга.wms_preview, name='wms-preview'),
+        path('wms-preview/<int:pk>/<str:url_type>/', суурь_давхарга.wms_preview, name='wms-preview'),
         path('үүсгэх/', суурь_давхарга.үүсгэх, name='үүсгэх'),
         path('swap/', суурь_давхарга.swap, name='swap'),
         path('<int:pk>/detail/', суурь_давхарга.detail, name='detail'),
@@ -90,6 +90,7 @@ urlpatterns = [
         path('<int:pk>/erguuleg-fields/', org_views.get_erguuleg_fields),
         path('save-erguul/', org_views.save_erguul),
         path('get-erguul/', org_views.get_erguuls),
+        path('get-select-values/', org_views.get_select_values),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -173,6 +174,13 @@ urlpatterns = [
 
     path('geoserver/rest/', include(([
         path('layers/', geoserver_views.layers),
+        path('group_list/', geoserver_views.layer_groups),
+        path('remove_layer_group/', geoserver_views.remove_layer_group),
+        path('get_group_detial/', geoserver_views.get_group_detial),
+        path('get_layers/', geoserver_views.get_layer_detial),
+        path('create_layer_group/', geoserver_views.create_layer_group),
+        path('get_group_cache_list/', geoserver_views.get_group_cache),
+        path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

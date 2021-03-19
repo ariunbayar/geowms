@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.theme.default.min.css" %}">
     <link rel="stylesheet" href="{% static "assets/bootstrap/css/animate.min.css" %}">
     <link href="{% static "assets/bootstrap/css/font-awesome.min.css" %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static "assets/admin/css/app-style.css" %}">
+
 </head>
 <style>
 </style>
@@ -22,6 +24,10 @@
         <div class="container">
             <div class="ml-auto mt-2 mt-lg-0">
                 {% if user.is_authenticated %}
+                    {% if user and not user.is_sso %}
+                        <a href="{% url "org:frontend" %}" class="btn gp-btn-primary">Байгууллага</a>
+                        |
+                    {% endif %}
                     {% if user.is_superuser %}
                     <span class="btn gp-btn-primary">
                         Нэвтэрсэн хэрэглэгч: {{user.username}}
@@ -34,7 +40,7 @@
                     {% endif %}
                     <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
                 {% else %}
-                <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+                    <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
                 {% endif %}
             </div>
         </div>
@@ -58,16 +64,16 @@
             <div class="col-md-4 align-self-center">
                 <div class="login-reg float-right">
                     <div class="ml-auto mt-2 mt-lg-0">
-                        {% if user.is_authenticated and user.is_superuser%}
-                        {% if not user.is_superuser %}
-                        <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
-                        {% endif %}
-                        {% else %}
-                        <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
-                        <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
+                        {% if user.is_authenticated and user %}
+                            {% if not user %}
+                                <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
+                            {% endif %}
+                            {% else %}
+                                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
+                                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
                         {% endif %}
                     </div>
-                    {#              <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a>#}
+                        {# <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a> #}
 
                 </div>
             </div>
@@ -89,11 +95,11 @@
                 {% with request.resolver_match.url_name as url_name %}
                 <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="/covid/">КОВИД-19</a>
+                        <a class="nav-link" href="/covid_dashboard/">КОВИД-19</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/open-layer/">Нээлттэй өгөгдөл</a>
-                    </li>
+                    <!-- <li class="nav-item"> -->
+                        <!-- <a class="nav-link" href="/open-layer/">Нээлттэй өгөгдөл</a> -->
+                    <!-- </li> -->
                     <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
                         <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
                     </li>
@@ -135,7 +141,7 @@
         {% endblock %}
     </div>
 
-    <footer class="footer">
+    <div class="footer">
         <div class="top gp-bg-dark">
             <div class="container">
                 <div class="row py-4">
@@ -191,7 +197,7 @@
                 <span class="">{{ CONFIGS.site_footer_text }}</span>
             </div>
         </div>
-    </footer>
+    </div>
     <!-- JS, Popper.js, and jQuery -->
     <script src="{% static "assets/bootstrap/js/jquery_3.5.1.slim.min.js" %}"></script>
     <script src="{% static "assets/bootstrap/js/popper.min.js" %}"></script>

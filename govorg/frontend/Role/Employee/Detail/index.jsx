@@ -21,6 +21,7 @@ export class Detail extends Component {
                 email: '',
                 gender: '',
                 register: '',
+                phone_number: '',
                 position: '',
                 is_admin: false,
                 is_super: false,
@@ -129,6 +130,7 @@ export class Detail extends Component {
             email,
             gender,
             register,
+            phone_number,
             is_admin,
             is_active,
             token,
@@ -140,6 +142,9 @@ export class Detail extends Component {
             street,
             apartment,
             door_number,
+            state,
+            pro_class,
+            address_state_display,
         } = this.state.employee
 
         const {
@@ -198,6 +203,11 @@ export class Detail extends Component {
                                         { token }
                                     </dd>
 
+                                    <dt className="col-md-3">Мэргэжлийн ангийн бүрэлдэхүүн статус:</dt>
+                                    <dd className="col-md-9">
+                                        { pro_class }
+                                    </dd>
+
                                 </dl>
                                 <dl className="row">
                                     <dt className="col-md-3">Бүртгэсэн:</dt>
@@ -230,9 +240,19 @@ export class Detail extends Component {
                                         { register }
                                     </dd>
 
+                                    <dt className="col-md-3">Утасны дугаар:</dt>
+                                    <dd className="col-md-9">
+                                        { phone_number }
+                                    </dd>
+
                                     <dt className="col-md-3">Эрх:</dt>
                                     <dd className="col-md-9">
                                         { role_name }
+                                    </dd>
+
+                                    <dt className="col-md-3">Ажилтны төлөв:</dt>
+                                    <dd className="col-md-9">
+                                        { state }
                                     </dd>
                                 </dl>
                                 {
@@ -242,6 +262,13 @@ export class Detail extends Component {
                                         <dt className="col-md-3">Гэрийн хаяг:</dt>
                                         <dd className="col-md-9">
                                             { level_1 + ", " + level_2 + ", " + level_3 + ", " + street + " гудамж " + apartment + " байр, " + door_number + " тоот" }
+                                        </dd>
+
+                                        <dt className="col-md-3">
+                                            Төлөв:
+                                        </dt>
+                                        <dd className="col-md-9">
+                                            { address_state_display }
                                         </dd>
                                     </dl>
                                 }

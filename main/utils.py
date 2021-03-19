@@ -22,7 +22,7 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
-from backend.config.models import Config
+from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 
@@ -538,10 +538,10 @@ def _is_domain(domain):
 
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
-def get_config(config_name):
+def get_config(config_name, Model=Config):
 
     default_values = {config_name: ''}
-    configs = Config.objects.filter(name__in=default_values.keys()).first()
+    configs = Model.objects.filter(name__in=default_values.keys()).first()
 
     return configs.value if configs else ''
 
@@ -779,7 +779,7 @@ def date_to_timezone(input_date):
     return output_date
 
 
-def get_display_items(items, fields, хувьсах_талбарууд=[]):
+def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
     display = list()
     for item in items.values():
         obj = dict()
@@ -792,6 +792,11 @@ def get_display_items(items, fields, хувьсах_талбарууд=[]):
                 if хувьсах_талбар['field'] == field:
                     action = хувьсах_талбар['action']
                     obj[хувьсах_талбар['new_field']] = action(item[field], item)
+
+        for нэмэлт_талбар in нэмэлт_талбарууд:
+            action = нэмэлт_талбар['action']
+            result_data = action(item)
+            obj[нэмэлт_талбар['field']] = result_data or None
 
         display.append(obj)
 
@@ -814,8 +819,6 @@ def geojson_to_geom(geo_json):
     geo_json = str(geo_json).replace("\'", "\"")
     geo_data = geoJsonConvertGeom(geo_json)
     geom = ''.join(geo_data)
-    geom = GEOSGeometry(geom)
-
     geom_type = GEOSGeometry(geom).geom_type
     if geom_type == 'Point':
         geom = MultiPoint(geom, srid=4326)
@@ -987,3 +990,32 @@ def create_index(model_name, field):
         cursor.execute(sql)
         return True
     return False
+
+
+def get_2d_data(geo_id):
+    cursor = connections['default'].cursor()
+    sql = """
+        SELECT
+            ST_AsText(ST_Transform(st_force2d(geo_data),4326)) as geom
+        FROM
+            m_geo_datas
+        WHERE
+            geo_id='{geo_id}'
+    """.format(
+        geo_id=geo_id
+    )
+
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    data = rows[0]['geom']
+    return data
+
+
+def search_dict_from_object(objs, key='name', value='value'):
+    data = dict()
+    for obj in objs:
+        data_key = obj[key]
+        data_value = obj[value]
+        data[data_key] = data_value
+    return data

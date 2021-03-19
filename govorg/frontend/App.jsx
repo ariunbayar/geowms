@@ -3,6 +3,7 @@ import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import { service } from "./service"
 import MenuItem from "@utils/MenuItem"
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
+import CovidConfigs from './Help/CovidConfigs';
 
 const InsPerms  = React.lazy(() => import('./Role/Role/GovPerms'));
 const Gov  = React.lazy(() => import('./Role/Gov/index'));
@@ -23,6 +24,9 @@ const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
+const Nema = React.lazy(() => import('./Nema'));
+const CovidConfig = React.lazy(() => import('./Help/CovidConfigs'));
+const CovidDashboardConfig = React.lazy(() => import('./Covid'))
 
 export class App extends Component {
 
@@ -40,6 +44,7 @@ export class App extends Component {
         this.requestCount = this.requestCount.bind(this)
         this.getEmpRoles = this.getEmpRoles.bind(this)
         this.getApproveAndRevoke = this.getApproveAndRevoke.bind(this)
+        this.getBaseLayer = this.getBaseLayer.bind(this)
     }
 
     componentDidMount() {
@@ -84,7 +89,7 @@ export class App extends Component {
     }
 
     render() {
-        const { org_role, employee } = this.props.org
+        const { org_role, employee, allowed_geom, obeg_employee, covid_configs, covid_dashboard } = this.props.org
         const { emp_role , approve, revoke, base_layer_list } = this.state
         return (
             <BrowserRouter>
@@ -112,6 +117,15 @@ export class App extends Component {
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
+                        {
+                            obeg_employee &&
+                            <MenuItem icon="gp-text-primary fa fa-star-o" url="/gov/nema/" text="Covid">
+                                <ul className="sidebar-submenu">
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/list/" text="Бүртгэл"></MenuItem>
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/map/" text="Газрын зураг"></MenuItem>
+                                </ul>
+                            </MenuItem>
+                        }
                         { revoke &&
                             <MenuItem
                                 icon="gp-text-primary fa fa-times-circle"
@@ -145,7 +159,7 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
 
                                     {
-                                       Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
+                                    Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
                                         <MenuItem
                                             key={idx}
                                             icon="gp-text-primary fa fa-circle-o"
@@ -189,6 +203,16 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                             </ul>
                         </MenuItem>
+                        {
+                            employee.is_admin && covid_configs.length > 0
+                            &&
+                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-config/" text="Covid Тохиргоо"></MenuItem>
+                        }
+                        {
+                            covid_dashboard.length > 0
+                            &&
+                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-dashboard-config/" text="Covid Dashboard"></MenuItem>
+                        }
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/help/" text="Тусламж"></MenuItem>
                     </ul>
                 </div>
@@ -206,7 +230,17 @@ export class App extends Component {
                                 <Route path="/gov/perm/region/" component={MapRegion} />
                                 <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
                                 <Route path="/gov/role/role/" component={Role} />
-                                <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} base_layer_list={base_layer_list} employee={employee} refreshCount={() => this.requestCount()} />} />
+                                <Route
+                                    path="/gov/org/map/:tid/:pid/:fid/"
+                                    component=
+                                        {
+                                            (props) => <Bundles {...props}
+                                            base_layer_list={base_layer_list}
+                                            employee={employee} refreshCount={() => this.requestCount()}
+                                            org_geom = {allowed_geom}
+                                        />
+                                        }
+                                    />
 
                                 <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
                                 <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
@@ -220,6 +254,10 @@ export class App extends Component {
                                 <Route exact path="/gov/help/" component={Help} />
                                 <Route exact path="/gov/profile/" component={Profile} />
                                 <Route exact path="/gov/profile/password/" component={Password} />
+
+                                <Route path="/gov/nema/" component={Nema} />
+                                <Route path="/gov/covid-config/" component={(props) => <CovidConfig {...props} covid_configs={covid_configs}/>} />
+                                <Route path="/gov/covid-dashboard-config/" component={(props) => <CovidDashboardConfig {...props} covid_dashboard={covid_dashboard}/>} />
                             </Switch>
                         </Suspense>
                     </div>

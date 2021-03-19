@@ -15,13 +15,12 @@ def all(request):
 
     for base_layer in BaseLayer.objects.all().order_by('sort_order'):
         wms_args = {}
-        if base_layer.tilename == 'wms':
-            try:
-                pk = int(base_layer.url.split('/')[-2])
-                wms = WMS.objects.get(pk=pk)
-                wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
-            except Exception:
-                pass
+        if base_layer.tilename == 'wms' or base_layer.tilename == 'wmts':
+            base_layer_url = base_layer.url.replace('wms/', '')
+            base_layer_url = base_layer_url.replace('wmts/', '')
+            pk = int(base_layer_url.split('/')[-2])
+            wms = WMS.objects.get(pk=pk)
+            wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
 
         base_layer_list.append({
             'tilename': base_layer.tilename,

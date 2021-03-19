@@ -30,7 +30,10 @@ export class EmployeeEdit extends Component {
                 email: '',
                 gender: '',
                 register: '',
+                phone_number: '',
                 is_admin: false,
+                state: '',
+                pro_class: '',
             },
             modal_status: 'closed',
             is_loading: true,
@@ -63,13 +66,16 @@ export class EmployeeEdit extends Component {
             sum_geo_id: '',
             horoo_geo_id: '',
             feature: {},
+
             description: '',
             point_coordinate: [],
             point: {},
             street: '',
             apartment: '',
             door_number: '',
+            address_state: true,
             map_coordinate: [],
+
             is_marker: true,
         }
 
@@ -114,20 +120,25 @@ export class EmployeeEdit extends Component {
             .then(({ success, employee_detail, role_id, perms }) => {
                 if (success) {
                     this.getFeildValues(employee_detail.level_1, employee_detail.level_2, employee_detail.level_3)
-                    this.setState({ perms, role_id, old_role_id: role_id, is_loading: false, form_values:{
+                    this.setState({ perms, role_id, old_role_id: role_id, is_loading: false,
+                        form_values:{
                             username: employee_detail.username,
                             last_name: employee_detail.last_name,
                             first_name: employee_detail.first_name,
-                            position: employee_detail.position,
+                            position: employee_detail.position_id,
                             email: employee_detail.email,
                             gender: employee_detail.gender,
                             register: employee_detail.register,
+                            phone_number: employee_detail.phone_number,
                             is_admin: employee_detail.is_admin,
+                            state: employee_detail.state_id,
+                            pro_class: employee_detail.pro_class_id,
                         },
                         point: employee_detail.point,
                         street: employee_detail.street,
                         apartment: employee_detail.apartment,
                         door_number: employee_detail.door_number,
+                        address_state: employee_detail.address_state,
                     })
                     this.getRolesForOption()
                 }
@@ -241,10 +252,13 @@ export class EmployeeEdit extends Component {
         const email = form_values.email
         const gender = form_values.gender
         const register = form_values.register
+        const phone_number = form_values.phone_number
         const is_admin = form_values.is_admin
+        const state = form_values.state
+        const pro_class = form_values.pro_class
         const {id, role_id} = this.state
 
-        const { street, apartment, door_number, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
+        const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
         const address = {
             'street': street,
             'apartment': apartment,
@@ -253,11 +267,12 @@ export class EmployeeEdit extends Component {
             'level_2': sum_name,
             'level_3': horoo_name,
             'point': point_coordinate,
+            'address_state': address_state,
         }
 
         this.checkRoleAndPerm()
         service
-            .updateEmployee(username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, this.perms, this.remove_perms, address)
+            .updateEmployee(username, first_name, last_name, position, email, gender, register, phone_number, is_admin, role_id, id, this.perms, this.remove_perms, address, state, pro_class)
             .then(({ success, info, errors }) => {
                 if(success) {
                     setStatus('saved')
@@ -472,8 +487,9 @@ export class EmployeeEdit extends Component {
 
     render() {
         const {form_values, roles, role_list, prefix, is_inspire_role, is_inspire_role_null, perms, old_role_id, role_id, id, is_address_map } = this.state
-        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point } = this.state
-        const { org_roles } = this.props
+        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, address_state, feature, street, apartment, door_number, point } = this.state
+        const { positions, states, pro_classes, org_roles } = this.props
+
         return (
             <div className="card">
                 <div className="card-body">
@@ -537,14 +553,18 @@ export class EmployeeEdit extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="position">Албан тушаал:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.position ? 'is-invalid' : '')}
-                                                    name='position'
-                                                    id="id_position"
-                                                    type="text"
-                                                    placeholder="Албан тушаал"
-                                                />
-                                                <ErrorMessage name="position" component="div" className="text-danger"/>
+                                                    <Field name="position" as="select" id="position"
+                                                        style={{ fontSize: '0.8rem' }}
+                                                        className={'custom-select ' + (errors.position ? 'is-invalid' : '')}
+                                                    >
+                                                        <option value="">--- Албан тушаал сонгоно уу ---</option>
+                                                        {
+                                                            positions.map((item, idx) =>
+                                                                <option key={idx} value={item.id}>{item.name}</option>
+                                                            )
+                                                        }
+                                                    </Field>
+                                                    <ErrorMessage name="position" component="span" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -571,60 +591,148 @@ export class EmployeeEdit extends Component {
                                                 </Fragment>
                                             </div>
                                         </div>
+                                        {this.props.employee.is_admin
+                                        ?
+                                            <div>
+                                                <div className="form-row">
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="register">Регистер:</label>
+                                                        <Field
+                                                            className={'form-control ' + (errors.register ? 'is-invalid' : '')}
+                                                            name='register'
+                                                            id="id_register"
+                                                            type="text"
+                                                            placeholder="Регистер"
+                                                        />
+                                                        <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                    </div>
+                                                    {this.props.employee.is_admin &&
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="choose_role">Role: </label>
+                                                        <select className='form-control' id="choose_role" name='choose_role' value={this.state.role_id} onChange={(e) => this.getRole(e.target.value)}>
+                                                            <option value="">--- Role сонгоно уу ---</option>
+                                                            {role_list.length > 0 && role_list.map((role, idx) =>
+                                                                <option key={idx} value={role.role_id}>{role.role_name}</option>
+                                                            )}
+                                                        </select>
+                                                    </div>}
+                                                </div>
+                                                <div className='form-row'>
+                                                    <div className="form-group col-md-6">
+                                                        <div className="position-relative has-icon-right">
+                                                            <label htmlFor="phone_number" >Утасны дугаар:</label>
+                                                            <Field
+                                                                className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                                name='phone_number'
+                                                                id="id_phone_number"
+                                                                type="text"
+                                                                placeholder="Утасны дугаар"
+                                                            />
+                                                            <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                        </div>
+                                                    </div>
+                                                    {this.props.employee.is_admin &&
+                                                    <div className="form-group col-md-3 mt-1 text-center"><br/>
+                                                        <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                                        <Field
+                                                            className="ml-2"
+                                                            name='is_admin'
+                                                            id="id_is_admin"
+                                                            type="checkbox"
+                                                        />
+                                                        <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                    </div>
+                                                    }
+                                                    {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
+                                                    <div className="col-md-3 mt-1 text-center"><br/>
+                                                        <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                            {} Нууц үг солих имэйл илгээх
+                                                        </button>
+                                                    </div>
+                                                    : null
+                                                    }
+                                                </div>
+                                            </div>
+                                        :
+                                            <div>
+                                                <div className="form-row">
+                                                    <div className="form-group col-md-6">
+                                                        <label htmlFor="register">Регистер:</label>
+                                                        <Field
+                                                            className={'form-control ' + (errors.register ? 'is-invalid' : '')}
+                                                            name='register'
+                                                            id="id_register"
+                                                            type="text"
+                                                            placeholder="Регистер"
+                                                        />
+                                                        <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                    </div>
+                                                    <div className="form-group col-md-6">
+                                                        <div className="position-relative has-icon-right">
+                                                            <label htmlFor="phone_number" >Утасны дугаар:</label>
+                                                            <Field
+                                                                className={'form-control ' + (errors.phone_number ? 'is-invalid' : '')}
+                                                                name='phone_number'
+                                                                id="id_phone_number"
+                                                                type="text"
+                                                                placeholder="Утасны дугаар"
+                                                            />
+                                                            <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
+                                                    <div className="col-md-3 mt-1">
+                                                        <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                            {} Нууц үг солих имэйл илгээх
+                                                        </button>
+                                                    </div>
+                                                    : null
+                                                    }
+                                                </div><br/>
+                                            </div>
+                                        }
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="register">Регистер:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.register ? 'is-invalid' : '')}
-                                                    name='register'
-                                                    id="id_register"
-                                                    type="text"
-                                                    placeholder="Регистер"
-                                                />
-                                                <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                    <label htmlFor='id_state'>Төлөв:</label>
+                                                    <Field name="state" as="select" id="state"
+                                                        style={{ fontSize: '0.8rem' }}
+                                                        className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                    >
+                                                        <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
+                                                        {
+                                                            states.map((item, idx) =>
+                                                                <option key={idx} value={item[0]}>{item[1]}</option>
+                                                            )
+                                                        }
+                                                    </Field>
+                                                    <ErrorMessage name="state" component="div" className="invalid-feedback"/>
                                             </div>
-                                            {this.props.employee.is_admin &&
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="choose_role">Role: </label>
-                                                <select className='form-control' id="choose_role" name='choose_role' value={this.state.role_id} onChange={(e) => this.getRole(e.target.value)}>
-                                                    <option value="">--- Role сонгоно уу ---</option>
-                                                    {role_list.length > 0 && role_list.map((role, idx) =>
-                                                        <option key={idx} value={role.role_id}>{role.role_name}</option>
-                                                    )}
-                                                </select>
-                                            </div>}
-                                        </div>
-                                        <div className='form-row'>
-                                            {this.props.employee.is_admin &&
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor='is_admin'>Байгууллагын админ</label>
-                                                <Field
-                                                    className="ml-2"
-                                                    name='is_admin'
-                                                    id="id_is_admin"
-                                                    type="checkbox"
-                                                />
-                                                <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>
+                                                    <Field name="pro_class" as="select" id="pro_class"
+                                                        style={{ fontSize: '0.8rem' }}
+                                                        className={'custom-select ' + (errors.pro_class ? 'is-invalid' : '')}
+                                                    >
+                                                        <option value="">--- Мэргэжлийн ангийн бүрэлдэхүүн ---</option>
+                                                        {
+                                                            pro_classes.map((item, idx) =>
+                                                                <option key={idx} value={item[0]}>{item[1]}</option>
+                                                            )
+                                                        }
+                                                    </Field>
+                                                    <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
-                                            }
-                                            {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
-                                            <div className="col-md-6">
-                                                <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
-                                                    {} Нууц үг солих имэйл илгээх
-                                                </button>
-                                            </div>
-                                            : null
-                                            }
                                         </div>
-                                        <br/>
-                                        <div className="form-group col-md-6">
+                                        {this.props.employee.is_admin &&
+                                        <div className="form-group col-md-12">
                                             <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => this.refreshMap()}>
                                                 {
                                                     !is_address_map ? "Role сонгох" : "Гэрийн хаяг оруулах"
                                                 }
                                             </button>
-                                        </div>
-
+                                        </div>}
                                         <div>
                                             {
                                                 is_address_map && (is_inspire_role || is_inspire_role_null)
@@ -701,7 +809,7 @@ export class EmployeeEdit extends Component {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="form-group col-4">
+                                                            <div className="form-group col-2">
                                                                 <label htmlFor="apartment">Байр:</label>
                                                                 <div className="input-group">
                                                                     <input
@@ -716,7 +824,7 @@ export class EmployeeEdit extends Component {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="form-group col-4">
+                                                            <div className="form-group col-2">
                                                                 <label htmlFor="door_number">Хаалганы дугаар:</label>
                                                                 <div className="input-group">
                                                                     <input
@@ -729,6 +837,20 @@ export class EmployeeEdit extends Component {
                                                                     <div className="input-group-append">
                                                                         <span className="input-group-text">тоот</span>
                                                                     </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="form-group mt-4">
+                                                                <div className="form-check">
+                                                                    <label className="form-check-label" htmlFor="id_address_state">
+                                                                        Байнгын оршин суугаа хаяг
+                                                                    </label>
+                                                                    <input
+                                                                        onChange={(e) => this.setState({ address_state: e.target.checked })}
+                                                                        className={'form-check-input col-4 ' + (errors.address_state ? 'is-invalid' : '')}
+                                                                        type="checkbox"
+                                                                        id="id_address_state"
+                                                                        checked={address_state}
+                                                                    />
                                                                 </div>
                                                             </div>
                                                         </div>
