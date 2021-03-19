@@ -14,11 +14,17 @@ def _insert_datas(apps, schema):
     big_parent_id = None
 
     covid_qs = CovidDashboard.objects
+    mongol = covid_qs.create(
+        name='Монгол улс',
+        geo_id='au_496',
+        parent_id=None,
+    )
+    mongol_id = mongol.id
     for item in admin_levels:
         data = dict()
         for key, value in item.items():
             if key != 'children':
-                data['parent_id'] = None
+                data['parent_id'] = mongol_id
                 data[key] = value
             elif key == 'children':
                 new_covid = covid_qs.create(

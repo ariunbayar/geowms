@@ -1,4 +1,5 @@
 import json
+from django.db.models.expressions import Combinable
 
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
@@ -205,38 +206,60 @@ def _for_dashb_list():
 def _get_form_fields(Model):
     send_fields = []
     for f in Model._meta.get_fields():
-        if f.name != 'id' and not 'create' in f.name and not 'update' in f.name:
+        if 'too' in f.name:
             if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
                 send_fields.append({
                     'origin_name': f.name,
                     'name': f.verbose_name,
                     'length': f.max_length,
                 })
-    rsp = {
-        'success': True,
-        'fields': send_fields
-    }
+    return send_fields
+
+
+def _get_child(children, data):
+    childs = []
+    for child in children.values():
+        child_dict = dict()
+        child_dict['name'] = child['name']
+        child_dict['geo_id'] = child['geo_id']
+        for name in _for_dashb_list():
+            data[name] = child[name]
+        childs.append(child_dict)
+        data['children'] = childs
+    return data
 
 
 def _make_json_for_dashb(initial_qs, items):
-    data = dict()
-    for item in items:
-        parent_id = item.id
-        children = initial_qs.filter(parent_id=parent_id)
+    datas = list()
+    for item in items.values():
+        data = dict()
+        parent_id = item['id']
+        data['name'] = item['name']
+        data['geo_id'] = item['geo_id']
         for name in _for_dashb_list():
-            print(name)
-    return children
+            data[name] = item[name]
+        children = initial_qs.filter(parent_id=parent_id)
+        if children:
+            data['children'] = _make_json_for_dashb(initial_qs, children)
+            datas.append(data)
+        else:
+            datas.append(data)
+
+    return datas
 
 
-def _get_covid_dashboard():
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_covid_dashboard(request):
     initial_qs = CovidDashboard.objects
-    data = dict()
     parents = initial_qs.filter(parent_id__isnull=True)
-    children = _make_json_for_dashb(initial_qs, parents)
-    fields = _get_form_fields(CovidDashboard)
-    return 'haha'
-
-_get_covid_dashboard()
+    data = _make_json_for_dashb(initial_qs, parents)
+    rsp = {
+        'success': True,
+        'data': data,
+    }
+    return JsonResponse(rsp)
 
 
 @login_required(login_url='/gov/secure/login/')
@@ -246,7 +269,7 @@ def frontend(request):
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
     covid_configs = _get_covid_configs(org)
-    covid_dashboard = _get_covid_dashboard()
+    covid_dashboard = _get_form_fields(CovidDashboard)
     context = {
         'org': {
             "org_name": org.name.upper(),
