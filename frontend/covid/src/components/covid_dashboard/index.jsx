@@ -9,6 +9,8 @@ import {Header} from "./components/Header"
 import {service} from './components/service'
 import CovidMap from './components/covid_map'
 import Vaccine from './components/vaccine'
+import Loader from '@utils/Loader'
+
 
 class CovidDashboard extends PureComponent {
     constructor(props) {
@@ -19,6 +21,7 @@ class CovidDashboard extends PureComponent {
             update_time: '',
             mongol_zuruu: [],
             geo_id: '',
+            is_loading: true
         }
         this.getGeoID = this.getGeoID.bind(this)
     }
@@ -28,7 +31,6 @@ class CovidDashboard extends PureComponent {
     }
 
     getGeoID(geo_id){
-        console.log(geo_id);
         this.setState({ geo_id })
     }
 
@@ -36,17 +38,17 @@ class CovidDashboard extends PureComponent {
         service
             .getDataDashboard()
             .then(({ success, data, update_time, zuruu }) => {
-                this.setState({ datas: data[0]['children'], mongol_data: data[0], update_time, mongol_zuruu: zuruu })
+                this.setState({ datas: data[0]['children'], mongol_data: data[0], update_time, mongol_zuruu: zuruu, is_loading: false })
             })
     }
 
     render() {
-        const { datas, mongol_data, update_time, mongol_zuruu, geo_id } = this.state
+        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading } = this.state
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="row">
-
+                        <Loader is_loading={is_loading} />
                         <div className="col-md-12" >
                             <Header />
                         </div>
