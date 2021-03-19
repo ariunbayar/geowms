@@ -17,12 +17,19 @@ class CovidDashboard extends PureComponent {
             datas: [],
             mongol_data: [],
             update_time: '',
-            mongol_zuruu: []
+            mongol_zuruu: [],
+            geo_id: '',
         }
+        this.getGeoID = this.getGeoID.bind(this)
     }
 
     componentDidMount() {
         this.getData()
+    }
+
+    getGeoID(geo_id){
+        console.log(geo_id);
+        this.setState({ geo_id })
     }
 
     getData() {
@@ -34,41 +41,42 @@ class CovidDashboard extends PureComponent {
     }
 
     render() {
-        const { datas, mongol_data, update_time, mongol_zuruu } = this.state
+        const { datas, mongol_data, update_time, mongol_zuruu, geo_id } = this.state
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="row">
 
-                        <div className="col-md-12 border border-danger" >
+                        <div className="col-md-12" >
                             <Header />
                         </div>
 
-                        <div className="col-md-3" style={{height: '1000px'}}>
+                        <div className="col-md-3 border border-dark" style={{height: '1000px'}}>
                             <Menu
                                 mongol_data={mongol_data}
                                 update_time={update_time}
                                 mongol_zuruu={mongol_zuruu}
                             /><br/>
                             <Countries
+                                getGeoID={this.getGeoID}
                                 datas={datas}
                             />
                         </div>
 
-                        <div className="col-md-9 border border-danger">
+                        <div className="col-md-9 border border-dark">
                             <div className="row">
-                                <div className="col-md-12 border border-danger" style={{height: '50px'}}>
+                                <div className="col-md-12 border border-bottom border-dark" style={{height: '50px'}}>
                                     <Navbar />
                                 </div>
                                 <div className="col-md-12 p-0" style={{height: '950px', overflow: "auto"}}>
                                     <Switch>
-                                        <Route path={"/covid_dashboard/graph/"} component={Graph} />
+                                        <Route exact path={"/covid_dashboard/graph/"} component={(props) => <Graph {...props} geo_id={geo_id}/>  } />
                                     </Switch>
                                     <Switch>
-                                        <Route exact path="/covid_dashboard/" component={CovidMap} />
+                                        <Route path={"/covid_dashboard/"} component={(props) => <CovidMap {...props} geo_id={geo_id}/>  } />
                                     </Switch>
                                     <Switch>
-                                        <Route path="/covid_dashboard/vaccine/" component={Vaccine} />
+                                        <Route exact path="/covid_dashboard/vaccine/" component={Vaccine} />
                                     </Switch>
                                 </div>
                             </div>

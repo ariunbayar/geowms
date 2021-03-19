@@ -26,13 +26,13 @@ export  class Countries extends Component {
         const check = this.state.datas
         console.log("re", region)
         if (region == 'theme') {
-            console.log(geo_id)
+            this.props.getGeoID(geo_id)
         }
         else if (region == 'package') {
-            console.log(geo_id)
+            this.props.getGeoID(geo_id)
         }
         else if (region == 'feature') {
-            console.log(geo_id)
+            this.props.getGeoID(geo_id)
         }
 
         this.setState({fields: [], id_list: [], view_name: ''})

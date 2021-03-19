@@ -3,12 +3,9 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
-<<<<<<< HEAD
 from geojson import FeatureCollection
 from datetime import datetime, timedelta
-=======
 from geojson import FeatureCollection, Feature
->>>>>>> fd848f5e58d9358952761f37163417fe0fd075fd
 
 from main.decorators import ajax_required
 from main import utils
@@ -144,6 +141,7 @@ def get_covid_data(request, geo_id):
 @require_GET
 @ajax_required
 def get_covid_state(request, geo_id):
+    print(geo_id)
     qs = CovidDashboard.objects.filter(geo_id=geo_id)
     covid_datas = qs.values()
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)
@@ -183,7 +181,7 @@ def get_covid_state(request, geo_id):
             covid_data_ogj.batlagdsan_tohioldol_too, covid_data_ogj.edgersen_humuus_too,
             covid_data_ogj.emchlegdej_bui_humuus_too, covid_data_ogj.nas_barsan_hunii_too,
             covid_data_ogj.tusgaarlagdaj_bui_humuus_too, covid_data_ogj.shinjilgee_hiisen_too
-            ],
+        ],
         'backgroundColor': ['#FF6384','#4BC0C0','#FFCE56','#E7E9ED','#36A2EB', '#EC0E00', '#EC0E00']
     }
 
@@ -223,7 +221,8 @@ def get_covid_state(request, geo_id):
         'charts': {
             'piechart_one': piechart_one,
             'linechart_all': linechart_all
-        }
+        },
+        'name': qs.first().name,
     }
     return JsonResponse(rsp)
 
