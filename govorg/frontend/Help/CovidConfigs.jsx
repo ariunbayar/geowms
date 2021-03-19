@@ -210,9 +210,13 @@ class CovidConfigs extends Component {
                         )
                     }
                 </div>
-                <button className="btn btn-primary" onClick={this.setConfig}>
-                    Хадгалах
-                </button>
+                {
+                    covid_configs.length > 0
+                    &&
+                        <button className="btn btn-primary" onClick={this.setConfig}>
+                            Хадгалах
+                        </button>
+                }
             </div>
         );
     }
