@@ -65,13 +65,12 @@ class Form extends Component {
         service
             .saveDashboard(values, geo_id)
             .then(rsp => {
-                console.log(rsp);
+                // console.log(rsp);
             })
     }
 
     render() {
         const { covid_dashboard, values } = this.state
-        console.log(values);
         return (
             <div className="card-body pt-0">
                 <hr />
