@@ -20,6 +20,7 @@ from backend.inspire.models import MGeoDatas
 from backend.config.models import CovidConfig
 
 from frontend.covid.models import CovidDashboard
+from frontend.covid.models import CovidDashboardLog
 
 from govorg.backend.utils import (
     get_package_features_data_display,
@@ -262,6 +263,18 @@ def get_covid_dashboard(request):
     return JsonResponse(rsp)
 
 
+def _dash_create_log(geo_id, initial_qs):
+    values = initial_qs.values()
+    for value in values:
+        for name in _for_dashb_list():
+            if name == value['name']:
+                value[name] = value[name]
+        if value['name'] == 'updated_at':
+            value['']
+    log_qs = CovidDashboardLog.objects
+    log_qs.create(**data)
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -271,6 +284,7 @@ def save_dashboard(request, payload):
     qs = CovidDashboard.objects
     dashb = qs.filter(geo_id=geo_id)
     if dashb:
+        # _dash_create_log(geo_id, dashb)
         dashb.update(
             **values
         )
