@@ -135,7 +135,7 @@ def _layer_to_display_nema_codes(code, bundle_id):
 def _get_wms_list_of_nema(wms_list, wms_qs, bundle_id, layer_codes, request):
     for wms in wms_qs:
         if wms.is_active:
-            url = reverse('api:service:wms_proxy', args=(bundle, wms.pk, 'wms'))
+            url = reverse('api:service:wms_proxy', args=(bundle_id, wms.pk, 'wms'))
             layers = list()
             for code in layer_codes:
                 layer = _layer_to_display_nema_codes(code, bundle_id)
@@ -169,7 +169,7 @@ def get_nema(request, bundle_id):
         'success': True,
         'layer_codes': layer_codes,
         'wms_list': wms_list,
-        'bundle': {"id": bundle},
+        'bundle': {"id": bundle_id},
     }
     return JsonResponse(rsp)
 
