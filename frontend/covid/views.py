@@ -3,8 +3,12 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
+<<<<<<< HEAD
 from geojson import FeatureCollection
 from datetime import datetime, timedelta
+=======
+from geojson import FeatureCollection, Feature
+>>>>>>> fd848f5e58d9358952761f37163417fe0fd075fd
 
 from main.decorators import ajax_required
 from main import utils
@@ -62,7 +66,6 @@ def get_nema(request):
 
     def _layer_to_display(code):
         layer_qs = WMSLayer.objects
-        
         layer_qs = layer_qs.filter(code=code)
         zoom_start = 4
         zoom_stop = 21
@@ -108,6 +111,31 @@ def get_nema(request):
         'layer_codes': layer_codes,
         'wms_list': wms_list,
         'bundle': {"id": bundle},
+    }
+    return JsonResponse(rsp)
+
+@require_GET
+@ajax_required
+def get_covid_data(request, geo_id):
+    form_datas = []
+    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    geo_data = utils.get_geoJson(geom.json)
+    covid_datas = CovidDashboard.objects.filter(geo_id=geo_id).first()
+    if covid_datas:
+        form_datas.append({
+            'id': covid_datas.id,
+            'name': covid_datas.name,
+            'parent_id': covid_datas.parent_id,
+            'batlagdsan_tohioldol_too': covid_datas.batlagdsan_tohioldol_too,
+            'edgersen_humuus_too': covid_datas.edgersen_humuus_too,
+            'emchlegdej_bui_humuus_too': covid_datas.emchlegdej_bui_humuus_too,
+            'nas_barsan_hunii_too': covid_datas.nas_barsan_hunii_too,
+            'tusgaarlagdaj_bui_humuus_too': covid_datas.tusgaarlagdaj_bui_humuus_too,
+        })
+
+    rsp = {
+        'geo_data': FeatureCollection(geo_data),
+        'form_datas': form_datas,
     }
     return JsonResponse(rsp)
 
