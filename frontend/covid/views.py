@@ -140,7 +140,7 @@ def get_covid_state(request, geo_id):
                         'origin_name': f.name,
                         'name': f.verbose_name,
                         'data': covid_data[f.name],
-                        'prev_data': last_day_data[0][f.name],
+                        'prev_data': last_day_data[1][f.name],
                         'color': color
                     })
     covid_data_ogj = qs.first()
