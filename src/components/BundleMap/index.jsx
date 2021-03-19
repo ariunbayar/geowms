@@ -130,7 +130,7 @@ export default class InspireMap extends Component {
     }
 
     handleModalApproveClose(){
-      this.setState({'is_modal_info_open': false})
+        this.setState({'is_modal_info_open': false})
     }
 
     cartButton(is_cart, point_name, code, point_id, is_again_clicked, geom_name, pdf_id){
@@ -241,7 +241,7 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-
+        const {wms_list} = this.props
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
@@ -256,15 +256,12 @@ export default class InspireMap extends Component {
             }
         }
 
-        if (this.props.bundle.id !== prevProps.bundle.id) {
-            const {bundle} = this.props
-            this.setState({bundle})
-            if (bundle.id) {
-                this.setState({is_sidebar_open: false})
-                this.controls.sidebar.showSideBar([], true, this.addLayerToSearch)
-                this.loadWmsLayers(bundle.id)
-            }
+        if (wms_list !== prevProps.wms_list) {
+            this.setState({is_sidebar_open: false})
+            this.controls.sidebar.showSideBar([], true, this.addLayerToSearch)
+            this.loadWmsLayers(wms_list)
         }
+
         if (this.props.code !== prevProps.code) {
             const {code, url} = this.props
             this.oneLayerAdd(url, code)
@@ -284,16 +281,11 @@ export default class InspireMap extends Component {
         })
     }
 
-    loadWmsLayers(bundle_id) {
-        this.setState({is_loading: true})
-        Promise.all([
-            service.loadWMSLayers(bundle_id),
-        ]).then(([{ wms_list }]) => {
-            this.addWmsLayers(wms_list)
-            this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
-            let is_nema = true
-            this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
-        })
+    loadWmsLayers(wms_list) {
+        this.addWmsLayers(wms_list)
+        this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
+        let is_nema = true
+        this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
     }
 
     oneLayerAdd(url, code){
@@ -327,19 +319,10 @@ export default class InspireMap extends Component {
     }
 
     addWmsLayers(wms_list){
-        const {map_wms_list} = this.state
-        this.map.removeLayer(
-            ...map_wms_list.reduce((acc_main, wms) =>
-            {
-                    const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
-                    return [...acc_main, ...tiles]
-            }, []),
-        )
-
         var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
         var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
         if(wms_list.length > 0) {
-            const _map_wms_list = wms_list.map(({name, url, chache_url, wms_or_cache_ur, layers}) => {
+            const map_wms_list = wms_list.map(({name, url, chache_url, wms_or_cache_ur, layers}) => {
                 return {
                     name,
                     layers: layers.map((layer) => {
@@ -384,38 +367,24 @@ export default class InspireMap extends Component {
                     }),
                 }
             })
-            if (map_wms_list.length > 0) {
-                _map_wms_list.map((layer, idx) => {
-                    map_wms_list.push(layer)
-                })
-                this.setState({ map_wms_list: map_wms_list })
-
-            }
-            else {
-                this.setState({ map_wms_list: _map_wms_list })
-            }
-            _map_wms_list.map((wms, idx) =>
+            map_wms_list.map((wms, idx) =>
                 wms.layers.map((layer, idx) => {
                     layer.defaultCheck == 0 && layer.tile.setVisible(false)
                     layer.defaultCheck == 0 && layer.wms_tile.setVisible(false)
                     layer['legend'] = layer.wms_tile.getSource().getLegendUrl()
                 })
             )
-
-            this.map.addLayer(
-                    ..._map_wms_list.reduce((acc_main, wms) =>
-                    {
-                            const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
-                            return [...acc_main, ...tiles]
-                    }, []),
-            )
-            this.setState({is_loading: false})
-        }
-        else{
-            this.setState({map_wms_list: []})
-            setTimeout(() => {
-                this.setState({is_loading: false})
-            }, 500);
+            this.setState({map_wms_list})
+            map_wms_list.map(( wms) => {
+                const tiles = wms.layers.map((layer) => layer.wms_or_cache_ur ? layer.tile : layer.wms_tile)
+                if (tiles){
+                    tiles.map((hoho) => {
+                        this.map.addLayer(hoho)
+                    })
+                }
+            })
+            this.map.addControl(new SidebarButton({toggleSidebar: this.toggleSidebar}))
+            this.map.addControl(this.controls.sidebar)
         }
     }
 
@@ -499,7 +468,6 @@ export default class InspireMap extends Component {
             name: maker_layer_name,
         })
         this.marker_layer = marker_layer
-
         const map = new Map({
             maxTilesLoading: 16,
             target: 'map',
@@ -524,7 +492,6 @@ export default class InspireMap extends Component {
             layers: [
                 ...base_layers,
                 vector_layer,
-                marker_layer,
             ],
             view: new View({
                 projection: this.state.projection,
@@ -535,7 +502,9 @@ export default class InspireMap extends Component {
         })
 
         map.on('click', this.handleMapClick)
+
         this.map = map
+        if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
         this.getErguulLayer()
         this.setState({is_loading: false})
 

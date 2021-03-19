@@ -553,11 +553,13 @@ def _get_org_id(default_values):
         'edgersen_humuusiin_too_org',
         'batlagdsan_tohioldol_org',
     }
+    org = []
 
     for default_value in default_values:
         qs = CovidConfig.objects
         qs = qs.filter(name=default_value)
-        org = qs.first().org
+        if qs:
+            org = qs.first().org
         for config_org_id in config_org_ids:
             splited = config_org_id.split("_org")
             conf_name = splited[0]
