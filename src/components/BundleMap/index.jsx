@@ -107,6 +107,7 @@ export default class InspireMap extends Component {
         this.readFeatures = this.readFeatures.bind(this)
         this.readFeature = this.readFeature.bind(this)
         this.getErguulLayer = this.getErguulLayer.bind(this)
+        this.addVectorSource = this.addVectorSource.bind(this)
     }
 
     initMarker() {
@@ -241,7 +242,7 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-
+        const { vector_source  } = this.props
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
@@ -256,10 +257,10 @@ export default class InspireMap extends Component {
             }
         }
 
-        if (this.props.bundle.id !== prevProps.bundle.id) {
+        if (this.props.bundle !== prevProps.bundle) {
             const {bundle} = this.props
             this.setState({bundle})
-            if (bundle.id) {
+            if (bundle) {
                 this.setState({is_sidebar_open: false})
                 this.controls.sidebar.showSideBar([], true, this.addLayerToSearch)
                 this.loadWmsLayers(bundle.id)
@@ -274,6 +275,10 @@ export default class InspireMap extends Component {
         if (this.state.map_wms_list !== prevState.map_wms_list) {
             this.setState({map_wms_list: this.state.map_wms_list})
         }
+
+        if (vector_source !== prevState.vector_source) {
+            this.addVectorSource(vector_source)
+        }
     }
 
     loadMapData() {
@@ -282,6 +287,35 @@ export default class InspireMap extends Component {
         ]).then(([{base_layer_list}]) => {
             this.handleMapDataLoaded(base_layer_list)
         })
+    }
+
+    addVectorSource(vector_source) {
+
+        const { projection, projection_display } = this.state
+        if (Object.keys(vector_source).length >0) {
+            const features = new GeoJSON({
+                dataProjection: projection_display,
+                featureProjection: projection,
+            }).readFeatures(vector_source['features'])
+            const vectorSource = new VectorSource({
+                features: features
+            });
+            const vector_layer = new VectorLayer({
+            source: vectorSource,
+            style: new Style({
+                stroke: new Stroke({
+                    color: 'rgba(100, 255, 0, 1)',
+                    width: 2
+                }),
+                fill: new Fill({
+                    color: 'rgba(100, 255, 0, 0.3)'
+                })
+            }),
+            })
+            this.map.addLayer(vector_layer)
+            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 3000}); 
+        }
+
     }
 
     loadWmsLayers(bundle_id) {

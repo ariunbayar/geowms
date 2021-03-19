@@ -1,24 +1,31 @@
 import React, { PureComponent } from 'react';
+import { Switch, Route, NavLink} from "react-router-dom"
+import CovidMap from './covid_map'
 
 class Navbar extends PureComponent {
     render() {
         return (
             <div>
-                <nav class="navbar navbar-expand-lg">
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <li class="nav-item active">
-                                <a class="nav-link" href="#">CASES <span class="sr-only">(current)</span></a>
+                <nav className="navbar navbar-expand-lg">
+                    <div className="collapse navbar-collapse" id="navbarNav">
+                        <ul className="navbar-nav">
+                            <li className="nav-item active">
+                                <NavLink className="waves-effect waves-light" to={'/covid_dashboard/cases/'}>
+                                    CASES
+                                </NavLink>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Vaccine</a>
+                            <li className="nav-item">
+                                <a className="nav-link" href="#">Vaccine</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Graphs</a>
+                            <li className="nav-item">
+                                <a className="nav-link" href="#">Graphs</a>
                             </li>
                         </ul>
                     </div>
                 </nav>
+                <Switch>
+                        <Route path="/covid_dashboard/cases/" component={CovidMap} />
+                    </Switch>
             </div>
         );
     }

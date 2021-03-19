@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
-from geojson import FeatureCollection
+from geojson import FeatureCollection, Feature
 
 from main.decorators import ajax_required
 from main import utils
@@ -106,5 +106,16 @@ def get_nema(request):
         'layer_codes': layer_codes,
         'wms_list': wms_list,
         'bundle': {"id": bundle},
+    }
+    return JsonResponse(rsp)
+
+@require_GET
+@ajax_required
+def get_covid_data(request, geo_id):
+    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    geo_data = utils.get_geoJson(geom.json)
+
+    rsp = {
+        'geo_data': FeatureCollection(geo_data)
     }
     return JsonResponse(rsp)
