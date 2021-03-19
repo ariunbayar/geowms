@@ -22,9 +22,9 @@ class CovidDashboard extends PureComponent {
                             HEADER
                         </div>
 
-                        <div className="col-md-3 border border-danger" style={{height: '1000px'}}>
+                        <div className="col-md-3" style={{height: '1000px'}}>
                             <Menu/><br/>
-                            {/* <Countries/> */}
+                            <Countries/>
                         </div>
 
                         <div className="col-md-9 border border-danger" style={{height: '1000px'}}>

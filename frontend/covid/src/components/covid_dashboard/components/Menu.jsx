@@ -26,7 +26,7 @@ export  class Menu extends Component {
         active_case_text, active_case, fatal_case_text, fatal_case, fatal_case_plus, updated
     } = this.state
             return (
-                <div>
+                <div><br/>
                     <div className="row">
                         <div className="col-md-12">
                             <label htmlFor="label" style={{fontSize: '115%'}} className="mw-100 text-wrap align-middle">{vaccine_text}</label>
