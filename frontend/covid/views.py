@@ -215,7 +215,6 @@ def get_covid_data(request, geo_id):
 @require_GET
 @ajax_required
 def get_covid_state(request, geo_id):
-    print(geo_id)
     qs = CovidDashboard.objects.filter(geo_id=geo_id)
     covid_datas = qs.values()
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)

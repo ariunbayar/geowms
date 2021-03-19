@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import InspireMap from "@utils/BundleMap"
 import {service} from './service'
 import { Children } from "react"
+import { containsCoordinate } from "ol/extent"
 
 export default class NemaMap extends Component {
 

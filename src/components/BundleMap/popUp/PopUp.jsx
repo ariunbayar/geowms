@@ -72,7 +72,7 @@ class PopUpCmp extends Component {
         if (plus == datas.length) {
             this.setState({ is_plus: false, is_prev: true })
         } else {
-            this.setState({ is_plus: true, is_prev: true })
+            this.setState({ is_plus: false, is_prev: true })
         }
         this.checkModeAndCode(plus, datas)
         this.setState({ startNumber: plus })
@@ -187,7 +187,7 @@ class PopUpCmp extends Component {
     }
 
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, form_datas} = this.state
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, form_datas, is_loading} = this.state
         const { is_empty, is_from_inspire } = this.props
         return (
                 <div>
@@ -224,7 +224,7 @@ class PopUpCmp extends Component {
                         }
                         </div> :''
                     }
-                    {/* <Loader is_loading={is_loading} /> */}
+                    <Loader is_loading={is_loading} />
                     <div className="ol-popup-arrow">
                     </div>
                 </div>
