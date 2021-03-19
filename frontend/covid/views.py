@@ -4,6 +4,7 @@ from django.shortcuts import render, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
 from geojson import FeatureCollection
+from datetime import datetime, timedelta
 
 from main.decorators import ajax_required
 from main import utils
@@ -195,5 +196,100 @@ def get_covid_state(request, geo_id):
             'piechart_one': piechart_one,
             'linechart_all': linechart_all
         }
+    }
+    return JsonResponse(rsp)
+
+
+def _for_dashb_list():
+    return [
+        'batlagdsan_tohioldol_too',
+        'edgersen_humuus_too',
+        'emchlegdej_bui_humuus_too',
+        'nas_barsan_hunii_too',
+        'tusgaarlagdaj_bui_humuus_too',
+        'niit_eruul_mendiin_baiguullaga_too',
+        'emnelegiin_too',
+        'emiin_sangiin_too',
+        'shinjilgee_hiisen_too'
+    ]
+
+
+def _get_child(children, data):
+    childs = []
+    for child in children.values():
+        child_dict = dict()
+        child_dict['name'] = child['name']
+        child_dict['geo_id'] = child['geo_id']
+        for name in _for_dashb_list():
+            data[name] = child[name]
+        childs.append(child_dict)
+        data['children'] = childs
+    return data
+
+
+def _make_json_for_dashb(initial_qs, items, get_child=True):
+    datas = list()
+    for item in items.values():
+        data = dict()
+        parent_id = item['id']
+        data['name'] = item['name']
+        data['geo_id'] = item['geo_id']
+        for name in _for_dashb_list():
+            data[name] = item[name]
+        children = initial_qs.filter(parent_id=parent_id)
+        if children and get_child:
+            data['children'] = _make_json_for_dashb(initial_qs, children)
+            datas.append(data)
+        else:
+            data['children']= []
+            datas.append(data)
+
+    return datas
+
+
+def _days_hours_minutes(td):
+    return td.days, td.seconds//3600, (td.seconds//60)%60
+
+
+def _for_mongol_list():
+    return {
+        'batlagdsan_tohioldol_too',
+        'emchlegdej_bui_humuus_too',
+        'nas_barsan_hunii_too',
+    }
+
+
+@require_GET
+@ajax_required
+def get_data_dashboard(request):
+    initial_qs = CovidDashboard.objects
+    parents = initial_qs.filter(parent_id__isnull=True)
+    data = _make_json_for_dashb(initial_qs, parents)
+
+    updated = parents.first().updated_at
+    date_now = datetime.today()
+    timed = date_now - updated.utcnow()
+    day, hour, minut = _days_hours_minutes(timed)
+    msg = ''
+    if day:
+        msg = str(day) + " өдрийн"
+    elif hour:
+        msg = str(hour) + " цагийн"
+    elif minut:
+        msg = str(minut) + " минутын"
+
+    qs_log = CovidDashboardLog.objects.filter(parent_id__isnull=True)
+    last_day_data = qs_log.order_by('-updated_at').values()
+    last_day_data = last_day_data[1]
+    mongol = parents.values()[0]
+    zuruu = dict()
+    for name in _for_mongol_list():
+        zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+
+    rsp = {
+        'success': True,
+        'data': data,
+        'update_time': msg,
+        'zuruu': zuruu,
     }
     return JsonResponse(rsp)

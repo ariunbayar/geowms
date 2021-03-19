@@ -2,6 +2,7 @@ import {getGetOptions, getPostOptions, handleResponse} from '../../../helpers/se
 
 export const service = {
     getState,
+    getDataDashboard,
 }
 
 function getState(geo_id) {
@@ -9,4 +10,11 @@ function getState(geo_id) {
         ...getGetOptions(),
     }
     return fetch(`/covid/get-covid-state/${geo_id}/`, requestOptions).then(handleResponse)
+}
+
+function getDataDashboard() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`/covid/get-data-dashboard/`, requestOptions).then(handleResponse)
 }

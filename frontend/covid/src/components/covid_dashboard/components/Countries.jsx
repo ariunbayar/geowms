@@ -1,5 +1,4 @@
 import React, { Component } from "react"
-import { service } from '../../../../../../backend/webapp/src/components/InspireViews/service'
 
 export  class Countries extends Component {
     constructor(props) {
@@ -11,65 +10,16 @@ export  class Countries extends Component {
             prev_package_event: null,
             check_package_event: null,
             geom_type: '',
-            datas: [
-                {
-                    'geo_id': 'au_62',
-                    'name': 'Өвөрхангай',
-                    'batlagdsan_tohioldol_too': 10,
-                    'children': [
-                        {
-                            'geo_id': 'au_6255',
-                            'name': 'Хужирт',
-                            'batlagdsan_tohioldol_too': 5,
-                            'children': [
-                                {'geo_id': 'au_625551', 'batlagdsan_tohioldol_too': 2, 'name': '1-р баг'},
-                                {'geo_id': 'au_625553', 'batlagdsan_tohioldol_too': 3, 'name': '2-р баг'}
-                            ]
-                        },
-                        {
-                            'geo_id': 'au_6234',
-                            'name': 'Өлзийт',
-                            'batlagdsan_tohioldol_too': 5,
-                            'children': [
-                                {'geo_id': 'au_623451', 'batlagdsan_tohioldol_too': 5, 'name': '1-р баг'},
-                                {'geo_id': 'au_623453', 'batlagdsan_tohioldol_too': 0, 'name': '2-р баг'},
-                                {'geo_id': 'au_623455', 'batlagdsan_tohioldol_too': 0, 'name': '3-р баг'},
-                                {'geo_id': 'au_623457', 'batlagdsan_tohioldol_too': 0, 'name': '4-р баг'}
-                            ]
-                        }
-                    ]
-                },
-                {
-                    'geo_id': 'au_46',
-                    'name': 'Өмнөговь',
-                    'batlagdsan_tohioldol_too': 15,
-                    'children': [
-                        {
-                            'geo_id': 'au_4607',
-                            'name': 'Баян-Овоо',
-                            'batlagdsan_tohioldol_too': 10,
-                            'children': [
-                                {'geo_id': 'au_460751', 'batlagdsan_tohioldol_too': 5, 'name': '1-р баг'},
-                                {'geo_id': 'au_460753', 'batlagdsan_tohioldol_too': 5, 'name': '2-р баг'},
-                                {'geo_id': 'au_460755', 'batlagdsan_tohioldol_too': 0, 'name': '3-р баг'}
-                            ]
-                        },
-                        {
-                        'geo_id': 'au_4604',
-                            'name': 'Баяндалай',
-                            'batlagdsan_tohioldol_too': 5,
-                            'children': [
-                                {'geo_id': 'au_460451', 'batlagdsan_tohioldol_too': 5, 'name': '1-р баг'},
-                                {'geo_id': 'au_460453', 'batlagdsan_tohioldol_too': 0, 'name': '2-р баг'},
-                                {'geo_id': 'au_460455', 'batlagdsan_tohioldol_too': 0, 'name': '3-р баг'}
-                            ]
-                        }
-                    ],
-                }
-            ]
+            datas: props.datas
         }
         this.activeView = this.activeView.bind(this)
         this.getGeoId = this.getGeoId.bind(this)
+    }
+
+    componentDidUpdate(pP, pS) {
+        if(pP.datas !== this.props.datas) {
+            this.setState({ datas: this.props.datas })
+        }
     }
 
     getGeoId(){
@@ -150,6 +100,7 @@ export  class Countries extends Component {
 
     render() {
         const { datas } = this.state
+        console.log(datas);
         return (
             <div className="row">
                 <div className="col-md-12">
