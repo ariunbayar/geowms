@@ -243,8 +243,7 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { vector_source, form_datas} = this.props
-        const {wms_list} = this.props
+        const { vector_source, form_datas, wms_list} = this.props
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
@@ -317,22 +316,17 @@ export default class InspireMap extends Component {
             })
             this.map.addLayer(vector_layer)
             this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+            this.map.addControl(this.controls.popup)
             this.controls.popup.getFormdata(true, form_datas)
-
         }
 
     }
 
-    loadWmsLayers(bundle_id) {
-        this.setState({is_loading: true})
-        Promise.all([
-            service.loadWMSLayers(bundle_id)
-        ]).then(([{ wms_list }]) => {
+    loadWmsLayers(wms_list) {
             this.addWmsLayers(wms_list)
             this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
             let is_nema = true
             this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
-        })
     }
 
     oneLayerAdd(url, code){
@@ -553,7 +547,6 @@ export default class InspireMap extends Component {
         this.map = map
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
         this.getErguulLayer()
-        this.map.addControl(this.controls.popup)
         this.setState({is_loading: false})
 
     }
@@ -731,6 +724,7 @@ export default class InspireMap extends Component {
                                 filtered_layer_name = aimag_name
                             }
                             const tile = new Tile ({
+
                                 source: new TileWMS({
                                     projection: this.state.projection,
                                     url: main_url,
