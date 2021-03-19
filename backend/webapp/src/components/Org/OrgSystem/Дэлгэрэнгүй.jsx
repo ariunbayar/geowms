@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 import {NavLink} from 'react-router-dom'
-
 import {Notif} from '@utils/Notification'
 import Loader from "@utils/Loader"
-
 import {service} from './service'
 import Modal from "../../Modal"
 import BackButton from "@utils/Button/BackButton"
@@ -177,7 +175,7 @@ export class Дэлгэрэнгүй extends Component {
                                 <h5> {wms.name} </h5>
                                 <ul>
                                     {wms.layer_list.map((layer, idx) =>
-                                        <li key={idx}>
+                                        <li key={idx} id="accordion1">
                                             GeoJSON: {layer.title} ({layer.code})
                                             <div className="input-group mt-2">
                                                 <input type="text" className="form-control col-7" disabled value={`${is_state ? layer.json_private_url : layer.json_public_url}`}/>
@@ -187,10 +185,16 @@ export class Дэлгэрэнгүй extends Component {
                                                     </button>
                                                 </span>
                                             </div>
+                                            <div>
+                                                <button data-toggle="collapse" data-target={`#collapse-${wms.id + layer.id}`} aria-expanded="false" aria-controls={`#collapse-${wms.id + layer.id}`}>Багана эрх</button>
+                                            </div>
+                                            {layer &&
                                             <Attributes
                                                 wms={wms}
                                                 layer={layer}
+                                                addNotif={this.addNotif}
                                             ></Attributes>
+                                            }
                                         </li>
                                     )}
                                 </ul>

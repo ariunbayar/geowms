@@ -11,7 +11,7 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from main.decorators import ajax_required
 from main import utils
-from .models import GovOrg
+from .models import GovOrg, GovOrgWMSLayer
 from .forms import SystemForm
 from main.components import Datatable
 import requests
@@ -96,11 +96,9 @@ def хадгалах(request, payload, pk=None):
 @user_passes_test(lambda u: u.is_superuser)
 def set_attributes(request, payload, pk):
     array = payload.get('array')
-    system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
-    print(array)
-    print(system)
-    system.attributes = json.dumps(array, ensure_ascii=False)
-    system.save()
+    system_layer = get_object_or_404(GovOrgWMSLayer, pk=pk)
+    system_layer.attributes = json.dumps(array, ensure_ascii=False)
+    system_layer.save()
 
     return JsonResponse({
         'success': True,
@@ -128,19 +126,20 @@ def _get_wmslayers(request, govorg, wms):
     layer_list = []
     system_local_base_url = utils.get_config('system_local_base_url')
     for wmslayer in wms.wmslayer_set.all():
-        # attributes = json.loads(wmslayer.attributes)
-        # print(attributes)
-        print(wmslayer.govorgs.values())
-        print(wmslayer.wms_layers)
-        layer_list.append({
-            'id': wmslayer.id,
-            'attributes': [],
-            'code': wmslayer.code,
-            'name': wmslayer.name,
-            'title': wmslayer.title,
-            'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wmslayer.code])),
-            'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wmslayer.code]),
-        })
+        govorg_layers = GovOrgWMSLayer.objects.filter(govorg=govorg, wms_layer=wmslayer).first()
+        attributes = []
+        if govorg_layers:
+            if govorg_layers.attributes:
+                attributes = json.loads(govorg_layers.attributes)
+            layer_list.append({
+                'id': govorg_layers.id,
+                'attributes': attributes,
+                'code': wmslayer.code,
+                'name': wmslayer.name,
+                'title': wmslayer.title,
+                'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wmslayer.code])),
+                'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wmslayer.code]),
+            })
     return layer_list
 
 

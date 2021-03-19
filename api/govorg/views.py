@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
-from backend.govorg.models import GovOrg as System
+from backend.govorg.models import GovOrgWMSLayer, GovOrg as System
 from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
 from backend.org.models import Employee
 from backend.wms.models import WMSLog
@@ -82,10 +82,35 @@ def json_proxy(request, token, code):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-    conf_geoserver = geoserver.get_connection_conf()
-    system = get_object_or_404(System, token=token, deleted_by__isnull=True)
 
-    if not system.wms_layers.filter(code=code):
+    conf_geoserver = cache.get('geoserver_config')
+    if not conf_geoserver:
+        conf_geoserver = geoserver.get_connection_conf()
+        cache.set('geoserver_config', conf_geoserver, 86400)
+
+
+    system = cache.get('system_{}_{}'.format(token, code))
+    allowed_att = cache.get('allowed_att_{}_{}'.format(token, code))
+    wms_layer = cache.get('wms_layer_{}_{}'.format(token, code))
+    if not system and not allowed_att:
+        system = get_object_or_404(System, token=token, deleted_by__isnull=True)
+        cache.set('system_{}_{}'.format(token, code), system, 600)
+
+        wms_layer = system.wms_layers.filter(code=code).first()
+        cache.set('wms_layer_{}_{}'.format(token, code), wms_layer, 600)
+
+
+        govorg_layer = GovOrgWMSLayer.objects.filter(wms_layer=wms_layer, govorg=system).first()
+        allowed_att = ''
+        if govorg_layer and govorg_layer.attributes:
+            attributes = json.loads(govorg_layer.attributes)
+            for attribute in attributes:
+                allowed_att = allowed_att + attribute + ','
+            allowed_att = allowed_att[:-1]
+        
+        cache.set('allowed_att_{}_{}'.format(token, code), allowed_att, 600)
+
+    if not wms_layer:
         raise Http404
     if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
         raise Http404
@@ -95,19 +120,18 @@ def json_proxy(request, token, code):
             host=conf_geoserver['geoserver_host'],
             port=conf_geoserver['geoserver_port'],
     )
-
     if request.GET.get('REQUEST') == 'GetCapabilities':
         allowed_layers = [code]
         if request.GET.get('SERVICE') == 'WFS':
             queryargs = {
-                **request.GET
+                **request.GET,
+                "propertyName": [allowed_att],
             }
             rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
             content = rsp.content
             content = filter_layers_wfs(content, allowed_layers)
         else:
             raise Http404
-
 
     else:
         queryargs = {
@@ -116,7 +140,7 @@ def json_proxy(request, token, code):
             'request': 'GetFeature',
             'typeName': code,
             'outputFormat': 'application/json',
-            "propertyName": 'inspire_id,beginlifespanversion,geo_data',
+            "propertyName": allowed_att,
             'maxFeatures': 10
         }
 
