@@ -22,7 +22,7 @@ export  class Countries extends Component {
         }
     }
 
-    activeView(event, name) {
+    activeView(event, region, geo_id) {
         const check = this.state.datas
         console.log("re", region)
         if (region == 'theme') {
