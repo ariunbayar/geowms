@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Switch, Route, NavLink} from "react-router-dom"
+import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import CovidMap from './covid_map'
 
 class Navbar extends PureComponent {
@@ -9,16 +9,29 @@ class Navbar extends PureComponent {
                 <nav className="navbar navbar-expand-lg">
                     <div className="collapse navbar-collapse" id="navbarNav">
                         <ul className="navbar-nav">
-                            <li className="nav-item active">
-                                <NavLink className="waves-effect waves-light" to={'/covid_dashboard/cases/'}>
-                                    CASES
+                            <li className="nav-item">
+                                <NavLink to={"/covid_dashboard/cases/"}
+                                    className="nav-link"
+                                    activeClassName="active"
+                                >
+                                    Cases
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link" href="#">Vaccine</a>
+                                <NavLink to={"/covid_dashboard/"}
+                                    className="nav-link"
+                                    activeClassName="active"
+                                >
+                                    Vaccine
+                                </NavLink>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link" href="#">Graphs</a>
+                                <NavLink to={"/covid_dashboard/graph/"}
+                                    className="nav-link"
+                                    activeClassName="active"
+                                >
+                                    Graphs
+                                </NavLink>
                             </li>
                         </ul>
                     </div>

@@ -33,6 +33,7 @@ from govorg.backend.utils import (
 
 from main.decorators import ajax_required
 from main import utils
+from main.components import Datatable
 
 def _get_properties_by_feature(initial_qs, feature_ids):
 
@@ -204,16 +205,18 @@ def _for_dashb_list():
     ]
 
 
-def _get_form_fields(Model):
+def _get_form_fields(Model, org):
+
     send_fields = []
-    for f in Model._meta.get_fields():
-        if 'too' in f.name:
-            if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
-                send_fields.append({
-                    'origin_name': f.name,
-                    'name': f.verbose_name,
-                    'length': f.max_length,
-                })
+    if org.level == 3:
+        for f in Model._meta.get_fields():
+            if 'too' in f.name:
+                if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                    send_fields.append({
+                        'origin_name': f.name,
+                        'name': f.verbose_name,
+                        'length': f.max_length,
+                    })
     return send_fields
 
 
@@ -263,16 +266,66 @@ def get_covid_dashboard(request):
     return JsonResponse(rsp)
 
 
+def _get_str_date(date, item):
+    date = utils._get_str_date(date)
+    return date
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def dashboard_list(request, payload, geo_id):
+    оруулах_талбарууд = [
+        'id',
+        'name', 'geo_id',
+        'edgersen_humuus_too', 'batlagdsan_tohioldol_too',
+        'nas_barsan_hunii_too', 'shinjilgee_hiisen_too',
+        'updated_at',
+    ]
+
+    хувьсах_талбарууд = [
+        {
+            "field": "updated_at",
+            "action": _get_str_date,
+            "new_field": "updated_at"
+        }
+    ]
+
+    initial_qs = CovidDashboardLog.objects
+    initial_qs = initial_qs.filter(geo_id=geo_id)
+    if initial_qs:
+        datatable = Datatable(
+            model=CovidDashboardLog,
+            payload=payload,
+            initial_qs=initial_qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+        )
+
+        items, total_page = datatable.get()
+        rsp = {
+            'items': items,
+            'page': payload.get("page"),
+            'total_page': total_page
+        }
+    else:
+        rsp = {
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
+
+    return JsonResponse(rsp)
+
+
 def _dash_create_log(geo_id, initial_qs):
     values = initial_qs.values()
     for value in values:
+        del value['id']
         for name in _for_dashb_list():
             if name == value['name']:
                 value[name] = value[name]
-        if value['name'] == 'updated_at':
-            value['']
     log_qs = CovidDashboardLog.objects
-    log_qs.create(**data)
+    log_qs.create(**value)
 
 
 @require_POST
@@ -284,7 +337,7 @@ def save_dashboard(request, payload):
     qs = CovidDashboard.objects
     dashb = qs.filter(geo_id=geo_id)
     if dashb:
-        # _dash_create_log(geo_id, dashb)
+        _dash_create_log(geo_id, dashb)
         dashb.update(
             **values
         )
@@ -297,6 +350,49 @@ def save_dashboard(request, payload):
     rsp = {
         'success': success,
         'info': info,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def remove_dashboard(request, pk):
+    qs = CovidDashboardLog.objects
+    qs = qs.filter(pk=pk)
+    qs.delete()
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай устгалаа'
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def save_dashboard_log(request, payload):
+    values = payload.get('values')
+    geo_id = payload.get('geo_id')
+
+    date = values['updated_at']
+    values['updated_at'] = utils.date_to_timezone(date)
+
+    covid_qs = CovidDashboard.objects
+    covid_qs = covid_qs.filter(geo_id=geo_id)
+    covid_qs = covid_qs.first()
+
+    values['name'] = covid_qs.name
+    values['geo_id'] = geo_id
+    values['parent_id'] = covid_qs.parent_id
+
+    qs = CovidDashboardLog.objects
+    qs.create(
+        **values
+    )
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгаллаа',
     }
     return JsonResponse(rsp)
 
@@ -322,7 +418,7 @@ def frontend(request):
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
     covid_configs = _get_covid_configs(org)
-    covid_dashboard = _get_form_fields(CovidDashboard)
+    covid_dashboard = _get_form_fields(CovidDashboard, org)
     context = {
         'org': {
             "org_name": org.name.upper(),

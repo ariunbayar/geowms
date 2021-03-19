@@ -204,14 +204,14 @@ export class App extends Component {
                             </ul>
                         </MenuItem>
                         {
-                            employee.is_admin
+                            employee.is_admin && covid_configs.length > 0
                             &&
                                 <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-config/" text="Covid Тохиргоо"></MenuItem>
                         }
                         {
-                            employee.is_admin
+                            covid_dashboard.length > 0
                             &&
-                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-dashboard-config/" text="Covid Тохиргоонууд"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-dashboard-config/" text="Covid Dashboard"></MenuItem>
                         }
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/help/" text="Тусламж"></MenuItem>
                     </ul>
