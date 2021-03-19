@@ -156,7 +156,7 @@ def get_covid_state(request, geo_id):
         'backgroundColor': ['#FF6384','#4BC0C0','#FFCE56','#E7E9ED','#36A2EB', '#EC0E00', '#EC0E00']
     }
 
-    covid_data_objs = qs_log.order_by('created_at')
+    covid_data_objs = qs_log.order_by('updated_at')
     batlagdsan_tohioldol_too = []
     edgersen_humuus_too = []
     nas_barsan_hunii_too = []
@@ -171,7 +171,7 @@ def get_covid_state(request, geo_id):
         emchlegdej_bui_humuus_too.append(covid_data_ob.emchlegdej_bui_humuus_too)
         tusgaarlagdaj_bui_humuus_too.append(covid_data_ob.tusgaarlagdaj_bui_humuus_too)
         shinjilgee_hiisen_too.append(covid_data_ob.shinjilgee_hiisen_too)
-        dates.append(covid_data_ob.created_at.strftime('%Y-%m-%d.%H-%M'))
+        dates.append(covid_data_ob.updated_at.strftime('%Y-%m-%d.%H-%M'))
 
     linechart_all = {
         'datas': [

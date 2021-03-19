@@ -8,19 +8,28 @@ class Navbar extends PureComponent {
                 <nav className="navbar navbar-expand-lg">
                     <div className="collapse navbar-collapse" id="navbarNav">
                         <ul className="navbar-nav">
-                            <li className="nav-item active">
-                                <NavLink to={"/covid_dashboard/"} activeClassName="active">
-                                <a className="nav-link" href="#">CASES <span className="sr-only">(current)</span></a>
+                            <li className="nav-item">
+                                <NavLink to={"/covid_dashboard/"}
+                                    className="nav-link"
+                                    activeClassName="active"
+                                >
+                                    CASES
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to={"/covid_dashboard/"} activeClassName="active">
-                                <a className="nav-link" href="#">Vaccine</a>
+                                <NavLink to={"/covid_dashboard/"}
+                                    className="nav-link"
+                                    activeClassName="active"
+                                >
+                                    Vaccine
                                 </NavLink>
                             </li>
                             <li className="nav-item">
-                                <NavLink to={"/covid_dashboard/graph/"} activeClassName="active">
-                                <a className="nav-link" href="#">Graphs</a>
+                                <NavLink to={"/covid_dashboard/graph/"}
+                                    className="nav-link"
+                                    activeClassName="active"
+                                >
+                                    Graphs
                                 </NavLink>
                             </li>
                         </ul>

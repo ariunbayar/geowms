@@ -36,10 +36,10 @@ class Graph extends PureComponent {
     render() {
         const {count_datas, charts, name} = this.state
         return (
-            <div className="">
+            <div className="card-body">
                 <div className="row pt-3">
                     <div className="col-12 mb-2">
-                        <h4 className="text-center">{name} өнөөдрын байдлаар</h4>
+                        <h4 className="text-center">{name} өнөөдрийн байдлаар</h4>
                     </div>
                     {count_datas.map((data, idx) =>
                         <Card idx={idx} color={data.color} head_text={data.name} body_text={data.data} footer_text={data.data}/>
@@ -59,7 +59,7 @@ class Graph extends PureComponent {
                         />
                     </div>
                     <div className="col-4">
-                    <h4 className="text-center">Өнөөдрын байдлаар</h4>
+                    <h4 className="text-center">Өнөөдрийн байдлаар</h4>
                         <PieChart
                                 label="Батлагдсан тохиолдол"
                                 labels={charts.piechart_one ? charts.piechart_one.labels : []}
