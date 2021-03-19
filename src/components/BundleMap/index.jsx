@@ -318,8 +318,7 @@ export default class InspireMap extends Component {
             }),
             })
             this.map.addLayer(vector_layer)
-            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 3000})
-            this.map.addControl(this.controls.popup)
+            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 4000})
             this.controls.popup.getFormdata(true, form_datas)
 
         }

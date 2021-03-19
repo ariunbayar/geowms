@@ -42,6 +42,7 @@ class PopUpCmp extends Component {
 
     componentDidMount() {
         this.element = document.getElementById("popup")
+        this.element.className = 'col-2 col-md-2 col-xl-2 bg-light rounded mt-4 ml-4 justify-content-between'
         if (this.props.sendElem) this.props.sendElem(this.element)
         service.getUser().then(({is_authenticated}) =>
         {
@@ -189,7 +190,7 @@ class PopUpCmp extends Component {
         const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, form_datas} = this.state
         const { is_empty, is_from_inspire } = this.props
         return (
-                <div className="d-flex flex-column posit" style={{minHeight:'10vh'}}>
+                <div>
                     {
                         form_datas.length > 0 ?
                         <div className="row">
@@ -278,13 +279,11 @@ export class PopUp extends Control {
     }
 
     getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=false) {
-        console.log(datas)
         this.toggleControl(isload)
         this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading})
     }
 
     getFormdata(isload, form_datas) {
-        console.log(form_datas)
         this.toggleControl(isload)
         this.renderComponent({form_datas})
     }
