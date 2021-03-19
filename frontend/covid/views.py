@@ -15,6 +15,7 @@ from backend.wms.models import WMS
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
+from .models import CovidDashboard
 
 
 def covid_index(request):
@@ -112,10 +113,25 @@ def get_nema(request):
 @require_GET
 @ajax_required
 def get_covid_data(request, geo_id):
+    form_datas = []
     geom = utils.get_geom(geo_id, 'MultiPolygon')
     geo_data = utils.get_geoJson(geom.json)
+    covid_datas = CovidDashboard.objects.filter(geo_id=geo_id).first()
+    if covid_datas:
+        form_datas.append({
+            'id': covid_datas.id,
+            'name': covid_datas.name,
+            'parent_id': covid_datas.parent_id,
+            'batlagdsan_tohioldol_too': covid_datas.batlagdsan_tohioldol_too,
+            'edgersen_humuus_too': covid_datas.edgersen_humuus_too,
+            'emchlegdej_bui_humuus_too': covid_datas.emchlegdej_bui_humuus_too,
+            'nas_barsan_hunii_too': covid_datas.nas_barsan_hunii_too,
+            'tusgaarlagdaj_bui_humuus_too': covid_datas.tusgaarlagdaj_bui_humuus_too,
+        })
 
     rsp = {
-        'geo_data': FeatureCollection(geo_data)
+        'geo_data': FeatureCollection(geo_data),
+        'form_datas': form_datas,
     }
+
     return JsonResponse(rsp)

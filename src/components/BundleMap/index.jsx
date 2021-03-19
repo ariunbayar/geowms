@@ -59,6 +59,7 @@ export default class InspireMap extends Component {
             is_loading: false,
             format: new GeoJSON(),
             layer_one_tile: null,
+            form_datas: props.form_datas,
         }
 
         this.controls = {
@@ -242,7 +243,7 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { vector_source  } = this.props
+        const { vector_source, form_datas} = this.props
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
         }
@@ -279,6 +280,10 @@ export default class InspireMap extends Component {
         if (vector_source !== prevState.vector_source) {
             this.addVectorSource(vector_source)
         }
+
+        if (form_datas !== prevState.form_datas) {
+            this.setState({form_datas})
+        }
     }
 
     loadMapData() {
@@ -291,7 +296,7 @@ export default class InspireMap extends Component {
 
     addVectorSource(vector_source) {
 
-        const { projection, projection_display } = this.state
+        const { projection, projection_display, form_datas} = this.state
         if (Object.keys(vector_source).length >0) {
             const features = new GeoJSON({
                 dataProjection: projection_display,
@@ -313,7 +318,10 @@ export default class InspireMap extends Component {
             }),
             })
             this.map.addLayer(vector_layer)
-            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 3000}); 
+            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 3000})
+            this.map.addControl(this.controls.popup)
+            this.controls.popup.getFormdata(true, form_datas)
+
         }
 
     }
@@ -1011,10 +1019,10 @@ export default class InspireMap extends Component {
     transformToLatLong(coordinateList) {
         const geom = coordinateList[0].map((coord, idx) => {
             const map_coord = transformCoordinate(coord, this.state.projection, this.state.projection_display)
-              return map_coord
+            return map_coord
         })
         return geom
-      }
+    }
 
     formatArea(polygon) {
         const area = getArea(polygon);
@@ -1022,7 +1030,7 @@ export default class InspireMap extends Component {
         let type;
         if (area > 10000) {
           output = Math.round((area / 1000000) * 100) / 100;
-          type = 'km'
+            type = 'km'
         } else {
           output = Math.round(area * 100) / 100;
           type = 'm'

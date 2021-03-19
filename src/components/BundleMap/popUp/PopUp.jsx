@@ -29,6 +29,7 @@ class PopUpCmp extends Component {
             is_purchase: false,
             is_enable: false,
             is_authenticated: false,
+            form_datas: props.form_datas,
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -49,12 +50,15 @@ class PopUpCmp extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { datas } = this.props
+        const { form_datas, datas} = this.props
         if(pP.datas !== datas && !this.props.is_loading) {
             this.properties = []
             const startNumber = 1
             this.setState({ startNumber, is_plus: true, is_prev: false })
             this.checkModeAndCode(startNumber, datas)
+        }
+        if (pP.form_datas !== form_datas) {
+            this.setState({form_datas})
         }
     }
 
@@ -182,134 +186,44 @@ class PopUpCmp extends Component {
     }
 
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
-        const { is_empty, is_from_inspire, is_loading } = this.props
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, form_datas} = this.state
+        const { is_empty, is_from_inspire } = this.props
         return (
-                <div>
-                    <div className="ol-popup-header">
-                        <div className="ol-popup-header-content">
-                            {!is_empty && datas && datas.length > 0
-                                ?
-                                <div className="ol-header-cont" role="group">
-                                    {startNumber}
-                                    &nbsp; - &nbsp;
-                                    {datas.length}
-                                    &nbsp;
-                                    {is_prev ? <span onClick={this.prevTab} className="span-left" role="button">
-                                        <i className="fa fa-caret-left gp-text-primary fa-1x" aria-hidden="true" ></i>
-                                    </span> : null}
-                                    &nbsp;&nbsp;&nbsp;
-                                    {!(datas.length == startNumber) && is_plus ? <span className="span-right" onClick={this.plusTab} role="button">
-                                        <i className="fa fa-caret-right gp-text-primary fa-1x"  aria-hidden="true" ></i>
-                                    </span> : null}
-                                    <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
-                                        <i className="fa fa-times" aria-hidden="true"></i>
-                                    </div>
-                                </div>
-                                :
-                                "Сонгоогүй байна"
-                            }
-                            {!datas &&
-                                <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
-                                    <i className="fa fa-times" aria-hidden="true"></i>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                    <Loader is_loading={is_loading} />
+                <div className="d-flex flex-column justify-content-center align-items text-center" style={{minHeight:'10vh'}}>
                     {
-                        is_empty
-                        ?
-                            <div className="ol-popup-contet text-center">
-                                <b>Хоосон газар сонгосон байна.</b>
-                            </div>
-                        :
-                            <div className="ol-popup-contet">
-                                {
-                                    data.length >= 1
-                                    &&
-                                        data[0].map((layer, idx) =>
-                                            idx == 1 &&
-                                            layer.map((value, v_idx) =>
-                                                value[0].toLowerCase().startsWith('name')
-                                                && <b key={v_idx}>{value[1]}</b>
-                                            )
-                                        )
-                                }
-                                <hr className="m-1 border border-secondary rounded"/>
-                                <table className="table borderless no-padding">
-                                    <tbody>
-                                        {
-                                            data.length >= 1
-                                            ?
-                                                data[0].map((layer, idx) =>
-                                                    idx == 1 &&
-                                                    layer.map((value, v_idx) =>
-                                                        !value[0].toLowerCase().startsWith('name')
-                                                        &&
-                                                            <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
-                                                                <th className="font-weight-normal">
-                                                                    <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
-                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
-                                                                </th>
-                                                            </tr>
-                                                        )
-                                                )
-                                            :
-                                            <tr><th>Хоосон байна</th></tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                    }
-                    {!is_authenticated && !is_empty && is_from_inspire
-                        ?
-                        <div className="btn-group flex-wrap d-flex justify-content-center">
-                            <button
-                                className="btn btn-xs btn-primary mb-2 mx-3"
-                            >
-                                <a className="text-decoration-none text-white" href="/login/">Нэвтрэх</a>
-                            </button>
-                        </div>
-                        :
-                        !is_empty
-                            ?
-                                this.state.is_purchase
-                                ?
-                                    <div className="btn-group flex-wrap d-flex justify-content-center">
-                                        <button className="btn btn-xs btn-primary my-2 mx-3" disabled>
-                                            <div className="spinner-border" role="status">
-                                                <span className="sr-only"></span>
-                                            </div>
-                                            {} Хүлээнэ үү..
-                                        </button>
+                        form_datas.length > 0 ?
+                        <div className="row">
+                        {
+                            <div className="col-md-12 justify-content-center">
+                                <div className="col-md-12 my-3">
+                                    <h6 className="text-center pl-3">{form_datas[0].name}</h6>
+                                    <div className="col-md-12 text-danger text-justify">
+                                        <span className="float-left">Нийт тохиолдол</span>
+                                        <span className="float-right">{form_datas[0].batlagdsan_tohioldol_too}</span>
                                     </div>
-                                :
-                                is_from_inspire && this.is_from_inspire
-                                ?
-                                    <div className="btn-group flex-wrap d-flex justify-content-center">
-                                        <button
-                                            className="btn btn-xs btn-primary mx-3"
-                                            onClick={() => this.checkDataForPurchase()}
-                                            disabled={is_enable ? "" : "disabled"}
-                                        >
-                                            Худалдаж авах
-                                        </button>
-                                        <button
-                                            className="btn btn-xs btn-primary my-2 mx-3"
-                                            onClick={() => this.openCartSide()}
-                                            disabled={is_enable ? "" : "disabled"}
-                                        >
-                                            Сагсанд нэмэх
-                                        </button>
-                                    </div>
-                                :
-                                null
-                            :
-                            null
+                                </div>
+                                <div className="col-md-12 mt-3 pt-3 d-block ">
+                                    <ul className="col-md-12">
+                                        <li className="text-warning">
+                                            <span className="float-left text-dark">Эмчлэгдэж буй</span>
+                                            <span className="float-right text-muted">{form_datas[0].emchlegdej_bui_humuus_too}</span>
+                                        </li>
+                                        <li className="text-success">
+                                            <span className="float-left text-dark">Эдгэрсэн</span>
+                                            <span className="float-right text-muted">{form_datas[0].edgersen_humuus_too}</span>
+                                        </li>
+                                        <li className="text-dark">
+                                            <span className="float-left text-dark">Нас барсан</span>
+                                            <span className="float-right text-muted">{form_datas[0].nas_barsan_hunii_too}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                        </div> :''
                     }
+                    {/* <Loader is_loading={is_loading} /> */}
                     <div className="ol-popup-arrow">
-
                     </div>
                 </div>
             )
@@ -335,6 +249,7 @@ export class PopUp extends Control {
         this.renderComponent = this.renderComponent.bind(this)
         this.toggleControl = this.toggleControl.bind(this)
         this.getData = this.getData.bind(this)
+        this.getFormdata = this.getFormdata.bind(this)
     }
 
     toggleControl(is_visible) {
@@ -362,8 +277,15 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=true) {
+    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=false) {
+        console.log(datas)
         this.toggleControl(isload)
         this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading})
+    }
+
+    getFormdata(isload, form_datas) {
+        console.log(form_datas)
+        this.toggleControl(isload)
+        this.renderComponent({form_datas})
     }
 }
