@@ -30,7 +30,7 @@ class CovidDashboard extends PureComponent {
                                 <div className="col-md-12 border border-danger" style={{height: '50px'}}>
                                     <Navbar />
                                 </div>
-                                <div className="col-md-12 border border-danger" style={{height: '950px'}}>
+                                <div className="col-md-12 border border-danger bg-light" style={{height: '950px', scroll: "auto"}}>
                                     <Switch>
                                         <Route path={"/covid_dashboard/graph/"} component={Graph} />
                                     </Switch>

@@ -28,8 +28,10 @@ export default class PieChart extends Component {
             ]
         }
         return (
-            <div className="wrapper">
-                <Pie height={height} data={dataLine} ></Pie>
+            <div className="wrapper card">
+                <div className="card-body">
+                    <Pie height={height} data={dataLine} ></Pie>
+                </div>
             </div>
         )
     }
