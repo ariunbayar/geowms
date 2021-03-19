@@ -26,6 +26,7 @@ const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
 const Nema = React.lazy(() => import('./Nema'));
 const CovidConfig = React.lazy(() => import('./Help/CovidConfigs'));
+const CovidDashboardConfig = React.lazy(() => import('./Covid'))
 
 export class App extends Component {
 
@@ -88,7 +89,7 @@ export class App extends Component {
     }
 
     render() {
-        const { org_role, employee, allowed_geom, obeg_employee, covid_configs} = this.props.org
+        const { org_role, employee, allowed_geom, obeg_employee, covid_configs, covid_dashboard } = this.props.org
         const { emp_role , approve, revoke, base_layer_list } = this.state
         return (
             <BrowserRouter>
@@ -203,9 +204,14 @@ export class App extends Component {
                             </ul>
                         </MenuItem>
                         {
-                            employee.is_admin
+                            employee.is_admin && covid_configs.length > 0
                             &&
                                 <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-config/" text="Covid Тохиргоо"></MenuItem>
+                        }
+                        {
+                            covid_dashboard.length > 0
+                            &&
+                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-dashboard-config/" text="Covid Dashboard"></MenuItem>
                         }
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/help/" text="Тусламж"></MenuItem>
                     </ul>
@@ -248,8 +254,10 @@ export class App extends Component {
                                 <Route exact path="/gov/help/" component={Help} />
                                 <Route exact path="/gov/profile/" component={Profile} />
                                 <Route exact path="/gov/profile/password/" component={Password} />
+
                                 <Route path="/gov/nema/" component={Nema} />
                                 <Route path="/gov/covid-config/" component={(props) => <CovidConfig {...props} covid_configs={covid_configs}/>} />
+                                <Route path="/gov/covid-dashboard-config/" component={(props) => <CovidDashboardConfig {...props} covid_dashboard={covid_dashboard}/>} />
                             </Switch>
                         </Suspense>
                     </div>

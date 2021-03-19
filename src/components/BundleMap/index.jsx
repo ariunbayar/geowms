@@ -59,6 +59,7 @@ export default class InspireMap extends Component {
             is_loading: false,
             format: new GeoJSON(),
             layer_one_tile: null,
+            form_datas: props.form_datas,
         }
 
         this.controls = {
@@ -107,6 +108,7 @@ export default class InspireMap extends Component {
         this.readFeatures = this.readFeatures.bind(this)
         this.readFeature = this.readFeature.bind(this)
         this.getErguulLayer = this.getErguulLayer.bind(this)
+        this.addVectorSource = this.addVectorSource.bind(this)
     }
 
     initMarker() {
@@ -241,6 +243,7 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
+        const { vector_source, form_datas} = this.props
         const {wms_list} = this.props
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
@@ -271,6 +274,14 @@ export default class InspireMap extends Component {
         if (this.state.map_wms_list !== prevState.map_wms_list) {
             this.setState({map_wms_list: this.state.map_wms_list})
         }
+
+        if (vector_source !== prevState.vector_source) {
+            this.addVectorSource(vector_source)
+        }
+
+        if (form_datas !== prevState.form_datas) {
+            this.setState({form_datas})
+        }
     }
 
     loadMapData() {
@@ -281,11 +292,47 @@ export default class InspireMap extends Component {
         })
     }
 
-    loadWmsLayers(wms_list) {
-        this.addWmsLayers(wms_list)
-        this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
-        let is_nema = true
-        this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
+    addVectorSource(vector_source) {
+
+        const { projection, projection_display, form_datas} = this.state
+        if (Object.keys(vector_source).length > 0) {
+            const features = new GeoJSON({
+                dataProjection: projection_display,
+                featureProjection: projection,
+            }).readFeatures(vector_source['features'])
+            const vectorSource = new VectorSource({
+                features: features
+            });
+            const vector_layer = new VectorLayer({
+                source: vectorSource,
+                style: new Style({
+                    stroke: new Stroke({
+                        color: 'rgba(100, 255, 0, 1)',
+                        width: 2
+                    }),
+                    fill: new Fill({
+                        color: 'rgba(100, 255, 0, 0.3)'
+                    })
+                }),
+            })
+            this.map.addLayer(vector_layer)
+            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+            this.controls.popup.getFormdata(true, form_datas)
+
+        }
+
+    }
+
+    loadWmsLayers(bundle_id) {
+        this.setState({is_loading: true})
+        Promise.all([
+            service.loadWMSLayers(bundle_id)
+        ]).then(([{ wms_list }]) => {
+            this.addWmsLayers(wms_list)
+            this.props.loadErguul && this.props.loadErguul((val) => this.readFeatures(val))
+            let is_nema = true
+            this.props.loadNema && this.props.loadNema((wms_list) => this.addWmsLayers(wms_list, is_nema))
+        })
     }
 
     oneLayerAdd(url, code){
@@ -506,6 +553,7 @@ export default class InspireMap extends Component {
         this.map = map
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
         this.getErguulLayer()
+        this.map.addControl(this.controls.popup)
         this.setState({is_loading: false})
 
     }
@@ -946,10 +994,10 @@ export default class InspireMap extends Component {
     transformToLatLong(coordinateList) {
         const geom = coordinateList[0].map((coord, idx) => {
             const map_coord = transformCoordinate(coord, this.state.projection, this.state.projection_display)
-              return map_coord
+            return map_coord
         })
         return geom
-      }
+    }
 
     formatArea(polygon) {
         const area = getArea(polygon);
@@ -957,7 +1005,7 @@ export default class InspireMap extends Component {
         let type;
         if (area > 10000) {
           output = Math.round((area / 1000000) * 100) / 100;
-          type = 'km'
+            type = 'km'
         } else {
           output = Math.round(area * 100) / 100;
           type = 'm'
@@ -986,6 +1034,7 @@ export default class InspireMap extends Component {
                 <div
                     id="map"
                     style={{height:"calc( 80vh - 85px - 15px)"}}
+                    className="mw-100"
                 >
                 </div>
             </div>
