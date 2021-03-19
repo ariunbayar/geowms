@@ -199,11 +199,12 @@ class PopUpCmp extends Component {
                                 <div className="col-md-12 my-3">
                                     <h6 className="text-center pl-3">{form_datas[0].name}</h6>
                                     <div className="col-md-12 text-danger text-justify">
-                                        <span className="float-left">Нийт тохиолдол</span>
+                                        <span className="float-left">Батлагдсан тохиолдол</span>
                                         <span className="float-right">{form_datas[0].batlagdsan_tohioldol_too}</span>
                                     </div>
                                 </div>
                                 <div className="col-md-12 mt-3 pt-3 d-block ">
+                                    <hr />
                                     <ul className="col-md-12">
                                         <li className="text-warning">
                                             <span className="float-left text-dark">Эмчлэгдэж буй</span>

@@ -3,7 +3,8 @@ import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
 import Navbar from "./components/Navbar"
 import Graph from "./components/Graph"
 import {Header} from "./components/Header"
-
+import CovidMap from './components/covid_map'
+import Vaccine from './components/vaccine'
 
 class CovidDashboard extends PureComponent {
     constructor(props) {
@@ -27,14 +28,20 @@ class CovidDashboard extends PureComponent {
                             MENU
                         </div>
 
-                        <div className="col-md-9 border border-danger" style={{height: '1000px'}}>
+                        <div className="col-md-9 border border-danger">
                             <div className="row">
                                 <div className="col-md-12 border border-danger" style={{height: '50px'}}>
                                     <Navbar />
                                 </div>
-                                <div className="col-md-12" style={{height: '950px', overflow: "auto"}}>
+                                <div className="col-md-12 p-0" style={{height: '950px', overflow: "auto"}}>
                                     <Switch>
                                         <Route path={"/covid_dashboard/graph/"} component={Graph} />
+                                    </Switch>
+                                    <Switch>
+                                        <Route exact path="/covid_dashboard/" component={CovidMap} />
+                                    </Switch>
+                                    <Switch>
+                                        <Route path="/covid_dashboard/vaccine/" component={Vaccine} />
                                     </Switch>
                                 </div>
                             </div>

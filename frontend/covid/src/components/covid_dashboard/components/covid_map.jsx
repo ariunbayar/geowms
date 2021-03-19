@@ -4,9 +4,6 @@ import {service} from './service'
 
 export default class CovidMap extends Component {
 
-
-
-
     constructor(props) {
 
         super(props)
@@ -44,9 +41,9 @@ export default class CovidMap extends Component {
     render() {
         const { geo_data, form_datas} = this.state
         return (
-                <div className="col-12 col-md-12 col-xl-12 my-3 h-100">
+                <div className="col-12 col-md-12 col-xl-12 h-100 p-0">
                     <InspireMap
-                        height="80vh"
+                        height="100vh"
                         vector_source={geo_data}
                         form_datas={form_datas}
                     />
