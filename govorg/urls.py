@@ -170,6 +170,8 @@ urlpatterns = [
         path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
         path('set-config/', org_views.set_config),
         path('get-covid-dashboard/', org_views.get_covid_dashboard),
+        path('get-covid-dashboard-id/<str:geo_id>/', org_views.get_covid_dashboard_id),
+        path('save-covid-dashboard/', org_views.save_dashboard),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

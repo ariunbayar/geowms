@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import { service } from './service';
 
 class Input extends Component {
 
@@ -40,48 +41,55 @@ class Form extends Component {
         super(props)
         this.state = {
             data: props.data,
+            covid_dashboard: props.covid_dashboard,
+            values: {},
+            is_loading: true,
         }
         this.setValue = this.setValue.bind(this)
-        this.setValueToObj = this.setValueToObj.bind(this)
+        this.handleSave = this.handleSave.bind(this)
     }
 
     setValue(value, name) {
-        let obj = Object()
-        obj[name] = value
         const { values } = this.state
-        values.map((item, idx) => {
-            if (item.name == name) {
-                values[idx]['value'] = value
-            }
-        })
+        values[name] = value
         this.setState({ values })
     }
 
     componentDidMount() {
-        this.setValueToObj()
+    //     this.setValueToObj('au_496')
     }
 
-    // setValueToObj() {
-    //     const { data } = this.state
-    //     const { covid_dashboard } = this.props
-    //     data.map((covid_dashboard, idx) => {
-    //     })
-    // }
+    handleSave() {
+        const { values } = this.state
+        const { geo_id } = this.props
+        service
+            .saveDashboard(values, geo_id)
+            .then(rsp => {
+                console.log(rsp);
+            })
+    }
 
     render() {
-        const { covid_dashboard } = this.props
-        const { data } = this.props
+        const { covid_dashboard, values } = this.state
+        console.log(values);
         return (
-            <div className="card-body">
+            <div className="card-body pt-0">
+                <hr />
                 {covid_dashboard.map((item, idx) =>
                     <Input key={idx}
-                        type="text"
+                        type="number"
                         value={item.value}
                         name={item.origin_name}
                         setValue={this.setValue}
                         mn_name={item.name}
                     />
                 )}
+                <button
+                    className="btn btn-block gp-btn-primary"
+                    onClick={this.handleSave}
+                >
+                    Хадгалах
+                </button>
             </div>
         );
     }

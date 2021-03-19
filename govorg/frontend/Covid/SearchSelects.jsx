@@ -20,18 +20,7 @@ export default class SearchSelects extends Component {
             horoo_geo_id: '',
         }
         this.handleChange = this.handleChange.bind(this)
-        this.getGeom = this.getGeom.bind(this)
         this.getFieldValues = this.getFieldValues.bind(this)
-    }
-
-    getGeom(geo_id) {
-        service
-            .getDashboardFromId(geo_id)
-            .then(({ feature }) => {
-                if (feature) {
-                    this.props.sendFeature(feature)
-                }
-            })
     }
 
     getFieldValues() {
@@ -72,7 +61,7 @@ export default class SearchSelects extends Component {
             })
             obj[field_geo_id] = geo_id
             obj[field_name] = value.name
-            this.getGeom(geo_id)
+            this.props.getValue(geo_id)
         }
         else {
             if (reset_fields.length > 0) {
@@ -96,7 +85,7 @@ export default class SearchSelects extends Component {
                 geo_id = 'au_496'
             }
             obj[field_geo_id] = geo_id
-            this.getGeom(geo_id)
+            this.props.getValue(geo_id)
         }
         this.setState({ [field_id]: idx, ...obj })
     }

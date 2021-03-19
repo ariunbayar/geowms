@@ -229,7 +229,7 @@ def _get_child(children, data):
     return data
 
 
-def _make_json_for_dashb(initial_qs, items):
+def _make_json_for_dashb(initial_qs, items, get_child=True):
     datas = list()
     for item in items.values():
         data = dict()
@@ -239,7 +239,7 @@ def _make_json_for_dashb(initial_qs, items):
         for name in _for_dashb_list():
             data[name] = item[name]
         children = initial_qs.filter(parent_id=parent_id)
-        if children:
+        if children and get_child:
             data['children'] = _make_json_for_dashb(initial_qs, children)
             datas.append(data)
         else:
@@ -255,6 +255,45 @@ def get_covid_dashboard(request):
     initial_qs = CovidDashboard.objects
     parents = initial_qs.filter(parent_id__isnull=True)
     data = _make_json_for_dashb(initial_qs, parents)
+    rsp = {
+        'success': True,
+        'data': data,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def save_dashboard(request, payload):
+    values = payload.get('values')
+    geo_id = payload.get('geo_id')
+    qs = CovidDashboard.objects
+    dashb = qs.filter(geo_id=geo_id)
+    if dashb:
+        dashb.update(
+            **values
+        )
+        success = True
+        info = 'Амжилттай хадгаллаа'
+    else:
+        success = False
+        info = 'Алдаа гарсан байна'
+
+    rsp = {
+        'success': success,
+        'info': info,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_covid_dashboard_id(request, geo_id):
+    initial_qs = CovidDashboard.objects
+    covid = initial_qs.filter(geo_id=geo_id)
+    data = _make_json_for_dashb(initial_qs, covid, False)
     rsp = {
         'success': True,
         'data': data,
