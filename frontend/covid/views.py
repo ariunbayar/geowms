@@ -17,8 +17,9 @@ from backend.config.models import CovidConfig
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer, Bundle
-from .models import CovidDashboard, CovidDashboardLog
 from backend.geoserver.models import WmtsCacheConfig
+
+from .models import CovidDashboard, CovidDashboardLog
 
 
 def covid_index(request):
@@ -294,3 +295,33 @@ def get_covid_state(request, geo_id):
         }
     }
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def get_nema_all(request, payload, bundle_id):
+    choice_list = payload.get('choice_list')
+    wms_list = []
+    if len(choice_list) == 1:
+        wms_qs, qs = _get_nema_layers(int(choice_list[0]))
+    else:
+        wms_qs, qs = _get_nema_layers()
+
+    if not wms_qs:
+        rsp = {
+            'success': False,
+            'info': 'WMS олдсонгүй системийн админд хандана уу'
+        }
+        return JsonResponse(rsp)
+    wms_list, layer_codes = _get_nema_code_list(qs, wms_qs, request, bundle_id)
+    if qs:
+        wms_list = _get_wms_list_of_nema(wms_list, wms_qs, bundle_id, layer_codes, request)
+
+    rsp = {
+        'success': True,
+        'layer_codes': layer_codes,
+        'wms_list': wms_list,
+        'bundle': {"id": bundle_id},
+    }
+    return JsonResponse(rsp)
+
