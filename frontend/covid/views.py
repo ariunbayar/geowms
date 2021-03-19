@@ -380,17 +380,18 @@ def get_data_dashboard(request):
 
     qs_log = CovidDashboardLog.objects.filter(parent_id__isnull=True)
     last_day_data = qs_log.order_by('-updated_at').values()
-    last_day_data = last_day_data[1]
-    mongol = parents.values()[0]
     zuruu = dict()
-    for name in _for_mongol_list():
-        zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+    if last_day_data:
+        last_day_data = last_day_data[1]
+        mongol = parents.values()[0]
+        for name in _for_mongol_list():
+            zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
 
     rsp = {
         'success': True,
         'data': data,
         'update_time': msg,
-        'zuruu': zuruu,
+        'zuruu': zuruu if zuruu else '',
     }
     return JsonResponse(rsp)
 
