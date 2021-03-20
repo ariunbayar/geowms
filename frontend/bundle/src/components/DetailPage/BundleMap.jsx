@@ -188,7 +188,6 @@ export default class BundleMap extends Component {
             return {
                 name,
                 layers: layers.map((layer) => {
-                    console.log(layer.zoom_start, layer.code, layer.zoom_stop, wms_or_cache_ur)
                     return {
                         ...layer,
                         wms_or_cache_ur,
