@@ -57,6 +57,8 @@ export class UserAdd extends Component {
             is_loading: true,
 
             errors: '',
+
+            firstOrder_geom: '',
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -215,7 +217,7 @@ export class UserAdd extends Component {
         let array
         service
             .formOptions('second')
-            .then(({ success, secondOrders }) => {
+            .then(({ success, secondOrders, firstOrder_geom }) => {
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
@@ -240,7 +242,7 @@ export class UserAdd extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: secondOrders, ...obj, is_loading: false })
+                    this.setState({ aimag: secondOrders, ...obj, is_loading: false, firstOrder_geom })
                 }
             })
     }
@@ -309,7 +311,7 @@ export class UserAdd extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)

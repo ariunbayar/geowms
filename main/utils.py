@@ -295,54 +295,55 @@ def get_administrative_levels():
     ```
         [
             {
-                'geo_id': 'au_62',
+                'geo_id': '62',
                 'name': 'Өвөрхангай',
                 'children': [
                     {
-                        'geo_id': 'au_6255',
+                        'geo_id': '6255',
                         'name': 'Хужирт',
                         'children': [
-                            {'geo_id': 'au_625551', 'name': '1-р баг'},
-                            {'geo_id': 'au_625553', 'name': '2-р баг'}
+                            {'geo_id': '625551', 'name': '1-р баг'},
+                            {'geo_id': '625553', 'name': '2-р баг'}
                         ]
                     },
                     {
-                        'geo_id': 'au_6234',
+                        'geo_id': '6234',
                         'name': 'Өлзийт',
                         'children': [
-                            {'geo_id': 'au_623451', 'name': '1-р баг'},
-                            {'geo_id': 'au_623453', 'name': '2-р баг'},
-                            {'geo_id': 'au_623455', 'name': '3-р баг'},
-                            {'geo_id': 'au_623457', 'name': '4-р баг'}
+                            {'geo_id': '623451', 'name': '1-р баг'},
+                            {'geo_id': '623453', 'name': '2-р баг'},
+                            {'geo_id': '623455', 'name': '3-р баг'},
+                            {'geo_id': '623457', 'name': '4-р баг'}
                         ]
                     }
                 ]
             },
             {
-                'geo_id': 'au_46',
+                'geo_id': '46',
                 'name': 'Өмнөговь',
                 'children': [
                     {
-                        'geo_id': 'au_4607',
+                        'geo_id': '4607',
                         'name': 'Баян-Овоо',
                         'children': [
-                            {'geo_id': 'au_460751', 'name': '1-р баг'},
-                            {'geo_id': 'au_460753', 'name': '2-р баг'},
-                            {'geo_id': 'au_460755', 'name': '3-р баг'}
+                            {'geo_id': '460751', 'name': '1-р баг'},
+                            {'geo_id': '460753', 'name': '2-р баг'},
+                            {'geo_id': '460755', 'name': '3-р баг'}
                         ]
                     },
                     {
-                       'geo_id': 'au_4604',
+                       'geo_id': '4604',
                         'name': 'Баяндалай',
                         'children': [
-                            {'geo_id': 'au_460451', 'name': '1-р баг'},
-                            {'geo_id': 'au_460453', 'name': '2-р баг'},
-                            {'geo_id': 'au_460455', 'name': '3-р баг'}
+                            {'geo_id': '460451', 'name': '1-р баг'},
+                            {'geo_id': '460453', 'name': '2-р баг'},
+                            {'geo_id': '460455', 'name': '3-р баг'}
                         ]
                     }
                 ],
             }
         ]
+        *updated 2021-03-20 odko
     ```
     """
 
@@ -709,9 +710,9 @@ def get_1stOrder_geo_id():
     LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
 
     try:
-        feature_id = LFeatures.objects.filter(feature_code='au-au-au').first().feature_id
+        feature_id = LFeatures.objects.filter(feature_code='bnd-au-au').first().feature_id
         property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
-        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder\n').first().code_list_id
+        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder').first().code_list_id
         feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
         qs = MDatas.objects.filter(property_id=property_id)

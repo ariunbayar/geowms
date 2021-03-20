@@ -50,6 +50,7 @@ export class OrgEdit extends Component {
     handleGetAll(org_level, org_id){
         if (org_id) {
             service.orgAll(org_level, org_id).then(({ orgs }) => {
+                console.log(orgs);
                 if (orgs) {
                     orgs.map(org => this.setState({
                         form_values: {
@@ -77,21 +78,21 @@ export class OrgEdit extends Component {
                     var find_text = ''
                     for (var i = 0; i < geo_id.length; i++){
                         find_text += geo_id[i]
-                        if (i === 4) {
+                        if (i === 1) {
                             secondOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
                                     this.handle2ndOrderChange(value['geo_id'])
                                 }
                             })
                         }
-                        if (i === 6) {
+                        if (i === 3) {
                             this.state.thirthOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
                                     this.handle3rdOrderChange(value['geo_id'])
                                 }
                             })
                         }
-                        if (i === 8) {
+                        if (i === 5) {
                             this.state.fourthOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
                                     this.handle4thOrderChange(value['geo_id'])
@@ -214,7 +215,7 @@ export class OrgEdit extends Component {
         const {form_values, roles, disabled} = this.state
         const org_id = this.props.id
         const org_level = this.props.level
-
+        console.log(form_values);
         return (
             <div>
                 <Formik

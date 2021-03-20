@@ -1426,7 +1426,8 @@ def form_options(request, option):
     if option == 'second':
         rsp = {
             'success': True,
-            'secondOrders': admin_levels
+            'secondOrders': admin_levels,
+            'firstOrder_geom': utils.get_1stOrder_geo_id(),
         }
     else:
         rsp = {
@@ -1751,3 +1752,12 @@ def get_select_values(request):
         'pro_classes': pro_classes,
     }
     return JsonResponse(rsp)
+
+
+
+from main import utils
+
+
+firstOrder_geo_id = utils.get_1stOrder_geo_id()
+
+print(firstOrder_geo_id)

@@ -153,6 +153,7 @@ def aimag(request):
     rsp = {
         'success': success,
         'info': info,
+        'firstOrder_geom': utils.get_1stOrder_geo_id(),
     }
     return JsonResponse(rsp)
 
