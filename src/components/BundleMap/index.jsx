@@ -431,7 +431,9 @@ export default class InspireMap extends Component {
 
 
     handleMapDataLoaded(base_layer_list) {
-        this.setState({is_loading: true})
+        // this.setState({is_loading: true})
+        var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
+        var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
 
         const base_layer_name = 'base_layer'
         const {base_layers, base_layer_controls} =
@@ -465,6 +467,27 @@ export default class InspireMap extends Component {
                                 }
                             }),
                             name: base_layer_name,
+                        })
+                    }
+
+                    if (base_layer_info.tilename == "wmts") {
+                        layer = new Tile({
+                            source: new WMTS({
+                                url: base_layer_info.url,
+                                layer: base_layer_info.layers,
+                                matrixSet: this.state.projection_display,
+                                format: 'image/png',
+                                projection: this.state.projection_display,
+                                tileGrid: new WMTSTileGrid({
+                                    tileSize: [256,256],
+                                    extent: [-180.0,-90.0,180.0,90.0],
+                                    origin: [-180.0, 90.0],
+                                    resolutions: resolutions,
+                                    matrixIds: gridNames,
+                                }),
+                                style: '',
+                                wrapX: true,
+                            }),
                         })
                     }
 
@@ -529,6 +552,8 @@ export default class InspireMap extends Component {
                 this.controls.sidebar,
                 this.controls.cart,
                 this.controls.alertBox,
+                this.controls.popup,
+
             ]),
             layers: [
                 ...base_layers,
@@ -545,7 +570,13 @@ export default class InspireMap extends Component {
         map.on('click', this.handleMapClick)
 
         this.map = map
+
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
+        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
+
+        // const overlay = this.overlay
+        // overlay.setPosition([coordinate])
+
         this.getErguulLayer()
         this.setState({is_loading: false})
 
@@ -582,10 +613,8 @@ export default class InspireMap extends Component {
 
     handleMapClick(event) {
         if(!this.state.is_draw_open) {
-
             const coordinate = event.coordinate
             this.marker.point.setCoordinates(coordinate)
-
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
@@ -806,7 +835,6 @@ export default class InspireMap extends Component {
     showFeaturesAt(coordinate) {
         this.is_empty = true
         this.sendFeatureInfo = []
-
         // const overlay = this.overlay
         // overlay.setPosition(coordinate)
 
