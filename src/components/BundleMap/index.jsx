@@ -1027,8 +1027,7 @@ export default class InspireMap extends Component {
                 <Loader is_loading={is_loading}></Loader>
                 <div
                     id="map"
-                    style={{height:"calc( 80vh - 85px - 15px)"}}
-                    className="mw-100"
+                    style={{height:"calc( 45vh - 5px - 15px)"}}
                 >
                 </div>
             </div>

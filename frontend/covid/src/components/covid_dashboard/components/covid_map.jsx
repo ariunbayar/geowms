@@ -9,7 +9,8 @@ export default class CovidMap extends Component {
         super(props)
 
         this.state = {
-            geo_id: props.geo_id ? props.geo_id : 'au_496',
+            // geo_id: props.geo_id ? props.geo_id : 'au_496',
+            geo_id: 'au_496',
             geo_data: [],
             form_datas: [],
         }
@@ -22,16 +23,17 @@ export default class CovidMap extends Component {
         this.handleGeoData(geo_id)
     }
 
-    componentDidUpdate(pP, pS){
-        const { geo_id, datas} = this.props
-        if(pP.geo_id != geo_id) {
-            this.handleGeoData(geo_id)
-        }
+    // componentDidUpdate(pP, pS){
+    //     // const { geo_id, datas} = this.props
+    //     const geo_id = 'au_496'
+    //     if(pP.geo_id != geo_id) {
+    //         this.handleGeoData(geo_id)
+    //     }
 
-    }
+    // }
 
     handleGeoData(geo_id) {
-        const id = this.props.match.params.id
+        // const id = this.props.match.params.id
         service.get_geo_data(geo_id)
             .then(({ geo_data, form_datas}) => {
                 this.setState({geo_data, form_datas})
@@ -41,13 +43,12 @@ export default class CovidMap extends Component {
     render() {
         const { geo_data, form_datas} = this.state
         return (
-                <div className="col-12 col-md-12 col-xl-12 h-100 p-0">
-                    <InspireMap
-                        height="100vh"
-                        vector_source={geo_data}
-                        form_datas={form_datas}
-                    />
-                </div>
+            <div className="col-12 col-md-12 p-0">
+                <InspireMap
+                    vector_source={geo_data}
+                    form_datas={form_datas}
+                />
+            </div>
         )
     }
 }
