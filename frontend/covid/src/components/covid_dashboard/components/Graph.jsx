@@ -72,44 +72,14 @@ class Graph extends PureComponent {
                     </div>
                     <div className="col-4">
                     <h4 className="text-center">Өнөөдрийн байдлаар</h4>
-                        <PieChart
-                                label="Батлагдсан тохиолдол"
-                                labels={charts.piechart_one ? charts.piechart_one.labels : []}
-                                datas={charts.piechart_one ? charts.piechart_one.datas : []}
-                                height={330}
-                                backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
-                        />
-                    </div>
-                    {/* <div className="col-4">
-                        <RadarChart
-                            height={400}
+                    <PieChart
+                            label="Батлагдсан тохиолдол"
                             labels={charts.piechart_one ? charts.piechart_one.labels : []}
                             datas={charts.piechart_one ? charts.piechart_one.datas : []}
-                            backgroundColor={'rgba(184, 185, 210, .3)'}
-                            borderColor={'#4BC0C0'}
-                            label={"Үйлдлийн төрлөөр"}
-                        />
-                    </div>
-                    <div className="col-4">
-                    <LineGraph
-                        labels={['1', '2', '3', '4', '5', '6']}
-                        lineTension={0.1}
-                        label="Батлагдсан тохиолдол 2"
-                        datas={[60, 30, 10, 120, 340, 210]}
-                        datas={[210, 30, 10, 120, 340]}
-                        graph_color={'#15ca20'}
-                        height={150}
+                            height={330}
+                            backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
                     />
                     </div>
-                    <div className="col-4">
-                        <PolorGraph
-                            height={400}
-                            label={"odrii mend"}
-                            backgroundColor= {['#FF6384','#4BC0C0','#FFCE56','#E7E9ED','#36A2EB', '#EC0E00', '#EC0E00']}
-                            labels={charts.piechart_one ? charts.piechart_one.labels : []}
-                            datas={charts.piechart_one ? charts.piechart_one.datas : []}
-                        />
-                    </div> */}
                 </div>
             </div>
         );
