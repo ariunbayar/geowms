@@ -9,8 +9,16 @@ export default class TsegAdd extends Component {
         super(props)
         this.state = {
             fields: [],
+            values: {},
         }
         this.getFields = this.getFields.bind(this)
+        this.getValue = this.getValue.bind(this)
+    }
+
+    getValue(value, name) {
+        const { values } = this.state
+        values[name] = value
+        this.setState({ values })
     }
 
     componentDidMount() {
@@ -21,15 +29,16 @@ export default class TsegAdd extends Component {
         service
             .getFormFields()
             .then(({ success, fields }) => {
+                console.log(fields);
                 if (success) {
-                    console.log(fields);
                     this.setState({ fields })
                 }
             })
     }
 
     render() {
-        const { fields } = this.state
+        const { fields, values } = this.state
+        console.log(values);
         return (
             <div className="card-body">
                 <h1>Nemeh bolon zasah</h1>
@@ -37,10 +46,12 @@ export default class TsegAdd extends Component {
                     fields.map((field, idx) =>
                         <GPInput key={idx}
                             mn_name={field.property_name}
-                            name={field.property_code}
+                            name={field.property_id}
                             placeholder={field.property_name}
                             type={field.value_type_id}
                             sendValue={this.getValue}
+                            options={field.data_list}
+                            main_values={values}
                         />
                     )
                 }
