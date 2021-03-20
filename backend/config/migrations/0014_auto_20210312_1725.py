@@ -44,7 +44,7 @@ def create_value_type_config(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('backend_config', '0011_auto_20210223_1219'),
+        ('backend_config', '0013_auto_20210317_1013'),
     ]
 
     operations = [
