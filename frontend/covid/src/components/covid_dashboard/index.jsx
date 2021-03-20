@@ -72,13 +72,13 @@ class CovidDashboard extends PureComponent {
                                 </div>
                                 <div className="col-md-12 p-0" style={{height: '950px', overflow: "auto"}}>
                                     <Switch>
-                                        <Route exact path={"/covid_dashboard/graph/"} component={(props) => <Graph {...props} geo_id={geo_id}/>  } />
-                                    </Switch>
-                                    <Switch>
-                                        <Route path={"/covid_dashboard/"} component={(props) => <CovidMap {...props} geo_id={geo_id}/>  } />
+                                        <Route exact path={"/covid_dashboard/"} component={(props) => <CovidMap {...props} geo_id={geo_id}/>  } />
                                     </Switch>
                                     <Switch>
                                         <Route exact path="/covid_dashboard/vaccine/" component={Vaccine} />
+                                    </Switch>
+                                    <Switch>
+                                        <Route exact path={"/covid_dashboard/graph/"} component={(props) => <Graph {...props} geo_id={geo_id}/>  } />
                                     </Switch>
                                 </div>
                             </div>
