@@ -176,7 +176,13 @@ urlpatterns = [
         path('', org_views.frontend, name='frontend'),
         path('emp-role/', org_views.emp_role, name='emp-role'),
         path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
-        path('set-config/', org_views.set_config)
+        path('set-config/', org_views.set_config),
+        path('get-covid-dashboard/', org_views.get_covid_dashboard),
+        path('get-covid-dashboard-id/<str:geo_id>/', org_views.get_covid_dashboard_id),
+        path('save-covid-dashboard/', org_views.save_dashboard),
+        path('dahsb-list/<str:geo_id>/', org_views.dashboard_list),
+        path('save-covid-dashboard-log/', org_views.save_dashboard_log),
+        path('remove-dashboard/<int:pk>/', org_views.remove_dashboard),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

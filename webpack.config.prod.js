@@ -131,6 +131,10 @@ module.exports = {
             filename: path.resolve(__dirname, 'frontend/covid/templates/covid/index.prod.html'),
         }),
         hhwp({
+            chunks: ['frontend/covid'],
+            filename: path.resolve(__dirname, 'frontend/covid/templates/covid_dashboard/index.prod.html'),
+        }),
+        hhwp({
             chunks: ['frontend/open_layer'],
             filename: path.resolve(__dirname, 'frontend/open_layer/templates/open_layer/index.prod.html'),
         }),

@@ -30,7 +30,6 @@ export class СуурьДавхарга extends Control {
         base_layers.forEach((l) => element.appendChild(l))
 
     }
-
     initLayer({thumbnail_1x, thumbnail_2x, layer, is_active}) {
 
         const el = document.createElement('a')
@@ -53,7 +52,6 @@ export class СуурьДавхарга extends Control {
     }
 
     toggleLayer(is_active, el, layer) {
-
         if (this.last_active && is_active) {
             this.last_active.layer.setVisible(false)
             this.last_active.el.classList.toggle(CLASS_ACTIVE, false)

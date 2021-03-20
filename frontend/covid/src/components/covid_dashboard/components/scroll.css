@@ -1,0 +1,9 @@
+.bundle-view-scroll {
+    overflow-y: scroll;
+    height: calc(60vh - 36px);
+}
+
+.bundle-view-right-scroll {
+    overflow-y: scroll;
+    height: calc(60vh - 36px);
+}

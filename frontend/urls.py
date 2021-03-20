@@ -72,6 +72,11 @@ urlpatterns = [
 
     path('covid/', include(([
         path('get-nema/', covid_views.get_nema),
+        path('get-covid-state/<str:geo_id>/', covid_views.get_covid_state),
+        path('get-data-dashboard/', covid_views.get_data_dashboard),
+        path('<str:geo_id>/geo_data/', covid_views.get_covid_data),
+        path('get-nema/<int:bundle_id>/', covid_views.get_nema),
+        path('get-nema/<int:bundle_id>/all/', covid_views.get_nema_all),
     ], 'covid'))),
 
     path('profile/api/', include(([
@@ -87,7 +92,8 @@ urlpatterns = [
     ], 'profile'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
-    re_path('^covid/.*', covid_views.index, name='covid'),
+    re_path('^covid/.*', covid_views.covid_index, name='covid'),
+    re_path('^covid_dashboard/.*', covid_views.dashboard_index, name='covid_dashboard'),
     re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
     re_path('^profile/.*', profile_views.history, name='history'),
 
