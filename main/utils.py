@@ -346,18 +346,18 @@ def get_administrative_levels():
     ```
     """
 
-    i_code_list_2nd_order = InspireCodeList('2ndOrder\n')
-    i_code_list_3rd_order = InspireCodeList('3rdOrder\n')
-    i_code_list_4th_order = InspireCodeList('4thOrder\n')
+    i_code_list_2nd_order = InspireCodeList('2ndOrder')
+    i_code_list_3rd_order = InspireCodeList('3rdOrder')
+    i_code_list_4th_order = InspireCodeList('4thOrder')
 
-    def _get_code_names(national_codes):
+    def _get_code_names(geo_id):
 
-        table_au_au_ab = InspireFeature('au-au-ab')
+        table_au_au_ab = InspireFeature('bnd-au-au')
 
-        i_data_type_administrative_boundary = InspireDataType('AdministrativeBoundary')
-        i_property_name = InspireProperty('name')
+        i_data_type_administrative_boundary = InspireDataType('GeographicalName')
+        i_property_name = InspireProperty('text')
 
-        table_au_au_ab.filter({'geo_id': national_codes})
+        table_au_au_ab.filter({'geo_id': geo_id})
         table_au_au_ab.select({
             'geo_id': True,
             i_data_type_administrative_boundary: [i_property_name],
@@ -369,7 +369,7 @@ def get_administrative_levels():
             yield code, name
 
     def _get_au_items():
-        table_au_au_au = InspireFeature('au-au-au')
+        table_au_au_au = InspireFeature('bnd-au-au')
 
         table_au_au_au.filter(
             {
@@ -388,7 +388,6 @@ def get_administrative_levels():
                 'geo_id': True,
                 InspireDataType('AdministrativeUnit'): [
                     InspireProperty('NationalLevel'),
-                    InspireProperty('nationalCode'),
                 ],
             },
         )
@@ -396,27 +395,25 @@ def get_administrative_levels():
         for row in table_au_au_au.fetch():
             geo_id = row['geo_id']
             level = row[InspireDataType('AdministrativeUnit')][InspireProperty('NationalLevel')]
-            code = row[InspireDataType('AdministrativeUnit')][InspireProperty('nationalCode')]
-            yield geo_id, level, code
+            yield geo_id, level
 
     # build flat data
-
     items = {
         '#root': {
             'children': list()
         }
     }
 
-    for geo_id, level, code in _get_au_items():
-        items[code] = {
+    for geo_id, level in _get_au_items():
+        items[geo_id] = {
             'geo_id': geo_id,
             'level': level,
-            'code': code,
             'name': '',
             'children': list(),
         }
 
     codes = list(items.keys())
+
     for code, name in _get_code_names(codes):
         items[code]['name'] = name
 
@@ -468,7 +465,6 @@ def get_administrative_levels():
             if _is_leaf_node(item['level']):
                 del item['children']
             del item['level']
-            del item['code']
 
     # sort children
 
