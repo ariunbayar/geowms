@@ -1107,6 +1107,8 @@ export default class BundleMap extends Component {
     }
 
     render() {
+        console.log('asd');
+
         const { is_modal_info_open} = this.state
         const Menu_comp = () => {
             return (
