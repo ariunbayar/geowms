@@ -1200,12 +1200,12 @@ export default class InspireMap extends Component {
         const {is_loading} = this.state
         const height = this.props.height ? this.props.height : '80vh'
         return (
-            <div>
+            <div className="px-0 mx-0">
                 <Loader is_loading={is_loading}></Loader>
                 <div
                     id="map"
                     style={{height: `${height}`}}
-                    className="mw-100"
+                    className="mw-100 px-0 mx-0"
                 >
                 </div>
             </div>
