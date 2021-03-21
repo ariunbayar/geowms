@@ -61,7 +61,7 @@ export default class ListTable extends Component {
                     {tseg_id}
                 </td>
                 <td>
-                    <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
+                    <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
                         <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
                     </NavLink>
                 </td>

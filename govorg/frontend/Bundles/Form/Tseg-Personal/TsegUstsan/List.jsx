@@ -101,7 +101,7 @@ export class List extends Component {
             <div className="card">
                 <div  className="card-body">
                     <div className="col-md-12">
-                        <NavLink className="btn gp-btn-primary float-right my-2" to={"/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
+                        <NavLink className="btn gp-btn-primary float-right my-2" to={"/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
                             Нэмэх
                         </NavLink>
                         <input

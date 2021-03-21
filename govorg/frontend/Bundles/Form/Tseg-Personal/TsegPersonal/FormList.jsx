@@ -6,7 +6,6 @@ import {service} from '../../service'
 import {Pagination} from '../../../../components/pagination/pagination'
 import ModalAlert from "@utils/Modal/ModalAlert"
 
-
 export class FormList extends Component {
 
     constructor(props) {
@@ -109,7 +108,7 @@ export class FormList extends Component {
                 <div  className="card-body">
                     <div className="row">
                         <div className="col-md-12 ">
-                            <NavLink className="btn gp-btn-primary float-right" to={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
+                            <NavLink className="btn gp-btn-primary float-right" to={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                 Нэмэх
                             </NavLink>
                             <div className="form-row text-right">

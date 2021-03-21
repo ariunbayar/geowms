@@ -3,7 +3,6 @@ import {Switch, Route, Link, NavLink} from "react-router-dom"
 
 import {TsegPersonal} from './TsegPersonal'
 import {TsegUstsan} from './TsegUstsan'
-import TsegRequest from './TsegRequest'
 
 export class Bar extends Component {
 
@@ -15,10 +14,9 @@ export class Bar extends Component {
         return (
             <div>
                 <Switch>
-                    <Route exact path="/gov/forms/"/>
                     <Route path="/gov/forms/tseg-info/tsegpersonal/tseg-personal/" component={TsegPersonal}/>
                     <Route path="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" component={TsegUstsan}/>
-                    <Route path="/gov/forms/tseg-info/tsegpersonal/requests/" component={TsegRequest}/>
+                    <Route exact path="/gov/forms/"/>
                 </Switch>
             </div>
         )

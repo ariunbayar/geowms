@@ -13,9 +13,9 @@ export class TsegPersonal extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/"} component={FormList}/>
-                <Route exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"} component={(data)=><Forms data={data}/>}/>
-                <Route  exact path={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/:id/:t_type/засах/"} component={(data)=><Forms data={data}/>}/>
+                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/"} component={FormList}/>
+                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/"} component={(data)=><Forms data={data}/>}/>
+                <Route  exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/:t_type/засах/"} component={(data)=><Forms data={data}/>}/>
             </Switch>
         )
 

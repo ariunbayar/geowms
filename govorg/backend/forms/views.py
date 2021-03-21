@@ -26,7 +26,7 @@ from backend.inspire.models import (
 )
 from backend.org.models import Employee, Org
 from geoportal_app.models import User
-from .models import TsegRequest
+from govorg.backend.org_request.models import TsegRequest
 
 from .models import (
     TsegUstsan,
@@ -51,6 +51,7 @@ from .models import (
 )
 
 from main.decorators import ajax_required
+from main.components import Datatable
 from main import utils
 # Create your models here.
 
@@ -957,6 +958,8 @@ def _create_request(request_datas):
     change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
     change_request.values = request_datas['values'] if 'values' in request_datas else None
     change_request.pdf_id = request_datas['pdf_id'] if 'pdf_id' in request_datas else None
+    change_request.point_id = request_datas['point_id'] if 'point_id' in request_datas else None
+    change_request.point_name = request_datas['point_name'] if 'point_name' in request_datas else None
 
     change_request.save()
     return change_request.id
@@ -1014,6 +1017,9 @@ def _make_request_datas(values, request_values):
         'geo_json': request_values['geo_json'],
         'values': values,
         'pdf_id': request_values['pdf_id'],
+        'point_id': request_values['point_id'],
+        'point_name': request_values['point_name'],
+        't_type': request_values['t_type'],
     }
 
     success = _create_request(request_datas)
@@ -1205,6 +1211,9 @@ def tsegPersonal(request):
                 request_values['kind'] = TsegPersonal.KIND_UPDATE
                 request_values['geo_json'] = geom.json
                 request_values['pdf_id'] = mpoints.pid
+                request_values['point_id'] = point_id
+                request_values['t_type'] = t_type
+                request_values['point_name'] = request.POST.get('tesgiin_ner')
                 _make_request_datas(value, request_values)
                 file_name = mpoints.pid + '.pdf'
                 src_file = os.path.join(settings.FILES_ROOT, tseg_file_url, file_name)
@@ -1219,17 +1228,17 @@ def tsegPersonal(request):
             file_name = 'PDF'+ objectid + '.pdf'
             for_db_pdf_name = 'PDF' + objectid
 
-            # tesgiin_ner_check = Mpoint_view.objects.using('postgis_db').filter(point_name=tesgiin_ner)
-            # objectid_check = Mpoint_view.objects.using('postgis_db').filter(point_id=objectid)
+            tesgiin_ner_check = Mpoint_view.objects.using('postgis_db').filter(point_name=tesgiin_ner)
+            objectid_check = Mpoint_view.objects.using('postgis_db').filter(point_id=objectid)
 
-            # if tesgiin_ner_check or objectid_check:
-            #     name = False
-            #     ids = False
-            #     if tesgiin_ner_check:
-            #         name = True
-            #     if objectid_check:
-            #         ids = True
-            #     return JsonResponse({'success': False, 'name': name, 'ids':ids})
+            if tesgiin_ner_check or objectid_check:
+                name = False
+                ids = False
+                if tesgiin_ner_check:
+                    name = True
+                if objectid_check:
+                    ids = True
+                return JsonResponse({'success': False, 'name': name, 'ids':ids})
 
             date = None
             file1 = ''
@@ -1243,24 +1252,26 @@ def tsegPersonal(request):
             if request.POST.get('date'):
                 date = request.POST.get('date')
 
-            # mpoint = Mpoint9.objects.using('postgis_db').create(
-            #         objectid='null',
-            #         point_id=point_id,
-            #         ondor=ondor,
-            #         point_name=request.POST.get('tesgiin_ner'),
-            #         ondor_type=ondor_type,
-            #         pid=for_db_pdf_name,
-            #         point_class=point_class_for_mpoint,
-            #         mclass=request.POST.get('center_typ'),
-            #         aimag=request.POST.get('aimag_name'),
-            #         sum=request.POST.get('sum_name'),
-            #         sheet1=request.POST.get('trapetsiin_dugaar'),
-            #         sheet2=request.POST.get('BA'),
-            #         sheet3=request.POST.get('LA'),
-            #         t_type='g109',
-            #         point_class_name='Шинээр нэмэгдсэн төлөв',
-            #         geom=geom
-            # )
+            t_type = 'g109'
+
+            mpoint = Mpoint9.objects.using('postgis_db').create(
+                    objectid='null',
+                    point_id=point_id,
+                    ondor=ondor,
+                    point_name=request.POST.get('tesgiin_ner'),
+                    ondor_type=ondor_type,
+                    pid=for_db_pdf_name,
+                    point_class=point_class_for_mpoint,
+                    mclass=request.POST.get('center_typ'),
+                    aimag=request.POST.get('aimag_name'),
+                    sum=request.POST.get('sum_name'),
+                    sheet1=request.POST.get('trapetsiin_dugaar'),
+                    sheet2=request.POST.get('BA'),
+                    sheet3=request.POST.get('LA'),
+                    t_type=t_type,
+                    point_class_name='Шинээр нэмэгдсэн төлөв',
+                    geom=geom
+            )
 
             point_id = request.POST.get('toviin_dugaar')
 
@@ -1304,7 +1315,10 @@ def tsegPersonal(request):
             request_values['kind'] = TsegRequest.KIND_CREATE
             request_values['geo_json'] = geom.json
             request_values['pdf_id'] = for_db_pdf_name
-            print(value, request_values)
+            request_values['point_id'] = point_id
+            request_values['point_name'] = request.POST.get('tesgiin_ner')
+            request_values['t_type'] = t_type
+
             _make_request_datas(value, request_values)
             # mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0])
 
@@ -2164,5 +2178,24 @@ def get_field_values(request):
         'point_classes': point_classes,
         'ondor_types': ondor_types,
         'nativeness': nativeness,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_request_list(request, payload):
+    print('hahaha')
+    datatable = Datatable(
+        model=TsegRequest,
+        payload=payload,
+    )
+
+    items, total_page = datatable.get()
+    rsp = {
+        'items': items,
+        'page': payload.get("page"),
+        'total_page': total_page
     }
     return JsonResponse(rsp)

@@ -90,7 +90,7 @@ export default class FormTable extends Component {
                 <th>{aimag}</th>
                 <th>{sum}</th>
                 <th>
-                    <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/${id}/${t_type}/засах/`}>
+                    <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${id}/${t_type}/засах/`}>
                             <i className="fa fa-pencil-square-o gp-text-primary" aria-hidden="true"></i>
                     </NavLink>
                 </th>

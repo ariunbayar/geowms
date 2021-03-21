@@ -9,7 +9,7 @@ import Maps from '../../../../components/map/Map'
 import ModalAlert from "@utils/Modal/ModalAlert"
 
 
-export  class Forms extends Component {
+export class Forms extends Component {
 
     constructor(props) {
         super(props)
@@ -511,14 +511,14 @@ export  class Forms extends Component {
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
-            this.props.data.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/')
+            this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/')
         }, 2000)
     }
 
     modalClose(){
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
-        this.props.data.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/')
+        this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/')
     }
 
     render() {
@@ -562,7 +562,7 @@ export  class Forms extends Component {
                                         />
                                     </div>
                                     <div className="col-md-12 mb-4 mt-4 pl-0">
-                                        <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/`} className='btn gp-outline-primary '>
+                                        <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-personal/`} className='btn gp-outline-primary '>
                                                 <i className="fa fa-angle-double-left"></i> Буцах
                                         </NavLink>
                                     </div>
