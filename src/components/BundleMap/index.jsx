@@ -352,7 +352,7 @@ export default class InspireMap extends Component {
                     }
                 }),
             })
-            this.setState({layer_one_tile: _layer_one_tile})
+            this.setState({layer_one_tile: _layer_one_tile, map_wms_list: _layer_one_tile})
             this.map.addLayer(_layer_one_tile)
             setTimeout(() => {
                 this.setState({is_loading: false})
@@ -601,8 +601,8 @@ export default class InspireMap extends Component {
 
         ]
         var is_not_inspire = false
-        const overlay = this.overlay
-        overlay.setPosition([11891028.94202717, 6084338.840478047])
+        // const overlay = this.overlay
+        // overlay.setPosition([11891028.94202717, 6084338.840478047])
         // this.controls.popup.getData(true, example, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
         // this.controls.popup.getData(true, example, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
         // if (center) {
@@ -883,7 +883,6 @@ export default class InspireMap extends Component {
         let not_visible_layers = []
         let is_not_inspire = true
         this.setVisibleMarket(true)
-
         wms_array.map(({layers}) => {
             if(layers) {
                 layers.map(({tile, wms_tile, geodb_table, code}) => {
@@ -953,7 +952,7 @@ export default class InspireMap extends Component {
                                                 this.getPopUpInfo(coordinate, not_visible_layers)
                                             }
                                             else {
-                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
                                             }
                                         }
                                         else {
@@ -963,7 +962,7 @@ export default class InspireMap extends Component {
                                         }
                                     }
                                     else {
-                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
                                     }
 
                                 })

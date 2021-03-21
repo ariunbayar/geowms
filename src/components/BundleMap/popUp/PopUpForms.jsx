@@ -39,11 +39,8 @@ export class PopUpCmpForms extends Component {
         this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
     }
 
-    componentDidMount() {
-    }
-
     componentDidUpdate(pP, pS) {
-        const { datas } = this.props
+        const { datas, is_loading} = this.props
         if(pP.datas !== datas && !this.props.is_loading) {
             this.properties = []
             const startNumber = 1
@@ -252,7 +249,7 @@ export class PopUpCmpForms extends Component {
                                                         )
                                                 )
                                             :
-                                            <tr><th>Хоосон байнаdsfdsfsdfsdfsdfdsf</th></tr>
+                                            <tr><th>Хоосон байна.</th></tr>
                                         }
                                     </tbody>
                                 </table>

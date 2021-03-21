@@ -41,11 +41,28 @@ class PopUpCmp extends Component {
         })
     }
 
+    componentDidUpdate(pP, pS) {
+        const { datas, is_loading} = this.props
+        console.log("hohfdkshfklsdjflksdjf", datas, is_loading)
+        if(pP.datas !== datas || is_loading != pP.is_loading) {
+            console.log(datas)
+            this.setState({datas, is_loading})
+        }
+    }
+
+
     render() {
-        const {PPComponent} = this.props
+        const {PPComponent, is_empty, is_from_inspire, close} = this.props
+        const { datas, is_loading } = this.state
         return (
                 <div>
-                    <PPComponent/>
+                    <PPComponent
+                        datas={datas}
+                        is_empty={is_empty}
+                        is_from_inspire={is_from_inspire}
+                        is_loading={is_loading}
+                        close={close}
+                    />
                 </div>
             )
     }
