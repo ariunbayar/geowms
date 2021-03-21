@@ -74,22 +74,22 @@ class CovidDashboard extends PureComponent {
                 datasets: [
                     {
                         label: 'Chart',
-                        data: [33, 53, 85, 41, 44, 65],
-                        backgroundColor: gradient,
+                        data: [13, 53, 85, 41, 54, 25],
+                        backgroundColor: '#FFD24A',
                         borderColor: '#05deb3',
                     },
 
                     {
                         label: 'Chart1',
-                        data: [33, 53, 85, 41, 44, 65],
-                        backgroundColor: gradient,
+                        data: [33, 43, 65, 51, 44, 55],
+                        backgroundColor: '#0B3A7D',
                         borderColor: '#05deb3',
                     },
 
                     {
                         label: 'Chart2',
-                        data: [33, 53, 85, 41, 44, 65],
-                        backgroundColor: gradient,
+                        data: [23, 63, 45, 61, 14, 65],
+                        backgroundColor: '#33cc33',
                         borderColor: '#05deb3',
                     },
                 ]
@@ -161,7 +161,10 @@ class CovidDashboard extends PureComponent {
                             </div>
                             <div className="row">
                                 <div className="col-8">
-                                    <CovidMap />
+                                    <CovidMap
+                                        geo_id={geo_id}
+                                        datas={datas}
+                                    />
                                 </div>
                                 <div className="col-4">
                                     <div className="card bg-transparent shadow-none border border-light">
@@ -174,6 +177,11 @@ class CovidDashboard extends PureComponent {
                                             />
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-12">
+                                    <Graph/>
                                 </div>
                             </div>
                             <div className="row mt-4">
