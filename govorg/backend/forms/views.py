@@ -1,5 +1,6 @@
 import os
 import json
+from types import coroutine
 import pyproj
 import uuid
 
@@ -19,7 +20,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.paginator import Paginator
 
 from backend.inspire.models import (
-    LFeatures,
+    LCodeLists, LFeatures,
     LPackages,
     LThemes,
     LProperties,
@@ -56,9 +57,13 @@ from main import utils
 # Create your models here.
 
 
-def createPdf(tseg, x, y):
+def createPdf(values, requests):
 
-    data = Mpoint_view.objects.using('postgis_db').filter(point_id=tseg['PointNumber']).first()
+    geo_json = json.loads(requests.geo_json)
+    coroutines = geo_json['coordinates']
+    x = coroutines[0]
+    y = coroutines[1]
+
     if y and x:
         L = float(y)
         B = float(x)
@@ -100,28 +105,29 @@ def createPdf(tseg, x, y):
     pdf.cell(-50)
     pdf.cell(10, 8, '1.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
-    pdf.cell(43, 8, data.point_name, 1, 0, 'C')
+    pdf.cell(43, 8, requests.point_name, 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
-    pdf.cell(43, 8, data.point_id, 1, 0, 'C')
+    pdf.cell(43, 8, requests.point_id, 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     pdf.cell(-188)
     pdf.cell(10, 8, '3.', 1, 0, 'C')
     pdf.cell(51, 8, 'Трапцийн дугаар', 1, 0, 'C')
     trapets = 'Байхгүй'
-    if 'Nomenclature' in tseg:
-        trapets = tseg['Nomenclature']
+    if 'Nomenclature' in values:
+        trapets = values['Nomenclature']
     pdf.cell(33, 8, trapets, 1, 0, 'C')
     pdf.cell(10, 8, '4.', 1, 0, 'C')
     pdf.cell(41, 8, 'Сүлжээний төрөл', 1, 0, 'C')
-    pdf.cell(43, 8, str(tseg['GeodeticalNetworkPointClassValue']), 1, 0, 'C')
+    suljee = _get_model_qs(LCodeLists, {'code_list_id': values['GeodeticalNetworkPointClassValue']}).first().code_list_name
+    pdf.cell(43, 8, suljee, 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     # mor 3
     pdf.ln(0)
     pdf.cell(10, 8, '5.', 1, 0, 'C')
     pdf.cell(84, 8, 'Байршил (Аймаг, сум, дүүрэг)', 1, 0, 'C')
-    pdf.cell(94, 8, data. aimag + ' ' + data.sum, 1, 1, 'C')
+    pdf.cell(94, 8, requests.aimag + ' ' + requests.sum, 1, 1, 'C')
     pdf.ln(0)
     pdf.cell(10, 8, '6.', 1, 0, 'C')
     pdf.cell(33, 8, 'Цэгийн солбилцол', 1, 0, 'C')
@@ -140,38 +146,40 @@ def createPdf(tseg, x, y):
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.ln(70)
-    if 'PointNearPhoto' in tseg:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['PointNearPhoto']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
-    if 'PointFarPhoto' in tseg:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['PointFarPhoto']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+    if 'PointNearPhoto' in values:
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+    if 'PointFarPhoto' in values:
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
     pdf.ln(8)
-    pdf.multi_cell(188, 5, tseg['PointLocationDescription'], 1, 0, 'C')
+    pdf.multi_cell(188, 5, values['PointLocationDescription'], 1, 0, 'C')
     newH = pdf.get_y()
     # mor 6
-    if 'LocationOverviewMap' in tseg:
+    if 'LocationOverviewMap' in values or 'PointCenterType' in values:
         pdf.cell(94, 8, '9. Байршлын тойм зураг.', 1, 0, 'C')
         pdf.cell(94, 8, '10. Төв цэгийн хэлбэр', 1, 0, 'C')
         pdf.ln(8)
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
-        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['PointCenterType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
-        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'PointCenterType' in values:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointCenterType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'LocationOverviewMap' in values:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6
     pdf.cell(10, 8, '11.', 1, 0, 'C')
-    if 'sudalga_or_shine' in tseg:
-        sudalgaa = tseg['sudalga_or_shine']
+    if 'sudalga_or_shine' in values:
+        sudalgaa = values['sudalga_or_shine']
     else:
         sudalgaa = 'Байхгүй'
     pdf.cell(84, 8, 'Судалгаа: ' + sudalgaa, 1, 0, 'C')
     pdf.cell(10, 8, '12.', 1, 0, 'C')
-    if 'date' in tseg:
-        date = tseg['date']
+    if 'beginLifespanVersion' in values:
+        date = values['beginLifespanVersion']
     else:
         date = ''
 
@@ -181,17 +189,17 @@ def createPdf(tseg, x, y):
     pdf.ln(8)
     pdf.cell(10, 8, '13.', 1, 0, 'C')
     pdf.cell(84, 8, 'Хөрсний шинж байдал:', 1, 0, 'C')
-    pdf.cell(94, 8, tseg['SoilType'], 1, 0, 'C')
+    pdf.cell(94, 8, values['SoilType'], 1, 0, 'C')
     # mor 6
     pdf.ln(8)
     pdf.cell(10, 8, '14.', 1, 0, 'C')
     pdf.cell(84, 8, 'Хувийн хэрэг хөтөлсөн:', 1, 0, 'C')
-    pdf.cell(94, 8, tseg['EmployeeName'], 1, 0, 'C')
+    pdf.cell(94, 8, values['EmployeeName'], 1, 0, 'C')
     # mor 6
     pdf.ln(8)
     pdf.cell(10, 8, '15.', 1, 0, 'C')
     pdf.cell(84, 8, 'Байгууллага', 1, 0, 'C')
-    pdf.cell(94, 8, tseg['CompanyName'], 1, 0, 'C')
+    pdf.cell(94, 8, values['CompanyName'], 1, 0, 'C')
     return pdf
 
 
@@ -637,17 +645,43 @@ def dursgaltGazarRemove(request, payload):
         return JsonResponse({'success': False})
 
 
+def _get_display_text(field, value):
+    for f in TsegRequest._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == field:
+                for c_id, c_type in f.choices:
+                    if c_id == value:
+                        return c_type
+
+
+def _get_state_color(state, item):
+    display_name = _get_display_text('state', state)
+    return display_name
+
+
+def _get_kind_color(kind, item):
+    display_name = _get_display_text('kind', kind)
+    return display_name
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_list(request, payload):
     requests = TsegRequest.objects
-    requests = requests.exclude(state=TsegRequest.STATE_REJECT)
+    requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
     if requests:
+
+        хувьсах_талбарууд = [
+            {"field": "state", "action": _get_state_color, "new_field": "state"},
+            {"field": "kind", "action": _get_kind_color, "new_field": "kind"},
+        ]
+
         datatable = Datatable(
             initial_qs=requests,
             model=TsegRequest,
             payload=payload,
+            хувьсах_талбарууд=хувьсах_талбарууд
         )
 
         items, total_page = datatable.get()
@@ -665,55 +699,26 @@ def tseg_personal_list(request, payload):
     return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def tsegPersonalRemove(request, payload):
-    pk = payload.get('id')
-    t_type = payload.get('t_type')
-    class_type = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    data = None
-    if class_type.t_type == 'g102':
-        data = Mpoint2.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if class_type.t_type == 'g103':
-        data = Mpoint3.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if class_type.t_type == 'g104':
-        data = Mpoint4.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if class_type.t_type == 'g105':
-        data = Mpoint5.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if class_type.t_type == 'g106':
-        data = Mpoint6.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if class_type.t_type == 'g107':
-        data = Mpoint7.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if class_type.t_type == 'g108':
-        data = Mpoint8.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if class_type.t_type == 'g109':
-        data = Mpoint9.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    if data:
-        mpoint10 = Mpoint10.objects.using('postgis_db').create(
-            objectid=data.objectid,
-            point_id=data.point_id,
-            point_name=data.point_name,
-            point_class_name='Устсан төлөв',
-            pid=data.pid,
-            point_class=data.point_class,
-            mclass=data.mclass,
-            center_typ=data.center_typ,
-            aimag=data.aimag,
-            sum=data.sum,
-            sheet1=data.sheet1,
-            sheet2=data.sheet2,
-            sheet3=data.sheet3,
-            ondor=data.ondor,
-            ondor_type=data.ondor_type,
-            t_type='g110',
-            geom=data.geom
-        )
-        if mpoint10:
-            data.delete()
-        return JsonResponse({'success': True})
+def tseg_personal_remove(request, id):
+    qs = TsegRequest.objects
+    qs = qs.filter(pk=id)
+
+    if qs:
+        qs.update(state=TsegRequest.STATE_REJECT)
+
+        rsp = {
+            'success': True,
+            'msg': 'Амжилттай татгалзлаа'
+        }
     else:
-        return JsonResponse({'success': False})
+        rsp = {
+            'success': False,
+            'msg': 'Энэ мэдээлэл олдсонгүй'
+        }
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -758,7 +763,7 @@ def tsegPersonalUpdate(request, payload):
                 'bairshil_tseg_holoos_img_url': '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else '',
                 'sudalga_or_shine':  values['PointShape'] if 'PointShape' in values else '',
                 'hors_shinj_baidal': values['Nomenclature'] if 'Nomenclature' in values else '',
-                'date': values['beginLifespanVersion'].strftime("%Y-%m-%d") if values and 'beginLifespanVersion' in values else '',
+                'date': values['beginLifespanVersion'] if values and 'beginLifespanVersion' in values else '',
                 'hotolson': values['EmployeeName'] if 'EmployeeName' in values else '',
                 'alban_tushaal': values['EmployeePosition'] if 'EmployeePosition' in values else '',
                 'alban_baiguullga': values['CompanyName'] if 'CompanyName' in values else '',
@@ -774,7 +779,6 @@ def tsegPersonalUpdate(request, payload):
                 'cc': int(sheets[2]),
                 'center_typ': requests.point_type if requests.point_type else '',
                 'ondor': values['elevation'] if values['elevation'] else '',
-                'geo_id': values['geo_id']
             })
 
     rsp = {
@@ -934,6 +938,9 @@ def _create_request(request_datas):
     change_request.point_class = request_datas['point_class'] if 'point_class' in request_datas else None
     change_request.point_type = request_datas['point_type'] if 'point_type' in request_datas else None
 
+    change_request.aimag = request_datas['aimag'] if 'aimag' in request_datas else None
+    change_request.sum = request_datas['sum'] if 'sum' in request_datas else None
+
     change_request.save()
     return change_request.id
 
@@ -944,7 +951,7 @@ def _check_and_make_form_json(feature_id, values):
 
     for key, value in values.items():
         prop_qs = LProperties.objects
-        prop_qs = prop_qs.filter(property_code=key)
+        prop_qs = prop_qs.filter(property_code__iexact=key)
         prop_qs = prop_qs.first()
 
         form_json = dict()
@@ -992,6 +999,8 @@ def _make_request_datas(values, request_values):
         'point_name': request_values['point_name'],
         'point_class': request_values['point_class'],
         'point_type': request_values['point_type'],
+        'aimag': request_values['aimag'],
+        'sum': request_values['sum'],
     }
 
     success = _create_request(request_datas)
@@ -1018,9 +1027,9 @@ def _get_values(request):
     value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
     value['OperatorName'] = request.POST.get('alban_baiguullga') # bolson
     value['name'] = request.POST.get('tesgiin_ner') # bolson
-    value['beginLifespanVersion'] = utils.date_to_timezone(request.POST.get('date')) #bolson
-    value['AdministrativeUnitSubClass_1'] = request.POST.get('aimag_name') #bolson
-    value['AdministrativeUnitSubClass_2'] = request.POST.get('sum_name') #bolson
+    value['beginLifespanVersion'] = request.POST.get('date') #bolson
+    value['AdministrativeUnitSubclass'] = utils.get_code_list_id_from_name(request.POST.get('aimag_name'), 'AdministrativeUnitSubClass') #bolson
+    value['AdministrativeUnitSubClass'] = utils.get_code_list_id_from_name(request.POST.get('sum_name'), 'AdministrativeUnitSubClass')#bolson
     value['SoilType'] = request.POST.get('hors_shinj_baidal') #mdku
     # value['endLifespanVersion'] = date # ustsanii daraah hadagalah # TODO
     value['elevation'] = request.POST.get('ondor')#bolson
@@ -1115,7 +1124,8 @@ def tsegPersonal(request):
                 request_values['point_name'] = request.POST.get('tesgiin_ner')
                 request_values['point_class'] = request.POST.get('suljeenii_torol')
                 request_values['point_type'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None
-
+                request_values['aimag'] = request.POST.get('aimag_name') if request.POST.get('aimag_name') else None
+                request_values['sum'] = request.POST.get('sum_name') if request.POST.get('sum_name') else None
                 _make_request_datas(value, request_values)
                 return JsonResponse({ 'success': True, 'name': False, 'ids': False })
 
@@ -1162,15 +1172,19 @@ def tsegPersonal(request):
             request_values['point_class'] = request.POST.get('suljeenii_torol')
             request_values['point_type'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None
 
+            request_values['aimag'] = request.POST.get('aimag_name') if request.POST.get('aimag_name') else None
+            request_values['sum'] = request.POST.get('sum_name') if request.POST.get('sum_name') else None
             _make_request_datas(value, request_values)
             # mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0])
 
     return JsonResponse({'success': True, 'name': False, 'ids': False})
 
 
-def _send_data_to_pdf(values, file_name, tseg_file_url='tseg-personal-file'):
-    src_file = os.path.join(settings.FILES_ROOT, file_name + ".pdf")
-    pdf = createPdf(values['value'], values['x'], values['y'])
+def _send_data_to_pdf(values, file_name, requests, tseg_file_url='tseg-personal-file'):
+    if isinstance(values, str):
+        values = json.loads(values)
+    src_file = os.path.join(settings.FILES_ROOT, tseg_file_url, file_name + ".pdf")
+    pdf = createPdf(values, requests)
     pdf.output(src_file, 'F')
 
 
@@ -1731,30 +1745,39 @@ def tsegPersonalSearch(request, payload):
         return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def tsegPersonalSuccess(request, payload):
-    feauture_id = 83
-    point_type = int(payload.get('point_type')) # zereg
+def tseg_personal_success(request, id):
+    qs = TsegRequest.objects
+    qs = qs.filter(pk=id)
+    if qs:
+        with transaction.atomic():
+            value = qs.first()
+            feature_qs = _get_model_qs(LFeatures, {'feature_id': value.feature_id})
+            feature_code = feature_qs.first().feature_code
 
-    objectid = payload.get('objectid')
-    point_class = int(payload.get('point_class'))
+            geo_json = json.loads(value.geo_json)
+            coroutines = geo_json['coordinates']
 
-    if data:
-        #TODO tuhain huseltend bgaa form iig m_datas ruu hadgalaad geom iig ni mdatas ruu hadgalana
-        utils.refreshMaterializedView(feauture_id)
-        rsp = {
-            'success': True,
-            'msg': "Амжилттай боллоо",
-        }
-        return JsonResponse(rsp)
+            new_geo_id = utils.save_value_to_mdatas(value.values, feature_code, [coroutines[0], coroutines[1], 0])
+            #TODO tuhain huseltend bgaa form iig m_datas ruu hadgalaad geom iig ni mdatas ruu hadgalana
+            utils.refreshMaterializedView(value.feature_id)
+            qs.update(
+                state=TsegRequest.STATE_APPROVE,
+                new_geo_id=new_geo_id,
+            )
+            _send_data_to_pdf(value.values, value.pdf_id, value)
+            rsp = {
+                'success': True,
+                'msg': "Амжилттай боллоо",
+            }
     else:
         rsp = {
             'success': False,
-            'msg': "Төлөв адилхан тул боломжгүй",
+            'msg': "Мэдээлэл олдсонгүй",
         }
-        return JsonResponse(rsp)
+    return JsonResponse(rsp)
 
 
 @require_POST
@@ -1874,33 +1897,13 @@ def get_field_values(request):
     point_type = utils.InspireProperty('GeodeticalNetworkPointTypeValue')
     point_class = utils.InspireProperty('GeodeticalNetworkPointClassValue')
     ondor_type = utils.InspireProperty('elevationReference')
-    # nativeness = utils.InspireProperty('nativeness')
     point_types = utils.get_code_list_from_property_id(point_type.property_id)
     point_classes = utils.get_code_list_from_property_id(point_class.property_id)
     ondor_types = utils.get_code_list_from_property_id(ondor_type.property_id)
-    # nativeness = utils.get_code_list_from_property_id(nativeness.property_id)
     rsp = {
         'point_types': point_types,
         'point_classes': point_classes,
         'ondor_types': ondor_types,
         # 'nativeness': nativeness,
-    }
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def get_request_list(request, payload):
-    datatable = Datatable(
-        model=TsegRequest,
-        payload=payload,
-    )
-
-    items, total_page = datatable.get()
-    rsp = {
-        'items': items,
-        'page': payload.get("page"),
-        'total_page': total_page
     }
     return JsonResponse(rsp)

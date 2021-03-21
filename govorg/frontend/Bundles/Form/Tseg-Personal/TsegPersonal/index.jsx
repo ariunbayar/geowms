@@ -17,6 +17,7 @@ export class TsegPersonal extends Component {
                 <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/"} component={TsegRequest}/>
                 <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/"} component={(data)=><Forms data={data}/>}/>
                 <Route  exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/засах/"} component={(data)=><Forms data={data}/>}/>
+                <Route  exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/шийдвэрлэх/"} component={(data)=><Forms data={data} only_see={true}/>}/>
             </Switch>
         )
 

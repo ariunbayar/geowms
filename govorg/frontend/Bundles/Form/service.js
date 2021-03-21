@@ -10,6 +10,8 @@ export const service = {
     findSum,
     searchTsegName,
     getFieldValue,
+    successPoint,
+    rejectPoint,
 }
 
 const prefix = '/gov/api/tseg-personal'
@@ -88,4 +90,18 @@ function getFieldValue(){
         ...getGetOptions(),
     }
     return fetch(`${prefix}/get-field-values/`, opts).then(handleResponse)
+}
+
+function successPoint(id){
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/success-point/${id}/`, opts).then(handleResponse)
+}
+
+function rejectPoint(id){
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/remove-point/${id}/`, opts).then(handleResponse)
 }

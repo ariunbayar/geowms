@@ -1039,14 +1039,14 @@ def get_feature_from_code(feature_code):
 
 def save_geom_to_mgeo_data(geo_data, feature_id, feature_code):
     MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
-    geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    new_geo_id = GEoIdGenerator(feature_id, feature_code).get()
     mgeo_qs = MGeoDatas.objects
     mgeo_qs = mgeo_qs.create(
-        geo_id=geo_id,
+        geo_id=new_geo_id,
         feature_id=feature_id,
         geo_data=geo_data,
     )
-    return mgeo_qs
+    return mgeo_qs, new_geo_id
 
 
 def get_properties(feature_id):
@@ -1071,13 +1071,20 @@ def get_properties(feature_id):
 def _value_types():
     return [
         {'value_type': 'value_number', 'value_names': ['double', 'number']},
-        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text', 'data-type']},
         {'value_type': 'value_date', 'value_names': ['date']},
         {'value_type': 'code_list_id', 'value_names': ['single-select', 'multi-select']},
     ]
 
 
+def json_load(data):
+    if isinstance(data, str):
+        data = json.loads(data)
+    return data
+
+
 def make_value_dict(value, properties_qs, is_display=False):
+    value = json_load(value)
     for types in _value_types():
         for prop in properties_qs.values():
             for key, val in value.items():
@@ -1094,14 +1101,14 @@ def make_value_dict(value, properties_qs, is_display=False):
                     yield data
 
 
-def save_value_to_mdatas(value, feature_code, geom, geom_type='Point', geo_id=''):
+def save_value_to_mdatas(value, feature_code, coordinate=None, geom_type='Point', geo_id=''):
     l_feature_qs = get_feature_from_code(feature_code)
 
     feature_id = l_feature_qs.feature_id
 
-    point = get_geom_for_filter_from_coordinate(geom, geom_type)
+    point = get_geom_for_filter_from_coordinate(coordinate, geom_type)
     point = get_geom_for_filter_from_geometry(point.json, True)
-    mgeo_qs = save_geom_to_mgeo_data(point, feature_id, feature_code)
+    mgeo_qs, new_geo_id = save_geom_to_mgeo_data(point, feature_id, feature_code)
 
     properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
     datas = make_value_dict(value, properties_qs)
@@ -1128,7 +1135,7 @@ def save_value_to_mdatas(value, feature_code, geom, geom_type='Point', geo_id=''
             else:
                 mdata_qs = mdata_qs.create(geo_id=geo_id, **data)
 
-    return True
+    return new_geo_id
 
 
 def get_code_list_from_property_id(property_id):
@@ -1253,3 +1260,21 @@ def search_dict_from_object(objs, key='name', value='value'):
 def check_saved_data(point_name, point_id):
     has_name, has_ids = False, False
     return has_name, has_ids
+
+
+def get_code_list_id_from_name(code_list_name, property_code):
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+
+    code_list_id = None
+    properties_qs = LProperties.objects
+    properties_qs = properties_qs.filter(property_code=property_code)
+    if properties_qs:
+        prop = properties_qs.first()
+        property_id = prop.property_id
+        code_lists = get_code_list_from_property_id(property_id)
+        for code_list in code_lists:
+            if code_list_name == code_list['code_list_name']:
+                code_list_id = code_list['code_list_id']
+                break
+
+    return code_list_id

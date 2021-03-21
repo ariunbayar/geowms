@@ -30,6 +30,7 @@ export class Forms extends Component {
                 ondor_torol: '',
                 pid: '',
             },
+            only_see: props.only_see,
             tesgiin_ner: '',
             toviin_dugaar: '',
             hors_shinj_baidal: '',
@@ -76,6 +77,8 @@ export class Forms extends Component {
             checkNull:[],
             bairshil_error:false,
             modal_alert_status: 'closed',
+            modal_title: '',
+            modal_type: '',
             timer: null,
             geo_id: '',
         }
@@ -94,6 +97,8 @@ export class Forms extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getFieldValues = this.getFieldValues.bind(this)
+        this.successPoint = this.successPoint.bind(this)
+        this.rejectPoint = this.rejectPoint.bind(this)
     }
 
     handleBoxOver (e){
@@ -395,7 +400,7 @@ export class Forms extends Component {
         form_datas.append('t_type', t_type)
         service.tsegPersonal(form_datas).then(({success, name, ids}) => {
             if (success) {
-                this.setState({ modal_alert_status: 'open' })
+                this.setState({ modal_alert_status: 'open', modal_title: 'Амжилттай хадгаллаа', modal_type: 'success' })
                 setStatus('saved')
                 setSubmitting(false)
                 this.modalCloseTime()
@@ -427,22 +432,21 @@ export class Forms extends Component {
         service
             .updateTseg(id, t_type)
             .then(({ tseg_display }) => {
-                console.log(tseg_display);
                 if(tseg_display) {
                     tseg_display.map((item, idx) =>
                     {
                         const value = item.date
-                        const d = value.split("-")
-                        const daydhkf = parseInt(d[2]) + 1
-                        if(daydhkf<=10){
-                            var dated = '0' + `${daydhkf}`
-                        }
-                        else{
-                            var dated = `${daydhkf}`
-                        }
-                        const m =d[1]
-                        const y = d[0]
-                        var dateStr = y+ "-" + m + "-" + dated;
+                        // const d = value.split("-")
+                        // const daydhkf = parseInt(d[2]) + 1
+                        // if(daydhkf<=10){
+                            // var dated = '0' + `${daydhkf}`
+                        // }
+                        // else{
+                            // var dated = `${daydhkf}`
+                        // }
+                        // const m =d[1]
+                        // const y = d[0]
+                        // var dateStr = y+ "-" + m + "-" + dated;
                         this.setState({
                             values : {
                                 ...this.state.values,
@@ -452,7 +456,7 @@ export class Forms extends Component {
                                 ondor_torol: item.ondor_torol,
                                 suljeenii_torol: item.suljeenii_torol,
                                 sudalga_or_shine: item.sudalga_or_shine,
-                                date: dateStr,
+                                date: value,
                                 hotolson: item.hotolson,
                                 alban_tushaal: item.alban_tushaal,
                                 alban_baiguullga: item.alban_baiguullga,
@@ -521,14 +525,53 @@ export class Forms extends Component {
         this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/')
     }
 
+    successPoint() {
+        const id = this.props.data.match.params.id
+        service
+            .successPoint(id)
+            .then(({success, msg}) => {
+                if (success) {
+                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'success'})
+                    this.modalCloseTime()
+                }
+                else {
+                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'danger'})
+                    this.modalCloseTime()
+                }
+            })
+            .catch(() => {
+                this.setState({modal_alert_status: "open", modal_title: 'Алдаа гарсан байна', modal_type: 'danger'})
+                this.modalCloseTime()
+            })
+    }
+
+    rejectPoint() {
+        const id = this.props.data.match.params.id
+        service
+            .rejectPoint(id)
+            .then(({success, msg}) => {
+                if (success) {
+                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'success'})
+                    this.modalCloseTime()
+                }
+                else {
+                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'danger'})
+                    this.modalCloseTime()
+                }
+            })
+            .catch(() => {
+                this.setState({modal_alert_status: "open", modal_title: 'Алдаа гарсан байна', modal_type: 'danger'})
+                this.modalCloseTime()
+            })
+    }
+
     render() {
         if(this.state.latlongy == ''){
             this.getItem()
         }
 
-       const { point_classes, point_types, ondor_types } = this.state
-
-       const error_msg = this.state.error_msg
+        const { point_classes, point_types, ondor_types, only_see } = this.state
+        const error_msg = this.state.error_msg
         return (
         <Formik
             enableReinitialize
@@ -559,6 +602,7 @@ export class Forms extends Component {
                                             handleXY={this.handleXY}
                                             coordinatCheck={false}
                                             xy={this.x}
+                                            only_see={only_see}
                                         />
                                     </div>
                                     <div className="col-md-12 mb-4 mt-4 pl-0">
@@ -588,6 +632,7 @@ export class Forms extends Component {
                                                             className={'form-control ' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
                                                             onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
                                                             value = {this.state.tesgiin_ner}
+                                                            disabled={only_see ? 'disabled' : ''}
                                                         />
                                                             {this.state.name_error ? <div className="invalid-feedback">Цэгийн нэр давхцаж байна !!!</div> : this.state.tesgiin_ner == '' ? '' : ''}
                                                     </div>
@@ -606,6 +651,7 @@ export class Forms extends Component {
                                                             className={'form-control ' + (this.state.id_error || this.error_msg.length > 0 ? 'is-invalid' : '')}
                                                             onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
                                                             value = {this.state.toviin_dugaar}
+                                                            disabled={only_see ? 'disabled' : ''}
                                                         />
                                                         {this.state.id_error ? <div className="invalid-feedback">Төвийн дугаар давхцаж байна !!!</div> : this.state.toviin_dugaar == '' ? '' : ''}
                                                     </div>
@@ -629,8 +675,11 @@ export class Forms extends Component {
                                                 <th>Сүлжээний төрөл</th>
                                                 <td>
                                                     <Fragment>
-                                                        <Field name="suljeenii_torol" as="select"
-                                                        className={'custom-select ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
+                                                        <Field
+                                                            name="suljeenii_torol" as="select"
+                                                            disabled={only_see ? 'disabled' : ''}
+                                                            className={'custom-select ' + (errors.suljeenii_torol ? 'is-invalid' : '')}
+                                                        >
                                                             <option value="">...</option>
                                                             {
                                                                 point_types && point_types.map((point_type, idx) =>
@@ -651,8 +700,11 @@ export class Forms extends Component {
                                                 <th>Зэрэг</th>
                                                 <td>
                                                     <Fragment>
-                                                        <Field name="center_typ" as="select"
-                                                        className={'custom-select ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                        <Field
+                                                            name="center_typ" as="select"
+                                                            disabled={only_see ? 'disabled' : ''}
+                                                            className={'custom-select ' + (errors.center_typ ? 'is-invalid' : '')}
+                                                        >
                                                             <option value="">...</option>
                                                             {
                                                                 point_classes && point_classes.map((point_class, idx) =>
@@ -675,7 +727,7 @@ export class Forms extends Component {
                                                 <th scope="row">5</th>
                                                 <th>Аймаг</th>
                                                 <td colSpan="1" scope="rowgroup">
-                                                <input
+                                                    <input
                                                         className={'form-control '}
                                                         name='aimag_name'
                                                         id="aimag_name"
@@ -683,7 +735,6 @@ export class Forms extends Component {
                                                         type="text"
                                                         value={this.state.aimag_name}
                                                     />
-
                                                 </td>
                                                 <th>Сум</th>
                                                 <td colSpan="2" scope="rowgroup">
@@ -702,7 +753,12 @@ export class Forms extends Component {
                                                 <th rowSpan="4" scope="rowgroup" scope="row">6</th>
                                                 <th rowSpan="4" scope="rowgroup" className="text-justify">
                                                     WGS84 солбицлын<br></br> тогтолтоонд, <br></br> ITRF 2008 эринд <br></br>тодорхойлсон<br></br>
-                                                    <button type='button' className="btn gp-outline-primary " onClick={this.handleCoordinatCheck}>
+                                                    <button
+                                                        type='button'
+                                                        className="btn gp-outline-primary"
+                                                        onClick={this.handleCoordinatCheck}
+                                                        disabled={only_see ? 'disabled' : ''}
+                                                    >
                                                         Шалгах
                                                     </button>
                                                 </th>
@@ -721,6 +777,7 @@ export class Forms extends Component {
                                                         type="number"
                                                         onChange = {(e)=>this.handleOnchange(e)}
                                                         value ={this.state.BA || ''}
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <input
                                                         className={'form-control row float-left mx-0 my-2'}
@@ -730,6 +787,7 @@ export class Forms extends Component {
                                                         type="number"
                                                         onChange = {(e)=>this.handleOnchange(e)}
                                                         value ={this.state.BB || ''}
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <input
                                                         className={'form-control row float-left mx-0 my-2'}
@@ -739,6 +797,7 @@ export class Forms extends Component {
                                                         type="number"
                                                         onChange = {(e)=>this.handleOnchange(e)}
                                                         value ={this.state.BC || ''}
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                 </td>
                                                 <td colSpan="2" scope="rowgroup" className="">
@@ -750,6 +809,7 @@ export class Forms extends Component {
                                                         type="number"
                                                         onChange = {(e)=>this.handleOnchange(e)}
                                                         value ={this.state.LA}
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <input
                                                         className={'form-control row float-left mx-0 my-2'}
@@ -759,6 +819,7 @@ export class Forms extends Component {
                                                         type="number"
                                                         onChange = {(e)=>this.handleOnchange(e)}
                                                         value ={this.state.LB || ''}
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <input
                                                         className={'form-control row float-left mx-0 my-2'}
@@ -768,6 +829,7 @@ export class Forms extends Component {
                                                         type="number"
                                                         onChange = {(e)=>this.handleOnchange(e)}
                                                         value ={this.state.LC || ''}
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                 </td>
                                             </tr>
@@ -778,6 +840,7 @@ export class Forms extends Component {
                                                     <br />
                                                     <Fragment>
                                                         <Field name="ondor_torol" as="select" style={{fontSize: '0.8rem'}}
+                                                            disabled={only_see ? 'disabled' : ''}
                                                             className={'custom-select ' + (errors.ondor_torol ? 'is-invalid' : '')}>
                                                             <option>...</option>
                                                             {
@@ -805,6 +868,7 @@ export class Forms extends Component {
                                                         id="id_ondor"
                                                         type="number"
                                                         onKeyDown={ e => ( e.keyCode === 69 || e.keyCode === 190 ) && e.preventDefault() }
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <ErrorMessage name="ondor" component="div" className="invalid-feedback"/>
                                                 </th>
@@ -812,23 +876,27 @@ export class Forms extends Component {
                                             <tr>
                                                 <th colSpan="7" scope="rowgroup" style={{textAlign: "center"}}>
                                                     7. Цэгийн фото зураг
-                                                    <div
-                                                        type="button"
-                                                        onMouseOver={(e) => this.handleBoxOver(e)}
-                                                        onMouseLeave={(e) => this.handleBoxLeave(e)}
-                                                        style={{backgroundColor:"white"}}
-                                                        className="float-right"
-                                                    >
-                                                    <i className="fa fa-exclamation-circle float-right">
-                                                        <div className={`alert alert-dark rounded position-absolute d-none`+
-                                                                    `${this.state.showBox ? " d-block" : ""}`}
-                                                                    role="alert"
-                                                        >
-                                                            <h6 className="alert-heading">Санамж!</h6>
-                                                            <p>".jpeg" болон ".png" байх ёстой</p>
-                                                        </div>
-                                                    </i>
-                                                    </div>
+                                                    {
+                                                        !only_see
+                                                        &&
+                                                            <div
+                                                                type="button"
+                                                                onMouseOver={(e) => this.handleBoxOver(e)}
+                                                                onMouseLeave={(e) => this.handleBoxLeave(e)}
+                                                                style={{backgroundColor:"white"}}
+                                                                className="float-right"
+                                                            >
+                                                            <i className="fa fa-exclamation-circle float-right">
+                                                                <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                                            `${this.state.showBox ? " d-block" : ""}`}
+                                                                            role="alert"
+                                                                >
+                                                                    <h6 className="alert-heading">Санамж!</h6>
+                                                                    <p>".jpeg" болон ".png" байх ёстой</p>
+                                                                </div>
+                                                            </i>
+                                                            </div>
+                                                    }
                                                 </th>
                                             </tr>
                                             <tr>
@@ -842,16 +910,20 @@ export class Forms extends Component {
                                             <tr>
                                                 <td colSpan="3" scope="rowgroup">
                                                 <div className="form-group">
-                                                    <ImageUploader
-                                                        withPreview={true}
-                                                        withIcon={false}
-                                                        buttonText='Зураг оруулах'
-                                                        onChange={(e) =>this.onDrop(e, 'tseg_oiroos_img_url')}
-                                                        imgExtension={['.jpeg', '.png']}
-                                                        maxFileSize={2250000}
-                                                        singleImage={true}
-                                                        label=''
-                                                    />
+                                                    {
+                                                        !only_see
+                                                        &&
+                                                            <ImageUploader
+                                                                withPreview={true}
+                                                                withIcon={false}
+                                                                buttonText='Зураг оруулах'
+                                                                onChange={(e) =>this.onDrop(e, 'tseg_oiroos_img_url')}
+                                                                imgExtension={['.jpeg', '.png']}
+                                                                maxFileSize={2250000}
+                                                                singleImage={true}
+                                                                label=''
+                                                            />
+                                                    }
                                                     {
                                                     this.state.tseg_oiroos_img_url_zurag ?
                                                     <center><img src={this.state.tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
@@ -861,16 +933,20 @@ export class Forms extends Component {
 
                                                 </td>
                                                 <td colSpan="3" scope="rowgroup">
-                                                    <ImageUploader
-                                                        withPreview={true}
-                                                        withIcon={false}
-                                                        buttonText='Зураг оруулах'
-                                                        onChange={(e) =>this.onDrop(e, 'tseg_holoos_img_url')}
-                                                        imgExtension={['.jpg', '.png']}
-                                                        maxFileSize={2250000}
-                                                        singleImage={true}
-                                                        label=''
-                                                    />
+                                                    {
+                                                        !only_see
+                                                        &&
+                                                            <ImageUploader
+                                                                withPreview={true}
+                                                                withIcon={false}
+                                                                buttonText='Зураг оруулах'
+                                                                onChange={(e) =>this.onDrop(e, 'tseg_holoos_img_url')}
+                                                                imgExtension={['.jpg', '.png']}
+                                                                maxFileSize={2250000}
+                                                                singleImage={true}
+                                                                label=''
+                                                            />
+                                                    }
                                                     {
                                                     this.state.tseg_holoos_img_url_zurag ?
                                                     <center><img src={this.state.tseg_holoos_img_url_zurag } width="150px" height="100px"/></center>:
@@ -889,6 +965,7 @@ export class Forms extends Component {
                                                         type="textarea"
                                                         onChange = {(e) => this.handleInput(e)}
                                                         value={this.state.barishil_tuhai}
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                 </th>
                                             </tr>
@@ -902,16 +979,20 @@ export class Forms extends Component {
                                             </tr>
                                             <tr>
                                                 <td colSpan="3" scope="rowgroup">
-                                                    <ImageUploader
-                                                        withPreview={true}
-                                                        withIcon={false}
-                                                        buttonText='Зураг оруулах'
-                                                        onChange={(e) =>this.onDrop(e, 'bairshil_tseg_oiroos_img_url')}
-                                                        imgExtension={['.jpg', '.png']}
-                                                        maxFileSize={2250000}
-                                                        singleImage={true}
-                                                        label=''
-                                                    />
+                                                    {
+                                                        !only_see
+                                                        &&
+                                                            <ImageUploader
+                                                                withPreview={true}
+                                                                withIcon={false}
+                                                                buttonText='Зураг оруулах'
+                                                                onChange={(e) =>this.onDrop(e, 'bairshil_tseg_oiroos_img_url')}
+                                                                imgExtension={['.jpg', '.png']}
+                                                                maxFileSize={2250000}
+                                                                singleImage={true}
+                                                                label=''
+                                                            />
+                                                    }
                                                     {
                                                     this.state.bairshil_tseg_oiroos_img_url_zurag ?
                                                     <center><img src={this.state.bairshil_tseg_oiroos_img_url_zurag} width="150px" height="100px"/></center>:
@@ -919,16 +1000,20 @@ export class Forms extends Component {
                                                     }
                                                 </td>
                                                 <td colSpan="3" scope="rowgroup">
-                                                    <ImageUploader
-                                                        withPreview={true}
-                                                        withIcon={false}
-                                                        buttonText='Зураг оруулах'
-                                                        onChange={(e) =>this.onDrop(e, 'bairshil_tseg_holoos_img_url')}
-                                                        imgExtension={['.jpg', '.png']}
-                                                        maxFileSize={2250000}
-                                                        singleImage={true}
-                                                        label=''
-                                                    />
+                                                    {
+                                                        !only_see
+                                                        &&
+                                                            <ImageUploader
+                                                                withPreview={true}
+                                                                withIcon={false}
+                                                                buttonText='Зураг оруулах'
+                                                                onChange={(e) =>this.onDrop(e, 'bairshil_tseg_holoos_img_url')}
+                                                                imgExtension={['.jpg', '.png']}
+                                                                maxFileSize={2250000}
+                                                                singleImage={true}
+                                                                label=''
+                                                            />
+                                                    }
                                                     {
                                                     this.state.bairshil_tseg_holoos_img_url_zurag ?
                                                     <center><img src={this.state.bairshil_tseg_holoos_img_url_zurag} width="150px" height="100px"/></center>:
@@ -942,6 +1027,7 @@ export class Forms extends Component {
                                                 <td colSpan="5" scope="rowgroup">
                                                     <Fragment>
                                                         <Field name="sudalga_or_shine" as="select"
+                                                        disabled={only_see ? 'disabled' : ''}
                                                         className={'custom-select ' + (errors.sudalga_or_shine ? 'is-invalid' : '')}>
                                                             <option>...</option>
                                                             {
@@ -975,6 +1061,7 @@ export class Forms extends Component {
                                                             className={'form-control ' + (this.state.hors_error || this.error_msg.length > 0 ? 'is-invalid' : '')}
                                                             onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
                                                             value = {this.state.hors_shinj_baidal}
+                                                            disabled={only_see ? 'disabled' : ''}
                                                         />
                                                         {this.state.hors_error ? <div className="invalid-feedback">Бүртгэлгүй хөрсний мэдээлэл байна</div> : ''}
                                                     </div>
@@ -989,6 +1076,7 @@ export class Forms extends Component {
                                                         name='date'
                                                         id="id_date"
                                                         type="date"
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <ErrorMessage name="date" component="div" className="invalid-feedback"/>
                                                 </td>
@@ -1017,7 +1105,7 @@ export class Forms extends Component {
                                                     : null}
                                                 </td>
                                             </tr>: null}
-                                            {values.suljeenii_torol == '3' ?
+                                            {values.suljeenii_torol == '-1' ?
                                             <tr>
                                                 <th colSpan="1" scope="rowgroup">15.</th>
                                                 <th colSpan="2" scope="rowgroup">Файл 2:</th>
@@ -1052,6 +1140,7 @@ export class Forms extends Component {
                                                         name='alban_baiguullga'
                                                         id="id_alban_baiguullga"
                                                         type="text"
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <ErrorMessage name="alban_baiguullga" component="div" className="invalid-feedback"/>
                                                 </td>
@@ -1065,6 +1154,7 @@ export class Forms extends Component {
                                                         name='alban_tushaal'
                                                         id="id_alban_tushaal"
                                                         type="text"
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback"/>
                                                 </td>
@@ -1078,6 +1168,7 @@ export class Forms extends Component {
                                                         name='hotolson'
                                                         id="id_hotolson"
                                                         type="text"
+                                                        disabled={only_see ? 'disabled' : ''}
                                                     />
                                                     <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
                                                 </td>
@@ -1086,11 +1177,32 @@ export class Forms extends Component {
                                     </table>
                                     <div className="span3 my-3">
                                         <div>
-                                        <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
-                                                {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                                {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                                {!isSubmitting && 'Нэмэх' }
-                                            </button>
+                                        {
+                                            !only_see
+                                            ?
+                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
+                                                    {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                                    {!isSubmitting && 'Нэмэх' }
+                                                </button>
+                                            :
+                                                <div className="float-right">
+                                                    <button
+                                                        type='button'
+                                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                                                        onClick={this.successPoint}
+                                                    >
+                                                        Баталгаажуулах
+                                                    </button>
+                                                    <button
+                                                        type='button'
+                                                        className="btn gp-btn-primary waves-effect waves-light"
+                                                        onClick={this.rejectPoint}
+                                                    >
+                                                        Татгалзах
+                                                    </button>
+                                                </div>
+                                        }
                                         </div>
                                         <datalist id="tsegList">
                                             {this.datalist}
@@ -1102,8 +1214,8 @@ export class Forms extends Component {
                         <ModalAlert
                             modalAction={() => this.modalClose()}
                             status={this.state.modal_alert_status}
-                            title="Амжилттай нэмлээ"
-                            model_type_icon = "success"
+                            title={this.state.modal_title}
+                            model_type_icon={this.state.modal_type}
                         />
                     </div>
                  </Form>

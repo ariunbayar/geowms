@@ -2,6 +2,22 @@ import React, { Component } from 'react';
 
 import { PortalDataTable } from "@utils/DataTable"
 
+export const makeStateColor = (state) => {
+    let color
+    if (state == "ШИНЭ") color = 'text-primary'
+    else if (state == "ТАТГАЛЗСАН") color = 'text-danger'
+    else if (state == "ЗӨВШӨӨРСӨН") color = 'text-success'
+    return color
+}
+
+export const makeKindColor = (kind) => {
+    let color
+    if (kind == "ҮҮССЭН") color = 'text-success'
+    else if (kind == "ЗАССАН") color = 'text-primary'
+    else if (kind == "УСТГАСАН") color = 'text-danger'
+    return color
+}
+
 class TsegRequest extends Component {
 
     constructor(props) {
@@ -15,30 +31,26 @@ class TsegRequest extends Component {
                 {'field': 'point_id', "title": 'Цэгийн дугаар'},
                 {'field': 'point_class', "title": 'Цэгийн анги'},
                 {'field': 'point_type', "title": 'Цэгийн төрөл'},
+                {'field': 'state', "title": 'Төлөв', 'has_action': true},
+                {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
             ],
             нэмэлт_талбарууд: [
-                {
-                    "title": 'Засах',
-                    "icon": 'fa fa-pencil-square-o text-success',
-                    "action": (values) => this.goLink(values),
-                },
                 {
                     "title": 'Шийдвэрлэх',
                     "icon": 'fa fa-check-square-o text-warning',
                     "action": (values) => this.goSuccess(values),
                 },
             ],
+            хувьсах_талбарууд: [
+                {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
+                {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
+            ],
         }
-        this.goLink = this.goLink.bind(this)
         this.goSuccess = this.goSuccess.bind(this)
     }
 
-    goLink(values) {
-        this.props.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${values.id}/засах/`)
-    }
-
     goSuccess(values) {
-        console.log(values);
+        this.props.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${values.id}/шийдвэрлэх/`)
     }
 
     render() {
