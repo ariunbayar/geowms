@@ -80,7 +80,7 @@ export default class NemaMap extends Component {
         const { bundle, wms_list} = this.state
         return (
             <div className="col-lg-12">
-                <div className="col-12 col-md-12 col-xl-12 d-flex justify-content-center">
+                {/* <div className="col-12 col-md-12 col-xl-12 d-flex justify-content-center">
                     <div className="form-check d-inline-block mx-3 my-3">
                         <input className="form-check-input" type="checkbox" name="1"  onChange={(e) => this.handleOnChange(e)}/>
                         <label className="form-check-label h5">
@@ -93,11 +93,11 @@ export default class NemaMap extends Component {
                             Хаалттай
                         </label>
                     </div>
-                </div>
+                </div> */}
                 <div className="col-12 col-md-12 col-xl-12">
                     <InspireMap
                         wms_list={wms_list}
-                        height="80vh"
+                        height="100vh"
                         base_layer={true}
                     />
                 </div>

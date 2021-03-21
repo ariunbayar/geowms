@@ -62,6 +62,7 @@ export default class InspireMap extends Component {
             layer_one_tile: null,
             form_datas: props.form_datas,
             center: props.center,
+            layer_2405: ''
         }
 
         this.controls = {
@@ -1197,12 +1198,13 @@ export default class InspireMap extends Component {
 
     render() {
         const {is_loading} = this.state
+        const height = this.props.height ? this.props.height : '80vh'
         return (
             <div>
                 <Loader is_loading={is_loading}></Loader>
                 <div
                     id="map"
-                    style={{height:"calc( 80vh - 85px - 15px)"}}
+                    style={{height: `${height}`}}
                     className="mw-100"
                 >
                 </div>

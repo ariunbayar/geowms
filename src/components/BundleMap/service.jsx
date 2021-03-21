@@ -17,6 +17,7 @@ export const service = {
     getFeatureInfo,
     getGeom,
     getContainGeoms,
+    updatec2405
 }
 
 function getCookie(name) {
@@ -75,6 +76,15 @@ function loadWMSLayers(id) {
         ..._getGetOptions(),
     }
     return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
+}
+
+function updatec2405(attr10, attr_layer) {
+    console.log(attr_layer)
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({attr10, attr_layer})
+    }
+    return fetch('/gov/api/nema/update-c2405/', requestOptions).then(handleResponse)
 }
 
 function loadBaseLayers() {

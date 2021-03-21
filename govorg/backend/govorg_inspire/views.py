@@ -1206,3 +1206,42 @@ def nema_remove(request, pk):
         'success': True,
         'info': 'Ажилттай устгалаа'
     })
+
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def update_c2405(request, payload):
+    attr10 = payload.get('attr10')
+    attr_layer = payload.get('attr_layer')
+    cursor = connections['nema'].cursor()
+    attributes = {}
+    if not attributes:
+        return JsonResponse({
+            'success': True,
+            'info': "Attribute хоосон байна"
+        })
+
+    sql = """
+    UPDATE c2405
+    set attr10='{attr10}'
+    where
+        attr1='{attr1}' and attr3='{attr3}' and
+        attr4 = '{attr4}' and attr5='{attr5}' and attr7='{attr7}' and
+        attr8 = '{attr8}' and attr9='{attr9}'
+    """.format(
+        attr1=str(attr_layer[4][1]),
+        attr3=str(attr_layer[6][1]),
+        attr4=str(attr_layer[7][1]),
+        attr5=str(attr_layer[8][1]),
+        attr7=str(attr_layer[10][1]),
+        attr8=str(attr_layer[11][1]),
+        attr9=str(attr_layer[12][1]),
+        attr10=attr10
+    )
+    cursor.execute(sql)
+    return JsonResponse({
+        'success': True,
+        'info': "Амжилттай хадгалагдлаа"
+    })

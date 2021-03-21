@@ -29,6 +29,7 @@ export class PopUpCmpForms extends Component {
             is_purchase: false,
             is_enable: false,
             is_authenticated: false,
+            attr10: 'Тусгаарлалтад байгаа',
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -37,16 +38,36 @@ export class PopUpCmpForms extends Component {
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
         this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
         this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
+        this.hanleUpdateAttr = this.hanleUpdateAttr.bind(this)
     }
 
     componentDidUpdate(pP, pS) {
         const { datas, is_loading} = this.props
+        const { attr10, attr_layer} = this.state
         if(pP.datas !== datas && !this.props.is_loading) {
             this.properties = []
             const startNumber = 1
-            this.setState({ startNumber, is_plus: true, is_prev: false })
+            this.setState({ startNumber, is_plus: true, is_prev: false})
             this.checkModeAndCode(startNumber, datas)
         }
+
+        if (pS.attr10 !== attr10) {
+            this.setState({attr10})
+        }
+    }
+
+    hanleUpdateAttr() {
+        var attributes = this.state.datas[0][0][1]
+        service.updatec2405(this.state.attr10, attributes).then(({success, info})=>
+        {
+            if(success){
+                alert(info)
+            }
+            else{
+                alert(info)
+            }
+            this.setState({is_loading: false})
+        })
     }
 
     plusTab() {
@@ -80,7 +101,6 @@ export class PopUpCmpForms extends Component {
     }
 
     checkModeAndCode(number, datas) {
-        console.log('checkModeAndCode', datas)
         let mode
         let code
         let values
@@ -218,7 +238,7 @@ export class PopUpCmpForms extends Component {
                                 <b>Хоосон газар сонгосон байна.</b>
                             </div>
                         :
-                            <div className="ol-popup-contet">
+                            <div className="ol-popup-contet  overflow-auto" style={{height: '30vh'}}>
                                 {
                                     data.length >= 1
                                     &&
@@ -238,16 +258,35 @@ export class PopUpCmpForms extends Component {
                                             ?
                                                 data[0].map((layer, idx) =>
                                                     idx == 1 &&
-                                                    layer.map((value, v_idx) =>
-                                                        !value[0].toLowerCase().startsWith('name')
-                                                        &&
-                                                            <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
-                                                                <th className="font-weight-normal">
-                                                                    <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
-                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
-                                                                </th>
-                                                            </tr>
-                                                        )
+                                                    <Fragment>
+                                                        {   layer.map((value, v_idx) =>
+                                                            !value[0].toLowerCase().startsWith('name')
+                                                            &&
+                                                                <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
+                                                                    <th className="font-weight-normal">
+                                                                        <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
+                                                                        <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
+                                                                    </th>
+                                                                </tr>
+                                                            )}
+                                                            {data[2] =='c2405' &&
+                                                                <tr>
+                                                                    <th>
+                                                                    <b className="d-block" style={{fontSize: '70%'}}>attr10</b>
+                                                                    <select
+                                                                            style={{fontSize: '70%', border: '0'}}
+                                                                            value={this.state.attr10}
+                                                                            onChange={(e) => this.setState({ attr10: e.target.value, attr_layer: layer})}
+                                                                        >
+                                                                            <option value="Тусгаарлалтад байгаа">Тусгаарлалтад байгаа</option>
+                                                                            <option value="Эмчлэгдэж байгаа">Эмчлэгдэж байгаа</option>
+                                                                            <option value="Эдгэрсэн">Эдгэрсэн</option>
+                                                                            <option value="Нас барсан">Нас барсан</option>
+                                                                        </select>
+                                                                    <a className="fa fa-plus-square text-success my-3 mr-2 ml-1 p-0" onClick={this.hanleUpdateAttr}/>
+                                                                </th></tr>
+                                                            }
+                                                        </Fragment>
                                                 )
                                             :
                                             <tr><th>Хоосон байна.</th></tr>
