@@ -145,7 +145,7 @@ export default class ConfigGeoserver extends Component {
                                                 />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="geoserver_port">Port</label>
+                                                <label htmlFor="id_geoserver_port">Port</label>
                                                 <Field
                                                     name="geoserver_port"
                                                     type="text"
