@@ -50,7 +50,6 @@ export class OrgEdit extends Component {
     handleGetAll(org_level, org_id){
         if (org_id) {
             service.orgAll(org_level, org_id).then(({ orgs }) => {
-                console.log(orgs);
                 if (orgs) {
                     orgs.map(org => this.setState({
                         form_values: {
@@ -215,7 +214,6 @@ export class OrgEdit extends Component {
         const {form_values, roles, disabled} = this.state
         const org_id = this.props.id
         const org_level = this.props.level
-        console.log(form_values);
         return (
             <div>
                 <Formik
