@@ -43,20 +43,6 @@ class Graph extends PureComponent {
         const {count_datas, charts, name} = this.state
         return (
             <div className="card-body">
-                <div className="row pt-3">
-                    <div className="col-12 mb-2">
-                        <h4 className="text-center">{name} өнөөдрийн байдлаар</h4>
-                    </div>
-                    {count_datas.map((data, idx) =>
-                        <Card
-                            idx={idx}
-                            color={data.color}
-                            head_text={data.name}
-                            body_text={data.data}
-                            prev_data={data.prev_data}
-                        />
-                    )}
-                </div>
                 <div className="row">
                     <div className="col-8">
                         <h4 className="text-center">Нийт байдлаар</h4>
@@ -71,14 +57,14 @@ class Graph extends PureComponent {
                         />
                     </div>
                     <div className="col-4">
-                    <h4 className="text-center">Өнөөдрийн байдлаар</h4>
-                    <PieChart
-                            label="Батлагдсан тохиолдол"
-                            labels={charts.piechart_one ? charts.piechart_one.labels : []}
-                            datas={charts.piechart_one ? charts.piechart_one.datas : []}
-                            height={330}
-                            backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
-                    />
+                        <h4 className="text-center">Өнөөдрийн байдлаар</h4>
+                        <PieChart
+                                label="Батлагдсан тохиолдол"
+                                labels={charts.piechart_one ? charts.piechart_one.labels : []}
+                                datas={charts.piechart_one ? charts.piechart_one.datas : []}
+                                height={330}
+                                backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
+                        />
                     </div>
                 </div>
             </div>

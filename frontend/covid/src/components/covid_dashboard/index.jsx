@@ -11,7 +11,7 @@ import CovidMap from './components/covid_map'
 import Vaccine from './components/vaccine'
 import Loader from '@utils/Loader'
 import Card from './components/components/Card'
-
+import './components/components/card.css'
 
 class CovidDashboard extends PureComponent {
     constructor(props) {
@@ -24,6 +24,7 @@ class CovidDashboard extends PureComponent {
             geo_id: '',
             is_loading: true,
             count_datas: [],
+            count_covid_datas: [],
             geo_id: props.geo_id ? props.geo_id : 'au_496',
         }
         this.getGeoID = this.getGeoID.bind(this)
@@ -49,37 +50,29 @@ class CovidDashboard extends PureComponent {
     }
 
     getState(geo_id){
-        service.getState(geo_id).then(({success, count_datas, charts, name}) =>{
+        service.getState(geo_id).then(({success, count_datas, count_covid_datas, charts, name}) =>{
             if(success){
-                this.setState({count_datas, charts, name})
+                this.setState({count_datas, count_covid_datas, charts, name})
             }
         })
     }
 
     render() {
-        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas } = this.state
+        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas } = this.state
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="row">
-                        <div className="col-12 col-lg-7 col-xl-2 border border-primary">
+                        <Loader is_loading={is_loading} />
+                        <div className="col-md-2">
                             <Countries
                                 getGeoID={this.getGeoID}
                                 datas={datas}
                             />
                         </div>
-                        <div className="col-12 col-lg-7 col-xl-10">
+                        <div className="col-10">
                             <div className="row">
-                                <div className="col-12 col-lg-7 col-xl-8 border border-primary">
-                                    <div className="card bg-transparent shadow-none border border-light">
-                                        <div className="card-body">
-                                            <div className="row">
-                                                <CovidMap />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-12 col-lg-7 col-xl-4 border border-primary pt-2">
+                                <div className="col-12">
                                     <div className="row">
                                         {count_datas.map((data, idx) =>
                                             <Card
@@ -91,6 +84,30 @@ class CovidDashboard extends PureComponent {
                                             />
                                         )}
                                     </div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-8">
+                                    <CovidMap />
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-12">
+                                    <Graph/>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-12">
+                                    <div className="row">
+                                    {count_covid_datas.map((data, idx) =>
+                                        <Card
+                                            idx={idx}
+                                            color={data.color}
+                                            head_text={data.name}
+                                            body_text={data.data}
+                                            prev_data={data.prev_data}
+                                        />
+                                    )}</div>
                                 </div>
                             </div>
                         </div>

@@ -220,6 +220,7 @@ def get_covid_state(request, geo_id):
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)
     last_day_data = qs_log.order_by('-updated_at').values()
     count_datas = []
+    count_covid_datas = []
     for f in CovidDashboard._meta.get_fields():
         if f.name != 'id' and f.name != 'updated_by' and not 'updated_at' in f.name and not 'name' in f.name and not 'parent_id' in f.name and not 'org' in f.name and not 'geo_id' in f.name:
             if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
@@ -236,13 +237,22 @@ def get_covid_state(request, geo_id):
                 else:
                     color = "info"
                 for covid_data in covid_datas:
-                    count_datas.append({
-                        'origin_name': f.name,
-                        'name': f.verbose_name,
-                        'data': covid_data[f.name],
-                        'prev_data': last_day_data[1][f.name],
-                        'color': color
-                    })
+                    if color != 'info':
+                        count_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name],
+                            'color': color
+                        })
+                    else:
+                        count_covid_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name],
+                            'color': color
+                        })
     covid_data_ogj = qs.first()
     piechart_one = {
         'labels': [
@@ -291,6 +301,7 @@ def get_covid_state(request, geo_id):
     rsp = {
         'success': True,
         'count_datas': count_datas,
+        'count_covid_datas': count_covid_datas,
         'charts': {
             'piechart_one': piechart_one,
             'linechart_all': linechart_all
