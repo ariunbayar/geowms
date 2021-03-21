@@ -26,7 +26,7 @@ from backend.inspire.models import (
 )
 from backend.org.models import Employee, Org
 from geoportal_app.models import User
-from govorg.backend.org_request.models import TsegRequest
+from .models import TsegRequest
 
 from .models import (
     TsegUstsan,
