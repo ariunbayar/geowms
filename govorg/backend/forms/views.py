@@ -3,6 +3,7 @@ import os
 from django.db import connections, transaction
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
+from django.contrib.auth.decorators import login_required
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from .models import (
@@ -202,6 +203,7 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def hureeCountEdit(request, payload):
     id = payload.get('id')
     action = payload.get('action')
@@ -227,6 +229,7 @@ def hureeCountEdit(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def update(request, payload):
     date = None
     form_datas = payload.get('form_datas')
@@ -246,6 +249,7 @@ def update(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def remove(request, payload):
     pk = payload.get('id')
     tuuhSoyol = TuuhSoyol.objects.filter(id=pk)
@@ -292,6 +296,7 @@ def remove(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def about(request, payload):
     ids = payload.get('id')
     tuuh_soyl = []
@@ -312,6 +317,7 @@ def about(request, payload):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def all(request):
     tuuh_soyl = []
     for tuuh in TuuhSoyol.objects.using('postgis_db').all():
@@ -331,6 +337,7 @@ def all(request):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def dursgaltGazarUpdate(request, payload):
     form_datas = payload.get('form_datas')
     form_datas_values = payload.get('form_datas_values')
@@ -411,6 +418,7 @@ def dursgaltGazarUpdate(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def dursgaltGazarCreate(request, payload):
     form_datas = payload.get('form_datas')
     form_datas_values = payload.get('form_datas_values')
@@ -492,6 +500,7 @@ def dursgaltGazarCreate(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def dursgaltGazarAll(request, payload):
     page = payload.get('page')
     query = payload.get('query')
@@ -543,6 +552,7 @@ def findPoint(x,y, tuug_soyol):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def dursgaltGazarAbout(request, payload):
     form_data = []
     for data in TuuhSoyolPoint.objects.using('postgis_db').filter(pk = payload.get('id')):
@@ -601,6 +611,7 @@ def dursgaltGazarAbout(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def dursgaltGazarRemove(request, payload):
     pk = payload.get('id')
     tuuhsoylPoint = TuuhSoyolPoint.objects.using('postgis_db').filter(id=pk)
@@ -613,6 +624,7 @@ def dursgaltGazarRemove(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tseg_personal_list(request, payload):
     query = payload.get('query')
     page = payload.get('page')
@@ -662,6 +674,7 @@ def tseg_personal_list(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegPersonalRemove(request, payload):
     pk = payload.get('id')
     t_type = payload.get('t_type')
@@ -712,6 +725,7 @@ def tsegPersonalRemove(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     t_type = payload.get('t_type')
@@ -795,6 +809,7 @@ class UnAcceptedValueError(Exception):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def findPoints(request, payload):
     try:
         point_id = str(payload.get("point_id"))
@@ -824,6 +839,7 @@ def findPoints(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def findSum(request, payload):
     try:
         info = []
@@ -914,6 +930,7 @@ def _get_point_class_for_mpoint(point_class):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegPersonal(request):
     pk = request.POST.get('idx')
     point_id = request.POST.get('toviin_dugaar')
@@ -1164,6 +1181,7 @@ def tsegPersonal(request):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegUstsan(request):
     is_dan = bool(request.POST.get('is_dan'))
     tseg_id = int(request.POST.get('id'))
@@ -1281,6 +1299,7 @@ def tsegUstsan(request):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegUstsanSuccess(request, payload):
     pk = payload.get('id')
     tseg_ustsan = get_object_or_404(TsegUstsan, pk=pk)
@@ -1325,6 +1344,7 @@ def tsegUstsanSuccess(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegUstsanList(request, payload):
     page = payload.get('page')
     per_page = payload.get('perpage')
@@ -1362,6 +1382,7 @@ def tsegUstsanList(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegUstsanRemove(request, payload):
     pk = payload.get('id')
     tseg_ustsan = TsegUstsan.objects.get(pk=pk)
@@ -1386,6 +1407,7 @@ def tsegUstsanRemove(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def hureeCreate(request, payload):
     x = payload.get('x')
     y = payload.get('y')
@@ -1419,6 +1441,7 @@ def hureeCreate(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def hureeUpdate(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     idx = payload.get('id')
@@ -1449,6 +1472,7 @@ def hureeUpdate(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def hureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
@@ -1480,6 +1504,7 @@ def hureeDelete(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def hureeAll(request, payload):
     ids = payload.get('id')
     tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
@@ -1496,6 +1521,7 @@ def hureeAll(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def ayulAll(request, payload):
     ids = payload.get('id')
     ayul_data = []
@@ -1511,8 +1537,8 @@ def ayulAll(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def ayulHureeCreate(request, payload):
-
     x = payload.get('x')
     y = payload.get('y')
     idx = payload.get('dursgalt_id')
@@ -1544,6 +1570,7 @@ def ayulHureeCreate(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def ayulHureeUpdate(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     huree_id = payload.get('id')
@@ -1572,6 +1599,7 @@ def ayulHureeUpdate(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def ayulHureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
@@ -1602,6 +1630,7 @@ def ayulHureeDelete(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegUstsanEdit(request, payload):
     form_data = []
     img_holoos_url = ''
@@ -1651,6 +1680,7 @@ def tsegUstsanEdit(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegPersonalNameSearch(request, payload):
     query = payload.get('query')
     name = payload.get('name')
@@ -1710,6 +1740,7 @@ def tsegPersonalNameSearch(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegPersonalSearch(request, payload):
     query = payload.get('query')
     items = []
@@ -1739,6 +1770,7 @@ def tsegPersonalSearch(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tsegPersonalSuccess(request, payload):
     feauture_id = 83
     point_type = int(payload.get('point_type')) # zereg
@@ -1871,6 +1903,7 @@ def tsegPersonalSuccess(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def tuuhenOvList(request, payload):
     query = payload.get('query')
     page = payload.get('page')
@@ -1908,6 +1941,7 @@ def tuuhenOvList(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def rows(request, payload):
     tuuh_soyl = payload.get('id')
     cursor = connections['postgis_db'].cursor()
@@ -1931,6 +1965,7 @@ def rows(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def ayuul_geoms(request, payload):
     tuuh_soyl = payload.get('id')
     cursor = connections['postgis_db'].cursor()
@@ -1954,6 +1989,7 @@ def ayuul_geoms(request, payload):
 
 @require_POST
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def geom_points(request, payload):
     tuuh_soyl = payload.get('id')
     cursor = connections['postgis_db'].cursor()
@@ -1977,9 +2013,12 @@ def geom_points(request, payload):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_field_values(request):
-    point_types = utils.get_code_list_from_property_id(141)
-    point_classes = utils.get_code_list_from_property_id(142)
+    point_type = utils.InspireProperty('GeodeticalNetworkPointTypeValue')
+    point_class = utils.InspireProperty('GeodeticalNetworkPointClassValue')
+    point_types = utils.get_code_list_from_property_id(point_type.property_id)
+    point_classes = utils.get_code_list_from_property_id(point_class.property_id)
     rsp = {
         'point_types': point_types,
         'point_classes': point_classes,

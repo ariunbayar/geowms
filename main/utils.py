@@ -1146,12 +1146,8 @@ def get_code_list_from_property_id(property_id):
             code_lists = LCodeLists.objects.filter(property_id=property_id_up)
             for code_list in code_lists:
                 value = dict()
-                # check child
-                qs = LCodeLists.objects
-                qs = qs.filter(top_code_list_id=code_list.code_list_id)
-                if qs:
-                    top_property_id = qs.first().property_id
-                    value['children'] = get_code_list_from_property_id(top_property_id)
+                if code_list.top_code_list_id:
+                    value['top_code_list_id'] = code_list.top_code_list_id
 
                 value['code_list_id'] = code_list.code_list_id
                 value['property_id'] = code_list.property_id

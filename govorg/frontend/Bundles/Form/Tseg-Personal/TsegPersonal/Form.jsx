@@ -577,8 +577,7 @@ export  class Forms extends Component {
                                             <tr>
                                                 <th scope="row">1</th>
                                                 <th>Цэгийн нэр</th>
-                                                <td  scope="rowgroup">
-                                                    {this.state.name_error ? <a className="text-danger">Цэгийн нэр давхцаж байна !!!</a> : this.state.tesgiin_ner == '' ? '' : ''}
+                                                <td scope="rowgroup">
                                                     <div className="input-group">
                                                         <input
                                                             name="tesgiin_ner"
@@ -586,16 +585,16 @@ export  class Forms extends Component {
                                                             id="tesgiin_ner"
                                                             list="tsegList"
                                                             autoComplete="off"
-                                                            className={'form-control' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
+                                                            className={'form-control ' + (this.state.name_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
                                                             onChange={(e) => this.handleSearchWithName('tesgiin_ner', e)}
                                                             value = {this.state.tesgiin_ner}
                                                         />
+                                                            {this.state.name_error ? <div className="invalid-feedback">Цэгийн нэр давхцаж байна !!!</div> : this.state.tesgiin_ner == '' ? '' : ''}
                                                     </div>
                                                 </td>
                                                 <th scope="row">2</th>
                                                 <th>Төвийн дугаар</th>
-                                                <td  scope="rowgroup">
-                                                    {this.state.id_error ? <a className="text-danger">Төвийн дугаар давхцаж байна !!! </a> : this.state.toviin_dugaar == '' ? '' : ''}
+                                                <td scope="rowgroup">
                                                     <div className="input-group">
                                                         <input
                                                             name="toviin_dugaar"
@@ -604,12 +603,11 @@ export  class Forms extends Component {
                                                             id="toviin_dugaar"
                                                             list="tsegList"
                                                             autoComplete="off"
-                                                            className={'form-control' + (this.state.id_error || this.error_msg.length > 0 ? ' is-invalid' : '')}
+                                                            className={'form-control ' + (this.state.id_error || this.error_msg.length > 0 ? 'is-invalid' : '')}
                                                             onChange={(e) => this.handleSearchWithName('toviin_dugaar', e)}
                                                             value = {this.state.toviin_dugaar}
                                                         />
-                                                        <div>
-                                                        </div>
+                                                        {this.state.id_error ? <div className="invalid-feedback">Төвийн дугаар давхцаж байна !!!</div> : this.state.toviin_dugaar == '' ? '' : ''}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -631,8 +629,8 @@ export  class Forms extends Component {
                                                 <th>Сүлжээний төрөл</th>
                                                 <td>
                                                     <Fragment>
-                                                        <Field name="suljeenii_torol" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
+                                                        <Field name="suljeenii_torol" as="select"
+                                                        className={'custom-select ' + (errors.suljeenii_torol ? 'is-invalid' : '')}>
                                                             <option value="">...</option>
                                                             {
                                                                 point_types && point_types.map((point_type, idx) =>
@@ -645,7 +643,7 @@ export  class Forms extends Component {
                                                                 )
                                                             }
                                                         </Field>
-                                                        <ErrorMessage name="suljeenii_torol" component="div" className="text-dange"/>
+                                                        <ErrorMessage name="suljeenii_torol" component="div" className="invalid-feedback"/>
                                                     </Fragment>
                                                 </td>
                                             </tr>
@@ -653,8 +651,8 @@ export  class Forms extends Component {
                                                 <th>Зэрэг</th>
                                                 <td>
                                                     <Fragment>
-                                                        <Field name="center_typ" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.center_typ ? 'is-invalid' : '')}>
+                                                        <Field name="center_typ" as="select"
+                                                        className={'custom-select ' + (errors.center_typ ? 'is-invalid' : '')}>
                                                             <option value="">...</option>
                                                             {
                                                                 point_classes && point_classes.map((point_class, idx) =>
@@ -668,7 +666,7 @@ export  class Forms extends Component {
                                                                 )
                                                             }
                                                         </Field>
-                                                        <ErrorMessage name="center_typ" component="div" className="text-dange"/>
+                                                        <ErrorMessage name="center_typ" component="div" className="invalid-feedback"/>
                                                     </Fragment>
                                                 </td>
                                             </tr>
@@ -716,7 +714,7 @@ export  class Forms extends Component {
                                             <tr>
                                                 <td colSpan="2" className="pl-3">
                                                     <input
-                                                        className={'form-control row float-left m-2' }
+                                                        className={'form-control row float-left mx-0 my-2'}
                                                         name='BA'
                                                         id="BA"
                                                         placeholder="D"
@@ -725,7 +723,7 @@ export  class Forms extends Component {
                                                         value ={this.state.BA || ''}
                                                     />
                                                     <input
-                                                        className={'form-control row float-left m-2' }
+                                                        className={'form-control row float-left mx-0 my-2'}
                                                         placeholder="M"
                                                         name='BB'
                                                         id="BB"
@@ -734,7 +732,7 @@ export  class Forms extends Component {
                                                         value ={this.state.BB || ''}
                                                     />
                                                     <input
-                                                        className={'form-control row float-left m-2' }
+                                                        className={'form-control row float-left mx-0 my-2'}
                                                         placeholder="S"
                                                         name='BC'
                                                         id="BC"
@@ -743,9 +741,9 @@ export  class Forms extends Component {
                                                         value ={this.state.BC || ''}
                                                     />
                                                 </td>
-                                                <td colSpan="2" scope="rowgroup" className="pl-5">
+                                                <td colSpan="2" scope="rowgroup" className="">
                                                     <input
-                                                        className={'form-control row float-left m-2' }
+                                                        className={'form-control row float-left mx-0 my-2'}
                                                         placeholder="D"
                                                         name="LA"
                                                         id="LA"
@@ -754,7 +752,7 @@ export  class Forms extends Component {
                                                         value ={this.state.LA}
                                                     />
                                                     <input
-                                                        className={'form-control row float-left m-2' }
+                                                        className={'form-control row float-left mx-0 my-2'}
                                                         placeholder="M"
                                                         name='LB'
                                                         id="LB"
@@ -763,7 +761,7 @@ export  class Forms extends Component {
                                                         value ={this.state.LB || ''}
                                                     />
                                                     <input
-                                                        className={'form-control row float-left m-2' }
+                                                        className={'form-control row float-left mx-0 my-2'}
                                                         placeholder="S"
                                                         name='LC'
                                                         id="LC"
@@ -776,15 +774,16 @@ export  class Forms extends Component {
                                             <tr>
                                                 <th colSpan="2" scope="rowgroup">
                                                     Өндөр төрөл
+                                                    <br />
                                                     <Fragment>
-                                                        <Field name="ondor_torol" as="select" className="form-control"
-                                                            className={'form-control ' + (errors.ondor_torol ? 'is-invalid' : '')}>
+                                                        <Field name="ondor_torol" as="select"
+                                                            className={'custom-select ' + (errors.ondor_torol ? 'is-invalid' : '')}>
                                                             <option >...</option>
                                                             <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
                                                             <option value="Ортометрын өндрийн утга">Ортометрын өндрийн утга</option>
                                                             <option value="Балтын тэнгэсийн өндрийн утга">Балтын тэнгэсийн өндрийн утга</option>
                                                         </Field>
-                                                        <ErrorMessage name="ondor_torol" component="div" className="text-dange"/>
+                                                        <ErrorMessage name="ondor_torol" component="div" className="invalid-feedback"/>
                                                     </Fragment>
                                                 </th>
                                                 <th colSpan="4" scope="rowgroup">
@@ -796,7 +795,7 @@ export  class Forms extends Component {
                                                         type="number"
                                                         onKeyDown={ e => ( e.keyCode === 69 || e.keyCode === 190 ) && e.preventDefault() }
                                                     />
-                                                    <ErrorMessage name="ondor" component="div" className="text-dange"/>
+                                                    <ErrorMessage name="ondor" component="div" className="invalid-feedback"/>
                                                 </th>
                                             </tr>
                                             <tr>
@@ -930,13 +929,13 @@ export  class Forms extends Component {
                                                 <th colSpan="1" scope="rowgroup">11.</th>
                                                 <td colSpan="5" scope="rowgroup">
                                                     <Fragment>
-                                                        <Field name="sudalga_or_shine" as="select" className="form-control"
-                                                        className={'form-control ' + (errors.sudalga_or_shine ? 'is-invalid' : '')}>
+                                                        <Field name="sudalga_or_shine" as="select"
+                                                        className={'custom-select ' + (errors.sudalga_or_shine ? 'is-invalid' : '')}>
                                                             <option>...</option>
                                                             <option>Сэргээсэн</option>
                                                             <option>Шинээр суулгасан</option>
                                                         </Field>
-                                                        <ErrorMessage name="sudalga_or_shine" component="div" className="text-dange"/>
+                                                        <ErrorMessage name="sudalga_or_shine" component="div" className="invalid-feedback"/>
                                                     </Fragment>
                                                 </td>
                                             </tr>
@@ -944,7 +943,6 @@ export  class Forms extends Component {
                                                 <th colSpan="1" scope="rowgroup">12.</th>
                                                 <th colSpan="2" scope="rowgroup">Хөрсний шинж байдал:</th>
                                                 <td colSpan="4" scope="rowgroup">
-                                                {this.state.hors_error ? <a className="text-danger">Бүртгэлгүй хөрсний мэдээлэл байна</a> : ''}
                                                     <div className="input-group">
                                                         <input
                                                             name="hors_shinj_baidal"
@@ -952,12 +950,11 @@ export  class Forms extends Component {
                                                             id="hors_shinj_baidal"
                                                             list="tsegList"
                                                             autoComplete="off"
-                                                            className={'form-control' + (this.state.hors_error || this.error_msg.length > 0 ? ' is-invalid feedbakc' : '')}
+                                                            className={'form-control ' + (this.state.hors_error || this.error_msg.length > 0 ? 'is-invalid' : '')}
                                                             onChange={(e) => this.handleSearchWithName('hors_shinj_baidal', e)}
                                                             value = {this.state.hors_shinj_baidal}
                                                         />
-                                                        <div>
-                                                        </div>
+                                                        {this.state.hors_error ? <div className="invalid-feedback">Бүртгэлгүй хөрсний мэдээлэл байна</div> : ''}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -971,7 +968,7 @@ export  class Forms extends Component {
                                                         id="id_date"
                                                         type="date"
                                                     />
-                                                    <ErrorMessage name="date" component="div" className="text-dange"/>
+                                                    <ErrorMessage name="date" component="div" className="invalid-feedback"/>
                                                 </td>
                                             </tr>
                                             {values.suljeenii_torol == '3' ?
@@ -1033,7 +1030,7 @@ export  class Forms extends Component {
                                                         id="id_alban_baiguullga"
                                                         type="text"
                                                     />
-                                                    <ErrorMessage name="alban_baiguullga" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="alban_baiguullga" component="div" className="invalid-feedback"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -1046,7 +1043,7 @@ export  class Forms extends Component {
                                                         id="id_alban_tushaal"
                                                         type="text"
                                                     />
-                                                    <ErrorMessage name="alban_tushaal" component="div" className="=text-danger"/>
+                                                    <ErrorMessage name="alban_tushaal" component="div" className="invalid-feedback"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -1059,7 +1056,7 @@ export  class Forms extends Component {
                                                         id="id_hotolson"
                                                         type="text"
                                                     />
-                                                    <ErrorMessage name="hotolson" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="hotolson" component="div" className="invalid-feedback"/>
                                                 </td>
                                             </tr>
                                         </tbody>
