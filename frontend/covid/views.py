@@ -2,6 +2,8 @@
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, reverse
 from itertools import groupby
+from django.db.models import Count
+from django.db.models.query import QuerySet
 
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
@@ -21,7 +23,8 @@ from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer, Bundle
 from backend.geoserver.models import WmtsCacheConfig
 
-from .models import CovidDashboard, CovidDashboardLog
+
+from .models import CovidDashboard, CovidDashboardLog, PopulationAge, PopulationCount
 
 
 def covid_index(request):
@@ -297,6 +300,44 @@ def get_covid_state(request, geo_id):
         ],
         'dates': dates
     }
+
+    # const data = {
+    #         labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    #         datasets: [
+    #           {
+    #             label: "First dataset",
+    #             data: [33, 53, 85, 41, 44, 65],
+    #             fill: true,
+    #             backgroundColor: 'rgba(52, 168, 235, 0.2)',
+    #             borderColor: 'rgba(52, 168, 235, 1)',
+    #             borderWidth: 1,
+    #           },
+    #           {
+    #             label: "Second dataset",
+    #             data: [33, 25, 35, 51, 54, 76],
+    #             fill: false,
+    #             backgroundColor: 'linear-gradient(to right, #0088CA, #0B3A7D)',
+    #             borderColor: 'rgba(255, 99, 132, 1)',
+    #             borderWidth: 1,
+    #           },
+    #           {
+    #             label: "Tirth dataset",
+    #             data: [3, 15, 25, 41, 34, 66],
+    #             fill: false,
+    #             backgroundColor: 'rgba(52, 168, 235, 0.2)',
+    #             borderColor: 'rgba(52, 168, 235, 1)',
+    #             borderWidth: 1,
+    #           },
+    #         ]
+    #     }
+
+    sorted_age_list = PopulationAge.objects.all().values('age_group').annotate(Count('age_group')).order_by('age_group_number')
+    sorted_age_list = list(sorted_age_list)
+
+    age_labels = []
+    for sorted_age in sorted_age_list:
+        age_labels.append(sorted_age['age_group'])
+    print(age_labels)
 
     rsp = {
         'success': True,
