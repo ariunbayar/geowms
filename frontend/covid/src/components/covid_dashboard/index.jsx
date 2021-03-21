@@ -12,6 +12,7 @@ import Vaccine from './components/vaccine'
 import Loader from '@utils/Loader'
 import { number } from 'yup';
 import DropDown from './components/DropDown';
+import Card from './components/components/Card'
 
 
 class CovidDashboard extends PureComponent {
@@ -23,13 +24,18 @@ class CovidDashboard extends PureComponent {
             update_time: '',
             mongol_zuruu: [],
             geo_id: '',
-            is_loading: true
+            is_loading: true,
+            count_datas: [],
+            geo_id: props.geo_id ? props.geo_id : 'au_496',
         }
         this.getGeoID = this.getGeoID.bind(this)
+        this.getState = this.getState.bind(this)
     }
 
     componentDidMount() {
         this.getData()
+        const {geo_id} = this.state
+        this.getState(geo_id)
     }
 
     getGeoID(geo_id){
@@ -44,8 +50,16 @@ class CovidDashboard extends PureComponent {
             })
     }
 
+    getState(geo_id){
+        service.getState(geo_id).then(({success, count_datas, charts, name}) =>{
+            if(success){
+                this.setState({count_datas, charts, name})
+            }
+        })
+    }
+
     render() {
-        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading } = this.state
+    const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas } = this.state
 
         const getData = (canvas) => {
             const ctx = canvas.getContext("2d");
@@ -129,7 +143,7 @@ class CovidDashboard extends PureComponent {
                         </div>
                         <div className="col-12 col-lg-7 col-xl-10">
                             <div className="row">
-                                <div className="col-12 col-lg-7 col-xl-10 border border-primary">
+                                <div className="col-12 col-lg-7 col-xl-8 border border-primary">
                                     <div className="card bg-transparent shadow-none border border-light">
                                         <div className="card-body">
                                             <div className="row">
@@ -138,43 +152,17 @@ class CovidDashboard extends PureComponent {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-12 col-lg-7 col-xl-2 border border-primary">
-                                    <div className="card bg-transparent shadow-none border border-light">
-                                        <div className="card-body">
-                                        <div className="media align-items-center">
-                                        <div className="media-body text-left">
-                                            <h4 className="text-primary mb-0">45,85,240</h4>
-                                            <span>Total Likes</span>
-                                        </div>
-                                        <div className="align-self-center w-circle-icon Doughnutrounded gradient-violet">
-                                            <i className="icon-like text-white"></i></div>
-                                        </div>
-                                        </div>
-                                    </div>
-                                    <div className="card bg-transparent shadow-none border border-light">
-                                        <div className="card-body">
-                                        <div className="media align-items-center">
-                                        <div className="media-body text-left">
-                                            <h4 className="text-danger mb-0">78,50,325</h4>
-                                            <span>Comments</span>
-                                        </div>
-                                        <div className="align-self-center w-circle-icon rounded gradient-ibiza">
-                                            <i className="icon-speech text-white"></i></div>
-                                        </div>
-                                        </div>
-                                    </div>
-                                    <div className="card bg-transparent shadow-none border border-light">
-                                        <div className="card-body">
-                                        <div className="media align-items-center">
-                                        <div className="media-body text-left">
-                                            <h4 className="text-dark mb-0">25,40,354</h4>
-                                            <span>Total Shares</span>
-                                        </div>
-                                        <div className="align-self-center w-circle-icon rounded gradient-royal">
-                                            <i className="icon-share text-white"></i></div>
-                                        </div>
-                                        </div>
-
+                                <div className="col-12 col-lg-7 col-xl-4 border border-primary pt-2">
+                                    <div className="row">
+                                        {count_datas.map((data, idx) =>
+                                            <Card
+                                                idx={idx}
+                                                color={data.color}
+                                                head_text={data.name}
+                                                body_text={data.data}
+                                                prev_data={data.prev_data}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </div>
