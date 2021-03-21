@@ -7,7 +7,7 @@ import {service} from './service'
 
 const validationSchema = Yup.object().shape({
     geoserver_host: Yup.string(),
-    geoserver_protocal: Yup.string(),
+    geoserver_protocol: Yup.string(),
     geoserver_user: Yup.string(),
     geoserver_pass: Yup.string(),
     geoserver_port: Yup.string(),
@@ -28,7 +28,7 @@ export default class ConfigGeoserver extends Component {
                 geoserver_pass: '',
                 geoserver_port:'',
                 geoserver_db_host:'',
-                geoserver_protocal: '',
+                geoserver_protocol: '',
             },
             values: {},
         }
@@ -127,7 +127,7 @@ export default class ConfigGeoserver extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12 text-wrap">
-                                                <small htmlFor="id_geoserver_host">IP Address / Domain name</small>
+                                                <label htmlFor="id_geoserver_host">IP Address / Domain name</label>
                                                 <Field
                                                     name="geoserver_host"
                                                     id="id_geoserver_host"
@@ -136,7 +136,7 @@ export default class ConfigGeoserver extends Component {
                                                 />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <small htmlFor="id_geoserver_user">Port</small>
+                                                <label htmlFor="geoserver_port">Port</label>
                                                 <Field
                                                     name="geoserver_port"
                                                     type="text"
@@ -145,10 +145,10 @@ export default class ConfigGeoserver extends Component {
                                                 />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <small htmlFor="geoserver_protocal">Protocal</small>
+                                                <label htmlFor="geoserver_protocol">Protocal</label>
                                                 <Field
-                                                    name="geoserver_protocal"
-                                                    id="geoserver_protocal"
+                                                    name="geoserver_protocol"
+                                                    id="geoserver_protocol"
                                                     type="text"
                                                     className="form-control"
                                                 />

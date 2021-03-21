@@ -108,7 +108,7 @@ def үүсгэх(request):
         payload = json.loads(request.body)
 
         base_layer = BaseLayer()
-        protocal  = Config.objects.filter(name='geoserver_protocal').first().value
+        protocal  = Config.objects.filter(name='geoserver_protocol').first().value
         if protocal:
             url = ''
             url_data = payload.get('url').split(":")
