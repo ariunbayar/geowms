@@ -1143,7 +1143,7 @@ def get_code_list_from_property_id(property_id):
             to_property_id += 1
         x_range = range(property_id, to_property_id)
         for property_id_up in x_range:
-            code_lists = LCodeLists.objects.filter(property_id=property_id_up)
+            code_lists = LCodeLists.objects.filter(property_id=property_id_up).order_by('order_no')
             for code_list in code_lists:
                 value = dict()
                 if code_list.top_code_list_id:

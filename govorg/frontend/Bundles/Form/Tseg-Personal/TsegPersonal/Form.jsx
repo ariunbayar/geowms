@@ -107,8 +107,8 @@ export  class Forms extends Component {
     getFieldValues() {
         service
             .getFieldValue()
-            .then(({ point_classes, point_types }) => {
-                this.setState({ point_classes, point_types })
+            .then(({ point_classes, point_types, ondor_types, nativeness }) => {
+                this.setState({ point_classes, point_types, ondor_types, nativeness })
             })
     }
 
@@ -526,7 +526,7 @@ export  class Forms extends Component {
         this.getItem()
        }
 
-       const { point_classes, point_types } = this.state
+       const { point_classes, point_types, ondor_types, nativeness } = this.state
 
        const error_msg = this.state.error_msg
         return (
@@ -778,10 +778,20 @@ export  class Forms extends Component {
                                                     <Fragment>
                                                         <Field name="ondor_torol" as="select" style={{fontSize: '0.8rem'}}
                                                             className={'custom-select ' + (errors.ondor_torol ? 'is-invalid' : '')}>
-                                                            <option >...</option>
-                                                            <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
+                                                            <option>...</option>
+                                                            {
+                                                                 ondor_types && ondor_types.map((item, idx) =>
+                                                                    <option
+                                                                        key={idx}
+                                                                        value={item.code_list_id}
+                                                                    >
+                                                                        {item.code_list_name}
+                                                                    </option>
+                                                                )
+                                                            }
+                                                            {/* <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
                                                             <option value="Ортометрын өндрийн утга">Ортометрын өндрийн утга</option>
-                                                            <option value="Балтын тэнгэсийн өндрийн утга">Балтын тэнгэсийн өндрийн утга</option>
+                                                            <option value="Балтын тэнгэсийн өндрийн утга">Балтын тэнгэсийн өндрийн утга</option> */}
                                                         </Field>
                                                         <ErrorMessage name="ondor_torol" component="div" className="invalid-feedback"/>
                                                     </Fragment>
@@ -932,8 +942,18 @@ export  class Forms extends Component {
                                                         <Field name="sudalga_or_shine" as="select"
                                                         className={'custom-select ' + (errors.sudalga_or_shine ? 'is-invalid' : '')}>
                                                             <option>...</option>
-                                                            <option>Сэргээсэн</option>
-                                                            <option>Шинээр суулгасан</option>
+                                                            {
+                                                                 nativeness && nativeness.map((item, idx) =>
+                                                                    <option
+                                                                        key={idx}
+                                                                        value={item.code_list_id}
+                                                                    >
+                                                                        {item.code_list_name}
+                                                                    </option>
+                                                                )
+                                                            }
+                                                            {/* <option>Сэргээсэн</option>
+                                                            <option>Шинээр суулгасан</option> */}
                                                         </Field>
                                                         <ErrorMessage name="sudalga_or_shine" component="div" className="invalid-feedback"/>
                                                     </Fragment>
