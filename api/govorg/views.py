@@ -237,7 +237,7 @@ def _get_cql_filter(geo_id):
 
 
 def _get_request_content(base_url, request, geo_id, headers):
-    if request.GET.get('REQUEST') == 'GetMap' and geo_id != 'au_496':
+    if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
         cql_filter = cache.get('{}'.format(geo_id))
         if not cql_filter:
             cql_filter = _get_cql_filter(geo_id)
