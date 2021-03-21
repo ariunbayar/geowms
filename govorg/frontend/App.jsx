@@ -154,11 +154,12 @@ export class App extends Component {
                                     text="Цэгийн мэдээлэл"
                                 >
                                     <ul className="sidebar-submenu">
-                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
-                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/requests/" text="Цэгийн хүсэлт"></MenuItem>
                                     </ul>
                                 </MenuItem>
-                                <MenuItem
+                                {/* <MenuItem
                                     icon="gp-text-primary fa fa-circle-o"
                                     url="/gov/tseg-personal/"
                                     text="Шинэчилж байгаа Цэгийн мэдээлэл"
@@ -167,7 +168,7 @@ export class App extends Component {
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tseg-personal/list/" text="Шинэ цэг"></MenuItem>
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tseg-personal/tseg-ustsan/list/" text="Цэг устгах"></MenuItem>
                                     </ul>
-                                </MenuItem>
+                                </MenuItem> */}
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
 
                                     {
@@ -233,7 +234,7 @@ export class App extends Component {
                     <div className="content-wrapper">
                         <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачаалж байна."}/>}>
                             <Switch>
-                                <Route path={"/gov/froms/"} component={Forms} />
+                                <Route path={"/gov/forms/"} component={Forms} />
                                 <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
 
                                 <Route path={"/gov/tseg-personal/"} component={Tseg} />
