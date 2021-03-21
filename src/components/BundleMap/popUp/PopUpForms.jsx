@@ -80,6 +80,7 @@ export class PopUpCmpForms extends Component {
     }
 
     checkModeAndCode(number, datas) {
+        console.log('checkModeAndCode', datas)
         let mode
         let code
         let values

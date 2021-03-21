@@ -43,9 +43,7 @@ class PopUpCmp extends Component {
 
     componentDidUpdate(pP, pS) {
         const { datas, is_loading} = this.props
-        console.log("hohfdkshfklsdjflksdjf", datas, is_loading)
         if(pP.datas !== datas || is_loading != pP.is_loading) {
-            console.log(datas)
             this.setState({datas, is_loading})
         }
     }

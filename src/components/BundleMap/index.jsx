@@ -113,6 +113,7 @@ export default class InspireMap extends Component {
         this.addVectorSource = this.addVectorSource.bind(this)
         this.popUpload = this.popUpload.bind(this)
         this.featureFromUrl = this.featureFromUrl.bind(this)
+        this.getDetailOfPoint = this.getDetailOfPoint.bind(this)
     }
 
     initMarker() {
@@ -248,8 +249,13 @@ export default class InspireMap extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         const { vector_source, form_datas, wms_list, center} = this.props
+        const { layer_one_tile } = this.state
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
+        }
+
+        if (prevState.layer_one_tile != layer_one_tile) {
+            this.setState({layer_one_tile})
         }
 
         if (prevProps.features !== this.props.features) {
@@ -352,7 +358,7 @@ export default class InspireMap extends Component {
                     }
                 }),
             })
-            this.setState({layer_one_tile: _layer_one_tile, map_wms_list: _layer_one_tile})
+            this.setState({layer_one_tile: _layer_one_tile})
             this.map.addLayer(_layer_one_tile)
             setTimeout(() => {
                 this.setState({is_loading: false})
@@ -811,9 +817,13 @@ export default class InspireMap extends Component {
         if (this.state.map_wms_list) {
             this.array = this.state.map_wms_list
         }
-        else if (this.state.filtered_wms) {
+        if (this.state.filtered_wms) {
             this.array = this.state.filtered_wms
         }
+        if (this.state.layer_one_tile) {
+            this.array = this.state.layer_one_tile
+        }
+
         return this.array
     }
 
@@ -875,6 +885,92 @@ export default class InspireMap extends Component {
         }
     }
 
+    getDetailOfPoint(wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, is_not_inspire) {
+        if (wms_tile.getVisible()) {
+            const {layer_code, is_feature} = this.check_inspire_layer(code)
+            if (is_feature) {
+                    not_visible_layers.push(layer_code)
+            }
+            if (!is_feature) {
+                const wms_source = wms_tile.getSource()
+                const url = wms_source.getFeatureInfoUrl(
+                    coordinate,
+                    resolution,
+                    projection,
+                    {
+                        'INFO_FORMAT': 'application/vnd.ogc.gml',
+                    }
+                )
+                if (url) {
+                    fetch(url)
+                    .then((response) => response.text())
+                    .then((text) => {
+                        const parser = new WMSGetFeatureInfo()
+                        const features = parser.readFeatures(text)
+                        if (features.length > 0) {
+                            features.map((feature, idx) => {
+                                if(feature.getGeometry().getType().includes('Polygon')) {
+                                    const source = new VectorSource({
+                                        features: features
+                                    });
+                                    this.selectSource = source
+                                    this.state.vector_layer.setSource(this.selectSource)
+                                }
+                            })
+                        }
+                        const feature_info = features.map((feature) => {
+                            const geometry_name = feature.getGeometryName()
+                            const values =
+                                feature.getKeys()
+                                .filter((key) => key != geometry_name)
+                                .map((key) => [key, feature.get(key)])
+                            return [feature.getId(), values]
+                        })
+
+                        if(!this.state.is_draw_open){
+                            if(feature_info.length > 0) {
+                                is_not_inspire = false
+                                this.is_empty = false
+                                if(this.sendFeatureInfo.length > 0) {
+                                    this.sendFeatureInfo.map((feat, idx) => {
+                                        if (feat[0].field_name !== feature_info[0][0]) {
+                                            feature_info.push(geodb_table)
+                                            feature_info.push(code)
+                                            this.sendFeatureInfo.push(feature_info)
+                                        }
+                                    })
+                                }
+                                if (this.sendFeatureInfo.length == 0) {
+                                    feature_info.push(geodb_table)
+                                    feature_info.push(code)
+                                    this.sendFeatureInfo.push(feature_info)
+                                }
+                                if(geodb_table == 'mpoint_view') {
+                                    this.state.vector_layer.setSource(null)
+                                }
+                                if (not_visible_layers.length > 0) {
+                                    this.getPopUpInfo(coordinate, not_visible_layers)
+                                }
+                                else {
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
+                                }
+                            }
+                            else {
+                                if (not_visible_layers.length == 0) {
+                                    this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
+                                }
+                            }
+                        }
+                        else {
+                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
+                        }
+
+                    })
+                }
+            }
+        }
+    }
+
     featureFromUrl(coordinate) {
         const view = this.map.getView()
         const projection = view.getProjection()
@@ -883,96 +979,26 @@ export default class InspireMap extends Component {
         let not_visible_layers = []
         let is_not_inspire = true
         this.setVisibleMarket(true)
-        wms_array.map(({layers}) => {
-            if(layers) {
-                layers.map(({tile, wms_tile, geodb_table, code}) => {
-                    if (wms_tile.getVisible()) {
-                        const {layer_code, is_feature} = this.check_inspire_layer(code)
-                        if (is_feature) {
-                                not_visible_layers.push(layer_code)
-                        }
-                        if (!is_feature) {
-                            const wms_source = wms_tile.getSource()
-                            const url = wms_source.getFeatureInfoUrl(
-                                coordinate,
-                                resolution,
-                                projection,
-                                {
-                                    'INFO_FORMAT': 'application/vnd.ogc.gml',
-                                }
-                            )
-                            if (url) {
-                                fetch(url)
-                                .then((response) => response.text())
-                                .then((text) => {
-                                    const parser = new WMSGetFeatureInfo()
-                                    const features = parser.readFeatures(text)
-                                    if (features.length > 0) {
-                                        features.map((feature, idx) => {
-                                            if(feature.getGeometry().getType().includes('Polygon')) {
-                                                const source = new VectorSource({
-                                                    features: features
-                                                });
-                                                this.selectSource = source
-                                                this.state.vector_layer.setSource(this.selectSource)
-                                            }
-                                        })
-                                    }
-                                    const feature_info = features.map((feature) => {
-                                        const geometry_name = feature.getGeometryName()
-                                        const values =
-                                            feature.getKeys()
-                                            .filter((key) => key != geometry_name)
-                                            .map((key) => [key, feature.get(key)])
-                                        return [feature.getId(), values]
-                                    })
-
-                                    if(!this.state.is_draw_open){
-                                        if(feature_info.length > 0) {
-                                            is_not_inspire = false
-                                            this.is_empty = false
-                                            if(this.sendFeatureInfo.length > 0) {
-                                                this.sendFeatureInfo.map((feat, idx) => {
-                                                    if (feat[0].field_name !== feature_info[0][0]) {
-                                                        feature_info.push(geodb_table)
-                                                        feature_info.push(code)
-                                                        this.sendFeatureInfo.push(feature_info)
-                                                    }
-                                                })
-                                            }
-                                            if (this.sendFeatureInfo.length == 0) {
-                                                feature_info.push(geodb_table)
-                                                feature_info.push(code)
-                                                this.sendFeatureInfo.push(feature_info)
-                                            }
-                                            if(geodb_table == 'mpoint_view') {
-                                                this.state.vector_layer.setSource(null)
-                                            }
-                                            if (not_visible_layers.length > 0) {
-                                                this.getPopUpInfo(coordinate, not_visible_layers)
-                                            }
-                                            else {
-                                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
-                                            }
-                                        }
-                                        else {
-                                            if (not_visible_layers.length == 0) {
-                                                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
-                                            }
-                                        }
-                                    }
-                                    else {
-                                        this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
-                                    }
-
-                                })
-                            }
-                        }
+        if (wms_array.length >0) {
+            wms_array.map(({layers}) => {
+                if(layers) {
+                    layers.map(({tile, wms_tile, geodb_table, code}) => {
+                        this.getDetailOfPoint(wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, is_not_inspire)
                     }
+                    )
                 }
-                )
-            }
-        })
+            })
+        }
+        else if(this.props.code) {
+            this.getDetailOfPoint(
+            wms_array, this.props.code,
+            coordinate, projection,
+            resolution, [],
+            not_visible_layers, is_not_inspire)
+        }
+        // if (is_not_inspire) {
+        //     this.getPopUpInfo(coordinate, not_visible_layers)
+        // }
     }
 
     handleToggle(idx) {
