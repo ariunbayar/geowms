@@ -776,7 +776,7 @@ export  class Forms extends Component {
                                                     Өндөр төрөл
                                                     <br />
                                                     <Fragment>
-                                                        <Field name="ondor_torol" as="select"
+                                                        <Field name="ondor_torol" as="select" style={{fontSize: '0.8rem'}}
                                                             className={'custom-select ' + (errors.ondor_torol ? 'is-invalid' : '')}>
                                                             <option >...</option>
                                                             <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
