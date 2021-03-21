@@ -117,7 +117,8 @@ def үүсгэх(request):
                 while i < len(url_data):
                     url = url + ":" + url_data[i]
                     i = i+1
-
+            else:
+                url = payload.get('url')
         sizes = [
             (128 * 2, 72 * 2),
             (128 * 1, 72 * 1),
