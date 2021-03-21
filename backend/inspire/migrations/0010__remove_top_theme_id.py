@@ -12,7 +12,7 @@ def _check_column():
         FROM information_schema.columns
         WHERE table_schema  = 'public'
         AND table_name      = 'l_themes'
-        AND column_name     = 'theme_id'
+        AND column_name     = 'top_theme_id'
     ;
     """
     cursor.execute(sql)

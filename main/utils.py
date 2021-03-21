@@ -709,19 +709,16 @@ def get_1stOrder_geo_id():
     LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
     LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
 
-    try:
-        feature_id = LFeatures.objects.filter(feature_code='bnd-au-au').first().feature_id
-        property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
-        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder').first().code_list_id
-        feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    feature_id = LFeatures.objects.filter(feature_code='bnd-au-au').first().feature_id
+    property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
+    code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder').first().code_list_id
+    feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
-        qs = MDatas.objects.filter(property_id=property_id)
-        qs = qs.filter(code_list_id=code_list_id)
+    qs = MDatas.objects.filter(property_id=property_id)
+    qs = qs.filter(code_list_id=code_list_id)
 
-        return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
+    return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
 
-    except:
-        return None
 
 
 def get_geoJson(data):
