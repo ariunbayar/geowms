@@ -8,6 +8,7 @@ import csv
 
 
 def _import_data(apps, schema_editor):
+    print("\nУншиж байна ...")
     PopulationAge = apps.get_model('frontend_covid', 'PopulationAge')
     PopulationCount = apps.get_model('frontend_covid', 'PopulationCount')
 
@@ -22,9 +23,10 @@ def _import_data(apps, schema_editor):
                     code = contents[item][0]
                     name = contents[item][1]
                     total_number = contents[item][4]
-                    age_group = contents[item][2]
+                    age_group_number = contents[item][2]
+                    age_group = contents[item][3]
 
-                    pop_age = PopulationAge(age_group=age_group)
+                    pop_age = PopulationAge(age_group=age_group, age_group_number=age_group_number)
                     pop_age.save()
                     pop_age_id = pop_age.id
                     pop_count = PopulationCount(geo_id=geo_id, name=name, total_number=total_number, code=code, age=PopulationAge.objects.get(id=pop_age_id))
@@ -34,7 +36,7 @@ def _import_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend_covid', '0004_auto_20210321_2003'),
+        ('frontend_covid', '0004_auto_20210321_2122'),
     ]
 
     operations = [

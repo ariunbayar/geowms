@@ -49,6 +49,7 @@ class CovidDashboardLog(models.Model):
 
 
 class PopulationAge(models.Model):
+    age_group_number = models.PositiveIntegerField(null=False)
     age_group = models.CharField(max_length=250, null=False)
 
 

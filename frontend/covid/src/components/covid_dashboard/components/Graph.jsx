@@ -53,7 +53,7 @@ class Graph extends PureComponent {
                             datas={charts.linechart_all ? charts.linechart_all.datas : []}
                             graph_color={'#EC0E00'}
                             lineTension={0.3}
-                            height={150}
+                            height={100}
                         />
                     </div>
                     <div className="col-4">
@@ -62,7 +62,7 @@ class Graph extends PureComponent {
                                 label="Батлагдсан тохиолдол"
                                 labels={charts.piechart_one ? charts.piechart_one.labels : []}
                                 datas={charts.piechart_one ? charts.piechart_one.datas : []}
-                                height={330}
+                                height={220}
                                 backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
                         />
                     </div>
