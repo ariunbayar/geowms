@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import {BrowserRouter, Switch, Route, NavLink} from "react-router-dom";
+import { Bar, Line } from "react-chartjs-2";
 import Navbar from "./components/Navbar"
 import {Menu} from "./components/Menu"
 import {Countries} from "./components/Countries"
@@ -10,6 +10,8 @@ import {service} from './components/service'
 import CovidMap from './components/covid_map'
 import Vaccine from './components/vaccine'
 import Loader from '@utils/Loader'
+import { number } from 'yup';
+import DropDown from './components/DropDown';
 
 
 class CovidDashboard extends PureComponent {
@@ -44,6 +46,77 @@ class CovidDashboard extends PureComponent {
 
     render() {
         const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading } = this.state
+
+        const getData = (canvas) => {
+            const ctx = canvas.getContext("2d");
+            const gradient = ctx.createLinearGradient(0, 0, 300, 0);
+            gradient.addColorStop(0, '#0088CA');
+            gradient.addColorStop(0.5, '#006CB6');
+            gradient.addColorStop(1, '#0B3A7D');
+
+            return {
+                labels: ['1', '2', '3', '4', '5', '6', '7', '8'],
+                datasets: [
+                    {
+                        label: 'Chart',
+                        data: [33, 53, 85, 41, 44, 65],
+                        backgroundColor: gradient,
+                        borderColor: '#05deb3',
+                    },
+
+                    {
+                        label: 'Chart1',
+                        data: [33, 53, 85, 41, 44, 65],
+                        backgroundColor: gradient,
+                        borderColor: '#05deb3',
+                    },
+
+                    {
+                        label: 'Chart2',
+                        data: [33, 53, 85, 41, 44, 65],
+                        backgroundColor: gradient,
+                        borderColor: '#05deb3',
+                    },
+                ]
+            }
+        }
+        const canvas = document.createElement('canvas');
+        const chartData = getData(canvas);
+
+        const data = {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [
+              {
+                label: "First dataset",
+                data: [33, 53, 85, 41, 44, 65],
+                fill: true,
+                backgroundColor: 'rgba(52, 168, 235, 0.2)',
+                borderColor: 'rgba(52, 168, 235, 1)',
+                borderWidth: 1,
+              },
+              {
+                label: "Second dataset",
+                data: [33, 25, 35, 51, 54, 76],
+                fill: false,
+                backgroundColor: 'linear-gradient(to right, #0088CA, #0B3A7D)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+              },
+              {
+                label: "Tirth dataset",
+                data: [3, 15, 25, 41, 34, 66],
+                fill: false,
+                backgroundColor: 'rgba(52, 168, 235, 0.2)',
+                borderColor: 'rgba(52, 168, 235, 1)',
+                borderWidth: 1,
+              },
+            ]
+        };
+
+        const options = {
+            cornerRadius: 10,
+        }
+
         return (
             <div className="card">
                 <div className="card-body">
@@ -73,7 +146,7 @@ class CovidDashboard extends PureComponent {
                                             <h4 className="text-primary mb-0">45,85,240</h4>
                                             <span>Total Likes</span>
                                         </div>
-                                        <div className="align-self-center w-circle-icon rounded gradient-violet">
+                                        <div className="align-self-center w-circle-icon Doughnutrounded gradient-violet">
                                             <i className="icon-like text-white"></i></div>
                                         </div>
                                         </div>
@@ -103,7 +176,32 @@ class CovidDashboard extends PureComponent {
                                         </div>
 
                                     </div>
+                                </div>
+                            </div>
+                            <div className="row justify-content-around border border-primary">
+                                <div className="col-12 col-lg-4 col-xl-5">
+                                    <div className="card bg-transparent shadow-none border border-light">
+                                        <DropDown />
+                                        <div className="card-body">
+                                            <Bar
+                                                height={150}
+                                                data={chartData}
+                                                options={options}
+                                            />
+                                        </div>
                                     </div>
+                                </div>
+                                <div className="col-12 col-lg-4 col-xl-5">
+                                    <div className="card bg-transparent shadow-none border border-light">
+                                        <DropDown />
+                                        <div className="card-body">
+                                            <Line
+                                                height={150}
+                                                data={data}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
