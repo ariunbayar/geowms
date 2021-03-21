@@ -22,9 +22,11 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+from backend.inspire.models import MGeoDatas
 from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
+
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -1019,3 +1021,10 @@ def search_dict_from_object(objs, key='name', value='value'):
         data_value = obj[value]
         data[data_key] = data_value
     return data
+
+
+def get_center_of_geo_data(geo_id):
+    center = []
+    geo = MGeoDatas.objects.filter(geo_id='au_11').first()
+    center = geo.geo_data.centroid
+    return list(center)
