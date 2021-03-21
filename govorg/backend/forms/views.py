@@ -641,49 +641,27 @@ def dursgaltGazarRemove(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_list(request, payload):
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    tseg_personal = []
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    mpoint = Mpoint_view.objects.using('postgis_db')
-    mpoint = mpoint.annotate(search=SearchVector(
-        'point_id',
-        'pid',
-        't_type',
-        'mclass',
-        ) + SearchVector('point_name'))
-    mpoint = mpoint.filter(search__contains=query)
-    mpoint = mpoint.exclude(t_type='g110')
-    mpoint = mpoint.order_by(sort_name)
-    total_items = Paginator(mpoint, per_page)
-    items_page = total_items.page(page)
-    for mpoint_all in items_page.object_list:
-        tseg_personal.append({
-            'id': mpoint_all.id,
-            'objectid': mpoint_all.objectid,
-            'point_id':mpoint_all.point_id.zfill(4) if mpoint_all.point_id and len(mpoint_all.point_id)<4 else mpoint_all.point_id,
-            'point_name': mpoint_all.point_name,
-            'pid': mpoint_all.pid,
-            'point_class': mpoint_all.point_class,
-            'point_type': mpoint_all.mclass,
-            'center_typ': mpoint_all.mclass,
-            'aimag': mpoint_all.aimag,
-            'sum': mpoint_all.sum,
-            'sheet1': mpoint_all.sheet1,
-            'sheet2': mpoint_all.sheet2,
-            'sheet3': mpoint_all.sheet3,
-            'geom': mpoint_all.geom,
-            't_type': mpoint_all.t_type,
-        })
-    total_page = total_items.num_pages
-    rsp = {
-        'items': tseg_personal,
-        'page': page,
-        'total_page': total_page,
-    }
+    requests = TsegRequest.objects
+    requests = requests.exclude(state=TsegRequest.STATE_REJECT)
+    if requests:
+        datatable = Datatable(
+            initial_qs=requests,
+            model=TsegRequest,
+            payload=payload,
+        )
+
+        items, total_page = datatable.get()
+        rsp = {
+            'items': items,
+            'page': payload.get("page"),
+            'total_page': total_page
+        }
+    else:
+        rsp = {
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
     return JsonResponse(rsp)
 
 
@@ -743,70 +721,61 @@ def tsegPersonalRemove(request, payload):
 @login_required(login_url='/gov/secure/login/')
 def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
-    t_type = payload.get('t_type')
     tseg_display = []
-    data = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-    point_id = data.point_id
-    feature_code = 'gnp-gp-gp'
-    tseg = utils.get_mdata_values(feature_code, point_id)
-    search_cursor_data = GEOSGeometry(data.geom)
-    if search_cursor_data:
-        latlongx = search_cursor_data[0]
-        latlongy = search_cursor_data[1]
-        LA = int(float(latlongx))
-        LB = int((float(latlongx)-LA)*60)
-        LC = float("{:.6f}".format(((float(latlongx))-LA-LB/60)*3600 ))
-        BA = int(float(latlongy))
-        BB = int((float(latlongy)-BA)*60)
-        BC = (float(float(latlongy))-BA-BB/60)*3600
-    if data.sheet2:
-        sheet2 = int(data.sheet2)
-    else:
-        sheet2 = 0
-    if data.sheet3:
-        sheet3 = int(data.sheet3)
-    else:
-        sheet3 = 0
 
-    tseg_display.append({
-        'latlongx': latlongx if search_cursor_data else '',
-        'latlongy': latlongy if search_cursor_data else '',
-        'LA':LA if search_cursor_data else '',
-        'LB':LB if search_cursor_data else "",
-        'LC':LC if search_cursor_data else '',
-        'BA':BA if search_cursor_data else "",
-        'BB':BB if search_cursor_data else "",
-        'BC':BC if search_cursor_data else "",
-        'tseg_oiroos_img_url': '/media/' + tseg['PointNearPhoto'] if tseg and 'PointNearPhoto' in tseg else '',
-        'tseg_holoos_img_url': '/media/' + tseg['PointFarPhoto'] if tseg and 'PointFarPhoto' in tseg else '',
-        'barishil_tuhai': tseg['PointLocationDescription'] if 'PointLocationDescription' in tseg else '',
-        'bairshil_tseg_oiroos_img_url': '/media/' + tseg['PointCenterType'] if tseg and 'PointCenterType' in tseg else '',
-        'bairshil_tseg_holoos_img_url': '/media/' + tseg['LocationOverviewMap'] if tseg and 'LocationOverviewMap' in tseg else '',
-        'sudalga_or_shine':  tseg['PointShape'] if 'PointShape' in tseg else '',
-        'hors_shinj_baidal': tseg['Nomenclature'] if 'Nomenclature' in tseg else '',
-        'date': tseg['beginLifespanVersion'].strftime("%Y-%m-%d") if tseg and 'beginLifespanVersion' in tseg else '',
-        'hotolson': tseg['EmployeeName'] if 'EmployeeName' in tseg else '',
-        # 'file_path1': tseg.file_path1.name if tseg else '',
-        # 'file_path2': tseg.file_path2.name if tseg else '',
-        'alban_tushaal': tseg['EmployeePosition'] if 'EmployeePosition' in tseg else '',
-        'alban_baiguullga': tseg['CompanyName'] if 'CompanyName' in tseg else '',
-        'suljeenii_torol': tseg['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in tseg else '',
-        'id': data.id if data.id else '',
-        'objectid': data.objectid if data.objectid else '',
-        'point_id': data.point_id if  data.point_id else '',
-        'point_name': data.point_name if data.point_name else '',
-        'pid': data.pid if data.pid else '',
-        'ondor_torol': data.ondor_type if data.ondor_type else '',
-        'center_typ': data.mclass if data.mclass else '',
-        'aimag': data.aimag if data.aimag else '',
-        'sum': data.sum if data.sum else '',
-        'sheet1':data.sheet1 if data.sheet1 else '',
-        'zone': int(data.sheet2) if sheet2 else '',
-        'cc': int(data.sheet3) if sheet3 else '',
-        't_type': data.t_type if data.t_type else '',
-        'ondor': data.ondor if data.ondor else '',
-        'geo_id': tseg['geo_id']
-    })
+    requests = TsegRequest.objects
+    requests = requests.filter(pk=pk).first()
+    if requests:
+        geo_json = json.loads(requests.geo_json)
+        if geo_json['coordinates']:
+            latlongx = geo_json['coordinates'][0]
+            latlongy = geo_json['coordinates'][1]
+            LA = int(float(latlongx))
+            LB = int((float(latlongx)-LA)*60)
+            LC = float("{:.6f}".format(((float(latlongx))-LA-LB/60)*3600 ))
+            BA = int(float(latlongy))
+            BB = int((float(latlongy)-BA)*60)
+            BC = (float(float(latlongy))-BA-BB/60)*3600
+
+        if requests.values:
+            values = json.loads(requests.values)
+            sheets = values['Nomenclature']
+            sheets = sheets.split("-")
+
+            tseg_display.append({
+                'latlongx': latlongx,
+                'latlongy': latlongy,
+                'LA': LA,
+                'LB': LB,
+                'LC': LC,
+                'BA': BA,
+                'BB': BB,
+                'BC': BC,
+                'tseg_oiroos_img_url': '/media/' + values['PointNearPhoto'] if values and 'PointNearPhoto' in values else '',
+                'tseg_holoos_img_url': '/media/' + values['PointFarPhoto'] if values and 'PointFarPhoto' in values else '',
+                'barishil_tuhai': values['PointLocationDescription'] if 'PointLocationDescription' in values else '',
+                'bairshil_tseg_oiroos_img_url': '/media/' + values['PointCenterType'] if values and 'PointCenterType' in values else '',
+                'bairshil_tseg_holoos_img_url': '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else '',
+                'sudalga_or_shine':  values['PointShape'] if 'PointShape' in values else '',
+                'hors_shinj_baidal': values['Nomenclature'] if 'Nomenclature' in values else '',
+                'date': values['beginLifespanVersion'].strftime("%Y-%m-%d") if values and 'beginLifespanVersion' in values else '',
+                'hotolson': values['EmployeeName'] if 'EmployeeName' in values else '',
+                'alban_tushaal': values['EmployeePosition'] if 'EmployeePosition' in values else '',
+                'alban_baiguullga': values['CompanyName'] if 'CompanyName' in values else '',
+                'suljeenii_torol': values['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in values else '',
+                'id': requests.id if requests.id else '',
+                'point_id': requests.point_id if  requests.point_id else '',
+                'point_name': requests.point_name if requests.point_name else '',
+                'pid': requests.pdf_id if requests.pdf_id else '',
+                'aimag': requests.aimag if requests.aimag else '',
+                'sum': requests.sum if requests.sum else '',
+                'sheet1': sheets[0],
+                'zone': int(sheets[1]),
+                'cc': int(sheets[2]),
+                'center_typ': requests.point_type if requests.point_type else '',
+                'ondor': values['elevation'] if values['elevation'] else '',
+                'geo_id': values['geo_id']
+            })
 
     rsp = {
         'tseg_display': tseg_display,
@@ -930,15 +899,15 @@ def findSum(request, payload):
         return JsonResponse(rsp)
 
 
-def _get_point_class_for_mpoint(point_class):
+def _get_point_class_name(point_class):
     obj = {
-        str(utils.InspireCodeList('G102_P').code_list_id): '2', #gnss in baingin ajillagatai
-        str(utils.InspireCodeList('G103_P').code_list_id): '3', #gps iin suljee
-        str(utils.InspireCodeList('G104_P').code_list_id): '4', #trangulyts
-        str(utils.InspireCodeList('G105_P').code_list_id): '5', #polygometer
-        str(utils.InspireCodeList('G106_P').code_list_id): '6', #gravimeter
-        str(utils.InspireCodeList('G107_P').code_list_id): '7', #ulsin geodiez undur suljee
-        str(utils.InspireCodeList('G108_P').code_list_id): '8', #zuraglalliin suljee
+        str(utils.InspireCodeList('G102_P').code_list_id): '2', # gnss in baingin ajillagatai
+        str(utils.InspireCodeList('G103_P').code_list_id): '3', # gps iin suljee
+        str(utils.InspireCodeList('G104_P').code_list_id): '4', # trangulyts
+        str(utils.InspireCodeList('G105_P').code_list_id): '5', # polygometer
+        str(utils.InspireCodeList('G106_P').code_list_id): '6', # gravimeter
+        str(utils.InspireCodeList('G107_P').code_list_id): '7', # ulsin geodiez undur suljee
+        str(utils.InspireCodeList('G108_P').code_list_id): '8', # zuraglalliin suljee
     }
     return obj[str(point_class)]
 
@@ -962,6 +931,9 @@ def _create_request(request_datas):
     change_request.point_id = request_datas['point_id'] if 'point_id' in request_datas else None
     change_request.point_name = request_datas['point_name'] if 'point_name' in request_datas else None
 
+    change_request.point_class = request_datas['point_class'] if 'point_class' in request_datas else None
+    change_request.point_type = request_datas['point_type'] if 'point_type' in request_datas else None
+
     change_request.save()
     return change_request.id
 
@@ -971,11 +943,9 @@ def _check_and_make_form_json(feature_id, values):
     code_list_values = ""
 
     for key, value in values.items():
-        print(key)
         prop_qs = LProperties.objects
         prop_qs = prop_qs.filter(property_code=key)
         prop_qs = prop_qs.first()
-        print(prop_qs)
 
         form_json = dict()
         form_json['property_name'] = prop_qs.property_name
@@ -1016,10 +986,12 @@ def _make_request_datas(values, request_values):
         'kind': request_values['kind'],
         'form_json': form_json_list,
         'geo_json': request_values['geo_json'],
-        'values': values,
+        'values': json.dumps(values, ensure_ascii=False),
         'pdf_id': request_values['pdf_id'],
         'point_id': request_values['point_id'],
         'point_name': request_values['point_name'],
+        'point_class': request_values['point_class'],
+        'point_type': request_values['point_type'],
     }
 
     success = _create_request(request_datas)
@@ -1040,15 +1012,15 @@ def _get_values(request):
     value['GeodeticalNetworkPointClassValue'] = int(request.POST.get('suljeenii_torol')) #bolson
     value['GeodeticalNetworkPointTypeValue'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
     value['PointLocationDescription'] = request.POST.get('barishil_tuhai') # bolson
-    value['Nomenclature'] = str(request.POST.get('sheet1')) + str(request.POST.get('sheet2')) + str(request.POST.get('sheet3'))#bolson
+    value['Nomenclature'] = str(request.POST.get('trapetsiin_dugaar')) + "-" + str(request.POST.get('BA')) + "-" + str(request.POST.get('LA'))#bolson
     value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
     value['EmployeeName'] = request.POST.get('hotolson') # bolson
     value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
     value['OperatorName'] = request.POST.get('alban_baiguullga') # bolson
     value['name'] = request.POST.get('tesgiin_ner') # bolson
-    value['beginLifespanVersion'] = request.POST.get('date') #bolson
-    value['AdministrativeUnitSubClass'] = request.POST.get('aimag_name') #bolson
-    value['AdministrativeUnitSubClass'] = request.POST.get('sum_name') #bolson
+    value['beginLifespanVersion'] = utils.date_to_timezone(request.POST.get('date')) #bolson
+    value['AdministrativeUnitSubClass_1'] = request.POST.get('aimag_name') #bolson
+    value['AdministrativeUnitSubClass_2'] = request.POST.get('sum_name') #bolson
     value['SoilType'] = request.POST.get('hors_shinj_baidal') #mdku
     # value['endLifespanVersion'] = date # ustsanii daraah hadagalah # TODO
     value['elevation'] = request.POST.get('ondor')#bolson
@@ -1138,8 +1110,11 @@ def tsegPersonal(request):
                 request_values['kind'] = TsegPersonal.KIND_UPDATE
                 request_values['geo_json'] = geom.json
                 request_values['pdf_id'] = point_id
+
                 request_values['point_id'] = point_id
                 request_values['point_name'] = request.POST.get('tesgiin_ner')
+                request_values['point_class'] = request.POST.get('suljeenii_torol')
+                request_values['point_type'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None
 
                 _make_request_datas(value, request_values)
                 return JsonResponse({ 'success': True, 'name': False, 'ids': False })
@@ -1181,8 +1156,11 @@ def tsegPersonal(request):
             request_values['kind'] = TsegRequest.KIND_CREATE
             request_values['geo_json'] = geom.json
             request_values['pdf_id'] = point_id
+
             request_values['point_id'] = point_id
             request_values['point_name'] = request.POST.get('tesgiin_ner')
+            request_values['point_class'] = request.POST.get('suljeenii_torol')
+            request_values['point_type'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None
 
             _make_request_datas(value, request_values)
             # mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0])
@@ -1369,25 +1347,25 @@ def tsegUstsanList(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanRemove(request, payload):
-#     pk = payload.get('id')
-#     tseg_ustsan = TsegUstsan.objects.get(pk=pk)
-#     if tseg_ustsan:
-#         if tseg_ustsan.img_holoos:
-#             tseg_ustsan.img_holoos.delete(save=False)
-#         if tseg_ustsan.img_oiroos:
-#             tseg_ustsan.img_oiroos.delete(save=False)
-#         if tseg_ustsan.img_baruun:
-#             tseg_ustsan.img_baruun.delete(save=False)
-#         if tseg_ustsan.img_zuun:
-#             tseg_ustsan.img_zuun.delete(save=False)
-#         if tseg_ustsan.img_hoino:
-#             tseg_ustsan.img_hoino.delete(save=False)
-#         if tseg_ustsan.img_omno:
-#             tseg_ustsan.img_omno.delete(save=False)
-#         tseg_ustsan.delete()
-    return JsonResponse({'success': True})
-#     else:
-#         return JsonResponse({'success': False})
+    pk = payload.get('id')
+    tseg_ustsan = TsegUstsan.objects.get(pk=pk)
+    if tseg_ustsan:
+        if tseg_ustsan.img_holoos:
+            tseg_ustsan.img_holoos.delete(save=False)
+        if tseg_ustsan.img_oiroos:
+            tseg_ustsan.img_oiroos.delete(save=False)
+        if tseg_ustsan.img_baruun:
+            tseg_ustsan.img_baruun.delete(save=False)
+        if tseg_ustsan.img_zuun:
+            tseg_ustsan.img_zuun.delete(save=False)
+        if tseg_ustsan.img_hoino:
+            tseg_ustsan.img_hoino.delete(save=False)
+        if tseg_ustsan.img_omno:
+            tseg_ustsan.img_omno.delete(save=False)
+        tseg_ustsan.delete()
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
 
 
 @require_POST
@@ -1914,7 +1892,6 @@ def get_field_values(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_request_list(request, payload):
-    print('hahaha')
     datatable = Datatable(
         model=TsegRequest,
         payload=payload,

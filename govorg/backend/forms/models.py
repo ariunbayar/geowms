@@ -455,7 +455,12 @@ class TsegRequest(models.Model):
     form_json = models.TextField(null=True)
     geo_json = models.TextField(null=True)
     pdf_id = models.CharField(max_length=100, null=True)
+
     point_id = models.CharField(max_length=100, null=True)
     point_name = models.CharField(max_length=100, null=True)
+    point_class = models.CharField(max_length=100, null=True)
+    point_type = models.CharField(max_length=100, null=True)
+    aimag = models.CharField(max_length=100, null=True)
+    sum = models.CharField(max_length=100, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

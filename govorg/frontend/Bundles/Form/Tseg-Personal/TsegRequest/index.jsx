@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 
 import { PortalDataTable } from "@utils/DataTable"
-import InspireMap from '@utils/BundleMap'
 
 class TsegRequest extends Component {
 
@@ -9,25 +8,37 @@ class TsegRequest extends Component {
         super(props);
         this.state = {
             refresh: false,
-            жагсаалтын_холбоос: `/back/api/систем/govorgList/${props.match.params.id}/`,
+            жагсаалтын_холбоос: `/gov/api/tseg-personal/list/`,
             custom_query: {},
             талбарууд: [
-                {'field': 'name', "title": 'Системийн нэрүүд', 'has_action': true},
-                {'field': 'token', "title": 'Токен'},
-                {'field': 'created_at', "title": 'Үүсгэсэн огноо'},
+                {'field': 'point_name', "title": 'Цэгийн нэр'},
+                {'field': 'point_id', "title": 'Цэгийн дугаар'},
+                {'field': 'point_class', "title": 'Цэгийн анги'},
+                {'field': 'point_type', "title": 'Цэгийн төрөл'},
             ],
-            нэмэлт_талбарууд: [{
-                "title": 'Шийдвэрлэх',
-                'component': InspireMap,
-                'props': {
-                    'refreshData': () => this.refreshData(),
+            нэмэлт_талбарууд: [
+                {
+                    "title": 'Засах',
+                    "icon": 'fa fa-pencil-square-o text-success',
+                    "action": (values) => this.goLink(values),
                 },
-            }],
+                {
+                    "title": 'Шийдвэрлэх',
+                    "icon": 'fa fa-check-square-o text-warning',
+                    "action": (values) => this.goSuccess(values),
+                },
+            ],
         }
+        this.goLink = this.goLink.bind(this)
+        this.goSuccess = this.goSuccess.bind(this)
     }
 
-    componentDidMount() {
+    goLink(values) {
+        this.props.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${values.id}/засах/`)
+    }
 
+    goSuccess(values) {
+        console.log(values);
     }
 
     render() {
@@ -54,6 +65,7 @@ class TsegRequest extends Component {
                         нэмэх_товч={нэмэх_товч}
                         custom_query={custom_query}
                         нэмэлт_талбарууд={нэмэлт_талбарууд}
+                        нэмэх_товч={'/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/'}
                     />
                 </div>
             </div>

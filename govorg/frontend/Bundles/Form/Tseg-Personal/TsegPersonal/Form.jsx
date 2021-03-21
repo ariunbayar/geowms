@@ -246,7 +246,7 @@ export class Forms extends Component {
             service.findSum(X, niitB).then(({info, success}) => {
                 if(success){
                     this.setState({
-                        latlongy:X,
+                        latlongy: X,
                         latlongx:niitB,
                         aimag_name:info[0]['aimag'],
                         trapetsiin_dugaar: info[0].vseg,
@@ -522,9 +522,9 @@ export class Forms extends Component {
     }
 
     render() {
-       if(this.state.latlongy == ''){
-        this.getItem()
-       }
+        if(this.state.latlongy == ''){
+            this.getItem()
+        }
 
        const { point_classes, point_types, ondor_types } = this.state
 
