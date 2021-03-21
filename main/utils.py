@@ -1248,3 +1248,8 @@ def search_dict_from_object(objs, key='name', value='value'):
         data_value = obj[value]
         data[data_key] = data_value
     return data
+
+
+def check_saved_data(point_name, point_id):
+    has_name, has_ids = False, False
+    return has_name, has_ids

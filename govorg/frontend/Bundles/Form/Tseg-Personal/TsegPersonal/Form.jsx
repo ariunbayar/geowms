@@ -107,8 +107,8 @@ export class Forms extends Component {
     getFieldValues() {
         service
             .getFieldValue()
-            .then(({ point_classes, point_types, ondor_types, nativeness }) => {
-                this.setState({ point_classes, point_types, ondor_types, nativeness })
+            .then(({ point_classes, point_types, ondor_types }) => {
+                this.setState({ point_classes, point_types, ondor_types })
             })
     }
 
@@ -526,7 +526,7 @@ export class Forms extends Component {
         this.getItem()
        }
 
-       const { point_classes, point_types, ondor_types, nativeness } = this.state
+       const { point_classes, point_types, ondor_types } = this.state
 
        const error_msg = this.state.error_msg
         return (
@@ -593,7 +593,7 @@ export class Forms extends Component {
                                                     </div>
                                                 </td>
                                                 <th scope="row">2</th>
-                                                <th>Төвийн дугаар</th>
+                                                <th>Цэгийн дугаар</th>
                                                 <td scope="rowgroup">
                                                     <div className="input-group">
                                                         <input
@@ -772,7 +772,8 @@ export class Forms extends Component {
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th colSpan="2" scope="rowgroup">
+                                                {/* TODO */}
+                                                {/* <th colSpan="2" scope="rowgroup">
                                                     Өндөр төрөл
                                                     <br />
                                                     <Fragment>
@@ -788,14 +789,14 @@ export class Forms extends Component {
                                                                         {item.code_list_name}
                                                                     </option>
                                                                 )
-                                                            }
+                                                            } */}
                                                             {/* <option value="Эллипсойдын өндрийн утга">Эллипсойдын өндрийн утга</option>
                                                             <option value="Ортометрын өндрийн утга">Ортометрын өндрийн утга</option>
                                                             <option value="Балтын тэнгэсийн өндрийн утга">Балтын тэнгэсийн өндрийн утга</option> */}
-                                                        </Field>
+                                                        {/* </Field>
                                                         <ErrorMessage name="ondor_torol" component="div" className="invalid-feedback"/>
                                                     </Fragment>
-                                                </th>
+                                                </th> */}
                                                 <th colSpan="4" scope="rowgroup">
                                                     Өндөр тоо
                                                     <Field
@@ -935,7 +936,8 @@ export class Forms extends Component {
                                                     }
                                                 </td>
                                             </tr>
-                                            <tr>
+                                            {/* TODO */}
+                                            {/* <tr>
                                                 <th colSpan="1" scope="rowgroup">11.</th>
                                                 <td colSpan="5" scope="rowgroup">
                                                     <Fragment>
@@ -951,14 +953,14 @@ export class Forms extends Component {
                                                                         {item.code_list_name}
                                                                     </option>
                                                                 )
-                                                            }
+                                                            } */}
                                                             {/* <option>Сэргээсэн</option>
                                                             <option>Шинээр суулгасан</option> */}
-                                                        </Field>
+                                                        {/* </Field>
                                                         <ErrorMessage name="sudalga_or_shine" component="div" className="invalid-feedback"/>
                                                     </Fragment>
                                                 </td>
-                                            </tr>
+                                            </tr> */}
                                             <tr>
                                                 <th colSpan="1" scope="rowgroup">12.</th>
                                                 <th colSpan="2" scope="rowgroup">Хөрсний шинж байдал:</th>
@@ -991,7 +993,8 @@ export class Forms extends Component {
                                                     <ErrorMessage name="date" component="div" className="invalid-feedback"/>
                                                 </td>
                                             </tr>
-                                            {values.suljeenii_torol == '3' ?
+                                            {/* TODO */}
+                                            {values.suljeenii_torol == '-1' ?
                                             <tr>
                                                 <th colSpan="1" scope="rowgroup">14.</th>
                                                 <th colSpan="2" scope="rowgroup">Файл 1:</th>

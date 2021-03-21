@@ -103,14 +103,15 @@ def createPdf(tseg, x, y):
     pdf.cell(43, 8, data.point_name, 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
-    pdf.cell(41, 8, 'Төвийн дугаар', 1, 0, 'C')
+    pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
     pdf.cell(43, 8, data.point_id, 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     pdf.cell(-188)
     pdf.cell(10, 8, '3.', 1, 0, 'C')
     pdf.cell(51, 8, 'Трапцийн дугаар', 1, 0, 'C')
-    if data.sheet1:
-        trapets = data.sheet1 + '-' + str(int(data.sheet2)) + '-' + str(int(data.sheet3))
+    trapets = 'Байхгүй'
+    if 'Nomenclature' in tseg:
+        trapets = tseg['Nomenclature']
     pdf.cell(33, 8, trapets, 1, 0, 'C')
     pdf.cell(10, 8, '4.', 1, 0, 'C')
     pdf.cell(41, 8, 'Сүлжээний төрөл', 1, 0, 'C')
@@ -119,7 +120,7 @@ def createPdf(tseg, x, y):
     # mor 3
     pdf.ln(0)
     pdf.cell(10, 8, '5.', 1, 0, 'C')
-    pdf.cell(84, 8, 'Байршил (Аймаг, сум, дүүрэг, хороо)', 1, 0, 'C')
+    pdf.cell(84, 8, 'Байршил (Аймаг, сум, дүүрэг)', 1, 0, 'C')
     pdf.cell(94, 8, data. aimag + ' ' + data.sum, 1, 1, 'C')
     pdf.ln(0)
     pdf.cell(10, 8, '6.', 1, 0, 'C')
@@ -157,7 +158,7 @@ def createPdf(tseg, x, y):
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
-        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['LocationOverviewMap']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['PointCenterType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
         pdf.image(os.path.join(settings.MEDIA_ROOT, tseg['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
@@ -166,7 +167,7 @@ def createPdf(tseg, x, y):
     if 'sudalga_or_shine' in tseg:
         sudalgaa = tseg['sudalga_or_shine']
     else:
-        sudalgaa = 'байхгүй'
+        sudalgaa = 'Байхгүй'
     pdf.cell(84, 8, 'Судалгаа: ' + sudalgaa, 1, 0, 'C')
     pdf.cell(10, 8, '12.', 1, 0, 'C')
     if 'date' in tseg:
@@ -180,7 +181,7 @@ def createPdf(tseg, x, y):
     pdf.ln(8)
     pdf.cell(10, 8, '13.', 1, 0, 'C')
     pdf.cell(84, 8, 'Хөрсний шинж байдал:', 1, 0, 'C')
-    pdf.cell(94, 8, tseg['Nomenclature'], 1, 0, 'C')
+    pdf.cell(94, 8, tseg['SoilType'], 1, 0, 'C')
     # mor 6
     pdf.ln(8)
     pdf.cell(10, 8, '14.', 1, 0, 'C')
@@ -1019,7 +1020,6 @@ def _make_request_datas(values, request_values):
         'pdf_id': request_values['pdf_id'],
         'point_id': request_values['point_id'],
         'point_name': request_values['point_name'],
-        't_type': request_values['t_type'],
     }
 
     success = _create_request(request_datas)
@@ -1034,6 +1034,27 @@ def _get_model_qs(Model, search):
     return qs
 
 
+def _get_values(request):
+    value = dict()
+    value['PointNumber'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
+    value['GeodeticalNetworkPointClassValue'] = int(request.POST.get('suljeenii_torol')) #bolson
+    value['GeodeticalNetworkPointTypeValue'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
+    value['PointLocationDescription'] = request.POST.get('barishil_tuhai') # bolson
+    value['Nomenclature'] = str(request.POST.get('sheet1')) + str(request.POST.get('sheet2')) + str(request.POST.get('sheet3'))#bolson
+    value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
+    value['EmployeeName'] = request.POST.get('hotolson') # bolson
+    value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
+    value['OperatorName'] = request.POST.get('alban_baiguullga') # bolson
+    value['name'] = request.POST.get('tesgiin_ner') # bolson
+    value['beginLifespanVersion'] = request.POST.get('date') #bolson
+    value['AdministrativeUnitSubClass'] = request.POST.get('aimag_name') #bolson
+    value['AdministrativeUnitSubClass'] = request.POST.get('sum_name') #bolson
+    value['SoilType'] = request.POST.get('hors_shinj_baidal') #mdku
+    # value['endLifespanVersion'] = date # ustsanii daraah hadagalah # TODO
+    value['elevation'] = request.POST.get('ondor')#bolson
+    return value
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1041,13 +1062,9 @@ def tsegPersonal(request):
     employee = get_object_or_404(Employee, user=request.user)
     pk = request.POST.get('idx')
     point_id = request.POST.get('toviin_dugaar')
-    ondor_type = request.POST.get('ondor_torol')
-    t_type = request.POST.get('t_type')
-    geo_id = request.POST.get('geo_id')
 
     tseg_image_url = 'tseg-personal'
     tseg_bairshil_img_url = 'tseg-personal-img'
-    tseg_file_url = 'tseg-personal-file'
 
     request_values = dict()
 
@@ -1070,23 +1087,9 @@ def tsegPersonal(request):
     if pk:
         create_tseg = False
 
-    if(len(point_id)<4):
-        point_id.zfill(4)
-
-    if request.POST.get('date'):
-        date = request.POST.get('date')
-
     y = float(request.POST.get('latlongy'))
     x = float(request.POST.get('latlongx'))
     geom = Point(x, y)
-    ondor = request.POST.get('ondor')
-
-    if request.POST.get('suljeenii_torol'):
-        point_class = int(request.POST.get('suljeenii_torol'))
-    else:
-        point_class = 0
-
-    point_class_for_mpoint = _get_point_class_for_mpoint(point_class)
 
     def _save_image(request_name, folder_path, request):
         image_name = ''
@@ -1096,91 +1099,13 @@ def tsegPersonal(request):
         return image_name
 
     with transaction.atomic():
-        print(create_tseg)
         if not create_tseg:
-            mpoints = Mpoint_view.objects.using('postgis_db').filter(id=pk, t_type=t_type).first()
-            point_id = mpoints.point_id
             tseg = utils.get_mdata_values(feature_code, point_id)
 
             if not tseg:
                 create_tseg = True
 
-            if not create_tseg:
-                if mpoints.t_type == 'g102':
-                    point_class_name='GNSS-ийн байнгын ажиллагаатай станц'
-                    Mpoint = Mpoint2
-
-                if mpoints.t_type == 'g103':
-                    point_class_name='GPS-ийн сүлжээний цэг'
-                    Mpoint = Mpoint3
-
-                if mpoints.t_type == 'g104':
-                    point_class_name='Триангуляцийн сүлжээний цэг'
-                    Mpoint = Mpoint4
-
-                if mpoints.t_type == 'g105':
-                    point_class_name='Полигонометрийн сүлжээний цэг'
-                    Mpoint = Mpoint5
-
-                if mpoints.t_type == 'g106':
-                    point_class_name='Гравиметрийн сүлжээний цэг'
-                    Mpoint = Mpoint6
-
-                if mpoints.t_type == 'g107':
-                    point_class_name='Өндрийн сүлжээний цэг'
-                    Mpoint = Mpoint7
-
-                if mpoints.t_type == 'g108':
-                    point_class_name='Зураглалын сүлжээний цэг'
-                    Mpoint = Mpoint8
-
-                if mpoints.t_type == 'g109':
-                    point_class_name='Шинээр нэмэгдсэн төлөв'
-                    Mpoint = Mpoint9
-
-                if mpoints.t_type == 'g110':
-                    point_class_name='Устсан төлөв'
-                    Mpoint = Mpoint10
-
-                mpoint_qs = Mpoint.objects.using('postgis_db')
-                mpoint_qs = mpoint_qs.filter(id=pk, t_type=t_type)
-                mpoint_qs.update(
-                    objectid="null", point_id=point_id,
-                    point_name=request.POST.get('tesgiin_ner'),
-                    ondor=ondor,
-                    point_class=point_class_for_mpoint,
-                    ondor_type=ondor_type,
-                    mclass=request.POST.get('center_typ'),
-                    aimag=request.POST.get('aimag_name'), sum=request.POST.get('sum_name'),
-                    sheet1=request.POST.get('trapetsiin_dugaar'), sheet2=request.POST.get('zone'),
-                    sheet3=request.POST.get('cc'),
-                    point_class_name=point_class_name,
-                    geom=geom
-                )
-
-                value = dict()
-                value['PointNumber'] = point_id # bolson
-                value['GeodeticalNetworkPointClassValue'] = point_class #bolson
-                value['GeodeticalNetworkPointTypeValue'] = request.POST.get('center_typ') # bolson
-                value['PointLocationDescription'] = request.POST.get('barishil_tuhai') # bolson
-                value['nativeness'] = request.POST.get('sudalga_or_shine') # medku
-                value['Nomenclature'] = request.POST.get('hors_shinj_baidal') #mdku
-                value['date'] = date #mdku
-                # value['file_path1'] = file1_name,
-                # value['file_path2'] = file2_name,
-                value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
-                value['EmployeeName'] = request.POST.get('hotolson') # bolson
-                value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
-                value['OperatorName'] = request.POST.get('alban_baiguullga') # bolson
-                value['name'] = request.POST.get('tesgiin_ner') # bolson
-                value['beginLifespanVersion'] = date
-                value['endLifespanVersion'] = date
-                value['localId'] = point_id
-                value['AdministrativeUnitSubClass'] = request.POST.get('aimag_name'),
-                value['AdministrativeUnitSubClass'] = request.POST.get('sum_name'),
-
-                value['elevationReference'] = ondor_type #bolson
-                value['elevationValue'] = ondor#bolson
+                value = _get_values(request)
 
                 def _remove_and_save(request_name, property_name, tseg, value, folder_path, request):
                     post_request = request.POST.get(request_name)
@@ -1197,6 +1122,7 @@ def tsegPersonal(request):
                 value = _remove_and_save('bairshil_tseg_oiroos_img_url', 'PointCenterType', tseg, value, tseg_bairshil_img_url, request)
                 value = _remove_and_save('bairshil_tseg_holoos_img_url', 'LocationOverviewMap', tseg, value, tseg_bairshil_img_url, request)
 
+                # TODO
                 # if not request.POST.get('file1'):
                 #     tseg_personal.file_path1.delete(save=False)
                 #     tseg_personal.file_path1 = request.FILES['file1']
@@ -1208,97 +1134,37 @@ def tsegPersonal(request):
                 #     tseg_personal.save()
 
                 # mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0], geo_id=geo_id)
+
                 request_values['kind'] = TsegPersonal.KIND_UPDATE
                 request_values['geo_json'] = geom.json
-                request_values['pdf_id'] = mpoints.pid
+                request_values['pdf_id'] = point_id
                 request_values['point_id'] = point_id
-                request_values['t_type'] = t_type
                 request_values['point_name'] = request.POST.get('tesgiin_ner')
+
                 _make_request_datas(value, request_values)
-                file_name = mpoints.pid + '.pdf'
-                src_file = os.path.join(settings.FILES_ROOT, tseg_file_url, file_name)
-                pdf = createPdf(value, x, y)
-                pdf.output(src_file, 'F')
                 return JsonResponse({ 'success': True, 'name': False, 'ids': False })
 
         if create_tseg:
-            tesgiin_ner = request.POST.get('tesgiin_ner')
-            objectid = request.POST.get('toviin_dugaar')
+            has_name, has_ids = utils.check_saved_data(request.POST.get('tesgiin_ner'), point_id) # tsegiin ner bolon object id ni huuchin hadgalsan uguig shalgana
 
-            file_name = 'PDF'+ objectid + '.pdf'
-            for_db_pdf_name = 'PDF' + objectid
-
-            tesgiin_ner_check = Mpoint_view.objects.using('postgis_db').filter(point_name=tesgiin_ner)
-            objectid_check = Mpoint_view.objects.using('postgis_db').filter(point_id=objectid)
-
-            if tesgiin_ner_check or objectid_check:
+            if has_name or has_ids:
                 name = False
                 ids = False
-                if tesgiin_ner_check:
+                if has_name:
                     name = True
-                if objectid_check:
+                if has_ids:
                     ids = True
                 return JsonResponse({'success': False, 'name': name, 'ids':ids})
 
-            date = None
-            file1 = ''
-            file2 = ''
-            if not request.POST.get('file1'):
-                file1 = request.FILES['file1']
+            # TODO
+            # if not request.POST.get('file1'):
+                # file1 = request.FILES['file1']
                 # file1_name = utils.save_file_to_storage(file1, tseg_file_url)
-            if not request.POST.get('file2'):
-                file2 = request.FILES['file2']
+            # if not request.POST.get('file2'):
+                # file2 = request.FILES['file2']
                 # file2_name = utils.save_file_to_storage(file2, tseg_file_url)
-            if request.POST.get('date'):
-                date = request.POST.get('date')
 
-            t_type = 'g109'
-
-            mpoint = Mpoint9.objects.using('postgis_db').create(
-                    objectid='null',
-                    point_id=point_id,
-                    ondor=ondor,
-                    point_name=request.POST.get('tesgiin_ner'),
-                    ondor_type=ondor_type,
-                    pid=for_db_pdf_name,
-                    point_class=point_class_for_mpoint,
-                    mclass=request.POST.get('center_typ'),
-                    aimag=request.POST.get('aimag_name'),
-                    sum=request.POST.get('sum_name'),
-                    sheet1=request.POST.get('trapetsiin_dugaar'),
-                    sheet2=request.POST.get('BA'),
-                    sheet3=request.POST.get('LA'),
-                    t_type=t_type,
-                    point_class_name='Шинээр нэмэгдсэн төлөв',
-                    geom=geom
-            )
-
-            point_id = request.POST.get('toviin_dugaar')
-
-            value = dict()
-            value['PointNumber'] = point_id # bolson
-            value['GeodeticalNetworkPointClassValue'] = point_class #bolson
-            value['GeodeticalNetworkPointTypeValue'] = request.POST.get('center_typ') # bolson
-            value['PointLocationDescription'] = request.POST.get('barishil_tuhai') # bolson
-            value['nativeness'] = request.POST.get('sudalga_or_shine') # medku
-            value['Nomenclature'] = request.POST.get('hors_shinj_baidal') #mdku
-            value['date'] = date #mdku
-            # value['file_path1'] = file1_name,
-            # value['file_path2'] = file2_name,
-            value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
-            value['EmployeeName'] = request.POST.get('hotolson') # bolson
-            value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
-            value['OperatorName'] = request.POST.get('alban_baiguullga') # bolson
-            value['name'] = request.POST.get('tesgiin_ner') # bolson
-            value['beginLifespanVersion'] = date
-            value['localId'] = point_id
-            value['endLifespanVersion'] = date
-            value['AdministrativeUnitSubClass'] = request.POST.get('aimag_name')
-            value['AdministrativeUnitSubClass'] = request.POST.get('sum_name')
-            value['versionID'] = date
-
-            value['elevationReference'] = ondor_type #bolson
-            value['elevationValue'] = ondor#bolson
+            value = _get_values(request)
 
             def _make_value(request_name, property_name, folder_path, request, value):
                 image_name = _save_image(request_name, folder_path, request)
@@ -1314,19 +1180,20 @@ def tsegPersonal(request):
 
             request_values['kind'] = TsegRequest.KIND_CREATE
             request_values['geo_json'] = geom.json
-            request_values['pdf_id'] = for_db_pdf_name
+            request_values['pdf_id'] = point_id
             request_values['point_id'] = point_id
             request_values['point_name'] = request.POST.get('tesgiin_ner')
-            request_values['t_type'] = t_type
 
             _make_request_datas(value, request_values)
             # mdatas = utils.save_value_to_mdatas(value, feature_code, [x, y, 0])
 
-            src_file = os.path.join(settings.FILES_ROOT, tseg_file_url, file_name)
-            pdf = createPdf(value, x, y)
-            pdf.output(src_file, 'F')
+    return JsonResponse({'success': True, 'name': False, 'ids': False})
 
-    return JsonResponse({'success': True, 'name': False, 'ids':False})
+
+def _send_data_to_pdf(values, file_name, tseg_file_url='tseg-personal-file'):
+    src_file = os.path.join(settings.FILES_ROOT, file_name + ".pdf")
+    pdf = createPdf(values['value'], values['x'], values['y'])
+    pdf.output(src_file, 'F')
 
 
 @require_POST
@@ -1362,6 +1229,7 @@ def tsegUstsan(request):
             baiguulla = ''
             alban_tushaal = ''
             phone = ''
+
     if tseg_id != -1:
         Tsegs = get_object_or_404(TsegUstsan, id=tseg_id)
         TsegUstsan.objects.filter(id=tseg_id).update(
@@ -1407,6 +1275,7 @@ def tsegUstsan(request):
             Tsegs.img_hoino = SimpleUploadedFile('icon.png', image_x2)
             Tsegs.save()
         return JsonResponse({'success': True})
+
     else:
         if img_holoos:
             [image_x2] = utils.resize_b64_to_sizes(img_holoos, [(720, 720)])
@@ -1452,44 +1321,10 @@ def tsegUstsan(request):
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanSuccess(request, payload):
     pk = payload.get('id')
-    tseg_ustsan = get_object_or_404(TsegUstsan, pk=pk)
-    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id=tseg_ustsan.tseg_id).first()
-    if mpoint:
-        tseglog = TsegUstsanLog.objects.create(
-                    log_id=mpoint.id,
-                    img_holoos =  tseg_ustsan.img_holoos.url if tseg_ustsan.img_holoos else '',
-                    img_oiroos = tseg_ustsan.img_oiroos.url if tseg_ustsan.img_oiroos else '',
-                    img_baruun = tseg_ustsan.img_baruun.url if tseg_ustsan.img_baruun else '',
-                    img_zuun = tseg_ustsan.img_zuun.url if tseg_ustsan.img_zuun else '',
-                    img_hoino = tseg_ustsan.img_hoino.url if tseg_ustsan.img_hoino else '',
-                    img_omno = tseg_ustsan.img_omno.url if tseg_ustsan.img_omno else '',
-            )
-    class_type = Mpoint_view.objects.using('postgis_db').filter(id=mpoint.id, point_id=tseg_ustsan.tseg_id).first()
-    data = None
-    if class_type.t_type == 'g102':
-        data = Mpoint2.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if class_type.t_type == 'g103':
-        data = Mpoint3.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if class_type.t_type == 'g104':
-        data = Mpoint4.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if class_type.t_type == 'g105':
-        data = Mpoint5.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if class_type.t_type == 'g106':
-        data = Mpoint6.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if class_type.t_type == 'g107':
-        data = Mpoint7.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if class_type.t_type == 'g108':
-        data = Mpoint8.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if class_type.t_type == 'g109':
-        data = Mpoint9.objects.using('postgis_db').filter(id=mpoint.id, t_type=mpoint.t_type).first()
-    if data:
-        mpoint10 = Mpoint10.objects.using('postgis_db').create(objectid=data.objectid, point_id=data.point_id, point_name=data.point_name, pid=data.pid, point_class=data.point_class, mclass=data.mclass, center_typ=data.center_typ, sum=data.sum,aimag=data.aimag, sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3, ondor=data.ondor, t_type='g110', geom=data.geom, ondor_type=data.ondor_type)
-        if mpoint10:
-            data.delete()
-            tseg_ustsan.delete()
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False})
+
+    tseg_request = get_object_or_404(TsegRequest, pk=pk, kind=TsegRequest.STATE_REJECT)
+    #TODO ustsan tseg iig ustgah iig batalgaajuulah batalgaajwal mdatas mgeodatas aas ustana refreshmaterialzed view
+    return JsonResponse({'success': True})
 
 
 @require_POST
@@ -1534,25 +1369,25 @@ def tsegUstsanList(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanRemove(request, payload):
-    pk = payload.get('id')
-    tseg_ustsan = TsegUstsan.objects.get(pk=pk)
-    if tseg_ustsan:
-        if tseg_ustsan.img_holoos:
-            tseg_ustsan.img_holoos.delete(save=False)
-        if tseg_ustsan.img_oiroos:
-            tseg_ustsan.img_oiroos.delete(save=False)
-        if tseg_ustsan.img_baruun:
-            tseg_ustsan.img_baruun.delete(save=False)
-        if tseg_ustsan.img_zuun:
-            tseg_ustsan.img_zuun.delete(save=False)
-        if tseg_ustsan.img_hoino:
-            tseg_ustsan.img_hoino.delete(save=False)
-        if tseg_ustsan.img_omno:
-            tseg_ustsan.img_omno.delete(save=False)
-        tseg_ustsan.delete()
-        return JsonResponse({'success': True})
-    else:
-        return JsonResponse({'success': False})
+#     pk = payload.get('id')
+#     tseg_ustsan = TsegUstsan.objects.get(pk=pk)
+#     if tseg_ustsan:
+#         if tseg_ustsan.img_holoos:
+#             tseg_ustsan.img_holoos.delete(save=False)
+#         if tseg_ustsan.img_oiroos:
+#             tseg_ustsan.img_oiroos.delete(save=False)
+#         if tseg_ustsan.img_baruun:
+#             tseg_ustsan.img_baruun.delete(save=False)
+#         if tseg_ustsan.img_zuun:
+#             tseg_ustsan.img_zuun.delete(save=False)
+#         if tseg_ustsan.img_hoino:
+#             tseg_ustsan.img_hoino.delete(save=False)
+#         if tseg_ustsan.img_omno:
+#             tseg_ustsan.img_omno.delete(save=False)
+#         tseg_ustsan.delete()
+    return JsonResponse({'success': True})
+#     else:
+#         return JsonResponse({'success': False})
 
 
 @require_POST
@@ -1927,116 +1762,9 @@ def tsegPersonalSuccess(request, payload):
 
     objectid = payload.get('objectid')
     point_class = int(payload.get('point_class'))
-    t_type = payload.get('t_type')
-    data = None
-    Mpoint = None
-
-    if t_type == 'g102':
-        data = Mpoint2.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 2:
-            data = None
-    if t_type == 'g103':
-        data = Mpoint3.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 3:
-            data = None
-    if t_type == 'g104':
-        data = Mpoint4.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 4:
-            data = None
-    if t_type == 'g105':
-        data = Mpoint5.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 5:
-            data = None
-    if t_type == 'g106':
-        data = Mpoint6.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 6:
-            data = None
-    if t_type == 'g107':
-        data = Mpoint7.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 7:
-            data = None
-    if t_type == 'g108':
-        data = Mpoint8.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 8:
-            data = None
-    if t_type == 'g109':
-        data = Mpoint9.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 9:
-            data = None
-    if t_type == 'g110':
-        data = Mpoint10.objects.using('postgis_db').filter(id=objectid).first()
-        if data.point_class == 10:
-            data = None
 
     if data:
-        if data.point_class == 2:
-            point_class = 2
-            Mpoint = Mpoint2
-            point_class_name = 'GNSS-ийн байнгын ажиллагаатай станц'
-            t_type = 'g102',
-
-        if data.point_class == 3:
-            Mpoint = Mpoint3
-            point_class = 3
-            point_class_name = 'GPS-ийн сүлжээний цэг'
-            t_type = 'g103'
-
-        if data.point_class == 4:
-            Mpoint = Mpoint4
-            point_class = 4
-            point_class_name = 'Триангуляцийн сүлжээний цэг'
-            t_type = 'g104'
-
-        if data.point_class == 5:
-            Mpoint = Mpoint5
-            point_class = 5
-            point_class_name = 'Полигонометрийн сүлжээний цэг'
-            t_type = 'g105'
-
-        if data.point_class == 6:
-            Mpoint = Mpoint6
-            point_class = 6
-            point_class_name = 'Гравиметрийн сүлжээний цэг'
-            t_type = 'g106'
-
-        if data.point_class == 7:
-            Mpoint = Mpoint7
-            point_class = 7
-            point_class_name = 'Өндрийн сүлжээний цэг'
-            t_type = 'g107'
-
-        if data.point_class == 8:
-            Mpoint = Mpoint8
-            point_class = 8
-            point_class_name = 'Зураглалын сүлжээний цэг'
-            t_type = 'g108'
-
-        if data.point_class == 9:
-            Mpoint = Mpoint9
-            point_class = 9
-            point_class_name = 'Шинээр нэмэгдсэн төлөв'
-            t_type = 'g109'
-
-        if data.point_class == 10:
-            Mpoint = Mpoint10
-            point_class = 10
-            point_class_name = 'Устсан төлөв'
-            t_type = 'g110'
-
-        Mpoint.objects.using('postgis_db').create(
-            objectid=data.objectid,
-            point_id=data.point_id, point_name=data.point_name,
-            pid=data.pid, point_class=point_class,
-            ondor_type=data.ondor_type,
-            point_class_name=point_class_name,
-            mclass=data.mclass, center_typ=data.center_typ,
-            sum=data.sum, aimag=data.aimag,
-            sheet1=data.sheet1, sheet2=data.sheet2, sheet3=data.sheet3,
-            ondor=data.ondor, t_type=t_type,
-            geom=data.geom
-        )
-
-        data.delete()
+        #TODO tuhain huseltend bgaa form iig m_datas ruu hadgalaad geom iig ni mdatas ruu hadgalana
         utils.refreshMaterializedView(feauture_id)
         rsp = {
             'success': True,
@@ -2168,16 +1896,16 @@ def get_field_values(request):
     point_type = utils.InspireProperty('GeodeticalNetworkPointTypeValue')
     point_class = utils.InspireProperty('GeodeticalNetworkPointClassValue')
     ondor_type = utils.InspireProperty('elevationReference')
-    nativeness = utils.InspireProperty('nativeness')
+    # nativeness = utils.InspireProperty('nativeness')
     point_types = utils.get_code_list_from_property_id(point_type.property_id)
     point_classes = utils.get_code_list_from_property_id(point_class.property_id)
     ondor_types = utils.get_code_list_from_property_id(ondor_type.property_id)
-    nativeness = utils.get_code_list_from_property_id(nativeness.property_id)
+    # nativeness = utils.get_code_list_from_property_id(nativeness.property_id)
     rsp = {
         'point_types': point_types,
         'point_classes': point_classes,
         'ondor_types': ondor_types,
-        'nativeness': nativeness,
+        # 'nativeness': nativeness,
     }
     return JsonResponse(rsp)
 
