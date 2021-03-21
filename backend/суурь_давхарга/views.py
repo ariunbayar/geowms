@@ -108,12 +108,15 @@ def үүсгэх(request):
         payload = json.loads(request.body)
 
         base_layer = BaseLayer()
-        protocal  = Config.objects.filter(name='geoserver_protocol').first().value
-        if protocal:
-            url = ''
+        protocol  = Config.objects.filter(name='geoserver_protocol').first().value
+        if protocol:
             url_data = payload.get('url').split(":")
-            if url_data[0] != protocal:
-                url = protocal + url_data[1] + url_data[2]
+            url = protocol
+            if url_data[0] != protocol:
+                i = 1
+                while i < len(url_data):
+                    url = url + ":" + url_data[i]
+                    i = i+1
 
         sizes = [
             (128 * 2, 72 * 2),

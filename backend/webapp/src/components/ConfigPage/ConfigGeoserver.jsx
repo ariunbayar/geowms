@@ -136,21 +136,21 @@ export default class ConfigGeoserver extends Component {
                                                 />
                                             </div>
                                             <div className="form-group col-md-6">
+                                                <label htmlFor="id_geoserver_protocol">Protocol</label>
+                                                <Field
+                                                    name="geoserver_protocol"
+                                                    id="id_geoserver_protocol"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-6">
                                                 <label htmlFor="geoserver_port">Port</label>
                                                 <Field
                                                     name="geoserver_port"
                                                     type="text"
                                                     className="form-control"
                                                     id="id_geoserver_port"
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="geoserver_protocol">Protocal</label>
-                                                <Field
-                                                    name="geoserver_protocol"
-                                                    id="geoserver_protocol"
-                                                    type="text"
-                                                    className="form-control"
                                                 />
                                             </div>
                                         </div>
