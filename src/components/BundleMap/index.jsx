@@ -29,6 +29,7 @@ import { Sidebar } from './Sidebar'
 import { PopUp } from './popUp/PopUp'
 import { AlertRoot } from "./ShopControls/alert"
 import Loader from '@utils/Loader'
+import  {PopUpCmpForms}  from './popUp/PopUpForms'
 
 
 export default class InspireMap extends Component {
@@ -576,7 +577,7 @@ export default class InspireMap extends Component {
         this.map = map
 
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
-        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
+        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, PopUpCmpForms)
         this.getErguulLayer()
         this.setState({is_loading: false})
 
@@ -957,7 +958,7 @@ export default class InspireMap extends Component {
                                         }
                                         else {
                                             if (not_visible_layers.length == 0) {
-                                                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
+                                                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
                                             }
                                         }
                                     }
