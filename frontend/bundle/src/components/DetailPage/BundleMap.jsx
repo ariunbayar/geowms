@@ -274,7 +274,8 @@ export default class BundleMap extends Component {
                     if (base_layer_info.tilename == "wmts") {
                         layer = new Tile({
                             source: new WMTS({
-                                url: base_layer_info.url,
+                                // url: base_layer_info.url,
+                                url: base_layer_info.geoserver_url,
                                 layer: base_layer_info.layers,
                                 matrixSet: this.state.projection_display,
                                 format: 'image/png',
