@@ -16,6 +16,7 @@ export class Bar extends Component {
                 <Switch>
                     <Route path="/gov/forms/tseg-info/tsegpersonal/tseg-personal/" component={TsegPersonal}/>
                     <Route path="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" component={TsegUstsan}/>
+                    <Route path="/gov/forms/tseg-info/tsegpersonal/tseg-list/" component={TsegUstsan}/>
                     <Route exact path="/gov/forms/"/>
                 </Switch>
             </div>

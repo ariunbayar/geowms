@@ -664,6 +664,19 @@ def _get_kind_color(kind, item):
     return display_name
 
 
+def _getname(point_class, item=None):
+    point_class = _get_model_qs(LCodeLists, {'code_list_id': int(point_class)})
+    point_class = point_class.first().code_list_name
+    return point_class
+
+
+def _get_point_type_name(point_type, item):
+    if point_type:
+        point_type = _get_model_qs(LCodeLists, {'code_list_id': int(point_type)})
+        point_type = point_type.first().code_list_name
+    return point_type
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -675,6 +688,8 @@ def tseg_personal_list(request, payload):
         хувьсах_талбарууд = [
             {"field": "state", "action": _get_state_color, "new_field": "state"},
             {"field": "kind", "action": _get_kind_color, "new_field": "kind"},
+            {"field": "point_type", "action": _get_point_type_name, "new_field": "point_type"},
+            {"field": "point_class", "action": _getname, "new_field": "point_class"},
         ]
 
         datatable = Datatable(
@@ -1917,6 +1932,5 @@ def get_field_values(request):
         'point_types': point_types,
         'point_classes': point_classes,
         'ondor_types': ondor_types,
-        # 'nativeness': nativeness,
     }
     return JsonResponse(rsp)
