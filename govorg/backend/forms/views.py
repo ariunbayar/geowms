@@ -699,6 +699,19 @@ def tseg_personal_list(request, payload):
     return JsonResponse(rsp)
 
 
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def tseg_inspire_list(request, payload):
+    query = ''
+    datas = utils.get_mdata_values('gnp-gp-gp', query)
+
+    rsp = {
+        'items': datas
+    }
+    return JsonResponse(rsp)
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1081,7 +1094,7 @@ def tsegPersonal(request):
 
     with transaction.atomic():
         if not create_tseg:
-            tseg = utils.get_mdata_values(feature_code, point_id)
+            tseg = utils.get_mdata_value(feature_code, point_id)
 
             if not tseg:
                 create_tseg = True
