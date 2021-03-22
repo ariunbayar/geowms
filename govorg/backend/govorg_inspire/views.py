@@ -1216,8 +1216,7 @@ def update_c2405(request, payload):
     attr10 = payload.get('attr10')
     attr_layer = payload.get('attr_layer')
     cursor = connections['nema'].cursor()
-    attributes = {}
-    if not attributes:
+    if not attr_layer:
         return JsonResponse({
             'success': True,
             'info': "Attribute хоосон байна"

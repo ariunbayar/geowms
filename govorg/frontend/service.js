@@ -11,7 +11,8 @@ export const service = {
     updatePassword,
     getEmpRoles,
     getApproveAndRevoke,
-    loadBaseLayers
+    loadBaseLayers,
+    updatec2405
 }
 
 function loadBaseLayers() {
@@ -78,4 +79,12 @@ function getEmpRoles() {
 function getApproveAndRevoke() {
     const requestOptions = getGetOptions()
     return fetch('/gov/get_approve_and_revoke/', requestOptions).then(handleResponse)
+}
+
+function updatec2405(attr10, attr_layer) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({attr10, attr_layer})
+    }
+    return fetch('/gov/api/nema/update-c2405/', requestOptions).then(handleResponse)
 }

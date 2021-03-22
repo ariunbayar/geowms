@@ -29,7 +29,6 @@ import { Sidebar } from './Sidebar'
 import { PopUp } from './popUp/PopUp'
 import { AlertRoot } from "./ShopControls/alert"
 import Loader from '@utils/Loader'
-import  {PopUpCmpForms}  from './popUp/PopUpForms'
 
 
 export default class InspireMap extends Component {
@@ -115,6 +114,7 @@ export default class InspireMap extends Component {
         this.popUpload = this.popUpload.bind(this)
         this.featureFromUrl = this.featureFromUrl.bind(this)
         this.getDetailOfPoint = this.getDetailOfPoint.bind(this)
+        this.ChoosePopUp = this.ChoosePopUp.bind(this)
     }
 
     initMarker() {
@@ -582,10 +582,17 @@ export default class InspireMap extends Component {
         this.map = map
 
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
-        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, PopUpCmpForms)
+        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
         this.getErguulLayer()
         this.setState({is_loading: false})
 
+    }
+
+    ChoosePopUp(values) {
+        const {PPContent} = this.props
+        return (
+                <PPContent {...values}/>
+        )
     }
 
     onClickCloser(){
@@ -868,7 +875,13 @@ export default class InspireMap extends Component {
         overlay.setPosition(coordinate)
 
         this.setState({ pay_modal_check: false })
-        this.featureFromUrl(coordinate)
+        // if (this.props.form_datas) {
+        //     this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+        // }
+
+        if (! this.props.featurefromUrl) {
+            this.featureFromUrl(coordinate)
+        }
 
         this.sendFeatureInfo = []
         this.is_empty = true
@@ -951,17 +964,17 @@ export default class InspireMap extends Component {
                                     this.getPopUpInfo(coordinate, not_visible_layers)
                                 }
                                 else {
-                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
                                 }
                             }
                             else {
                                 if (not_visible_layers.length == 0) {
-                                    this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
+                                    this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
                                 }
                             }
                         }
                         else {
-                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, PopUpCmpForms)
+                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
                         }
 
                     })

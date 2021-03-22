@@ -3,6 +3,7 @@ import InspireMap from "@utils/BundleMap"
 import {service} from './service'
 import { Children } from "react"
 import { containsCoordinate } from "ol/extent"
+import {NemaPP} from './nemapop'
 
 export default class NemaMap extends Component {
 
@@ -99,6 +100,7 @@ export default class NemaMap extends Component {
                         wms_list={wms_list}
                         height="80vh"
                         base_layer={true}
+                        PPContent={NemaPP}
                     />
                 </div>
             </div>

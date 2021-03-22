@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import InspireMap from "@utils/BundleMap"
 import {service} from './service'
+import {CovidPP} from './covid_popup'
 
 export default class CovidMap extends Component {
 
@@ -46,6 +47,8 @@ export default class CovidMap extends Component {
                         height="100vh"
                         vector_source={geo_data}
                         form_datas={form_datas}
+                        PPContent={CovidPP}
+                        featurefromUrl={true}
                     />
                 </div>
         )
