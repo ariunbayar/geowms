@@ -61,7 +61,8 @@ export default class InspireMap extends Component {
             layer_one_tile: null,
             form_datas: props.form_datas,
             center: props.center,
-            layer_2405: ''
+            layer_2405: '',
+            vectorSource: null
         }
 
         this.controls = {
@@ -311,6 +312,12 @@ export default class InspireMap extends Component {
 
         const { projection, projection_display, form_datas} = this.state
         if (Object.keys(vector_source).length > 0) {
+            this.map.getLayers().forEach(layer => {
+                if (layer && layer.get('id') === 'aimag') {
+                  layer.getSource().clear();
+                }
+            });
+
             const features = new GeoJSON({
                 dataProjection: projection_display,
                 featureProjection: projection,
@@ -326,6 +333,7 @@ export default class InspireMap extends Component {
                         width: 2
                     }),
                 }),
+                id: 'aimag'
             })
             this.map.addLayer(vector_layer)
             this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
@@ -1208,7 +1216,7 @@ export default class InspireMap extends Component {
                 <Loader is_loading={is_loading}></Loader>
                 <div
                     id="map"
-                    style={{height: `${height}`}}
+                    style={{height: `${height}`,}}
                     className="mw-100 px-0 mx-0"
                 >
                 </div>
