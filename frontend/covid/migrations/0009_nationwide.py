@@ -45,7 +45,7 @@ def _nationwide(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend_covid', '0006_import_data'),
+        ('frontend_covid', '0008_import_data'),
     ]
 
     operations = [
