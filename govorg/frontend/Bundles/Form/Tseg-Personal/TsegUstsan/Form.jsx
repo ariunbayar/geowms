@@ -286,14 +286,14 @@ export class FormTseg extends Component {
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
-            this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
+            this.props.data.history.push( `/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/`)
         }, 2000)
     }
 
     modalClose(){
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
-        this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
+        this.props.data.history.push( `/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/`)
     }
 
     render() {
@@ -342,7 +342,7 @@ export class FormTseg extends Component {
                             <div className="card-body">
                                 <div className="row ml-3">
                                     <div className="col-md-12 mb-4 mt-4">
-                                        <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`} className='btn gp-outline-primary '>
+                                        <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/`} className='btn gp-outline-primary '>
                                                 <i className="fa fa-angle-double-left"></i> Буцах
                                         </NavLink>
                                     </div>

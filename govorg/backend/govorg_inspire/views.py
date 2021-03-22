@@ -749,9 +749,6 @@ def _make_request(values, request_values):
         'kind': request_values['kind'],
         'form_json': form_json_list,
         'geo_json': request_values['geo_json'],
-        'order_at': request_values['order_at'],
-        'order_no': request_values['order_no'],
-        'group_id': request_values['group_id'],
     }
 
     success = _create_request(request_datas)

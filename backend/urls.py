@@ -136,6 +136,8 @@ urlpatterns = [
         path('payment/save/', config_views.payment_configs_save),
         path('covid/', config_views.covid_configs),
         path('covid/save/', config_views.covid_configs_save),
+        path('get-value-type-fields/', config_views.get_value_type_fields),
+        path('save-value-types/', config_views.save_value_types),
     ], 'config'))),
 
     path('api/error500/', include(([
