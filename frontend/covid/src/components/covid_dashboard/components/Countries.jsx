@@ -98,7 +98,7 @@ export  class Countries extends Component {
                     <div className="bundle-view-scroll">
                         <div id='accordion1'>
                             {datas.map((theme, theme_idx) =>
-                                <ul className="list-group mr-1" key={theme_idx}>
+                                <ul className="list-group bg-light mr-1" key={theme_idx}>
                                     <li className="list-group-item list-group-hover mt-2 collapsed"
                                         id={`${theme_idx}`}
                                         data-toggle="collapse"

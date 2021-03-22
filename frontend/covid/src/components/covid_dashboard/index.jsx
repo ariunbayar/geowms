@@ -71,8 +71,8 @@ class CovidDashboard extends PureComponent {
         const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, pop_data } = this.state
 
         return (
-            <div className="card">
-                <div className="card-body">
+            <div className="card bg-light">
+                <div className="card-body bg-light">
                     <div className="row">
                         <Loader is_loading={is_loading} />
                         <div className="col-sm-2">
@@ -105,7 +105,7 @@ class CovidDashboard extends PureComponent {
                                     />
                                 </div>
                                 <div className="col-sm-4">
-                                    <div className="card bg-transparent shadow-none border border-light">
+                                    <div className="card">
                                         <div className="card-body">
                                             <h4 className="text-center">Насны ангилал</h4>
                                             <Bar
