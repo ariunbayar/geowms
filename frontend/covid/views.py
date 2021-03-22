@@ -218,11 +218,7 @@ def get_covid_data(request, geo_id):
 @require_GET
 @ajax_required
 def get_covid_state(request, geo_id):
-    print(geo_id)
-    print(geo_id)
-    print(geo_id)
     qs = CovidDashboard.objects.filter(geo_id=geo_id)
-    print(qs)
     covid_datas = qs.values()
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)
     last_day_data = qs_log.order_by('-updated_at').values()
@@ -245,23 +241,21 @@ def get_covid_state(request, geo_id):
                     color = "info"
                 for covid_data in covid_datas:
                     if color != 'info':
-                        if last_day_data:
-                            count_datas.append({
-                                'origin_name': f.name,
-                                'name': f.verbose_name,
-                                'data': covid_data[f.name],
-                                'prev_data': last_day_data[1][f.name],
-                                'color': color
-                            })
+                        count_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name],
+                            'color': color
+                        })
                     else:
-                        if last_day_data:
-                            count_covid_datas.append({
-                                'origin_name': f.name,
-                                'name': f.verbose_name,
-                                'data': covid_data[f.name],
-                                'prev_data': last_day_data[1][f.name],
-                                'color': color
-                            })
+                        count_covid_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name],
+                            'color': color
+                        })
     covid_data_ogj = qs.first()
     piechart_one = {
         'labels': [
