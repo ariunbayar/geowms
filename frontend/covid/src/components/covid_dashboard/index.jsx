@@ -70,33 +70,6 @@ class CovidDashboard extends PureComponent {
     render() {
         const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, pop_data } = this.state
 
-        const asd = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-            datasets: [
-                {
-                label: 'My First dataset',
-                fill: false,
-                lineTension: 0.1,
-                backgroundColor: 'rgba(75,192,192,0.4)',
-                borderColor: 'rgba(75,192,192,1)',
-                borderCapStyle: 'butt',
-                borderDash: [],
-                borderDashOffset: 0.0,
-                borderJoinStyle: 'miter',
-                pointBorderColor: 'rgba(75,192,192,1)',
-                pointBackgroundColor: '#fff',
-                pointBorderWidth: 1,
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-                pointHoverBorderColor: 'rgba(220,220,220,1)',
-                pointHoverBorderWidth: 2,
-                pointRadius: 1,
-                pointHitRadius: 10,
-                data: [65, 59, 80, 81, 56, 55, 40]
-                }
-            ]
-            };
-
         return (
             <div className="card">
                 <div className="card-body">
@@ -133,8 +106,8 @@ class CovidDashboard extends PureComponent {
                                 </div>
                                 <div className="col-4">
                                     <div className="card bg-transparent shadow-none border border-light">
-                                        <DropDown />
                                         <div className="card-body">
+                                            <h4 className="text-center">Насны ангилал</h4>
                                             <Bar
                                                 height={200}
                                                 data={pop_data}

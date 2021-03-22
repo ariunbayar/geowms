@@ -1,9 +1,31 @@
 .bundle-view-scroll {
     overflow-y: scroll;
     height: 1000px;
+    /* opacity: 0; */
 }
 
 .bundle-view-right-scroll {
     overflow-y: scroll;
     height: 1000px;
 }
+
+.list-group-hover:hover{
+    border: 1px solid #00809D;
+    color: #00809D;
+    font-weight: 600;
+}
+
+.list-group-active{
+    border: 1px solid #00809D;
+    color: #00809D;
+}
+
+.list-group-hover:hover .list-group-count{
+    transition: 0.5s;
+    margin-right: 30px;
+    font-weight: 600;
+}
+.list-group-count{
+    transition: 0.5s;
+}
+
