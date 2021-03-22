@@ -316,8 +316,6 @@ def get_covid_state(request, geo_id):
     age_labels = []
     for sorted_age in sorted_age_list:
         age_labels.append(sorted_age['age_group'])
-    if geo_id == '496':
-        geo_id = 11
     pop_counts = PopulationCount.objects.filter(geo_id=int(geo_id))
     pop_counts = list(pop_counts)
 
@@ -458,10 +456,15 @@ def get_data_dashboard(request):
     last_day_data = qs_log.order_by('-updated_at').values()
     zuruu = dict()
     if last_day_data:
-        last_day_data = last_day_data[1]
-        mongol = parents.values()[0]
-        for name in _for_mongol_list():
-            zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+        if len(last_day_data) < 1:
+            last_day_data = last_day_data[1]
+            mongol = parents.values()[0]
+            for name in _for_mongol_list():
+                zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+        else:
+            mongol = parents.values()[0]
+            for name in _for_mongol_list():
+                zuruu[name + "_zuruu"] = str(mongol[name])
 
     rsp = {
         'success': True,
