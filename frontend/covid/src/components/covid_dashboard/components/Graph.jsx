@@ -12,7 +12,7 @@ class Graph extends PureComponent {
     constructor(props) {
         super(props)
         this.state = {
-            geo_id: props.geo_id ? props.geo_id : 'au_496',
+            geo_id: props.geo_id ? props.geo_id : '496',
             count_datas: [],
             charts: {}
         }

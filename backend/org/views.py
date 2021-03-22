@@ -1426,7 +1426,8 @@ def form_options(request, option):
     if option == 'second':
         rsp = {
             'success': True,
-            'secondOrders': admin_levels
+            'secondOrders': admin_levels,
+            'firstOrder_geom': utils.get_1stOrder_geo_id(),
         }
     else:
         rsp = {

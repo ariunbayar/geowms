@@ -295,69 +295,70 @@ def get_administrative_levels():
     ```
         [
             {
-                'geo_id': 'au_62',
+                'geo_id': '62',
                 'name': 'Өвөрхангай',
                 'children': [
                     {
-                        'geo_id': 'au_6255',
+                        'geo_id': '6255',
                         'name': 'Хужирт',
                         'children': [
-                            {'geo_id': 'au_625551', 'name': '1-р баг'},
-                            {'geo_id': 'au_625553', 'name': '2-р баг'}
+                            {'geo_id': '625551', 'name': '1-р баг'},
+                            {'geo_id': '625553', 'name': '2-р баг'}
                         ]
                     },
                     {
-                        'geo_id': 'au_6234',
+                        'geo_id': '6234',
                         'name': 'Өлзийт',
                         'children': [
-                            {'geo_id': 'au_623451', 'name': '1-р баг'},
-                            {'geo_id': 'au_623453', 'name': '2-р баг'},
-                            {'geo_id': 'au_623455', 'name': '3-р баг'},
-                            {'geo_id': 'au_623457', 'name': '4-р баг'}
+                            {'geo_id': '623451', 'name': '1-р баг'},
+                            {'geo_id': '623453', 'name': '2-р баг'},
+                            {'geo_id': '623455', 'name': '3-р баг'},
+                            {'geo_id': '623457', 'name': '4-р баг'}
                         ]
                     }
                 ]
             },
             {
-                'geo_id': 'au_46',
+                'geo_id': '46',
                 'name': 'Өмнөговь',
                 'children': [
                     {
-                        'geo_id': 'au_4607',
+                        'geo_id': '4607',
                         'name': 'Баян-Овоо',
                         'children': [
-                            {'geo_id': 'au_460751', 'name': '1-р баг'},
-                            {'geo_id': 'au_460753', 'name': '2-р баг'},
-                            {'geo_id': 'au_460755', 'name': '3-р баг'}
+                            {'geo_id': '460751', 'name': '1-р баг'},
+                            {'geo_id': '460753', 'name': '2-р баг'},
+                            {'geo_id': '460755', 'name': '3-р баг'}
                         ]
                     },
                     {
-                       'geo_id': 'au_4604',
+                       'geo_id': '4604',
                         'name': 'Баяндалай',
                         'children': [
-                            {'geo_id': 'au_460451', 'name': '1-р баг'},
-                            {'geo_id': 'au_460453', 'name': '2-р баг'},
-                            {'geo_id': 'au_460455', 'name': '3-р баг'}
+                            {'geo_id': '460451', 'name': '1-р баг'},
+                            {'geo_id': '460453', 'name': '2-р баг'},
+                            {'geo_id': '460455', 'name': '3-р баг'}
                         ]
                     }
                 ],
             }
         ]
+        *updated 2021-03-20 odko
     ```
     """
 
-    i_code_list_2nd_order = InspireCodeList('2ndOrder\n')
-    i_code_list_3rd_order = InspireCodeList('3rdOrder\n')
-    i_code_list_4th_order = InspireCodeList('4thOrder\n')
+    i_code_list_2nd_order = InspireCodeList('2ndOrder')
+    i_code_list_3rd_order = InspireCodeList('3rdOrder')
+    i_code_list_4th_order = InspireCodeList('4thOrder')
 
-    def _get_code_names(national_codes):
+    def _get_code_names(geo_id):
 
-        table_au_au_ab = InspireFeature('au-au-ab')
+        table_au_au_ab = InspireFeature('bnd-au-au')
 
-        i_data_type_administrative_boundary = InspireDataType('AdministrativeBoundary')
-        i_property_name = InspireProperty('name')
+        i_data_type_administrative_boundary = InspireDataType('GeographicalName')
+        i_property_name = InspireProperty('text')
 
-        table_au_au_ab.filter({'geo_id': national_codes})
+        table_au_au_ab.filter({'geo_id': geo_id})
         table_au_au_ab.select({
             'geo_id': True,
             i_data_type_administrative_boundary: [i_property_name],
@@ -369,7 +370,7 @@ def get_administrative_levels():
             yield code, name
 
     def _get_au_items():
-        table_au_au_au = InspireFeature('au-au-au')
+        table_au_au_au = InspireFeature('bnd-au-au')
 
         table_au_au_au.filter(
             {
@@ -388,7 +389,6 @@ def get_administrative_levels():
                 'geo_id': True,
                 InspireDataType('AdministrativeUnit'): [
                     InspireProperty('NationalLevel'),
-                    InspireProperty('nationalCode'),
                 ],
             },
         )
@@ -396,27 +396,25 @@ def get_administrative_levels():
         for row in table_au_au_au.fetch():
             geo_id = row['geo_id']
             level = row[InspireDataType('AdministrativeUnit')][InspireProperty('NationalLevel')]
-            code = row[InspireDataType('AdministrativeUnit')][InspireProperty('nationalCode')]
-            yield geo_id, level, code
+            yield geo_id, level
 
     # build flat data
-
     items = {
         '#root': {
             'children': list()
         }
     }
 
-    for geo_id, level, code in _get_au_items():
-        items[code] = {
+    for geo_id, level in _get_au_items():
+        items[geo_id] = {
             'geo_id': geo_id,
             'level': level,
-            'code': code,
             'name': '',
             'children': list(),
         }
 
     codes = list(items.keys())
+
     for code, name in _get_code_names(codes):
         items[code]['name'] = name
 
@@ -468,7 +466,6 @@ def get_administrative_levels():
             if _is_leaf_node(item['level']):
                 del item['children']
             del item['level']
-            del item['code']
 
     # sort children
 
@@ -712,19 +709,16 @@ def get_1stOrder_geo_id():
     LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
     LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
 
-    try:
-        feature_id = LFeatures.objects.filter(feature_code='au-au-au').first().feature_id
-        property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
-        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder\n').first().code_list_id
-        feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    feature_id = LFeatures.objects.filter(feature_code='bnd-au-au').first().feature_id
+    property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
+    code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder').first().code_list_id
+    feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
-        qs = MDatas.objects.filter(property_id=property_id)
-        qs = qs.filter(code_list_id=code_list_id)
+    qs = MDatas.objects.filter(property_id=property_id)
+    qs = qs.filter(code_list_id=code_list_id)
 
-        return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
+    return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
 
-    except:
-        return None
 
 
 def get_geoJson(data):
