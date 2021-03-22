@@ -22,10 +22,9 @@
 
 .list-group-hover:hover .list-group-count{
     transition: 0.5s;
-    margin-right: 30px;
+    margin-right: 15px;
     font-weight: 600;
 }
 .list-group-count{
     transition: 0.5s;
 }
-

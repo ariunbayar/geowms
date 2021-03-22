@@ -235,7 +235,7 @@ def get_covid_state(request, geo_id):
                     color = "warning"
                 elif f.name == 'nas_barsan_hunii_too':
                     color = "dark"
-                elif f.name == 'shinjilgee_hiisen_too':
+                elif f.name == 'vaccine_hiisen_too':
                     color = "primary"
                 else:
                     color = "info"

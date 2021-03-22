@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend_covid', '0006_import_data'),
+        ('frontend_covid', '0006_auto_20210321_2122'),
     ]
 
     operations = [

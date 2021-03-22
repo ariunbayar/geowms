@@ -75,15 +75,15 @@ class CovidDashboard extends PureComponent {
                 <div className="card-body">
                     <div className="row">
                         <Loader is_loading={is_loading} />
-                        <div className="col-md-2">
+                        <div className="col-sm-2">
                             <Countries
                                 getGeoID={this.getGeoID}
                                 datas={datas}
                             />
                         </div>
-                        <div className="col-10">
+                        <div className="col-sm-10">
                             <div className="row">
-                                <div className="col-12">
+                                <div className="col-sm-12">
                                     <div className="row">
                                         {count_datas.map((data, idx) =>
                                             <Card
@@ -98,13 +98,13 @@ class CovidDashboard extends PureComponent {
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="col-8">
+                                <div className="col-sm-8">
                                     <CovidMap
                                         geo_id={geo_id}
                                         datas={datas}
                                     />
                                 </div>
-                                <div className="col-4">
+                                <div className="col-sm-4">
                                     <div className="card bg-transparent shadow-none border border-light">
                                         <div className="card-body">
                                             <h4 className="text-center">Насны ангилал</h4>
@@ -117,12 +117,12 @@ class CovidDashboard extends PureComponent {
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="col-12">
+                                <div className="col-sm-12">
                                     <Graph/>
                                 </div>
                             </div>
                             <div className="row mt-4">
-                                <div className="col-12">
+                                <div className="col-sm-12">
                                     <div className="row">
                                     {count_covid_datas.map((data, idx) =>
                                         <Card
