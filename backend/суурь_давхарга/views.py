@@ -9,6 +9,7 @@ from main.utils import resize_b64_to_sizes
 from .models import BaseLayer
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
+from backend.config.models import Config
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.core.cache import cache
@@ -107,14 +108,23 @@ def үүсгэх(request):
         payload = json.loads(request.body)
 
         base_layer = BaseLayer()
-
+        protocol  = Config.objects.filter(name='geoserver_protocol').first().value
+        if protocol:
+            url_data = payload.get('url').split(":")
+            url = protocol
+            if url_data[0] != protocol:
+                i = 1
+                while i < len(url_data):
+                    url = url + ":" + url_data[i]
+                    i = i+1
+            else:
+                url = payload.get('url')
         sizes = [
             (128 * 2, 72 * 2),
             (128 * 1, 72 * 1),
         ]
-
         base_layer.name = payload.get('name')
-        base_layer.url = payload.get('url')
+        base_layer.url = url
         base_layer.tilename = payload.get('tilename')
 
         [thumbnail_2x, thumbnail_1x] = resize_b64_to_sizes(payload.get('thumbnail'), sizes)

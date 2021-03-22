@@ -7,6 +7,7 @@ import {service} from './service'
 
 const validationSchema = Yup.object().shape({
     geoserver_host: Yup.string(),
+    geoserver_protocol: Yup.string(),
     geoserver_user: Yup.string(),
     geoserver_pass: Yup.string(),
     geoserver_port: Yup.string(),
@@ -27,6 +28,7 @@ export default class ConfigGeoserver extends Component {
                 geoserver_pass: '',
                 geoserver_port:'',
                 geoserver_db_host:'',
+                geoserver_protocol: '',
             },
             values: {},
         }
@@ -124,7 +126,7 @@ export default class ConfigGeoserver extends Component {
                                 <Form>
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
-                                            <div className="form-group col-md-6">
+                                            <div className="form-group col-md-12 text-wrap">
                                                 <label htmlFor="id_geoserver_host">IP Address / Domain name</label>
                                                 <Field
                                                     name="geoserver_host"
@@ -134,7 +136,16 @@ export default class ConfigGeoserver extends Component {
                                                 />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="id_geoserver_user">Port</label>
+                                                <label htmlFor="id_geoserver_protocol">Protocol</label>
+                                                <Field
+                                                    name="geoserver_protocol"
+                                                    id="id_geoserver_protocol"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_geoserver_port">Port</label>
                                                 <Field
                                                     name="geoserver_port"
                                                     type="text"
