@@ -47,7 +47,6 @@ export class CovidPP extends Component {
         if(pP.datas !== datas) {
             if (datas) {
                 if (datas.length >0) {
-                // console.log("hohohoi", datas[0].nas_barsan_hunii_too)
                     var datas_covid = datas[0]
                     this.setState({
                         nas_barsan_hunii_too: datas_covid.nas_barsan_hunii_too,
