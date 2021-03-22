@@ -60,6 +60,8 @@ export default class InspireMap extends Component {
             format: new GeoJSON(),
             layer_one_tile: null,
             form_datas: props.form_datas,
+            center: props.center,
+            layer_2405: ''
         }
 
         this.controls = {
@@ -109,6 +111,10 @@ export default class InspireMap extends Component {
         this.readFeature = this.readFeature.bind(this)
         this.getErguulLayer = this.getErguulLayer.bind(this)
         this.addVectorSource = this.addVectorSource.bind(this)
+        this.popUpload = this.popUpload.bind(this)
+        this.featureFromUrl = this.featureFromUrl.bind(this)
+        this.getDetailOfPoint = this.getDetailOfPoint.bind(this)
+        this.ChoosePopUp = this.ChoosePopUp.bind(this)
     }
 
     initMarker() {
@@ -243,9 +249,14 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { vector_source, form_datas, wms_list} = this.props
+        const { vector_source, form_datas, wms_list, center} = this.props
+        const { layer_one_tile } = this.state
         if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
             this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
+        }
+
+        if (prevState.layer_one_tile != layer_one_tile) {
+            this.setState({layer_one_tile})
         }
 
         if (prevProps.features !== this.props.features) {
@@ -281,6 +292,11 @@ export default class InspireMap extends Component {
         if (form_datas !== prevState.form_datas) {
             this.setState({form_datas})
         }
+
+        if (center !== prevState.center) {
+            if (center) this.popUpload(center)
+        }
+
     }
 
     loadMapData() {
@@ -309,15 +325,10 @@ export default class InspireMap extends Component {
                         color: 'rgba(100, 255, 0, 1)',
                         width: 2
                     }),
-                    fill: new Fill({
-                        color: 'rgba(100, 255, 0, 0.3)'
-                    })
                 }),
             })
             this.map.addLayer(vector_layer)
             this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
-            this.map.addControl(this.controls.popup)
-            this.controls.popup.getFormdata(true, form_datas)
         }
 
     }
@@ -431,7 +442,9 @@ export default class InspireMap extends Component {
 
 
     handleMapDataLoaded(base_layer_list) {
-        this.setState({is_loading: true})
+        const { center } = this.state
+        var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
+        var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
 
         const base_layer_name = 'base_layer'
         const {base_layers, base_layer_controls} =
@@ -465,6 +478,27 @@ export default class InspireMap extends Component {
                                 }
                             }),
                             name: base_layer_name,
+                        })
+                    }
+
+                    if (base_layer_info.tilename == "wmts") {
+                        layer = new Tile({
+                            source: new WMTS({
+                                url: base_layer_info.url,
+                                layer: base_layer_info.layers,
+                                matrixSet: this.state.projection_display,
+                                format: 'image/png',
+                                projection: this.state.projection_display,
+                                tileGrid: new WMTSTileGrid({
+                                    tileSize: [256,256],
+                                    extent: [-180.0,-90.0,180.0,90.0],
+                                    origin: [-180.0, 90.0],
+                                    resolutions: resolutions,
+                                    matrixIds: gridNames,
+                                }),
+                                style: '',
+                                wrapX: true,
+                            }),
                         })
                     }
 
@@ -529,6 +563,8 @@ export default class InspireMap extends Component {
                 this.controls.sidebar,
                 this.controls.cart,
                 this.controls.alertBox,
+                this.controls.popup,
+
             ]),
             layers: [
                 ...base_layers,
@@ -545,10 +581,19 @@ export default class InspireMap extends Component {
         map.on('click', this.handleMapClick)
 
         this.map = map
+
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
+        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
         this.getErguulLayer()
         this.setState({is_loading: false})
 
+    }
+
+    ChoosePopUp(values) {
+        const {PPContent} = this.props
+        return (
+                <PPContent {...values}/>
+        )
     }
 
     onClickCloser(){
@@ -558,6 +603,16 @@ export default class InspireMap extends Component {
         closer.blur();
         this.setVisibleMarket(false)
         // this.state.vector_layer.setSource(null)
+    }
+
+    popUpload(center) {
+        const {form_datas} = this.state
+        const projection = this.map.getView().getProjection()
+        const map_coord = transformCoordinate(center, this.state.projection_display, projection)
+        var is_not_inspire = false
+        const overlay = this.overlay
+        overlay.setPosition(map_coord)
+        this.controls.popup.getData(true, form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
     }
 
     getElement(element) {
@@ -582,10 +637,8 @@ export default class InspireMap extends Component {
 
     handleMapClick(event) {
         if(!this.state.is_draw_open) {
-
             const coordinate = event.coordinate
             this.marker.point.setCoordinates(coordinate)
-
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
@@ -762,9 +815,13 @@ export default class InspireMap extends Component {
         if (this.state.map_wms_list) {
             this.array = this.state.map_wms_list
         }
-        else if (this.state.filtered_wms) {
+        if (this.state.filtered_wms) {
             this.array = this.state.filtered_wms
         }
+        if (this.state.layer_one_tile) {
+            this.array = this.state.layer_one_tile
+        }
+
         return this.array
     }
 
@@ -806,11 +863,18 @@ export default class InspireMap extends Component {
     showFeaturesAt(coordinate) {
         this.is_empty = true
         this.sendFeatureInfo = []
-
-        // const overlay = this.overlay
-        // overlay.setPosition(coordinate)
+        const overlay = this.overlay
+        overlay.setPosition(coordinate)
 
         this.setState({ pay_modal_check: false })
+        if (this.props.form_datas) {
+
+            this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+        }
+
+        if (! this.props.featurefromUrl) {
+            this.featureFromUrl(coordinate)
+        }
 
         this.sendFeatureInfo = []
         this.is_empty = true
@@ -824,6 +888,122 @@ export default class InspireMap extends Component {
         if (mode == 'private') {
             this.state.vector_layer.setSource(source)
         }
+    }
+
+    getDetailOfPoint(wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, is_not_inspire) {
+        if (wms_tile.getVisible()) {
+            const {layer_code, is_feature} = this.check_inspire_layer(code)
+            if (is_feature) {
+                    not_visible_layers.push(layer_code)
+            }
+            if (!is_feature) {
+                const wms_source = wms_tile.getSource()
+                const url = wms_source.getFeatureInfoUrl(
+                    coordinate,
+                    resolution,
+                    projection,
+                    {
+                        'INFO_FORMAT': 'application/vnd.ogc.gml',
+                    }
+                )
+                if (url) {
+                    fetch(url)
+                    .then((response) => response.text())
+                    .then((text) => {
+                        const parser = new WMSGetFeatureInfo()
+                        const features = parser.readFeatures(text)
+                        if (features.length > 0) {
+                            features.map((feature, idx) => {
+                                if(feature.getGeometry().getType().includes('Polygon')) {
+                                    const source = new VectorSource({
+                                        features: features
+                                    });
+                                    this.selectSource = source
+                                    this.state.vector_layer.setSource(this.selectSource)
+                                }
+                            })
+                        }
+                        const feature_info = features.map((feature) => {
+                            const geometry_name = feature.getGeometryName()
+                            const values =
+                                feature.getKeys()
+                                .filter((key) => key != geometry_name)
+                                .map((key) => [key, feature.get(key)])
+                            return [feature.getId(), values]
+                        })
+
+                        if(!this.state.is_draw_open){
+                            if(feature_info.length > 0) {
+                                is_not_inspire = false
+                                this.is_empty = false
+                                if(this.sendFeatureInfo.length > 0) {
+                                    this.sendFeatureInfo.map((feat, idx) => {
+                                        if (feat[0].field_name !== feature_info[0][0]) {
+                                            feature_info.push(geodb_table)
+                                            feature_info.push(code)
+                                            this.sendFeatureInfo.push(feature_info)
+                                        }
+                                    })
+                                }
+                                if (this.sendFeatureInfo.length == 0) {
+                                    feature_info.push(geodb_table)
+                                    feature_info.push(code)
+                                    this.sendFeatureInfo.push(feature_info)
+                                }
+                                if(geodb_table == 'mpoint_view') {
+                                    this.state.vector_layer.setSource(null)
+                                }
+                                if (not_visible_layers.length > 0) {
+                                    this.getPopUpInfo(coordinate, not_visible_layers)
+                                }
+                                else {
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+                                }
+                            }
+                            else {
+                                if (not_visible_layers.length == 0) {
+                                    this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+                                }
+                            }
+                        }
+                        else {
+                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+                        }
+
+                    })
+                }
+            }
+        }
+    }
+
+    featureFromUrl(coordinate) {
+        const view = this.map.getView()
+        const projection = view.getProjection()
+        const resolution = view.getResolution()
+        const wms_array = this.getWMSArray()
+        let not_visible_layers = []
+        let is_not_inspire = true
+        this.setVisibleMarket(true)
+        if (wms_array.length >0) {
+            wms_array.map(({layers}) => {
+                if(layers) {
+                    layers.map(({tile, wms_tile, geodb_table, code}) => {
+                        this.getDetailOfPoint(wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, is_not_inspire)
+                    }
+                    )
+                }
+            })
+        }
+        else if(this.props.code) {
+            this.getDetailOfPoint(
+            wms_array, this.props.code,
+            coordinate, projection,
+            resolution, [],
+            not_visible_layers, is_not_inspire)
+        }
+        // if (is_not_inspire) {
+        //     this.getPopUpInfo(coordinate, not_visible_layers)
+        // }
     }
 
     handleToggle(idx) {
@@ -1022,12 +1202,14 @@ export default class InspireMap extends Component {
 
     render() {
         const {is_loading} = this.state
+        const height = this.props.height ? this.props.height : '80vh'
         return (
-            <div>
+            <div className="px-0 mx-0">
                 <Loader is_loading={is_loading}></Loader>
                 <div
                     id="map"
-                    style={{height:"calc( 45vh - 5px - 15px)"}}
+                    style={{height: `${height}`}}
+                    className="mw-100 px-0 mx-0"
                 >
                 </div>
             </div>

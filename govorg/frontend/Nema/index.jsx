@@ -11,7 +11,7 @@ export default class Nema extends Component {
             <div className="row">
                 <div className="col-lg-12">
                     <div className="card">
-                        <div className="card-body">
+                        <div className="card-body p-0 m-2">
                             <Switch>
                                 <Route exact path="/gov/nema/list/" component={NemaTable} />
                                 <Route exact path="/gov/nema/map/" component={NemaMap} />

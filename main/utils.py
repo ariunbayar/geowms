@@ -26,10 +26,11 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
-from main.inspire import GEoIdGenerator
+from backend.inspire.models import MGeoDatas
 from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
+from main.inspire import GEoIdGenerator
 import uuid
 
 
@@ -498,7 +499,6 @@ def get_geom(geo_id, geom_type=None, srid=4326):
     qs = qs.annotate(geo_data_transformed=Transform('geo_data', srid))
     qs = qs.filter(geo_id=geo_id)
     geom_info = qs.first()
-
     if not geom_info:
         return None
 
@@ -1309,6 +1309,13 @@ def search_dict_from_object(objs, key='name', value='value'):
         data_value = obj[value]
         data[data_key] = data_value
     return data
+
+
+def get_center_of_geo_data(geo_id):
+    center = []
+    geo = MGeoDatas.objects.filter(geo_id=geo_id).first()
+    center = geo.geo_data.centroid
+    return list(center)
 
 
 def check_saved_data(point_name, point_id):

@@ -4,6 +4,7 @@ import * as Yup from 'yup'
 import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import InspireMap from "@utils/BundleMap"
+import {NemaPP} from './nemapop'
 
 
 const validationSchema = Yup.object().shape({
@@ -221,6 +222,7 @@ export class ModelAddNema extends Component {
                                 code={form_values.code }
                                 url={url}
                                 height="55vh"
+                                PPContent={NemaPP}
                             />
                         }
                     </div>

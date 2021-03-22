@@ -188,12 +188,20 @@ def get_nema(request, bundle_id):
     }
     return JsonResponse(rsp)
 
+
 @require_GET
 @ajax_required
 def get_covid_data(request, geo_id):
     form_datas = []
-    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    geom = utils.get_geom(geo_id)
     geo_data = utils.get_geoJson(geom.json)
+
+    center_point = [107.15968151256514, 47.91619699047089]
+    center_of_geom = utils.get_center_of_geo_data(geo_id)
+    if center_of_geom:
+        center_point=center_of_geom
+
+
     covid_datas = CovidDashboard.objects.filter(geo_id=geo_id).first()
     if covid_datas:
         form_datas.append({
@@ -210,6 +218,7 @@ def get_covid_data(request, geo_id):
     rsp = {
         'geo_data': FeatureCollection(geo_data),
         'form_datas': form_datas,
+        'center_of_geom': center_point
     }
     return JsonResponse(rsp)
 
