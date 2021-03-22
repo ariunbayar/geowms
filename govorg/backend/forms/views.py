@@ -790,7 +790,7 @@ def tsegPersonalUpdate(request, payload):
                 'bairshil_tseg_oiroos_img_url': '/media/' + values['PointCenterType'] if values and 'PointCenterType' in values else '',
                 'bairshil_tseg_holoos_img_url': '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else '',
                 'sudalga_or_shine':  values['PointShape'] if 'PointShape' in values else '',
-                'hors_shinj_baidal': values['Nomenclature'] if 'Nomenclature' in values else '',
+                'hors_shinj_baidal': values['SoilType'] if 'SoilType' in values else '',
                 'date': values['beginLifespanVersion'] if values and 'beginLifespanVersion' in values else '',
                 'hotolson': values['EmployeeName'] if 'EmployeeName' in values else '',
                 'alban_tushaal': values['EmployeePosition'] if 'EmployeePosition' in values else '',
