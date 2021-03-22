@@ -10,7 +10,7 @@ export default class PieChart extends Component {
     }
 
     render() {
-        const { labels, datas, backgroundColor, height, label } = this.props
+        const { labels, datas, backgroundColor, height, label, title } = this.props
 
         const dataLine = {
             labels: labels,
@@ -30,6 +30,7 @@ export default class PieChart extends Component {
         return (
             <div className="wrapper card">
                 <div className="card-body">
+                    <h4 className="text-center">{title}</h4>
                     <Pie height={height} data={dataLine} ></Pie>
                 </div>
             </div>

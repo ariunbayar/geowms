@@ -12,7 +12,7 @@ export default class LineGraph extends Component {
         }
     }
     render() {
-        const { labels, datas, graph_color, height, label, lineTension, is_one_many_line } = this.props
+        const { labels, datas, graph_color, height, label, lineTension, is_one_many_line, title } = this.props
 
         if(is_one_many_line){
             var datasets = []
@@ -84,6 +84,7 @@ export default class LineGraph extends Component {
         return (
             <div className="wrapper card">
                 <div className="card-body">
+                    <h4 className="text-center">{title}</h4>
                     <Line height={height} data={dataLine} />
                 </div>
             </div>

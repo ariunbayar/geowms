@@ -31,7 +31,6 @@ export default class CovidMap extends Component {
     }
 
     handleGeoData(geo_id) {
-        const id = this.props.match.params.id
         service.get_geo_data(geo_id)
             .then(({ geo_data, form_datas}) => {
                 this.setState({geo_data, form_datas})
@@ -41,13 +40,12 @@ export default class CovidMap extends Component {
     render() {
         const { geo_data, form_datas} = this.state
         return (
-                <div className="col-12 col-md-12 col-xl-12 h-100 p-0">
-                    <InspireMap
-                        height="100vh"
-                        vector_source={geo_data}
-                        form_datas={form_datas}
-                    />
-                </div>
+            <div className="col-12">
+                <InspireMap
+                    vector_source={geo_data}
+                    form_datas={form_datas}
+                />
+            </div>
         )
     }
 }
