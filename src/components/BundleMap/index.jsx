@@ -606,15 +606,13 @@ export default class InspireMap extends Component {
     }
 
     popUpload(center) {
+        const {form_datas} = this.state
+        const projection = this.map.getView().getProjection()
+        const map_coord = transformCoordinate(center, this.state.projection_display, projection)
         var is_not_inspire = false
-        // const overlay = this.overlay
-        // overlay.setPosition([11891028.94202717, 6084338.840478047])
-        // this.controls.popup.getData(true, example, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
-        // this.controls.popup.getData(true, example, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false)
-        // if (center) {
-        //     const overlay = this.overlay
-        //     overlay.setPosition([107.15968151256514, 47.91619699047089])
-        // }
+        const overlay = this.overlay
+        overlay.setPosition(map_coord)
+        this.controls.popup.getData(true, form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
     }
 
     getElement(element) {

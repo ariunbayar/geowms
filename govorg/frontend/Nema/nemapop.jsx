@@ -287,7 +287,7 @@ export class NemaPP extends Component {
                                                                             <option value="Эдгэрсэн">Эдгэрсэн</option>
                                                                             <option value="Нас барсан">Нас барсан</option>
                                                                         </select>
-                                                                    <a className="fa fa-plus-square text-success my-3 mr-2 ml-1 p-0" onClick={this.hanleUpdateAttr}/>
+                                                                    <a className="fa fa-floppy-o text-success my-3 mt-4 mr-2 ml-1 p-0" onClick={this.hanleUpdateAttr}/>
                                                                 </th></tr>
                                                             }
                                                         </Fragment>

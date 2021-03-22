@@ -31,9 +31,8 @@ export class CovidPP extends Component {
             edgersen_humuus_too: '0',
             emchlegdej_bui_humuus_too:'0',
             nas_barsan_hunii_too: '0',
-            batlagdsan_tohioldol_too: '0'
-
-
+            batlagdsan_tohioldol_too: '0',
+            form_datas: props.datas,
         }
     }
 
@@ -46,14 +45,17 @@ export class CovidPP extends Component {
     componentDidUpdate(pP, pS) {
         const {datas} = this.props
         if(pP.datas !== datas) {
-            if (datas[0]) {
-                var datas_covid = datas[0]
-                this.setState({
-                    nas_barsan_hunii_too: datas_covid.nas_barsan_hunii_too,
-                    edgersen_humuus_too: datas_covid.edgersen_humuus_too,
-                    emchlegdej_bui_humuus_too: datas_covid.emchlegdej_bui_humuus_too,
-                    batlagdsan_tohioldol_too: datas_covid.batlagdsan_tohioldol_too
-                })
+            if (datas) {
+                if (datas.length >0) {
+                // console.log("hohohoi", datas[0].nas_barsan_hunii_too)
+                    var datas_covid = datas[0]
+                    this.setState({
+                        nas_barsan_hunii_too: datas_covid.nas_barsan_hunii_too,
+                        edgersen_humuus_too: datas_covid.edgersen_humuus_too,
+                        emchlegdej_bui_humuus_too: datas_covid.emchlegdej_bui_humuus_too,
+                        batlagdsan_tohioldol_too: datas_covid.batlagdsan_tohioldol_too
+                    })
+                }
             }
         }
     }

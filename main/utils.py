@@ -1313,9 +1313,10 @@ def search_dict_from_object(objs, key='name', value='value'):
 
 def get_center_of_geo_data(geo_id):
     center = []
-    geo = MGeoDatas.objects.filter(geo_id='au_11').first()
+    geo = MGeoDatas.objects.filter(geo_id=geo_id).first()
     center = geo.geo_data.centroid
     return list(center)
+
 
 def check_saved_data(point_name, point_id):
     has_name, has_ids = False, False
