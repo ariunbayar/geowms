@@ -296,6 +296,7 @@ export default class InspireMap extends Component {
         if (center !== prevState.center) {
             if (center) this.popUpload(center)
         }
+
     }
 
     loadMapData() {
@@ -605,13 +606,6 @@ export default class InspireMap extends Component {
     }
 
     popUpload(center) {
-        var example  = [
-            [
-                'name', 'delgermaa'
-            ],
-            ['hoho', 'haha']
-
-        ]
         var is_not_inspire = false
         // const overlay = this.overlay
         // overlay.setPosition([11891028.94202717, 6084338.840478047])
@@ -875,9 +869,10 @@ export default class InspireMap extends Component {
         overlay.setPosition(coordinate)
 
         this.setState({ pay_modal_check: false })
-        // if (this.props.form_datas) {
-        //     this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
-        // }
+        if (this.props.form_datas) {
+
+            this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+        }
 
         if (! this.props.featurefromUrl) {
             this.featureFromUrl(coordinate)

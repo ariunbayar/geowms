@@ -499,7 +499,6 @@ def get_geom(geo_id, geom_type=None, srid=4326):
     qs = qs.annotate(geo_data_transformed=Transform('geo_data', srid))
     qs = qs.filter(geo_id=geo_id)
     geom_info = qs.first()
-
     if not geom_info:
         return None
 
@@ -1318,7 +1317,7 @@ def get_center_of_geo_data(geo_id):
     center = geo.geo_data.centroid
     return list(center)
 
-  def check_saved_data(point_name, point_id):
+def check_saved_data(point_name, point_id):
     has_name, has_ids = False, False
     return has_name, has_ids
 
