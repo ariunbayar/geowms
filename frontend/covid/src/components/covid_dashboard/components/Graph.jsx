@@ -42,7 +42,7 @@ class Graph extends PureComponent {
     render() {
         const {count_datas, charts, name} = this.state
         return (
-            <div className="card-body">
+            <div className="card-body px-0">
                 <div className="row">
                     <div className="col-8">
                         <LineGraph

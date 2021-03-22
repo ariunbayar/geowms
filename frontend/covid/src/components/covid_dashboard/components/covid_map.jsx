@@ -45,7 +45,7 @@ export default class CovidMap extends Component {
         return (
             <div className="col-12 col-md-12 col-xl-12 h-100 p-0">
                 <InspireMap
-                    height="100vh"
+                    height="50vh"
                     vector_source={geo_data}
                     form_datas={form_datas}
                     PPContent={CovidPP}

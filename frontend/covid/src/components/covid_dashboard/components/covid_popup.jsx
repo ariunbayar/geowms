@@ -30,6 +30,7 @@ export class CovidPP extends Component {
             datas: props.datas,
             edgersen_humuus_too: '0',
             emchlegdej_bui_humuus_too:'0',
+            name:'',
             nas_barsan_hunii_too: '0',
             batlagdsan_tohioldol_too: '0',
             form_datas: props.datas,
@@ -52,7 +53,8 @@ export class CovidPP extends Component {
                         nas_barsan_hunii_too: datas_covid.nas_barsan_hunii_too,
                         edgersen_humuus_too: datas_covid.edgersen_humuus_too,
                         emchlegdej_bui_humuus_too: datas_covid.emchlegdej_bui_humuus_too,
-                        batlagdsan_tohioldol_too: datas_covid.batlagdsan_tohioldol_too
+                        batlagdsan_tohioldol_too: datas_covid.batlagdsan_tohioldol_too,
+                        name: datas_covid.name
                     })
                 }
             }
@@ -61,13 +63,13 @@ export class CovidPP extends Component {
 
 
     render() {
-        const { datas, is_loading, nas_barsan_hunii_too, edgersen_humuus_too, emchlegdej_bui_humuus_too, batlagdsan_tohioldol_too} = this.state
+        const { datas, is_loading, nas_barsan_hunii_too, edgersen_humuus_too, emchlegdej_bui_humuus_too, batlagdsan_tohioldol_too, name} = this.state
         return (
             <div className="card-body justify-content-between" style={{marginRight: "1%", marginLeft: '1%'}}>
                 {
                     <div className="px-0">
                         <div className="col-md-12 text-center">
-                            <label htmlFor="label" className="mw-100 align-middle">Улаанбаатар</label>
+                            <label htmlFor="label" className="mw-100 align-middle">{name}</label>
                         </div>
                         <div className="row text-danger">
                             <small className="col-md-8">Батлагдсан</small>
