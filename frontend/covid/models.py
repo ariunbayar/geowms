@@ -22,6 +22,7 @@ class CovidDashboard(models.Model):
     niit_eruul_mendiin_baiguullaga_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Нийт эрүүл мэндийн байгууллагын тоо")
     emnelegiin_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Эмнэлэгийн тоо")
     emiin_sangiin_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Эмийн сангийн тоо")
+    vaccine_hiisen_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Вакцин хийсэн тоо")
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True, verbose_name="Бүртгэсэн ажилтан")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Бүртгэсэн огноо")
 
@@ -45,6 +46,7 @@ class CovidDashboardLog(models.Model):
     emiin_sangiin_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Эмийн сангийн тоо")
     shinjilgee_hiisen_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Шинжилгээ хийсэн тоо")
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True, verbose_name="Бүртгэсэн ажилтан")
+    vaccine_hiisen_too = models.PositiveIntegerField(null=True, default=0, verbose_name="Вакцин хийсэн тоо")
     updated_at = models.DateTimeField(auto_now=False, verbose_name="Бүртгэсэн огноо")
 
 
