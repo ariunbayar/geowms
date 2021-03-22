@@ -50,7 +50,11 @@ class TsegRequest extends Component {
     }
 
     goSuccess(values) {
-        this.props.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${values.id}/шийдвэрлэх/`)
+        if (values.state == 'ШИНЭ') {
+            this.props.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${values.id}/шийдвэрлэх/`)
+        } else {
+            this.props.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${values.id}/харах/`)
+        }
     }
 
     render() {

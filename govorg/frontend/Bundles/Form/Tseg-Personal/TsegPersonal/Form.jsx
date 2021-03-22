@@ -31,6 +31,7 @@ export class Forms extends Component {
                 pid: '',
             },
             only_see: props.only_see,
+            no_buttons: props.no_buttons,
             tesgiin_ner: '',
             toviin_dugaar: '',
             hors_shinj_baidal: '',
@@ -569,7 +570,7 @@ export class Forms extends Component {
             this.getItem()
         }
 
-        const { point_classes, point_types, ondor_types, only_see } = this.state
+        const { point_classes, point_types, ondor_types, only_see, no_buttons } = this.state
         const error_msg = this.state.error_msg
         return (
         <Formik
@@ -1177,30 +1178,34 @@ export class Forms extends Component {
                                     <div className="span3 my-3">
                                         <div>
                                         {
-                                            !only_see
+                                            !no_buttons
                                             ?
-                                                <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
-                                                    {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
-                                                    {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                                    {!isSubmitting && 'Нэмэх' }
-                                                </button>
+                                                !only_see
+                                                ?
+                                                    <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
+                                                        {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
+                                                        {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
+                                                        {!isSubmitting && 'Нэмэх' }
+                                                    </button>
+                                                :
+                                                    <div className="float-right">
+                                                        <button
+                                                            type='button'
+                                                            className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                                                            onClick={this.successPoint}
+                                                        >
+                                                            Баталгаажуулах
+                                                        </button>
+                                                        <button
+                                                            type='button'
+                                                            className="btn gp-btn-primary waves-effect waves-light"
+                                                            onClick={this.rejectPoint}
+                                                        >
+                                                            Татгалзах
+                                                        </button>
+                                                    </div>
                                             :
-                                                <div className="float-right">
-                                                    <button
-                                                        type='button'
-                                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                                        onClick={this.successPoint}
-                                                    >
-                                                        Баталгаажуулах
-                                                    </button>
-                                                    <button
-                                                        type='button'
-                                                        className="btn gp-btn-primary waves-effect waves-light"
-                                                        onClick={this.rejectPoint}
-                                                    >
-                                                        Татгалзах
-                                                    </button>
-                                                </div>
+                                                null
                                         }
                                         </div>
                                         <datalist id="tsegList">
