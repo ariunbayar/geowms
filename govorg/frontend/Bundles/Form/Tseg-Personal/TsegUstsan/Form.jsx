@@ -108,19 +108,17 @@ export class FormTseg extends Component {
             this.error_msg = []
         }
         if(e.target.value.length >= 0){
-            this.error_msg = []
-            this.setState({ checkError: this.state.error })
-            service.searchTseg(e.target.value).then(({items, names}) => {
-                if(items !== false){
-                    this.setState({items, tseg_dugaar_error:false , checkError:[] })
-                    const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
-                    this.setState({oiroltsoo_bairlal})
-                    this.optionVal(items)
-                }
-                else{
-                    this.setState({ tseg_dugaar_error: true, checkError: this.state.error })
-                }
-            })
+            // service.searchTseg(e.target.value).then(({items, names}) => {
+            //     if(items !== false){
+            //         this.setState({items, tseg_dugaar_error:false , checkError:[] })
+            //         const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
+            //         this.setState({oiroltsoo_bairlal})
+            //         this.optionVal(items)
+            //     }
+            //     else{
+            //         this.setState({ tseg_dugaar_error: true, checkError: this.state.error })
+            //     }
+            // })
         }
     }
 
@@ -286,14 +284,14 @@ export class FormTseg extends Component {
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
-            this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
+            this.props.data.history.push( `/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/`)
         }, 2000)
     }
 
     modalClose(){
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
-        this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)
+        this.props.data.history.push( `/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/`)
     }
 
     render() {
@@ -302,6 +300,7 @@ export class FormTseg extends Component {
             tseg_dugaar_error, oiroltsoo_bairlal, bairlal_error,
             showMore
         } = this.state
+        console.log(this.state.checkError)
         return (
             <Formik
                 initialValues={this.state.values}
@@ -320,6 +319,7 @@ export class FormTseg extends Component {
                     isValid,
                     dirty,
                 }) => {
+                    console.log(errors);
                     if(isSubmitting == true){
                         if(this.state.tseg_dugaar_error == ''){
                             this.error_msg = []
@@ -336,13 +336,14 @@ export class FormTseg extends Component {
                     const checkError = this.state.checkError
                     const has_error = Object.keys(errors).length > 0
                     const error_bn = Object.keys(checkError).length > 0
+                    console.log(has_error);
                     return (
                     <Form>
                         <div className="container p-3 card">
                             <div className="card-body">
                                 <div className="row ml-3">
                                     <div className="col-md-12 mb-4 mt-4">
-                                        <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`} className='btn gp-outline-primary '>
+                                        <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/`} className='btn gp-outline-primary '>
                                                 <i className="fa fa-angle-double-left"></i> Буцах
                                         </NavLink>
                                     </div>
@@ -760,7 +761,7 @@ export class FormTseg extends Component {
                                         </tbody>
                                     </table>
                                     <div>
-                                    <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0}>
+                                    <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error}>
                                                 {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                 {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                                 {!isSubmitting && 'Нэмэх' }

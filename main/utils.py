@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image
 from collections import namedtuple
 from io import BytesIO
@@ -10,8 +12,10 @@ import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry, Point
+from django.conf import settings
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
@@ -22,9 +26,11 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+from main.inspire import GEoIdGenerator
 from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+import uuid
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -888,14 +894,19 @@ def get_geom_for_filter_from_coordinate(coordinate, geom_type, srid=4326):
     return geom
 
 
-def get_geom_for_filter_from_geometry(geometry):
+def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
     if isinstance(geometry, str):
-        geometry = json.loads(geo_json)
+        geometry = json.loads(geometry)
 
     polygonlist = GEOSGeometry(json.dumps(geometry))
     module = importlib.import_module('django.contrib.gis.geos')
-    class_ = getattr(module, geometry['type'])
-    geom = class_(*polygonlist)
+
+    geom_type = geometry['type']
+    if change_to_multi:
+        geom_type = 'Multi' + geometry['type']
+
+    class_ = getattr(module, geom_type)
+    geom = class_(polygonlist)
 
     return geom
 
@@ -973,6 +984,29 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
         return [item[0] for item in cursor.fetchall()]
 
 
+def save_img_to_folder(image, folder_name, file_name, ext):
+    import PIL.Image as Image
+    import io, uuid
+    uniq = uuid.uuid4().hex[:8]
+    file_full_name = file_name + '_' + uniq + ext
+    bytes = bytearray(image)
+    image = Image.open(io.BytesIO(bytes))
+    image = image.resize((720,720), Image.ANTIALIAS)
+    image = image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
+    return folder_name + '/' + file_full_name
+
+
+def save_file_to_storage(file, folder_name, file_full_name):
+    from django.core.files.storage import FileSystemStorage
+    path = os.path.join(settings.MEDIA_ROOT, folder_name)
+    fs = FileSystemStorage(
+        location=path
+    )
+    file = fs.save(file_full_name, file)
+    fs.url(file)
+    return path
+
+
 def create_index(model_name, field):
     with connections['default'].cursor() as cursor:
         sql = """
@@ -984,6 +1018,268 @@ def create_index(model_name, field):
         cursor.execute(sql)
         return True
     return False
+
+
+# ------------------------------------------------------------------------------------------------
+# feature code oor feature iin qs awah
+def get_feature_from_code(feature_code):
+    Lfeature = apps.get_model('backend_inspire', 'LFeatures')
+    l_feature_qs = Lfeature.objects
+    l_feature_qs = l_feature_qs.filter(feature_code=feature_code)
+    if l_feature_qs:
+        return l_feature_qs.first()
+    else:
+        raise Exception('Бүртгэлгүй feature ийн мэдээлэл байна: {}'.format(feature_code))
+
+
+def save_geom_to_mgeo_data(geo_data, feature_id, feature_code):
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    new_geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.create(
+        geo_id=new_geo_id,
+        feature_id=feature_id,
+        geo_data=geo_data,
+    )
+    return mgeo_qs, new_geo_id
+
+
+def get_properties(feature_id, get_all=False):
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
+    DataTypeConfigs = apps.get_model('backend_inspire', 'LDataTypeConfigs')
+
+    l_feature_c_qs = LFeatureConfigs.objects
+    l_feature_c_qs = l_feature_c_qs.filter(feature_id=feature_id)
+    data_type_ids = l_feature_c_qs.values_list('data_type_id', flat=True)
+
+    data_type_c_qs = DataTypeConfigs.objects
+    data_type_c_qs = data_type_c_qs.filter(data_type_id__in=data_type_ids)
+    property_ids = data_type_c_qs.values_list('property_id', flat=True)
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.filter(property_id__in=property_ids)
+
+    if get_all:
+        feature_config_ids = l_feature_c_qs.values_list('feature_config_id', flat=True)
+        return feature_config_ids, data_type_ids, property_ids
+    else:
+        return property_qs, l_feature_c_qs, data_type_c_qs
+
+
+def _value_types():
+    return [
+        {'value_type': 'value_number', 'value_names': ['double', 'number']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text', 'data-type']},
+        {'value_type': 'value_date', 'value_names': ['date']},
+        {'value_type': 'code_list_id', 'value_names': ['single-select', 'multi-select']},
+    ]
+
+
+def json_load(data):
+    if isinstance(data, str):
+        data = json.loads(data)
+    return data
+
+
+def make_value_dict(value, properties_qs, is_display=False):
+    value = json_load(value)
+    for types in _value_types():
+        for prop in properties_qs.values():
+            for key, val in value.items():
+                if prop['value_type_id'] in types['value_names'] and key == prop['property_code']:
+                    data = dict()
+                    if not is_display:
+                        if 'date' in types['value_type']:
+                            val = date_to_timezone(val)
+                        data[types['value_type']] = val
+                        data['property_id'] = prop['property_id']
+                    if is_display:
+                        data[prop['property_code']] = val
+
+                    yield data
+
+
+def save_value_to_mdatas(value, feature_code, coordinate=None, geom_type='Point', geo_id=''):
+    l_feature_qs = get_feature_from_code(feature_code)
+
+    feature_id = l_feature_qs.feature_id
+
+    point = get_geom_for_filter_from_coordinate(coordinate, geom_type)
+    point = get_geom_for_filter_from_geometry(point.json, True)
+    mgeo_qs, new_geo_id = save_geom_to_mgeo_data(point, feature_id, feature_code)
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    datas = make_value_dict(value, properties_qs)
+    for data in datas:
+        for data_type_c in data_type_c_qs:
+            if data_type_c.property_id == data['property_id']:
+                for l_feature_c in l_feature_c_qs:
+                    if data_type_c.data_type_id == l_feature_c.data_type_id:
+                        data['feature_config_id'] = l_feature_c.feature_config_id
+                        data['data_type_id'] = l_feature_c.data_type_id
+
+        MDatas = apps.get_model('backend_inspire', 'MDatas')
+        mdata_qs = MDatas.objects
+        if not geo_id:
+            data['geo_id'] = mgeo_qs.geo_id
+            mdata_qs = mdata_qs.create(**data)
+        else:
+            mdata_qs = mdata_qs.filter(geo_id=geo_id)
+            mdata_qs = mdata_qs.filter(feature_config_id=data['feature_config_id'])
+            mdata_qs = mdata_qs.filter(data_type_id=data['data_type_id'])
+            mdata_qs = mdata_qs.filter(property_id=data['property_id'])
+            if mdata_qs:
+                mdata_qs = mdata_qs.update(**data)
+            else:
+                mdata_qs = mdata_qs.create(geo_id=geo_id, **data)
+
+    return new_geo_id
+
+
+def get_code_list_from_property_id(property_id):
+    LCodeListConfigs = apps.get_model('backend_inspire', 'LCodeListConfigs')
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    code_list_values = []
+    code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
+    for code_list_config in code_list_configs:
+        property_id = code_list_config.property_id
+        to_property_id = code_list_config.to_property_id
+        if property_id == to_property_id:
+            to_property_id += 1
+        x_range = range(property_id, to_property_id)
+        for property_id_up in x_range:
+            code_lists = LCodeLists.objects.filter(property_id=property_id_up).order_by('order_no')
+            for code_list in code_lists:
+                value = dict()
+                if code_list.top_code_list_id:
+                    value['top_code_list_id'] = code_list.top_code_list_id
+
+                value['code_list_id'] = code_list.code_list_id
+                value['property_id'] = code_list.property_id
+                value['code_list_code'] = code_list.code_list_code
+                value['code_list_name'] = code_list.code_list_name
+                value['code_list_definition'] = code_list.code_list_definition
+                code_list_values.append(value)
+
+    return code_list_values
+
+
+def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs):
+    data = dict()
+    for prop in properties_qs:
+        if prop.property_code == 'PointNumber':
+            data = _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
+    return data
+
+
+def _mdata_values_field():
+    return [
+        'value_text', 'value_number', 'value_date', 'code_list_id'
+    ]
+
+
+def _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs):
+    data = dict()
+    property_id = prop.property_id
+    data['property_id'] = property_id
+    for data_type_c in data_type_c_qs:
+        if property_id == data_type_c.property_id:
+            data_type_id = data_type_c.data_type_id
+            data['data_type_id'] = data_type_id
+            for l_feature_c in l_feature_c_qs:
+                if l_feature_c.data_type_id == data_type_id:
+                    l_feature_c_id = l_feature_c.feature_config_id
+                    data['feature_config_id'] = l_feature_c_id
+    return data
+
+
+def _get_all_geos(feature_id):
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    qs = MGeoDatas.objects
+    qs = qs.filter(feature_id=feature_id)
+    geo_ids = qs.values_list('geo_id', flat=True)
+    return geo_ids
+
+
+def get_mdata_values(feature_code, query):
+    rows = []
+
+    l_feature_qs = get_feature_from_code(feature_code)
+    feature_id = l_feature_qs.feature_id
+
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+
+    names_qs = ViewNames.objects
+    view = names_qs.filter(feature_id=feature_id)
+
+    if view:
+        view = view.first()
+        view_name = view.view_name
+
+        view_prop_qs = ViewProperties.objects
+        view_prop_qs = view_prop_qs.filter(view=view)
+        property_ids = list(view_prop_qs.values_list("property_id", flat=True))
+
+        lp_qs = LProperties.objects
+        lp_qs = lp_qs.filter(property_id__in=property_ids)
+        properties = lp_qs.values_list("property_code", flat=True)
+
+        if properties:
+            properties = ",".join([prop_code for prop_code in properties])
+            properties = properties.lower() + ",geo_id"
+        else:
+            properties = ''
+
+        where = "pointnumber like '%{query}%'".format(query=query)
+
+        cursor = connections['default'].cursor()
+        sql = """
+            select {properties} from {view_name} where {where}
+        """.format(view_name=view_name, properties=properties, where=where)
+        cursor.execute(sql)
+        rows = dict_fetchall(cursor)
+        rows = list(rows)
+
+    return rows
+
+
+def get_mdata_value(feature_code, value=None, only_geo_id=False):
+    geo_id = ''
+
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    l_feature_qs = get_feature_from_code(feature_code)
+
+    feature_id = l_feature_qs.feature_id
+    send_value = dict()
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    data = _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs)
+
+    data['value_text'] = value
+    mdatas_qs = MDatas.objects
+    mdatas_qs = mdatas_qs.filter(**data)
+    mdatas_qs = mdatas_qs.first()
+    if mdatas_qs:
+        geo_id = mdatas_qs.geo_id
+        if not only_geo_id:
+            mdatas = MDatas.objects.filter(geo_id=geo_id)
+            for mdata in mdatas.values():
+                value = dict()
+                values = mdata
+                for field in _mdata_values_field():
+                    if values[field]:
+                        for prop in properties_qs:
+                            if prop.property_id == mdata['property_id']:
+                                value[prop.property_code] = values[field]
+                datas = make_value_dict(value, properties_qs, True)
+                for data in datas:
+                    for key, value in data.items():
+                        send_value[key] = value
+
+    send_value['geo_id'] = geo_id
+
+    return send_value
 
 
 def get_2d_data(geo_id):
@@ -1013,3 +1309,26 @@ def search_dict_from_object(objs, key='name', value='value'):
         data_value = obj[value]
         data[data_key] = data_value
     return data
+
+
+def check_saved_data(point_name, point_id):
+    has_name, has_ids = False, False
+    return has_name, has_ids
+
+
+def get_code_list_id_from_name(code_list_name, property_code):
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+
+    code_list_id = None
+    properties_qs = LProperties.objects
+    properties_qs = properties_qs.filter(property_code=property_code)
+    if properties_qs:
+        prop = properties_qs.first()
+        property_id = prop.property_id
+        code_lists = get_code_list_from_property_id(property_id)
+        for code_list in code_lists:
+            if code_list_name == code_list['code_list_name']:
+                code_list_id = code_list['code_list_id']
+                break
+
+    return code_list_id

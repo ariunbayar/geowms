@@ -14,6 +14,7 @@ from backend.bundle.models import Bundle
 from backend.inspire.models import LThemes
 
 from .models import Config
+from backend.inspire.models import LValueTypes
 from .models import CovidConfig
 
 from backend.org.models import Org
@@ -643,3 +644,47 @@ def covid_configs_save(request, payload):
                 qs.update(org=payload.get(config_org_id))
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_value_type_fields(request):
+    value_type_qs = LValueTypes.objects.values('value_type_id')
+    value_types = list(value_type_qs)
+
+    config_values = Config.objects.filter(name='value_types').first()
+    initial_values = dict()
+    for value_type in value_types:
+        value = ''
+        if config_values:
+            obj = json.loads(config_values.value)
+            value = obj[value_type['value_type_id']]
+        initial_values[value_type['value_type_id']] = value
+
+    rsp = {
+        'success': True,
+        'value_types': value_types,
+        'initial_values': initial_values,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def save_value_types(request, payload):
+    values = payload.get('values')
+    config_name = 'value_types'
+
+    Config.objects.update_or_create(
+        name=config_name,
+        defaults={
+            'value': json.dumps(payload.get('values', ''))
+        }
+    )
+
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)
