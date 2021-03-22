@@ -110,17 +110,17 @@ export class FormTseg extends Component {
         if(e.target.value.length >= 0){
             this.error_msg = []
             this.setState({ checkError: this.state.error })
-            service.searchTseg(e.target.value).then(({items, names}) => {
-                if(items !== false){
-                    this.setState({items, tseg_dugaar_error:false , checkError:[] })
-                    const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
-                    this.setState({oiroltsoo_bairlal})
-                    this.optionVal(items)
-                }
-                else{
-                    this.setState({ tseg_dugaar_error: true, checkError: this.state.error })
-                }
-            })
+            // service.searchTseg(e.target.value).then(({items, names}) => {
+            //     if(items !== false){
+            //         this.setState({items, tseg_dugaar_error:false , checkError:[] })
+            //         const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
+            //         this.setState({oiroltsoo_bairlal})
+            //         this.optionVal(items)
+            //     }
+            //     else{
+            //         this.setState({ tseg_dugaar_error: true, checkError: this.state.error })
+            //     }
+            // })
         }
     }
 
