@@ -449,10 +449,15 @@ def get_data_dashboard(request):
     last_day_data = qs_log.order_by('-updated_at').values()
     zuruu = dict()
     if last_day_data:
-        last_day_data = last_day_data[1]
-        mongol = parents.values()[0]
-        for name in _for_mongol_list():
-            zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+        if len(last_day_data) < 1:
+            last_day_data = last_day_data[1]
+            mongol = parents.values()[0]
+            for name in _for_mongol_list():
+                zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+        else:
+            mongol = parents.values()[0]
+            for name in _for_mongol_list():
+                zuruu[name + "_zuruu"] = str(mongol[name])
 
     rsp = {
         'success': True,
