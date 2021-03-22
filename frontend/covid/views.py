@@ -287,6 +287,7 @@ def get_covid_state(request, geo_id):
     emchlegdej_bui_humuus_too = []
     tusgaarlagdaj_bui_humuus_too = []
     shinjilgee_hiisen_too = []
+    vaccine_hiisen_too = []
     dates = []
     for covid_data_ob in covid_data_objs:
         batlagdsan_tohioldol_too.append(covid_data_ob.batlagdsan_tohioldol_too)
@@ -295,6 +296,7 @@ def get_covid_state(request, geo_id):
         emchlegdej_bui_humuus_too.append(covid_data_ob.emchlegdej_bui_humuus_too)
         tusgaarlagdaj_bui_humuus_too.append(covid_data_ob.tusgaarlagdaj_bui_humuus_too)
         shinjilgee_hiisen_too.append(covid_data_ob.shinjilgee_hiisen_too)
+        vaccine_hiisen_too.append(covid_data_ob.vaccine_hiisen_too)
         dates.append(covid_data_ob.updated_at.strftime('%Y-%m-%d.%H-%M'))
 
     linechart_all = {
@@ -304,7 +306,8 @@ def get_covid_state(request, geo_id):
             {'label': 'Эмчлэгдэж буй хүмүүсийн тоо', 'color': '#FFCE56', 'data': emchlegdej_bui_humuus_too},
             {'label': 'Нас барсан хүмүүсийн тоо', 'color': '#E7E9ED', 'data': nas_barsan_hunii_too},
             {'label': 'Тусгаарлагдаж буй хүмүүсийн тоо', 'color': '#36A2EB', 'data': tusgaarlagdaj_bui_humuus_too},
-            {'label': 'Шинжилгээ хийсэн тоо', 'color': '#EC0E00', 'data': shinjilgee_hiisen_too}
+            {'label': 'Шинжилгээ хийсэн тоо', 'color': '#EC0E00', 'data': shinjilgee_hiisen_too},
+            {'label': 'Вакцин хийсэн тоо', 'color': '#EC0E00', 'data': vaccine_hiisen_too}
 
         ],
         'dates': dates
