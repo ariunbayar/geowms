@@ -218,7 +218,11 @@ def get_covid_data(request, geo_id):
 @require_GET
 @ajax_required
 def get_covid_state(request, geo_id):
+    print(geo_id)
+    print(geo_id)
+    print(geo_id)
     qs = CovidDashboard.objects.filter(geo_id=geo_id)
+    print(qs)
     covid_datas = qs.values()
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)
     last_day_data = qs_log.order_by('-updated_at').values()
@@ -309,8 +313,9 @@ def get_covid_state(request, geo_id):
     age_labels = []
     for sorted_age in sorted_age_list:
         age_labels.append(sorted_age['age_group'])
-
-    pop_counts = PopulationCount.objects.filter(geo_id=geo_id)
+    if geo_id == '496':
+        geo_id = 11
+    pop_counts = PopulationCount.objects.filter(geo_id=int(geo_id))
     pop_counts = list(pop_counts)
 
     total_numbers = []

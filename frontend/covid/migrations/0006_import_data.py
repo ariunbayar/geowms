@@ -36,7 +36,7 @@ def _import_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('frontend_covid', '0004_auto_20210321_2122'),
+        ('frontend_covid', '0005_auto_20210321_2122'),
     ]
 
     operations = [
