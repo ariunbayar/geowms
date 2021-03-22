@@ -201,7 +201,8 @@ def _for_dashb_list():
         'niit_eruul_mendiin_baiguullaga_too',
         'emnelegiin_too',
         'emiin_sangiin_too',
-        'shinjilgee_hiisen_too'
+        'shinjilgee_hiisen_too',
+        'vaccine_hiisen_too',
     ]
 
 

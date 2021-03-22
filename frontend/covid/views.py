@@ -2,6 +2,8 @@
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, reverse
 from itertools import groupby
+from django.db.models import Count, Q
+from django.db.models.query import QuerySet
 
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
@@ -21,7 +23,8 @@ from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer, Bundle
 from backend.geoserver.models import WmtsCacheConfig
 
-from .models import CovidDashboard, CovidDashboardLog
+
+from .models import CovidDashboard, CovidDashboardLog, PopulationAge, PopulationCount
 
 
 def covid_index(request):
@@ -229,6 +232,7 @@ def get_covid_state(request, geo_id):
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)
     last_day_data = qs_log.order_by('-updated_at').values()
     count_datas = []
+    count_covid_datas = []
     for f in CovidDashboard._meta.get_fields():
         if f.name != 'id' and f.name != 'updated_by' and not 'updated_at' in f.name and not 'name' in f.name and not 'parent_id' in f.name and not 'org' in f.name and not 'geo_id' in f.name:
             if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
@@ -240,18 +244,27 @@ def get_covid_state(request, geo_id):
                     color = "warning"
                 elif f.name == 'nas_barsan_hunii_too':
                     color = "dark"
-                elif f.name == 'shinjilgee_hiisen_too':
+                elif f.name == 'vaccine_hiisen_too':
                     color = "primary"
                 else:
                     color = "info"
                 for covid_data in covid_datas:
-                    count_datas.append({
-                        'origin_name': f.name,
-                        'name': f.verbose_name,
-                        'data': covid_data[f.name],
-                        'prev_data': last_day_data[1][f.name],
-                        'color': color
-                    })
+                    if color != 'info':
+                        count_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name],
+                            'color': color
+                        })
+                    else:
+                        count_covid_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name],
+                            'color': color
+                        })
     covid_data_ogj = qs.first()
     piechart_one = {
         'labels': [
@@ -297,14 +310,68 @@ def get_covid_state(request, geo_id):
         'dates': dates
     }
 
+    sorted_age_list = PopulationAge.objects.all().values('age_group').annotate(Count('age_group')).order_by('age_group_number')
+    length = len(sorted_age_list)
+    sorted_age_list = list(sorted_age_list)
+    age_labels = []
+    for sorted_age in sorted_age_list:
+        age_labels.append(sorted_age['age_group'])
+    if geo_id == '496':
+        geo_id = 11
+    pop_counts = PopulationCount.objects.filter(geo_id=int(geo_id))
+    pop_counts = list(pop_counts)
+
+    total_numbers = []
+    for pop_count in pop_counts:
+        total_numbers.append(pop_count.total_number)
+
+    color_list = [
+        'rgba(0, 136, 202, 0.8)',
+        'rgba(0, 108, 182, 0.8)',
+        'rgba(11, 58, 125, 0.8)',
+        'rgba(78, 51, 149, 0.8)',
+        'rgba(161, 20, 69, 0.8)',
+        'rgba(255, 71, 72, 0.8)',
+        'rgba(255, 210, 74, 0.8)',
+        'rgba(0, 163, 207, 0.8)',
+        'rgba(0, 136, 202, 0.8)',
+        'rgba(0, 108, 182, 0.8)',
+        'rgba(11, 58, 125, 0.8)',
+        'rgba(78, 51, 149, 0.8)',
+        'rgba(161, 20, 69, 0.8)',
+        'rgba(255, 71, 72, 0.8)',
+        'rgba(255, 210, 74, 0.8)',
+    ]
+
+    datasets = []
+    for idx in range (length):
+        datasets.append(
+            {
+                'label': [age_labels[idx]],
+                'data': [total_numbers[idx]],
+                'fill': True,
+                'backgroundColor': color_list[idx],
+                'borderColor': color_list[idx],
+                'borderWidth': 1,
+
+            }
+        )
+
+
+    pop_data = {
+        'datasets': datasets
+    }
+
     rsp = {
         'success': True,
         'count_datas': count_datas,
+        'count_covid_datas': count_covid_datas,
         'charts': {
             'piechart_one': piechart_one,
             'linechart_all': linechart_all
         },
         'name': qs.first().name,
+        'pop_data': pop_data,
     }
     return JsonResponse(rsp)
 

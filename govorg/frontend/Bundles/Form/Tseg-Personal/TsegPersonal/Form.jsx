@@ -505,7 +505,6 @@ export class Forms extends Component {
                     this.x = []
                     this.x.push(latx, laty)
                 }
-
             })
 
         }
