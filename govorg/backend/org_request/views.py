@@ -514,7 +514,7 @@ def _get_emp_features(employee):
 def _value_types():
     return [
         {'value_type': 'value_number', 'value_names': ['double', 'number']},
-        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text', 'data-type']},
         {'value_type': 'value_date', 'value_names': ['date']},
     ]
 

@@ -24,22 +24,10 @@ def all(request):
             wms = WMS.objects.get(pk=pk)
             wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
 
-        protocol  = Config.objects.filter(name='geoserver_protocol').first().value
-        url = ''
-        if wms:
-            url_data = wms.url.split(":")
-            url = protocol
-            if url_data[0] != protocol:
-                i = 1
-                while i < len(url_data):
-                    url = url + ":" + url_data[i]
-                    i = i+1
-            else:
-                url = url_data
         base_layer_list.append({
             'tilename': base_layer.tilename,
             'url': base_layer.url,
-            'geoserver_url': url if wms else '',
+            'geoserver_url': wms.cache_url if wms else '',
             'thumbnail_1x': base_layer.thumbnail_1x.url,
             'thumbnail_2x': base_layer.thumbnail_2x.url,
             **wms_args,

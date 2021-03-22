@@ -27,7 +27,7 @@ class CovidDashboard extends PureComponent {
             is_loading: true,
             count_datas: [],
             count_covid_datas: [],
-            geo_id: props.geo_id ? props.geo_id : 'au_496',
+            geo_id: props.geo_id ? props.geo_id : '496',
 
             pop_data: [],
         }
@@ -71,19 +71,19 @@ class CovidDashboard extends PureComponent {
         const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, pop_data } = this.state
 
         return (
-            <div className="card">
-                <div className="card-body">
+            <div className="card bg-light">
+                <div className="card-body bg-light">
                     <div className="row">
                         <Loader is_loading={is_loading} />
-                        <div className="col-md-2">
+                        <div className="col-sm-2">
                             <Countries
                                 getGeoID={this.getGeoID}
                                 datas={datas}
                             />
                         </div>
-                        <div className="col-10">
+                        <div className="col-sm-10">
                             <div className="row">
-                                <div className="col-12">
+                                <div className="col-sm-12">
                                     <div className="row">
                                         {count_datas.map((data, idx) =>
                                             <Card
@@ -98,16 +98,16 @@ class CovidDashboard extends PureComponent {
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="col-8">
+                                <div className="col-sm-8">
                                     <CovidMap
                                         geo_id={geo_id}
                                         datas={datas}
                                     />
                                 </div>
-                                <div className="col-4">
-                                    <div className="card bg-transparent shadow-none border border-light">
-                                        <DropDown />
+                                <div className="col-sm-4">
+                                    <div className="card">
                                         <div className="card-body">
+                                            <h4 className="text-center">Насны ангилал</h4>
                                             <Bar
                                                 height={200}
                                                 data={pop_data}
@@ -117,12 +117,12 @@ class CovidDashboard extends PureComponent {
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="col-12">
+                                <div className="col-sm-12">
                                     <Graph/>
                                 </div>
                             </div>
                             <div className="row mt-4">
-                                <div className="col-12">
+                                <div className="col-sm-12">
                                     <div className="row">
                                     {count_covid_datas.map((data, idx) =>
                                         <Card

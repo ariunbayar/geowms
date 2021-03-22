@@ -45,7 +45,6 @@ class Graph extends PureComponent {
             <div className="card-body">
                 <div className="row">
                     <div className="col-8">
-                        <h4 className="text-center">Нийт байдлаар</h4>
                         <LineGraph
                             label="Батлагдсан тохиолдол"
                             labels={charts.linechart_all ? charts.linechart_all.dates : []}
@@ -54,16 +53,17 @@ class Graph extends PureComponent {
                             graph_color={'#EC0E00'}
                             lineTension={0.3}
                             height={100}
+                            title={"Нийт байдлаар"}
                         />
                     </div>
                     <div className="col-4">
-                        <h4 className="text-center">Өнөөдрийн байдлаар</h4>
                         <PieChart
-                                label="Батлагдсан тохиолдол"
-                                labels={charts.piechart_one ? charts.piechart_one.labels : []}
-                                datas={charts.piechart_one ? charts.piechart_one.datas : []}
-                                height={220}
-                                backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
+                            label="Батлагдсан тохиолдол"
+                            labels={charts.piechart_one ? charts.piechart_one.labels : []}
+                            datas={charts.piechart_one ? charts.piechart_one.datas : []}
+                            height={220}
+                            backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
+                            title={"Өнөөдрийн байдлаар"}
                         />
                     </div>
                 </div>

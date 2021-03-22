@@ -167,7 +167,7 @@ def _set_user(user, user_detail):
 
     user.username = user_detail['username']
     user.first_name = user_detail['first_name']
-    user.last_name = user_detail['first_name']
+    user.last_name = user_detail['last_name']
     user.email = user_detail['email']
     user.gender = user_detail['gender']
     user.register = user_detail['register']
