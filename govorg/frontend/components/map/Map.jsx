@@ -234,8 +234,9 @@ export default class Maps extends Component {
                 zoom: 5.041301562246971,
             })
         })
-
-        map.on('click', this.handleMapClick)
+        if (!this.props.only_see) {
+            map.on('click', this.handleMapClick)
+        }
         this.map = map
         if ( this.props.type !== 'ayuul'){
             this.handleSetCenter()
@@ -243,12 +244,14 @@ export default class Maps extends Component {
     }
 
     handleMapClick(event) {
+        if (!this.props.only_see) {
             this.marker.point.setCoordinates(event.coordinate)
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.dataProjection)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
             this.setState({coordinate_clicked})
             this.showFeaturesAt(coordinate_clicked)
+        }
     }
 
     showFeaturesAt(coordinate) {
