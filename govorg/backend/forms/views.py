@@ -1367,6 +1367,8 @@ def tsegUstsanSuccess(request, payload):
 
             utils.refreshMaterializedView(feature_id)
 
+            tseg_request.save()
+
             rsp = {
                 'success': True,
                 'msg': 'Амжилттай цуцаллаа'
@@ -1406,6 +1408,7 @@ def tsegUstsanList(request, payload):
             'oiroltsoo_bairlal': item.oiroltsoo_bairlal,
             'evdersen_baidal': item.evdersen_baidal,
             'nohtsol_baidal': item.shaltgaan,
+            'is_removed': item.is_removed
         })
     total_page = total_items.num_pages
 

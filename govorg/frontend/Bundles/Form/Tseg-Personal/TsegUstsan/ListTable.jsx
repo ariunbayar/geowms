@@ -41,7 +41,7 @@ export default class ListTable extends Component {
 
     render() {
         const idx = this.props.idx
-        const {id,email,name,alban_tushaal,utas,tseg_id} = this.props.values
+        const {id,email,name,alban_tushaal,utas,tseg_id, is_removed} = this.props.values
         const {is_modal_success_open, is_modal_delete_open}=this.state
         return (
             <tr>
@@ -61,13 +61,23 @@ export default class ListTable extends Component {
                     {tseg_id}
                 </td>
                 <td>
-                    <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
-                        <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
-                    </NavLink>
+                    {
+                        !is_removed
+                        &&
+                            <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
+                                <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
+                            </NavLink>
+                    }
                 </td>
                 <td>
-                    <button href="#" className="btn gp-btn-primary" aria-hidden="true" onClick={this.handleModalSuccessOpen}>
-                        Баталгаажуулах
+                    <button href="#" className={`btn ${!is_removed ? ' gp-btn-primary' : "btn-success"}`} disabled={is_removed ? 'disabled': ''} aria-hidden="true" onClick={this.handleModalSuccessOpen}>
+                        {
+                            is_removed
+                            ?
+                                'Баталгаажсан'
+                            :
+                                'Баталгаажуулах'
+                        }
                     </button>
                     {is_modal_success_open &&
                         <Modal
@@ -82,9 +92,13 @@ export default class ListTable extends Component {
                     }
                 </td>
                 <td>
-                    <a href="#" onClick={this.handleModalDeleteOpen}>
-                        <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                    </a>
+                    {
+                        !is_removed
+                        &&
+                            <a href="#" onClick={this.handleModalDeleteOpen}>
+                                <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                            </a>
+                    }
                     {is_modal_delete_open &&
                         <Modal
                             modalClose={this.handleModalDeleteClose}

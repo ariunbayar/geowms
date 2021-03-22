@@ -147,34 +147,33 @@ export class Forms extends Component {
             this.error_msg = []
         }
         if(e.target.value.length >= 1){
-            this.error_msg = []
-            const error =  this.state.error
-            this.setState({ checkError: this.state.error })
-            // service.searchTsegName(e.target.name, e.target.value).then(({hors_shinj_baidal_list, point_ids, names}) => {
-            //     if(names){
-            //         this.optionVal(names)
-            //         this.setState({names, name_error:true, checkError: error})
-            //     }
-            //     else if(names == false){
-            //         this.setState({ name_error: false, checkError:[]})
-            //     }
+            if (field == 'hors_shinj_baidal') {
+                service.searchTsegName(e.target.name, e.target.value).then(({hors_shinj_baidal_list, point_ids, names}) => {
+                    if(names){
+                        this.optionVal(names)
+                        this.setState({names, name_error:true, checkError: error})
+                    }
+                    else if(names == false){
+                        this.setState({ name_error: false, checkError:[]})
+                    }
 
-            //     else if(point_ids){
-            //         this.optionVal(point_ids)
-            //         this.setState({id_error:true, checkError: error})
-            //     }
-            //     else if(point_ids == false){
-            //         this.setState({ id_error: false , checkError:[] })
-            //     }
+                    else if(point_ids){
+                        this.optionVal(point_ids)
+                        this.setState({id_error:true, checkError: error})
+                    }
+                    else if(point_ids == false){
+                        this.setState({ id_error: false , checkError:[] })
+                    }
 
-            //     else if(hors_shinj_baidal_list){
-            //         this.optionVal(hors_shinj_baidal_list)
-            //         this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
-            //     }
-            //     else{
-            //         this.setState({ hors_error: true, checkError: error})
-            //     }
-            // })
+                    else if(hors_shinj_baidal_list){
+                        this.optionVal(hors_shinj_baidal_list)
+                        this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
+                    }
+                    else{
+                        this.setState({ hors_error: true, checkError: error})
+                    }
+                })
+            }
         }
     }
 
