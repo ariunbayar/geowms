@@ -118,7 +118,7 @@ class CovidDashboard extends PureComponent {
                             </div>
                             <div className="row">
                                 <div className="col-sm-12">
-                                    <Graph/>
+                                    <Graph geo_id={geo_id}/>
                                 </div>
                             </div>
                             <div className="row mt-4">
