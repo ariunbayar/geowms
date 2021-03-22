@@ -714,15 +714,88 @@ def tseg_personal_list(request, payload):
     return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def tseg_inspire_list(request, payload):
+def tseg_inspire_list(request):
     query = ''
-    datas = utils.get_mdata_values('gnp-gp-gp', query)
+    display_items = []
+    page = 1
+    per_page = 20
+
+    qs = _get_model_qs(LThemes, {'theme_code': 'gnp'})
+    theme_id = qs.first().theme_id
+    qs = _get_model_qs(LPackages, {'theme_id': theme_id})
+    package_id = qs.first().package_id
+    qs = _get_model_qs(LFeatures, {'package_id': package_id})
+    feature = qs.first()
+    feature_id = feature.feature_id
+
+    qs = MGeoDatas.objects
+    geo_qs = qs.filter(feature_id=feature_id)
+    # datas = utils.get_mdata_values('gnp-gp-gp', query)
+
+    total_items = Paginator(geo_qs, per_page)
+    items_page = total_items.page(page)
+    for item in items_page.object_list:
+        geo_json = item.geo_data.json
+        geo_json = json.loads(geo_json)
+
+        latlongx = geo_json['coordinates'][0][0]
+        latlongy = geo_json['coordinates'][0][1]
+        LA = int(float(latlongx))
+        LB = int((float(latlongx)-LA)*60)
+        LC = float("{:.6f}".format(((float(latlongx))-LA-LB/60)*3600 ))
+        BA = int(float(latlongy))
+        BB = int((float(latlongy)-BA)*60)
+        BC = (float(float(latlongy))-BA-BB/60)*3600
+
+        print(item)
+        values = utils.mdatas_for_paginator(feature.feature_code, item.geo_id)
+        print(values)
+
+        sheets = values['Nomenclature']
+        sheets = sheets.split("-")
+
+        display_items.append({
+            'latlongx': latlongx,
+            'latlongy': latlongy,
+            'LA': LA,
+            'LB': LB,
+            'LC': LC,
+            'BA': BA,
+            'BB': BB,
+            'BC': BC,
+            'tseg_oiroos_img_url': '/media/' + values['PointNearPhoto'] if values and 'PointNearPhoto' in values else '',
+            'tseg_holoos_img_url': '/media/' + values['PointFarPhoto'] if values and 'PointFarPhoto' in values else '',
+            'barishil_tuhai': values['PointLocationDescription'] if 'PointLocationDescription' in values else '',
+            'bairshil_tseg_oiroos_img_url': '/media/' + values['PointCenterType'] if values and 'PointCenterType' in values else '',
+            'bairshil_tseg_holoos_img_url': '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else '',
+            'sudalga_or_shine':  values['PointShape'] if 'PointShape' in values else '',
+            'hors_shinj_baidal': values['SoilType'] if 'SoilType' in values else '',
+            'date': values['beginLifespanVersion'] if values and 'beginLifespanVersion' in values else '',
+            'hotolson': values['EmployeeName'] if 'EmployeeName' in values else '',
+            'alban_tushaal': values['EmployeePosition'] if 'EmployeePosition' in values else '',
+            'alban_baiguullga': values['CompanyName'] if 'CompanyName' in values else '',
+            'suljeenii_torol': values['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in values else '',
+            'geo_id': item.geo_id if item.geo_id else '',
+            # 'point_id': requests.point_id if  requests.point_id else '',
+            # 'point_name': requests.point_name if requests.point_name else '',
+            # 'pid': requests.pdf_id if requests.pdf_id else '',
+            # 'aimag': requests.aimag if requests.aimag else '',
+            # 'sum': requests.sum if requests.sum else '',
+            'sheet1': sheets[0],
+            'zone': int(sheets[1]),
+            'cc': int(sheets[2]),
+            'center_typ': values['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in values else '',
+            'ondor': values['elevation'] if values['elevation'] else '',
+        })
+    total_page = total_items.num_pages
 
     rsp = {
-        'items': datas
+        'items': display_items,
+        'total_page': total_page,
+        'page': page,
     }
     return JsonResponse(rsp)
 

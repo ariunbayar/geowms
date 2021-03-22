@@ -12,6 +12,7 @@ export const service = {
     getFieldValue,
     successPoint,
     rejectPoint,
+    getInspireList,
 }
 
 const prefix = '/gov/api/tseg-personal'
@@ -104,4 +105,11 @@ function rejectPoint(id){
         ...getGetOptions(),
     }
     return fetch(`${prefix}/remove-point/${id}/`, opts).then(handleResponse)
+}
+
+function getInspireList() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/get-inspire-list/`, opts).then(handleResponse)
 }

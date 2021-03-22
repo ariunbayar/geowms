@@ -1244,6 +1244,38 @@ def get_mdata_values(feature_code, query):
     return rows
 
 
+def mdatas_for_paginator(feature_code, geo_id):
+    geo_id = ''
+
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    l_feature_qs = get_feature_from_code(feature_code)
+
+    feature_id = l_feature_qs.feature_id
+    send_value = dict()
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    print(geo_id)
+    mdatas_qs = MDatas.objects
+    mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+    print(mdatas_qs)
+    if mdatas_qs:
+        for mdata in mdatas_qs.values():
+            value = dict()
+            for field in _mdata_values_field():
+                if mdata[field]:
+                    for prop in properties_qs:
+                        if prop.property_id == mdata['property_id']:
+                            value[prop.property_code] = mdata[field]
+            datas = make_value_dict(value, properties_qs, True)
+            for data in datas:
+                for key, value in data.items():
+                    send_value[key] = value
+
+    send_value['geo_id'] = geo_id
+
+    return send_value
+
+
 def get_mdata_value(feature_code, value=None, only_geo_id=False):
     geo_id = ''
 
@@ -1261,7 +1293,7 @@ def get_mdata_value(feature_code, value=None, only_geo_id=False):
     mdatas_qs = mdatas_qs.filter(**data)
     mdatas_qs = mdatas_qs.first()
     if mdatas_qs:
-        geo_id = mdatas_qs.geo_id
+        geo_id = mdatas_qs.first().geo_id
         if not only_geo_id:
             mdatas = MDatas.objects.filter(geo_id=geo_id)
             for mdata in mdatas.values():
