@@ -1244,7 +1244,7 @@ def get_mdata_values(feature_code, query):
     return rows
 
 
-def get_mdata_value(feature_code, value=None):
+def get_mdata_value(feature_code, value=None, only_geo_id=False):
     geo_id = ''
 
     MDatas = apps.get_model('backend_inspire', 'MDatas')
@@ -1262,20 +1262,20 @@ def get_mdata_value(feature_code, value=None):
     mdatas_qs = mdatas_qs.first()
     if mdatas_qs:
         geo_id = mdatas_qs.geo_id
-
-        mdatas = MDatas.objects.filter(geo_id=geo_id)
-        for mdata in mdatas.values():
-            value = dict()
-            values = mdata
-            for field in _mdata_values_field():
-                if values[field]:
-                    for prop in properties_qs:
-                        if prop.property_id == mdata['property_id']:
-                            value[prop.property_code] = values[field]
-            datas = make_value_dict(value, properties_qs, True)
-            for data in datas:
-                for key, value in data.items():
-                    send_value[key] = value
+        if not only_geo_id:
+            mdatas = MDatas.objects.filter(geo_id=geo_id)
+            for mdata in mdatas.values():
+                value = dict()
+                values = mdata
+                for field in _mdata_values_field():
+                    if values[field]:
+                        for prop in properties_qs:
+                            if prop.property_id == mdata['property_id']:
+                                value[prop.property_code] = values[field]
+                datas = make_value_dict(value, properties_qs, True)
+                for data in datas:
+                    for key, value in data.items():
+                        send_value[key] = value
 
     send_value['geo_id'] = geo_id
 

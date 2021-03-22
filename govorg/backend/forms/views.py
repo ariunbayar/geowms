@@ -23,7 +23,7 @@ from backend.inspire.models import (
     LCodeLists, LFeatures,
     LPackages,
     LThemes,
-    LProperties,
+    LProperties, MDatas, MGeoDatas,
 )
 from backend.org.models import Employee, Org
 from geoportal_app.models import User
@@ -1342,9 +1342,41 @@ def tsegUstsan(request):
 def tsegUstsanSuccess(request, payload):
     pk = payload.get('id')
 
-    tseg_request = get_object_or_404(TsegRequest, pk=pk, kind=TsegRequest.STATE_REJECT)
-    #TODO ustsan tseg iig ustgah iig batalgaajuulah batalgaajwal mdatas mgeodatas aas ustana refreshmaterialzed view
-    return JsonResponse({'success': True})
+    tseg_request = get_object_or_404(TsegUstsan, pk=pk)
+
+    with transaction.atomic():
+        geo_id = utils.get_mdata_value('gnp-gp-gp', tseg_request.tseg_id, only_geo_id=True)
+        if geo_id['geo_id']:
+
+            mdatas_qs = MDatas.objects
+            mdatas_qs = mdatas_qs.filter(**geo_id)
+            mdatas_qs.delete()
+
+            mgeo_qs = MGeoDatas.objects
+            mgeo_qs = mgeo_qs.filter(**geo_id)
+            mgeo_qs.delete()
+
+            tseg_request.is_removed = True
+
+            qs = _get_model_qs(LThemes, {'theme_code': 'gnp'})
+            theme_id = qs.first().theme_id
+            qs = _get_model_qs(LPackages, {'theme_id': theme_id})
+            package_id = qs.first().package_id
+            qs = _get_model_qs(LFeatures, {'package_id': package_id})
+            feature_id = qs.first().feature_id
+
+            utils.refreshMaterializedView(feature_id)
+
+            rsp = {
+                'success': True,
+                'msg': 'Амжилттай цуцаллаа'
+            }
+            return JsonResponse(rsp)
+    rsp = {
+        'success': False,
+        'msg': 'Энэ цэг олдсонгүй'
+    }
+    return JsonResponse(rsp)
 
 
 @require_POST

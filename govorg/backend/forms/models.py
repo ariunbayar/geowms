@@ -151,6 +151,7 @@ class TsegUstsan(models.Model):
     sergeeh_sanal = models.CharField(max_length=100)
     gps_hemjilt = models.BooleanField(db_index=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_removed = models.BooleanField(default=False)
 
 
 class TsegUstsanLog(models.Model):
