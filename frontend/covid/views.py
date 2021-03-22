@@ -307,8 +307,6 @@ def get_covid_state(request, geo_id):
     age_labels = []
     for sorted_age in sorted_age_list:
         age_labels.append(sorted_age['age_group'])
-    if geo_id == '496':
-        geo_id = 11
     pop_counts = PopulationCount.objects.filter(geo_id=int(geo_id))
     pop_counts = list(pop_counts)
 
