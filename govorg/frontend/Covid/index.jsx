@@ -20,7 +20,6 @@ class CovidDashboardConfig extends PureComponent {
 
     getGeom(geo_id, data) {
         this.setState({ geo_id, data })
-        console.log(geo_id, data);
     }
 
     render() {
