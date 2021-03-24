@@ -2,6 +2,8 @@
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.shortcuts import render, reverse
 from itertools import groupby
+from django.db.models import Count, Q
+from django.db.models.query import QuerySet
 
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, FileResponse, Http404
@@ -21,7 +23,8 @@ from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer, Bundle
 from backend.geoserver.models import WmtsCacheConfig
 
-from .models import CovidDashboard, CovidDashboardLog
+
+from .models import CovidDashboard, CovidDashboardLog, PopulationAge, PopulationCount
 
 
 def covid_index(request):
@@ -185,12 +188,20 @@ def get_nema(request, bundle_id):
     }
     return JsonResponse(rsp)
 
+
 @require_GET
 @ajax_required
 def get_covid_data(request, geo_id):
     form_datas = []
-    geom = utils.get_geom(geo_id, 'MultiPolygon')
+    geom = utils.get_geom(geo_id)
     geo_data = utils.get_geoJson(geom.json)
+
+    center_point = [107.15968151256514, 47.91619699047089]
+    center_of_geom = utils.get_center_of_geo_data(geo_id)
+    if center_of_geom:
+        center_point=center_of_geom
+
+
     covid_datas = CovidDashboard.objects.filter(geo_id=geo_id).first()
     if covid_datas:
         form_datas.append({
@@ -207,6 +218,7 @@ def get_covid_data(request, geo_id):
     rsp = {
         'geo_data': FeatureCollection(geo_data),
         'form_datas': form_datas,
+        'center_of_geom': center_point
     }
     return JsonResponse(rsp)
 
@@ -220,6 +232,7 @@ def get_covid_state(request, geo_id):
     qs_log = CovidDashboardLog.objects.filter(geo_id=geo_id)
     last_day_data = qs_log.order_by('-updated_at').values()
     count_datas = []
+    count_covid_datas = []
     for f in CovidDashboard._meta.get_fields():
         if f.name != 'id' and f.name != 'updated_by' and not 'updated_at' in f.name and not 'name' in f.name and not 'parent_id' in f.name and not 'org' in f.name and not 'geo_id' in f.name:
             if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
@@ -231,29 +244,41 @@ def get_covid_state(request, geo_id):
                     color = "warning"
                 elif f.name == 'nas_barsan_hunii_too':
                     color = "dark"
-                elif f.name == 'shinjilgee_hiisen_too':
+                elif f.name == 'vaccine_hiisen_too':
                     color = "primary"
                 else:
                     color = "info"
                 for covid_data in covid_datas:
-                    count_datas.append({
-                        'origin_name': f.name,
-                        'name': f.verbose_name,
-                        'data': covid_data[f.name],
-                        'prev_data': last_day_data[1][f.name],
-                        'color': color
-                    })
+                    if color != 'info':
+                        count_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name] if len(last_day_data) > 1 else 0,
+                            'color': color
+                        })
+                    else:
+                        count_covid_datas.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'data': covid_data[f.name],
+                            'prev_data': last_day_data[1][f.name] if len(last_day_data) > 1 else 0,
+                            'color': color
+                        })
+
     covid_data_ogj = qs.first()
+
+    uwdsun = int(covid_data_ogj.batlagdsan_tohioldol_too) - int(covid_data_ogj.edgersen_humuus_too)
     piechart_one = {
         'labels': [
-            "Батлагдсан тохиолдол", "Эдгэрсэн хүмүүсийн тоо",
-            "Эмчлэгдэж буй хүмүүсийн тоо", "Нас барсан хүмүүсийн тоо",
-            "Тусгаарлагдаж буй хүмүүсийн тоо", "Шинжилгээ хийсэн тоо"
+            "Эдгэрсэн хүмүүсийн тоо", "Нас барсан хүмүүсийн тоо", "Тусгаарлагдаж буй хүмүүсийн тоо", "Өвдсөн хүмүүсийн тоо", "Вакцин хийсэн тоо"
             ],
         'datas': [
-            covid_data_ogj.batlagdsan_tohioldol_too, covid_data_ogj.edgersen_humuus_too,
-            covid_data_ogj.emchlegdej_bui_humuus_too, covid_data_ogj.nas_barsan_hunii_too,
-            covid_data_ogj.tusgaarlagdaj_bui_humuus_too, covid_data_ogj.shinjilgee_hiisen_too
+            covid_data_ogj.edgersen_humuus_too,
+            covid_data_ogj.nas_barsan_hunii_too,
+            covid_data_ogj.tusgaarlagdaj_bui_humuus_too,
+            uwdsun,
+            covid_data_ogj.vaccine_hiisen_too,
         ],
         'backgroundColor': ['#FF6384','#4BC0C0','#FFCE56','#E7E9ED','#36A2EB', '#EC0E00', '#EC0E00']
     }
@@ -265,6 +290,7 @@ def get_covid_state(request, geo_id):
     emchlegdej_bui_humuus_too = []
     tusgaarlagdaj_bui_humuus_too = []
     shinjilgee_hiisen_too = []
+    vaccine_hiisen_too = []
     dates = []
     for covid_data_ob in covid_data_objs:
         batlagdsan_tohioldol_too.append(covid_data_ob.batlagdsan_tohioldol_too)
@@ -273,6 +299,7 @@ def get_covid_state(request, geo_id):
         emchlegdej_bui_humuus_too.append(covid_data_ob.emchlegdej_bui_humuus_too)
         tusgaarlagdaj_bui_humuus_too.append(covid_data_ob.tusgaarlagdaj_bui_humuus_too)
         shinjilgee_hiisen_too.append(covid_data_ob.shinjilgee_hiisen_too)
+        vaccine_hiisen_too.append(covid_data_ob.vaccine_hiisen_too)
         dates.append(covid_data_ob.updated_at.strftime('%Y-%m-%d.%H-%M'))
 
     linechart_all = {
@@ -282,20 +309,73 @@ def get_covid_state(request, geo_id):
             {'label': 'Эмчлэгдэж буй хүмүүсийн тоо', 'color': '#FFCE56', 'data': emchlegdej_bui_humuus_too},
             {'label': 'Нас барсан хүмүүсийн тоо', 'color': '#E7E9ED', 'data': nas_barsan_hunii_too},
             {'label': 'Тусгаарлагдаж буй хүмүүсийн тоо', 'color': '#36A2EB', 'data': tusgaarlagdaj_bui_humuus_too},
-            {'label': 'Шинжилгээ хийсэн тоо', 'color': '#EC0E00', 'data': shinjilgee_hiisen_too}
+            {'label': 'Шинжилгээ хийсэн тоо', 'color': '#EC0E00', 'data': shinjilgee_hiisen_too},
+            {'label': 'Вакцин хийсэн тоо', 'color': '#0B3A7D', 'data': vaccine_hiisen_too}
 
         ],
         'dates': dates
     }
 
+    sorted_age_list = PopulationAge.objects.all().values('age_group').annotate(Count('age_group')).order_by('age_group_number')
+    length = len(sorted_age_list)
+    sorted_age_list = list(sorted_age_list)
+    age_labels = []
+    for sorted_age in sorted_age_list:
+        age_labels.append(sorted_age['age_group'])
+    pop_counts = PopulationCount.objects.filter(geo_id=int(geo_id))
+    pop_counts = list(pop_counts)
+
+    total_numbers = []
+    for pop_count in pop_counts:
+        total_numbers.append(pop_count.total_number)
+
+    color_list = [
+        'rgba(0, 136, 202, 0.8)',
+        'rgba(0, 108, 182, 0.8)',
+        'rgba(11, 58, 125, 0.8)',
+        'rgba(78, 51, 149, 0.8)',
+        'rgba(161, 20, 69, 0.8)',
+        'rgba(255, 71, 72, 0.8)',
+        'rgba(255, 210, 74, 0.8)',
+        'rgba(0, 163, 207, 0.8)',
+        'rgba(0, 136, 202, 0.8)',
+        'rgba(0, 108, 182, 0.8)',
+        'rgba(11, 58, 125, 0.8)',
+        'rgba(78, 51, 149, 0.8)',
+        'rgba(161, 20, 69, 0.8)',
+        'rgba(255, 71, 72, 0.8)',
+        'rgba(255, 210, 74, 0.8)',
+    ]
+
+    datasets = []
+    for idx in range (length):
+        datasets.append(
+            {
+                'label': [age_labels[idx]],
+                'data': [total_numbers[idx]],
+                'fill': True,
+                'backgroundColor': color_list[idx],
+                'borderColor': color_list[idx],
+                'borderWidth': 1,
+
+            }
+        )
+
+
+    pop_data = {
+        'datasets': datasets
+    }
+
     rsp = {
         'success': True,
         'count_datas': count_datas,
+        'count_covid_datas': count_covid_datas,
         'charts': {
             'piechart_one': piechart_one,
             'linechart_all': linechart_all
         },
         'name': qs.first().name,
+        'pop_data': pop_data,
     }
     return JsonResponse(rsp)
 
@@ -382,10 +462,15 @@ def get_data_dashboard(request):
     last_day_data = qs_log.order_by('-updated_at').values()
     zuruu = dict()
     if last_day_data:
-        last_day_data = last_day_data[1]
-        mongol = parents.values()[0]
-        for name in _for_mongol_list():
-            zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+        if len(last_day_data) < 1:
+            last_day_data = last_day_data[1]
+            mongol = parents.values()[0]
+            for name in _for_mongol_list():
+                zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+        else:
+            mongol = parents.values()[0]
+            for name in _for_mongol_list():
+                zuruu[name + "_zuruu"] = str(mongol[name])
 
     rsp = {
         'success': True,

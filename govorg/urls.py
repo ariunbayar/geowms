@@ -12,6 +12,7 @@ from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
 from govorg.backend.revoke_request import views as revoke_request_views
 from govorg.backend.secure import views as secure_views
+from govorg.backend.tseg import views as tseg_view
 
 urlpatterns = [
     path('api/', include(([
@@ -43,11 +44,17 @@ urlpatterns = [
             ], 'role'))),
         ], 'role'))),
 
+        path('tseg/', include(([
+            path('', tseg_view.tseg_personal),
+            path('get-fields/', tseg_view.get_tseg_fields),
+        ], 'tseg'))),
+
         path('system/', include(([
             path('', system_views.systemList, name='system'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
         ], 'system'))),
+
 
         path('inspire/', include(([
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
@@ -92,12 +99,13 @@ urlpatterns = [
             path('', forms_views.tsegPersonal, name='tseg-personal'),
             path('findSum/', forms_views.findSum, name='findSum'),
             path('find-point/', forms_views.findPoints, name='find-point'),
-            path('batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
+            path('success-point/<int:id>/', forms_views.tseg_personal_success, name='tseg-personal-batalgaajuulah'),
             path('update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
             path('search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
             path('searchName/', forms_views.tsegPersonalNameSearch, name='tsegPersonalNameSearch'),
             path('list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
-            path('remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
+            path('remove-point/<int:id>/', forms_views.tseg_personal_remove, name='tseg-personal-remove'),
+            path('get-field-values/', forms_views.get_field_values),
         ], 'tseg-personal'))),
 
         path('tseg-ustsan/', include(([
@@ -152,6 +160,7 @@ urlpatterns = [
         path('nema/', include(([
             path('', govorg_inspire_views.nema_list, name='nema_list'),
             path('create/', govorg_inspire_views.create_nema, name='nema_create'),
+            path('update-c2405/', govorg_inspire_views.update_c2405, name='nema_create'),
             path('<int:pk>/detail/', govorg_inspire_views.nema_detail, name='nema_detail'),
             path('remove/<int:pk>/', govorg_inspire_views.nema_remove, name='nema_remove'),
         ], 'nema'))),

@@ -28,7 +28,7 @@ class CovidDashboardConfig extends PureComponent {
     }
 
     componentDidMount() {
-        this.setValueToObj('au_496')
+        this.setValueToObj('496')
     }
 
     getDashboard() {

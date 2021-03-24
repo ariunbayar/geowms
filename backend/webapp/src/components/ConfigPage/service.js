@@ -156,6 +156,21 @@ const qpay = {
 
 }
 
+const inspire = {
+    get_value_type_fields: function() {
+        const requestOptions = getGetOptions()
+        return fetch('/back/api/config/get-value-type-fields/', requestOptions).then(handleResponse)
+    },
+    save_value_types: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({ values }),
+        }
+        return fetch('/back/api/config/save-value-types/', opts).then(handleResponse)
+    }
+
+}
+
 export const service = {
     config: {
         geoserver: geoserver,
@@ -165,10 +180,10 @@ export const service = {
         qgis: qgis,
         dan: dan,
         payment: payment,
-        qpay: qpay
+        qpay: qpay,
+        inspire: inspire,
     },
     getDisk,
     getPostgeVersion,
     getGeoServerVersion,
 }
-

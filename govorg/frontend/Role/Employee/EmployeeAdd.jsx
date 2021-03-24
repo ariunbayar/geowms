@@ -68,6 +68,8 @@ export class EmployeeAdd extends Component {
             address_state: true,
 
             is_address_map: true,
+
+            firstOrder_geom: '',
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -190,7 +192,7 @@ export class EmployeeAdd extends Component {
         let array
         service
             .formOptions()
-            .then(({ success, info }) => {
+            .then(({ success, info, firstOrder_geom }) => {
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, info)
@@ -215,7 +217,7 @@ export class EmployeeAdd extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: info, ...obj })
+                    this.setState({ aimag: info, ...obj, firstOrder_geom })
                 }
             })
     }
@@ -285,7 +287,7 @@ export class EmployeeAdd extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
@@ -341,30 +343,30 @@ export class EmployeeAdd extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="first_name">Овог:</label>
+                                                    <label htmlFor="last_name">Овог:</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
-                                                        name='first_name'
-                                                        id="id_first_name"
+                                                        className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
+                                                        name='last_name'
+                                                        id="id_last_name"
                                                         type="text"
                                                         placeholder="Овог"
                                                     />
-                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="last_name">Нэр:</label>
+                                                    <label htmlFor="first_name">Нэр:</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
-                                                        name='last_name'
-                                                        id="id_last_name"
+                                                        className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
+                                                        name='first_name'
+                                                        id="id_first_name"
                                                         type="text"
                                                         placeholder="Нэр"
                                                     />
-                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
                                                 </div>
                                             </div>
                                             <div className="form-group col-md-6">

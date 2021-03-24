@@ -32,6 +32,7 @@ class LCodeLists(models.Model):
     code_list_definition = models.CharField(max_length=500)
     code_list_definition_eng = models.CharField(max_length=500)
     has_text_value = models.BooleanField(default=True)
+    top_code_list_id = models.IntegerField()
     order_no = models.IntegerField()
     is_active = models.BooleanField(default=True)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -303,11 +304,11 @@ class MDatas(models.Model):
     code_list_id = models.IntegerField(null=True)
     value_text = models.CharField(max_length=4000, null=True)
     value_number = models.FloatField(null=True)
-    value_date = models.DateTimeField(null=True)
+    value_date = models.DateTimeField(null=True, auto_now=False)
     value_connected_geo_id = models.CharField(max_length=100, null=True)
-    created_on = models.DateTimeField(null=True)
+    created_on = models.DateTimeField(auto_now_add=True)
     created_by = models.IntegerField(null=True)
-    modified_on = models.DateTimeField(null=True)
+    modified_on = models.DateTimeField(auto_now=True)
     modified_by = models.IntegerField(null=True)
 
 
