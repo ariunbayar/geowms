@@ -14,8 +14,8 @@ export class NemaTable extends Component {
         this.state = {
             жагсаалтын_холбоос: '/gov/api/nema/',
             талбарууд: [
-                {'field': 'code', "title": 'layer code', "width": '20%'},
-                {'field': 'is_open', "title": 'is_open'},
+                {'field': 'code', "title": 'Давхаргын код', "width": '20%'},
+                {'field': 'is_open', "title": 'Нээлттэй/Хаалттай'},
                 {'field': 'created_at', "title": 'Огноо'},
                 {'field': 'created_by', "title": 'Үүсгэсэн'},
             ],
