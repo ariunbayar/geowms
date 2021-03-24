@@ -4,6 +4,8 @@ import {service} from './service'
 import { Children } from "react"
 import { containsCoordinate } from "ol/extent"
 import {NemaPP} from './nemapop'
+import CovidDashboard from '../../../frontend/covid/src/components/covid_dashboard'
+
 
 export default class NemaMap extends Component {
 
@@ -78,31 +80,12 @@ export default class NemaMap extends Component {
 
 
     render() {
-        const { bundle, wms_list} = this.state
+        const { bundle, wms_list } = this.state
+        const { employee } = this.props
         return (
             <div className="col-lg-12 p-0 m-0">
-                {/* <div className="col-12 col-md-12 col-xl-12 d-flex justify-content-center">
-                    <div className="form-check d-inline-block mx-3 my-3">
-                        <input className="form-check-input" type="checkbox" name="1"  onChange={(e) => this.handleOnChange(e)}/>
-                        <label className="form-check-label h5">
-                            Нээлттэй
-                        </label>
-                    </div>
-                    <div className="form-check d-inline-block mx-3 my-3">
-                        <input className="form-check-input"  name="2" type="checkbox" onChange={(e) => this.handleOnChange(e)}/>
-                        <label className="form-check-label h5">
-                            Хаалттай
-                        </label>
-                    </div>
-                </div> */}
                 <div className="col-12 col-md-12 col-xl-12 p-0 m-0">
-                    <InspireMap
-                        wms_list={wms_list}
-                        is_search_bar={true}
-                        height="80vh"
-                        base_layer={true}
-                        PPContent={NemaPP}
-                    />
+                    <CovidDashboard NemaPP={NemaPP} wms_list={wms_list} is_search_bar={true} is_zoom={"closed"} geo_id={employee.geo_id}/>
                 </div>
             </div>
         )

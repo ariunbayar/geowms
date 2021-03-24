@@ -427,7 +427,8 @@ def frontend(request):
             'org_role': _org_role(org),
             'employee': {
                 'is_admin': employee.is_admin,
-                'username': employee.user.username
+                'username': employee.user.username,
+                'geo_id': org.geo_id or None
             },
             'allowed_geom': geom.json if geom else None,
             'obeg_employee': True if employee.org.name.lower() == 'обег' else False,
