@@ -788,7 +788,7 @@ def tseg_inspire_list(request):
             'zone': int(sheets[1]),
             'cc': int(sheets[2]),
             'center_typ': values['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in values else '',
-            'ondor': values['elevation'] if values['elevation'] else '',
+            'ondor': values['elevationValue'] if values['elevationValue'] else '',
         })
     total_page = total_items.num_pages
 
@@ -879,7 +879,7 @@ def tsegPersonalUpdate(request, payload):
                 'zone': int(sheets[1]),
                 'cc': int(sheets[2]),
                 'center_typ': requests.point_type if requests.point_type else '',
-                'ondor': values['elevation'] if values['elevation'] else '',
+                'ondor': values['elevationValue'] if values['elevationValue'] else '',
             })
 
     rsp = {
@@ -1118,7 +1118,7 @@ def _get_model_qs(Model, search):
 
 def _get_values(request):
     value = dict()
-    value['PointNumber'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
+    value['localId'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
     value['GeodeticalNetworkPointClassValue'] = int(request.POST.get('suljeenii_torol')) #bolson
     value['GeodeticalNetworkPointTypeValue'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
     value['PointLocationDescription'] = request.POST.get('barishil_tuhai') # bolson
@@ -1126,14 +1126,13 @@ def _get_values(request):
     value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
     value['EmployeeName'] = request.POST.get('hotolson') # bolson
     value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
-    value['OperatorName'] = request.POST.get('alban_baiguullga') # bolson
-    value['name'] = request.POST.get('tesgiin_ner') # bolson
+    value['PointNumber'] = request.POST.get('tesgiin_ner') # bolson
     value['beginLifespanVersion'] = request.POST.get('date') #bolson
-    value['AdministrativeUnitSubclass'] = utils.get_code_list_id_from_name(request.POST.get('aimag_name'), 'AdministrativeUnitSubClass') #bolson
+    value['AdministrativeUnitSubClass'] = utils.get_code_list_id_from_name(request.POST.get('aimag_name'), 'AdministrativeUnitSubClass') #bolson
     value['AdministrativeUnitSubClass'] = utils.get_code_list_id_from_name(request.POST.get('sum_name'), 'AdministrativeUnitSubClass')#bolson
     value['SoilType'] = request.POST.get('hors_shinj_baidal') #mdku
     # value['endLifespanVersion'] = date # ustsanii daraah hadagalah # TODO
-    value['elevation'] = request.POST.get('ondor')#bolson
+    value['elevationValue'] = request.POST.get('ondor')#bolson
     return value
 
 
@@ -1881,6 +1880,37 @@ def tsegPersonalSearch(request, payload):
         return JsonResponse(rsp)
 
 
+def _save_property_zero(geo_id, values):
+    values = json.loads(values)
+
+    datas = list()
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id)
+    for mdata in mdata_qs.values():
+        prop_qs = LProperties.objects
+        props_qs = prop_qs.filter(property_id=mdata['property_id'])
+        prop_code = props_qs.first().property_code
+        if prop_code in values.keys():
+            del values[prop_code]
+
+    data = dict()
+    for key, value in values.items():
+        prop_qs = prop_qs.filter(property_code=key)
+        prop = prop_qs.first()
+        property_id = prop.property_id
+        data['property_id'] = property_id
+        data['geo_id'] = geo_id
+        if key == 'SoilType':
+            data['value_text'] = value
+        else:
+            for types in utils._value_types():
+                if prop.value_type_id == types['value_names']:
+                        data[types['value_type']] = value
+        datas.append(data)
+
+    for data in datas:
+        MDatas.objects.create(**data)
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1897,13 +1927,18 @@ def tseg_personal_success(request, id):
             coroutines = geo_json['coordinates']
 
             new_geo_id = utils.save_value_to_mdatas(value.values, feature_code, [coroutines[0], coroutines[1], 0])
-            #TODO tuhain huseltend bgaa form iig m_datas ruu hadgalaad geom iig ni mdatas ruu hadgalana
+
+            #TODO arilana hurs hatuu onooson
+            _save_property_zero(new_geo_id, value.values)
+
             utils.refreshMaterializedView(value.feature_id)
+
             qs.update(
                 state=TsegRequest.STATE_APPROVE,
                 new_geo_id=new_geo_id,
             )
             _send_data_to_pdf(value.values, value.pdf_id, value)
+
             rsp = {
                 'success': True,
                 'msg': "Амжилттай боллоо",

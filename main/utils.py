@@ -1070,7 +1070,7 @@ def get_properties(feature_id, get_all=False):
 def _value_types():
     return [
         {'value_type': 'value_number', 'value_names': ['double', 'number']},
-        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text', 'data-type']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
         {'value_type': 'value_date', 'value_names': ['date']},
         {'value_type': 'code_list_id', 'value_names': ['single-select', 'multi-select']},
     ]
@@ -1254,10 +1254,8 @@ def mdatas_for_paginator(feature_code, geo_id):
     send_value = dict()
 
     properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
-    print(geo_id)
     mdatas_qs = MDatas.objects
     mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
-    print(mdatas_qs)
     if mdatas_qs:
         for mdata in mdatas_qs.values():
             value = dict()
