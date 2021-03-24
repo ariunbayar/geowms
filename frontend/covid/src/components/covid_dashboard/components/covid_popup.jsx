@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react"
 import ReactDOM from 'react-dom'
 import Loader from "@utils/Loader"
+import {Control} from 'ol/control'
 
 export class CovidPP extends Component {
 
@@ -69,6 +70,9 @@ export class CovidPP extends Component {
                 {
                     <div className="px-0">
                         <div className="col-md-12 text-center">
+                            <div className="text-right" id="popup-closer" role="button" onClick={() => this.props.close()}>
+                                <i className="fa fa-times" aria-hidden="true"></i>
+                            </div>
                             <label htmlFor="label" className="mw-100 align-middle">{name}</label>
                         </div>
                         <div className="row text-danger">
@@ -79,19 +83,19 @@ export class CovidPP extends Component {
                             <li className="text-warning">
                                 <div className="row pl-2">
                                     <small className="text-dark col-md-8 px-0">Эмчлэгдэж буй</small>
-                                    <small className="text-muted col-md-4 float-right">{emchlegdej_bui_humuus_too}</small>
+                                    <small className="text-muted col-md-4 text-right px-2">{emchlegdej_bui_humuus_too}</small>
                                 </div>
                             </li>
                             <li className="text-success">
                                 <div className="row pl-2">
                                     <small className="text-dark col-md-8 px-0">Эдгэрсэн</small>
-                                    <small className="text-muted col-md-4 float-right">{edgersen_humuus_too}</small>
+                                    <small className="text-muted col-md-4 text-right px-2">{edgersen_humuus_too}</small>
                                 </div>
                             </li>
                             <li className="text-dark">
                                 <div className="row pl-2">
                                     <small className="text-dark col-md-8 px-0">Нас барсан</small>
-                                    <small className="text-muted col-md-4 float-right">{nas_barsan_hunii_too}</small>
+                                    <small className="text-muted col-md-4 text-right px-2">{nas_barsan_hunii_too}</small>
                                 </div>
                             </li>
                         </ul>
@@ -99,5 +103,44 @@ export class CovidPP extends Component {
                 }
             </div>
             )
+    }
+}
+
+export class PopUp extends Control {
+
+    constructor(opt_options) {
+
+        const options = opt_options || {}
+
+        super({
+            element: document.createElement('div'),
+            target: options.target,
+        })
+
+        this.is_component_initialized = false
+
+        this.element.className = 'ol-popup'
+        this.element.setAttribute("id", "popup")
+
+        this.renderComponent = this.renderComponent.bind(this)
+        this.toggleControl = this.toggleControl.bind(this)
+        this.getData = this.getData.bind(this)
+    }
+
+    renderComponent(props) {
+        if (!this.is_component_initialized) {
+            ReactDOM.render(<PopUpCmp {...props}/>, this.element)
+            this.is_component_initialized = true
+        }
+
+        ReactDOM.hydrate(<PopUpCmp {...props}/>, this.element)
+    }
+
+    blockPopUp(close) {
+        this.renderComponent({close})
+    }
+
+    getData(close) {
+        this.renderComponent({close})
     }
 }
