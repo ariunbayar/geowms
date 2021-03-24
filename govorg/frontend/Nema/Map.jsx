@@ -98,6 +98,7 @@ export default class NemaMap extends Component {
                 <div className="col-12 col-md-12 col-xl-12 p-0 m-0">
                     <InspireMap
                         wms_list={wms_list}
+                        is_search_bar={true}
                         height="80vh"
                         base_layer={true}
                         PPContent={NemaPP}
