@@ -42,15 +42,18 @@ export default class CovidMap extends Component {
 
     render() {
         const { geo_data, form_datas, center_of_geom} = this.state
+        const { NemaPP, wms_list, is_search_bar, is_zoom } = this.props
         return (
             <div className="col-12 col-md-12 col-xl-12 h-100 p-0">
                 <InspireMap
                     height="50vh"
                     vector_source={geo_data}
                     form_datas={form_datas}
-                    PPContent={CovidPP}
-                    featurefromUrl={true}
-                    center={center_of_geom}
+                    PPContent={NemaPP || CovidPP}
+                    wms_list={wms_list || []}
+                    is_search_bar={is_search_bar || false}
+                    featurefromUrl={is_zoom ? false : true}
+                    center={is_zoom ? null : center_of_geom}
                 />
             </div>
         )
