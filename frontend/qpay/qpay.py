@@ -52,12 +52,12 @@ class Qpay():
                 'Authorization': 'Bearer %s' % self.access_token
         }
         data = {
-                "id",
-                "register_no",
-                "name",
-                "email",
-                "phone_number",
-                "note"
+                "id": "CUST_001",
+                "register_no": "ddf",
+                "name": "Central brnach",
+                "email": "info@info.mn",
+                "phone_number": "99888899",
+                "note": "davaa"
         }
 
         body = {
