@@ -26,7 +26,7 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
-from backend.inspire.models import MGeoDatas
+from backend.inspire.models import LProperties, MGeoDatas
 from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
@@ -1253,32 +1253,17 @@ def get_mdata_values(feature_code, query):
     return rows
 
 
-def mdatas_for_paginator(feature_code, geo_id):
-    geo_id = ''
+def mdatas_for_paginator(initial_qs, searchs):
 
-    MDatas = apps.get_model('backend_inspire', 'MDatas')
-    l_feature_qs = get_feature_from_code(feature_code)
-
-    feature_id = l_feature_qs.feature_id
     send_value = dict()
-
-    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
-    mdatas_qs = MDatas.objects
-    mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
-    if mdatas_qs:
-        for mdata in mdatas_qs.values():
-            value = dict()
+    for search in searchs:
+        mdata_qs = initial_qs.filter(**search)
+        for mdata in mdata_qs.values():
             for field in _mdata_values_field():
                 if mdata[field]:
-                    for prop in properties_qs:
-                        if prop.property_id == mdata['property_id']:
-                            value[prop.property_code] = mdata[field]
-            datas = make_value_dict(value, properties_qs, True)
-            for data in datas:
-                for key, value in data.items():
-                    send_value[key] = value
-
-    send_value['geo_id'] = geo_id
+                    if field == 'value_date':
+                        mdata[field] = datetime_to_string(mdata[field])
+                    send_value[mdata['property_id']] = mdata[field]
 
     return send_value
 

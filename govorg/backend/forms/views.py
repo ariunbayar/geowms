@@ -714,6 +714,16 @@ def tseg_personal_list(request, payload):
     return JsonResponse(rsp)
 
 
+def _get_property_zero(initial_qs):
+    value = ''
+    initial_qs = initial_qs.filter(feature_config_id=None)
+    initial_qs = initial_qs.filter(property_id=0)
+    initial_qs = initial_qs.first()
+    if initial_qs:
+        value = initial_qs.value_text
+    return value
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -731,65 +741,36 @@ def tseg_inspire_list(request):
     feature = qs.first()
     feature_id = feature.feature_id
 
+    searchs = list()
+    properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
+    for prop in properties_qs:
+        data = utils._get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
+        searchs.append(data)
+
     qs = MGeoDatas.objects
     geo_qs = qs.filter(feature_id=feature_id)
     # datas = utils.get_mdata_values('gnp-gp-gp', query)
 
     total_items = Paginator(geo_qs, per_page)
     items_page = total_items.page(page)
+
     for item in items_page.object_list:
-        geo_json = item.geo_data.json
-        geo_json = json.loads(geo_json)
+        geo_id = item.geo_id
 
-        latlongx = geo_json['coordinates'][0][0]
-        latlongy = geo_json['coordinates'][0][1]
-        LA = int(float(latlongx))
-        LB = int((float(latlongx)-LA)*60)
-        LC = float("{:.6f}".format(((float(latlongx))-LA-LB/60)*3600 ))
-        BA = int(float(latlongy))
-        BB = int((float(latlongy)-BA)*60)
-        BC = (float(float(latlongy))-BA-BB/60)*3600
-
-        print(item)
-        values = utils.mdatas_for_paginator(feature.feature_code, item.geo_id)
-        print(values)
-
-        sheets = values['Nomenclature']
-        sheets = sheets.split("-")
-
+        mdatas_qs = MDatas.objects
+        mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+        values = utils.mdatas_for_paginator(mdatas_qs, searchs)
         display_items.append({
-            'latlongx': latlongx,
-            'latlongy': latlongy,
-            'LA': LA,
-            'LB': LB,
-            'LC': LC,
-            'BA': BA,
-            'BB': BB,
-            'BC': BC,
-            'tseg_oiroos_img_url': '/media/' + values['PointNearPhoto'] if values and 'PointNearPhoto' in values else '',
-            'tseg_holoos_img_url': '/media/' + values['PointFarPhoto'] if values and 'PointFarPhoto' in values else '',
-            'barishil_tuhai': values['PointLocationDescription'] if 'PointLocationDescription' in values else '',
-            'bairshil_tseg_oiroos_img_url': '/media/' + values['PointCenterType'] if values and 'PointCenterType' in values else '',
-            'bairshil_tseg_holoos_img_url': '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else '',
-            'sudalga_or_shine':  values['PointShape'] if 'PointShape' in values else '',
-            'hors_shinj_baidal': values['SoilType'] if 'SoilType' in values else '',
-            'date': values['beginLifespanVersion'] if values and 'beginLifespanVersion' in values else '',
-            'hotolson': values['EmployeeName'] if 'EmployeeName' in values else '',
-            'alban_tushaal': values['EmployeePosition'] if 'EmployeePosition' in values else '',
-            'alban_baiguullga': values['CompanyName'] if 'CompanyName' in values else '',
             'suljeenii_torol': values['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in values else '',
-            'geo_id': item.geo_id if item.geo_id else '',
+            'center_typ': values['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in values else '',
+            'geo_id': geo_id if geo_id else '',
             # 'point_id': requests.point_id if  requests.point_id else '',
-            # 'point_name': requests.point_name if requests.point_name else '',
+            'point_name': values['PointNumber'] if 'PointNumber' in values else '',
             # 'pid': requests.pdf_id if requests.pdf_id else '',
             # 'aimag': requests.aimag if requests.aimag else '',
             # 'sum': requests.sum if requests.sum else '',
-            'sheet1': sheets[0],
-            'zone': int(sheets[1]),
-            'cc': int(sheets[2]),
-            'center_typ': values['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in values else '',
-            'ondor': values['elevationValue'] if values['elevationValue'] else '',
         })
+
     total_page = total_items.num_pages
 
     rsp = {
@@ -937,6 +918,7 @@ def findSum(request, payload):
         cursor = connections['postgis_db'].cursor()
         cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
         geom = cursor.fetchone()
+        print(geom)
         if(geom):
             zoneout=int(L)/6+31
             instr = ("+proj=longlat +datum=WGS84 +no_defs")
@@ -995,6 +977,7 @@ def findSum(request, payload):
                 'success': False,
                 'info': "Монгол улсын хилийн гадна байна !!!",
             }
+            print(rsp)
             return JsonResponse(rsp)
     except Exception:
         rsp = {
