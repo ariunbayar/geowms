@@ -14,7 +14,7 @@ export default class Nema extends Component {
                         <div className="card-body p-0 m-2">
                             <Switch>
                                 <Route exact path="/gov/nema/list/" component={NemaTable} />
-                                <Route exact path="/gov/nema/map/" component={NemaMap} />
+                                <Route exact path="/gov/nema/map/" component={(props) => <NemaMap {...props} employee={this.props.employee}/>}/>
                                 <Route exact path="/gov/nema/үүсгэх/" component={ModelAddNema} />
                                 <Route exact path="/gov/nema/:id/засах/" component={ModelAddNema} />
                             </Switch>
