@@ -30,6 +30,10 @@ export default class SearchSelects extends Component {
             .then(({ success, info, firstOrder_geom }) => {
                 if (success) {
                     this.setState({ aimag: info, firstOrder_geom })
+                    this.props.setLoading(false)
+                    if (this.props.is_not_first) {
+                        this.props.getValue(firstOrder_geom)
+                    }
                 }
             })
     }

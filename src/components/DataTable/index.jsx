@@ -142,18 +142,18 @@ export class PortalDataTable extends Component {
                 <div className="row my-2">
                     <div className="col-lg-12">
                         <div className="table-responsive table_wrapper">
+                            <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
                             <table className="table table_wrapper_table">
-                                <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
                                 <thead className={`bg-primary text-${table_head_color}`}>
                                     <tr>
                                         <th scope="col" className={`bg-${color}`}>№</th>
                                         {талбарууд.map((item, index) =>
                                             item.is_sort ?
-                                            <th>
+                                            <th key={index}>
                                                 {item.title}
                                             </th>
                                             :
-                                            <th onClick={() => this.handleSort(item.field, this.state[item.field])} key={index} className={`bg-${color} ${item.is_center ? 'text-center' : null}`}>
+                                            <th key={index} onClick={() => this.handleSort(item.field, this.state[item.field])} key={index} className={`bg-${color} ${item.is_center ? 'text-center' : null}`}>
                                                 {item.title}&nbsp;
                                                 <a><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
                                             </th>
