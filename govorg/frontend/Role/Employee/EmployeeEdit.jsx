@@ -79,6 +79,10 @@ export class EmployeeEdit extends Component {
             is_marker: true,
 
             firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -103,6 +107,8 @@ export class EmployeeEdit extends Component {
         this.getGeom = this.getGeom.bind(this)
 
         this.refreshMap = this.refreshMap.bind(this)
+
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
@@ -112,7 +118,20 @@ export class EmployeeEdit extends Component {
         this.emp_perms=[]
 
         this.getDetail()
-        this.getFeildValues()
+        if (!this.state.id) {
+            this.getFeildValues()
+        }
+        this.getSelectValue()
+    }
+
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
     }
 
     getDetail() {
@@ -490,8 +509,8 @@ export class EmployeeEdit extends Component {
     render() {
         const {form_values, roles, role_list, prefix, is_inspire_role, is_inspire_role_null, perms, old_role_id, role_id, id, is_address_map } = this.state
         const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, address_state, feature, street, apartment, door_number, point } = this.state
-        const { positions, states, pro_classes, org_roles } = this.props
-
+        const { org_roles } = this.props
+        const { positions, states, pro_classes } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -527,7 +546,7 @@ export class EmployeeEdit extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="last_name">Овог:</label>
+                                                    <label htmlFor="id_last_name">Овог:</label>
                                                     <Field
                                                         className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
                                                         name='last_name'
@@ -542,7 +561,7 @@ export class EmployeeEdit extends Component {
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="first_name">Нэр:</label>
+                                                    <label htmlFor="id_first_name">Нэр:</label>
                                                     <Field
                                                         className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
                                                         name='first_name'

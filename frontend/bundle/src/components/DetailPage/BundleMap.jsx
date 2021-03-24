@@ -32,7 +32,7 @@ import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
-import SideBar from "./SideBar"
+import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
 
 
@@ -274,8 +274,8 @@ export default class BundleMap extends Component {
                     if (base_layer_info.tilename == "wmts") {
                         layer = new Tile({
                             source: new WMTS({
-                                // url: base_layer_info.url,
-                                url: base_layer_info.geoserver_url,
+                                url: base_layer_info.url,
+                                // url: base_layer_info.geoserver_url,
                                 layer: base_layer_info.layers,
                                 matrixSet: this.state.projection_display,
                                 format: 'image/png',

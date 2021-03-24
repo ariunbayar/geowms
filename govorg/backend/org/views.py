@@ -201,7 +201,8 @@ def _for_dashb_list():
         'niit_eruul_mendiin_baiguullaga_too',
         'emnelegiin_too',
         'emiin_sangiin_too',
-        'shinjilgee_hiisen_too'
+        'shinjilgee_hiisen_too',
+        'vaccine_hiisen_too',
     ]
 
 
@@ -212,11 +213,38 @@ def _get_form_fields(Model, org):
         for f in Model._meta.get_fields():
             if 'too' in f.name:
                 if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
-                    send_fields.append({
-                        'origin_name': f.name,
-                        'name': f.verbose_name,
-                        'length': f.max_length,
-                    })
+                    if f.name == 'emiin_sangiin_too':
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': True,
+                            'togtmol_too': utils.get_covid_config('emiin_sangiin_too') or 9026
+                        })
+                    elif f.name == 'emnelegiin_too':
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': True,
+                            'togtmol_too': utils.get_covid_config('emlegiin_too') or 2026
+                        })
+                    elif f.name == 'niit_eruul_mendiin_baiguullaga_too':
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': True,
+                            'togtmol_too': utils.get_covid_config('niit_eruul_mend_baiguullaga_too') or 4026
+                        })
+                    else:
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': False,
+                            'togtmol_too': 123
+                        })
     return send_fields
 
 
@@ -426,7 +454,8 @@ def frontend(request):
             'org_role': _org_role(org),
             'employee': {
                 'is_admin': employee.is_admin,
-                'username': employee.user.username
+                'username': employee.user.username,
+                'geo_id': org.geo_id or None
             },
             'allowed_geom': geom.json if geom else None,
             'obeg_employee': True if employee.org.name.lower() == 'обег' else False,

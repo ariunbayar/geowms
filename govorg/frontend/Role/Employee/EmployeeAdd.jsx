@@ -70,6 +70,10 @@ export class EmployeeAdd extends Component {
             is_address_map: true,
 
             firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -82,11 +86,14 @@ export class EmployeeAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         this.getRolesForOption()
         this.getFeildValues()
+        this.getSelectValue()
     }
 
     getRolesForOption() {
@@ -232,6 +239,16 @@ export class EmployeeAdd extends Component {
             })
     }
 
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
+    }
+
     getPoint(point_coordinate, map_coordinate) {
 
         let coordinates = point_coordinate
@@ -308,7 +325,8 @@ export class EmployeeAdd extends Component {
     render() {
         const { form_values, roles, role_list, emp_role_id, prefix, is_inspire_role, is_inspire_role_null } = this.state
         const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, address_state, is_address_map } = this.state
-        const { positions, states, pro_classes, org_roles } = this.props
+        const { positions, states, pro_classes } = this.state
+        const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
