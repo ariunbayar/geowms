@@ -279,7 +279,7 @@ export class GroupAdd extends Component {
                                                         </div>
                                                         }
                                                     <div className="col-md-12">
-                                                        <div className="row justify-content-center">
+                                                        <div className="row justify-content-center overflow-auto" style={{height: '30vh'}}>
                                                             <table className="table table-wrapper-table">
                                                                 <thead>
                                                                     <tr>
