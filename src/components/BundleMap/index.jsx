@@ -29,6 +29,8 @@ import { Sidebar } from './Sidebar'
 import { PopUp } from './popUp/PopUp'
 import { AlertRoot } from "./ShopControls/alert"
 import Loader from '@utils/Loader'
+import SideBar from "@utils/SideBar"
+import WMSItem from './WMSItem'
 
 
 export default class InspireMap extends Component {
@@ -62,7 +64,9 @@ export default class InspireMap extends Component {
             form_datas: props.form_datas,
             center: props.center,
             layer_2405: '',
-            vectorSource: null
+            vectorSource: null,
+            search_date: '',
+            is_search_bar: props.is_search_bar || false
         }
 
         this.controls = {
@@ -446,30 +450,20 @@ export default class InspireMap extends Component {
                     })
                 }
             })
-            this.map.addControl(new SidebarButton({toggleSidebar: this.toggleSidebar}))
             this.map.addControl(this.controls.sidebar)
         }
     }
 
-    updateParams(date){
+    updateParams(date, is_clear){
+        date = date.replace("-", "/");
+        date = date.replace("-", "/");
         this.map.getLayers().getArray().forEach((layer) => {
-            if(layer.get('code') && layer.get('code') == 'c2405') {
-                console.log(layer)
-            }
-            if(layer.get('code') && layer.get('code') == 'c2405') {
-                layer.getSource().updateParams({params: {
-                        'LAYERS': layer.get('code'),
-                        'FORMAT': 'image/png',
-                        'VERSION': '1.1.1',
-                        "STYLES": '',
-                        "exceptions": 'application/vnd.ogc.se_inimage',
-                        'cql_filter': `created > '${date} 00:00:00' and created < '${date} 23:59:59' `
-                    }
-                })
+            if(layer.get('code') && layer.get('code') == 'c2405' || layer.get('code') == 'c2406') {
+                if(is_clear) layer.getSource().updateParams({'cql_filter': `attr2 like '%${date}%' `})
+                else layer.getSource().updateParams({'cql_filter': null})
             }
         })
     }
-
 
     handleMapDataLoaded(base_layer_list) {
         const { center } = this.state
@@ -584,7 +578,6 @@ export default class InspireMap extends Component {
                     undefinedHTML: '',
                 }),
                 new СуурьДавхарга({layers: base_layer_controls}),
-                new SidebarButton({toggleSidebar: this.toggleSidebar}),
                 new ScaleLine(),
                 this.controls.modal,
                 this.controls.shopmodal,
@@ -921,7 +914,6 @@ export default class InspireMap extends Component {
     }
 
     getDetailOfPoint(wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, is_not_inspire) {
-        this.updateParams('2021-03-19')
         if (wms_tile.getVisible()) {
             const {layer_code, is_feature} = this.check_inspire_layer(code)
             if (is_feature) {
@@ -1232,8 +1224,74 @@ export default class InspireMap extends Component {
 
 
     render() {
-        const {is_loading} = this.state
+        const {is_loading, is_search_bar} = this.state
         const height = this.props.height ? this.props.height : '80vh'
+
+        const Menu_comp = () => {
+            return (
+                <div>
+                    {this.state.map_wms_list.map((wms, idx) =>
+                        <WMSItem wms={wms} key={idx} addLayer={this.addLayerToSearch}/>
+                    )}
+                </div>
+            )
+        }
+
+        const Search_comp = () => {
+            return (
+                <div>
+                    <div className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
+                        <div className="form-group">
+                            <label className="font-weight-bold" htmlFor="formGroupInput">Өдрөөр хайх</label>
+                            <div className="input-group mb-3">
+                                <input type="date" className="form-control" placeholder="search_date"
+                                    name="search_date"
+                                    onChange={(e) => this.setState({search_date: e.target.value}) }
+                                    value={this.state.search_date}
+                                />
+                            </div>
+                            <div className="mb-3">
+                                <div className="row">
+                                    <div className="col-md-5">
+                                        <button className="btn gp-btn-primary my-3" type="submit" onClick={() => this.updateParams(this.state.search_date, true)}><i className="fa fa-search mr-1"></i>Хайх</button>
+                                    </div>
+                                    <div className="col-md-7 d-flex flex-row-reverse">
+                                        <button className="btn gp-btn-primary my-3" type="button" onClick={() => this.updateParams(this.state.search_date, false)}><i className="fa fa-trash mr-1"></i>Цэвэрлэх</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        const settings_component = () => {
+            return(
+                <div>
+                    <h4>Тун удахгүй</h4>
+                </div>
+            )
+        }
+
+        var items = []
+        items.push({
+            "key": "menus",
+            "icon": "fa fa-bars",
+            "title": "Давхаргууд",
+            "component": Menu_comp,
+        })
+        is_search_bar && items.push({
+            "key": "search",
+            "icon": "fa fa-search",
+            "component": Search_comp,
+        })
+        items.push({
+            "key": "settings",
+            "icon": "fa fa-gear",
+            "component": settings_component,
+            "bottom": true,
+        })
         return (
             <div className="px-0 mx-0">
                 <Loader is_loading={is_loading}></Loader>
@@ -1242,6 +1300,9 @@ export default class InspireMap extends Component {
                     style={{height: `${height}`,}}
                     className="mw-100 px-0 mx-0"
                 >
+                    <SideBar
+                        items = {items}
+                    />
                 </div>
             </div>
         )

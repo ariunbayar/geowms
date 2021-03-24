@@ -32,7 +32,7 @@ import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
-import SideBar from "./SideBar"
+import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
 
 
