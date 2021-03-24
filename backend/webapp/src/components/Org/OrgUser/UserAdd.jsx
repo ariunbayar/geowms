@@ -59,6 +59,10 @@ export class UserAdd extends Component {
             errors: '',
 
             firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -70,10 +74,12 @@ export class UserAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
+        this.getSelectValue()
         if(org_emp){
             this.handleGetAll(org_emp)
         }
@@ -82,6 +88,15 @@ export class UserAdd extends Component {
         }
     }
 
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
+    }
 
     handleGetAll(org_emp){
         service
@@ -324,7 +339,7 @@ export class UserAdd extends Component {
             feature, street, apartment, door_number, point, errors, address_state
         } = this.state
 
-        const { positions, states, pro_classes } = this.props
+        const { positions, states, pro_classes } = this.state
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
