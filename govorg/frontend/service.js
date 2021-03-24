@@ -12,7 +12,8 @@ export const service = {
     getEmpRoles,
     getApproveAndRevoke,
     loadBaseLayers,
-    updatec2405
+    updatec2405,
+    get_attr_details
 }
 
 function loadBaseLayers() {
@@ -63,10 +64,19 @@ function detail() {
     return fetch(`/profile/api/info/`, opts).then(handleResponse)
 }
 
+
+function get_attr_details(datas) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ datas }),
+    }
+    return fetch(`/gov/api/nema/get_attr_details/`, requestOptions).then(handleResponse)
+}
+
 function updatePassword(new_password, old_password, re_password) {
     const requestOptions = {
         ...getPostOptions(),
-          body: JSON.stringify({ new_password, old_password, re_password }),
+        body: JSON.stringify({ new_password, old_password, re_password }),
     }
     return fetch(`/profile/api/update-password/`, requestOptions).then(handleResponse)
 }

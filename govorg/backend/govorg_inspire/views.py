@@ -1241,3 +1241,48 @@ def update_c2405(request, payload):
         'success': True,
         'info': "Амжилттай хадгалагдлаа"
     })
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_attr_details(request, payload):
+
+    datas = payload.get('datas')
+    table_name = datas[0][-1]
+    cursor = connections['nema'].cursor()
+    attributes_1_10 = []
+    attr_10 = False
+    attr_10_value = ''
+    for attr in datas[0][0][1]:
+        attr_1_19 = []
+        if 'attr' in attr[0]:
+            sql = """
+                select
+                    attr_name
+                from
+                    _attr
+                where
+                    attr_layer_id = '{table_name}' and attr_id='{attr}'
+            """.format(
+                table_name=table_name,
+                attr = attr[0]
+            )
+            cursor.execute(sql)
+            attr_name = list(cursor.fetchone())
+            attr_1_19 = [attr_name[0], attr[1]]
+            attributes_1_10.append(attr_1_19)
+
+        else:
+            attributes_1_10.append(attr)
+
+        if attr[0] == 'attr10':
+            attr_10_value = attr[1]
+            attr_10 = True
+
+    datas[0][0][1] = attributes_1_10
+    return JsonResponse({
+        'datas': datas,
+        'attr10_status': attr_10,
+        'attr_10_value': attr_10_value
+    })

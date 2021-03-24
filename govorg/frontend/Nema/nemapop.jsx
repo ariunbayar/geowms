@@ -30,6 +30,7 @@ export class NemaPP extends Component {
             is_enable: false,
             is_authenticated: false,
             attr10: 'Тусгаарлалтад байгаа',
+            attr10_status: false
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -39,16 +40,18 @@ export class NemaPP extends Component {
         this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
         this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
         this.hanleUpdateAttr = this.hanleUpdateAttr.bind(this)
+        this.getNemaAttributeDetail = this.getNemaAttributeDetail.bind(this)
     }
 
     componentDidUpdate(pP, pS) {
         const { datas, is_loading, datas_hoho} = this.props
         const { attr10, attr_layer} = this.state
         if(pP.datas !== datas && !this.props.is_loading) {
-            this.properties = []
-            const startNumber = 1
-            this.setState({ startNumber, is_plus: true, is_prev: false})
-            this.checkModeAndCode(startNumber, datas)
+            // this.properties = []
+            // const startNumber = 1
+            // this.setState({ startNumber, is_plus: true, is_prev: false})
+            this.getNemaAttributeDetail(datas)
+            // this.checkModeAndCode(startNumber, datas)
         }
 
         if (pS.attr10 !== attr10) {
@@ -58,6 +61,20 @@ export class NemaPP extends Component {
         if (pP.datas !== datas) {
             this.setState({datas})
         }
+    }
+    getNemaAttributeDetail(datas) {
+        service.get_attr_details(datas).then(({datas, attr10_status, attr_10_value})=>{
+            this.properties = []
+            const startNumber = 1
+            if (attr10_status) {
+                this.setState({ startNumber, is_plus: true, is_prev: false, attr10_status, attr10: attr_10_value})
+            }
+            else{
+                this.setState({ startNumber, is_plus: true, is_prev: false, attr10_status})
+            }
+
+            this.checkModeAndCode(startNumber, datas)
+        })
     }
 
     hanleUpdateAttr() {
@@ -200,7 +217,7 @@ export class NemaPP extends Component {
     }
 
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, attr10_status} = this.state
         const { is_empty, is_from_inspire, is_loading, datas_hoho} = this.props
         return (
                 <div>
@@ -276,7 +293,7 @@ export class NemaPP extends Component {
                                                             {data[2] =='c2405' &&
                                                                 <tr>
                                                                     <th>
-                                                                    <b className="d-block" style={{fontSize: '70%'}}>attr10</b>
+                                                                    { ! attr10_status && <b className="d-block" style={{fontSize: '70%'}}>Төлөв</b>}
                                                                     <select
                                                                             style={{fontSize: '70%', border: '0'}}
                                                                             value={this.state.attr10}
@@ -287,7 +304,7 @@ export class NemaPP extends Component {
                                                                             <option value="Эдгэрсэн">Эдгэрсэн</option>
                                                                             <option value="Нас барсан">Нас барсан</option>
                                                                         </select>
-                                                                    <a className="fa fa-floppy-o text-success my-3 mt-4 mr-2 ml-1 p-0" onClick={this.hanleUpdateAttr}/>
+                                                                    <a className="fa fa-floppy-o text-success my-3 mt-2 mr-2 ml-1 p-0" onClick={this.hanleUpdateAttr}/>
                                                                 </th></tr>
                                                             }
                                                         </Fragment>
