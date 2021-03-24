@@ -116,6 +116,7 @@ export default class InspireMap extends Component {
         this.featureFromUrl = this.featureFromUrl.bind(this)
         this.getDetailOfPoint = this.getDetailOfPoint.bind(this)
         this.ChoosePopUp = this.ChoosePopUp.bind(this)
+        this.updateParams = this.updateParams.bind(this)
     }
 
     initMarker() {
@@ -408,6 +409,7 @@ export default class InspireMap extends Component {
                                     style: '',
                                     wrapX: true,
                                 }),
+                                code: layer.code
                             }),
                             wms_tile: new Image({
                                 source: new ImageWMS({
@@ -422,6 +424,7 @@ export default class InspireMap extends Component {
                                         "exceptions": 'application/vnd.ogc.se_inimage',
                                     }
                                 }),
+                                code: layer.code
                             })
                         }
                     }),
@@ -446,6 +449,25 @@ export default class InspireMap extends Component {
             this.map.addControl(new SidebarButton({toggleSidebar: this.toggleSidebar}))
             this.map.addControl(this.controls.sidebar)
         }
+    }
+
+    updateParams(date){
+        this.map.getLayers().getArray().forEach((layer) => {
+            if(layer.get('code') && layer.get('code') == 'c2405') {
+                console.log(layer)
+            }
+            if(layer.get('code') && layer.get('code') == 'c2405') {
+                layer.getSource().updateParams({params: {
+                        'LAYERS': layer.get('code'),
+                        'FORMAT': 'image/png',
+                        'VERSION': '1.1.1',
+                        "STYLES": '',
+                        "exceptions": 'application/vnd.ogc.se_inimage',
+                        'cql_filter': `created > '${date} 00:00:00' and created < '${date} 23:59:59' `
+                    }
+                })
+            }
+        })
     }
 
 
@@ -899,6 +921,7 @@ export default class InspireMap extends Component {
     }
 
     getDetailOfPoint(wms_tile, code, coordinate, projection, resolution, geodb_table, not_visible_layers, is_not_inspire) {
+        this.updateParams('2021-03-19')
         if (wms_tile.getVisible()) {
             const {layer_code, is_feature} = this.check_inspire_layer(code)
             if (is_feature) {
