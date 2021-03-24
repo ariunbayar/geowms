@@ -25,7 +25,7 @@ def create_value_type_config(apps, schema_editor):
         "double": "number",
         "link": "text",
         "multi-select": "checkbox",
-        "multi-text":"textarea",
+        "multi-text": "textarea",
         "number": "number",
         "single-select": "select",
         "text": "text",
@@ -50,3 +50,49 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(create_value_type_config),
     ]
+
+# import json
+# from django.db import migrations
+
+
+# def _has_value(Model, object):
+#     has_value = False
+#     config_qs = Model.objects
+#     config_qs = config_qs.filter(name=object['name'], value__isnull=False)
+#     if config_qs:
+#         has_value = True
+
+#     return has_value
+
+
+# def create_qpay_config(apps, schema_editor):
+
+#     Config = apps.get_model('backend_config', 'Config')
+
+#     value = {
+#         "id",
+#         "register_no",
+#         "name",
+#         "email",
+#         "phone_number",
+#         "note",
+#     }
+
+#     value = json.dumps(value)
+#     obj = dict()
+#     obj['value'] = value
+
+#     has_value = _has_value(Config, obj)
+#     if not has_value:
+#         Config.objects.create(**obj)
+
+
+# class Migration(migrations.Migration):
+
+#     dependencies = [
+#         ('backend_config', '0014_auto_20210312_1725.py'),
+#     ]
+
+#     operations = [
+#         migrations.RunPython(create_qpay_config),
+#     ]

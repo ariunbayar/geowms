@@ -1,6 +1,7 @@
 import requests
 import json
 from django.conf import settings
+from backend.config.models import Config
 
 
 class Qpay():
@@ -50,14 +51,14 @@ class Qpay():
                 **self.BASE_HEADERS,
                 'Authorization': 'Bearer %s' % self.access_token
         }
-        # data = {
-        #         "id": "CUST_001",
-        #         "register_no": "ddf",
-        #         "name": "Central brnach",
-        #         "email": "info@info.mn",
-        #         "phone_number":"99888899",
-        #         "note" : "davaa"
-        # }
+        data = {
+                "id",
+                "register_no",
+                "name",
+                "email",
+                "phone_number",
+                "note"
+        }
 
         body = {
             "template_id": settings.QPAY['TEMPLATE_ID'],
@@ -73,10 +74,17 @@ class Qpay():
             "vat_flag": "0"
         }
 
+        configs = Config.objects.filter(name__in=data).values_list('name', 'value')
+
+        conf_geoserver = {
+            name: ValueError
+            for name, value in configs
+        }
+
         rsp = requests.post(self.create_url, data=body, headers=headers)
 
         self.create_data = rsp
-        return self.create_data
+        return self.create_data, conf_geoserver
 
     def check(self):
 

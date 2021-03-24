@@ -36,11 +36,11 @@ export default class ConfigPage extends Component {
                     </div>
                     <div className="col-lg-4">
                         <ConfigDan/>
-                        <ConfigQpay/>
                         <ConfigEmail/>
                     </div>
                     <div className="col-lg-4">
                         <ConfigValueTypes/>
+                        <ConfigQpay/>
                     </div>
                 </div>
             </div>
