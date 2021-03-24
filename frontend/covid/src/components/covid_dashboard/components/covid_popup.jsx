@@ -65,38 +65,47 @@ export class CovidPP extends Component {
     render() {
         const { datas, is_loading, nas_barsan_hunii_too, edgersen_humuus_too, emchlegdej_bui_humuus_too, batlagdsan_tohioldol_too, name} = this.state
         return (
-            <div className="card-body justify-content-between" style={{marginRight: "1%", marginLeft: '1%'}}>
-                {
-                    <div className="px-0">
-                        <div className="col-md-12 text-center">
-                            <label htmlFor="label" className="mw-100 align-middle">{name}</label>
+            <div>
+                <div className="ol-popup-header">
+                    <div className="ol-popup-header-content" onClick={() => this.props.close()}>
+                        <div className="ol-popup-closer" id="popup-closer" role="button">
+                            <i className="fa fa-times text-muted" aria-hidden="true"></i>
                         </div>
-                        <div className="row text-danger">
-                            <small className="col-md-8">Батлагдсан</small>
-                            <small className="col-md-4">{batlagdsan_tohioldol_too}</small>
-                        </div>
-                        <ul className="col-md-12 border-top border-muted">
-                            <li className="text-warning">
-                                <div className="row pl-2">
-                                    <small className="text-dark col-md-8 px-0">Эмчлэгдэж буй</small>
-                                    <small className="text-muted col-md-4 float-right">{emchlegdej_bui_humuus_too}</small>
-                                </div>
-                            </li>
-                            <li className="text-success">
-                                <div className="row pl-2">
-                                    <small className="text-dark col-md-8 px-0">Эдгэрсэн</small>
-                                    <small className="text-muted col-md-4 float-right">{edgersen_humuus_too}</small>
-                                </div>
-                            </li>
-                            <li className="text-dark">
-                                <div className="row pl-2">
-                                    <small className="text-dark col-md-8 px-0">Нас барсан</small>
-                                    <small className="text-muted col-md-4 float-right">{nas_barsan_hunii_too}</small>
-                                </div>
-                            </li>
-                        </ul>
                     </div>
-                }
+                </div>
+                <div className="card-body justify-content-between" style={{marginRight: "1%", marginLeft: '1%'}}>
+                    {
+                        <div className="px-0">
+                            <div className="col-md-12 text-center">
+                                <label htmlFor="label" className="mw-100 align-middle">{name}</label>
+                            </div>
+                            <div className="row text-danger">
+                                <small className="col-md-8">Батлагдсан</small>
+                                <small className="col-md-4">{batlagdsan_tohioldol_too}</small>
+                            </div>
+                            <ul className="col-md-12 border-top border-muted">
+                                <li className="text-warning">
+                                    <div className="row pl-2">
+                                        <small className="text-dark col-md-8 px-0">Эмчлэгдэж буй</small>
+                                        <small className="text-muted col-md-4 float-right">{emchlegdej_bui_humuus_too}</small>
+                                    </div>
+                                </li>
+                                <li className="text-success">
+                                    <div className="row pl-2">
+                                        <small className="text-dark col-md-8 px-0">Эдгэрсэн</small>
+                                        <small className="text-muted col-md-4 float-right">{edgersen_humuus_too}</small>
+                                    </div>
+                                </li>
+                                <li className="text-dark">
+                                    <div className="row pl-2">
+                                        <small className="text-dark col-md-8 px-0">Нас барсан</small>
+                                        <small className="text-muted col-md-4 float-right">{nas_barsan_hunii_too}</small>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
             </div>
             )
     }
