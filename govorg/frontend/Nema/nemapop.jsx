@@ -59,7 +59,7 @@ export class NemaPP extends Component {
         }
 
         if (pP.datas !== datas) {
-            this.setState({datas, attributes: datas[0][0][1]})
+            if (datas && datas[0][0][1]) this.setState({datas, attributes: datas[0][0][1]})
         }
 
         if (pS.data !== data) {
