@@ -21,7 +21,6 @@ from backend.config.models import CovidConfig
 
 from frontend.covid.models import CovidDashboard
 from frontend.covid.models import CovidDashboardLog
-
 from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
@@ -404,8 +403,9 @@ def save_dashboard_log(request, payload):
     geo_id = payload.get('geo_id')
 
     date = values['updated_at']
+    print(values['updated_at'])
     values['updated_at'] = utils.date_to_timezone(date)
-
+    values['updated_at']
     covid_qs = CovidDashboard.objects
     covid_qs = covid_qs.filter(geo_id=geo_id)
     covid_qs = covid_qs.first()

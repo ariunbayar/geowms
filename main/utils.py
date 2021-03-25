@@ -655,41 +655,38 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
 
 
 def get_emp_property_roles(employee, fid):
-
     property_ids = []
     property_details = []
-    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
-
     EmpPerm = apps.get_model('backend_inspire', 'EmpPerm')
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-
     EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
     property_perms = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid).distinct('property_id', 'perm_kind').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+
     if property_perms:
         for prop in property_perms:
             if prop.get('property_id') not in property_ids:
                 property_ids.append(prop.get('property_id'))
         for property_id in property_ids:
+            property_roles = {'PERM_VIEW': True, 'PERM_CREATE':True, 'PERM_REMOVE':True, 'PERM_UPDATE':True, 'PERM_APPROVE':True, 'PERM_REVOKE':True}
             for prop in property_perms:
                 if property_id == prop['property_id']:
                     if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
-                        property_roles['PERM_VIEW'] = True
+                        property_roles['PERM_VIEW'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_CREATE:
-                        property_roles['PERM_CREATE'] = True
+                        property_roles['PERM_CREATE'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_REMOVE:
-                        property_roles['PERM_REMOVE'] = True
+                        property_roles['PERM_REMOVE'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_UPDATE:
-                        property_roles['PERM_UPDATE'] = True
+                        property_roles['PERM_UPDATE'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
-                        property_roles['PERM_APPROVE'] = True
+                        property_roles['PERM_APPROVE'] = False
                     else:
-                        property_roles['PERM_REVOKE'] = True
+                        property_roles['PERM_REVOKE'] = False
 
             property_details.append({
                 'property_id': property_id,
                 'roles': property_roles
             })
-
     return property_ids, property_details
 
 
@@ -788,9 +785,8 @@ def date_fix_format(input_date):
 
 def date_to_timezone(input_date):
     input_date = date_fix_format(input_date)
-    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
-    output_date = timezone.make_aware(naive_time)
-    return output_date
+    naive_time = datetime.strptime(input_date, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    return naive_time
 
 
 def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):

@@ -19,10 +19,13 @@ export default class SearchSelects extends Component {
             sum_geo_id: '',
             horoo_geo_id: '',
             firstOrder_geom: '',
+            all_user_id: -1,
+            all_user: ['Бүх ажилчид'],
         }
         this.handleChange = this.handleChange.bind(this)
         this.getGeom = this.getGeom.bind(this)
         this.getFieldValues = this.getFieldValues.bind(this)
+        this.handleAllUser = this.handleAllUser.bind(this)
     }
 
     getGeom(geo_id) {
@@ -102,12 +105,22 @@ export default class SearchSelects extends Component {
         this.setState({ [field_id]: idx, ...obj })
     }
 
+    handleAllUser(e) {
+        const idx = e.target.value
+        this.setState({ all_user_id: idx })
+        if (idx == '-1') {
+            this.props.handleAllUser(false)
+        } else {
+            this.props.handleAllUser(true)
+        }
+    }
+
     render() {
-        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id } = this.state
+        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, all_user_id, all_user } = this.state
 
         return (
             <div className="form-row">
-                <div className="form-group col-4">
+                <div className="form-group col-3">
                     <label htmlFor="aimag">Аймаг/Хот:</label>
                     <select
                         id="aimag"
@@ -122,7 +135,7 @@ export default class SearchSelects extends Component {
                         )}
                     </select>
                 </div>
-                <div className="form-group col-4">
+                <div className="form-group col-3">
                     <label htmlFor="sum">Сум/Дүүрэг:</label>
                     <select
                         id="sum"
@@ -136,7 +149,7 @@ export default class SearchSelects extends Component {
                         )}
                     </select>
                 </div>
-                <div className="form-group col-4">
+                <div className="form-group col-3">
                     <label htmlFor="horoo">Хороо/Баг:</label>
                     <select
                         id="horoo"
@@ -147,6 +160,20 @@ export default class SearchSelects extends Component {
                         <option value='-1'>--- Баг/Хороо сонгох ---</option>
                         {horoo.map((data, idx) =>
                             <option key={idx} value={idx}>{data.name}</option>
+                        )}
+                    </select>
+                </div>
+                <div className="form-group col-3">
+                    <label htmlFor="all_user">Ажилтан/Бүх ажилчид:</label>
+                    <select
+                        id="all_user"
+                        className="form-control"
+                        onChange={(e) => this.handleAllUser(e)}
+                        value={all_user_id}
+                    >
+                        <option value='-1'>--- Байгууллагын ажилчид ---</option>
+                        {all_user.map((data, idx) =>
+                            <option key={idx} value={idx}>{data}</option>
                         )}
                     </select>
                 </div>
