@@ -32,6 +32,7 @@ export class EmployeeAdd extends Component {
                 choose_role: '',
                 state: '',
                 pro_class: '',
+                is_user: false,
             },
             role_list: [],
             emp_role_id: null,
@@ -462,8 +463,8 @@ export class EmployeeAdd extends Component {
                                                 />
                                                 <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                             </div>
-                                            <div className="form-group col-md-6 mt-1 text-center"><br/>
-                                                <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                            <div className="form-row col-md-3 mt-4 text-center"><br/>
+                                                <label className="" htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
                                                     name='is_admin'
@@ -471,6 +472,16 @@ export class EmployeeAdd extends Component {
                                                     type="checkbox"
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                            </div>
+                                            <div className="form-row col-md-3 mt-4 text-center"><br/>
+                                                <label className="" htmlFor='is_user'>Хэрэглэгч</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_user'
+                                                    id="id_is_user"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_user" component="div" className="text-danger"/>
                                             </div>
                                         </div>
                                         <div className="form-row">

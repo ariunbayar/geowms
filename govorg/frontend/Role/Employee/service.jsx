@@ -65,10 +65,10 @@ function deleteEmployee(id) {
     return fetch(`${prefix}/${id}/delete/`, requestOptions).then(handleResponse)
 }
 
-function updateEmployee(username, first_name, last_name, position, email, gender, register, phone_number, is_admin, role_id, id, add_perm, remove_perm, address, state, pro_class) {
+function updateEmployee(user_detail, role_id, id, add_perm, remove_perm, address ) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ username, first_name, last_name, position, email, gender, register, phone_number, is_admin, role_id, id, add_perm, remove_perm, address, state, pro_class })
+        body: JSON.stringify({ user_detail, role_id, id, add_perm, remove_perm, address })
     }
 
     return fetch(`${prefix}/${id}/update/`, requestOptions).then(handleResponse)

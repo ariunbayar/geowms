@@ -88,6 +88,7 @@ def _get_employee_display(employee):
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+        'is_user': user.is_user,
 
         'role_name': role,
 
@@ -132,8 +133,14 @@ def _get_position_name(postition_id, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def list(request, payload):
+    is_user = payload.get('is_user')
+
     org = get_object_or_404(Org, employee__user=request.user)
-    qs = Employee.objects.filter(org=org)
+    if is_user:
+        users_qs = User.objects.filter(is_user=is_user)
+        qs = Employee.objects.filter(user__in=users_qs)
+    else:
+        qs = Employee.objects.filter(org=org)
 
     оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
@@ -172,6 +179,14 @@ def _set_user(user, user_detail):
     user.gender = user_detail['gender']
     user.register = user_detail['register']
     user.phone_number = user_detail['phone_number']
+    user.is_user = user_detail['is_user']
+
+    is_user = user_detail['is_user']
+    if is_user:
+        user.is_active = True
+    else:
+        user.is_active = False
+
     user.save()
 
 
@@ -304,6 +319,7 @@ def create(request, payload):
     address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
+    is_user = user_detail['is_user']
 
     emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
@@ -355,7 +371,8 @@ def create(request, payload):
                 obj_array.append(emp_perm_inspire)
             EmpPermInspire.objects.bulk_create(obj_array)
 
-            utils.send_approve_email(user)
+            if is_user:
+                utils.send_approve_email(user)
 
         rsp = {
             'success': True,
@@ -382,7 +399,7 @@ def _delete_remove_perm(remove_perms):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
-
+    user_detail = payload.get('user_detail')
     can_update = False
     role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
@@ -399,6 +416,7 @@ def update(request, payload, pk):
     address_state = address.get('address_state')
     address_state = _get_address_state_code(address_state)
     address['address_state'] = address_state
+    is_user = user_detail['is_user']
 
     if employee.user == request.user:
         can_update = True
@@ -407,7 +425,7 @@ def update(request, payload, pk):
         can_update = True
 
     if can_update:
-        errors = _employee_validation(employee.user, payload)
+        errors = _employee_validation(employee.user, user_detail)
         if errors:
             return JsonResponse({
                 'success': False,
@@ -452,10 +470,13 @@ def update(request, payload, pk):
                     address_qs.create(employee=employee, **address)
 
                 user = employee.user
-                _set_user(user, payload)
+                _set_user(user, user_detail)
 
                 employee = employee
-                _set_employee(employee, payload)
+                _set_employee(employee, user_detail)
+
+                if is_user:
+                    utils.send_approve_email(user)
 
             return JsonResponse({
                 'success': True,
