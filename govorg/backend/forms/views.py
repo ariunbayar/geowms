@@ -841,6 +841,17 @@ def _get_aimag_sum(values, code):
     return aimag, sum
 
 
+def _get_hurs(geo_id):
+    hurs = ''
+    mdata_qs = MDatas.objects
+    mdata_qs = mdata_qs.filter(geo_id=geo_id)
+    if mdata_qs:
+        hurs = mdata_qs.filter(property_id=0)
+        if hurs:
+            hurs = hurs.first().value_text
+    return hurs
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -891,7 +902,6 @@ def tsegPersonalUpdate(request, payload):
             data['bairshil_tseg_oiroos_img_url'] = '/media/' + values['PointCenterType'] if values and 'PointCenterType' in values else ''
             data['bairshil_tseg_holoos_img_url'] = '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else ''
             data['sudalga_or_shine'] =  values['PointShape'] if 'PointShape' in values else ''
-            data['hors_shinj_baidal'] = values['SoilType'] if 'SoilType' in values else ''
             data['date'] = utils.datetime_to_string(values['beginLifespanVersion']) if values and 'beginLifespanVersion' in values else ''
             data['hotolson'] = values['EmployeeName'] if 'EmployeeName' in values else ''
             data['alban_tushaal'] = values['EmployeePosition'] if 'EmployeePosition' in values else ''
@@ -910,14 +920,17 @@ def tsegPersonalUpdate(request, payload):
                 data['aimag'] = requests.aimag if requests.aimag else ''
                 data['sum'] = requests.sum if requests.sum else ''
                 data['center_typ'] = requests.point_type if requests.point_type else ''
+                data['hors_shinj_baidal'] = values['SoilType'] if 'SoilType' in values else ''
             if geo_id:
                 aimag, sum = _get_aimag_sum(values, 'AdministrativeUnitSubClass')
+                soil_type = _get_hurs(geo_id)
                 data['geo_id'] = geo_id if geo_id else ''
                 data['point_id'] = values['localId'] if 'localId' in values else ''
                 data['point_name'] = values['PointNumber'] if 'PointNumber' in values else ''
                 data['aimag'] = aimag
                 data['sum'] = sum
                 data['center_typ'] = values['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in values else ''
+                data['hors_shinj_baidal'] = soil_type
                 # data['suljeenii_torol'] = suljeenii_torol
             tseg_display.append(data)
 
