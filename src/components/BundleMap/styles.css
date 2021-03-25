@@ -115,9 +115,9 @@ element.style {
 
 .ol-full-screen {
     right: .5rem;
-    top: 25px;
-    width: 48px;
-    height: 48px;
+    top: 20px;
+    width: 46px;
+    height: 46px;
 
 }
 .ol-full-screen .ol-full-screen-false{
@@ -133,7 +133,7 @@ element.style {
 
 }
 .ol-zoom {
-    width: 48px;
+    width: 46px;
     height: 87px;
     left: unset;
     right: .5rem;
