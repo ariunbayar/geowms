@@ -782,10 +782,9 @@ def date_fix_format(input_date):
 
 
 def date_to_timezone(input_date):
-    date_fix_format(input_date)
-    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
-    output_date = timezone.make_aware(naive_time)
-    return output_date
+    input_date = date_fix_format(input_date)
+    naive_time = datetime.strptime(input_date, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    return naive_time
 
 
 def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
