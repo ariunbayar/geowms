@@ -212,7 +212,7 @@ export default class Maps extends Component {
                 features: [this.marker.feature],
             })
         })
-
+        console.log(base_layers);
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -221,12 +221,12 @@ export default class Maps extends Component {
                     coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
                     undefinedHTML: '',
                 }),
-                new СуурьДавхарга({layers: base_layer_controls}),
+                // new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
                 this.controls.coordinateCopy,
             ]),
             layers: [
-                ...base_layers,
+                ...[base_layers[0]],
                 vector_layer,
                 marker_layer,
             ],
