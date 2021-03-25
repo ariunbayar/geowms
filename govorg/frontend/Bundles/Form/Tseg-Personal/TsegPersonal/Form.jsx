@@ -7,7 +7,7 @@ import {service} from '../../service'
 import {validationSchema} from './validationSchema'
 import Maps from '../../../../components/map/Map'
 import ModalAlert from "@utils/Modal/ModalAlert"
-
+import Modal from "@utils/Modal/Modal"
 
 export class Forms extends Component {
 
@@ -82,6 +82,7 @@ export class Forms extends Component {
             modal_type: '',
             timer: null,
             geo_id: '',
+            is_open_modal: false,
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -100,6 +101,8 @@ export class Forms extends Component {
         this.getFieldValues = this.getFieldValues.bind(this)
         this.successPoint = this.successPoint.bind(this)
         this.rejectPoint = this.rejectPoint.bind(this)
+        this.loadTseg = this.loadTseg.bind(this)
+        this.requestModalOpen = this.requestModalOpen.bind(this)
     }
 
     handleBoxOver (e){
@@ -113,17 +116,18 @@ export class Forms extends Component {
     getFieldValues() {
         service
             .getFieldValue()
-            .then(({ point_classes, point_types, ondor_types }) => {
-                this.setState({ point_classes, point_types, ondor_types })
+            .then(({ point_classes, point_types }) => {
+                this.setState({ point_classes, point_types })
             })
     }
 
     componentDidMount(){
         this.getFieldValues()
         const id = this.props.data.match.params.id
+        const geo_id = this.props.data.match.params.geo_id
         const t_type = this.props.data.match.params.t_type
-        if(id) {
-            this.tsegUpdate(id, t_type)
+        if(id || geo_id) {
+            this.tsegUpdate(id, geo_id)
         }
     }
 
@@ -428,25 +432,27 @@ export class Forms extends Component {
         })
     }
 
-    tsegUpdate(id, t_type){
+    tsegUpdate(id, geo_id){
         service
-            .updateTseg(id, t_type)
+            .updateTseg(id, geo_id)
             .then(({ tseg_display }) => {
                 if(tseg_display) {
                     tseg_display.map((item, idx) =>
                     {
-                        const value = item.date
-                        // const d = value.split("-")
-                        // const daydhkf = parseInt(d[2]) + 1
-                        // if(daydhkf<=10){
-                            // var dated = '0' + `${daydhkf}`
-                        // }
-                        // else{
-                            // var dated = `${daydhkf}`
-                        // }
-                        // const m =d[1]
-                        // const y = d[0]
-                        // var dateStr = y+ "-" + m + "-" + dated;
+                        var value = item.date
+                        if (geo_id) {
+                            const d = value.split("-")
+                            const daydhkf = parseInt(d[2]) + 1
+                            if(daydhkf<=10){
+                                var dated = '0' + `${daydhkf}`
+                            }
+                            else{
+                                var dated = `${daydhkf}`
+                            }
+                            const m =d[1]
+                            const y = d[0]
+                            value = y+ "-" + m + "-" + dated;
+                        }
                         this.setState({
                             values : {
                                 ...this.state.values,
@@ -486,7 +492,7 @@ export class Forms extends Component {
                             file_path11: item.file_path1,
                             file_path22: item.file_path2,
                             geo_id: item.geo_id,
-                            id, t_type
+                            id
                         })
                         }
                     )
@@ -522,6 +528,17 @@ export class Forms extends Component {
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
         this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/')
+    }
+
+    requestModalOpen(modalAction, modalText, modalTitle, modalType, modalButtonName) {
+        this.setState({
+            is_open_modal: true,
+            modalAction,
+            modalText,
+            modalTitle,
+            modalType,
+            modalButtonName,
+        })
     }
 
     successPoint() {
@@ -564,13 +581,33 @@ export class Forms extends Component {
             })
     }
 
+    loadTseg(setTseg) {
+        const id = this.props.data.match.params.id
+        const geo_id = this.props.data.match.params.geo_id
+        if (geo_id || id) {
+            service
+                .getTseg(id, geo_id)
+                .then(({ coord }) => {
+                    setTseg(coord)
+                })
+        }
+    }
+
     render() {
-        if(this.state.latlongy == ''){
-            this.getItem()
+        const { point_classes, point_types, ondor_types, only_see, no_buttons, latlongx, latlongy } = this.state
+        const error_msg = this.state.error_msg
+
+        let back_url
+        let button_name
+        if (this.props.data.match.params?.geo_id) {
+            back_url = `/gov/forms/tseg-info/tsegpersonal/inspire-tseg/`
+            button_name = 'Засах'
+        }
+        else {
+            back_url = `/gov/forms/tseg-info/tsegpersonal/tseg-personal/`
+            button_name = 'Нэмэх'
         }
 
-        const { point_classes, point_types, ondor_types, only_see, no_buttons } = this.state
-        const error_msg = this.state.error_msg
         return (
         <Formik
             enableReinitialize
@@ -600,12 +637,15 @@ export class Forms extends Component {
                                         <Maps
                                             handleXY={this.handleXY}
                                             coordinatCheck={false}
-                                            xy={this.x}
+                                            xy={latlongx}
+                                            xy={latlongy}
                                             only_see={only_see}
+                                            loadTseg={this.loadTseg}
                                         />
                                     </div>
                                     <div className="col-md-12 mb-4 mt-4 pl-0">
-                                        <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-personal/`} className='btn gp-outline-primary '>
+                                        <NavLink to={back_url}
+                                            className='btn gp-outline-primary '>
                                                 <i className="fa fa-angle-double-left"></i> Буцах
                                         </NavLink>
                                     </div>
@@ -1184,21 +1224,33 @@ export class Forms extends Component {
                                                     <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
                                                         {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                         {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                                        {!isSubmitting && 'Нэмэх' }
+                                                        {!isSubmitting && button_name }
                                                     </button>
                                                 :
                                                     <div className="float-right">
                                                         <button
                                                             type='button'
                                                             className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                                            onClick={this.successPoint}
+                                                            onClick={() => this.requestModalOpen(
+                                                                this.successPoint,
+                                                                `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
+                                                                'Баталгаажуулах',
+                                                                'nogoon',
+                                                                'Баталгаажуулах',
+                                                            )}
                                                         >
                                                             Баталгаажуулах
                                                         </button>
                                                         <button
                                                             type='button'
                                                             className="btn gp-btn-primary waves-effect waves-light"
-                                                            onClick={this.rejectPoint}
+                                                            onClick={() => this.requestModalOpen(
+                                                                this.rejectPoint,
+                                                                `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
+                                                                'Татгалзах',
+                                                                'warning',
+                                                                'Татгалзах',
+                                                            )}
                                                         >
                                                             Татгалзах
                                                         </button>
@@ -1214,6 +1266,16 @@ export class Forms extends Component {
                                 </div>
                             </div>
                         </div>
+                        {this.state.is_open_modal &&
+                            <Modal
+                                modalClose={() => this.setState({ is_open_modal: false })}
+                                modalAction={this.state.modalAction}
+                                text={this.state.modalText}
+                                title={this.state.modalTitle}
+                                model_type_icon={this.state.modalType}
+                                actionNameDelete={this.state.modalButtonName}
+                            />
+                        }
                         <ModalAlert
                             modalAction={() => this.modalClose()}
                             status={this.state.modal_alert_status}

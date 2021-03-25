@@ -655,16 +655,19 @@ def _get_feature_collection(employees):
     return feature_collection
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def get_addresses(request):
+def get_addresses(request, payload):
+    all_user = payload.get('all_user')
     employee = get_object_or_404(Employee, user=request.user)
     if employee.is_admin:
-        org = employee.org
-
-        employees = Employee.objects
-        employees = employees.filter(org=org)
+        if all_user:
+            employees = Employee.objects.all()
+        else:
+            org = employee.org
+            employees = Employee.objects
+            employees = employees.filter(org=org)
     else:
         raise Http404
 

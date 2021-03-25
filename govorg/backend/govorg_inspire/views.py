@@ -379,7 +379,7 @@ def detail(request, gid, fid, tid):
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_details = get_emp_property_roles(employee, fid)
     if property_ids:
-        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'id')
+        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'id').order_by('property_id')
         for prop in mdatas:
             lproperty = LProperties.objects.filter(property_id=prop.get('property_id')).first()
             properties.append(_get_property(prop, property_details, lproperty))

@@ -97,9 +97,10 @@ function getGeom(geo_id) {
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }
 
-function getAddresses() {
+function getAddresses(all_user) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({all_user}),
     }
     return fetch(`${prefix}/addresses/`, requestOptions).then(handleResponse)
 }

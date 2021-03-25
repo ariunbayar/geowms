@@ -106,6 +106,8 @@ urlpatterns = [
             path('list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
             path('remove-point/<int:id>/', forms_views.tseg_personal_remove, name='tseg-personal-remove'),
             path('get-field-values/', forms_views.get_field_values),
+            path('get-inspire-list/', forms_views.tseg_inspire_list),
+            path('get-tseg/', forms_views.get_tseg),
         ], 'tseg-personal'))),
 
         path('tseg-ustsan/', include(([

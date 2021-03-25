@@ -51,6 +51,8 @@ export default class AddressMap extends Component {
 
     componentDidUpdate(pP, pS) {
         if (pP.features !== this.props.features) {
+            const source = this.vector_layer.getSource()
+            source.clear()
             this.readFeatures(this.props.features)
         }
         if (pP.feature !== this.props.feature) {

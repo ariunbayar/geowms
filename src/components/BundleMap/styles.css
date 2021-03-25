@@ -115,40 +115,40 @@ element.style {
 
 .ol-full-screen {
     right: .5rem;
-    top: 23px;
-    width: 50px;
-    height: 50px;
+    top: 20px;
+    width: 46px;
+    height: 46px;
 
 }
 .ol-full-screen .ol-full-screen-false{
-    width: 45px;
-    height: 45px;
-    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
 
 }
 .ol-full-screen .ol-full-screen-true{
-    width: 45px;
-    height: 45px;
-    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
 
 }
 .ol-zoom {
-    width: 50px;
-    height: 96px;
+    width: 46px;
+    height: 87px;
     left: unset;
     right: .5rem;
     top: 70px;
 }
 .ol-zoom  .ol-zoom-out{
-    width: 45px;
-    height: 45px;
-    font-size: 55px;
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
 
 }
 .ol-zoom .ol-zoom-in{
-    width: 45px;
-    height: 45px;
-    font-size: 55px;
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
 }
 
 .ol-mouse-position {
@@ -281,6 +281,7 @@ element.style {
     max-width: 600px;
     z-index: 1030;
     min-height: 170px;
+    opacity: 0.8;
 }
 
 .ol-popup:after, .ol-popup:before {
