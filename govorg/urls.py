@@ -162,6 +162,7 @@ urlpatterns = [
             path('create/', govorg_inspire_views.create_nema, name='nema_create'),
             path('update-c2405/', govorg_inspire_views.update_c2405, name='nema_create'),
             path('get_attr_details/', govorg_inspire_views.get_attr_details, name='get_attr_details'),
+            path('get_nema_choice_list/', govorg_inspire_views.get_nema_choice_list, name='get_nema_choice_list'),
             path('<int:pk>/detail/', govorg_inspire_views.nema_detail, name='nema_detail'),
             path('remove/<int:pk>/', govorg_inspire_views.nema_remove, name='nema_remove'),
         ], 'nema'))),
