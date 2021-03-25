@@ -895,7 +895,7 @@ export default class InspireMap extends Component {
             this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
         }
 
-        if (! this.props.featurefromUrl) {
+        if (!this.props.featurefromUrl) {
             this.featureFromUrl(coordinate)
         }
 
@@ -954,7 +954,6 @@ export default class InspireMap extends Component {
                                 .map((key) => [key, feature.get(key)])
                             return [feature.getId(), values]
                         })
-
                         if(!this.state.is_draw_open){
                             if(feature_info.length > 0) {
                                 is_not_inspire = false
@@ -985,7 +984,7 @@ export default class InspireMap extends Component {
                             }
                             else {
                                 if (not_visible_layers.length == 0) {
-                                    this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
                                 }
                             }
                         }

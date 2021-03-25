@@ -85,7 +85,7 @@ export default class NemaMap extends Component {
         return (
             <div className="col-lg-12 p-0 m-0">
                 <div className="col-12 col-md-12 col-xl-12 p-0 m-0">
-                    <CovidDashboard NemaPP={NemaPP} wms_list={wms_list} is_search_bar={true} is_zoom={"closed"} geo_id={employee.geo_id}/>
+                    <CovidDashboard NemaPP={NemaPP} wms_list={wms_list} is_search_bar={true} is_zoom={"closed"} geo_id={employee.geo_id} nema={true}/>
                 </div>
             </div>
         )

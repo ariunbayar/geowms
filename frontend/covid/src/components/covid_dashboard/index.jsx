@@ -69,7 +69,7 @@ class CovidDashboard extends PureComponent {
 
     render() {
         const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, pop_data } = this.state
-        const { NemaPP, wms_list, is_search_bar, is_zoom, org_geo_id } = this.props
+        const { NemaPP, wms_list, is_search_bar, is_zoom, org_geo_id, nema} = this.props
 
         return (
             <div className="card-body bg-light">
@@ -106,6 +106,7 @@ class CovidDashboard extends PureComponent {
                                     wms_list={wms_list}
                                     is_search_bar={is_search_bar}
                                     is_zoom={is_zoom}
+                                    nema={nema}
                                 />
                             </div>
                             <div className="col-xl-4 col-sm-12">
