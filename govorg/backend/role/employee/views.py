@@ -137,10 +137,17 @@ def list(request, payload):
 
     org = get_object_or_404(Org, employee__user=request.user)
     if is_user:
-        users_qs = User.objects.filter(is_user=is_user)
-        qs = Employee.objects.filter(user__in=users_qs)
+        qs = Employee.objects.filter(org=org)
+        qs = qs.filter(user__is_user=True)
     else:
         qs = Employee.objects.filter(org=org)
+    if not qs:
+        rsp = {
+            'items': [],
+            'page': payload.get('page'),
+            'total_page': 1,
+        }
+        return JsonResponse(rsp)
 
     оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
@@ -319,7 +326,7 @@ def create(request, payload):
     address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
-    is_user = user_detail['is_user']
+    is_user = user_detail['is_user'] or False
 
     emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
@@ -416,7 +423,7 @@ def update(request, payload, pk):
     address_state = address.get('address_state')
     address_state = _get_address_state_code(address_state)
     address['address_state'] = address_state
-    is_user = user_detail['is_user']
+    is_user = user_detail['is_user'] or False
 
     if employee.user == request.user:
         can_update = True

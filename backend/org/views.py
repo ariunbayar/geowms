@@ -224,7 +224,6 @@ def employee_update(request, payload, pk, level):
     phone_number = values.get('phone_number')
     re_password_mail = values.get('re_password_mail')
     is_user = values.get('is_user')
-
     address = payload.get('address')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
@@ -258,7 +257,7 @@ def employee_update(request, payload, pk, level):
             user.register = register.upper()
             user.username = username
             user.is_superuser = is_super
-            user.is_user = is_user
+            user.is_user = is_user or False
             if password:
                 user.set_password(password)
             if is_user:
@@ -362,7 +361,6 @@ def employee_add(request, payload, level, pk):
     is_super = values.get('is_super')
     phone_number = values.get('phone_number')
     is_user = values.get('is_user')
-
     address = payload.get('address')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
@@ -394,7 +392,7 @@ def employee_add(request, payload, level, pk):
             user.gender = gender
             user.is_superuser = is_super if org.level == 4 else False
             user.register = register.upper()
-            user.is_user = is_user
+            user.is_user = is_user or False
             if is_user:
                 user.is_active = True
             else:
