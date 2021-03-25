@@ -934,7 +934,6 @@ def tsegPersonalUpdate(request, payload):
                 data['hors_shinj_baidal'] = soil_type
                 # data['suljeenii_torol'] = suljeenii_torol
             tseg_display.append(data)
-            print(tseg_display)
 
     rsp = {
         'tseg_display': tseg_display,
