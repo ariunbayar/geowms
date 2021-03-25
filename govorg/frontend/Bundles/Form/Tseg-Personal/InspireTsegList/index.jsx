@@ -13,8 +13,9 @@ export class InspList extends Component {
     render() {
         return (
             <Switch>
-                <Route path={"/gov/forms/tseg-info/tsegpersonal/inspire-tseg/"} component={InspireTsegList}/>
-                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/inspire-tseg/:id/засах/"} component={(data)=><Forms data={data} />}/>
+                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/inspire-tseg/"} component={InspireTsegList}/>
+                <Route path={"/gov/forms/tseg-info/tsegpersonal/inspire-tseg/:geo_id/засах/"} component={(data)=><Forms data={data} />}/>
+                <Route path={"/gov/forms/tseg-info/tsegpersonal/inspire-tseg/:geo_id/detail/"} component={(data)=><Forms data={data} only_see={true} no_buttons={true}/>}/>
             </Switch>
         )
     }

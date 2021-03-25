@@ -100,6 +100,7 @@ export class Forms extends Component {
         this.getFieldValues = this.getFieldValues.bind(this)
         this.successPoint = this.successPoint.bind(this)
         this.rejectPoint = this.rejectPoint.bind(this)
+        this.loadTseg = this.loadTseg.bind(this)
     }
 
     handleBoxOver (e){
@@ -121,9 +122,10 @@ export class Forms extends Component {
     componentDidMount(){
         this.getFieldValues()
         const id = this.props.data.match.params.id
+        const geo_id = this.props.data.match.params.geo_id
         const t_type = this.props.data.match.params.t_type
-        if(id) {
-            this.tsegUpdate(id, t_type)
+        if(id || geo_id) {
+            this.tsegUpdate(id, geo_id)
         }
     }
 
@@ -428,9 +430,9 @@ export class Forms extends Component {
         })
     }
 
-    tsegUpdate(id, t_type){
+    tsegUpdate(id, geo_id){
         service
-            .updateTseg(id, t_type)
+            .updateTseg(id, geo_id)
             .then(({ tseg_display }) => {
                 if(tseg_display) {
                     tseg_display.map((item, idx) =>
@@ -486,7 +488,7 @@ export class Forms extends Component {
                             file_path11: item.file_path1,
                             file_path22: item.file_path2,
                             geo_id: item.geo_id,
-                            id, t_type
+                            id
                         })
                         }
                     )
@@ -564,13 +566,33 @@ export class Forms extends Component {
             })
     }
 
+    loadTseg(setTseg) {
+        const id = this.props.data.match.params.id
+        const geo_id = this.props.data.match.params.geo_id
+        if (geo_id || id) {
+            service
+                .getTseg(id, geo_id)
+                .then(({ coord }) => {
+                    setTseg(coord)
+                })
+        }
+    }
+
     render() {
-        if(this.state.latlongy == ''){
-            this.getItem()
+        const { point_classes, point_types, ondor_types, only_see, no_buttons, latlongx, latlongy } = this.state
+        const error_msg = this.state.error_msg
+
+        let back_url
+        let button_name
+        if (this.props.data.match.params?.geo_id) {
+            back_url = `/gov/forms/tseg-info/tsegpersonal/inspire-tseg/`
+            button_name = 'Засах'
+        }
+        else {
+            back_url = `/gov/forms/tseg-info/tsegpersonal/tseg-personal/`
+            button_name = 'Нэмэх'
         }
 
-        const { point_classes, point_types, ondor_types, only_see, no_buttons } = this.state
-        const error_msg = this.state.error_msg
         return (
         <Formik
             enableReinitialize
@@ -600,12 +622,15 @@ export class Forms extends Component {
                                         <Maps
                                             handleXY={this.handleXY}
                                             coordinatCheck={false}
-                                            xy={this.x}
+                                            xy={latlongx}
+                                            xy={latlongy}
                                             only_see={only_see}
+                                            loadTseg={this.loadTseg}
                                         />
                                     </div>
                                     <div className="col-md-12 mb-4 mt-4 pl-0">
-                                        <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-personal/`} className='btn gp-outline-primary '>
+                                        <NavLink to={back_url}
+                                            className='btn gp-outline-primary '>
                                                 <i className="fa fa-angle-double-left"></i> Буцах
                                         </NavLink>
                                     </div>
@@ -1184,7 +1209,7 @@ export class Forms extends Component {
                                                     <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0} onClick = {this.checkError}>
                                                         {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                                         {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                                        {!isSubmitting && 'Нэмэх' }
+                                                        {!isSubmitting && button_name }
                                                     </button>
                                                 :
                                                     <div className="float-right">
