@@ -212,7 +212,6 @@ export default class Maps extends Component {
                 features: [this.marker.feature],
             })
         })
-        console.log(base_layers);
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
