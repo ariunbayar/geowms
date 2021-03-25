@@ -21,7 +21,6 @@ from backend.config.models import CovidConfig
 
 from frontend.covid.models import CovidDashboard
 from frontend.covid.models import CovidDashboardLog
-
 from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
