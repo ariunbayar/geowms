@@ -26,7 +26,7 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
-from backend.inspire.models import MGeoDatas
+from backend.inspire.models import LProperties, MGeoDatas
 from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
@@ -769,12 +769,17 @@ def get_geoJson(data):
 
 
 def datetime_to_string(date):
-    return date.strftime('%Y-%m-%d') if date else ''
+    if date and isinstance(date, datetime):
+        date = date.strftime('%Y-%m-%d')
+    else:
+        date = ''
+    return date
 
 
 def date_fix_format(input_date):
-    if '/' in input_date:
-        input_date = input_date.replace('/', '-')
+    if not isinstance(input_date, datetime):
+        if '/' in input_date:
+            input_date = input_date.replace('/', '-')
     return input_date
 
 
@@ -1075,7 +1080,7 @@ def get_properties(feature_id, get_all=False):
 def _value_types():
     return [
         {'value_type': 'value_number', 'value_names': ['double', 'number']},
-        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text', 'data-type']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
         {'value_type': 'value_date', 'value_names': ['date']},
         {'value_type': 'code_list_id', 'value_names': ['single-select', 'multi-select']},
     ]
@@ -1096,7 +1101,8 @@ def make_value_dict(value, properties_qs, is_display=False):
                     data = dict()
                     if not is_display:
                         if 'date' in types['value_type']:
-                            val = date_to_timezone(val)
+                            #TODO date to timezone
+                            val = val
                         data[types['value_type']] = val
                         data['property_id'] = prop['property_id']
                     if is_display:
@@ -1115,7 +1121,7 @@ def save_value_to_mdatas(value, feature_code, coordinate=None, geom_type='Point'
     mgeo_qs, new_geo_id = save_geom_to_mgeo_data(point, feature_id, feature_code)
 
     properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
-    datas = make_value_dict(value, properties_qs)
+    datas = make_value_dict(value, properties_qs, False)
     for data in datas:
         for data_type_c in data_type_c_qs:
             if data_type_c.property_id == data['property_id']:
@@ -1170,12 +1176,26 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs):
+def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
     data = dict()
     for prop in properties_qs:
-        if prop.property_code == 'PointNumber':
+        if prop.property_code == property_code:
             data = _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
     return data
+
+
+def _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[]):
+    datas = list ()
+    for prop in properties_qs:
+        data = dict()
+        if property_codes:
+            if prop.property_code in property_codes:
+                data = _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
+                datas.append(data)
+        else:
+            data = _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
+            datas.append(data)
+    return datas
 
 
 def _mdata_values_field():
@@ -1249,9 +1269,24 @@ def get_mdata_values(feature_code, query):
     return rows
 
 
-def get_mdata_value(feature_code, value=None, only_geo_id=False):
-    geo_id = ''
+def mdatas_for_paginator(initial_qs, searchs):
 
+    send_values = list()
+    for search in searchs:
+        value = dict()
+        mdata_qs = initial_qs.filter(**search)
+        for mdata in mdata_qs.values():
+            for field in _mdata_values_field():
+                if mdata[field]:
+                    if field == 'value_date':
+                        mdata[field] = datetime_to_string(mdata[field])
+                    value[mdata['property_id']] = mdata[field]
+                    send_values.append(value)
+
+    return send_values
+
+
+def get_mdata_value(feature_code, geo_id, is_display=False):
     MDatas = apps.get_model('backend_inspire', 'MDatas')
     l_feature_qs = get_feature_from_code(feature_code)
 
@@ -1259,16 +1294,13 @@ def get_mdata_value(feature_code, value=None, only_geo_id=False):
     send_value = dict()
 
     properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
-    data = _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs)
+    datas = _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs)
 
-    data['value_text'] = value
     mdatas_qs = MDatas.objects
-    mdatas_qs = mdatas_qs.filter(**data)
-    mdatas_qs = mdatas_qs.first()
-    if mdatas_qs:
-        geo_id = mdatas_qs.geo_id
-        if not only_geo_id:
-            mdatas = MDatas.objects.filter(geo_id=geo_id)
+    mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+    for data in datas:
+        mdatas = mdatas_qs.filter(**data)
+        if mdatas:
             for mdata in mdatas.values():
                 value = dict()
                 values = mdata
@@ -1277,7 +1309,7 @@ def get_mdata_value(feature_code, value=None, only_geo_id=False):
                         for prop in properties_qs:
                             if prop.property_id == mdata['property_id']:
                                 value[prop.property_code] = values[field]
-                datas = make_value_dict(value, properties_qs, True)
+                datas = make_value_dict(value, properties_qs, is_display)
                 for data in datas:
                     for key, value in data.items():
                         send_value[key] = value

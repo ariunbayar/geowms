@@ -12,6 +12,8 @@ export const service = {
     getFieldValue,
     successPoint,
     rejectPoint,
+    getInspireList,
+    getTseg,
 }
 
 const prefix = '/gov/api/tseg-personal'
@@ -45,10 +47,10 @@ function tsegPersonal(form_datas) {
     return fetch(`${prefix}/`, opts).then(handleResponse)
 }
 
-function updateTseg(id, t_type){
+function updateTseg(id, geo_id){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({id, t_type}),
+        body: JSON.stringify({id, geo_id}),
     }
     return fetch(`${prefix}/update/`, opts).then(handleResponse)
 }
@@ -104,4 +106,20 @@ function rejectPoint(id){
         ...getGetOptions(),
     }
     return fetch(`${prefix}/remove-point/${id}/`, opts).then(handleResponse)
+}
+
+function getInspireList(page, perpage, query, sort_name) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ page, perpage, query, sort_name }),
+    }
+    return fetch(`${prefix}/get-inspire-list/`, opts).then(handleResponse)
+}
+
+function getTseg(id, geo_id) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ id, geo_id }),
+    }
+    return fetch(`${prefix}/get-tseg/`, opts).then(handleResponse)
 }
