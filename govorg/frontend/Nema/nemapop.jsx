@@ -242,7 +242,12 @@ export class NemaPP extends Component {
                                     </div>
                                 </div>
                                 :
-                                "Сонгоогүй байна"
+                                <div className="ol-header-cont" role="group">
+                                    Сонгоогүй байна
+                                    <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>
+                                        <i className="fa fa-times" aria-hidden="true"></i>
+                                    </div>
+                                </div>
                             }
                             {!datas &&
                                 <div className="ol-popup-closer" id="popup-closer" role="button" onClick={() => this.props.close()}>

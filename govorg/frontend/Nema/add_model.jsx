@@ -5,6 +5,7 @@ import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import InspireMap from "@utils/BundleMap"
 import {NemaPP} from './nemapop'
+import BackButton from "@utils/Button/BackButton"
 
 
 const validationSchema = Yup.object().shape({
@@ -135,7 +136,7 @@ export class ModelAddNema extends Component {
                                                 <div className="form-row col-md-12 d-inline-block text-dark">
                                                     <div className="form-row col-md-12">
                                                         <label htmlFor="" className="col-md-12">
-                                                            <strong>Давхаргын code</strong>
+                                                            <strong>Давхаргын код</strong>
                                                         </label>
                                                         <Field
                                                             type="text"
@@ -236,6 +237,7 @@ export class ModelAddNema extends Component {
                         model_type_icon={model_alert_icon}
                     />
                 }
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/gov/nema/list/`}></BackButton>
             </div>
         )
 

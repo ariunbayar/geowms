@@ -538,6 +538,15 @@ def _is_domain(domain):
     )
     return re.search(pattern, domain) is not None
 
+# Зөвхөн нэг config мэдээллийг буцаана
+# оролт config one name
+def get_covid_config(config_name, Model=CovidConfig):
+
+    default_values = {config_name: ''}
+    configs = Model.objects.filter(name__in=default_values.keys()).first()
+
+    return configs.value if configs else ''
+
 
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
@@ -773,10 +782,9 @@ def date_fix_format(input_date):
 
 
 def date_to_timezone(input_date):
-    date_fix_format(input_date)
-    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
-    output_date = timezone.make_aware(naive_time)
-    return output_date
+    input_date = date_fix_format(input_date)
+    naive_time = datetime.strptime(input_date, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    return naive_time
 
 
 def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):

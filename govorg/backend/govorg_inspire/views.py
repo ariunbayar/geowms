@@ -1043,6 +1043,12 @@ def _get_nema_status(item):
     return nema_status
 
 
+def _get_created_by(item):
+    id = item.get('created_by') if isinstance(item, dict) else item[0].get('created_by')
+    user = User.objects.filter(id=id).first()
+    return user.first_name if user else  id
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1051,6 +1057,8 @@ def nema_list(request, payload):
 
     нэмэлт_талбарууд = [
         {"field": "is_open", "action": _get_nema_status},
+        {"field": "created_by", "action": _get_created_by},
+        {"field": "code", "action": _get_layer_names},
     ]
 
     datatable = Datatable(
@@ -1175,7 +1183,7 @@ def nema_detail(request, pk):
         'code': nema_detail[0]['code'],
         'layer_name': _get_layer_names(nema_detail),
         'is_open': nema_detail[0]['is_open'],
-        'created_by': User.objects.filter(id=user_id).first().username,
+        'created_by': User.objects.filter(id=user_id).first().first_name,
         'created_at': utils.datetime_to_string(nema_detail[0]['created_at']),
         'user_id': user_id,
     })

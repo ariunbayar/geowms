@@ -26,7 +26,7 @@ export default class SideBar extends Component {
         const { is_togle, items, active_menu } = this.state
         return(
             <div id="sidebar"
-                className={is_togle ?  "sidebar sidebar-left " : "sidebar sidebar-left collapsed"} style={{zIndex: 1000}}
+                className={is_togle ?  "sidebar sidebar-left " : "sidebar sidebar-left collapsed"} style={{zIndex: 1}}
             >
                 <div className="sidebar-tabs">
                     <ul>
