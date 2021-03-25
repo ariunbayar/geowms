@@ -69,10 +69,10 @@ export class CovidPP extends Component {
             <div className="card-body justify-content-between" style={{marginRight: "1%", marginLeft: '1%'}}>
                 {
                     <div className="px-0">
+                        <div className="text-right" id="popup-closer" role="button" onClick={() => this.props.close()}>
+                            <i className="fa fa-times" aria-hidden="true"></i>
+                        </div>
                         <div className="col-md-12 text-center">
-                            <div className="text-right" id="popup-closer" role="button" onClick={() => this.props.close()}>
-                                <i className="fa fa-times" aria-hidden="true"></i>
-                            </div>
                             <label htmlFor="label" className="mw-100 align-middle">{name}</label>
                         </div>
                         <div className="row text-danger">
