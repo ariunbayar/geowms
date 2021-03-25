@@ -11,7 +11,7 @@ class Card extends PureComponent {
     render() {
         const {color, head_text, body_text, prev_data} = this.props
         return (
-            <div className="col">
+            <div className="col-xl col-sm-4">
               <div className={`card text-center border-bottom-sm border-top-sm border-${color}`}>
                 <div className="card-body">
                     <h6 style={{minHeight: '30px'}}>{head_text}</h6>
