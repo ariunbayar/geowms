@@ -5,6 +5,7 @@ import { service } from '../../service'
 
 import { Pagination } from "@utils/Pagination"
 import { GPIcon } from '@utils/Tools'
+import Modal from "@utils/Modal/Modal"
 
 class InspireTsegList extends Component {
 
@@ -18,9 +19,23 @@ class InspireTsegList extends Component {
             query: '',
             query_min: false,
             search_load: false,
+            point_types: [],
+            point_classes: [],
         }
-        this.handleSearch = this.handleSearch.bind(this)
         this.paginate = this.paginate.bind(this)
+        this.getFields = this.getFields.bind(this)
+    }
+
+    componentDidMount() {
+        this.getFields()
+    }
+
+    getFields() {
+        service
+            .getFieldValue()
+            .then(({ point_types, point_classes }) => {
+                this.setState({ point_types, point_classes })
+            })
     }
 
     paginate (page, query, sort_name) {
@@ -34,37 +49,11 @@ class InspireTsegList extends Component {
                 })
     }
 
-    handleSearch(field, e) {
-        if(e.target.value.length >= 1)
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(this.state.currentPage, e.target.value)
-        }
-    }
-
     render() {
-        const { items, legnth } = this.state
+        const { items, legnth, point_types, point_classes } = this.state
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="row">
-                        <div className="float-right search-bar mr-3">
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="query"
-                                placeholder="Хайх"
-                                onChange={(e) => this.handleSearch('query', e)}
-                                value={this.state.query}
-                            />
-                            <a><i className="icon-magnifier"></i></a>
-                        </div>
-                    </div>
                     <div className="row ml-1">
                         <div className="col-lg-12">
                             <div className="row pt-4 table-responsive">
@@ -103,6 +92,8 @@ class InspireTsegList extends Component {
                                                 <Rows key={index}
                                                     idx={index+1}
                                                     values={values}
+                                                    point_types={point_types}
+                                                    point_classes={point_classes}
                                                 />
                                             )
                                         }
@@ -144,7 +135,26 @@ class Rows extends Component {
             center_typ,
             geo_id,
         } = this.props.values
-        const { idx } = this.props
+        const { idx, point_types, point_classes } = this.props
+
+        let suljee
+        let angi
+        if (suljeenii_torol) {
+            point_types.map((item, idx) => {
+                if (item.code_list_id == suljeenii_torol) {
+                    suljee = item.code_list_name
+                }
+            })
+        }
+
+        if (center_typ) {
+            point_classes.map((item, idx) => {
+                if (item.code_list_id == center_typ) {
+                    angi = item.code_list_name
+                }
+            })
+        }
+
         return (
             <tr>
                 <th>
@@ -161,10 +171,10 @@ class Rows extends Component {
                     {point_id}
                 </td>
                 <td>
-                    {suljeenii_torol}
+                    {suljee}
                 </td>
                 <td>
-                    {center_typ}
+                    {angi}
                 </td>
                 <td>
                     <a href={`/gov/forms/tseg-info/tsegpersonal/inspire-tseg/${geo_id}/засах/`}>
