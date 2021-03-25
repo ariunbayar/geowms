@@ -59,6 +59,12 @@ export class UserAdd extends Component {
             errors: '',
 
             firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
+
+            is_user: false,
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -70,10 +76,12 @@ export class UserAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
+        this.getSelectValue()
         if(org_emp){
             this.handleGetAll(org_emp)
         }
@@ -82,6 +90,15 @@ export class UserAdd extends Component {
         }
     }
 
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
+    }
 
     handleGetAll(org_emp){
         service
@@ -106,6 +123,7 @@ export class UserAdd extends Component {
                             phone_number: employee.phone_number,
                             state: employee.state_id,
                             pro_class: employee.pro_class_id,
+                            is_user: employee.is_user,
                         },
                         point: employee.point,
                         street: employee.street,
@@ -324,7 +342,7 @@ export class UserAdd extends Component {
             feature, street, apartment, door_number, point, errors, address_state
         } = this.state
 
-        const { positions, states, pro_classes } = this.props
+        const { positions, states, pro_classes } = this.state
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -519,6 +537,16 @@ export class UserAdd extends Component {
                                                     type="checkbox"
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="invalid-feedback"/>
+                                            </div>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_is_user'>хэрэглэгч</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_user'
+                                                    id="id_is_user"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_user" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {org_level ==4 &&

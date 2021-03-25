@@ -12,7 +12,7 @@ from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrg as System
 from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils

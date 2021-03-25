@@ -36,6 +36,8 @@ export default class Maps extends Component {
             source_draw: null,
             info:[],
             xy: [],
+            latlongx: props.latlongx,
+            latlongy: props.latlongy,
             map_open:true,
             geoms: [],
             ayuul_geoms: [],
@@ -210,7 +212,6 @@ export default class Maps extends Component {
                 features: [this.marker.feature],
             })
         })
-
         const map = new Map({
             target: 'map',
             controls: defaultControls().extend([
@@ -219,12 +220,12 @@ export default class Maps extends Component {
                     coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
                     undefinedHTML: '',
                 }),
-                new СуурьДавхарга({layers: base_layer_controls}),
+                // new СуурьДавхарга({layers: base_layer_controls}),
                 new ScaleLine(),
                 this.controls.coordinateCopy,
             ]),
             layers: [
-                ...base_layers,
+                ...[base_layers[0]],
                 vector_layer,
                 marker_layer,
             ],
@@ -240,6 +241,19 @@ export default class Maps extends Component {
         this.map = map
         if ( this.props.type !== 'ayuul'){
             this.handleSetCenter()
+        }
+        this.props.loadTseg && this.props.loadTseg((val) => this.handleSetTseg(val))
+    }
+
+    handleSetTseg(coord) {
+        if(coord && this.map){
+            if(coord[0] > 60){
+                const view = this.map.getView()
+                const map_projection = view.getProjection()
+                const map_coord = transformCoordinate(coord, this.state.dataProjection, map_projection)
+                this.marker.point.setCoordinates(map_coord)
+                view.setCenter(map_coord)
+            }
         }
     }
 

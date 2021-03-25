@@ -32,6 +32,7 @@ export class EmployeeAdd extends Component {
                 choose_role: '',
                 state: '',
                 pro_class: '',
+                is_user: false,
             },
             role_list: [],
             emp_role_id: null,
@@ -70,6 +71,10 @@ export class EmployeeAdd extends Component {
             is_address_map: true,
 
             firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -82,11 +87,14 @@ export class EmployeeAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         this.getRolesForOption()
         this.getFeildValues()
+        this.getSelectValue()
     }
 
     getRolesForOption() {
@@ -232,6 +240,16 @@ export class EmployeeAdd extends Component {
             })
     }
 
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
+    }
+
     getPoint(point_coordinate, map_coordinate) {
 
         let coordinates = point_coordinate
@@ -308,7 +326,8 @@ export class EmployeeAdd extends Component {
     render() {
         const { form_values, roles, role_list, emp_role_id, prefix, is_inspire_role, is_inspire_role_null } = this.state
         const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, address_state, is_address_map } = this.state
-        const { positions, states, pro_classes, org_roles } = this.props
+        const { positions, states, pro_classes } = this.state
+        const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
@@ -444,8 +463,8 @@ export class EmployeeAdd extends Component {
                                                 />
                                                 <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                             </div>
-                                            <div className="form-group col-md-6 mt-1 text-center"><br/>
-                                                <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                            <div className="form-row col-md-3 mt-4 text-center"><br/>
+                                                <label className="" htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
                                                     name='is_admin'
@@ -453,6 +472,16 @@ export class EmployeeAdd extends Component {
                                                     type="checkbox"
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                            </div>
+                                            <div className="form-row col-md-3 mt-4 text-center"><br/>
+                                                <label className="" htmlFor='is_user'>Хэрэглэгч</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_user'
+                                                    id="id_is_user"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_user" component="div" className="text-danger"/>
                                             </div>
                                         </div>
                                         <div className="form-row">

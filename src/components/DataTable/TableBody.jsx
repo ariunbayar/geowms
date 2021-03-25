@@ -20,7 +20,7 @@ export class TableBody extends Component {
                         хувьсах_талбарууд.map((хувьс, index) =>
                             хувьс.field == item.field
                             &&
-                            <td key={idx} className={`${item.is_center ? "text-center " : ' '}`}>
+                            <td key={idx} className={`${item.is_center ? "text-center " : ' '}`} style={{width: хувьс.width ? хувьс.width: null}}>
                                 {
                                     хувьс.component
                                     ?
@@ -45,7 +45,7 @@ export class TableBody extends Component {
                             </td>
                         )
                     :
-                        <td key={idx}>{values[item.field]}</td>
+                        <td key={idx} style={{width: item.width ? item.width: null}}>{values[item.field]}</td>
                 )}
                 {нэмэлт_талбарууд.map((item, idx) =>
                     <td key={idx} style={{width: item.width ? item.width: null}}>

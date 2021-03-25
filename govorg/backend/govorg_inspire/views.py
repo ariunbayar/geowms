@@ -379,7 +379,7 @@ def detail(request, gid, fid, tid):
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_details = get_emp_property_roles(employee, fid)
     if property_ids:
-        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'id')
+        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'id').order_by('property_id')
         for prop in mdatas:
             lproperty = LProperties.objects.filter(property_id=prop.get('property_id')).first()
             properties.append(_get_property(prop, property_details, lproperty))
@@ -1043,6 +1043,12 @@ def _get_nema_status(item):
     return nema_status
 
 
+def _get_created_by(item):
+    id = item.get('created_by') if isinstance(item, dict) else item[0].get('created_by')
+    user = User.objects.filter(id=id).first()
+    return user.first_name if user else  id
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -1051,6 +1057,8 @@ def nema_list(request, payload):
 
     нэмэлт_талбарууд = [
         {"field": "is_open", "action": _get_nema_status},
+        {"field": "created_by", "action": _get_created_by},
+        {"field": "code", "action": _get_layer_names},
     ]
 
     datatable = Datatable(
@@ -1175,7 +1183,7 @@ def nema_detail(request, pk):
         'code': nema_detail[0]['code'],
         'layer_name': _get_layer_names(nema_detail),
         'is_open': nema_detail[0]['is_open'],
-        'created_by': User.objects.filter(id=user_id).first().username,
+        'created_by': User.objects.filter(id=user_id).first().first_name,
         'created_at': utils.datetime_to_string(nema_detail[0]['created_at']),
         'user_id': user_id,
     })
@@ -1205,39 +1213,146 @@ def nema_remove(request, pk):
     })
 
 
-
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def update_c2405(request, payload):
     attr10 = payload.get('attr10')
-    attr_layer = payload.get('attr_layer')
+    attributes = payload.get('attributes')
+    layer_code = payload.get('layer_name')
+    attr_name = 'attr10'
     cursor = connections['nema'].cursor()
-    if not attr_layer:
+    if not attributes:
         return JsonResponse({
             'success': True,
             'info': "Attribute хоосон байна"
         })
 
+    if layer_code == 'c2406':
+        attr_name = 'attr5'
+
+    attr_1_10 = ''
+    if layer_code == 'c2405':
+        for attr in attributes:
+            if not (attr[0] == 'attr6'  or  attr[0] == 'attr10' or attr[0] == 'created' or attr[0] == 'modified'):
+                attr_1_10  += "{attr0}= '{attr1}' and ".format(attr0=attr[0], attr1=attr[1])
+    else:
+        for attr in attributes:
+            if not (attr[0] == 'attr5' or attr[0] == 'created' or attr[0] == 'modified'):
+                attr_1_10  += "{attr0}= '{attr1}' and ".format(attr0=attr[0], attr1=attr[1])
+
     sql = """
-    UPDATE c2405
-    set attr10='{attr10}'
+    UPDATE {table_name}
+    set {attr_name}='{attr10}'
     where
-        attr1='{attr1}' and attr3='{attr3}' and
-        attr4 = '{attr4}' and attr5='{attr5}' and attr7='{attr7}' and
-        attr8 = '{attr8}' and attr9='{attr9}'
+        {value}
+
     """.format(
-        attr1=str(attr_layer[4][1]),
-        attr3=str(attr_layer[6][1]),
-        attr4=str(attr_layer[7][1]),
-        attr5=str(attr_layer[8][1]),
-        attr7=str(attr_layer[10][1]),
-        attr8=str(attr_layer[11][1]),
-        attr9=str(attr_layer[12][1]),
-        attr10=attr10
+        attr_name=attr_name,
+        table_name=layer_code,
+        attr10=attr10,
+        value=attr_1_10[:-4]
     )
+
     cursor.execute(sql)
     return JsonResponse({
         'success': True,
         'info': "Амжилттай хадгалагдлаа"
+    })
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_attr_details(request, payload):
+
+    datas = payload.get('datas')
+
+    try:
+        table_name = datas[0][-1]
+    except Exception:
+        return JsonResponse({
+                'datas': datas,
+                'attr10_status': False,
+                'attr_10_value': ''
+            })
+
+    table_name = datas[0][-1]
+    cursor = connections['nema'].cursor()
+    attributes_1_10 = []
+    attr_10 = False
+    attr_10_value = ''
+    for attr in datas[0][0][1]:
+        attr_1_19 = []
+        if 'attr' in attr[0]:
+            sql = """
+                select
+                    attr_name
+                from
+                    _attr
+                where
+                    attr_layer_id = '{table_name}' and attr_id='{attr}'
+            """.format(
+                table_name=table_name,
+                attr = attr[0]
+            )
+            cursor.execute(sql)
+            attr_name = list(cursor.fetchone())
+            attr_1_19 = [attr_name[0], attr[1]]
+            attributes_1_10.append(attr_1_19)
+
+        else:
+            attributes_1_10.append(attr)
+
+        if (attr[0] == 'attr10' and table_name=='c2405') or  (attr[0] == 'attr5' and table_name=='c2406'):
+            attr_10_value = attr[1]
+            attr_10 = True
+
+    datas[0][0][1] = attributes_1_10
+    return JsonResponse({
+        'datas': datas,
+        'attr10_status': attr_10,
+        'attr_10_value': attr_10_value
+    })
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_nema_choice_list(request, payload):
+
+    try:
+        table_name = table_name = payload.get('data')
+    except Exception:
+        return JsonResponse({
+                'choice_list': [],
+            })
+
+    attr_name = ''
+    choices_list = []
+    cursor = connections['nema'].cursor()
+
+    if table_name == 'c2405':
+        attr_name = 'attr10'
+    else:
+        attr_name = 'attr5'
+
+    sql = """
+        select
+            attr_dataexp
+        from
+            _attr
+        where
+            attr_layer_id = '{table_name}' and attr_id='{attr}'
+    """.format(
+        table_name=table_name,
+        attr = attr_name
+    )
+
+    cursor.execute(sql)
+    choices_list = list(cursor.fetchone())
+    choices_list = choices_list[0].split(',')
+
+    return JsonResponse({
+        'choices_list': choices_list,
     })

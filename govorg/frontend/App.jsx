@@ -156,6 +156,7 @@ export class App extends Component {
                                     <ul className="sidebar-submenu">
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/inspire-tseg/" text="Цэгийн жагсаалт"></MenuItem>
                                     </ul>
                                 </MenuItem>
                                 {/* <MenuItem
@@ -270,7 +271,7 @@ export class App extends Component {
                                 <Route exact path="/gov/profile/" component={Profile} />
                                 <Route exact path="/gov/profile/password/" component={Password} />
 
-                                <Route path="/gov/nema/" component={Nema} />
+                                <Route path="/gov/nema/" component={(props) => <Nema {...props} employee={employee}/>}/>
                                 <Route path="/gov/covid-config/" component={(props) => <CovidConfig {...props} covid_configs={covid_configs}/>} />
                                 <Route path="/gov/covid-dashboard-config/" component={(props) => <CovidDashboardConfig {...props} covid_dashboard={covid_dashboard}/>} />
                             </Switch>

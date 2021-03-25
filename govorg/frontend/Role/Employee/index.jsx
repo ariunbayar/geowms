@@ -12,25 +12,7 @@ export default class Employee extends Component {
         super(props)
 
         this.state = {
-            positions: [],
-            states: [],
-            pro_classes: [],
         }
-        this.getSelectValue = this.getSelectValue.bind(this)
-    }
-
-    componentDidMount() {
-        this.getSelectValue()
-    }
-
-    getSelectValue() {
-        service
-            .getSelectValue()
-            .then(({ success, positions, states, pro_classes }) => {
-                if (success) {
-                    this.setState({ positions, states, pro_classes })
-                }
-            })
     }
 
     render() {

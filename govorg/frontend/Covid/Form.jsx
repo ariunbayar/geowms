@@ -27,9 +27,9 @@ class Input extends Component {
 
     render() {
         const { value } = this.state
-        const { name, mn_name, type } = this.props
+        const { name, mn_name, type, length } = this.props
         return (
-            <div className="form-group">
+            <div className={`form-group col-md-${length}`}>
                 <label htmlFor={`id_${name}`}>{mn_name}</label>
                 <input
                     className="form-control"
@@ -68,7 +68,7 @@ class Form extends Component {
     }
 
     componentDidMount() {
-        const { is_log } = this.props
+        const { is_log, geo_id } = this.props
         if (!is_log) {
             this.makeValueJson(this.state.data)
         } else {
@@ -123,29 +123,45 @@ class Form extends Component {
         const { is_log } = this.props
         return (
             <div className="card-body pt-0">
-                {
-                    is_log &&
-                        <BackButton {...this.props} name={'Буцах'}/>
-                }
-                {covid_dashboard.map((item, idx) =>
-                    <Input key={idx}
-                        type="number"
-                        value={item.value}
-                        name={item.origin_name}
-                        setValue={this.setValue}
-                        mn_name={item.name}
-                    />
-                )}
-                {
-                    is_log &&
-                        <Input
-                            type="date"
-                            value={date}
-                            name={'updated_at'}
-                            setValue={this.setValue}
-                            mn_name={'Бүртгэсэн огноо'}
-                        />
-                }
+                <div className="row">
+                    <div className="col-md-12">
+                        {
+                            is_log &&
+                                <BackButton {...this.props} name={'Буцах'}/>
+                        }
+                        {covid_dashboard.map((item, idx) =>
+                            item.is_togtmol ?
+                            <Input key={idx}
+                                type="number"
+                                value={item.value || item.togtmol_too}
+                                name={item.origin_name}
+                                setValue={this.setValue}
+                                mn_name={item.name}
+                                length='12'
+                            />
+                            :
+                            <Input key={idx}
+                                type="number"
+                                value={item.value}
+                                name={item.origin_name}
+                                setValue={this.setValue}
+                                mn_name={item.name}
+                                length='12'
+                            />
+                        )}
+                        {
+                            is_log &&
+                                <Input
+                                    type="date"
+                                    value={date}
+                                    name={'updated_at'}
+                                    setValue={this.setValue}
+                                    mn_name={'Бүртгэсэн огноо'}
+                                    length='12'
+                            />
+                        }
+                    </div>
+                </div>
                 <button
                     className="btn btn-block gp-btn-primary"
                     onClick={this.handleSave}
