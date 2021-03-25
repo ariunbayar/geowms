@@ -88,14 +88,15 @@ element.style {
     border-radius: 4px;
     padding: 1px;
 }
+
 .⚙-toggle:hover{
     background-color: rgba(0,60,136,0.7);
 }
+
 .⚙-toggle:focus{
     background-color: rgba(0,60,136,0.7);
 
 }
-
 
 .⚙-toggle a{
     position: absolute;
@@ -105,11 +106,6 @@ element.style {
     height: 50px;
 
 }
-/* .fa-lg{
-    font-size: 40px;
-    color: white;
-    line-height: unset;
-} */
 
 .⚙-toggle .fa-lg{
     font-size: 40px;
