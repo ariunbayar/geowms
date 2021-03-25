@@ -1257,6 +1257,16 @@ def update_c2405(request, payload):
 def get_attr_details(request, payload):
 
     datas = payload.get('datas')
+
+    try:
+        table_name = datas[0][-1]
+    except Exception:
+        return JsonResponse({
+                'datas': datas,
+                'attr10_status': False,
+                'attr_10_value': ''
+            })
+
     table_name = datas[0][-1]
     cursor = connections['nema'].cursor()
     attributes_1_10 = []
