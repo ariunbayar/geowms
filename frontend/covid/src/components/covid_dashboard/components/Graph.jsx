@@ -44,7 +44,7 @@ class Graph extends PureComponent {
         return (
             <div className="card-body px-0">
                 <div className="row">
-                    <div className="col-8">
+                    <div className="col-xl-8 col-sm-12">
                         <LineGraph
                             label="Батлагдсан тохиолдол"
                             labels={charts.linechart_all ? charts.linechart_all.dates : []}
@@ -56,7 +56,7 @@ class Graph extends PureComponent {
                             title={"Нийт байдлаар"}
                         />
                     </div>
-                    <div className="col-4">
+                    <div className="col-xl-4 col-sm-12">
                         <PieChart
                             label="Батлагдсан тохиолдол"
                             labels={charts.piechart_one ? charts.piechart_one.labels : []}
