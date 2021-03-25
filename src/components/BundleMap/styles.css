@@ -281,6 +281,7 @@ element.style {
     max-width: 600px;
     z-index: 1030;
     min-height: 170px;
+    opacity: 0.8;
 }
 
 .ol-popup:after, .ol-popup:before {
