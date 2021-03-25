@@ -7,7 +7,7 @@ import {service} from '../../service'
 import {validationSchema} from './validationSchema'
 import Maps from '../../../../components/map/Map'
 import ModalAlert from "@utils/Modal/ModalAlert"
-
+import Modal from "@utils/Modal/Modal"
 
 export class Forms extends Component {
 
@@ -82,6 +82,7 @@ export class Forms extends Component {
             modal_type: '',
             timer: null,
             geo_id: '',
+            is_open_modal: false,
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -101,6 +102,7 @@ export class Forms extends Component {
         this.successPoint = this.successPoint.bind(this)
         this.rejectPoint = this.rejectPoint.bind(this)
         this.loadTseg = this.loadTseg.bind(this)
+        this.requestModalOpen = this.requestModalOpen.bind(this)
     }
 
     handleBoxOver (e){
@@ -114,8 +116,8 @@ export class Forms extends Component {
     getFieldValues() {
         service
             .getFieldValue()
-            .then(({ point_classes, point_types, ondor_types }) => {
-                this.setState({ point_classes, point_types, ondor_types })
+            .then(({ point_classes, point_types }) => {
+                this.setState({ point_classes, point_types })
             })
     }
 
@@ -524,6 +526,17 @@ export class Forms extends Component {
         clearTimeout(this.state.timer)
         this.setState({modal_alert_status: "closed"})
         this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/')
+    }
+
+    requestModalOpen(modalAction, modalText, modalTitle, modalType, modalButtonName) {
+        this.setState({
+            is_open_modal: true,
+            modalAction,
+            modalText,
+            modalTitle,
+            modalType,
+            modalButtonName,
+        })
     }
 
     successPoint() {
@@ -1216,14 +1229,26 @@ export class Forms extends Component {
                                                         <button
                                                             type='button'
                                                             className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                                            onClick={this.successPoint}
+                                                            onClick={() => this.requestModalOpen(
+                                                                this.successPoint,
+                                                                `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
+                                                                'Баталгаажуулах',
+                                                                'nogoon',
+                                                                'Баталгаажуулах',
+                                                            )}
                                                         >
                                                             Баталгаажуулах
                                                         </button>
                                                         <button
                                                             type='button'
                                                             className="btn gp-btn-primary waves-effect waves-light"
-                                                            onClick={this.rejectPoint}
+                                                            onClick={() => this.requestModalOpen(
+                                                                this.rejectPoint,
+                                                                `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
+                                                                'Татгалзах',
+                                                                'warning',
+                                                                'Татгалзах',
+                                                            )}
                                                         >
                                                             Татгалзах
                                                         </button>
@@ -1239,6 +1264,16 @@ export class Forms extends Component {
                                 </div>
                             </div>
                         </div>
+                        {this.state.is_open_modal &&
+                            <Modal
+                                modalClose={() => this.setState({ is_open_modal: false })}
+                                modalAction={this.state.modalAction}
+                                text={this.state.modalText}
+                                title={this.state.modalTitle}
+                                model_type_icon={this.state.modalType}
+                                actionNameDelete={this.state.modalButtonName}
+                            />
+                        }
                         <ModalAlert
                             modalAction={() => this.modalClose()}
                             status={this.state.modal_alert_status}

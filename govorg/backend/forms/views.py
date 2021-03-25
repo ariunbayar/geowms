@@ -2117,14 +2117,11 @@ def geom_points(request, payload):
 def get_field_values(request):
     point_type = utils.InspireProperty('GeodeticalNetworkPointTypeValue')
     point_class = utils.InspireProperty('GeodeticalNetworkPointClassValue')
-    ondor_type = utils.InspireProperty('elevationReference')
     point_types = utils.get_code_list_from_property_id(point_type.property_id)
     point_classes = utils.get_code_list_from_property_id(point_class.property_id)
-    ondor_types = utils.get_code_list_from_property_id(ondor_type.property_id)
     rsp = {
         'point_types': point_types,
         'point_classes': point_classes,
-        'ondor_types': ondor_types,
     }
     return JsonResponse(rsp)
 
