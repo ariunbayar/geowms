@@ -439,18 +439,20 @@ export class Forms extends Component {
                 if(tseg_display) {
                     tseg_display.map((item, idx) =>
                     {
-                        const value = item.date
-                        // const d = value.split("-")
-                        // const daydhkf = parseInt(d[2]) + 1
-                        // if(daydhkf<=10){
-                            // var dated = '0' + `${daydhkf}`
-                        // }
-                        // else{
-                            // var dated = `${daydhkf}`
-                        // }
-                        // const m =d[1]
-                        // const y = d[0]
-                        // var dateStr = y+ "-" + m + "-" + dated;
+                        var value = item.date
+                        if (geo_id) {
+                            const d = value.split("-")
+                            const daydhkf = parseInt(d[2]) + 1
+                            if(daydhkf<=10){
+                                var dated = '0' + `${daydhkf}`
+                            }
+                            else{
+                                var dated = `${daydhkf}`
+                            }
+                            const m =d[1]
+                            const y = d[0]
+                            value = y+ "-" + m + "-" + dated;
+                        }
                         this.setState({
                             values : {
                                 ...this.state.values,

@@ -769,8 +769,11 @@ def get_geoJson(data):
 
 
 def datetime_to_string(date):
-    if date and isinstance(date, datetime):
-        date = date.strftime('%Y-%m-%d')
+    if date:
+        if isinstance(date, datetime):
+            date = date.strftime('%Y-%m-%d')
+        else:
+            date = date
     else:
         date = ''
     return date

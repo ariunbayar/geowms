@@ -738,7 +738,7 @@ def tseg_inspire_list(request, payload):
     query = payload.get("query")
     sort_name = payload.get("sort_name")
     if not sort_name:
-        sort_name = 'geo_id'
+        sort_name = '-created_on'
 
     # qs = _get_model_qs(LThemes, {'theme_code': 'gnp'})
     # theme_id = qs.first().theme_id
@@ -755,7 +755,7 @@ def tseg_inspire_list(request, payload):
 
     qs = MGeoDatas.objects
     geo_qs = qs.filter(feature_id=feature_id)
-    # geo_qs = geo_qs.order_by(sort_name)
+    geo_qs = geo_qs.order_by(sort_name)
 
     total_items = Paginator(geo_qs, per_page)
     items_page = total_items.page(page)
@@ -886,7 +886,6 @@ def tsegPersonalUpdate(request, payload):
 
             sheets = values['Nomenclature']
             sheets = sheets.split("-")
-
             data = dict()
             data['latlongx'] = latlongx
             data['latlongy'] = latlongy
