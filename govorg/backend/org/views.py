@@ -218,7 +218,7 @@ def _get_form_fields(Model, org):
                             'name': f.verbose_name,
                             'length': f.max_length,
                             'is_togtmol': True,
-                            'togtmol_too': utils.get_covid_config('emiin_sangiin_too') or 9026
+                            'togtmol_too': utils.get_covid_config('emiin_sangiin_too') or 1016
                         })
                     elif f.name == 'emnelegiin_too':
                         send_fields.append({
@@ -226,7 +226,7 @@ def _get_form_fields(Model, org):
                             'name': f.verbose_name,
                             'length': f.max_length,
                             'is_togtmol': True,
-                            'togtmol_too': utils.get_covid_config('emlegiin_too') or 2026
+                            'togtmol_too': utils.get_covid_config('emlegiin_too') or 1731
                         })
                     elif f.name == 'niit_eruul_mendiin_baiguullaga_too':
                         send_fields.append({
@@ -234,7 +234,7 @@ def _get_form_fields(Model, org):
                             'name': f.verbose_name,
                             'length': f.max_length,
                             'is_togtmol': True,
-                            'togtmol_too': utils.get_covid_config('niit_eruul_mend_baiguullaga_too') or 4026
+                            'togtmol_too': utils.get_covid_config('niit_eruul_mend_baiguullaga_too') or 2750
                         })
                     else:
                         send_fields.append({
@@ -403,7 +403,6 @@ def save_dashboard_log(request, payload):
     geo_id = payload.get('geo_id')
 
     date = values['updated_at']
-    print(values['updated_at'])
     values['updated_at'] = utils.date_to_timezone(date)
     values['updated_at']
     covid_qs = CovidDashboard.objects
