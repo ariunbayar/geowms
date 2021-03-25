@@ -34,6 +34,7 @@ export class EmployeeEdit extends Component {
                 is_admin: false,
                 state: '',
                 pro_class: '',
+                is_user: false,
             },
             modal_status: 'closed',
             is_loading: true,
@@ -154,6 +155,7 @@ export class EmployeeEdit extends Component {
                             is_admin: employee_detail.is_admin,
                             state: employee_detail.state_id,
                             pro_class: employee_detail.pro_class_id,
+                            is_user: employee_detail.is_user,
                         },
                         point: employee_detail.point,
                         street: employee_detail.street,
@@ -266,17 +268,6 @@ export class EmployeeEdit extends Component {
 
 
     handleSubmit(form_values, {setStatus, setSubmitting, setErrors}) {
-        const username = form_values.username
-        const first_name = form_values.first_name
-        const last_name = form_values.last_name
-        const position = form_values.position
-        const email = form_values.email
-        const gender = form_values.gender
-        const register = form_values.register
-        const phone_number = form_values.phone_number
-        const is_admin = form_values.is_admin
-        const state = form_values.state
-        const pro_class = form_values.pro_class
         const {id, role_id} = this.state
 
         const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
@@ -293,7 +284,7 @@ export class EmployeeEdit extends Component {
 
         this.checkRoleAndPerm()
         service
-            .updateEmployee(username, first_name, last_name, position, email, gender, register, phone_number, is_admin, role_id, id, this.perms, this.remove_perms, address, state, pro_class)
+            .updateEmployee(form_values, role_id, id, this.perms, this.remove_perms, address)
             .then(({ success, info, errors }) => {
                 if(success) {
                     setStatus('saved')
@@ -652,20 +643,33 @@ export class EmployeeEdit extends Component {
                                                             <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                                         </div>
                                                     </div>
-                                                    {this.props.employee.is_admin &&
-                                                    <div className="form-group col-md-3 mt-1 text-center"><br/>
-                                                        <label htmlFor='is_admin'>Байгууллагын админ</label>
-                                                        <Field
-                                                            className="ml-2"
-                                                            name='is_admin'
-                                                            id="id_is_admin"
-                                                            type="checkbox"
-                                                        />
-                                                        <ErrorMessage name="is_admin" component="div" className="text-danger"/>
-                                                    </div>
+                                                    {
+                                                        this.props.employee.is_admin &&
+                                                            <>
+                                                                <div className="form-group col-md-2 mt-1 text-center"><br/>
+                                                                    <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                                                    <Field
+                                                                        className="ml-2"
+                                                                        name='is_admin'
+                                                                        id="id_is_admin"
+                                                                        type="checkbox"
+                                                                    />
+                                                                    <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                                </div>
+                                                                <div className="form-group col-md-2 mt-1 text-center"><br/>
+                                                                    <label htmlFor='is_user'>Хэрэглэгч</label>
+                                                                    <Field
+                                                                        className="ml-2"
+                                                                        name='is_user'
+                                                                        id="id_is_user"
+                                                                        type="checkbox"
+                                                                    />
+                                                                    <ErrorMessage name="is_user" component="div" className="text-danger"/>
+                                                                </div>
+                                                            </>
                                                     }
                                                     {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
-                                                    <div className="col-md-3 mt-1 text-center"><br/>
+                                                    <div className="col-md-2 mt-1 text-center"><br/>
                                                         <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
                                                             {} Нууц үг солих имэйл илгээх
                                                         </button>

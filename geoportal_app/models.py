@@ -29,6 +29,7 @@ class User(AbstractUser):
     register = models.CharField(max_length=10, null=True)
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
+    is_user = models.BooleanField(default=False)
 
 
 class UserValidationEmail(models.Model):
