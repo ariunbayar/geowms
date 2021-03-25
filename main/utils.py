@@ -538,6 +538,15 @@ def _is_domain(domain):
     )
     return re.search(pattern, domain) is not None
 
+# Зөвхөн нэг config мэдээллийг буцаана
+# оролт config one name
+def get_covid_config(config_name, Model=CovidConfig):
+
+    default_values = {config_name: ''}
+    configs = Model.objects.filter(name__in=default_values.keys()).first()
+
+    return configs.value if configs else ''
+
 
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name

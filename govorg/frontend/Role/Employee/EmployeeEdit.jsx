@@ -108,7 +108,7 @@ export class EmployeeEdit extends Component {
 
         this.refreshMap = this.refreshMap.bind(this)
 
-        this.getSelectValue = this.getGeom.bind(this)
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {

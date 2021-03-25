@@ -130,6 +130,16 @@ class Form extends Component {
                                 <BackButton {...this.props} name={'Буцах'}/>
                         }
                         {covid_dashboard.map((item, idx) =>
+                            item.is_togtmol ?
+                            <Input key={idx}
+                                type="number"
+                                value={item.value || item.togtmol_too}
+                                name={item.origin_name}
+                                setValue={this.setValue}
+                                mn_name={item.name}
+                                length='12'
+                            />
+                            :
                             <Input key={idx}
                                 type="number"
                                 value={item.value}
