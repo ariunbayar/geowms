@@ -47,11 +47,7 @@ export class NemaPP extends Component {
         const { datas, is_loading, datas_hoho} = this.props
         const { attr10, attr_layer} = this.state
         if(pP.datas !== datas && !this.props.is_loading) {
-            // this.properties = []
-            // const startNumber = 1
-            // this.setState({ startNumber, is_plus: true, is_prev: false})
             this.getNemaAttributeDetail(datas)
-            // this.checkModeAndCode(startNumber, datas)
         }
 
         if (pS.attr10 !== attr10) {
