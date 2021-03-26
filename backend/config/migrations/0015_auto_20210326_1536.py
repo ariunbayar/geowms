@@ -28,7 +28,6 @@ def MigTest(apps,schema_editor):
         for name, value in datas:
             Config.objects.create(name=name, value=value)
 
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -36,7 +35,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(MigTest)
+          migrations.RunPython(MigTest)
     ]
-
-
