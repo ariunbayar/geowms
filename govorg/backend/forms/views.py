@@ -849,6 +849,8 @@ def _get_hurs(geo_id):
         hurs = mdata_qs.filter(property_id=0)
         if hurs:
             hurs = hurs.first().value_text
+        else:
+            hurs = ''
     return hurs
 
 

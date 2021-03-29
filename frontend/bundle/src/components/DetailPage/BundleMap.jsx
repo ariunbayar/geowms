@@ -209,6 +209,7 @@ export default class BundleMap extends Component {
                                 }),
                                 style: '',
                                 wrapX: true,
+                                cacheSize: 1000,
                             }),
                         }),
                         wms_tile: new Tile({

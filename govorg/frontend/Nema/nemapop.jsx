@@ -29,7 +29,11 @@ export class NemaPP extends Component {
             is_purchase: false,
             is_enable: false,
             is_authenticated: false,
-            attr10: 'Тусгаарлалтад байгаа',
+            layer_name: '',
+            attr10: '',
+            attr10_status: false,
+            choices_list: [],
+            attributes: [],
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -39,16 +43,15 @@ export class NemaPP extends Component {
         this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
         this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
         this.hanleUpdateAttr = this.hanleUpdateAttr.bind(this)
+        this.getNemaAttributeDetail = this.getNemaAttributeDetail.bind(this)
+        this.getNemaChoiceList = this.getNemaChoiceList.bind(this)
     }
 
     componentDidUpdate(pP, pS) {
-        const { datas, is_loading, datas_hoho} = this.props
-        const { attr10, attr_layer} = this.state
+        const { datas, is_loading} = this.props
+        const { attr10, attr_layer, data} = this.state
         if(pP.datas !== datas && !this.props.is_loading) {
-            this.properties = []
-            const startNumber = 1
-            this.setState({ startNumber, is_plus: true, is_prev: false})
-            this.checkModeAndCode(startNumber, datas)
+            this.getNemaAttributeDetail(datas)
         }
 
         if (pS.attr10 !== attr10) {
@@ -56,13 +59,40 @@ export class NemaPP extends Component {
         }
 
         if (pP.datas !== datas) {
-            this.setState({datas})
+            if (datas && datas[0][0][1]) this.setState({datas, attributes: datas[0][0][1]})
+        }
+
+        if (pS.data !== data) {
+            this.getNemaChoiceList(data)
         }
     }
 
+    getNemaChoiceList(data) {
+        if (data[2] && (data[2] == 'c2406' || data[2] == 'c2405')) {
+            service.get_nema_choice_list(data[2]).then(({choices_list}) =>{
+                this.setState({choices_list, layer_name: data[2]})
+            })
+        }
+    }
+
+    getNemaAttributeDetail(datas) {
+        service.get_attr_details(datas).then(({datas, attr10_status, attr_10_value})=>{
+            this.properties = []
+            const startNumber = 1
+            if (attr10_status) {
+                this.setState({ startNumber, is_plus: true, is_prev: false, attr10_status, attr10: attr_10_value})
+            }
+            else{
+                this.setState({ startNumber, is_plus: true, is_prev: false, attr10_status})
+            }
+
+            this.checkModeAndCode(startNumber, datas)
+        })
+    }
+
     hanleUpdateAttr() {
-        var attributes = this.state.datas[0][0][1]
-        service.updatec2405(this.state.attr10, attributes).then(({success, info})=>
+        const {layer_name, attr10, attributes} = this.state
+        service.updatec2405(attr10, attributes, layer_name).then(({success, info})=>
         {
             if(success){
                 alert(info)
@@ -200,7 +230,7 @@ export class NemaPP extends Component {
     }
 
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
+        const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated, attr10_status, layer_name, choices_list} = this.state
         const { is_empty, is_from_inspire, is_loading, datas_hoho} = this.props
         return (
                 <div>
@@ -244,15 +274,16 @@ export class NemaPP extends Component {
                         :
                             <div className="ol-popup-contet  overflow-auto" style={{height: '30vh'}}>
                                 {
-                                    data.length >= 1
-                                    &&
-                                        data[0].map((layer, idx) =>
-                                            idx == 1 &&
-                                            layer.map((value, v_idx) =>
-                                                value[0].toLowerCase().startsWith('name')
-                                                && <b key={v_idx}>{value[1]}</b>
-                                            )
-                                        )
+                                    data.length>= 1 && data[2]
+                                        &&
+                                        <div className="text-info text-center col-md-12">{data[2]}</div>
+                                    //     data[0].map((layer, idx) =>
+                                    //         idx == 1 &&
+                                    //         layer.map((value, v_idx) =>
+                                    //             value[0].toLowerCase().startsWith('name')
+                                    //             && <b key={v_idx}>{value[1]}</b>
+                                    //         )
+                                    //     )
                                 }
                                 <hr className="m-1 border border-secondary rounded"/>
                                 <table className="table borderless no-padding">
@@ -273,21 +304,21 @@ export class NemaPP extends Component {
                                                                     </th>
                                                                 </tr>
                                                             )}
-                                                            {data[2] =='c2405' &&
+                                                            {choices_list && choices_list.length > 0 &&
                                                                 <tr>
                                                                     <th>
-                                                                    <b className="d-block" style={{fontSize: '70%'}}>attr10</b>
+                                                                    { ! attr10_status && <b className="d-block" style={{fontSize: '70%'}}>Төлөв</b>}
                                                                     <select
                                                                             style={{fontSize: '70%', border: '0'}}
                                                                             value={this.state.attr10}
-                                                                            onChange={(e) => this.setState({ attr10: e.target.value, attr_layer: layer})}
+                                                                            onChange={(e) => this.setState({ attr10: e.target.value})}
                                                                         >
-                                                                            <option value="Тусгаарлалтад байгаа">Тусгаарлалтад байгаа</option>
-                                                                            <option value="Эмчлэгдэж байгаа">Эмчлэгдэж байгаа</option>
-                                                                            <option value="Эдгэрсэн">Эдгэрсэн</option>
-                                                                            <option value="Нас барсан">Нас барсан</option>
+                                                                            <option>-----------------------------------------</option>
+                                                                            {choices_list.map((name, idx) =>
+                                                                                <option key={idx} value={name}>{name}</option>
+                                                                            )}
                                                                         </select>
-                                                                    <a className="fa fa-floppy-o text-success my-3 mt-4 mr-2 ml-1 p-0" onClick={this.hanleUpdateAttr}/>
+                                                                    <a className="fa fa-floppy-o text-success my-3 mt-2 mr-2 ml-1 p-0" onClick={this.hanleUpdateAttr}/>
                                                                 </th></tr>
                                                             }
                                                         </Fragment>

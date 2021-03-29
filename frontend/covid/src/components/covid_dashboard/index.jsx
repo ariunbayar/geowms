@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react';
-import { Bar, Line } from "react-chartjs-2";
 import Navbar from "./components/Navbar"
 import {Menu} from "./components/Menu"
 import {Countries} from "./components/Countries"
@@ -28,8 +27,6 @@ class CovidDashboard extends PureComponent {
             count_datas: [],
             count_covid_datas: [],
             geo_id: props.geo_id ? props.geo_id : '496',
-
-            pop_data: [],
         }
         this.getGeoID = this.getGeoID.bind(this)
         this.getState = this.getState.bind(this)
@@ -68,8 +65,8 @@ class CovidDashboard extends PureComponent {
     }
 
     render() {
-        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, pop_data } = this.state
-        const { NemaPP, wms_list, is_search_bar, is_zoom, org_geo_id } = this.props
+        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas } = this.state
+        const { NemaPP, wms_list, is_search_bar, is_zoom, org_geo_id, nema} = this.props
 
         return (
             <div className="card-body bg-light">
@@ -98,7 +95,7 @@ class CovidDashboard extends PureComponent {
                             </div>
                         </div>
                         <div className="row">
-                            <div className="col-xl-8 col-sm-12">
+                            <div className="col-xl-12 col-sm-12">
                                 <CovidMap
                                     geo_id={geo_id}
                                     datas={datas}
@@ -106,18 +103,8 @@ class CovidDashboard extends PureComponent {
                                     wms_list={wms_list}
                                     is_search_bar={is_search_bar}
                                     is_zoom={is_zoom}
+                                    nema={nema}
                                 />
-                            </div>
-                            <div className="col-xl-4 col-sm-12">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <h4 className="text-center">Насны ангилал</h4>
-                                        <Bar
-                                            height={200}
-                                            data={pop_data}
-                                        />
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         <div className="row">

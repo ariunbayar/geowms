@@ -182,6 +182,7 @@ urlpatterns = [
         path('create_layer_group/', geoserver_views.create_layer_group),
         path('get_group_cache_list/', geoserver_views.get_group_cache),
         path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
+        path('update_geo_web_cache/', geoserver_views.update_geo_cache),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

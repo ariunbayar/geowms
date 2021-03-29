@@ -63,6 +63,8 @@ export class UserAdd extends Component {
             positions: [],
             states: [],
             pro_classes: [],
+
+            is_user: false,
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -121,6 +123,7 @@ export class UserAdd extends Component {
                             phone_number: employee.phone_number,
                             state: employee.state_id,
                             pro_class: employee.pro_class_id,
+                            is_user: employee.is_user,
                         },
                         point: employee.point,
                         street: employee.street,
@@ -534,6 +537,16 @@ export class UserAdd extends Component {
                                                     type="checkbox"
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="invalid-feedback"/>
+                                            </div>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_is_user'>хэрэглэгч</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_user'
+                                                    id="id_is_user"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_user" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {org_level ==4 &&
