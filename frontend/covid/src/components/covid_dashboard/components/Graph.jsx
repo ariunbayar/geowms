@@ -5,6 +5,7 @@ import PieChart from './components/PieChart'
 import RadarChart from './components/RadarChart'
 import {service} from './service'
 import PolorGraph from './components/PolorGraph'
+import { Bar } from "react-chartjs-2";
 
 
 class Graph extends PureComponent {
@@ -14,6 +15,7 @@ class Graph extends PureComponent {
         this.state = {
             geo_id: props.geo_id ? props.geo_id : '496',
             count_datas: [],
+            pop_data: [],
             charts: {}
         }
         this.getState = this.getState.bind(this)
@@ -32,19 +34,19 @@ class Graph extends PureComponent {
     }
 
     getState(geo_id){
-        service.getState(geo_id).then(({success, count_datas, charts, name}) =>{
+        service.getState(geo_id).then(({success, count_datas, charts, name, pop_data}) =>{
             if(success){
-                this.setState({count_datas, charts, name})
+                this.setState({count_datas, charts, name, pop_data})
             }
         })
     }
 
     render() {
-        const {count_datas, charts, name} = this.state
+        const {count_datas, charts, name, pop_data} = this.state
         return (
             <div className="card-body px-0">
                 <div className="row">
-                    <div className="col-xl-8 col-sm-12">
+                    <div className="col-xl-6 col-sm-12">
                         <LineGraph
                             label="Батлагдсан тохиолдол"
                             labels={charts.linechart_all ? charts.linechart_all.dates : []}
@@ -56,7 +58,7 @@ class Graph extends PureComponent {
                             title={"Нийт байдлаар"}
                         />
                     </div>
-                    <div className="col-xl-4 col-sm-12">
+                    <div className="col-xl-3 col-sm-12">
                         <PieChart
                             label="Батлагдсан тохиолдол"
                             labels={charts.piechart_one ? charts.piechart_one.labels : []}
@@ -65,6 +67,17 @@ class Graph extends PureComponent {
                             backgroundColor= {charts.piechart_one ? charts.piechart_one.backgroundColor : []}
                             title={"Өнөөдрийн байдлаар"}
                         />
+                    </div>
+                    <div className="col-xl-3 col-sm-12">
+                        <div className="card">
+                            <div className="card-body">
+                                <h4 className="text-center">Насны ангилал</h4>
+                                <Bar
+                                    height={220}
+                                    data={pop_data}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
