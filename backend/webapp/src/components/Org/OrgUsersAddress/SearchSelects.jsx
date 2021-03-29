@@ -18,6 +18,7 @@ export default class SearchSelects extends Component {
             aimag_geo_id: '',
             sum_geo_id: '',
             horoo_geo_id: '',
+            firstOrder_geom: '',
         }
         this.handleChange = this.handleChange.bind(this)
         this.getGeom = this.getGeom.bind(this)
@@ -37,9 +38,9 @@ export default class SearchSelects extends Component {
     getFieldValues() {
         service
             .formOptions('second')
-            .then(({ success, secondOrders }) => {
+            .then(({ success, secondOrders, firstOrder_geom }) => {
                 if (success) {
-                    this.setState({ aimag: secondOrders })
+                    this.setState({ aimag: secondOrders, firstOrder_geom })
                 }
             })
     }
@@ -93,7 +94,7 @@ export default class SearchSelects extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)

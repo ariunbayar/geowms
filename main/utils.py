@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image
 from collections import namedtuple
 from io import BytesIO
@@ -10,8 +12,10 @@ import json
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry, Point
+from django.conf import settings
 from django.db import connections
 from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
@@ -22,9 +26,12 @@ from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
-from backend.config.models import Config
+from backend.inspire.models import LProperties, MGeoDatas
+from backend.config.models import Config, CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
+from main.inspire import GEoIdGenerator
+import uuid
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -295,69 +302,70 @@ def get_administrative_levels():
     ```
         [
             {
-                'geo_id': 'au_62',
+                'geo_id': '62',
                 'name': 'Өвөрхангай',
                 'children': [
                     {
-                        'geo_id': 'au_6255',
+                        'geo_id': '6255',
                         'name': 'Хужирт',
                         'children': [
-                            {'geo_id': 'au_625551', 'name': '1-р баг'},
-                            {'geo_id': 'au_625553', 'name': '2-р баг'}
+                            {'geo_id': '625551', 'name': '1-р баг'},
+                            {'geo_id': '625553', 'name': '2-р баг'}
                         ]
                     },
                     {
-                        'geo_id': 'au_6234',
+                        'geo_id': '6234',
                         'name': 'Өлзийт',
                         'children': [
-                            {'geo_id': 'au_623451', 'name': '1-р баг'},
-                            {'geo_id': 'au_623453', 'name': '2-р баг'},
-                            {'geo_id': 'au_623455', 'name': '3-р баг'},
-                            {'geo_id': 'au_623457', 'name': '4-р баг'}
+                            {'geo_id': '623451', 'name': '1-р баг'},
+                            {'geo_id': '623453', 'name': '2-р баг'},
+                            {'geo_id': '623455', 'name': '3-р баг'},
+                            {'geo_id': '623457', 'name': '4-р баг'}
                         ]
                     }
                 ]
             },
             {
-                'geo_id': 'au_46',
+                'geo_id': '46',
                 'name': 'Өмнөговь',
                 'children': [
                     {
-                        'geo_id': 'au_4607',
+                        'geo_id': '4607',
                         'name': 'Баян-Овоо',
                         'children': [
-                            {'geo_id': 'au_460751', 'name': '1-р баг'},
-                            {'geo_id': 'au_460753', 'name': '2-р баг'},
-                            {'geo_id': 'au_460755', 'name': '3-р баг'}
+                            {'geo_id': '460751', 'name': '1-р баг'},
+                            {'geo_id': '460753', 'name': '2-р баг'},
+                            {'geo_id': '460755', 'name': '3-р баг'}
                         ]
                     },
                     {
-                       'geo_id': 'au_4604',
+                       'geo_id': '4604',
                         'name': 'Баяндалай',
                         'children': [
-                            {'geo_id': 'au_460451', 'name': '1-р баг'},
-                            {'geo_id': 'au_460453', 'name': '2-р баг'},
-                            {'geo_id': 'au_460455', 'name': '3-р баг'}
+                            {'geo_id': '460451', 'name': '1-р баг'},
+                            {'geo_id': '460453', 'name': '2-р баг'},
+                            {'geo_id': '460455', 'name': '3-р баг'}
                         ]
                     }
                 ],
             }
         ]
+        *updated 2021-03-20 odko
     ```
     """
 
-    i_code_list_2nd_order = InspireCodeList('2ndOrder\n')
-    i_code_list_3rd_order = InspireCodeList('3rdOrder\n')
-    i_code_list_4th_order = InspireCodeList('4thOrder\n')
+    i_code_list_2nd_order = InspireCodeList('2ndOrder')
+    i_code_list_3rd_order = InspireCodeList('3rdOrder')
+    i_code_list_4th_order = InspireCodeList('4thOrder')
 
-    def _get_code_names(national_codes):
+    def _get_code_names(geo_id):
 
-        table_au_au_ab = InspireFeature('au-au-ab')
+        table_au_au_ab = InspireFeature('bnd-au-au')
 
-        i_data_type_administrative_boundary = InspireDataType('AdministrativeBoundary')
-        i_property_name = InspireProperty('name')
+        i_data_type_administrative_boundary = InspireDataType('GeographicalName')
+        i_property_name = InspireProperty('text')
 
-        table_au_au_ab.filter({'geo_id': national_codes})
+        table_au_au_ab.filter({'geo_id': geo_id})
         table_au_au_ab.select({
             'geo_id': True,
             i_data_type_administrative_boundary: [i_property_name],
@@ -369,7 +377,7 @@ def get_administrative_levels():
             yield code, name
 
     def _get_au_items():
-        table_au_au_au = InspireFeature('au-au-au')
+        table_au_au_au = InspireFeature('bnd-au-au')
 
         table_au_au_au.filter(
             {
@@ -388,7 +396,6 @@ def get_administrative_levels():
                 'geo_id': True,
                 InspireDataType('AdministrativeUnit'): [
                     InspireProperty('NationalLevel'),
-                    InspireProperty('nationalCode'),
                 ],
             },
         )
@@ -396,27 +403,25 @@ def get_administrative_levels():
         for row in table_au_au_au.fetch():
             geo_id = row['geo_id']
             level = row[InspireDataType('AdministrativeUnit')][InspireProperty('NationalLevel')]
-            code = row[InspireDataType('AdministrativeUnit')][InspireProperty('nationalCode')]
-            yield geo_id, level, code
+            yield geo_id, level
 
     # build flat data
-
     items = {
         '#root': {
             'children': list()
         }
     }
 
-    for geo_id, level, code in _get_au_items():
-        items[code] = {
+    for geo_id, level in _get_au_items():
+        items[geo_id] = {
             'geo_id': geo_id,
             'level': level,
-            'code': code,
             'name': '',
             'children': list(),
         }
 
     codes = list(items.keys())
+
     for code, name in _get_code_names(codes):
         items[code]['name'] = name
 
@@ -468,7 +473,6 @@ def get_administrative_levels():
             if _is_leaf_node(item['level']):
                 del item['children']
             del item['level']
-            del item['code']
 
     # sort children
 
@@ -495,7 +499,6 @@ def get_geom(geo_id, geom_type=None, srid=4326):
     qs = qs.annotate(geo_data_transformed=Transform('geo_data', srid))
     qs = qs.filter(geo_id=geo_id)
     geom_info = qs.first()
-
     if not geom_info:
         return None
 
@@ -535,13 +538,22 @@ def _is_domain(domain):
     )
     return re.search(pattern, domain) is not None
 
+# Зөвхөн нэг config мэдээллийг буцаана
+# оролт config one name
+def get_covid_config(config_name, Model=CovidConfig):
+
+    default_values = {config_name: ''}
+    configs = Model.objects.filter(name__in=default_values.keys()).first()
+
+    return configs.value if configs else ''
+
 
 # Зөвхөн нэг config мэдээллийг буцаана
 # оролт config one name
-def get_config(config_name):
+def get_config(config_name, Model=Config):
 
     default_values = {config_name: ''}
-    configs = Config.objects.filter(name__in=default_values.keys()).first()
+    configs = Model.objects.filter(name__in=default_values.keys()).first()
 
     return configs.value if configs else ''
 
@@ -643,41 +655,38 @@ def has_employee_perm(employee, fid, geom, perm_kind, geo_json=None):
 
 
 def get_emp_property_roles(employee, fid):
-
     property_ids = []
     property_details = []
-    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
-
     EmpPerm = apps.get_model('backend_inspire', 'EmpPerm')
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-
     EmpPermInspire = apps.get_model('backend_inspire', 'EmpPermInspire')
     property_perms = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid).distinct('property_id', 'perm_kind').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+
     if property_perms:
         for prop in property_perms:
             if prop.get('property_id') not in property_ids:
                 property_ids.append(prop.get('property_id'))
         for property_id in property_ids:
+            property_roles = {'PERM_VIEW': True, 'PERM_CREATE':True, 'PERM_REMOVE':True, 'PERM_UPDATE':True, 'PERM_APPROVE':True, 'PERM_REVOKE':True}
             for prop in property_perms:
                 if property_id == prop['property_id']:
                     if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
-                        property_roles['PERM_VIEW'] = True
+                        property_roles['PERM_VIEW'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_CREATE:
-                        property_roles['PERM_CREATE'] = True
+                        property_roles['PERM_CREATE'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_REMOVE:
-                        property_roles['PERM_REMOVE'] = True
+                        property_roles['PERM_REMOVE'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_UPDATE:
-                        property_roles['PERM_UPDATE'] = True
+                        property_roles['PERM_UPDATE'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
-                        property_roles['PERM_APPROVE'] = True
+                        property_roles['PERM_APPROVE'] = False
                     else:
-                        property_roles['PERM_REVOKE'] = True
+                        property_roles['PERM_REVOKE'] = False
 
             property_details.append({
                 'property_id': property_id,
                 'roles': property_roles
             })
-
     return property_ids, property_details
 
 
@@ -712,19 +721,16 @@ def get_1stOrder_geo_id():
     LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
     LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
 
-    try:
-        feature_id = LFeatures.objects.filter(feature_code='au-au-au').first().feature_id
-        property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
-        code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder\n').first().code_list_id
-        feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    feature_id = LFeatures.objects.filter(feature_code='bnd-au-au').first().feature_id
+    property_id = LProperties.objects.filter(property_code='NationalLevel').first().property_id
+    code_list_id = LCodeLists.objects.filter(code_list_code='1stOrder').first().code_list_id
+    feature_config_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
-        qs = MDatas.objects.filter(property_id=property_id)
-        qs = qs.filter(code_list_id=code_list_id)
+    qs = MDatas.objects.filter(property_id=property_id)
+    qs = qs.filter(code_list_id=code_list_id)
 
-        return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
+    return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
 
-    except:
-        return None
 
 
 def get_geoJson(data):
@@ -763,20 +769,27 @@ def get_geoJson(data):
 
 
 def datetime_to_string(date):
-    return date.strftime('%Y-%m-%d') if date else ''
+    if date:
+        if isinstance(date, datetime):
+            date = date.strftime('%Y-%m-%d')
+        else:
+            date = date
+    else:
+        date = ''
+    return date
 
 
 def date_fix_format(input_date):
-    if '/' in input_date:
-        input_date = input_date.replace('/', '-')
+    if not isinstance(input_date, datetime):
+        if '/' in input_date:
+            input_date = input_date.replace('/', '-')
     return input_date
 
 
 def date_to_timezone(input_date):
-    date_fix_format(input_date)
-    naive_time = datetime.strptime(input_date, '%Y-%m-%d')
-    output_date = timezone.make_aware(naive_time)
-    return output_date
+    input_date = date_fix_format(input_date)
+    naive_time = datetime.strptime(input_date, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    return naive_time
 
 
 def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
@@ -894,14 +907,19 @@ def get_geom_for_filter_from_coordinate(coordinate, geom_type, srid=4326):
     return geom
 
 
-def get_geom_for_filter_from_geometry(geometry):
+def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
     if isinstance(geometry, str):
-        geometry = json.loads(geo_json)
+        geometry = json.loads(geometry)
 
     polygonlist = GEOSGeometry(json.dumps(geometry))
     module = importlib.import_module('django.contrib.gis.geos')
-    class_ = getattr(module, geometry['type'])
-    geom = class_(*polygonlist)
+
+    geom_type = geometry['type']
+    if change_to_multi:
+        geom_type = 'Multi' + geometry['type']
+
+    class_ = getattr(module, geom_type)
+    geom = class_(polygonlist)
 
     return geom
 
@@ -979,6 +997,29 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
         return [item[0] for item in cursor.fetchall()]
 
 
+def save_img_to_folder(image, folder_name, file_name, ext):
+    import PIL.Image as Image
+    import io, uuid
+    uniq = uuid.uuid4().hex[:8]
+    file_full_name = file_name + '_' + uniq + ext
+    bytes = bytearray(image)
+    image = Image.open(io.BytesIO(bytes))
+    image = image.resize((720,720), Image.ANTIALIAS)
+    image = image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
+    return folder_name + '/' + file_full_name
+
+
+def save_file_to_storage(file, folder_name, file_full_name):
+    from django.core.files.storage import FileSystemStorage
+    path = os.path.join(settings.MEDIA_ROOT, folder_name)
+    fs = FileSystemStorage(
+        location=path
+    )
+    file = fs.save(file_full_name, file)
+    fs.url(file)
+    return path
+
+
 def create_index(model_name, field):
     with connections['default'].cursor() as cursor:
         sql = """
@@ -990,6 +1031,295 @@ def create_index(model_name, field):
         cursor.execute(sql)
         return True
     return False
+
+
+# ------------------------------------------------------------------------------------------------
+# feature code oor feature iin qs awah
+def get_feature_from_code(feature_code):
+    Lfeature = apps.get_model('backend_inspire', 'LFeatures')
+    l_feature_qs = Lfeature.objects
+    l_feature_qs = l_feature_qs.filter(feature_code=feature_code)
+    if l_feature_qs:
+        return l_feature_qs.first()
+    else:
+        raise Exception('Бүртгэлгүй feature ийн мэдээлэл байна: {}'.format(feature_code))
+
+
+def save_geom_to_mgeo_data(geo_data, feature_id, feature_code):
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    new_geo_id = GEoIdGenerator(feature_id, feature_code).get()
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.create(
+        geo_id=new_geo_id,
+        feature_id=feature_id,
+        geo_data=geo_data,
+    )
+    return mgeo_qs, new_geo_id
+
+
+def get_properties(feature_id, get_all=False):
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+    LFeatureConfigs = apps.get_model('backend_inspire', 'LFeatureConfigs')
+    DataTypeConfigs = apps.get_model('backend_inspire', 'LDataTypeConfigs')
+
+    l_feature_c_qs = LFeatureConfigs.objects
+    l_feature_c_qs = l_feature_c_qs.filter(feature_id=feature_id)
+    data_type_ids = l_feature_c_qs.values_list('data_type_id', flat=True)
+
+    data_type_c_qs = DataTypeConfigs.objects
+    data_type_c_qs = data_type_c_qs.filter(data_type_id__in=data_type_ids)
+    property_ids = data_type_c_qs.values_list('property_id', flat=True)
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.filter(property_id__in=property_ids)
+
+    if get_all:
+        feature_config_ids = l_feature_c_qs.values_list('feature_config_id', flat=True)
+        return feature_config_ids, data_type_ids, property_ids
+    else:
+        return property_qs, l_feature_c_qs, data_type_c_qs
+
+
+def _value_types():
+    return [
+        {'value_type': 'value_number', 'value_names': ['double', 'number']},
+        {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
+        {'value_type': 'value_date', 'value_names': ['date']},
+        {'value_type': 'code_list_id', 'value_names': ['single-select', 'multi-select']},
+    ]
+
+
+def json_load(data):
+    if isinstance(data, str):
+        data = json.loads(data)
+    return data
+
+
+def make_value_dict(value, properties_qs, is_display=False):
+    value = json_load(value)
+    for types in _value_types():
+        for prop in properties_qs.values():
+            for key, val in value.items():
+                if prop['value_type_id'] in types['value_names'] and key == prop['property_code']:
+                    data = dict()
+                    if not is_display:
+                        if 'date' in types['value_type']:
+                            #TODO date to timezone
+                            val = val
+                        data[types['value_type']] = val
+                        data['property_id'] = prop['property_id']
+                    if is_display:
+                        data[prop['property_code']] = val
+
+                    yield data
+
+
+def save_value_to_mdatas(value, feature_code, coordinate=None, geom_type='Point', geo_id=''):
+    l_feature_qs = get_feature_from_code(feature_code)
+
+    feature_id = l_feature_qs.feature_id
+
+    point = get_geom_for_filter_from_coordinate(coordinate, geom_type)
+    point = get_geom_for_filter_from_geometry(point.json, True)
+    mgeo_qs, new_geo_id = save_geom_to_mgeo_data(point, feature_id, feature_code)
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    datas = make_value_dict(value, properties_qs, False)
+    for data in datas:
+        for data_type_c in data_type_c_qs:
+            if data_type_c.property_id == data['property_id']:
+                for l_feature_c in l_feature_c_qs:
+                    if data_type_c.data_type_id == l_feature_c.data_type_id:
+                        data['feature_config_id'] = l_feature_c.feature_config_id
+                        data['data_type_id'] = l_feature_c.data_type_id
+
+        MDatas = apps.get_model('backend_inspire', 'MDatas')
+        mdata_qs = MDatas.objects
+        if not geo_id:
+            data['geo_id'] = mgeo_qs.geo_id
+            mdata_qs = mdata_qs.create(**data)
+        else:
+            mdata_qs = mdata_qs.filter(geo_id=geo_id)
+            mdata_qs = mdata_qs.filter(feature_config_id=data['feature_config_id'])
+            mdata_qs = mdata_qs.filter(data_type_id=data['data_type_id'])
+            mdata_qs = mdata_qs.filter(property_id=data['property_id'])
+            if mdata_qs:
+                mdata_qs = mdata_qs.update(**data)
+            else:
+                mdata_qs = mdata_qs.create(geo_id=geo_id, **data)
+
+    return new_geo_id
+
+
+def get_code_list_from_property_id(property_id):
+    LCodeListConfigs = apps.get_model('backend_inspire', 'LCodeListConfigs')
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    code_list_values = []
+    code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
+    for code_list_config in code_list_configs:
+        property_id = code_list_config.property_id
+        to_property_id = code_list_config.to_property_id
+        if property_id == to_property_id:
+            to_property_id += 1
+        x_range = range(property_id, to_property_id)
+        for property_id_up in x_range:
+            code_lists = LCodeLists.objects.filter(property_id=property_id_up).order_by('order_no')
+            for code_list in code_lists:
+                value = dict()
+                if code_list.top_code_list_id:
+                    value['top_code_list_id'] = code_list.top_code_list_id
+
+                value['code_list_id'] = code_list.code_list_id
+                value['property_id'] = code_list.property_id
+                value['code_list_code'] = code_list.code_list_code
+                value['code_list_name'] = code_list.code_list_name
+                value['code_list_definition'] = code_list.code_list_definition
+                code_list_values.append(value)
+
+    return code_list_values
+
+
+def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+    data = dict()
+    for prop in properties_qs:
+        if prop.property_code == property_code:
+            data = _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
+    return data
+
+
+def _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[]):
+    datas = list ()
+    for prop in properties_qs:
+        data = dict()
+        if property_codes:
+            if prop.property_code in property_codes:
+                data = _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
+                datas.append(data)
+        else:
+            data = _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs)
+            datas.append(data)
+    return datas
+
+
+def _mdata_values_field():
+    return [
+        'value_text', 'value_number', 'value_date', 'code_list_id'
+    ]
+
+
+def _get_filter_dict(prop, l_feature_c_qs, data_type_c_qs):
+    data = dict()
+    property_id = prop.property_id
+    data['property_id'] = property_id
+    for data_type_c in data_type_c_qs:
+        if property_id == data_type_c.property_id:
+            data_type_id = data_type_c.data_type_id
+            data['data_type_id'] = data_type_id
+            for l_feature_c in l_feature_c_qs:
+                if l_feature_c.data_type_id == data_type_id:
+                    l_feature_c_id = l_feature_c.feature_config_id
+                    data['feature_config_id'] = l_feature_c_id
+    return data
+
+
+def _get_all_geos(feature_id):
+    MGeoDatas = apps.get_model('backend_inspire', 'MGeoDatas')
+    qs = MGeoDatas.objects
+    qs = qs.filter(feature_id=feature_id)
+    geo_ids = qs.values_list('geo_id', flat=True)
+    return geo_ids
+
+
+def get_mdata_values(feature_code, query):
+    rows = []
+
+    l_feature_qs = get_feature_from_code(feature_code)
+    feature_id = l_feature_qs.feature_id
+
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+
+    names_qs = ViewNames.objects
+    view = names_qs.filter(feature_id=feature_id)
+
+    if view:
+        view = view.first()
+        view_name = view.view_name
+
+        view_prop_qs = ViewProperties.objects
+        view_prop_qs = view_prop_qs.filter(view=view)
+        property_ids = list(view_prop_qs.values_list("property_id", flat=True))
+
+        lp_qs = LProperties.objects
+        lp_qs = lp_qs.filter(property_id__in=property_ids)
+        properties = lp_qs.values_list("property_code", flat=True)
+
+        if properties:
+            properties = ",".join([prop_code for prop_code in properties])
+            properties = properties.lower() + ",geo_id"
+        else:
+            properties = ''
+
+        where = "pointnumber like '%{query}%'".format(query=query)
+
+        cursor = connections['default'].cursor()
+        sql = """
+            select {properties} from {view_name} where {where}
+        """.format(view_name=view_name, properties=properties, where=where)
+        cursor.execute(sql)
+        rows = dict_fetchall(cursor)
+        rows = list(rows)
+
+    return rows
+
+
+def mdatas_for_paginator(initial_qs, searchs):
+
+    send_values = list()
+    for search in searchs:
+        value = dict()
+        mdata_qs = initial_qs.filter(**search)
+        for mdata in mdata_qs.values():
+            for field in _mdata_values_field():
+                if mdata[field]:
+                    if field == 'value_date':
+                        mdata[field] = datetime_to_string(mdata[field])
+                    value[mdata['property_id']] = mdata[field]
+                    send_values.append(value)
+
+    return send_values
+
+
+def get_mdata_value(feature_code, geo_id, is_display=False):
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    l_feature_qs = get_feature_from_code(feature_code)
+
+    feature_id = l_feature_qs.feature_id
+    send_value = dict()
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    datas = _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs)
+
+    mdatas_qs = MDatas.objects
+    mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+    for data in datas:
+        mdatas = mdatas_qs.filter(**data)
+        if mdatas:
+            for mdata in mdatas.values():
+                value = dict()
+                values = mdata
+                for field in _mdata_values_field():
+                    if values[field]:
+                        for prop in properties_qs:
+                            if prop.property_id == mdata['property_id']:
+                                value[prop.property_code] = values[field]
+                datas = make_value_dict(value, properties_qs, is_display)
+                for data in datas:
+                    for key, value in data.items():
+                        send_value[key] = value
+
+    send_value['geo_id'] = geo_id
+
+    return send_value
 
 
 def get_2d_data(geo_id):
@@ -1010,3 +1340,42 @@ def get_2d_data(geo_id):
     rows = list(rows)
     data = rows[0]['geom']
     return data
+
+
+def search_dict_from_object(objs, key='name', value='value'):
+    data = dict()
+    for obj in objs:
+        data_key = obj[key]
+        data_value = obj[value]
+        data[data_key] = data_value
+    return data
+
+
+def get_center_of_geo_data(geo_id):
+    center = []
+    geo = MGeoDatas.objects.filter(geo_id=geo_id).first()
+    center = geo.geo_data.centroid
+    return list(center)
+
+
+def check_saved_data(point_name, point_id):
+    has_name, has_ids = False, False
+    return has_name, has_ids
+
+
+def get_code_list_id_from_name(code_list_name, property_code):
+    LProperties = apps.get_model('backend_inspire', 'LProperties')
+
+    code_list_id = None
+    properties_qs = LProperties.objects
+    properties_qs = properties_qs.filter(property_code=property_code)
+    if properties_qs:
+        prop = properties_qs.first()
+        property_id = prop.property_id
+        code_lists = get_code_list_from_property_id(property_id)
+        for code_list in code_lists:
+            if code_list_name == code_list['code_list_name']:
+                code_list_id = code_list['code_list_id']
+                break
+
+    return code_list_id

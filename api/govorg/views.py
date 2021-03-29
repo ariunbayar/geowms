@@ -12,7 +12,7 @@ from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrg as System
 from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
@@ -237,7 +237,7 @@ def _get_cql_filter(geo_id):
 
 
 def _get_request_content(base_url, request, geo_id, headers):
-    if request.GET.get('REQUEST') == 'GetMap' and geo_id != 'au_496':
+    if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
         cql_filter = cache.get('{}'.format(geo_id))
         if not cql_filter:
             cql_filter = _get_cql_filter(geo_id)

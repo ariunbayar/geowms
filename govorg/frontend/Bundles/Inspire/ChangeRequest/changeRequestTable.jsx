@@ -67,22 +67,22 @@ export class ChangeRequestTable extends Component {
                 <td>
                     {created_at}
                 </td>
-                {state==1 ? <td className="text-priamry">ШИНЭ</td>:
-                state==2 ? <td className="text-danger">ТАТГАЛЗСАН</td>:
-                state==3 ? <td className="text-success">ЗӨВШӨӨРСӨН</td>:
-                state==4 ? <td className="gp-text-primary">ХЯНАХ</td>: null
+                {state=='ШИНЭ' ? <td className="text-priamry">ШИНЭ</td>:
+                state=='ТАТГАЛЗСАН' ? <td className="text-danger">ТАТГАЛЗСАН</td>:
+                state=='ЗӨВШӨӨРСӨН' ? <td className="text-success">ЗӨВШӨӨРСӨН</td>:
+                state=='ХЯНАХ' ? <td className="gp-text-primary">ХЯНАХ</td>: null
                 }
 
-                {kind==1 ? <td className="text-success">ҮҮССЭН</td>:
-                kind==2 ? <td className="text-primary">ЗАССАН</td>:
-                kind==5 ? <td className="text-danger">ЦУЦЛАСАН</td>:
-                kind==3 ? <td className="text-danger">УСТГАСАН</td>: null
+                {kind=='ҮҮССЭН' ? <td className="text-success">ҮҮССЭН</td>:
+                kind=='ЗАССАН' ? <td className="text-primary">ЗАССАН</td>:
+                kind=='ЦУЦЛАСАН' ? <td className="text-danger">ЦУЦЛАСАН</td>:
+                kind=='УСТГАСАН' ? <td className="text-danger">УСТГАСАН</td>: null
                 }
                 {
-                state ==1 || state ==4 ?
+                state =='ШИНЭ' || state == 'ХЯНАХ' ?
                     <td>
                     <button className="btn btn-primary" onClick={this.handleRequestOpen}>
-                       {state == 1 ?  'ДЭЛГЭРЭНГҮЙ' : 'ХЯНАХ'}
+                       {state == 'ШИНЭ' ?  'ДЭЛГЭРЭНГҮЙ' : 'ХЯНАХ'}
                     </button>
                     {is_model_request_open &&
                         <ChangeRequestModal

@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     'govorg.backend.meta_data.apps.MetaDataConfig',
     'govorg.backend.revoke_request.apps.RevokeRequestConfig',
     'govorg.backend.secure.apps.SecureConfig',
+    'govorg.backend.tseg.apps.TsegConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -197,7 +198,7 @@ LOGOUT_GOV_REDIRECT_URL = 'gov_secure:login'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 9175040 #70mb
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app/media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'geoportal_app', 'media')
 MEDIA_URL = '/media/'
 
 # Энд бичсэн url ийн log ийг хадгалж авахгүй.

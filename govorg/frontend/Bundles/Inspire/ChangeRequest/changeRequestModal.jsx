@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from "react"
-import RequestMap from '../../../OrgRequest/Map/Map'
+import RequestMap from './Map'
 
 import Маягт from "./Маягт"
 
@@ -111,12 +111,12 @@ export default class ChangeRequestModal extends Component {
                                         }
                                     </div>
                                     }
-                                    {state == 4 &&
+                                    {state == 'ХЯНАХ' &&
                                         <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
                                             <Маягт handleIsload={this.handleIsload} handleClose={this.handleClose} tid={theme_id} fid={feature_id} gid={old_geo_id} change_request_id={change_request_id}></Маягт>
                                         </div>
                                     }
-                                    <div className={form_json || state == 4 ? "col-md-6" : "col-md-12"}>
+                                    <div className={form_json || state == 'ХЯНАХ' ? "col-md-6" : "col-md-12"}>
                                         <RequestMap geoJson ={this.props.geo_json}/>
                                     </div>
                                 </div>

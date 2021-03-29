@@ -6,7 +6,7 @@ from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, Value
 from geoportal_app.models import User
-from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
+from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from govorg.backend.org_request.models import ChangeRequest
@@ -39,6 +39,22 @@ from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 
 
+def _get_address_state_db_value(address_state):
+    if address_state == EmployeeAddress.STATE_REGULER_CODE:
+        address_state = True
+    else:
+        address_state = False
+    return address_state
+
+
+def _get_address_state_code(address_state):
+    if address_state:
+        address_state = EmployeeAddress.STATE_REGULER_CODE
+    elif not address_state:
+        address_state = EmployeeAddress.STATE_SHORT_CODE
+    return address_state
+
+
 def _get_employee_display(employee):
 
     user = employee.user
@@ -54,19 +70,25 @@ def _get_employee_display(employee):
     return {
         'username': user.username,
         'id': employee.id,
-        'position': employee.position,
         'is_admin': employee.is_admin,
         'phone_number': employee.phone_number,
 
         'token': employee.token,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+        'position': employee.position.name,
+        'position_id': employee.position.id,
+        'state': employee.get_state_display(),
+        'state_id': employee.state,
+        'pro_class_id': employee.pro_class,
+        'pro_class': employee.get_pro_class_display(),
 
         'last_name': user.last_name,
         'first_name': user.first_name,
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+        'is_user': user.is_user,
 
         'role_name': role,
 
@@ -77,12 +99,15 @@ def _get_employee_display(employee):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
+        'address_state': _get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
+        'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
 
 def _get_name(user_id, item):
     user = User.objects.filter(pk=user_id).first()
-    return user.first_name
+    full_name = user.last_name[0].upper() + '.' + user.first_name.upper()
+    return full_name
 
 
 def _get_email(user_id, item):
@@ -98,17 +123,37 @@ def _get_role_name(item):
     return role_name
 
 
+def _get_position_name(postition_id, item):
+    position = DefaultPosition.objects.filter(id=postition_id).first()
+    position_name = position.name
+    return position_name
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def list(request, payload):
-    org = get_object_or_404(Org, employee__user=request.user)
-    qs = Employee.objects.filter(org=org)
+    is_user = payload.get('is_user')
 
-    оруулах_талбарууд = ['id', 'position', 'is_admin', 'user_id', 'token']
+    org = get_object_or_404(Org, employee__user=request.user)
+    if is_user:
+        qs = Employee.objects.filter(org=org)
+        qs = qs.filter(user__is_user=True)
+    else:
+        qs = Employee.objects.filter(org=org)
+    if not qs:
+        rsp = {
+            'items': [],
+            'page': payload.get('page'),
+            'total_page': 1,
+        }
+        return JsonResponse(rsp)
+
+    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
     хувьсах_талбарууд = [
         {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
         {"field": "user_id", "action": _get_email, "new_field": "user__email"},
+        {"field": "position_id", "action": _get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [
         {"field": "role_name", "action": _get_role_name},
@@ -131,25 +176,34 @@ def list(request, payload):
 
     return JsonResponse(rsp)
 
-suda = Employee.objects.all().extra(select = {'qweqw': 0})
-# print(suda.values())
+
 def _set_user(user, user_detail):
 
     user.username = user_detail['username']
     user.first_name = user_detail['first_name']
-    user.last_name = user_detail['first_name']
+    user.last_name = user_detail['last_name']
     user.email = user_detail['email']
     user.gender = user_detail['gender']
     user.register = user_detail['register']
     user.phone_number = user_detail['phone_number']
+    user.is_user = user_detail['is_user']
+
+    is_user = user_detail['is_user']
+    if is_user:
+        user.is_active = True
+    else:
+        user.is_active = False
+
     user.save()
 
 
 def _set_employee(employee, user_detail):
-
-    employee.position = user_detail['position']
+    employee.position_id = int(user_detail['position'])
+    employee.state = int(user_detail['state']) if user_detail['state'] else None
+    employee.pro_class = int(user_detail['pro_class']) if user_detail['pro_class'] else None
     employee.is_admin = user_detail['is_admin']
     employee.phone_number = user_detail['phone_number']
+
     employee.save()
 
 
@@ -200,8 +254,6 @@ def _employee_validation(user, user_detail):
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
         errors['position'] = 'Хоосон байна утга оруулна уу.'
-    elif len(position) > 250:
-        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
         errors['first_name'] = 'Хоосон байна утга оруулна уу.'
     elif len(first_name) > 30:
@@ -271,8 +323,10 @@ def create(request, payload):
     apartment = address.get('apartment')
     door_number = address.get('door_number')
     point_coordinate = address.get('point_coordinate')
+    address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
+    is_user = user_detail['is_user'] or False
 
     emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
@@ -315,6 +369,7 @@ def create(request, payload):
             employee_address.apartment = apartment
             employee_address.door_number = door_number
             employee_address.point = point
+            employee_address.address_state = _get_address_state_code(address_state)
             employee_address.save()
 
             obj_array = []
@@ -323,7 +378,8 @@ def create(request, payload):
                 obj_array.append(emp_perm_inspire)
             EmpPermInspire.objects.bulk_create(obj_array)
 
-            utils.send_approve_email(user)
+            if is_user:
+                utils.send_approve_email(user)
 
         rsp = {
             'success': True,
@@ -350,7 +406,7 @@ def _delete_remove_perm(remove_perms):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
-
+    user_detail = payload.get('user_detail')
     can_update = False
     role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
@@ -364,6 +420,11 @@ def update(request, payload, pk):
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
 
+    address_state = address.get('address_state')
+    address_state = _get_address_state_code(address_state)
+    address['address_state'] = address_state
+    is_user = user_detail['is_user'] or False
+
     if employee.user == request.user:
         can_update = True
     else:
@@ -371,7 +432,7 @@ def update(request, payload, pk):
         can_update = True
 
     if can_update:
-        errors = _employee_validation(employee.user, payload)
+        errors = _employee_validation(employee.user, user_detail)
         if errors:
             return JsonResponse({
                 'success': False,
@@ -416,10 +477,13 @@ def update(request, payload, pk):
                     address_qs.create(employee=employee, **address)
 
                 user = employee.user
-                _set_user(user, payload)
+                _set_user(user, user_detail)
 
                 employee = employee
-                _set_employee(employee, payload)
+                _set_employee(employee, user_detail)
+
+                if is_user:
+                    utils.send_approve_email(user)
 
             return JsonResponse({
                 'success': True,
@@ -619,16 +683,19 @@ def _get_feature_collection(employees):
     return feature_collection
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def get_addresses(request):
+def get_addresses(request, payload):
+    all_user = payload.get('all_user')
     employee = get_object_or_404(Employee, user=request.user)
     if employee.is_admin:
-        org = employee.org
-
-        employees = Employee.objects
-        employees = employees.filter(org=org)
+        if all_user:
+            employees = Employee.objects.all()
+        else:
+            org = employee.org
+            employees = Employee.objects
+            employees = employees.filter(org=org)
     else:
         raise Http404
 
@@ -775,7 +842,7 @@ def _get_state(state, item):
 def _get_fullname(address_id, item):
     address = EmployeeAddress.objects.filter(id=address_id).first()
     user = address.employee.user
-    fullname = user.first_name + '. ' + user.last_name
+    fullname = user.last_name[0].upper() + '.' + user.first_name.upper()
     return fullname
 
 

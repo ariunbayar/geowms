@@ -2,10 +2,12 @@ import React, { Component } from "react"
 
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
-import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
+import { transform as transformCoordinate, fromLonLat, Projection } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
-import { toLonLat } from 'ol/proj';
+import { toLonLat, get as getProjection } from 'ol/proj';
+import {getCenter} from 'ol/extent';
+import OSM from 'ol/source/OSM';
 import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
@@ -30,7 +32,7 @@ import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
-import SideBar from "./SideBar"
+import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
 
 
@@ -195,7 +197,7 @@ export default class BundleMap extends Component {
                             source: new WMTS({
                                 url: chache_url,
                                 layer: layer.code,
-                                matrixSet: "EPSG:4326",
+                                matrixSet: this.state.projection_display,
                                 format: 'image/png',
                                 projection: this.state.projection_display,
                                 tileGrid: new WMTSTileGrid({
@@ -209,8 +211,8 @@ export default class BundleMap extends Component {
                                 wrapX: true,
                             }),
                         }),
-                        wms_tile: new Image({
-                            source: new ImageWMS({
+                        wms_tile: new Tile({
+                            source: new TileWMS({
                                 projection: this.state.projection,
                                 ratio: 1,
                                 url: url,
@@ -250,13 +252,12 @@ export default class BundleMap extends Component {
                                 crossOrigin: 'Anonymous',
                                 url: base_layer_info.url,
                             }),
-                            name: base_layer_name,
                         })
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Image({
-                            source: new ImageWMS({
+                        layer = new Tile({
+                            source: new TileWMS({
                                 ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
@@ -274,8 +275,9 @@ export default class BundleMap extends Component {
                         layer = new Tile({
                             source: new WMTS({
                                 url: base_layer_info.url,
+                                // url: base_layer_info.geoserver_url,
                                 layer: base_layer_info.layers,
-                                matrixSet: "EPSG:4326",
+                                matrixSet: this.state.projection_display,
                                 format: 'image/png',
                                 projection: this.state.projection_display,
                                 tileGrid: new WMTSTileGrid({
@@ -409,7 +411,21 @@ export default class BundleMap extends Component {
         this.element_closer = elementa.children[0]
     }
 
+    // updateViewProjection() {
+    //     var newProj = getProjection(this.state.projection_display);
+    //     var newProjExtent = newProj.getExtent();
+    //     var newView = new View({
+    //       projection: newProj,
+    //       center: getCenter(newProjExtent || [0, 0, 0, 0]),
+    //       zoom: 1,
+    //       extent: newProjExtent || undefined,
+    //     });
+    //     this.map.setView(newView);
+    // }
+
     handleMapClick(event) {
+        const view = this.map.getView()
+        const projection = view.getProjection()
         if(!this.state.is_draw_open) {
 
             const coordinate = event.coordinate
@@ -534,7 +550,6 @@ export default class BundleMap extends Component {
                 name: name,
                 layers: this.is_not_visible_layers.map((layer_code) => {
                     var filtered_layer
-                    var filtered_tile
                     layers.map((layer) => {
                         if (layer_code == layer.code) {
                             filtered_layer = layer
@@ -646,11 +661,6 @@ export default class BundleMap extends Component {
 
     checkTile(wms_tile, tile) {
         let pop_tile = wms_tile
-        if (wms_tile.getVisible() || tile.getVisible()) {
-            if (tile.getVisible()) {
-                pop_tile = tile
-            }
-        }
         return pop_tile
     }
 
@@ -667,7 +677,7 @@ export default class BundleMap extends Component {
 
         wms_array.map(({layers}) => {
             if(layers) {
-                layers.map(({tile, wms_tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code}) => {
+                layers.map(({tile, wms_tile, feature_price, geodb_export_field, geodb_pk_field, geodb_schema, geodb_table, code, wms_or_cache_ur}) => {
                     const pop_tile = this.checkTile(wms_tile, tile)
                     if (pop_tile.getVisible()) {
                         const {layer_code, is_feature} = this.check_inspire_layer(code)
@@ -856,7 +866,6 @@ export default class BundleMap extends Component {
 
         const wms_array = this.getWMSArray()
         wms_array.map(({ layers }, w_idx) => {
-            console.log(layers);
             if(layers) {
                 layers.map(({tile, code}, idx) => {
                     if (tile.getVisible()) {
