@@ -211,8 +211,9 @@ export default class StyleMap extends Component {
 
         if(style_state == 'create_style'){
             this.setState({is_loading: true})
+            console.log("goem_type", geom_type)
             service.getStyleData(geom_type).then(({data}) =>
-                {
+                {console.log("data",data)
                 if (data)
                 {
                         const features = new GeoJSON({
@@ -228,6 +229,7 @@ export default class StyleMap extends Component {
                             return styles_new[feature.getGeometry().getType()];
                           }
                         })
+
                         this.map.addLayer(vector_layer)
                         this.map.getView().fit(vectorSource.getExtent(),{ padding: [200, 200, 200, 200] });
                         this.setState({is_loading: false})
