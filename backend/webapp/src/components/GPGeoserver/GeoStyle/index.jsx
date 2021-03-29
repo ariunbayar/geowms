@@ -9,10 +9,12 @@ export default class GPStyle extends Component {
 
     render() {
             return (
-                <div>
-                    <Switch>
-                        <Route path={"/back/gp-geoserver/style/"} component={CreateStyle}/>
-                    </Switch>
+                <div className="card">
+                    <div className="card-body">
+                        <Switch>
+                            <Route path={"/back/gp-geoserver/style/"} component={CreateStyle}/>
+                        </Switch>
+                    </div>
                 </div>
             )
         }
