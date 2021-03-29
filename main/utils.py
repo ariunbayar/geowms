@@ -32,6 +32,7 @@ from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
 from main.inspire import GEoIdGenerator
 import uuid
+from django.core.cache import cache
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -1379,3 +1380,11 @@ def get_code_list_id_from_name(code_list_name, property_code):
                 break
 
     return code_list_id
+
+
+# cache set end get
+def geo_cache(key_name, key, qs, time):
+    chache_data = cache.get('{}_{}'.format(key_name, key))
+    if not chache_data:
+        cache.set('{}_{}'.format(key_name, key), qs, time)
+    return qs
