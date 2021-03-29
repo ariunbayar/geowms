@@ -213,8 +213,9 @@ def update(request, payload):
     url_service = payload.get('url')
     wmts_url = payload.get('wmts_url')
 
-    if wms.cache_url:
-        WMS.objects.filter(pk=pk).update(cache_url=wmts_url)
+    if wms:
+        wms.cache_url = wmts_url or None
+        wms.save()
 
     if is_active:
         wms.is_active=True
