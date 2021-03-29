@@ -1,10 +1,10 @@
 import React, { Component } from "react"
-import {service} from './service'
+import {service} from '../service'
 import {NavLink} from "react-router-dom"
-import ModalAlert from "../ModalAlert"
+import ModalAlert from "../../ModalAlert"
 import Loader from "@utils/Loader"
 import GroupList from './list'
-import { GSPaginate } from "./geo_pagination"
+import { GSPaginate } from "../geo_pagination"
 
 export class List extends Component {
 
@@ -110,7 +110,7 @@ export class List extends Component {
                             <div className="float-sm-right">
                                 <NavLink
                                     className="btn gp-btn-primary waves-effect waves-light btn-sm"
-                                    to="/back/layer-groups/нэмэх/">
+                                    to="/back/gp-geoserver/layer-groups/нэмэх/">
                                     Нэмэх
                                 </NavLink>
                             </div>

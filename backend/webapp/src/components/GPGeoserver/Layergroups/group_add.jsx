@@ -1,9 +1,9 @@
 import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
-import { service } from './service'
+import { service } from '../service'
 import ModelSelectLayer from "./ModelSelect"
-import ModalAlert from "../ModalAlert"
+import ModalAlert from "../../ModalAlert"
 import {GPIcon} from "@utils/Tools"
 
 const validationSchema = Yup.object().shape({
@@ -157,7 +157,7 @@ export class GroupAdd extends Component {
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
         }, 2000)
-        this.props.history.push("/back/layer-groups/")
+        this.props.history.push("/back/gp-geoserver/layer-groups/")
     }
 
     render() {

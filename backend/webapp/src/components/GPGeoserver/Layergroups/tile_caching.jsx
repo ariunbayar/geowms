@@ -2,8 +2,8 @@ import React, { Component } from "react"
 import {Switch, Route, NavLink} from "react-router-dom"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
-import { service } from './service'
-import ModalAlert from "../ModalAlert"
+import { service } from '../service'
+import ModalAlert from "../../ModalAlert"
 
 var validationSchema = Yup.object().shape({
     zoom_start: Yup.number()
@@ -76,7 +76,6 @@ export class TileCaching extends Component {
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
         const group_name = this.props.match.params.group_name
         service.createGroupCache(values, group_name).then(({ success, errors, info}) => {
-            console.log("dflskjfks", success, errors, info)
             if (success) {
                 this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'success'})
                 setStatus('saved')
@@ -92,7 +91,7 @@ export class TileCaching extends Component {
         this.state.timer = setTimeout(() => {
             this.setState({modal_alert_status: "closed"})
         }, 2000)
-        this.props.history.push("/back/layer-groups/")
+        this.props.history.push("/back/gp-geoserver/layer-groups/")
     }
 
     render() {

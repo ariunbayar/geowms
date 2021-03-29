@@ -22,8 +22,7 @@ const InspireViews = React.lazy(() => import('./InspireViews'))
 const OrgRole = React.lazy(() => import('./OrgRole'))
 const Error500 = React.lazy(() => import('./Error500'))
 const PasswordChange = React.lazy(() => import('./Prifile/PasswordChange'))
-const LGroups = React.lazy(() => import('./Layergroups'))
-const LStyle = React.lazy(() => import('./GeoStyle/index'))
+const GPGeoserver = React.lazy(() => import('./GPGeoserver/index'))
 
 
 export default class App extends Component {
@@ -80,8 +79,8 @@ export default class App extends Component {
                   </MenuItem>
                   <MenuItem icon="fa fa-globe" url="/back/layer-groups/" text="Geoserver">
                       <ul className="sidebar-submenu">
-                          <MenuItem icon="fa fa-circle-o" url="/back/layer-groups/" text="Layer-Group"></MenuItem>
-                          <MenuItem icon="fa fa-circle-o" url="/back/geoserver-style/" text="Style"></MenuItem>
+                          <MenuItem icon="fa fa-circle-o" url="/back/gp-geoserver/layer-groups/" text="Layer-Group"></MenuItem>
+                          <MenuItem icon="fa fa-circle-o" url="/back/gp-geoserver/style/" text="Style"></MenuItem>
                       </ul>
                   </MenuItem>
                   <MenuItem icon="zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
@@ -134,8 +133,8 @@ export default class App extends Component {
                 <Route path={"/back/тохиргоо/"} component={ConfigPage} />
                 <Route path={"/back/error500/"} component={Error500} />
                 <Route path={"/back/дэд-сан/"} component={BundlePage} />
-                <Route path={"/back/layer-groups/"} component={LGroups} />
-                <Route path={"/back/geoserver-style/"} component={LStyle} />
+                <Route path={"/back/gp-geoserver/layer-groups/"} component={GPGeoserver} />
+                <Route path={"/back/gp-geoserver/style/"} component={GPGeoserver} />
               </Switch>
             </div>
           </BrowserRouter>

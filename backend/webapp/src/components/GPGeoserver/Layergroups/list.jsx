@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../Modal"
+import Modal from "../../Modal"
 import {GPIcon} from "@utils/Tools"
 
 export default class GroupList extends Component {
@@ -40,12 +40,12 @@ export default class GroupList extends Component {
                     {value}
                 </td>
                 <td>
-                    <NavLink to={`/back/layer-groups/${value}/tile-caching/`} exact>
+                    <NavLink to={`/back/gp-geoserver/layer-groups/${value}/tile-caching/`}>
                         <GPIcon icon={"fa fa-shopping-basket"}/>
                     </NavLink>
                 </td>
                 <td>
-                    <NavLink  className="text-primary" to={`/back/layer-groups/${value}/засах/`}>
+                    <NavLink className="text-primary" to={`/back/gp-geoserver/layer-groups/${value}/засах/`}>
                         <GPIcon icon={"fa fa-pencil-square-o"}/>
                     </NavLink>
                 </td>
