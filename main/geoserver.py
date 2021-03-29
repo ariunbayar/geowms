@@ -559,7 +559,7 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
         <seedRequest>
             <name>{layer_name}</name>
             <srs>
-                <number>{srs}</number>
+                <gridSetName>{srs}</gridSetName>
             </srs>
             <zoomStart>{zoom_start}</zoomStart>
             <zoomStop>{zoom_stop}</zoomStop>
