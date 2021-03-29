@@ -879,41 +879,41 @@ def _get_item_from_mpoint_view(mpoint):
     return point_info
 
 
+def _class_bolon_orgoor_angilah(has_points):
+    for point in has_points:
+        print(point)
+
+
 def _create_lavlagaa_infos(payment):
-    point_infos = []
+    is_true = False
+    has_points = []
     points = PaymentPoint.objects.filter(payment=payment)
     for point in points:
         if point.pdf_id:
-            mpoint_qs = Mpoint_view.objects.using('postgis_db')
-            mpoint_qs = mpoint_qs.filter(point_name=point.point_name)
-            if mpoint_qs:
-                mpoint_qs = mpoint_qs.first()
-                pid = mpoint_qs.pid
-                if pid == point.pdf_id:
-                    infos = _get_info_from_file(None, mpoint_qs, point.pdf_id, None)
-                    if infos:
-                        for info in infos:
-                            point_infos.append(info)
-                    else:
-                        info = _get_item_from_mpoint_view(mpoint_qs)
-                        point_infos.append(info)
-            else:
-                infos = _get_info_from_file(None, None, point.pdf_id, None)
-                for info in infos:
-                    point_infos.append(info)
+            has_pdf = _check_pdf_in_folder(point.pdf_id)
+            if has_pdf:
+                has_points.append(point)
 
     folder_name = 'tseg-personal-file'
-    class_names = _class_name_eer_angilah(point_infos)
-    if class_names:
-        for class_name in class_names:
-            if class_name['org_name']:
+    if has_points:
+        filtered_points = _class_bolon_orgoor_angilah(has_points)
+    # class_names = _class_name_eer_angilah(point_infos)
+    # if class_names:
+    #     for class_name in class_names:
+    #         if class_name['org_name']:
+    #             path = _create_folder_payment_id(folder_name, payment.id)
+    #             _create_lavlagaa_file(class_name, path)
+    if filtered_points:
+        for f_point in filtered_points:
+            if f_point['org_name']:
                 path = _create_folder_payment_id(folder_name, payment.id)
-                _create_lavlagaa_file(class_name, path)
+                _create_lavlagaa_file(f_point, path)
+        # _file_to_zip(str(payment.id), folder_name)
+        # payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+        # payment.save()
+        # is_true = True
 
-        _file_to_zip(str(payment.id), folder_name)
-        payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
-        payment.save()
-    return True
+    return is_true
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
@@ -1222,6 +1222,7 @@ def _check_pdf_in_folder(pdf_id):
 @ajax_required
 @login_required
 def check_button_ebable_pdf(request, payload):
+    print("check pdf")
     is_enable = False
     pdf_id = payload.get('pdf_id')
 
@@ -1247,17 +1248,19 @@ def check_button_ebable_pdf(request, payload):
 @ajax_required
 @login_required
 def check_button_ebable_pdf_geo_id(request, payload):
+    print("check pdf geo id")
     is_enable = False
-    pdf_id = None
-    geo_id = payload.get('geo_id')
+    pdf_id = payload.get('geo_id')
 
-    has_csv = _get_info_from_file('check', None, None, geo_id)
-    if has_csv:
+    # has_csv = _get_info_from_file('check', None, None, geo_id)
+    # if has_csv:
         # has_pdf_in_mpoint, pid = _check_pdf_from_mpoint_view(has_csv[0]) # mpoint_voew ээс үзэх
         # if has_pdf_in_mpoint:
-        pdf_id = has_csv[0]
-
+        # pdf_id = has_csv[0]
     if pdf_id:
+        print(type(pdf_id))
+        pdf_id = pdf_id.lstrip('0')
+        print(pdf_id)
         has_pdf = _check_pdf_in_folder(pdf_id)
         if len(has_pdf) > 0:
             is_enable = True
@@ -1458,3 +1461,7 @@ def get_contain_geoms(request, payload):
     }
 
     return JsonResponse(rsp)
+
+payment = Payment.objects.filter(id=7).first()
+is_true = _create_lavlagaa_infos(payment)
+print(is_true)

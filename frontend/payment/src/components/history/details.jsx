@@ -241,7 +241,7 @@ export class Details extends Component {
                         }
                         </div>
                         {
-                            !is_loading && (polygon.length > 0 || points.length > 0) &&
+                            !is_loading && (polygon && polygon.length > 0 || points && points.length > 0) &&
                             <div className="row py-3">
                                 <div className="col-md-6 py-0 my-3">
                                     <div id="payment">
