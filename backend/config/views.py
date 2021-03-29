@@ -688,26 +688,3 @@ def save_value_types(request, payload):
         'success': True,
     }
     return JsonResponse(rsp)
-
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def payment_configs_save(request, payload):
-
-    datas = {
-        'POLYGON_PER_KM_AMOUNT': '1',
-        'POLYGON_PER_M_AMOUNT': '1000',
-        'PROPERTY_PER_AMOUNT': '1'
-    }
-
-    for key,value in datas.items():
-        conf = Covid.objects.filter(name=key)
-        if not conf:
-            conf.create(
-                name = key,
-                value = value
-            )
-
-    return JsonResponse({"success": True})

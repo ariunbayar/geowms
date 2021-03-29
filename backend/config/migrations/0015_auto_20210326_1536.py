@@ -2,18 +2,8 @@
 
 from django.db import migrations
 
-def _check_value(Model, values):
-    check_value = False
-    config_qs = Model.objects
-    for name, value in values:
-        config_qs = config_qs.filter(name=name, value__isnull=False)
-    if config_qs:
-        check_value = True
 
-    return check_value
-
-
-def MigTest(apps,schema_editor):
+def create_payment_config(apps,schema_editor):
 
     Config = apps.get_model('backend_config', 'Config')
 
@@ -23,10 +13,14 @@ def MigTest(apps,schema_editor):
         ('PROPERTY_PER_AMOUNT', '1'),
     )
 
-    check_value = _check_value(Config, datas)
-    if not check_value:
-        for name, value in datas:
-            Config.objects.create(name=name, value=value)
+    for key,value in datas:
+        conf = Config.objects.filter(name=key)
+        if not conf:
+            conf.create(
+                name = key,
+                value = value
+            )
+
 
 class Migration(migrations.Migration):
 
@@ -35,5 +29,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-          migrations.RunPython(MigTest)
+          migrations.RunPython(create_payment_config)
     ]
