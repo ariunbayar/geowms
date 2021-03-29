@@ -21,6 +21,7 @@ export class WMSForm extends Component {
             id: props.match.params.id,
             name: '',
             url: '',
+            wmts_url: '',
             public_url: '',
             layers: [],
             layers_all: [],
@@ -56,9 +57,14 @@ export class WMSForm extends Component {
 
     handleSave() {
         const id = this.props.match.params.id
-        const {name,url,public_url,layers,layer_choices,is_active_change}= this.state
+        const {name,url,public_url,layers,layer_choices,is_active_change, wmts_url}= this.state
         if(is_active_change){
-            const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":true }
+            const values={
+                'id':id, 'name':name,'url':url,
+                "public_url":public_url,"layers":layers,
+                "layer_choices":layer_choices,"is_active":true,
+                'wmts_url': wmts_url
+            }
             if (id) {
                 service.update(values).then(({ success, item }) => {
                     this.setState({modal_alert_check: 'open'})
@@ -76,7 +82,7 @@ export class WMSForm extends Component {
             this.modalCloseTime()
         }
         else{
-            const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":false }
+            const values={'id':id, 'name':name,'url':url, "public_url":public_url,"layers":layers,"layer_choices":layer_choices,"is_active":false, wmts_url}
             if (id) {
                 service.update(values).then(({ success, item }) => {
                     if (success) { this.props.history.push('/back/wms/') }
@@ -118,7 +124,7 @@ export class WMSForm extends Component {
             if (wms_list) {
                 {
                     wms_list.map((wms, idx) =>
-                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [],is_active:wms.is_active })
+                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [],is_active:wms.is_active, wmts_url: wms.wmts_url})
                     )
 
                 }
@@ -233,6 +239,17 @@ export class WMSForm extends Component {
                                     placeholder="WMS URL"
                                     onChange={(e) => this.handleChange('url', e)}
                                     value={this.state.url}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="id_url">WMTS URL</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="id_wmts_url basic-input"
+                                    placeholder="WMTS URL"
+                                    onChange={(e) => this.handleChange('wmts_url', e)}
+                                    value={this.state.wmts_url}
                                 />
                             </div>
                             <div className="icheck-primary">
