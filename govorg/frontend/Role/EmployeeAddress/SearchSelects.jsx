@@ -19,13 +19,15 @@ export default class SearchSelects extends Component {
             sum_geo_id: '',
             horoo_geo_id: '',
             firstOrder_geom: '',
-            all_user_id: -1,
-            all_user: ['Бүх ажилчид'],
+            drop_down_status: false,
+            org_list: [],
+            levels: [],
         }
         this.handleChange = this.handleChange.bind(this)
         this.getGeom = this.getGeom.bind(this)
         this.getFieldValues = this.getFieldValues.bind(this)
-        this.handleAllUser = this.handleAllUser.bind(this)
+        this.getAllOrg = this.getAllOrg.bind(this)
+        this.handleChoose = this.handleChoose.bind(this)
     }
 
     getGeom(geo_id) {
@@ -50,6 +52,7 @@ export default class SearchSelects extends Component {
 
     componentDidMount() {
         this.getFieldValues()
+        this.getAllOrg()
     }
 
     handleChange(e, field, child_field, reset_fields, parent_field) {
@@ -105,18 +108,22 @@ export default class SearchSelects extends Component {
         this.setState({ [field_id]: idx, ...obj })
     }
 
-    handleAllUser(e) {
-        const idx = e.target.value
-        this.setState({ all_user_id: idx })
-        if (idx == '-1') {
-            this.props.handleAllUser(false)
-        } else {
-            this.props.handleAllUser(true)
-        }
+    getAllOrg() {
+        service
+            .getAllOrg()
+            .then(({ success, org_list, levels }) => {
+                if (success) {
+                    this.setState({ org_list, levels })
+                }
+            })
+    }
+
+    handleChoose(choose, value) {
+        this.props.handleChoose(choose, value)
     }
 
     render() {
-        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, all_user_id, all_user } = this.state
+        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, org_list, levels } = this.state
 
         return (
             <div className="form-row">
@@ -163,19 +170,45 @@ export default class SearchSelects extends Component {
                         )}
                     </select>
                 </div>
-                <div className="form-group col-3">
-                    <label htmlFor="all_user">Ажилтан/Бүх ажилчид:</label>
-                    <select
-                        id="all_user"
-                        className="form-control"
-                        onChange={(e) => this.handleAllUser(e)}
-                        value={all_user_id}
-                    >
-                        <option value='-1'>--- Байгууллагын ажилчид ---</option>
-                        {all_user.map((data, idx) =>
-                            <option key={idx} value={idx}>{data}</option>
-                        )}
-                    </select>
+                <div className="form-group col-3 text-right mt-4">
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-outline-primary btn-sm waves-effect waves-light m-1 dropdown-toggle"
+                            type="button" id="dropdownMenuButton"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                        >
+                            Байгууллага/Түвшин
+                        </button>
+                        <div className="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                            {
+                                levels.length > 0 &&
+                                    <>
+                                        <div className="dropdown-divider"></div>
+                                        <button className="dropdown-item py-1" value={'all'} onClick={(e) => this.handleChoose('all', e.target.value)}>Бүх байгууллага</button>
+                                        <div className="dropdown-divider"></div>
+                                        <button className="dropdown-item py-1" value={'this_org'} onClick={(e) => this.handleChoose('this_org', e.target.value)}>Энэ байгууллага</button>
+                                        {
+                                            levels.map((level, id) =>
+                                                <>
+                                                    <div className="dropdown-divider"></div>
+                                                    <button key={id} className="dropdown-item py-1" value={level} onClick={(e) => this.handleChoose('level', e.target.value)}>Түвшин-{level}</button>
+                                                    <ul className="mb-1">
+                                                        {
+                                                            org_list.map((data, idx) =>
+                                                                data.level == level &&
+                                                                    <button key={idx} className="dropdown-item py-1 pl-0" value={data.id} onClick={(e) => this.handleChoose('org', e.target.value)}>{data.name}</button>
+                                                            )
+                                                        }
+                                                    </ul>
+                                                </>
+                                            )
+                                        }
+                                    </>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         )
