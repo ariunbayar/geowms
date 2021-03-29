@@ -15,4 +15,7 @@ export const validationSchema = object().shape({
         .email(({ value }) => `Зөв e-mail хаяг оруулна уу.`)
         .max(254, '254-с илүүгүй урттай утга оруулна уу!')
         .required('Хоосон байна утга оруулна уу.'),
+    phone_number: string()
+        .max(8, '8-с илүүгүй урттай утга оруулна уу!')
+        .required('Хоосон байна утга оруулна уу.'),
 })

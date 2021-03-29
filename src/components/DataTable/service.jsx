@@ -53,10 +53,10 @@ export const service = {
     list
 }
 
-function list(жагсаалтын_холбоос, page, perpage, query, sort_name, custom_query){
+function list(жагсаалтын_холбоос, page, perpage, query, sort_name, custom_query, is_user){
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ page, perpage, query, sort_name, custom_query }),
+        body: JSON.stringify({ page, perpage, query, sort_name, custom_query, is_user }),
     }
     return fetch(жагсаалтын_холбоос, requestOptions).then(handleResponse)
 }

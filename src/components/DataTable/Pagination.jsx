@@ -16,6 +16,7 @@ export class Pagination extends Component {
             sort_name: props.sort_name,
             custom_query: props.custom_query,
             per_page: props.per_page,
+            is_user: this.props.is_user,
         }
 
         this.loadPage = this.loadPage.bind(this)
@@ -25,7 +26,7 @@ export class Pagination extends Component {
     }
 
     componentDidMount() {
-        this.loadPage(this.state.page, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
+        this.loadPage(this.state.page, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query, this.state.is_user)
     }
 
     componentDidUpdate(prevProps) {
@@ -33,55 +34,61 @@ export class Pagination extends Component {
         {
             const query = this.props.query
             this.setState({ query })
-            this.loadPage(1, query, this.props.sort_name, this.state.per_page, this.props.custom_query)
+            this.loadPage(1, query, this.props.sort_name, this.state.per_page, this.props.custom_query, this.state.is_user)
         }
         if(prevProps.sort_name !== this.props.sort_name)
         {
             const sort_name = this.props.sort_name
             const query = this.props.query
             this.setState({ sort_name })
-            this.loadPage(1, query, sort_name, this.state.per_page, this.props.custom_query)
+            this.loadPage(1, query, sort_name, this.state.per_page, this.props.custom_query, this.state.is_user)
         }
         if(prevProps.current_page !== this.props.current_page)
         {
             const current_page = this.props.current_page
             this.setState({ page: current_page })
-            this.loadPage(current_page, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
+            this.loadPage(current_page, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query, this.state.is_user)
         }
         if(prevProps.refresh !== this.props.refresh)
         {
-            this.loadPage(1, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query)
+            this.loadPage(1, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query, this.state.is_user)
         }
         if(prevProps.per_page !== this.props.per_page)
         {
             const per_page = this.props.per_page
             this.setState({ per_page })
-            this.loadPage(1, this.props.query, this.props.sort_name, per_page, this.props.custom_query)
+            this.loadPage(1, this.props.query, this.props.sort_name, per_page, this.props.custom_query, this.state.is_user)
         }
         if(this.props.custom_query){
             if(prevProps.custom_query !== this.props.custom_query){
                 this.setState({ custom_query: this.props.custom_query })
-                this.loadPage(1, this.props.query, this.props.sort_name, this.state.per_page, this.props.custom_query)
+                this.loadPage(1, this.props.query, this.props.sort_name, this.state.per_page, this.props.custom_query, this.state.is_user)
             }
+        }
+        if(prevProps.is_user !== this.props.is_user){
+            this.setState(
+                { is_user: this.props.is_user },
+                () => this.loadPage(1, this.state.query, this.state.sort_name, this.state.per_page, this.props.custom_query, this.state.is_user)
+            )
         }
     }
 
     nextPage() {
-        this.loadPage(this.state.page + 1, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query)
+        this.loadPage(this.state.page + 1, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query, this.state.is_user)
     }
 
     prevPage() {
-        this.loadPage(this.state.page - 1, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query)
+        this.loadPage(this.state.page - 1, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query, this.state.is_user)
     }
 
-    loadPage(page, query, sort_name, per_page, custom_query) {
+    loadPage(page, query, sort_name, per_page, custom_query, is_user) {
         if (this.state.is_loading) {
             return
         }
         page = Math.max(page, 1)
         page = Math.min(page, this.state.total_page)
         this.setState({is_loading: true})
-        this.props.paginate(page, query, sort_name, per_page, custom_query)
+        this.props.paginate(page, query, sort_name, per_page, custom_query, is_user)
         .then(({ page, total_page }) => {
             this.setState({
                 page,
@@ -94,7 +101,7 @@ export class Pagination extends Component {
     addPage(id) {
         const page = id.target.value
         this.setState({ page })
-        this.loadPage(page, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query)
+        this.loadPage(page, this.state.query, this.state.sort_name, this.state.per_page, this.state.custom_query, this.state.is_user)
     }
 
     render() {

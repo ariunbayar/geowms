@@ -124,7 +124,7 @@ def login(request):
                 messages.warning(request, 'Нэвтрэх оролдлого амжилтгүй боллоо.')
                 return redirect('secure:login')
         except Exception:
-            messages.warning(request, 'Буруу и-мэйл оруулсан байна!!!')
+            messages.warning(request, 'И-мэйл эсвэл нууц үг буруу байна!!!')
             return redirect('secure:login')
     form = LoginForm()
     return render(request, 'secure/login.html', {'form': form})

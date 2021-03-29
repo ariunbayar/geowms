@@ -10,6 +10,7 @@ from backend.wms.models import WMS
 from django.utils.timezone import localtime, now
 import main.geoserver as geoserver
 from geoportal_app.models import Role
+from django.core.cache import cache
 
 
 def _get_user_roles(user):
@@ -30,31 +31,34 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-
-    wms = WMS.objects.filter(pk=wms_id).first()
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    wms = cache.get('proxy_{}'.format(wms_id))
+    if not wms:
+        wms = WMS.objects.filter(pk=wms_id).first()
+        cache.set('proxy_{}'.format(wms_id), wms, 300)
 
     if wms is None or not wms.is_active:
         raise Http404
-
-    queryargs = request.GET
-    headers = {**BASE_HEADERS}
 
     if url_type == 'wmts':
         requests_url = wms.cache_url
     else:
         requests_url = wms.url
 
-    rsp = requests.get(requests_url, queryargs, headers=headers, timeout=5)
+    rsp = requests.get(requests_url, queryargs, headers=headers, timeout=100)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
-        user_roles = _get_user_roles(request.user)
-        wms_layers = wms.wmslayer_set.filter(
-                bundlelayer__bundle__pk=bundle_id,
-                bundlelayer__role_id__in=user_roles,
-            )
-        allowed_layers = set([layer.code for layer in wms_layers])
-
+        allowed_layers = cache.get('allowed_layers_{}'.format(wms_id))
+        if not allowed_layers:
+            user_roles = _get_user_roles(request.user)
+            wms_layers = wms.wmslayer_set.filter(
+                    bundlelayer__bundle__pk=bundle_id,
+                    bundlelayer__role_id__in=user_roles,
+                )
+            allowed_layers = set([layer.code for layer in wms_layers])
+            cache.set('allowed_layers_{}'.format(wms_id), allowed_layers, 300)
         content = filter_layers(content, allowed_layers)
         service_url = _get_service_url(request, bundle_id, wms, url_type)
         content = replace_src_url(content, requests_url, service_url)

@@ -113,7 +113,7 @@ def wms_layers(request, pk):
             wms_data = {
                 'name': wms.name,
                 'url': request.build_absolute_uri(url),
-                'chache_url': request.build_absolute_uri(chache_url),
+                'chache_url': chache_url,
                 'layers': [_layer_to_display(layer) for layer in layers],
                 'wms_or_cache_ur': True if wms.cache_url else False
             }
@@ -153,6 +153,7 @@ def aimag(request):
     rsp = {
         'success': success,
         'info': info,
+        'firstOrder_geom': utils.get_1stOrder_geo_id(),
     }
     return JsonResponse(rsp)
 

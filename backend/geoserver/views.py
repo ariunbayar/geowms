@@ -299,7 +299,7 @@ def create_group_cache(request, payload, group_name):
 
     detial_list = geoserver.get_layer_group_detail(group_name)
     glayer = detial_list.get('bounds')
-    srs = glayer.get('crs').split(":")[1]
+    srs = glayer.get('crs')
 
     errors = _cache_value_validation(zoom_start, zoom_stop, number_of_cache)
     if errors:
