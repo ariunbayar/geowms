@@ -3,7 +3,7 @@
 from django.db import migrations
 
 
-def create_payment_config(apps,schema_editor):
+def create_payment_config(apps, schema_editor):
 
     Config = apps.get_model('backend_config', 'Config')
 
@@ -13,12 +13,12 @@ def create_payment_config(apps,schema_editor):
         ('PROPERTY_PER_AMOUNT', '1'),
     )
 
-    for key,value in datas:
+    for key, value in datas:
         conf = Config.objects.filter(name=key)
         if not conf:
             conf.create(
-                name = key,
-                value = value
+                name=key,
+                value=value
             )
 
 
