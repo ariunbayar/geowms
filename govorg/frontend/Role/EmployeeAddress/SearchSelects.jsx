@@ -19,7 +19,6 @@ export default class SearchSelects extends Component {
             sum_geo_id: '',
             horoo_geo_id: '',
             firstOrder_geom: '',
-            drop_down_status: false,
             org_list: [],
             levels: [],
         }

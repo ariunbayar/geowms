@@ -1785,10 +1785,10 @@ def get_all_org(request):
     levels_qs = list(levels_qs)
     levels = [level['level'] for level in levels_qs]
 
-
     rsp = {
         'success': True,
         'org_list': org_list,
         'levels': levels,
     }
+
     return JsonResponse(rsp)
