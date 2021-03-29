@@ -77,6 +77,7 @@ function loadWMSLayers(id) {
     return fetch(`/дэд-сан/${id}/давхаргууд/`, requestOptions).then(handleResponse)
 }
 
+
 function loadBaseLayers() {
     const requestOptions = {
         ..._getGetOptions(),

@@ -44,9 +44,11 @@ export class CovidPage extends Component {
             emiin_sangiin_ungu: 'info',
             shinjilgee_ungu: 'info',
             is_loading: true,
+            wms_list: [],
         }
         this.getFeature = this.getFeature.bind(this)
         this.loadData = this.loadData.bind(this)
+        this.loadNema = this.loadNema.bind(this)
     }
 
     componentDidMount(){
@@ -58,6 +60,27 @@ export class CovidPage extends Component {
             .covidConfigGet()
             .then((values) => {
                 this.setState({ initial_values: values, is_loading: false })
+            })
+    }
+    componentDidUpdate(pP, pS) {
+        const { bundle } = this.state.initial_values
+        if(pS.initial_values.bundle != bundle) {
+            this.loadNema(bundle)
+        }
+    }
+
+    loadNema(bundle_id) {
+        service
+            .getNema(bundle_id)
+            .then(({ success, info, wms_list }) => {
+                if (success) {
+                    if (wms_list.length > 0) {
+                        this.setState({wms_list})
+                    }
+                }
+                else {
+                    alert(info)
+                }
             })
     }
 
@@ -106,8 +129,8 @@ export class CovidPage extends Component {
             emiin_sangiin_ungu,
             shinjilgee_ungu,
             is_loading,
+            wms_list
         } = this.state
-
         return (
             <div className="col-md-12">
                 <Loader is_loading={is_loading}/>
@@ -186,7 +209,9 @@ export class CovidPage extends Component {
                                     features={feature_collection}
                                     feature={feature}
                                     loadErguul={(func) => this.loadData(func)}
+                                    wms_list={wms_list}
                                     point_color={erguul_ungu}
+                                    base_layer={false}
                                 />
                             </div>
                         </div>

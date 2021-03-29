@@ -36,7 +36,7 @@ def login(request):
                 messages.warning(request, 'Нэвтрэх оролдлого амжилтгүй боллоо.')
                 return redirect('gov_secure:login')
         except Exception:
-            messages.warning(request, 'Буруу и-мэйл оруулсан байна!!!')
+            messages.warning(request, 'И-мэйл эсвэл нууц үг буруу байна!!!')
             return redirect('gov_secure:login')
     form = LoginForm()
     return render(request, 'govorg/backend/secure/login.html', {'form': form})

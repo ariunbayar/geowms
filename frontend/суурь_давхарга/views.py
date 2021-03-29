@@ -5,6 +5,7 @@ from main.decorators import ajax_required
 
 from backend.суурь_давхарга.models import BaseLayer
 from backend.wms.models import WMS
+from backend.config.models import Config
 
 
 @require_GET
@@ -15,17 +16,18 @@ def all(request):
 
     for base_layer in BaseLayer.objects.all().order_by('sort_order'):
         wms_args = {}
-        if base_layer.tilename == 'wms':
-            try:
-                pk = int(base_layer.url.split('/')[-2])
-                wms = WMS.objects.get(pk=pk)
-                wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
-            except Exception:
-                pass
+        wms = None
+        if base_layer.tilename == 'wms' or base_layer.tilename == 'wmts':
+            base_layer_url = base_layer.url.replace('wms/', '')
+            base_layer_url = base_layer_url.replace('wmts/', '')
+            pk = int(base_layer_url.split('/')[-2])
+            wms = WMS.objects.get(pk=pk)
+            wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
 
         base_layer_list.append({
             'tilename': base_layer.tilename,
             'url': base_layer.url,
+            'geoserver_url': wms.cache_url if wms else '',
             'thumbnail_1x': base_layer.thumbnail_1x.url,
             'thumbnail_2x': base_layer.thumbnail_2x.url,
             **wms_args,

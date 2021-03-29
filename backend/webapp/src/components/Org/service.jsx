@@ -20,6 +20,7 @@ export const service = {
     getEmpInfo,
     getErguulegFields,
     saveErguul,
+    getSelectValue,
 }
 
 
@@ -155,4 +156,11 @@ function saveErguul(values, emp_id, point, photo, erguul_id) {
         body: JSON.stringify({ values, emp_id, point, photo, erguul_id }),
     }
     return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
+}
+
+function getSelectValue() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/get-select-values/`, requestOptions).then(handleResponse)
 }
