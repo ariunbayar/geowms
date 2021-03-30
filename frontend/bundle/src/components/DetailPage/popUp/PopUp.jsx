@@ -53,7 +53,7 @@ class PopUpCmp extends Component {
         if(pP.datas !== datas && !this.props.is_loading) {
             this.properties = []
             const startNumber = 1
-            this.setState({ startNumber, is_plus: true, is_prev: false })
+            this.setState({ startNumber, is_plus: true, is_prev: false, is_enable: false })
             this.checkModeAndCode(startNumber, datas)
         }
     }
@@ -114,7 +114,7 @@ class PopUpCmp extends Component {
                     this.setState({ name: value[1] })
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
-                    this.checkButtonEnableWithPdf(value[1])
+                    // this.checkButtonEnableWithPdf(value[1])
                 }
                 if (value[2] && value[2].toLowerCase() == 'pointnumber') {
                     this.checkButtonEnableWithId(value[1])
