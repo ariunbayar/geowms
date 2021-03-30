@@ -1788,7 +1788,3 @@ def get_contain_geoms(request, payload):
     }
 
     return JsonResponse(rsp)
-
-# payment = Payment.objects.filter(pk=1).first()
-# folder_name = 'tseg-personal-file'
-# is_created = _create_lavlagaa_infos(payment, folder_name)
