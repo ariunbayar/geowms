@@ -5099,7 +5099,6 @@ table.grid td {
 
 }
 
-
-
-
-
+.navbar-dark .navbar-nav .nav-link {
+    color: white!important;
+}
