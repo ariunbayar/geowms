@@ -49,7 +49,6 @@ export  class Menu extends Component {
                     <div className="infoTileDosesAdministered">
                         <div className="dosesAdministered">
                             {this.numberWithCommas(onoodor_counts_obj['vaccine_hiisen_too'])}
-                            <small className="ml-1">{this.getCalculator(onoodor_counts_obj['vaccine_hiisen_too'], ochigdor_counts_obj['vaccine_hiisen_too'])}</small>
                         </div>
                     </div>
                 </div>
@@ -62,7 +61,6 @@ export  class Menu extends Component {
                     <div className="infoTileConfirmed">
                         <div className="confirmed">
                             {this.numberWithCommas(onoodor_counts_obj['batlagdsan_tohioldol_too'])}
-                            <small className="ml-1">{this.getCalculator(onoodor_counts_obj['batlagdsan_tohioldol_too'], ochigdor_counts_obj['batlagdsan_tohioldol_too'])}</small>
                         </div>
                     </div>
                 </div>
@@ -73,7 +71,6 @@ export  class Menu extends Component {
                             <div className="description" style={{color: "#1F8536"}}>Эдгэрсэн тоо</div>
                             <div className="total">
                                 {this.numberWithCommas(onoodor_counts_obj['edgersen_humuus_too'])}
-                                <small className="ml-1">{this.getCalculator(onoodor_counts_obj['edgersen_humuus_too'], ochigdor_counts_obj['edgersen_humuus_too'])}</small>
                             </div>
                         </h2>
                         <h2 className="legend">
@@ -81,7 +78,6 @@ export  class Menu extends Component {
                             <div className="description text-warning">Эмчлэгдэж буй тоо</div>
                             <div className="total">
                                 {this.numberWithCommas(onoodor_counts_obj['emchlegdej_bui_humuus_too'])}
-                                <small className="ml-1">{this.getCalculator(onoodor_counts_obj['emchlegdej_bui_humuus_too'], ochigdor_counts_obj['emchlegdej_bui_humuus_too'])}</small>
                             </div>
                         </h2>
                         <h2 className="legend">
@@ -89,7 +85,6 @@ export  class Menu extends Component {
                             <div className="description text-dark">Нас барсан тоо</div>
                             <div className="total">
                                 {this.numberWithCommas(onoodor_counts_obj['nas_barsan_hunii_too'])}
-                                <small className="ml-1">{this.getCalculator(onoodor_counts_obj['nas_barsan_hunii_too'], ochigdor_counts_obj['nas_barsan_hunii_too'])}</small>
                             </div>
                         </h2>
                     </div>
