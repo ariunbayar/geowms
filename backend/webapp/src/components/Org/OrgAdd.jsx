@@ -80,21 +80,21 @@ export class OrgAdd extends Component {
                     var find_text = ''
                     for (var i = 0; i < geo_id.length; i++){
                         find_text += geo_id[i]
-                        if (i === 4) {
+                        if (i === 1) {
                             secondOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
                                     this.handle2ndOrderChange(value['geo_id'])
                                 }
                             })
                         }
-                        if (i === 6) {
+                        if (i === 3) {
                             this.state.thirthOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
                                     this.handle3rdOrderChange(value['geo_id'])
                                 }
                             })
                         }
-                        if (i === 8) {
+                        if (i === 5) {
                             this.state.fourthOrders.map((value) => {
                                 if (value['geo_id'] === find_text) {
                                     this.handle4thOrderChange(value['geo_id'])

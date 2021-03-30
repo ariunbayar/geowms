@@ -14,10 +14,6 @@ export class OrgUser extends Component {
 
         this.state = {
         }
-
-    }
-
-    componentDidMount() {
     }
 
     render() {
@@ -27,14 +23,20 @@ export class OrgUser extends Component {
                 <Route
                     exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/нэмэх/"
                     component={(props) =>
-                        <UserAdd {...props} refreshCount={this.props.refreshCount}/>
+                        <UserAdd
+                            {...props}
+                            refreshCount={this.props.refreshCount}
+                        />
                     }
                 />
                 <Route exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/дэлгэрэнгүй/" component={ Detail }/>
                 <Route
                     exact path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/:emp/засах/"
                     component={(props) =>
-                        <UserAdd {...props} refreshCount={this.props.refreshCount}/>
+                        <UserAdd
+                            {...props}
+                            refreshCount={this.props.refreshCount}
+                        />
                     }
                 />
             </Switch>

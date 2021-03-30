@@ -9,7 +9,7 @@ export class App extends Component {
           <div className="bg-light">
             <BrowserRouter>
                 <Switch>
-                  <Route path="/open-layer/" component={(props) => <OpenLayerPage {...props} open_layer={this.props.open_layer}/>}/>
+                  {/* <Route path="/open-layer/" component={(props) => <OpenLayerPage {...props} open_layer={this.props.open_layer}/>}/> */}
                 </Switch>
             </BrowserRouter>
           </div>

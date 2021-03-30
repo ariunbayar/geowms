@@ -6,7 +6,6 @@ import {service} from '../../service'
 import {Pagination} from '../../../../components/pagination/pagination'
 import Modal from "@utils/Modal/Modal"
 
-
 export class FormList extends Component {
 
     constructor(props) {
@@ -33,8 +32,6 @@ export class FormList extends Component {
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
     }
@@ -89,24 +86,6 @@ export class FormList extends Component {
         })
     }
 
-    modalCloseTime(value){
-        if(value == 'success'){
-            this.state.timer = setTimeout(() => {
-                this.setState({modal_status: "closed"})
-            }, 2000)
-        }
-        else{
-            this.state.timer = setTimeout(() => {
-                this.setState({modal_status: "closed"})
-            }, 2000)
-        }
-    }
-
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_status: "closed"})
-    }
-
     modalChange(modal_icon, icon_color, title, text, has_button) {
         this.setState({
             modal_icon: modal_icon,
@@ -132,7 +111,7 @@ export class FormList extends Component {
                 <div  className="card-body">
                     <div className="row">
                         <div className="col-md-12 ">
-                            <NavLink className="btn gp-btn-primary float-right" to={"/gov/froms/tseg-info/tsegpersonal/tseg-personal/add/"}>
+                            <NavLink className="btn gp-btn-primary float-right" to={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/"}>
                                 Нэмэх
                             </NavLink>
                             <div className="form-row text-right">
@@ -171,7 +150,7 @@ export class FormList extends Component {
                                                 values={values}
                                                 handleRemove={() => this.handleRemove(values.id, values.t_type)}
                                                 handleMove={this.handleMove}
-                                                handleSuccess = {() => this.handleSuccess(values.point_type, values.id, values.point_class ,values.t_type)}
+                                                handleSuccess={() => this.handleSuccess(values.point_type, values.id, values.point_class ,values.t_type)}
                                             />
                                         )}
                                     </tbody>

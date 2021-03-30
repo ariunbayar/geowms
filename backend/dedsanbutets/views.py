@@ -749,7 +749,20 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     geom_type = values.get('geom_type')
     layer_title = feature.feature_name
 
-    if check_layer.status_code == 200:
+    if check_layer.status_code != 200:
+        layer_create = geoserver.create_layer(
+                            ws_name,
+                            ds_name,
+                            layer_name,
+                            layer_title,
+                            table_name,
+                            srs,
+                            geom_att,
+                            extends,
+                            False
+        )
+
+    else:
         layer_create = geoserver.create_layer(
                             ws_name,
                             ds_name,
@@ -762,19 +775,6 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                             True
         )
 
-    else:
-        geoserver.deleteLayerName(ws_name, ds_name, layer_name)
-        layer_create = geoserver.create_layer(
-                            ws_name,
-                            ds_name,
-                            layer_name,
-                            layer_title,
-                            table_name,
-                            srs,
-                            geom_att,
-                            extends,
-                            False
-        )
     if layer_create.status_code == 201 or layer_create.status_code == 200:
         if geom_type:
             cache_values = values.get('cache_values')
@@ -907,7 +907,7 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.code_list_id::character varying(1000), b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
@@ -951,7 +951,16 @@ def _create_design_view():
                         ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
                         ST_Transform(geo_data, 4326)
                         ) and
-                        feature_id in (5, 15,23, 17, 81, 38)
+                        feature_id in (
+                            select distinct(f.feature_id)
+                            from m_geo_datas f
+                            inner join l_features lf
+                            on f.feature_id = lf.feature_id
+                            inner join l_packages p
+                            on p.package_id = lf.package_id
+                            inner join l_themes t
+                            on t.theme_id = p.theme_id
+                        )
                 limit 10000
             '''
     with connections['default'].cursor() as cursor:
@@ -964,6 +973,7 @@ def _create_design_view():
 @user_passes_test(lambda u: u.is_superuser)
 def get_style_data(request, payload):
     geom_type = payload.get('geom_type')
+    geom_type = 'ST_' + geom_type
     cursor = connections['default'].cursor()
     sql = '''
             SELECT
@@ -975,9 +985,18 @@ def get_style_data(request, payload):
                     ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
                     ST_Transform(geo_data, 4326)
                     ) and
-                    feature_id in (5, 15,23, 17, 81, 38)
+                    feature_id in (
+                        select distinct(f.feature_id)
+                        from m_geo_datas f
+                        inner join l_features lf
+                        on f.feature_id = lf.feature_id
+                        inner join l_packages p
+                        on p.package_id = lf.package_id
+                        inner join l_themes t
+                        on t.theme_id = p.theme_id
+                    )
                     and
-                    ST_GeometryType(geo_data)  similar to '%{geom_type}%'
+                    ST_GeometryType(geo_data)  similar to '{geom_type}'
             limit 10000
             '''.format(geom_type=geom_type)
     cursor.execute(sql)

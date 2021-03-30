@@ -44,6 +44,17 @@ export default class CovidConfig extends Component {
                 shinjilgee_too: '',
                 nas_barsan_too: '',
                 erguul_ungu: '',
+
+                line_graph_org: '',
+                nas_barsan_too_org: '',
+                shinjilgee_too_org: '',
+                niit_eruul_mend_baiguullaga_too_org: '',
+                emlegiin_too_org: '',
+                emiin_sangiin_too_org: '',
+                tusgaarlagdsan_humuusiin_org: '',
+                emchlegdej_bui_humuus_too_org: '',
+                edgersen_humuusiin_too_org: '',
+                batlagdsan_tohioldol_org: '',
             },
             emy_logo:'',
             emy_logo_old:'',
@@ -51,7 +62,8 @@ export default class CovidConfig extends Component {
             gzbgzzg_logo_old:'',
             values: {},
             line_chart_datas: [],
-            bundles: []
+            bundles: [],
+            orgs: [],
         }
 
         this.handleEdit = this.handleEdit.bind(this)
@@ -94,11 +106,13 @@ export default class CovidConfig extends Component {
                 initial_values: values,
                 values,
                 line_chart_datas: values['line_chart_datas'],
+                line_graph_org: values['line_graph_org'],
                 emy_logo: values['emy_logo'],
                 emy_logo_old: values['emy_logo'],
                 gzbgzzg_logo: values['gzbgzzg_logo'],
                 gzbgzzg_logo_old: values['gzbgzzg_logo'],
                 bundles: values['bundles'],
+                orgs: values['orgs']
             })
         })
     }
@@ -119,6 +133,7 @@ export default class CovidConfig extends Component {
         let value = values
         value['emy_logo'] = emy_logo
         value['gzbgzzg_logo'] = gzbgzzg_logo
+
         service.config.covid
             .save(value, line_chart_datas)
             .then(({ success }) => {
@@ -160,9 +175,9 @@ export default class CovidConfig extends Component {
             emy_logo,
             emy_logo_old,
             line_chart_datas,
-            bundles
+            bundles,
+            orgs,
         } = this.state
-
         return (
             <div className="card">
 
@@ -203,13 +218,13 @@ export default class CovidConfig extends Component {
                                                 <label htmlFor="bundle">Дэд сан</label>
                                                 {bundles.map((bundle, idx) =>
                                                     values.bundle == bundle.pk &&
-                                                    <img src={bundle.icon} className="logo-icon" alt="logo icon"></img>
+                                                    <img key={idx} src={bundle.icon} className="logo-icon" alt="logo icon"></img>
                                                 )}
                                                 <Fragment>
                                                     <Field name="bundle" as="select"
                                                     className={'form-control mt-2 ' + (errors.bundle ? 'is-invalid' : '')}>
                                                         {bundles.map((bundle, idx) =>
-                                                            <option value={bundle.pk}>{bundle.name}</option>
+                                                            <option key={idx} value={bundle.pk}>{bundle.name}</option>
                                                         )}
                                                     </Field>
                                                     <ErrorMessage name="bundle" component="div" className="text-dange"/>
@@ -262,7 +277,7 @@ export default class CovidConfig extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="batlagdsan_tohioldol">Батлагдсан тохиолдол</label>
                                                 <Field
                                                     name="batlagdsan_tohioldol"
@@ -271,9 +286,21 @@ export default class CovidConfig extends Component {
                                                     className="form-control"
                                                 />
                                             </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="batlagdsan_tohioldol_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="batlagdsan_tohioldol_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
+                                            </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="edgersen_humuusiin_too">Эдгэрсэн хүмүүсийн тоо</label>
                                                 <Field
                                                     name="edgersen_humuusiin_too"
@@ -282,9 +309,21 @@ export default class CovidConfig extends Component {
                                                     className="form-control"
                                                 />
                                             </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="edgersen_humuusiin_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="edgersen_humuusiin_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
+                                            </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="emchlegdej_bui_humuus_too">Эмчлэгдэж буй хүмүүсийн тоо</label>
                                                 <Field
                                                     name="emchlegdej_bui_humuus_too"
@@ -293,9 +332,21 @@ export default class CovidConfig extends Component {
                                                     className="form-control"
                                                 />
                                             </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="emchlegdej_bui_humuus_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="emchlegdej_bui_humuus_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
+                                            </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="tusgaarlagdsan_humuusiin_too">Тусгаарлагдаж буй хүмүүсийн тоо</label>
                                                 <Field
                                                     name="tusgaarlagdsan_humuusiin_too"
@@ -303,6 +354,18 @@ export default class CovidConfig extends Component {
                                                     type="number"
                                                     className="form-control"
                                                 />
+                                            </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="tusgaarlagdsan_humuusiin_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="tusgaarlagdsan_humuusiin_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -317,7 +380,7 @@ export default class CovidConfig extends Component {
                                             </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="emiin_sangiin_too">Эмийн сангийн тоо</label>
                                                 <Field
                                                     name="emiin_sangiin_too"
@@ -326,9 +389,21 @@ export default class CovidConfig extends Component {
                                                     className="form-control"
                                                 />
                                             </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="emiin_sangiin_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="emiin_sangiin_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
+                                            </div>
                                         </div>
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="emlegiin_too">Эмнэлгийн тоо</label>
                                                 <Field
                                                     name="emlegiin_too"
@@ -337,10 +412,22 @@ export default class CovidConfig extends Component {
                                                     className="form-control"
                                                 />
                                             </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="emlegiin_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="emlegiin_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
+                                            </div>
                                         </div>
 
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="niit_eruul_mend_baiguullaga_too">Нийт эрүүл мэндийн байгуулагын тоо</label>
                                                 <Field
                                                     name="niit_eruul_mend_baiguullaga_too"
@@ -349,10 +436,22 @@ export default class CovidConfig extends Component {
                                                     className="form-control"
                                                 />
                                             </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="niit_eruul_mend_baiguullaga_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="niit_eruul_mend_baiguullaga_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
+                                            </div>
                                         </div>
 
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="id_shinjilgee_too">Шинжилгээ хийсэн тоо</label>
                                                 <Field
                                                     name="shinjilgee_too"
@@ -361,10 +460,22 @@ export default class CovidConfig extends Component {
                                                     className="form-control"
                                                 />
                                             </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="shinjilgee_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="shinjilgee_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
+                                            </div>
                                         </div>
 
                                         <div className="form-row">
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-10">
                                                 <label htmlFor="id_nas_barsan_too">Нас барсан хүмүүсийн тоо</label>
                                                 <Field
                                                     name="nas_barsan_too"
@@ -372,6 +483,18 @@ export default class CovidConfig extends Component {
                                                     type="number"
                                                     className="form-control"
                                                 />
+                                            </div>
+                                            <div className="col-md-2">
+                                                <label htmlFor="nas_barsan_too_org">
+                                                    Байгууллага
+                                                </label>
+                                                <Field name="nas_barsan_too_org" as="select"
+                                                    className={'form-control'}>
+                                                    <option value=""> --- Байгууллага --- </option>
+                                                    {orgs.map((org, idx) =>
+                                                        <option key={idx} value={org.id}>{org.name}</option>
+                                                    )}
+                                                </Field>
                                             </div>
                                         </div>
 
@@ -400,7 +523,9 @@ export default class CovidConfig extends Component {
                                             <table className="table table-bordered">
                                                 <thead>
                                                     <tr>
-                                                        <th colSpan="4" className="text-center align-center" scope="rowgroup">Line graph утга</th>
+                                                        <th colSpan="4" className="text-center align-center" scope="rowgroup">
+                                                            Line graph утга
+                                                        </th>
                                                     </tr>
                                                     <tr>
                                                         <th>№</th>
@@ -445,6 +570,13 @@ export default class CovidConfig extends Component {
                                                     </tr>
                                                 </tbody>
                                             </table>
+                                            <Field name="line_graph_org" as="select"
+                                                className={'form-control'}>
+                                                <option value=""> --- Байгууллага --- </option>
+                                                {orgs.map((org, idx) =>
+                                                    <option key={idx} value={org.id}>{org.name}</option>
+                                                )}
+                                            </Field>
                                         </div>
                                         { is_editing &&
                                             <button

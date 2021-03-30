@@ -103,7 +103,7 @@ export default class FormTable extends Component {
     }
 
     render() {
-        const { id, objectid, point_id, point_name, pid, point_class, point_type, center_typ,aimag, sum, t_type, sheet1, sheet2, sheet3, geom} = this.props.values
+        const { id, objectid, point_id, point_name, pid, point_class, point_type, center_typ, aimag, sum, t_type, sheet1, sheet2, sheet3, geom} = this.props.values
         const idx = this.props.idx
         return (
             <tr>
@@ -115,7 +115,7 @@ export default class FormTable extends Component {
                 <th>{aimag}</th>
                 <th>{sum}</th>
                 <th>
-                    <NavLink to={`/gov/froms/tseg-info/tsegpersonal/tseg-personal/${id}/${t_type}/засах/`}>
+                    <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-personal/${id}/${t_type}/засах/`}>
                             <i className="fa fa-pencil-square-o gp-text-primary" aria-hidden="true"></i>
                     </NavLink>
                 </th>
@@ -125,15 +125,20 @@ export default class FormTable extends Component {
                     </a>
                 </th>
                 <th>
-                    {t_type[3] != point_class ?
-                        <a className="btn" onClick={this.handleModalSuccessOpen}
-                                    onMouseOver={(e) => this.handleBoxOver(e)}
-                                    onMouseLeave={(e) => this.handleBoxLeave(e)}>
-                            <i className="fa fa-check" aria-hidden="true"></i>
-                        </a>:
-                        <a className="btn">
-                            <i className="fa fa-check text-success" aria-hidden="true"></i>
-                        </a>
+                    {
+                        t_type[3] != point_class
+                        ?
+                            <a className="btn"
+                                onClick={this.handleModalSuccessOpen}
+                                onMouseOver={(e) => this.handleBoxOver(e)}
+                                onMouseLeave={(e) => this.handleBoxLeave(e)}
+                            >
+                                <i className="fa fa-check" aria-hidden="true"></i>
+                            </a>
+                        :
+                            <a className="btn">
+                                <i className="fa fa-check text-success" aria-hidden="true"></i>
+                            </a>
                     }
                     <div className={`alert alert-dark rounded position-absolute d-none`+
                                 `${this.state.showBox ? " d-block" : ""}`}

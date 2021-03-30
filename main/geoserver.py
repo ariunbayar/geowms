@@ -17,6 +17,7 @@ def get_connection_conf():
         'geoserver_user',
         'geoserver_pass',
         'geoserver_db_host',
+        'geoserver_protocol'
     ]
 
     configs = Config.objects.filter(name__in=conf_names).values_list('name', 'value')
@@ -559,7 +560,7 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
         <seedRequest>
             <name>{layer_name}</name>
             <srs>
-                <number>{srs}</number>
+                <gridSetName>{srs}</gridSetName>
             </srs>
             <zoomStart>{zoom_start}</zoomStart>
             <zoomStop>{zoom_stop}</zoomStop>

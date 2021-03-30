@@ -193,13 +193,7 @@ export default class Маягт extends Component {
                                                     <Field name={`form_values.${index}.data` || ""}
                                                         as="select"
                                                         className="form-control"
-                                                        disabled={
-                                                            modifyend_selected_feature_check ||
-                                                            update_geom_from_list ||
-                                                            null_form_isload ||
-                                                            cancel_button_active ||
-                                                            remove_button_active
-                                                        }
+                                                        disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
                                                     >
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
@@ -217,13 +211,7 @@ export default class Маягт extends Component {
                                                     name={`form_values.${index}.data` || ""}
                                                     as="select"
                                                     className='form-control'
-                                                    disabled={
-                                                        modifyend_selected_feature_check ||
-                                                        update_geom_from_list  ||
-                                                        null_form_isload ||
-                                                        cancel_button_active ||
-                                                        remove_button_active
-                                                    }
+                                                    disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -232,13 +220,7 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data` || ""}
                                                     className='form-control'
-                                                    disabled={
-                                                        modifyend_selected_feature_check ||
-                                                        update_geom_from_list ||
-                                                        null_form_isload ||
-                                                        cancel_button_active ||
-                                                        remove_button_active
-                                                    }
+                                                    disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                 />

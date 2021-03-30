@@ -12,7 +12,7 @@ export default class Forms extends Component {
         return (
             <div className="">
                 <Switch>
-                    <Route path="/gov/froms/tseg-info/" component={Bar}/>
+                    <Route path="/gov/forms/tseg-info/" component={Bar}/>
                 </Switch>
             </div>
         )
