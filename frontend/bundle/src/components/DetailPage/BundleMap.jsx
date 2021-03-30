@@ -34,6 +34,7 @@ import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
 import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
+import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
 
 
 export default class BundleMap extends Component {
@@ -192,6 +193,7 @@ export default class BundleMap extends Component {
                         ...layer,
                         wms_or_cache_ur,
                         tile: new Tile({
+                            preload: 6,
                             minZoom: layer.zoom_start,
                             maxZoom: layer.zoom_stop,
                             source: new WMTS({
@@ -210,9 +212,11 @@ export default class BundleMap extends Component {
                                 style: '',
                                 wrapX: true,
                                 cacheSize: 1000,
+                                tileLoadFunction: securedImageWMS
                             }),
                         }),
                         wms_tile: new Tile({
+                            preload: 6,
                             source: new TileWMS({
                                 projection: this.state.projection,
                                 ratio: 1,
@@ -223,7 +227,8 @@ export default class BundleMap extends Component {
                                     'VERSION': '1.1.1',
                                     "STYLES": '',
                                     "exceptions": 'application/vnd.ogc.se_inimage',
-                                }
+                                },
+                                tileLoadFunction: securedImageWMS
                             }),
                         })
                     }
@@ -267,7 +272,8 @@ export default class BundleMap extends Component {
                                     'VERSION': '1.1.1',
                                     "STYLES": '',
                                     "exceptions": 'application/vnd.ogc.se_inimage',
-                                }
+                                },
+                                tileLoadFunction: securedImageWMS
                             }),
                             name: base_layer_name,
                         })
@@ -288,6 +294,7 @@ export default class BundleMap extends Component {
                                     resolutions: resolutions,
                                     matrixIds: gridNames,
                                 }),
+                                tileLoadFunction: securedImageWMS,
                                 style: '',
                                 wrapX: true,
                             }),
@@ -1146,7 +1153,9 @@ export default class BundleMap extends Component {
         const settings_component = () => {
             return(
                 <div>
-                    <h4>Тун удахгүй</h4>
+                    <div>
+                        <button class="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i class="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
+                    </div>
                 </div>
             )
         }
