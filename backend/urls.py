@@ -134,6 +134,8 @@ urlpatterns = [
         path('dan/save/', config_views.dan_configs_save),
         path('payment/', config_views.payment_configs),
         path('payment/save/', config_views.payment_configs_save),
+        path('qpay/', config_views.qpay_configs),
+        path('qpay/save/', config_views.qpay_configs_save),
         path('covid/', config_views.covid_configs),
         path('covid/save/', config_views.covid_configs_save),
         path('get-value-type-fields/', config_views.get_value_type_fields),

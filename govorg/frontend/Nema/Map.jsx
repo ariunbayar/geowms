@@ -1,10 +1,7 @@
 import React, { Component } from "react"
 import InspireMap from "@utils/BundleMap"
 import {service} from './service'
-import { Children } from "react"
-import { containsCoordinate } from "ol/extent"
-import {NemaPP} from './nemapop'
-import CovidDashboard from '../../../frontend/covid/src/components/covid_dashboard'
+import CovidDashboard from './covid_dashboard'
 
 
 export default class NemaMap extends Component {
@@ -85,7 +82,7 @@ export default class NemaMap extends Component {
         return (
             <div className="col-lg-12 p-0 m-0">
                 <div className="col-12 col-md-12 col-xl-12 p-0 m-0">
-                    <CovidDashboard NemaPP={NemaPP} wms_list={wms_list} is_search_bar={true} is_zoom={"closed"} geo_id={employee.geo_id} nema={true}/>
+                    <CovidDashboard wms_list={wms_list} geo_id={employee.geo_id}/>
                 </div>
             </div>
         )

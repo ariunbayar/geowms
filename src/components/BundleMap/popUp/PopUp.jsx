@@ -19,7 +19,7 @@ class PopUpCmp extends Component {
             is_prev: false,
             is_plus: true,
             data: [],
-            datas: '',
+            datas: props.datas,
             mode: '',
             name: '',
             id: '',
