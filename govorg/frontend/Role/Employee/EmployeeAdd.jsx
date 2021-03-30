@@ -32,6 +32,7 @@ export class EmployeeAdd extends Component {
                 choose_role: '',
                 state: '',
                 pro_class: '',
+                is_user: false,
             },
             role_list: [],
             emp_role_id: null,
@@ -68,6 +69,12 @@ export class EmployeeAdd extends Component {
             address_state: true,
 
             is_address_map: true,
+
+            firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -80,11 +87,14 @@ export class EmployeeAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         this.getRolesForOption()
         this.getFeildValues()
+        this.getSelectValue()
     }
 
     getRolesForOption() {
@@ -190,7 +200,7 @@ export class EmployeeAdd extends Component {
         let array
         service
             .formOptions()
-            .then(({ success, info }) => {
+            .then(({ success, info, firstOrder_geom }) => {
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, info)
@@ -215,7 +225,7 @@ export class EmployeeAdd extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: info, ...obj })
+                    this.setState({ aimag: info, ...obj, firstOrder_geom })
                 }
             })
     }
@@ -226,6 +236,16 @@ export class EmployeeAdd extends Component {
             .then(({ feature }) => {
                 if (feature) {
                     this.setState({ feature, last_geo_id: geo_id })
+                }
+            })
+    }
+
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
                 }
             })
     }
@@ -285,7 +305,7 @@ export class EmployeeAdd extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
@@ -306,7 +326,8 @@ export class EmployeeAdd extends Component {
     render() {
         const { form_values, roles, role_list, emp_role_id, prefix, is_inspire_role, is_inspire_role_null } = this.state
         const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, address_state, is_address_map } = this.state
-        const { positions, states, pro_classes, org_roles } = this.props
+        const { positions, states, pro_classes } = this.state
+        const { org_roles } = this.props
         return (
             <div className="card">
                 <div className="card-body">
@@ -341,30 +362,30 @@ export class EmployeeAdd extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="first_name">Овог:</label>
+                                                    <label htmlFor="last_name">Овог:</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
-                                                        name='first_name'
-                                                        id="id_first_name"
+                                                        className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
+                                                        name='last_name'
+                                                        id="id_last_name"
                                                         type="text"
                                                         placeholder="Овог"
                                                     />
-                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="last_name">Нэр:</label>
+                                                    <label htmlFor="first_name">Нэр:</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
-                                                        name='last_name'
-                                                        id="id_last_name"
+                                                        className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
+                                                        name='first_name'
+                                                        id="id_first_name"
                                                         type="text"
                                                         placeholder="Нэр"
                                                     />
-                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
                                                 </div>
                                             </div>
                                             <div className="form-group col-md-6">
@@ -442,8 +463,8 @@ export class EmployeeAdd extends Component {
                                                 />
                                                 <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                             </div>
-                                            <div className="form-group col-md-6 mt-1 text-center"><br/>
-                                                <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                            <div className="form-row col-md-3 mt-4 text-center"><br/>
+                                                <label className="" htmlFor='is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
                                                     name='is_admin'
@@ -451,6 +472,16 @@ export class EmployeeAdd extends Component {
                                                     type="checkbox"
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                            </div>
+                                            <div className="form-row col-md-3 mt-4 text-center"><br/>
+                                                <label className="" htmlFor='is_user'>Хэрэглэгч</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_user'
+                                                    id="id_is_user"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_user" component="div" className="text-danger"/>
                                             </div>
                                         </div>
                                         <div className="form-row">

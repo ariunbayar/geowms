@@ -32,7 +32,7 @@ export class TileCaching extends Component {
             model_alert_icon: 'success',
             image_formats: ['png', 'jpeg'],
             cache_types: ['seed', 'reseed', 'truncate'],
-            errors: '',
+            errors: [],
             timer: null,
 
         }
@@ -76,6 +76,7 @@ export class TileCaching extends Component {
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
         const group_name = this.props.match.params.group_name
         service.createGroupCache(values, group_name).then(({ success, errors, info}) => {
+            console.log("dflskjfks", success, errors, info)
             if (success) {
                 this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'success'})
                 setStatus('saved')
@@ -130,7 +131,7 @@ export class TileCaching extends Component {
                                             </div>
                                             <div className="form-row col-md-12 mb-2">
                                                     <label htmlFor="image_format" className="col-md-6 my-2"> Зургийн формат</label>
-                                                       <Field
+                                                    <Field
                                                             name='image_format'
                                                             id='image_format'
                                                             as="select"
@@ -145,7 +146,7 @@ export class TileCaching extends Component {
                                             </div>
                                             <div className="form-row col-md-12 mb-4 mt-2">
                                                     <label htmlFor="" className="col-md-6">Үйлдлийн төрөл</label>
-                                                       <Field
+                                                    <Field
                                                         name='cache_type'
                                                         id='cache_type'
                                                         as="select"
@@ -161,7 +162,7 @@ export class TileCaching extends Component {
                                             <div className="form-group col-md-6">
                                                     <label htmlFor="">Томруулах эхний утга</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.zoom_start ? 'is-invalid' : '')}
+                                                        className={'form-control ' + (errors && errors.zoom_start ? 'is-invalid' : '')}
                                                         name='zoom_start'
                                                         id="zoom_start"
                                                         type="number"
@@ -172,7 +173,7 @@ export class TileCaching extends Component {
                                             <div className="form-group col-md-6 mb-2">
                                                     <label htmlFor="">Томруулах сүүлчийн утга</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.zoom_stop ? 'is-invalid' : '')}
+                                                        className={'form-control ' + (errors && errors.zoom_stop ? 'is-invalid' : '')}
                                                         name='zoom_stop'
                                                         id="zoom_stop"
                                                         type="number"
@@ -182,7 +183,7 @@ export class TileCaching extends Component {
                                             <div className="form-group col-md-6 mb-2">
                                                     <label htmlFor="">Хэрэглэх таскуудын тоо</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.number_of_cache ? 'is-invalid' : '')}
+                                                        className={'form-control ' + (errors && errors.number_of_cache ? 'is-invalid' : '')}
                                                         name='number_of_cache'
                                                         id="number_of_cache"
                                                         type="number"

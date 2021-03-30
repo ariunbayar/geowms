@@ -99,6 +99,7 @@ def employee_detail(request, pk):
         'is_super': user.is_superuser,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
+        'is_user': user.is_user,
 
         'token': employee.token,
         'position': employee.position.name,
@@ -225,7 +226,7 @@ def employee_update(request, payload, pk, level):
     pro_class = values.get('pro_class')
     phone_number = values.get('phone_number')
     re_password_mail = values.get('re_password_mail')
-
+    is_user = values.get('is_user')
     address = payload.get('address')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
@@ -259,8 +260,13 @@ def employee_update(request, payload, pk, level):
             user.register = register.upper()
             user.username = username
             user.is_superuser = is_super
+            user.is_user = is_user or False
             if password:
                 user.set_password(password)
+            if is_user:
+                user.is_active = True
+            else:
+                user.is_active = False
             user.save()
 
             if re_password_mail:
@@ -310,6 +316,8 @@ def employee_update(request, payload, pk, level):
                     door_number=door_number,
                     address_state=address_state,
                 )
+        if is_user:
+            utils.send_approve_email(user)
         rsp = {
             'success': True, 'errors': errors
         }
@@ -355,7 +363,7 @@ def employee_add(request, payload, level, pk):
     is_admin = values.get('is_admin')
     is_super = values.get('is_super')
     phone_number = values.get('phone_number')
-
+    is_user = values.get('is_user')
     address = payload.get('address')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
@@ -387,6 +395,11 @@ def employee_add(request, payload, level, pk):
             user.gender = gender
             user.is_superuser = is_super if org.level == 4 else False
             user.register = register.upper()
+            user.is_user = is_user or False
+            if is_user:
+                user.is_active = True
+            else:
+                user.is_active = False
             user.save()
             user.roles.add(2)
             user.save()
@@ -419,7 +432,8 @@ def employee_add(request, payload, level, pk):
             employee_address.address_state = _get_address_state_code(address_state)
             employee_address.save()
 
-            utils.send_approve_email(user)
+            if is_user:
+                utils.send_approve_email(user)
 
         rsp = {
             'success': True,
@@ -660,7 +674,7 @@ def _get_employee(employee, filter_from_user):
         emp_obj = Employee.objects.filter(user=employee).first()
         id = employee.id
         last_name = employee.last_name
-        first_name = employee.first_name
+        first_name = employee.last_name[0].upper() + '.' + employee.first_name.upper()
         email = employee.email
         is_active = employee.is_active
         is_sso = employee.is_sso
@@ -670,12 +684,12 @@ def _get_employee(employee, filter_from_user):
         updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
     else:
         user = User.objects.filter(pk=employee.user_id).first()
-        id = user.id,
-        last_name = user.last_name,
-        first_name = user.first_name,
-        email = user.email,
-        is_active = user.is_active,
-        is_sso = user.is_sso,
+        id = user.id
+        last_name = user.last_name
+        first_name = user.last_name[0].upper() + '.' + user.first_name.upper()
+        email = user.email
+        is_active = user.is_active
+        is_sso = user.is_sso
         is_admin = employee.is_admin
         position = employee.position.name
         created_at = employee.created_at.strftime('%Y-%m-%d')
@@ -707,16 +721,21 @@ def employee_list(request, payload, level, pk):
     query = payload.get('query') or ''
     per_page = payload.get('perpage')
     sort_name = payload.get('sort_name') or 'first_name'
+    is_user = payload.get('is_user')
 
     if sort_name == 'first_name' or sort_name == '-first_name' or sort_name == 'email' or sort_name == '-email':
         qs = User.objects
-        qs = qs.filter(employee__org=org)
+        if is_user:
+            qs = qs.filter(employee__org=org, is_user=is_user)
+        else:
+            qs = qs.filter(employee__org=org)
         qs = qs.annotate(search=SearchVector(
                 'last_name',
                 'first_name',
                 'email'
             )
         )
+
     else:
         qs = Employee.objects
         qs = qs.filter(org=org)
@@ -1429,7 +1448,8 @@ def form_options(request, option):
     if option == 'second':
         rsp = {
             'success': True,
-            'secondOrders': admin_levels
+            'secondOrders': admin_levels,
+            'firstOrder_geom': utils.get_1stOrder_geo_id(),
         }
     else:
         rsp = {

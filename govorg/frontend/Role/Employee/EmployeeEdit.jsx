@@ -34,6 +34,7 @@ export class EmployeeEdit extends Component {
                 is_admin: false,
                 state: '',
                 pro_class: '',
+                is_user: false,
             },
             modal_status: 'closed',
             is_loading: true,
@@ -77,6 +78,12 @@ export class EmployeeEdit extends Component {
             map_coordinate: [],
 
             is_marker: true,
+
+            firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -101,6 +108,8 @@ export class EmployeeEdit extends Component {
         this.getGeom = this.getGeom.bind(this)
 
         this.refreshMap = this.refreshMap.bind(this)
+
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
@@ -110,7 +119,20 @@ export class EmployeeEdit extends Component {
         this.emp_perms=[]
 
         this.getDetail()
-        this.getFeildValues()
+        if (!this.state.id) {
+            this.getFeildValues()
+        }
+        this.getSelectValue()
+    }
+
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
     }
 
     getDetail() {
@@ -133,6 +155,7 @@ export class EmployeeEdit extends Component {
                             is_admin: employee_detail.is_admin,
                             state: employee_detail.state_id,
                             pro_class: employee_detail.pro_class_id,
+                            is_user: employee_detail.is_user,
                         },
                         point: employee_detail.point,
                         street: employee_detail.street,
@@ -245,17 +268,6 @@ export class EmployeeEdit extends Component {
 
 
     handleSubmit(form_values, {setStatus, setSubmitting, setErrors}) {
-        const username = form_values.username
-        const first_name = form_values.first_name
-        const last_name = form_values.last_name
-        const position = form_values.position
-        const email = form_values.email
-        const gender = form_values.gender
-        const register = form_values.register
-        const phone_number = form_values.phone_number
-        const is_admin = form_values.is_admin
-        const state = form_values.state
-        const pro_class = form_values.pro_class
         const {id, role_id} = this.state
 
         const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
@@ -272,7 +284,7 @@ export class EmployeeEdit extends Component {
 
         this.checkRoleAndPerm()
         service
-            .updateEmployee(username, first_name, last_name, position, email, gender, register, phone_number, is_admin, role_id, id, this.perms, this.remove_perms, address, state, pro_class)
+            .updateEmployee(form_values, role_id, id, this.perms, this.remove_perms, address)
             .then(({ success, info, errors }) => {
                 if(success) {
                     setStatus('saved')
@@ -358,7 +370,7 @@ export class EmployeeEdit extends Component {
         let array
         service
             .formOptions()
-            .then(({ success, info }) => {
+            .then(({ success, info, firstOrder_geom }) => {
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, info)
@@ -383,7 +395,7 @@ export class EmployeeEdit extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: info, ...obj })
+                    this.setState({ aimag: info, ...obj, firstOrder_geom })
                 }
             })
     }
@@ -453,7 +465,7 @@ export class EmployeeEdit extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
@@ -488,8 +500,8 @@ export class EmployeeEdit extends Component {
     render() {
         const {form_values, roles, role_list, prefix, is_inspire_role, is_inspire_role_null, perms, old_role_id, role_id, id, is_address_map } = this.state
         const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, address_state, feature, street, apartment, door_number, point } = this.state
-        const { positions, states, pro_classes, org_roles } = this.props
-
+        const { org_roles } = this.props
+        const { positions, states, pro_classes } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -525,30 +537,30 @@ export class EmployeeEdit extends Component {
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="first_name">Овог:</label>
+                                                    <label htmlFor="id_last_name">Овог:</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
-                                                        name='first_name'
-                                                        id="id_first_name"
+                                                        className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
+                                                        name='last_name'
+                                                        id="id_last_name"
                                                         type="text"
                                                         placeholder="Овог"
                                                     />
-                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
                                                 <div className="position-relative has-icon-right">
-                                                    <label htmlFor="last_name">Нэр:</label>
+                                                    <label htmlFor="id_first_name">Нэр:</label>
                                                     <Field
-                                                        className={'form-control ' + (errors.last_name ? 'is-invalid' : '')}
-                                                        name='last_name'
-                                                        id="id_last_name"
+                                                        className={'form-control ' + (errors.first_name ? 'is-invalid' : '')}
+                                                        name='first_name'
+                                                        id="id_first_name"
                                                         type="text"
                                                         placeholder="Нэр"
                                                     />
-                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
                                                 </div>
                                             </div>
                                             <div className="form-group col-md-6">
@@ -631,20 +643,33 @@ export class EmployeeEdit extends Component {
                                                             <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                                         </div>
                                                     </div>
-                                                    {this.props.employee.is_admin &&
-                                                    <div className="form-group col-md-3 mt-1 text-center"><br/>
-                                                        <label htmlFor='is_admin'>Байгууллагын админ</label>
-                                                        <Field
-                                                            className="ml-2"
-                                                            name='is_admin'
-                                                            id="id_is_admin"
-                                                            type="checkbox"
-                                                        />
-                                                        <ErrorMessage name="is_admin" component="div" className="text-danger"/>
-                                                    </div>
+                                                    {
+                                                        this.props.employee.is_admin &&
+                                                            <>
+                                                                <div className="form-group col-md-2 mt-1 text-center"><br/>
+                                                                    <label htmlFor='is_admin'>Байгууллагын админ</label>
+                                                                    <Field
+                                                                        className="ml-2"
+                                                                        name='is_admin'
+                                                                        id="id_is_admin"
+                                                                        type="checkbox"
+                                                                    />
+                                                                    <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                                </div>
+                                                                <div className="form-group col-md-2 mt-1 text-center"><br/>
+                                                                    <label htmlFor='is_user'>Хэрэглэгч</label>
+                                                                    <Field
+                                                                        className="ml-2"
+                                                                        name='is_user'
+                                                                        id="id_is_user"
+                                                                        type="checkbox"
+                                                                    />
+                                                                    <ErrorMessage name="is_user" component="div" className="text-danger"/>
+                                                                </div>
+                                                            </>
                                                     }
                                                     {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
-                                                    <div className="col-md-3 mt-1 text-center"><br/>
+                                                    <div className="col-md-2 mt-1 text-center"><br/>
                                                         <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
                                                             {} Нууц үг солих имэйл илгээх
                                                         </button>

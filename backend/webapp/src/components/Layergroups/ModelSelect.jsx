@@ -95,7 +95,7 @@ export default class ModelSelectLayer extends Component {
         const { layer_list, current_layers, search_query, layerPerPage, current_page } = this.state
         return (
             <Fragment>
-                <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-absolute w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
+                <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-fixed w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
                     <div className="col-md-12 modal-dialog modal-dialog-centered">
                         <div className="modal-content animated row" >
                             <div className="col-md-12">

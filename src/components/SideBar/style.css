@@ -1,0 +1,159 @@
+.sidebar-left {
+    border-right: 3px solid transparent;
+}
+
+.sidebar {
+    position: absolute;
+    height: calc(100% - 37px - 96px);
+    top: 3px;
+    left: 3px;
+    bottom: 3px;
+    width: 400px;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.4);
+    transition: 0.5s;
+}
+.sidebar.collapsed {
+    transition: 0.5s;
+    width: 42px;
+}
+
+@media (min-width: 768px){
+    .sidebar-left {
+        left: 6px;
+    }
+}
+
+@media (max-width: 991px) and (min-width: 768px){
+    .sidebar {
+        width: 305px;
+    }
+}
+
+.sidebar-tabs {
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    background-color: rgba(0, 60, 136, 0.5);
+}
+
+.sidebar-tabs, .sidebar-tabs > ul {
+    position: absolute;
+    width: 40px;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.sidebar-tabs > ul + ul {
+    bottom: 0;
+}
+
+.sidebar-tabs > ul > li {
+    width: 100%;
+    height: 40px;
+    color: #fff;
+    font-size: 12pt;
+    overflow: hidden;
+    transition: all 80ms;
+}
+
+.sidebar-tabs > ul > li.active {
+    color: #fff;
+    background-color: #034ea2;
+}
+
+.sidebar-tabs > ul > li > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    line-height: 40px;
+    color: inherit;
+    text-decoration: none;
+    text-align: center;
+}
+
+.sidebar-tabs > ul > li > a >.fa {
+    display: inline-block;
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.sidebar-left .sidebar-tabs {
+    left: 0;
+}
+
+.sidebar-tabs {
+    overflow: hidden;
+}
+
+.sidebar-tabs, .sidebar-tabs > ul {
+    position: absolute;
+    width: 40px;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+@media (min-width: 768px){
+    .sidebar-tabs {
+        border-radius: 2px 0 0 2px;
+    }
+}
+
+
+.sidebar-left .sidebar-content {
+    left: 43px;
+    right: 0;
+}
+
+.sidebar-content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+@media (min-width: 768px){
+    .sidebar-content {
+        border-radius: 0 2px 2px 0;
+    }
+}
+
+.sidebar-pane.active {
+    display: block;
+}
+@media (max-width: 991px) and (min-width: 768px){
+    .sidebar-pane {
+        min-width: 265px;
+    }
+}
+
+.sidebar-pane {
+    display: none;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    padding: 10px 20px;
+}
+
+.sidebar-header {
+    margin: -10px -20px 0;
+    height: 40px;
+    padding: 0 20px;
+    line-height: 40px;
+    font-size: 14.4pt;
+    color: #fff;
+    background-color: #034ea2;
+}
+
+.lorem {
+    font-style: italic;
+    color: #AAA;
+}

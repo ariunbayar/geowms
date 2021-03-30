@@ -6,6 +6,9 @@ from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+import main.geoserver as geoserver
+from main import utils
+from django.core.cache import cache
 
 
 def ajax_required(f):
@@ -106,3 +109,56 @@ def api_inspire_perm(perm_kind):
         return wrap
 
     return inner
+
+
+def get_conf_geoserver_base_url(url_nemelt):
+
+    def inner(f):
+
+        def wrap(request, *args, **kwargs):
+            base_url = cache.get('{}'.format(url_nemelt))
+            if not base_url:
+                conf_geoserver = utils.geo_cache('', 'geoserver_config', geoserver.get_connection_conf(), 86400)
+
+                if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
+                    raise Http404
+
+                base_url = '{protocol}://{host}:{port}/geoserver/{url_nemelt}'.format(
+                    host=conf_geoserver['geoserver_host'],
+                    port=conf_geoserver['geoserver_port'],
+                    protocol=conf_geoserver['geoserver_protocol'],
+                    url_nemelt=url_nemelt
+                )
+                cache.set('{}'.format(url_nemelt), base_url, 86400)
+            args = [base_url, *args]
+
+            try:
+                return f(request, *args, **kwargs)
+            except Http404:
+                return HttpResponseBadRequest('{"success": false}')
+
+        wrap.__doc__ = f.__doc__
+        wrap.__name__ = f.__name__
+
+        return wrap
+
+    return inner
+
+
+def get_conf_geoserver(f):
+
+    def wrap(request, *args, **kwargs):
+
+        if request.user.is_authenticated:
+            conf_geoserver = utils.geo_cache('', 'geoserver_config', geoserver.get_connection_conf(), 86400)
+            if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
+                raise Http404
+            args = [conf_geoserver, *args]
+            return f(request, *args, **kwargs)
+
+        raise Http404
+
+    wrap.__doc__ = f.__doc__
+    wrap.__name__ = f.__name__
+
+    return wrap

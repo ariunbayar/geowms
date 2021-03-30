@@ -1,4 +1,3 @@
-
 import React, { Component } from "react"
 import { PortalDataTable } from "@utils/DataTable/index"
 
@@ -26,7 +25,11 @@ export class EmployeeForm extends Component {
                 {"field": "position",  "text": ""},
                 {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
             ],
+            is_user: true,
+            drop_name: 'Хэрэглэгч',
         }
+
+        this.handleListChange = this.handleListChange.bind(this)
     }
 
     set_icon(value) {
@@ -41,6 +44,10 @@ export class EmployeeForm extends Component {
         this.props.history.push(`/gov/perm/employee/${values.id}/detail/`)
     }
 
+    handleListChange(is_user, drop_name) {
+        this.setState({ is_user, drop_name })
+    }
+
     render() {
         const {
             refresh,
@@ -50,10 +57,23 @@ export class EmployeeForm extends Component {
             custom_query,
             нэмэх_товч,
             нэмэлт_талбарууд,
+            is_user,
         } = this.state
         return (
             <div className="card">
                 <div className="card-body">
+                    <div className="d-flex flex-row-reverse mb-2">
+                        <div className="dropdown-menu-right show">
+                            <a className="btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {this.state.drop_name}
+                            </a>
+
+                            <div className="dropdown-menu mr-2" aria-labelledby="dropdownMenuLink">
+                                <button className="dropdown-item" onClick={() => this.handleListChange(true, 'Хэрэглэгч')}>Хэрэглэгч</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Бүх ажилчид')}>Бүх ажилчид</button>
+                            </div>
+                        </div>
+                    </div>
                     <div className="col-md-12">
                         <PortalDataTable
                             refresh={refresh}
@@ -66,6 +86,7 @@ export class EmployeeForm extends Component {
                             нэмэх_товч={нэмэх_товч}
                             custom_query={custom_query}
                             нэмэлт_талбарууд={нэмэлт_талбарууд}
+                            is_user={is_user}
                         />
                     </div>
                 </div>

@@ -1,10 +1,13 @@
+import json
+from django.db.models.expressions import Combinable
+
 from django.shortcuts import render, get_object_or_404
 from django.db.models import F
 from django.contrib.auth.decorators import login_required
-from backend.org.models import Org, Employee
-from main.decorators import ajax_required
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
+
+from backend.org.models import Org, Employee
 from backend.inspire.models import GovPerm
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPerm
@@ -14,7 +17,10 @@ from backend.inspire.models import LThemes
 from backend.inspire.models import LPackages
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MGeoDatas
+from backend.config.models import CovidConfig
 
+from frontend.covid.models import CovidDashboard
+from frontend.covid.models import CovidDashboardLog
 from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
@@ -24,7 +30,10 @@ from govorg.backend.utils import (
     get_perm_list
 )
 
+from main.decorators import ajax_required
 from main import utils
+from main.components import Datatable
+from django.views.decorators.cache import cache_page
 
 def _get_properties_by_feature(initial_qs, feature_ids):
 
@@ -173,12 +182,272 @@ def _emp_role(org, user):
     }
 
 
+def _get_covid_configs(org):
+    configs = list()
+    qs = CovidConfig.objects
+    qs = qs.filter(org=org)
+    if qs:
+        configs = list(qs.values('name', 'value', 'mn_name'))
+    return configs
+
+
+def _for_dashb_list():
+    return [
+        'batlagdsan_tohioldol_too',
+        'edgersen_humuus_too',
+        'emchlegdej_bui_humuus_too',
+        'nas_barsan_hunii_too',
+        'tusgaarlagdaj_bui_humuus_too',
+        'niit_eruul_mendiin_baiguullaga_too',
+        'emnelegiin_too',
+        'emiin_sangiin_too',
+        'shinjilgee_hiisen_too',
+        'vaccine_hiisen_too',
+    ]
+
+
+def _get_form_fields(Model, org):
+
+    send_fields = []
+    if org.level == 3:
+        for f in Model._meta.get_fields():
+            if 'too' in f.name:
+                if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                    if f.name == 'emiin_sangiin_too':
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': True,
+                            'togtmol_too': utils.get_covid_config('emiin_sangiin_too') or 1016
+                        })
+                    elif f.name == 'emnelegiin_too':
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': True,
+                            'togtmol_too': utils.get_covid_config('emlegiin_too') or 1731
+                        })
+                    elif f.name == 'niit_eruul_mendiin_baiguullaga_too':
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': True,
+                            'togtmol_too': utils.get_covid_config('niit_eruul_mend_baiguullaga_too') or 2750
+                        })
+                    else:
+                        send_fields.append({
+                            'origin_name': f.name,
+                            'name': f.verbose_name,
+                            'length': f.max_length,
+                            'is_togtmol': False,
+                            'togtmol_too': 123
+                        })
+    return send_fields
+
+
+def _get_child(children, data):
+    childs = []
+    for child in children.values():
+        child_dict = dict()
+        child_dict['name'] = child['name']
+        child_dict['geo_id'] = child['geo_id']
+        for name in _for_dashb_list():
+            data[name] = child[name]
+        childs.append(child_dict)
+        data['children'] = childs
+    return data
+
+
+def _make_json_for_dashb(initial_qs, items, get_child=True):
+    datas = list()
+    for item in items.values():
+        data = dict()
+        parent_id = item['id']
+        data['name'] = item['name']
+        data['geo_id'] = item['geo_id']
+        for name in _for_dashb_list():
+            data[name] = item[name]
+        children = initial_qs.filter(parent_id=parent_id)
+        if children and get_child:
+            data['children'] = _make_json_for_dashb(initial_qs, children)
+            datas.append(data)
+        else:
+            datas.append(data)
+
+    return datas
+
+
+@require_GET
+@ajax_required
 @login_required(login_url='/gov/secure/login/')
+def get_covid_dashboard(request):
+    initial_qs = CovidDashboard.objects
+    parents = initial_qs.filter(parent_id__isnull=True)
+    data = _make_json_for_dashb(initial_qs, parents)
+    rsp = {
+        'success': True,
+        'data': data,
+    }
+    return JsonResponse(rsp)
+
+
+def _get_str_date(date, item):
+    date = utils._get_str_date(date)
+    return date
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def dashboard_list(request, payload, geo_id):
+    оруулах_талбарууд = [
+        'id',
+        'name', 'geo_id',
+        'edgersen_humuus_too', 'batlagdsan_tohioldol_too',
+        'nas_barsan_hunii_too', 'shinjilgee_hiisen_too',
+        'updated_at',
+    ]
+
+    хувьсах_талбарууд = [
+        {
+            "field": "updated_at",
+            "action": _get_str_date,
+            "new_field": "updated_at"
+        }
+    ]
+
+    initial_qs = CovidDashboardLog.objects
+    initial_qs = initial_qs.filter(geo_id=geo_id)
+    if initial_qs:
+        datatable = Datatable(
+            model=CovidDashboardLog,
+            payload=payload,
+            initial_qs=initial_qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+        )
+
+        items, total_page = datatable.get()
+        rsp = {
+            'items': items,
+            'page': payload.get("page"),
+            'total_page': total_page
+        }
+    else:
+        rsp = {
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
+
+    return JsonResponse(rsp)
+
+
+def _dash_create_log(geo_id, initial_qs):
+    values = initial_qs.values()
+    for value in values:
+        del value['id']
+        for name in _for_dashb_list():
+            if name == value['name']:
+                value[name] = value[name]
+    log_qs = CovidDashboardLog.objects
+    log_qs.create(**value)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def save_dashboard(request, payload):
+    values = payload.get('values')
+    geo_id = payload.get('geo_id')
+    qs = CovidDashboard.objects
+    dashb = qs.filter(geo_id=geo_id)
+    if dashb:
+        _dash_create_log(geo_id, dashb)
+        dashb.update(
+            **values
+        )
+        success = True
+        info = 'Амжилттай хадгаллаа'
+    else:
+        success = False
+        info = 'Алдаа гарсан байна'
+
+    rsp = {
+        'success': success,
+        'info': info,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def remove_dashboard(request, pk):
+    qs = CovidDashboardLog.objects
+    qs = qs.filter(pk=pk)
+    qs.delete()
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай устгалаа'
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def save_dashboard_log(request, payload):
+    values = payload.get('values')
+    geo_id = payload.get('geo_id')
+
+    date = values['updated_at']
+    values['updated_at'] = utils.date_to_timezone(date)
+    values['updated_at']
+    covid_qs = CovidDashboard.objects
+    covid_qs = covid_qs.filter(geo_id=geo_id)
+    covid_qs = covid_qs.first()
+
+    values['name'] = covid_qs.name
+    values['geo_id'] = geo_id
+    values['parent_id'] = covid_qs.parent_id
+
+    qs = CovidDashboardLog.objects
+    qs.create(
+        **values
+    )
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгаллаа',
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_covid_dashboard_id(request, geo_id):
+    initial_qs = CovidDashboard.objects
+    covid = initial_qs.filter(geo_id=geo_id)
+    data = _make_json_for_dashb(initial_qs, covid, False)
+    rsp = {
+        'success': True,
+        'data': data,
+    }
+    return JsonResponse(rsp)
+
+
+@login_required(login_url='/gov/secure/login/')
+# @cache_page(60 * 15)
 def frontend(request):
 
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
+    covid_configs = _get_covid_configs(org)
+    covid_dashboard = _get_form_fields(CovidDashboard, org)
     context = {
         'org': {
             "org_name": org.name.upper(),
@@ -186,9 +455,13 @@ def frontend(request):
             'org_role': _org_role(org),
             'employee': {
                 'is_admin': employee.is_admin,
-                'username': employee.user.username
+                'username': employee.user.username,
+                'geo_id': org.geo_id or None
             },
-            'allowed_geom': geom.json if geom else None
+            'allowed_geom': geom.json if geom else None,
+            'obeg_employee': True if employee.org.name.lower() == 'обег' else False,
+            'covid_configs': covid_configs,
+            'covid_dashboard': covid_dashboard,
         },
     }
 
@@ -223,4 +496,29 @@ def get_approve_and_revoke(request):
         'approve': True if approve else False,
         'revoke': True if revoke else False,
     }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def set_config(request, payload):
+    employee = get_object_or_404(Employee, user=request.user, is_admin=True)
+    values = payload.get("values")
+    names = utils.search_dict_from_object(values)
+
+    qs = CovidConfig.objects
+    config_names = qs.filter(name__in=names.keys())
+
+    for config_name in config_names:
+        config_name.value = names[config_name.name]
+        if config_name.name == 'line_chart_datas':
+            config_name.value = json.dumps(names[config_name.name], ensure_ascii=False)
+        config_name.save()
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгаллаа'
+    }
+
     return JsonResponse(rsp)

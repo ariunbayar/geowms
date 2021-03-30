@@ -136,8 +136,12 @@ urlpatterns = [
         path('dan/save/', config_views.dan_configs_save),
         path('payment/', config_views.payment_configs),
         path('payment/save/', config_views.payment_configs_save),
+        path('qpay/', config_views.qpay_configs),
+        path('qpay/save/', config_views.qpay_configs_save),
         path('covid/', config_views.covid_configs),
         path('covid/save/', config_views.covid_configs_save),
+        path('get-value-type-fields/', config_views.get_value_type_fields),
+        path('save-value-types/', config_views.save_value_types),
     ], 'config'))),
 
     path('api/error500/', include(([
@@ -181,6 +185,7 @@ urlpatterns = [
         path('create_layer_group/', geoserver_views.create_layer_group),
         path('get_group_cache_list/', geoserver_views.get_group_cache),
         path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
+        path('update_geo_web_cache/', geoserver_views.update_geo_cache),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
