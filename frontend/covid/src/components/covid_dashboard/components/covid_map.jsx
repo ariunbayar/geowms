@@ -51,6 +51,7 @@ export default class CovidMap extends Component {
                     featurefromUrl={true}
                     vector_source={geo_data}
                     form_datas={form_datas}
+                    is_menu_bar_all={'closed'}
                 />
             </div>
         )
