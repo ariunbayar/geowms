@@ -4,7 +4,7 @@ import * as Yup from 'yup'
 import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import InspireMap from "@utils/BundleMap"
-import {NemaPP} from './nemapop'
+import {NemaPP} from './covid_dashboard/components/nemapop'
 import BackButton from "@utils/Button/BackButton"
 
 

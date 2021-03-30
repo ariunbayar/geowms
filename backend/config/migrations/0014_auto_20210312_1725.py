@@ -25,7 +25,7 @@ def create_value_type_config(apps, schema_editor):
         "double": "number",
         "link": "text",
         "multi-select": "checkbox",
-        "multi-text":"textarea",
+        "multi-text": "textarea",
         "number": "number",
         "single-select": "select",
         "text": "text",

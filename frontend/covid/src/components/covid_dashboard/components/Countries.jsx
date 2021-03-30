@@ -42,22 +42,22 @@ export  class Countries extends Component {
         const check_package_event = this.state.check_package_event
         const id_array = id.split('-')
         const id_array_length = id_array.length
-        event.className = "list-group-item list-group-hover mt-2 collapsed list-group-active"
+        event.className = "list-group-item list-group-hover mt-0 collapsed list-group-active"
         if (id_array_length === 1){
             event.querySelector('i').className = "icon expand-icon fa fa-minus"
             if (prev_theme_event !== null){
-                prev_event.className = "list-group-item list-group-hover mt-2 collapsed"
+                prev_event.className = "list-group-item list-group-hover mt-1 collapsed"
                 prev_theme_event.querySelector('i').className = "icon expand-icon fa fa-plus"
             }
             this.setState({prev_theme_event:  event})
         }
         if (id_array_length === 2){
-            prev_theme_event.className = "list-group-item list-group-hover mt-2 collapsed"
+            prev_theme_event.className = "list-group-item list-group-hover mt-1 collapsed"
             if (prev_package_event !== null){
                 if (prev_package_event.id.split('-')[0] === id.split('-')[0]){
                     if (prev_package_event.id === id){
                         if (event.querySelector('i').className === "icon expand-icon fa fa-minus ml-4"){
-                            prev_event.className = "list-group-item list-group-hover mt-2 collapsed"
+                            prev_event.className = "list-group-item list-group-hover mt-1 collapsed"
                             event.querySelector('i').className = "icon expand-icon fa fa-plus ml-4"
                         }
                         else{
@@ -66,14 +66,14 @@ export  class Countries extends Component {
                     }
                     else{
                         event.querySelector('i').className = "icon expand-icon fa fa-minus ml-4"
-                        prev_event.className = "list-group-item list-group-hover mt-2 collapsed"
+                        prev_event.className = "list-group-item list-group-hover mt-1 collapsed"
                         prev_package_event.querySelector('i').className = "icon expand-icon fa fa-plus ml-4"
                     }
                 }
                 else{
                     event.querySelector('i').className = "icon expand-icon fa fa-minus ml-4"
                     if (check_package_event !== null){
-                        prev_event.className = "list-group-item list-group-hover mt-2 collapsed"
+                        prev_event.className = "list-group-item list-group-hover mt-1 collapsed"
                         check_package_event.querySelector('i').className = "icon expand-icon fa fa-plus ml-4"
                     }
                     this.setState({check_package_event: prev_package_event})
@@ -85,7 +85,7 @@ export  class Countries extends Component {
             this.setState({prev_package_event:  event})
         }
         if (id_array_length === 3){
-            prev_event.className = "list-group-item list-group-hover mt-2 collapsed"
+            prev_event.className = "list-group-item list-group-hover mt-0 collapsed"
         }
         this.setState({prev_event: event})
     }
@@ -99,7 +99,7 @@ export  class Countries extends Component {
                         <div id='accordion1'>
                             {datas.map((theme, theme_idx) =>
                                 <ul className="list-group bg-light mr-1" key={theme_idx}>
-                                    <li className="list-group-item list-group-hover mt-2 collapsed"
+                                    <li className="list-group-item list-group-hover mt-1 collapsed"
                                         id={`${theme_idx}`}
                                         data-toggle="collapse"
                                         data-target={`#collapse-theme${theme_idx}`}
@@ -114,7 +114,7 @@ export  class Countries extends Component {
                                         <div id={`accordion10${theme_idx}`}>
                                             {theme.children.map((packages, pack_idx) =>
                                                 <ul className="list-group" key={pack_idx}>
-                                                    <li className="list-group-item list-group-hover mt-2 collapsed"
+                                                    <li className="list-group-item list-group-hover mt-1 collapsed"
                                                         id={`${theme_idx}-${pack_idx}`}
                                                         data-toggle="collapse"
                                                         data-target={`#collapse-packages${theme_idx}${pack_idx}`}
@@ -129,7 +129,7 @@ export  class Countries extends Component {
                                                         <div id={`accordion100${pack_idx}`}>
                                                             {packages.children.map((feature, idx) =>
                                                                 <ul className="list-group" key={idx}>
-                                                                    <li className="list-group-item list-group-hover mt-2"
+                                                                    <li className="list-group-item list-group-hover mt-0"
                                                                         id={`${theme_idx}-${pack_idx}-${idx}`}
                                                                         onClick={(e) => this.activeView(e.currentTarget, 'feature', feature.geo_id)}>
                                                                         <i style={{paddingLeft: "40px"}}></i> &nbsp;
