@@ -148,17 +148,20 @@ export class App extends Component {
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
-                                <MenuItem
-                                    icon="gp-text-primary fa fa-circle-o"
-                                    url="/gov/froms/tseg-info/tsegpersonal/"
-                                    text="Цэгийн мэдээлэл"
-                                >
+                                {
+                                    emp_role.point_perm_view &&
+                                    <MenuItem
+                                        icon="gp-text-primary fa fa-circle-o"
+                                        url="/gov/froms/tseg-info/tsegpersonal/"
+                                        text="Цэгийн мэдээлэл"
+                                    >
                                     <ul className="sidebar-submenu">
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/inspire-tseg/" text="Цэгийн жагсаалт"></MenuItem>
                                     </ul>
                                 </MenuItem>
+                                }
                                 {/* <MenuItem
                                     icon="gp-text-primary fa fa-circle-o"
                                     url="/gov/tseg-personal/"

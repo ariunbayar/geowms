@@ -144,10 +144,19 @@ def _emp_role(org, user):
     themes = []
     employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    point_perm_view = False
     if emp_perm:
+
+        point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
         feature_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
         if feature_ids:
-            package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
+            qs = LFeatures.objects.filter(feature_id__in=feature_ids)
+            if point_feature_id:
+                if point_feature_id in feature_ids:
+                    qs = qs.exclude(feature_id=point_feature_id)
+                    point_perm_view = True
+
+            package_ids = list(qs.distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
             theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
 
             for package_id in package_ids:
@@ -175,10 +184,12 @@ def _emp_role(org, user):
                 themes.append({
                     'id': theme.theme_id,
                     'name': theme.theme_name,
+                    'code': theme.theme_code,
                 })
     return {
         'themes': themes,
         'package_features': package_features,
+        'point_perm_view': point_perm_view
     }
 
 
