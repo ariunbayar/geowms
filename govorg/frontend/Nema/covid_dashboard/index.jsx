@@ -59,21 +59,13 @@ class CovidDashboard extends PureComponent {
 
     render() {
         const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas } = this.state
-        const { wms_list } = this.props
-
         return (
             <div className="card-body bg-light">
+                <Loader is_loading={is_loading} />
                 <div className="row">
-                    <Loader is_loading={is_loading} />
-                    <div className="col-xl-2 col-sm-3">
-                        <Countries
-                            getGeoID={this.getGeoID}
-                            datas={datas}
-                        />
-                    </div>
-                    <div className="col-xl-10 col-sm-9">
+                    <div className="col-xl-12 col-sm-12">
                         <div className="row">
-                            <div className="col-12">
+                            <div className="col-10 col-sm-12 col-xl-10">
                                 <div className="row">
                                     {count_datas.map((data, idx) =>
                                         <Card
@@ -86,13 +78,18 @@ class CovidDashboard extends PureComponent {
                                     )}
                                 </div>
                             </div>
+                            <div className="col-2 col-sm-12 col-xl-2">
+                                <Countries
+                                    getGeoID={this.getGeoID}
+                                    datas={datas}
+                                />
+                            </div>
                         </div>
                         <div className="row">
                             <div className="col-xl-12 col-sm-12">
                                 <CovidMap
                                     geo_id={geo_id}
                                     datas={datas}
-                                    wms_list={wms_list}
                                 />
                             </div>
                         </div>
