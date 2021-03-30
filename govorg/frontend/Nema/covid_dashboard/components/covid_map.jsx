@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import InspireMap from "@utils/BundleMap"
 import {service} from './service'
-import {CovidPP} from './covid_popup'
+import {NemaPP} from './nemapop'
 import { containsCoordinate } from "ol/extent"
 
 export default class CovidMap extends Component {
@@ -42,15 +42,15 @@ export default class CovidMap extends Component {
 
     render() {
         const { geo_data, form_datas, center_of_geom} = this.state
+        const { wms_list } = this.props
         return (
             <div className="col p-0">
                 <InspireMap
                     height="80vh"
-                    PPContent={CovidPP}
-                    center={center_of_geom}
-                    featurefromUrl={true}
                     vector_source={geo_data}
-                    form_datas={form_datas}
+                    PPContent={NemaPP}
+                    wms_list={wms_list || []}
+                    is_search_bar={true}
                 />
             </div>
         )

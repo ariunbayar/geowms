@@ -1,15 +1,9 @@
 import React, { PureComponent } from 'react';
-import Navbar from "./components/Navbar"
-import {Menu} from "./components/Menu"
 import {Countries} from "./components/Countries"
 import Graph from "./components/Graph"
-import {Header} from "./components/Header"
-
 import {service} from './components/service'
 import CovidMap from './components/covid_map'
-import Vaccine from './components/vaccine'
 import Loader from '@utils/Loader'
-import { number } from 'yup';
 import Card from '@utils/Covid/components/Card'
 import '@utils/Covid/components/card.css'
 
@@ -65,10 +59,12 @@ class CovidDashboard extends PureComponent {
 
     render() {
         const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas } = this.state
+        const { wms_list } = this.props
+
         return (
             <div className="card-body bg-light">
-                <Loader is_loading={is_loading} />
                 <div className="row">
+                    <Loader is_loading={is_loading} />
                     <div className="col-xl-2 col-sm-3">
                         <Countries
                             getGeoID={this.getGeoID}
@@ -96,6 +92,7 @@ class CovidDashboard extends PureComponent {
                                 <CovidMap
                                     geo_id={geo_id}
                                     datas={datas}
+                                    wms_list={wms_list}
                                 />
                             </div>
                         </div>

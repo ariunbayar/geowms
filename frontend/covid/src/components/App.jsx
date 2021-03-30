@@ -7,7 +7,7 @@ export class App extends Component {
 
     render() {
         return (
-          <div className="bg-light">
+          <div className="card mb-0">
             <BrowserRouter>
                 <Switch>
                   <Route path="/covid/" component={CovidPage}/>

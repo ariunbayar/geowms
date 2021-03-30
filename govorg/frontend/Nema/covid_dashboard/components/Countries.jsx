@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import './scroll.css'
 
-export  class Countries extends Component {
+export class Countries extends Component {
     constructor(props) {
         super(props);
         this.state = {

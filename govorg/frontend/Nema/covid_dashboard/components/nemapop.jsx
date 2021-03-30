@@ -1,8 +1,6 @@
 import React, { Component, Fragment } from "react"
-import {service} from '../service'
-import ReactDOM from 'react-dom'
+import {service} from '../../service'
 import Loader from "@utils/Loader"
-import {Control} from 'ol/control'
 
 export class NemaPP extends Component {
 
