@@ -40,6 +40,7 @@ export default class InspireMap extends Component {
         this.sendFeatureInfo = []
         this.is_not_visible_layers = []
         this.saved_aimag_name = ''
+        this.clicked_coordinate = []
         this.state = {
             projection: 'EPSG:3857',
             is_authenticated: false,
@@ -150,7 +151,7 @@ export default class InspireMap extends Component {
     cartButton(is_cart, point_name, code, point_id, is_again_clicked, geom_name, pdf_id){
         if(is_cart == true){
             this.controls.cart.showModal(
-                this.state.coordinate_clicked,
+                this.clicked_coordinate,
                 is_cart,
                 this.state.x,
                 this.state.y,
@@ -168,7 +169,11 @@ export default class InspireMap extends Component {
         {
             this.setState({is_authenticated})
         })
+
         this.loadMapData()
+        if (this.clicked_coordinate.length > 0) {
+            this.controls.coordinateCopy.setCoordinate(this.clicked_coordinate)
+        }
     }
 
     getFullName(feature) {
@@ -257,9 +262,9 @@ export default class InspireMap extends Component {
     componentDidUpdate(prevProps, prevState) {
         const { vector_source, form_datas, wms_list, center} = this.props
         const { layer_one_tile } = this.state
-        if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
-            this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
-        }
+        // if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
+        //     this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
+        // }
 
         if (prevState.layer_one_tile != layer_one_tile) {
             this.setState({layer_one_tile})
@@ -665,8 +670,8 @@ export default class InspireMap extends Component {
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
-
-            this.setState({ coordinate_clicked })
+            this.clicked_coordinate = coordinate_clicked
+            // this.setState({ coordinate_clicked })
             this.showFeaturesAt(coordinate)
         }
     }
@@ -888,8 +893,7 @@ export default class InspireMap extends Component {
         this.sendFeatureInfo = []
         const overlay = this.overlay
         overlay.setPosition(coordinate)
-
-        this.setState({ pay_modal_check: false })
+        // this.setState({ pay_modal_check: false })
         if (this.props.form_datas) {
 
             this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
