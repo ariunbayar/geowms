@@ -1073,7 +1073,6 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
 
 def _create_lavlagaa_infos(payment, folder_name):
     is_true = False
-    has_points = []
     points = PaymentPoint.objects.filter(payment=payment)
     if points:
         filtered_points, tseg_pdfs = _class_name_bolon_orgoor_angilah(points, folder_name)
@@ -1428,6 +1427,7 @@ def download_pdf(request, pk, pdf_id):
     payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
     point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
     # generate the file
+    pdf_id = pdf_id.zfill(4)
     file_name = pdf_id + '.pdf'
     src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', str(payment.id), file_name)
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
