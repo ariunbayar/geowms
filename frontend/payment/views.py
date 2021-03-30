@@ -8,9 +8,8 @@ import subprocess
 import glob
 import csv
 import PIL.Image as Image
+
 from datetime import date
-from django.db.models.base import Model
-from django.utils import tree
 from fpdf import FPDF
 from pyproj import Transformer
 
@@ -615,23 +614,23 @@ def _table_json():
         {
             'width': 30,
             'head_name': 'Өргөрөг',
-            'body_name': 'sheet2',
+            'body_name': 'sheet3',
         },
         {
             'width': 30,
             'head_name': 'Уртраг',
-            'body_name': 'sheet3',
+            'body_name': 'sheet2',
         },
-        # {
-        #     'width': 30,
-        #     'head_name': 'N_UTM',
-        #     'body_name': 'n_utm',
-        # },
-        # {
-        #     'width': 30,
-        #     'head_name': 'E_UTM',
-        #     'body_name': 'e_utm',
-        # },
+        {
+            'width': 30,
+            'head_name': 'N_UTM',
+            'body_name': 'n_utm',
+        },
+        {
+            'width': 30,
+            'head_name': 'E_UTM',
+            'body_name': 'e_utm',
+        },
         {
             'width': 20,
             'head_name': 'Өндөр',
@@ -668,7 +667,7 @@ def _remove_white_spaces(class_name):
 def _create_lavlagaa_file(class_infos, path):
     table_col = _table_json()
     point_infos = class_infos['infos']
-    table_start_gap = 60
+    table_start_gap = 30
     class PDF(FPDF):
         def footer(self):
             self.set_y(-15)
@@ -957,6 +956,11 @@ def _append_to_list(values, add_values):
     return values
 
 
+def _round_float(value, round_n=4):
+    value = round(value, round_n)
+    return value
+
+
 def _get_geom_info(mdata, value):
     mgeo_datas_qs = _filter_Model([{'geo_id': mdata['geo_id']}], Model=MGeoDatas)
     geo_json = []
@@ -964,14 +968,14 @@ def _get_geom_info(mdata, value):
     geo = mgeo.geo_data
     geo_json = json.loads(geo.json)
 
-    latlongx = geo_json['coordinates'][0][0]
-    latlongy = geo_json['coordinates'][0][1]
-    value['sheet2'] = latlongx
-    value['sheet3'] = latlongy
+    latlongy = geo_json['coordinates'][0][0]
+    latlongx = geo_json['coordinates'][0][1]
+    value['sheet2'] = latlongy
+    value['sheet3'] = latlongx
 
     utm = utils.lat_long_to_utm(latlongy, latlongx)
-    value['n_utm'] = utm[0]
-    value['e_utm'] = utm[1]
+    value['n_utm'] = _round_float(utm[1])
+    value['e_utm'] = _round_float(utm[0])
 
     return value
 
@@ -1175,17 +1179,17 @@ def createPdf(values):
         BB = int((B-BA)*60)
         BC = float((B-BA-BB/60)*3600)
         BC = "%.6f" % BC
-        Bchar = str(BA) + '°' + str(BB) + "'" + str("%.4f" % float(BC))  + '"'
-        Lchar = str(LA) + '°' + str(LB) + "'" + str("%.4f" % float(LC))  + '"'
+        Bchar = str(BA) + '°' + str(BB) + "'" + str(_round_float(float(BC)))  + '"'
+        Lchar = str(LA) + '°' + str(LB) + "'" + str(_round_float(float(LC)))  + '"'
         transformer = Transformer.from_crs(4326, 26917)
         transformer = Transformer.from_crs("EPSG:4326", 'EPSG:3857')
         L = float("%.6f" % L)
         B = float("%.6f" % B)
         val1 = transformer.transform(float(L), float(B))
         utmx = val1[0]
-        utmx = str("%.6f" % utmx)
+        utmx = str(_round_float(utmx, round_n=6))
         utmy = val1[1]
-        utmy = str("%.6f" % utmy)
+        utmy = str(_round_float(utmy, round_n=6))
     else:
         Bchar = ''
         Lchar = ''
@@ -1421,17 +1425,13 @@ def purchase_from_cart(request, payload):
 @require_GET
 @login_required
 def download_pdf(request, pk, pdf_id):
-    has_pdf = _check_pdf_in_folder(pdf_id)
-    if len(has_pdf) > 0:
-        payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
-        point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
-        # generate the file
-        file_name = pdf_id + '.pdf'
-        src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', file_name)
-        response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
-        return response
-    else:
-        raise Http404
+    payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
+    point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
+    # generate the file
+    file_name = pdf_id + '.pdf'
+    src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', str(payment.id), file_name)
+    response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
+    return response
 
 
 @require_GET
@@ -1789,10 +1789,6 @@ def get_contain_geoms(request, payload):
 
     return JsonResponse(rsp)
 
-
-
-
-
-payment = Payment.objects.filter(pk=50).first()
-folder_name = 'tseg-personal-file'
-is_created = _create_lavlagaa_infos(payment, folder_name)
+# payment = Payment.objects.filter(pk=1).first()
+# folder_name = 'tseg-personal-file'
+# is_created = _create_lavlagaa_infos(payment, folder_name)

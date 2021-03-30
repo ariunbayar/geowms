@@ -7,6 +7,7 @@ import base64
 import re
 import unicodedata
 import importlib
+import pyproj
 
 import json
 from django.apps import apps
@@ -862,10 +863,28 @@ def get_key_and_compare(dict, item):
     return value
 
 
-def lat_long_to_utm(lat, longi):
-    point = Point([lat, longi], srid=4326)
-    utm = point.transform(3857, clone=True)
-    return utm.coords
+def lat_long_to_utm(y, x, insys=4326):
+    print(y, x)
+    def _calc_outsys():
+        if 114 < y < 120:
+            outsys = 50
+        elif 108 < y < 114:
+            outsys = 49
+        elif 102 < y < 108:
+            outsys = 48
+        elif 96 < y < 102:
+            outsys = 47
+        elif 90 < y < 96:
+            outsys = 46
+        elif 84 < y < 90:
+            outsys = 45
+        return outsys
+    print("out", _calc_outsys())
+    inproj = pyproj.CRS('EPSG:' + str(insys))
+    outproj = pyproj.CRS('EPSG:326' + str(_calc_outsys()))
+    value = pyproj.transform(inproj, outproj, x, y)
+    print("val", value)
+    return value
 
 
 def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
