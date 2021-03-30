@@ -188,6 +188,7 @@ urlpatterns = [
         path('dahsb-list/<str:geo_id>/', org_views.dashboard_list),
         path('save-covid-dashboard-log/', org_views.save_dashboard_log),
         path('remove-dashboard/<int:pk>/', org_views.remove_dashboard),
+        path('emp-role/tseg-roles/', org_views.emp_tseg_roles),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

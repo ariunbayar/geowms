@@ -533,3 +533,17 @@ def set_config(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def emp_tseg_roles(request):
+    employee = get_object_or_404(Employee, user=request.user, is_admin=True)
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгаллаа'
+    }
+
+    return JsonResponse(rsp)

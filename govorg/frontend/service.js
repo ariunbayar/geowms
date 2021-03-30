@@ -15,7 +15,16 @@ export const service = {
     updatec2405,
     get_attr_details,
     get_nema_choice_list,
+    getEmpRole,
 }
+
+function getEmpRole() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch('/gov/emp-role/tseg-roles/', requestOptions).then(handleResponse)
+}
+
 
 function loadBaseLayers() {
     const requestOptions = {
