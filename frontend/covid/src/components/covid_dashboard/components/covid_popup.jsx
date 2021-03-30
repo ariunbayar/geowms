@@ -94,7 +94,7 @@ export class CovidPP extends Component {
                                 <li className="text-success">
                                     <div className="row pl-2">
                                         <small className="text-dark col-md-8 px-0">Эдгэрсэн</small>
-                                        <small className="text-muted col-md-4 float-right px-0">{123122}</small>
+                                        <small className="text-muted col-md-4 float-right px-0">{edgersen_humuus_too}</small>
                                     </div>
                                 </li>
                                 <li className="text-dark">
