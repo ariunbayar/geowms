@@ -22,7 +22,6 @@ export  class Countries extends Component {
     }
 
     handleOrderChange(chooseOrder, value) {
-        console.log(chooseOrder, value);
         if (value == '-1') {
             if (chooseOrder == 'secondOrder') {
                 value = '496'
