@@ -68,7 +68,9 @@ export default class InspireMap extends Component {
             layer_2405: '',
             vectorSource: null,
             search_date: '',
-            is_search_bar: props.is_search_bar || false
+            is_search_bar: props.is_search_bar || false,
+            is_menu_bar: props.is_menu_bar || false,
+            is_menu_bar_all: props.is_menu_bar_all || false,
         }
 
         this.controls = {
@@ -1220,7 +1222,7 @@ export default class InspireMap extends Component {
 
 
     render() {
-        const {is_loading, is_search_bar} = this.state
+        const {is_loading, is_search_bar, is_menu_bar, is_menu_bar_all} = this.state
         const height = this.props.height ? this.props.height : '80vh'
 
         const Menu_comp = () => {
@@ -1271,7 +1273,7 @@ export default class InspireMap extends Component {
         }
 
         var items = []
-        items.push({
+        is_menu_bar && items.push({
             "key": "menus",
             "icon": "fa fa-bars",
             "title": "Давхаргууд",
@@ -1296,9 +1298,9 @@ export default class InspireMap extends Component {
                     style={{height: `${height}`,}}
                     className="mw-100 px-0 mx-0"
                 >
-                    <SideBar
+                    {is_menu_bar_all &&<SideBar
                         items = {items}
-                    />
+                    />}
                 </div>
             </div>
         )

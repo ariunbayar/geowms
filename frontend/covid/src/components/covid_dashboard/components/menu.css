@@ -1,0 +1,130 @@
+.corona-content {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.corona-tab {
+    width: 100%;
+    padding: 16px 24px 0 24px;
+    box-sizing: border-box;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 5px 3px 5px rgba(0, 0, 0, 0.05);
+    z-index: 201;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.corona-verticalWrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow-x: auto;
+}
+
+.infoTile {
+    border-bottom: #DDD 1px solid;
+    color: #333;
+}
+
+.infoTile .infoTileHeader {
+    display: flex;
+    justify-content: space-between;
+}
+
+.infoTile .title {
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 4px;
+    color: #333333;
+    font-weight: 600;
+}
+
+/* 2 */
+
+.infoTile .infoTileDosesAdministered {
+    display: flex;
+    align-items: center;
+}
+
+.infoTile .dosesAdministered {
+    font-size: 20px;
+    color: #1F8536;
+    font-weight: bold;
+    line-height: 24px;
+}
+
+/* 3 */
+
+.infoTileConfirmedHeader {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #ddd;
+    padding-top: 16px;
+    margin-top: 16px;
+    margin-bottom: 4px;
+}
+
+/* 4 */
+
+.infoTileConfirmed {
+    display: flex;
+    align-items: center;
+}
+
+.infoTile .confirmed {
+    font-size: 20px;
+    color: #DE3700;
+    font-weight: bold;
+    line-height: 24px;
+}
+
+/* 5 */
+.infoTile .infoTileData {
+    padding-bottom: 12px;
+}
+
+.country .legend {
+    padding-top: 8px;
+}
+
+.legend {
+    display: grid;
+    padding-top: 8px;
+    grid-template-columns: 8px auto min-content;
+    align-items: center;
+    grid-gap: 16px 8px;
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.country .legend:first-child {
+    padding-top: 12px;
+}
+
+.legend .color {
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+}
+
+.legend .description {
+    font-weight: 600;
+}
+
+.legend .total {
+    color: #444;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.infoTile .lastUpdate {
+    font-size: 10px;
+    color: #767676;
+    line-height: 20px;
+    padding-bottom: 12px;
+}
