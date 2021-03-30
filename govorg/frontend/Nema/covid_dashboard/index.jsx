@@ -83,6 +83,7 @@ class CovidDashboard extends PureComponent {
                                     <Countries
                                         getGeoID={this.getGeoID}
                                         datas={datas}
+                                        geo_id={geo_id}
                                     />
                                 </div>
                             </div>
