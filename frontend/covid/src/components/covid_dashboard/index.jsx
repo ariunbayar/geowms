@@ -22,13 +22,13 @@ class CovidDashboard extends PureComponent {
             mongol_data: [],
             update_time: '',
             mongol_zuruu: [],
-            geo_id: '',
             is_loading: true,
             count_datas: [],
             onoodor_counts_obj: {},
             ochigdor_counts_obj: {},
             count_covid_datas: [],
             geo_id: props.geo_id ? props.geo_id : '496',
+            geo_name: 'Монгол улсын хэмжээнд'
         }
         this.getGeoID = this.getGeoID.bind(this)
         this.getState = this.getState.bind(this)
@@ -46,8 +46,8 @@ class CovidDashboard extends PureComponent {
         }
     }
 
-    getGeoID(geo_id){
-        this.setState({ geo_id })
+    getGeoID(geo_id, geo_name){
+        this.setState({ geo_id, geo_name })
     }
 
     getData() {
@@ -67,7 +67,7 @@ class CovidDashboard extends PureComponent {
     }
 
     render() {
-        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, onoodor_counts_obj, ochigdor_counts_obj } = this.state
+        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, onoodor_counts_obj, ochigdor_counts_obj, geo_name } = this.state
         return (
             <div className="card-body bg-light">
                 <Loader is_loading={is_loading} />
@@ -85,6 +85,7 @@ class CovidDashboard extends PureComponent {
                     <div className="col-xl-10 col-sm-9">
                         <div className="row">
                             <div className="col-xl-12 col-sm-12">
+                                <h3 className="text-center">{geo_name}</h3>
                                 <CovidMap
                                     geo_id={geo_id}
                                     datas={datas}
