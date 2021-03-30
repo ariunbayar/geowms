@@ -31,20 +31,48 @@ export default class StyleMap extends Component {
                 dashed_line_length: props.dashed_line_length,
                 color_opacity: props.color_opacity,
                 wellknownname: props.wellknownname,
-                is_loading: false
+                is_loading: false,
             }
+
             this.loadMapData = this.loadMapData.bind(this)
             this.loadMap = this.loadMap.bind(this)
         }
 
     componentDidMount() {
         this.loadMap()
-        this.loadMapData()
+        if (this.props.only_clicked) {
+            this.loadMapData()
+        }
     }
 
     componentDidUpdate(pP, pS){
-        if(pP.geom_type !=this.props.geom_type){
-            this.setState({geom_type:this.props.geom_type})
+        const {
+            style_color, style_size,
+            fill_color, style_name,
+            dashed_line_gap, dashed_line_length,
+            color_opacity, wellknownname,
+            geom_type, only_clicked
+        } = this.props
+
+        if(
+            pP.style_color != style_color || pP.style_size != style_size
+            || pP.fill_color != fill_color || pP.style_name != style_name ||
+            pP.dashed_line_gap != dashed_line_gap || pP.dashed_line_length != dashed_line_length ||
+            pP.color_opacity != color_opacity || pP.wellknownname != wellknownname||
+            pP.geom_type != geom_type
+        ){
+            this.setState({
+                style_size, fill_color,
+                style_color, style_name, color_opacity, wellknownname,
+                dashed_line_gap, dashed_line_length,
+                min_range: 0, max_range: 0, geom_type
+            })
+        }
+
+        if (pP.only_clicked != only_clicked) {
+            if (this.props.only_clicked) {
+                this.loadMapData()
+            }
         }
     }
 
@@ -182,29 +210,38 @@ export default class StyleMap extends Component {
             }),
         };
 
+        this.setState({is_loading: true})
         service.getStyleData(geom_type).then(({data}) =>
             {
-            if (data)
-            {
-                    const features = new GeoJSON({
-                        dataProjection: dataProjection,
-                        featureProjection: featureProjection,
-                    }).readFeatures(data)
-                    const vectorSource = new VectorSource({
-                        features: features
+                if (data)
+                {
+
+                    this.map.getLayers().forEach(layer => {
+                        if (layer && layer.get('id') === 'aimag') {
+                            layer.getSource().clear();
+                        }
                     });
-                    const vector_layer = new VectorLayer({
-                    source: vectorSource,
-                    style: function (feature) {
-                        return styles_new[feature.getGeometry().getType()];
+                        const features = new GeoJSON({
+                            dataProjection: dataProjection,
+                            featureProjection: featureProjection,
+                        }).readFeatures(data)
+                        const vectorSource = new VectorSource({
+                            features: features
+                        });
+                        const vector_layer = new VectorLayer({
+                            source: vectorSource,
+                            style: function (feature) {
+                                return styles_new[feature.getGeometry().getType()];
+                            },
+                            id: 'aimag'
+                        })
+
+                        this.map.addLayer(vector_layer)
+                        this.map.getView().fit(vectorSource.getExtent(),{ padding: [200, 200, 200, 200], duration: 3000 });
+                        this.setState({is_loading: false})
                     }
-                    })
-                    this.map.addLayer(vector_layer)
-                    this.map.getView().fit(vectorSource.getExtent(),{ padding: [200, 200, 200, 200] });
-                    this.setState({is_loading: false})
                 }
-            }
-        )
+            )
     }
 
     render() {

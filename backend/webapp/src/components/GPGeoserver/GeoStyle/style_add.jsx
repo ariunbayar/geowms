@@ -1,5 +1,7 @@
 import React, { Component } from "react"
 import StyleMap from "./Map"
+import { service } from './service'
+
 
 export class CreateStyle extends Component {
     constructor(props) {
@@ -21,7 +23,7 @@ export class CreateStyle extends Component {
             style_name: '',
             style_title: '',
             style_abstract: '',
-            check_style: false,
+            check_style: true,
             min_range: 0,
             max_range: 0,
             shape_type: '',
@@ -29,7 +31,9 @@ export class CreateStyle extends Component {
                 {"name": 'Point', 'geo_name':'PointSymbolizer'},
                 {"name": 'LineString', 'geo_name':'LineSymbolizer'},
                 {"name": 'Polygon', 'geo_name':'PolygonSymbolizer'}
-            ]
+            ],
+            only_clicked: false,
+            prev_style_name: '',
         }
         this.handleValues = this.handleValues.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
@@ -66,46 +70,62 @@ export class CreateStyle extends Component {
             fill_color, style_name,
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
-            had_chosen, check_style
+            had_chosen, shape_type, check_style
         } = this.state
 
-        if( pS.check_style !== check_style ){
+        if(
+            pS.style_color != style_color || pS.style_size != style_size
+            || pS.fill_color != fill_color || pS.style_name != style_name ||
+            pS.dashed_line_gap != dashed_line_gap || pS.dashed_line_length != dashed_line_length ||
+            pS.color_opacity != color_opacity || pS.wellknownname != wellknownname
+            || pS.shape_type !== shape_type || pS.check_style != check_style
+        ){
             this.setState({
-                check_style:false, style_size, fill_color,
+                style_size, fill_color,
                 style_color, style_name, color_opacity, wellknownname,
-                dashed_line_gap, dashed_line_length, check_style_name: '',
-                min_range: 0, max_range: 0, check_style_name: ''
+                dashed_line_gap, dashed_line_length,
+                min_range: 0, max_range: 0, shape_type, check_style: false,
+                only_clicked: false
             })
         }
 
-        if(pS.had_chosen !==  had_chosen){
+        if(pS.had_chosen !== had_chosen){
             this.setState({
                 check_style:false, style_color: '#800000',
                 style_size: 1, fill_color:  '#C0C0C0',
                 wellknownname: '', wellknowshape: '',
                 div_angle: '', color_opacity: 0.3,
                 dashed_line_length: 0, dashed_line_gap: 0,
-                min_range: 0, max_range: 0
+                min_range: 0, max_range: 0,
+                shape_type: '', only_clicked: false
             })
         }
     }
 
     handleOnClick() {
-        const { style_name } = this.state
+        const { style_name, prev_style_name, check_style_name} = this.state
             if(! style_name){
-                this.setState({check_style_name: 'Style-ийн нэр хоосон байна'})
+                this.setState({check_style_name: 'Style-ийн нэр хоосон байна', check_style: true, only_clicked: false})
             }
             else{
-                this.setState({is_loading:true})
-                service.checkStyleName(style_name).then(({success})=>
-                {
-                    if(success){
-                        this.setState({is_loading: false, check_style:true})
-                    }
-                    else{
-                        this.setState({is_loading:false, check_style_name: 'Style-ийн нэр давхцаж байна'})
-                    }
-                })
+                if (style_name != prev_style_name) {
+                    this.setState({is_loading:true, prev_style_name: style_name})
+                    service.checkStyleName(style_name).then(({success})=>
+                    {
+                        if(success){
+                            this.setState({is_loading: false, check_style: false, only_clicked: true, check_style_name: ''})
+                        }
+                        else{
+                            this.setState({is_loading:false, check_style_name: 'Style-ийн нэр давхцаж байна', check_style: true, only_clicked: false})
+                        }
+                    })
+                }
+                else if (check_style_name) {
+                    this.setState({check_style: true, only_clicked: false})
+                }
+                else {
+                    this.setState({check_style: false, only_clicked: true})
+                }
             }
         }
 
@@ -120,7 +140,7 @@ export class CreateStyle extends Component {
                 min_range, max_range, dashed_line_gap,
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
-                wellknowshape, div_angle
+                wellknowshape, div_angle, only_clicked
 
             } = this.state
             return (
@@ -355,6 +375,7 @@ export class CreateStyle extends Component {
                                         <button
                                             type="button"
                                             className='btn btn-primary col-md-6 mx-3'
+                                            disabled={check_style}
                                             onClick={this.handleOnClick}
                                         >
                                             Style шалгах
@@ -370,20 +391,16 @@ export class CreateStyle extends Component {
                             style_size={style_size}
                             fill_color={fill_color}
                             geom_type={shape_type}
+                            check_style={check_style}
                             wellknownname={wellknownname}
                             wellknowshape={wellknowshape}
                             div_angle={div_angle}
                             color_opacity={color_opacity}
                             dashed_line_length={dashed_line_length}
                             dashed_line_gap={dashed_line_gap}
+                            only_clicked={only_clicked}
                         />
                     </div>
-                    {/* <ModalAlert
-                        modalAction={() => this.modalClose()}
-                        status={modal_alert_status}
-                        title={model_alert_text}
-                        model_type_icon={model_alert_icon}
-                    /> */}
                 </div>
             )
         }
