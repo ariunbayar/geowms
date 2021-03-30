@@ -46,7 +46,7 @@ export default class CovidMap extends Component {
         return (
             <div className="col p-0">
                 <InspireMap
-                    height="50vh"
+                    height="80vh"
                     vector_source={geo_data}
                     form_datas={nema ? '': form_datas}
                     PPContent={nema ? NemaPP : CovidPP}
