@@ -130,11 +130,11 @@ function getAddresses(level, id) {
     return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
 }
 
-function getAddress(level, id) {
+function getAddress(pk) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`${prefix}/${level}/${id}/address/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/address-${pk}/`, requestOptions).then(handleResponse)
 }
 
 function getEmpInfo(id, is_erguul) {

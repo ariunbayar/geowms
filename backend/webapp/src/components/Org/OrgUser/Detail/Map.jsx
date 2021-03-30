@@ -33,13 +33,8 @@ export default class AddressMap extends Component {
         this.readFeatures = this.readFeatures.bind(this)
         this.readFeature = this.readFeature.bind(this)
         this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
-        this.translateStart = this.translateStart.bind(this)
-        this.selectedFeature = this.selectedFeature.bind(this)
-        this.getEmpInfo = this.getEmpInfo.bind(this)
         this.changedFeatureSetColor = this.changedFeatureSetColor.bind(this)
         this.makeLineString = this.makeLineString.bind(this)
-        this.sendErguuleg = this.sendErguuleg.bind(this)
-        this.downloadImage = this.downloadImage.bind(this)
     }
 
     componentDidMount() {
@@ -73,18 +68,7 @@ export default class AddressMap extends Component {
 
         this.vector_layer = vector_layer
 
-        const select = new Select();
-        select.on("select", event => this.selectedFeature(event))
-        this.select = select
-
-        const translate = new Translate({
-            features: select.getFeatures(),
-        });
-        translate.on("translatestart", event => this.translateStart(event));
-        this.translate = translate
-
         const map = new Map({
-            interactions: defaultInteractions().extend([select, translate]),
             layers: [
                 new TileLayer({
                     source: new OSM(),
@@ -102,100 +86,6 @@ export default class AddressMap extends Component {
         map.addControl(this.controls.form)
 
         this.map = map
-    }
-
-    makeFields(array, conv_array) {
-        let fields = Array()
-        Object.keys(array).map((field, idx) => {
-            conv_array.map((conv_field, c_idx) => {
-                if (field == conv_field.origin_name) {
-                    let mur = Object()
-                    mur['name'] = conv_field.name
-                    mur['origin_name'] = field
-                    mur['value'] = array[field] ? array[field] : ''
-                    mur['disabled'] = conv_field.disabled
-                    mur['choices'] = null
-                    mur['length'] = conv_field.length
-
-                    if (field == 'level_1') {
-                        mur['value'] = array['level_1'] + ", " + array['level_2'] + ", " + array['level_3'] + ", " + array['street'] + " гудамж " + array['apartment'] + " байр, " + array['door_number'] + " тоот"
-                    }
-                    fields.push(mur)
-                }
-            })
-        })
-        return fields
-    }
-
-    getEmpInfo(id, is_erguul) {
-        if (!is_erguul) {
-            is_erguul = false
-        }
-
-        service
-            .getEmpInfo(id, is_erguul)
-            .then(({ success, info, title }) => {
-                if (success) {
-                    let conv = [
-                        {
-                            'origin_name': 'org_name',
-                            'name': 'Байгууллагын нэр',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                        {
-                            'origin_name': 'phone_number',
-                            'name': 'Утасны дугаар',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                        {
-                            'origin_name': 'level_1',
-                            'name': 'Гэрийн хаяг',
-                            'disabled': true,
-                            'length': 2000,
-                        },
-                        {
-                            'origin_name': 'last_name',
-                            'name': 'Овог',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                        {
-                            'origin_name': 'first_name',
-                            'name': 'Нэр',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                        {
-                            'origin_name': 'date_start',
-                            'name': 'Эхлэх огноо',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                        {
-                            'origin_name': 'date_end',
-                            'name': 'Дуусах огноо',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                        {
-                            'origin_name': 'part_time',
-                            'name': 'Ээлж',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                        {
-                            'origin_name': 'erguul_address',
-                            'name': 'Эргүүлийн хаяг',
-                            'disabled': true,
-                            'length': 100,
-                        },
-                    ]
-                    const fields = this.makeFields(info, conv)
-                    this.controls.form.showForm(true, fields, title, undefined, '', true)
-                }
-            })
     }
 
     featureWithTextStyle(text, color='red') {
@@ -238,60 +128,6 @@ export default class AddressMap extends Component {
         const firt_name_conv = first_name.charAt(0).toUpperCase() + first_name.slice(1)
         const full_name = last_name_conv + '. ' + firt_name_conv
         return full_name
-    }
-
-    selectedFeature(event) {
-        this.translate.setActive(true)
-        const feature = event.selected[0]
-        if (feature) {
-            if (feature.getGeometry().getType() == 'Point') {
-                const properties = feature.getProperties()
-                const id = properties.id
-                this.id = id
-                if (properties.is_cloned) {
-                    this.translate.setActive(false)
-                }
-            }
-            else {
-                this.select.getFeatures().clear();
-            }
-        }
-        else {
-            this.changedFeatureSetColor()
-        }
-    }
-
-    translateStart(event) {
-        let too = 0
-        const source = this.vector_layer.getSource()
-
-        const feature = event.features.getArray()[0]
-        const featureID = feature.getProperties()['id']
-
-        const on_map_features = source.getFeatures();
-        if (on_map_features != null && on_map_features.length > 0) {
-            for (var i = 0; i < on_map_features.length; i++) {
-                const properties = on_map_features[i].getProperties();
-                const id = properties.id;
-                if (id == featureID && too < 2) {
-                    too++
-                }
-                else if(too == 2) {
-                    break
-                }
-            }
-        }
-
-        if (too < 2) {
-            const clonedFeature = feature.clone()
-            const full_name = this.getFullName(clonedFeature)
-            const style = this.featureWithTextStyle(full_name)
-            clonedFeature.setStyle(style)
-            clonedFeature.setProperties({ is_cloned: true })
-            source.addFeature(clonedFeature)
-        }
-
-        feature.setProperties({ is_changed: true })
     }
 
     fromLonLatToMapCoord(coordinate) {
@@ -352,7 +188,7 @@ export default class AddressMap extends Component {
 
                             this.extent = extent
                             if (!this.props.is_admin) {
-                                this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
+                                this.map.getView().fit(extent,{ padding: [555, 555, 555, 555], duration: 2000 })
                             }
 
                             source.addFeature(line_feature)
@@ -361,53 +197,6 @@ export default class AddressMap extends Component {
                 }
             }
         }
-    }
-
-    downloadImage(val, emp_id, coordinate_clicked, erguul_id) {
-        const map = this.map
-        let photo
-        this.props.setLoading(true)
-        map.once('rendercomplete', () => {
-            var mapCanvas = document.createElement('canvas');
-            var size = map.getSize();
-            mapCanvas.width = size[0];
-            mapCanvas.height = size[1];
-            var mapContext = mapCanvas.getContext('2d');
-            Array.prototype.forEach.call(
-                document.querySelectorAll('.ol-layer canvas'),
-                function (canvas) {
-                    if (canvas.width > 0) {
-                        var opacity = canvas.parentNode.style.opacity;
-                        mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
-                        var transform = canvas.style.transform;
-                        // Get the transform parameters from the style's transform matrix
-                        var matrix = transform
-                            .match(/^matrix\(([^\(]*)\)$/)[1]
-                            .split(',')
-                            .map(Number);
-                        // Apply the transform to the export map context
-                        CanvasRenderingContext2D.prototype.setTransform.apply(
-                            mapContext,
-                            matrix
-                        );
-                        mapContext.drawImage(canvas, 0, 0);
-                    }
-                }
-            );
-            if (navigator.msSaveBlob) {
-                // link download attribuute does not work on MS browsers
-                navigator.msSaveBlob(mapCanvas.msToBlob(), 'map.png');
-            } else {
-                photo = mapCanvas.toDataURL()
-            }
-            this.props.saveErguulPlace(val, emp_id, coordinate_clicked, photo, erguul_id)
-        });
-    }
-
-    sendErguuleg(val, emp_id, coordinate_clicked, erguul_id) {
-        const extent = this.extent
-        this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
-        this.downloadImage(val, emp_id, coordinate_clicked, erguul_id)
     }
 
     removeFeatureFromSource(featureID, state='') {
@@ -446,7 +235,7 @@ export default class AddressMap extends Component {
         })[0];
         source.addFeature(feat)
         feat.setProperties({ id })
-        this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], duration: 2000 })
+        // this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], duration: 2000 })
     }
 
     readFeatures(features) {
@@ -486,7 +275,10 @@ export default class AddressMap extends Component {
 
     render() {
         return (
-            <div id="map" style={{'height': 'calc( 49vh - 34px - 7px)'}}></div>
+            <div>
+                <h5>Гэрийн хаяг:</h5>
+                <div id="map" className="mt-2" style={{'height': 'calc( 49vh - 34px - 7px)'}}></div>
+            </div>
         )
     }
 }

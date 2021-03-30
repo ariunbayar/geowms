@@ -46,9 +46,8 @@ export class Detail extends Component {
 
     componentDidMount(){
         this.fetchDetail()
-        const level = this.props.match.params.level
-        const id = this.props.match.params.id
-        this.getAddresses(level, id)
+        const pk = this.props.match.params.emp
+        this.getAddresses(pk)
     }
 
     fetchDetail() {
@@ -89,9 +88,9 @@ export class Detail extends Component {
         this.props.history.push(`/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/`)
     }
 
-    getAddresses(level, id) {
+    getAddresses(pk) {
         service
-            .getAddress(level, id)
+            .getAddress(pk)
             .then(({ success, points }) => {
                 if (success) {
                     this.setState({ points, is_loading: false })
@@ -267,7 +266,7 @@ export class Detail extends Component {
                 </div>
                 <AddressMap
                     features={points}
-                    feature={feature}
+                    feature={points}
                     setLoading={this.setLoading}
                 />
             </div>
