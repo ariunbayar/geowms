@@ -1080,7 +1080,7 @@ def get_properties(feature_id, get_all=False):
         return property_qs, l_feature_c_qs, data_type_c_qs
 
 
-def _value_types():
+def value_types():
     return [
         {'value_type': 'value_number', 'value_names': ['double', 'number']},
         {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
@@ -1097,7 +1097,7 @@ def json_load(data):
 
 def make_value_dict(value, properties_qs, is_display=False):
     value = json_load(value)
-    for types in _value_types():
+    for types in value_types():
         for prop in properties_qs.values():
             for key, val in value.items():
                 if prop['value_type_id'] in types['value_names'] and key == prop['property_code']:
@@ -1179,7 +1179,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:

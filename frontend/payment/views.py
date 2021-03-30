@@ -9,6 +9,8 @@ import glob
 import csv
 import PIL.Image as Image
 from datetime import date
+from django.db.models.base import Model
+from django.utils import tree
 from fpdf import FPDF
 
 from django.conf import settings
@@ -35,6 +37,7 @@ from backend.dedsanbutets.models import ViewProperties
 from backend.inspire.models import (
     LFeatureConfigs,
     LDataTypeConfigs,
+    LFeatures,
     LProperties,
     LValueTypes,
     LCodeLists,
@@ -598,7 +601,7 @@ def _table_json():
         {
             'width': 30,
             'head_name': 'Цэгийн дугаар',
-            'body_name': 'point_id',
+            'body_name': 'PointNumber',
         },
         {
             'width': 30,
@@ -610,20 +613,20 @@ def _table_json():
             'head_name': 'Уртраг',
             'body_name': 'sheet3',
         },
-        {
-            'width': 30,
-            'head_name': 'N_UTM',
-            'body_name': 'n_utm',
-        },
-        {
-            'width': 30,
-            'head_name': 'E_UTM',
-            'body_name': 'e_utm',
-        },
+        # {
+        #     'width': 30,
+        #     'head_name': 'N_UTM',
+        #     'body_name': 'n_utm',
+        # },
+        # {
+        #     'width': 30,
+        #     'head_name': 'E_UTM',
+        #     'body_name': 'e_utm',
+        # },
         {
             'width': 20,
             'head_name': 'Өндөр',
-            'body_name': 'ondor',
+            'body_name': 'elevationValue',
         },
     ]
     return table_col
@@ -656,6 +659,7 @@ def _remove_white_spaces(class_name):
 def _create_lavlagaa_file(class_infos, path):
     table_col = _table_json()
     point_infos = class_infos['infos']
+    table_start_gap = 60
     class PDF(FPDF):
         def footer(self):
             self.set_y(-15)
@@ -665,7 +669,7 @@ def _create_lavlagaa_file(class_infos, path):
             self.cell(0, 8, 'Геопортал', 0, 0, 'C')
 
         def table_header(self):
-            pdf.cell(30)
+            pdf.cell(table_start_gap)
 
             pdf.set_font(font_name, '', 11)
             for col in range(0, len(table_col)):
@@ -676,8 +680,8 @@ def _create_lavlagaa_file(class_infos, path):
     pdf = PDF()
     pdf.add_page(orientation='Landscape')
     pdf.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'gzbgzzg-logo.jpg'), x=25, y=8, w=37, h=40)
-    org_name = class_infos['org_name']
-    class_name = _remove_white_spaces(class_infos['class_name'])
+    org_name = class_infos['CompanyName']
+    class_name = _remove_white_spaces(class_infos['GeodeticalNetworkPointClassValue'])
     font_name = 'DejaVu'
 
     pdf.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
@@ -704,7 +708,7 @@ def _create_lavlagaa_file(class_infos, path):
 
     end_y = 0
     for idx in range(0, len(point_infos)):
-        pdf.cell(30)
+        pdf.cell(table_start_gap)
         pdf.set_font(font_name, '', 9)
         current_x = pdf.get_x()
         current_y = pdf.get_y()
@@ -733,7 +737,7 @@ def _create_lavlagaa_file(class_infos, path):
         if calc_cell_height == cell_height:
             pdf.ln()
 
-    file_name = class_infos['t_type'] + "_" + class_infos['org_name']
+    file_name = class_name + "_" + class_infos['CompanyName']
     file_ext = 'pdf'
     pdf.output(os.path.join(path, file_name + "." + file_ext), 'F')
 
@@ -879,39 +883,223 @@ def _get_item_from_mpoint_view(mpoint):
     return point_info
 
 
-def _class_bolon_orgoor_angilah(has_points):
-    for point in has_points:
-        print(point)
+def _get_item_from_inspire(mpoint):
+    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
+    point_info = {
+        'point_id': mpoint.point_name,
+        'ondor': mpoint.ondor,
+        'aimag': mpoint.aimag,
+        'sum': mpoint.sum,
+        'sheet2': mpoint.sheet2,
+        'sheet3': mpoint.sheet3,
+        'n_utm': utm[0],
+        'e_utm': utm[1],
+        't_type': mpoint.t_type,
+        'class_name': mpoint.point_class_name,
+        'pdf_id': mpoint.pid,
+        'org_name': mpoint.org_name if hasattr(mpoint, 'org_name') else 'Геопортал',
+    }
+    return point_info
+
+
+def _get_feature_id(feature_code):
+    feat_qs = LFeatures.objects
+    feat_qs = feat_qs.filter(feature_code=feature_code)
+    return feat_qs
+
+
+def _get_filter_dicts():
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_code__iexact='pointnumber')
+    prop = prop_qs.first()
+
+    feature_qs = _get_feature_id('gnp-gp-gp')
+    if feature_qs:
+
+        feature = feature_qs.first()
+        property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
+        data = utils.get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
+
+        for prop_dict in prop_qs.values():
+            for type in utils.value_types():
+                if prop_dict['value_type_id'] in type['value_names']:
+                    filter_value_type = type['value_type']
+                    break
+    return data, filter_value_type
+
+
+def _filter_Model(filters, Model=MDatas):
+    qs = Model.objects
+    for search in filters:
+        qs = qs.filter(**search)
+    return qs
+
+
+def _append_to_list(values, add_values):
+    for before_value in values:
+        if before_value['CompanyName'] == add_values['CompanyName'] and before_value['GeodeticalNetworkPointClassValue'] == add_values['GeodeticalNetworkPointClassValue']:
+            before_value['infos'].append(add_values['infos'][0])
+            break
+        else:
+            values.append(add_values)
+            break
+    return values
+
+
+def _get_geom_info(mdata, value):
+    mgeo_datas_qs = _filter_Model([{'geo_id': mdata['geo_id']}], Model=MGeoDatas)
+    geo_json = []
+    mgeo = mgeo_datas_qs.first()
+    geo = mgeo.geo_data
+    geo_json = json.loads(geo.json)
+
+    latlongx = geo_json['coordinates'][0][0]
+    latlongy = geo_json['coordinates'][0][1]
+    value['sheet2'] = latlongx
+    value['sheet3'] = latlongy
+
+    utm = utils.lat_long_to_utm(latlongy, latlongx)
+    value['n_utm'] = utm[0]
+    value['e_utm'] = utm[1]
+
+    return value
+
+
+def _check_undur(value):
+    undur = 'elevationValue'
+    if undur not in value.keys():
+        value[undur] = 'Хоосон'
+    return value
+
+
+def _class_name_bolon_orgoor_angilah(points):
+    data, filter_value_type = _get_filter_dicts()
+    values = list()
+    values.append(
+        {
+            "infos": [
+                {
+                    "PointNumber": "0123",
+                    "PointCenterType": "tseg-personal-img/img_e859c934.png",
+                    "PointLocationDescription": "Хөвсгөл аймгийн Цагааннуур сум 31232132132132132132312",
+                    "sheet2": 99.111771,
+                    "sheet3": 51.56299,
+                    "n_utm": 11033071.87933954,
+                    "e_utm": 6721490.892584632,
+                    "Nomenclature": "M-51-99",
+                    "PointNearPhoto": "tseg-personal/img_ab0e5393.png",
+                    "PointFarPhoto": "tseg-personal/img_03e81489.png",
+                    "LocationOverviewMap": "tseg-personal-img/img_f5829c0d.png",
+                    "EmployeeName": "Т. Тест",
+                    "EmployeePosition": "test",
+                    "beginLifespanVersion": "2021-03-01",
+                    "GeodeticalNetworkPointTypeValue": "GPS_А",
+                    "sum": "Цагааннуур",
+                    "aimag": "Сүхбаатар",
+                    "elevationValue": 10,
+                }
+            ],
+            "CompanyName": "Тест ХХК",
+            "GeodeticalNetworkPointClassValue": " GPS-ийн сүлжээ"
+        },
+    )
+    values.append(
+        {
+            "infos": [
+                {
+                    "PointNumber": "0123",
+                    "PointCenterType": "tseg-personal-img/img_e859c934.png",
+                    "PointLocationDescription": "Хөвсгөл аймгийн Цагааннуур сум 31232132132132132132312",
+                    "sheet2": 99.111771,
+                    "sheet3": 51.56299,
+                    "n_utm": 11033071.87933954,
+                    "e_utm": 6721490.892584632,
+                    "Nomenclature": "M-51-99",
+                    "PointNearPhoto": "tseg-personal/img_ab0e5393.png",
+                    "PointFarPhoto": "tseg-personal/img_03e81489.png",
+                    "LocationOverviewMap": "tseg-personal-img/img_f5829c0d.png",
+                    "EmployeeName": "Т. Тест",
+                    "EmployeePosition": "test",
+                    "beginLifespanVersion": "2021-03-01",
+                    "GeodeticalNetworkPointTypeValue": "GPS_А",
+                    "sum": "Цагааннуур",
+                    "aimag": "Сүхбаатар",
+                    "elevationValue": 14,
+                }
+            ],
+            "CompanyName": "Тест10 ХХК",
+            "GeodeticalNetworkPointClassValue": " GPS-ийн сүлжээ"
+        }
+    )
+    for point in points:
+        filter_value = dict()
+        value = point.pdf_id.zfill(4)
+        filter_value[filter_value_type] = value
+        mdata_qs = _filter_Model([data, filter_value])
+        mdata = mdata_qs.first()
+
+        mdata_qs = _filter_Model([{ 'geo_id': mdata.geo_id }])
+        for_pdf = dict()
+        value = dict()
+        for mdata in mdata_qs.values():
+            lprop_qs = LProperties.objects
+            lprop_qs = lprop_qs.filter(property_id=mdata['property_id'])
+            for prop in lprop_qs.values():
+                for item in utils.value_types():
+                    if prop['value_type_id'] in item['value_names']:
+                        dict_value = mdata[item['value_type']]
+                        if 'date' in item['value_type']:
+                            dict_value = utils.datetime_to_string(dict_value)
+                        if item['value_type'] == 'code_list_id':
+                            code_qs = _filter_Model([{'code_list_id': dict_value}], Model=LCodeLists)
+                            if code_qs:
+                                code = code_qs.first()
+                                if prop['value_type_id'] == 'multi-select':
+                                    code_qs = _filter_Model([{'top_code_list_id': code.top_code_list_id}], Model=LCodeLists)
+                                    if code_qs:
+                                        top_code = code_qs.first()
+                                        prop['property_code'] = 'aimag'
+                                        dict_value = top_code.code_list_name
+                                        value['sum'] = code.code_list_name
+                                    else:
+                                        prop['property_code'] = 'aimag'
+                                        dict_value = code.code_list_name
+                                else:
+                                    dict_value = code.code_list_name
+                        if prop['property_code'] == 'Nomenclature':
+                            value = _get_geom_info(mdata, value)
+                        value[prop['property_code']] = dict_value
+        for_angilah = ['CompanyName', 'GeodeticalNetworkPointClassValue']
+        value = _check_undur(value)
+        infos = dict()
+        for_pdf['infos'] = list()
+        for key, value in value.items():
+            if key in for_angilah:
+                for_pdf[key] = value
+            else:
+                infos[key] = value
+        for_pdf['infos'].append(infos)
+
+        values = _append_to_list(values, for_pdf)
+    return values
 
 
 def _create_lavlagaa_infos(payment):
     is_true = False
     has_points = []
     points = PaymentPoint.objects.filter(payment=payment)
-    for point in points:
-        if point.pdf_id:
-            has_pdf = _check_pdf_in_folder(point.pdf_id)
-            if has_pdf:
-                has_points.append(point)
-
     folder_name = 'tseg-personal-file'
-    if has_points:
-        filtered_points = _class_bolon_orgoor_angilah(has_points)
-    # class_names = _class_name_eer_angilah(point_infos)
-    # if class_names:
-    #     for class_name in class_names:
-    #         if class_name['org_name']:
-    #             path = _create_folder_payment_id(folder_name, payment.id)
-    #             _create_lavlagaa_file(class_name, path)
-    if filtered_points:
-        for f_point in filtered_points:
-            if f_point['org_name']:
-                path = _create_folder_payment_id(folder_name, payment.id)
-                _create_lavlagaa_file(f_point, path)
-        # _file_to_zip(str(payment.id), folder_name)
-        # payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
-        # payment.save()
-        # is_true = True
+    if points:
+        filtered_points = _class_name_bolon_orgoor_angilah(points)
+        if filtered_points:
+            for f_point in filtered_points:
+                if f_point['CompanyName']:
+                    path = _create_folder_payment_id(folder_name, payment.id)
+                    _create_lavlagaa_file(f_point, path)
+            _file_to_zip(str(payment.id), folder_name)
+            payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
+            payment.save()
+            is_true = True
 
     return is_true
 
@@ -1222,7 +1410,6 @@ def _check_pdf_in_folder(pdf_id):
 @ajax_required
 @login_required
 def check_button_ebable_pdf(request, payload):
-    print("check pdf")
     is_enable = False
     pdf_id = payload.get('pdf_id')
 
@@ -1248,7 +1435,6 @@ def check_button_ebable_pdf(request, payload):
 @ajax_required
 @login_required
 def check_button_ebable_pdf_geo_id(request, payload):
-    print("check pdf geo id")
     is_enable = False
     pdf_id = payload.get('geo_id')
 
@@ -1258,9 +1444,7 @@ def check_button_ebable_pdf_geo_id(request, payload):
         # if has_pdf_in_mpoint:
         # pdf_id = has_csv[0]
     if pdf_id:
-        print(type(pdf_id))
         pdf_id = pdf_id.lstrip('0')
-        print(pdf_id)
         has_pdf = _check_pdf_in_folder(pdf_id)
         if len(has_pdf) > 0:
             is_enable = True
@@ -1461,7 +1645,3 @@ def get_contain_geoms(request, payload):
     }
 
     return JsonResponse(rsp)
-
-payment = Payment.objects.filter(id=7).first()
-is_true = _create_lavlagaa_infos(payment)
-print(is_true)
