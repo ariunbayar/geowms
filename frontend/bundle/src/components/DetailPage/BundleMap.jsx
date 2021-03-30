@@ -1007,15 +1007,15 @@ export default class BundleMap extends Component {
         }
 
         wms_array.map(({ name, layers }, w_idx) => {
-            layers.map(({ id, code, tile }, l_idx) => {
-                if (tile.getVisible()) {
+            layers.map(({ id, code, wms_tile }, l_idx) => {
+                if (wms_tile.getVisible()) {
                     const {layer_code, is_feature} = this.check_inspire_layer(code)
                     if (is_feature) {
                         layer_codes.push(layer_code)
                         layer_ids.push([code, id])
                     }
                 }
-                else if (!tile.getVisible() && this.is_not_visible_layers.length > 0) {
+                else if (!wms_tile.getVisible() && this.is_not_visible_layers.length > 0) {
                         this.is_not_visible_layers.map((layer_code, idx) => {
                             if (layer_code == code) {
                                 layer_ids.push([code, id])
