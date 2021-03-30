@@ -68,9 +68,9 @@ export default class InspireMap extends Component {
             layer_2405: '',
             vectorSource: null,
             search_date: '',
-            is_search_bar: props.is_search_bar || false,
-            is_menu_bar: props.is_menu_bar || false,
-            is_menu_bar_all: props.is_menu_bar_all || false,
+            is_search_bar: props.is_search_bar || true,
+            is_menu_bar: props.is_menu_bar || 'open',
+            is_menu_bar_all: props.is_menu_bar_all || 'open',
         }
 
         this.controls = {
@@ -1273,7 +1273,7 @@ export default class InspireMap extends Component {
         }
 
         var items = []
-        is_menu_bar && items.push({
+        is_menu_bar == 'open' && items.push({
             "key": "menus",
             "icon": "fa fa-bars",
             "title": "Давхаргууд",
@@ -1298,7 +1298,7 @@ export default class InspireMap extends Component {
                     style={{height: `${height}`,}}
                     className="mw-100 px-0 mx-0"
                 >
-                    {is_menu_bar_all &&<SideBar
+                    {is_menu_bar_all == 'open' &&<SideBar
                         items = {items}
                     />}
                 </div>

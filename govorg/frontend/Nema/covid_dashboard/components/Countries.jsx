@@ -38,8 +38,8 @@ export  class Countries extends Component {
         const { datas, secondOrder, thirthOrder, fourthOrder } = this.state
         return (
             <div className='row justify-content-around'>
-                <label className="col-sm-12">Бүсийг задаргаа</label>
-                <select className='form-control mb-2 col-sm-4 col-xl-12' value={secondOrder} onChange={(e) => this.handleOrderChange('secondOrder', e.target.value)}>
+                <label className="col-sm-12 mb-1">Бүсийн задаргаа</label>
+                <select className='form-control mb-1 col-sm-4 col-xl-12' value={secondOrder} onChange={(e) => this.handleOrderChange('secondOrder', e.target.value)}>
                     <option value='-1'>--- Улсын хэмжээнд ---</option>
                     {
                         datas.map((aimag, idx) =>
@@ -47,7 +47,7 @@ export  class Countries extends Component {
                         )
                     }
                 </select>
-                <select className='form-control mb-2 col-sm-4 col-xl-12' value={thirthOrder} onChange={(e) => this.handleOrderChange('thirthOrder', e.target.value)}>
+                <select className='form-control mb-1 col-sm-4 col-xl-12' value={thirthOrder} onChange={(e) => this.handleOrderChange('thirthOrder', e.target.value)}>
                     <option value='-1'>--- Сум/Дүүрэг сонгоно уу ---</option>
                     {
                         datas.map((aimag) =>
@@ -58,7 +58,7 @@ export  class Countries extends Component {
                         )
                     }
                 </select>
-                <select className='form-control mb-2 col-sm-4 col-xl-12' value={fourthOrder} onChange={(e) => this.handleOrderChange('fourthOrder', e.target.value)}>
+                <select className='form-control col-sm-4 mb-1 col-xl-12' value={fourthOrder} onChange={(e) => this.handleOrderChange('fourthOrder', e.target.value)}>
                     <option value='-1'>--- Баг/Хороо сонгоно уу ---</option>
                     {
                         datas.map((aimag) =>
