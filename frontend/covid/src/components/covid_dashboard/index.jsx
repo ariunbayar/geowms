@@ -13,6 +13,7 @@ import { number } from 'yup';
 import Card from '@utils/Covid/components/Card'
 import '@utils/Covid/components/card.css'
 
+
 class CovidDashboard extends PureComponent {
     constructor(props) {
         super(props);
@@ -24,6 +25,8 @@ class CovidDashboard extends PureComponent {
             geo_id: '',
             is_loading: true,
             count_datas: [],
+            onoodor_counts_obj: {},
+            ochigdor_counts_obj: {},
             count_covid_datas: [],
             geo_id: props.geo_id ? props.geo_id : '496',
         }
@@ -56,41 +59,30 @@ class CovidDashboard extends PureComponent {
     }
 
     getState(geo_id){
-        service.getState(geo_id).then(({success, count_datas, count_covid_datas, charts, name, pop_data}) =>{
+        service.getState(geo_id).then(({success, count_datas, count_covid_datas, charts, name, pop_data, onoodor_counts_obj, ochigdor_counts_obj}) =>{
             if(success){
-                this.setState({count_datas, count_covid_datas, charts, name, pop_data})
+                this.setState({count_datas, count_covid_datas, charts, name, pop_data, onoodor_counts_obj, ochigdor_counts_obj})
             }
         })
     }
 
     render() {
-        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas } = this.state
+        const { datas, mongol_data, update_time, mongol_zuruu, geo_id, is_loading, count_datas, count_covid_datas, onoodor_counts_obj, ochigdor_counts_obj } = this.state
         return (
             <div className="card-body bg-light">
                 <Loader is_loading={is_loading} />
                 <div className="row">
-                    <div className="col-xl-2 col-sm-3">
+                    <div className="col-xl-2 col-sm-3 corona-tab">
+                        <Menu
+                            onoodor_counts_obj={onoodor_counts_obj}
+                            ochigdor_counts_obj={ochigdor_counts_obj}
+                        />
                         <Countries
                             getGeoID={this.getGeoID}
                             datas={datas}
                         />
                     </div>
                     <div className="col-xl-10 col-sm-9">
-                        <div className="row">
-                            <div className="col-12">
-                                <div className="row">
-                                    {count_datas.map((data, idx) =>
-                                        <Card
-                                            idx={idx}
-                                            color={data.color}
-                                            head_text={data.name}
-                                            body_text={data.data}
-                                            prev_data={data.prev_data}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
                         <div className="row">
                             <div className="col-xl-12 col-sm-12">
                                 <CovidMap
@@ -102,20 +94,6 @@ class CovidDashboard extends PureComponent {
                         <div className="row">
                             <div className="col-12">
                                 <Graph geo_id={geo_id}/>
-                            </div>
-                        </div>
-                        <div className="row mt-4">
-                            <div className="col-12">
-                                <div className="row">
-                                {count_covid_datas.map((data, idx) =>
-                                    <Card
-                                        idx={idx}
-                                        color={data.color}
-                                        head_text={data.name}
-                                        body_text={data.data}
-                                        prev_data={data.prev_data}
-                                    />
-                                )}</div>
                             </div>
                         </div>
                     </div>
