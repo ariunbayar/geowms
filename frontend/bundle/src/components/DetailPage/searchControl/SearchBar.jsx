@@ -219,6 +219,8 @@ export class SearchBarComponent extends Component {
                                         )
                                     }
                             </select>
+                        </div>
+                        <div className="input-group mb-3">
                             <select name="center_typ" as="select"
                                 onChange={(e) => this.handleInputSum(e, 'sum_id', sum)}
                                 className='form-control'
@@ -231,6 +233,8 @@ export class SearchBarComponent extends Component {
                                     )
                                 }
                             </select>
+                        </div>
+                        <div className="input-group mb-3">
                             <select name="center_typ" as="select"
                                 onChange={(e) => this.handleInputSum(e, 'horoo_id', horoo)}
                                 className='form-control'

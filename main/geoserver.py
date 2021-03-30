@@ -17,6 +17,7 @@ def get_connection_conf():
         'geoserver_user',
         'geoserver_pass',
         'geoserver_db_host',
+        'geoserver_protocol'
     ]
 
     configs = Config.objects.filter(name__in=conf_names).values_list('name', 'value')
