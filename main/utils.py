@@ -864,7 +864,7 @@ def get_key_and_compare(dict, item):
 
 
 def lat_long_to_utm(y, x, insys=4326):
-    print(y, x)
+
     def _calc_outsys():
         if 114 < y < 120:
             outsys = 50
@@ -879,11 +879,11 @@ def lat_long_to_utm(y, x, insys=4326):
         elif 84 < y < 90:
             outsys = 45
         return outsys
-    print("out", _calc_outsys())
+
     inproj = pyproj.CRS('EPSG:' + str(insys))
     outproj = pyproj.CRS('EPSG:326' + str(_calc_outsys()))
     value = pyproj.transform(inproj, outproj, x, y)
-    print("val", value)
+
     return value
 
 

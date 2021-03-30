@@ -95,7 +95,6 @@ class PopUpCmp extends Component {
         let geom_name
         this.click_count = 0
         if (datas.length > 0) {
-            console.log(datas);
             if (this.props.is_from_inspire) {
                 code = datas[number - 1][0]
                 values = datas[number - 1][1]

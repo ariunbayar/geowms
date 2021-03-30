@@ -93,9 +93,6 @@ export class Purchase extends Component {
     }
 
     handleModalApproveClose(){
-        console.log(this.state);
-        console.log(this.state);
-        console.log(this.state);
         const purchase_id = this.props.match.params.id
         if (!this.state.purchase_all.export_files) {
             service.downloadPurchase(purchase_id)
@@ -104,7 +101,6 @@ export class Purchase extends Component {
     }
 
     qPayClose(is_success){
-        console.log('is_success', is_success);
         this.setState({ qpay_modal_is: false, is_modal_info_open: is_success })
     }
 
