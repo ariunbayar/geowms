@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
-import { service } from '../service'
+import { service } from './service'
 import ModelSelectLayer from "./ModelSelect"
 import ModalAlert from "../../ModalAlert"
 import {GPIcon} from "@utils/Tools"

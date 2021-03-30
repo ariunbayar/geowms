@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import {service} from '../service'
+import {service} from './service'
 import {NavLink} from "react-router-dom"
 import ModalAlert from "../../ModalAlert"
 import Loader from "@utils/Loader"

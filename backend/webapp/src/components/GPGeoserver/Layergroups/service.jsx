@@ -1,4 +1,4 @@
-import {getGetOptions,handleResponse,getPostOptions} from '../../helpers/service'
+import {getGetOptions,handleResponse,getPostOptions} from '../../../helpers/service'
 export const service ={
     getgrouplist,
     remove_layer_group,

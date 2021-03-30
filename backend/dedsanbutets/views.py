@@ -980,10 +980,12 @@ def get_style_data(request, payload):
                     ST_GeometryType(geo_data)  similar to '%{geom_type}%'
             limit 10000
             '''.format(geom_type=geom_type)
+
     cursor.execute(sql)
     some_attributes = dict_fetchall(cursor)
     some_attributes = list(some_attributes)
     features = []
+
     for i in some_attributes:
         data = get_geoJson(i.get('geom'))
         features.append(data)

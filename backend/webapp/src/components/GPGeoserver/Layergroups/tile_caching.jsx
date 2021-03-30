@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {Switch, Route, NavLink} from "react-router-dom"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
-import { service } from '../service'
+import { service } from './service'
 import ModalAlert from "../../ModalAlert"
 
 var validationSchema = Yup.object().shape({
