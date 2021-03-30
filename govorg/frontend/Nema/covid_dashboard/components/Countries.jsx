@@ -22,11 +22,12 @@ export  class Countries extends Component {
     }
 
     handleOrderChange(chooseOrder, value) {
+        console.log(chooseOrder, value);
         if (value == '-1') {
             if (chooseOrder == 'secondOrder') {
-                this.setState({ geo_id: '496' })
+                value = '496'
             } else {
-                this.setState({ geo_id: prev_geo_id })
+                value = this.state.prev_geo_id
             }
         }
         this.setState({ [chooseOrder]: value, geo_id: value, prev_geo_id: value },() =>
