@@ -1165,8 +1165,8 @@ def _check_none(values, code):
 
 def createPdf(values):
     if values['sheet2'] and values['sheet3']:
-        L = float(values['sheet2'])
-        B = float(values['sheet3'])
+        L = float(values['sheet3'])
+        B = float(values['sheet2'])
         LA = int(L)
         LB = int((L-LA)*60)
         LC = float((L-LA-LB/60)*3600)
@@ -1175,8 +1175,8 @@ def createPdf(values):
         BB = int((B-BA)*60)
         BC = float((B-BA-BB/60)*3600)
         BC = "%.6f" % BC
-        Bchar = str(BA) + '°' + str(BB) + "'" + str(float(BC))  + '"'
-        Lchar = str(LA) + '°' + str(LB) + "'" + str(float(LC))  + '"'
+        Bchar = str(BA) + '°' + str(BB) + "'" + str("%.4f" % float(BC))  + '"'
+        Lchar = str(LA) + '°' + str(LB) + "'" + str("%.4f" % float(LC))  + '"'
         transformer = Transformer.from_crs(4326, 26917)
         transformer = Transformer.from_crs("EPSG:4326", 'EPSG:3857')
         L = float("%.6f" % L)
