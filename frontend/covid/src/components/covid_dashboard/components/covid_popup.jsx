@@ -82,25 +82,25 @@ export class CovidPP extends Component {
                             </div>
                             <div className="row text-danger">
                                 <small className="col-md-8">Батлагдсан</small>
-                                <small className="col-md-4">{batlagdsan_tohioldol_too}</small>
+                                <small className="col-md-4 px-0">{batlagdsan_tohioldol_too}</small>
                             </div>
                             <ul className="col-md-12 border-top border-muted">
                                 <li className="text-warning">
                                     <div className="row pl-2">
                                         <small className="text-dark col-md-8 px-0">Эмчлэгдэж буй</small>
-                                        <small className="text-muted col-md-4 float-right">{emchlegdej_bui_humuus_too}</small>
+                                        <small className="text-muted col-md-4 float-right px-0">{emchlegdej_bui_humuus_too}</small>
                                     </div>
                                 </li>
                                 <li className="text-success">
                                     <div className="row pl-2">
                                         <small className="text-dark col-md-8 px-0">Эдгэрсэн</small>
-                                        <small className="text-muted col-md-4 float-right">{edgersen_humuus_too}</small>
+                                        <small className="text-muted col-md-4 float-right px-0">{123122}</small>
                                     </div>
                                 </li>
                                 <li className="text-dark">
                                     <div className="row pl-2">
                                         <small className="text-dark col-md-8 px-0">Нас барсан</small>
-                                        <small className="text-muted col-md-4 float-right">{nas_barsan_hunii_too}</small>
+                                        <small className="text-muted col-md-4 float-right px-0">{nas_barsan_hunii_too}</small>
                                     </div>
                                 </li>
                             </ul>

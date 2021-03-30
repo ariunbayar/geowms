@@ -76,7 +76,7 @@ export  class Menu extends Component {
                                 <div className="description text-warning">Эмчлэгдэж буй тоо</div>
                                 <div className="total">
                                     {this.numberWithCommas(onoodor_counts_obj['emchlegdej_bui_humuus_too'])}
-                                    <small className="ml-1">{this.getCalculator(onoodor_counts_obj['edgersen_humuus_too'], ochigdor_counts_obj['edgersen_humuus_too'])}</small>
+                                    <small className="ml-1">{this.getCalculator(onoodor_counts_obj['emchlegdej_bui_humuus_too'], ochigdor_counts_obj['emchlegdej_bui_humuus_too'])}</small>
                                 </div>
                             </h2>
                             <h2 className="legend">
@@ -84,7 +84,7 @@ export  class Menu extends Component {
                                 <div className="description text-dark">Нас барсан тоо</div>
                                 <div className="total">
                                     {this.numberWithCommas(onoodor_counts_obj['nas_barsan_hunii_too'])}
-                                    <small className="ml-1">{this.getCalculator(onoodor_counts_obj['edgersen_humuus_too'], ochigdor_counts_obj['edgersen_humuus_too'])}</small>
+                                    <small className="ml-1">{this.getCalculator(onoodor_counts_obj['nas_barsan_hunii_too'], ochigdor_counts_obj['nas_barsan_hunii_too'])}</small>
                                 </div>
                             </h2>
                         </div>
