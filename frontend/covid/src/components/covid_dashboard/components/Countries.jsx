@@ -98,6 +98,62 @@ export  class Countries extends Component {
                     <div className="bundle-view-scroll">
                         <div id='accordion1'>
                             {datas.map((theme, theme_idx) =>
+                                theme.name == 'Улаанбаатар' &&
+                                <ul className="list-group bg-light mr-1" key={theme_idx}>
+                                    <li className="list-group-item list-group-hover mt-1 collapsed"
+                                        id={`${theme_idx}`}
+                                        data-toggle="collapse"
+                                        data-target={`#collapse-theme${theme_idx}`}
+                                        aria-expanded="false"
+                                        aria-controls={`collapse-theme${theme_idx}`}
+                                        onClick={(e) => this.activeView(e.currentTarget, 'theme', theme.geo_id)}>
+                                        <i className="icon expand-icon fa fa-plus" id={`${theme_idx}`}></i>
+                                        <span className="bold">&nbsp;&nbsp;{theme.name}</span>
+                                        <div className="col-auto float-right list-group-count">{theme.batlagdsan_tohioldol_too}</div>
+                                    </li>
+                                    <div id={`collapse-theme${theme_idx}`} className="collapse" data-parent="#accordion1">
+                                        <div id={`accordion10${theme_idx}`}>
+                                            {theme.children.map((packages, pack_idx) =>
+                                                <ul className="list-group" key={pack_idx}>
+                                                    <li className="list-group-item list-group-hover mt-1 collapsed"
+                                                        id={`${theme_idx}-${pack_idx}`}
+                                                        data-toggle="collapse"
+                                                        data-target={`#collapse-packages${theme_idx}${pack_idx}`}
+                                                        aria-expanded="false"
+                                                        aria-controls={`collapse-packages${theme_idx}${pack_idx}`}
+                                                        onClick={(e) => this.activeView(e.currentTarget, 'package', packages.geo_id)}>
+                                                        <i className="icon expand-icon fa fa-plus ml-4" id={`${theme_idx}-${pack_idx}`}></i>
+                                                        <span  className="bold">&nbsp;&nbsp;{packages.name}</span>
+                                                        <div className="col-auto float-right list-group-count">{packages.batlagdsan_tohioldol_too}</div>
+                                                    </li>
+                                                    <div id={`collapse-packages${theme_idx}${pack_idx}`} className="collapse" data-parent={`#accordion10${pack_idx}`}>
+                                                        <div id={`accordion100${pack_idx}`}>
+                                                            {packages.children.map((feature, idx) =>
+                                                                <ul className="list-group" key={idx}>
+                                                                    <li className="list-group-item list-group-hover mt-0"
+                                                                        id={`${theme_idx}-${pack_idx}-${idx}`}
+                                                                        onClick={(e) => this.activeView(e.currentTarget, 'feature', feature.geo_id)}>
+                                                                        <i style={{paddingLeft: "40px"}}></i> &nbsp;
+                                                                        <span  className="p-0" id={`${theme_idx}-${pack_idx}-${idx}`}> {feature.name}</span>
+                                                                        <div className="col-auto float-right list-group-count">{feature.batlagdsan_tohioldol_too}</div>
+                                                                        {feature.view &&
+                                                                            <ul style={{paddingLeft: "90px"}} id={`${theme_idx}-${pack_idx}-${idx}`}>
+                                                                                <li id={`features-${theme_idx}${pack_idx}${idx}`}>{feature.view['view_name']}</li>
+                                                                            </ul>
+                                                                        }
+                                                                    </li>
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </ul>
+                                            )}
+                                        </div>
+                                    </div>
+                                </ul>
+                            )}
+                            {datas.map((theme, theme_idx) =>
+                                theme.name != 'Улаанбаатар' &&
                                 <ul className="list-group bg-light mr-1" key={theme_idx}>
                                     <li className="list-group-item list-group-hover mt-1 collapsed"
                                         id={`${theme_idx}`}
