@@ -15,29 +15,27 @@ export class Bar extends Component {
         return (
             <div>
                 <div className="container">
-                    <div className="row">
-                        <div className="col-md-12 py-0 my-0 ">
-                            <ul className="list-group list-group-horizontal col-md-8 my-0   list-unstyled">
-                                <li className="col-md-9" >
-                                <NavLink   to="/profile/tseg-personal/tseg-info/tseg-personal/" className="list-group-item col-md-12 mr-2 text-center" activeClassName="text-white gp-bg-primary">
-                                    Шинээр байгуулсан цэг тэмдэгтийн <br/>мэдээллийг илгээх
-                                </NavLink>
-                                </li>
-                                <li className="col-md-9">
-                                <NavLink  to="/profile/tseg-personal/tseg-info/tseg-ustsan/" className="list-group-item col-md-12 ml-2 text-center " activeClassName="text-white gp-bg-primary">
-                                          Устсан цэг тэмдэгтийн <br/>мэдээллийг илгээх
-                                </NavLink>
-                                </li>
-                            </ul>
+                    <div className="card">
+                        <div className="card-body">
+                            <div className="row">
+                                <div className="col-md-12 py-0 my-0">
+                                    <NavLink
+                                        to="/profile/tseg-personal/tseg-info/tseg-ustsan/"
+                                        className="list-group-item col-md-12 ml-2 text-center"
+                                        activeClassName="text-white gp-bg-primary"
+                                    >
+                                        Устсан цэг тэмдэгтийн мэдээллийг илгээх
+                                    </NavLink>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                        <Switch>
+                            <Route path="/profile/tseg-personal/tseg-info/tseg-ustsan/" component={DanForm}/>
+                            <Route exact path="/profile/tseg-personal/"/>
+                        </Switch>
                         </div>
                     </div>
-                </div>
-                <div>
-                <Switch>
-                            <Route path="/profile/tseg-personal/tseg-info/tseg-ustsan/" component={DanForm}/>
-                            <Route path="/profile/tseg-personal/tseg-info/tseg-personal/" component={Forms}/>
-                            <Route exact path="/profile/tseg-personal/"/>
-                 </Switch>
                 </div>
             </div>
         )
