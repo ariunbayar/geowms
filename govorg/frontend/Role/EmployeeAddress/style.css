@@ -1,24 +1,24 @@
-.bundle-view-scroll {
+.org-list-scroll {
     overflow-y: scroll;
     max-height: 45vh;
     /* opacity: 0; */
 }
 
-.bundle-view-scroll::-webkit-scrollbar-track {
+.org-list-scroll::-webkit-scrollbar-track {
     background: #f8f9fa;
 }
 
 /* Handle */
-.bundle-view-scroll::-webkit-scrollbar-thumb {
+.org-list-scroll::-webkit-scrollbar-thumb {
     background: #f8f9fa;
     border-radius: 10px;
 }
 
 /* Handle on hover */
-.bundle-view-scroll::-webkit-scrollbar-thumb:hover {
+.org-list-scroll::-webkit-scrollbar-thumb:hover {
     background: #034ea2;
 }
-.bundle-view-scroll:hover::-webkit-scrollbar-thumb {
+.org-list-scroll:hover::-webkit-scrollbar-thumb {
     background: #A9A9A9;
     border-radius: 10px;
     transition: 0.4s;
