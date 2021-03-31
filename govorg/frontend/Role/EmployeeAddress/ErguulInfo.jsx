@@ -14,12 +14,10 @@ export class ErguulInfo extends Component {
             },
             id: this.props.match.params.id,
         }
-        this.getDetail = this.getDetail.bind(this)
         this.getPos = this.getPos.bind(this)
     }
 
     componentDidMount(){
-        this.getDetail()
         this.getPos()
     }
 
@@ -29,6 +27,8 @@ export class ErguulInfo extends Component {
             .getWherePos(id)
             .then(({
                 success,
+                first_name,
+                last_name,
                 erguul_level3,
                 erguul_street,
                 date_start,
@@ -40,6 +40,8 @@ export class ErguulInfo extends Component {
                 }) => {
             if(success){
                 this.setState({
+                first_name,
+                last_name,
                 erguul_level3,
                 erguul_street,
                 date_start,
@@ -53,22 +55,11 @@ export class ErguulInfo extends Component {
         })
     }
 
-    getDetail() {
-        const { id } = this.state
-        service
-            .getDetailEmployee(id)
-            .then(({ employee_detail, success }) => {
-                if(success) {
-                    this.setState({
-                        employee: employee_detail,
-                    })
-                }
-            })
-    }
 
     render() {
-        const { first_name, last_name } = this.state.employee
         const {
+            first_name,
+            last_name,
             erguul_level3,
             erguul_street,
             date_start,
@@ -88,28 +79,7 @@ export class ErguulInfo extends Component {
                             <dd className="col-sm-6 col-xl-9">
                                 { last_name }, { first_name }
                             </dd>
-                            <dt className="col-sm-12 col-xl-12">Эргүүл хийсэн газар:</dt>
-                            <dt className="col-sm-6 col-xl-3">Хот/Аймаг:</dt>
-                            <dd className="col-sm-6 col-xl-9">
-                                { local_lvl1 }
-                            </dd>
-                            <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
-                            <dd className="col-sm-6 col-xl-9">
-                                { local_lvl2}
-                            </dd>
-                            <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
-                            <dd className="col-sm-6 col-xl-9">
-                                { erguul_level3}
-                            </dd>
-                            <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
-                            <dd className="col-sm-6 col-xl-9 pb-4">
-                                { erguul_street}
-                            </dd>
-                        </div>
-                    </div>
-                        <div className="col-6">
-                            <div className="row">
-                                <dt className="col-sm-6 col-xl-3">Эхэлсэн хугацаа:</dt>
+                            <dt className="col-sm-6 col-xl-3">Эхэлсэн хугацаа:</dt>
                                 <dd className="col-sm-6 col-xl-9">
                                     { date_start}
                                 </dd>
@@ -123,13 +93,40 @@ export class ErguulInfo extends Component {
                                 </dd>
                         </div>
                     </div>
-                </div>
-                <div className="row pb-5">
-                    <div className="col-12">
-                        <div> <b>Тайлбар:</b> </div>
-                            <div>
-                            { desc }
+                        <div className="col-6">
+                            <div className="row">
+                            <h5 className="col-sm-12 col-xl-12 ">
+                                Эргүүл хийсэн газар:
+                            </h5>
+                                <dt className="col-sm-6 col-xl-3">
+                                    Хот/Аймаг:
+                                </dt>
+                                <dd className="col-sm-6 col-xl-9">
+                                    { local_lvl1 }
+                                </dd>
+                                <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
+                                <dd className="col-sm-6 col-xl-9">
+                                    { local_lvl2}
+                                </dd>
+                                <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
+                                <dd className="col-sm-6 col-xl-9">
+                                    { erguul_level3}
+                                </dd>
+                                <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
+                                <dd className="col-sm-6 col-xl-9 pb-4">
+                                    { erguul_street}
+                                </dd>
                             </div>
+                    </div>
+                </div>
+                <div className="row pb-5 pr-5">
+                    <div className="col-12">
+                        <div>
+                            <b>Тайлбар:</b>
+                        </div>
+                        <div>
+                            <a className="ml-4 text-justify">{ desc }</a>
+                        </div>
                     </div>
                 </div>
             </div>
