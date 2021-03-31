@@ -1799,9 +1799,7 @@ def emp_gender_count(request, pk):
     #         users.append(employee.user.id)
 
     #     male_count = User.objects.filter(pk__in=users, gender='Эрэгтэй').count()
-    #     print(male_count)
     #     famale_count = User.objects.filter(pk__in=users, gender='Эмэгтэй').count()
-    #     print(famale_count)
 
     rsp = {
         'count_male': male_count,
@@ -1824,9 +1822,35 @@ def emp_age_count(request, pk):
         page_date.append(page.datetime.strftime('%Y-%m-%d'))
         count_emps.append(RequestEvent.objects.filter(datetime__date=page.datetime).count())
 
+    dateNow = datetime.datetime.now()
+    year = dateNow.year
+    yearCut = str(dateNow.year)[2:4]
+    print(year, 'year')
+    print(yearCut, 'yearCut')
+
+    qs = Employee.objects.filter(org_id=1)
+    emp = []
+    for employee in qs:
+        emp.append(employee.user.register)
+        print(emp)
+        # emps.append
+
+        register = employee.user.register
+        registerCut = register[2:4]
+        print(registerCut, 'registerCut')
+        if -1 < int(registerCut) and int(registerCut) < int(yearCut):
+            age = int(yearCut) - int(registerCut)
+            print(age, '2000 onoos hoish uy')
+        else:
+            birthYear = str(19) + registerCut
+            age = int(year) - int(birthYear)
+            print(age, '2000 onoos omnoh uyiinhen')
+
+        rsp = {
+            'page_date': age,  # nas
+        }
     rsp = {
-        'page_date': page_date,  # nas
-        'count_emps': count_emps,  # ajilchdiin too
+        'page_date_count': count_emps,  # nasaar buleglesen too
     }
     return JsonResponse(rsp)
 
@@ -1837,20 +1861,24 @@ def emp_age_count(request, pk):
 # print(year, 'year')
 # print(yearCut, 'yearCut')
 
-# qs = Employee.objects.filter(org_id=9)
+# qs = Employee.objects.filter(org_id=1)
 # emp = []
 # for employee in qs:
 #     emp.append(employee.user.register)
-#     print(qs)
-#     emps.append
+#     print(emp)
+#     # emps.append
 
 #     register = employee.user.register
 #     registerCut = register[2:4]
 #     print(registerCut, 'registerCut')
 #     if -1 < int(registerCut) and int(registerCut) < int(yearCut):
 #         age = int(yearCut) - int(registerCut)
-#         print(age, '2000 onoos omnoh uyiinhen')
+#         print(age, '2000 onoos hoish uy')
 #     else:
 #         birthYear = str(19) + registerCut
 #         age = int(year) - int(birthYear)
-#         print(age, '2000 onoos hoish uy')
+#         print(age, '2000 onoos omnoh uyiinhen')
+
+#     rsp = {
+#         'emps_age': age,
+#     }
