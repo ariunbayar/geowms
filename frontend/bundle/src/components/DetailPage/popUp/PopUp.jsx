@@ -65,9 +65,9 @@ class PopUpCmp extends Component {
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
         if (plus == datas.length) {
-            this.setState({ is_plus: false, is_prev: true })
+            this.setState({ is_plus: false, is_prev: true, is_enable: false })
         } else {
-            this.setState({ is_plus: true, is_prev: true })
+            this.setState({ is_plus: true, is_prev: true, is_enable: false })
         }
         this.checkModeAndCode(plus, datas)
         this.setState({ startNumber: plus })
@@ -80,9 +80,9 @@ class PopUpCmp extends Component {
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
         if (minus == 1) {
-            this.setState({ is_prev: false, is_plus: true })
+            this.setState({ is_prev: false, is_plus: true, is_enable: false })
         }else {
-            this.setState({ is_plus: true, is_prev: true })
+            this.setState({ is_plus: true, is_prev: true, is_enable: false })
         }
         this.checkModeAndCode(minus, datas)
         this.setState({ startNumber: minus })
@@ -109,15 +109,12 @@ class PopUpCmp extends Component {
                 if (value[0] == 'point_id') {
                     this.setState({ id: value[1] })
                 }
-                if ((value[0] == 'point_name') || value[2] && value[2].toLowerCase() == 'name') {
-                    this.setState({ name: value[1] })
-                }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
                     // this.checkButtonEnableWithPdf(value[1])
                 }
                 if (value[2] && value[2].toLowerCase() == 'pointnumber') {
                     this.checkButtonEnableWithId(value[1])
-                    this.setState({ id: value[1] })
+                    this.setState({ id: value[1], name: value[1] })
                     geom_name = value[1]
                 }
             })
