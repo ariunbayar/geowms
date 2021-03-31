@@ -183,7 +183,6 @@ class PopUpCmp extends Component {
     render() {
         const { datas, data, startNumber, is_prev, is_plus, is_enable, is_authenticated } = this.state
         const { is_empty, is_from_inspire, is_loading } = this.props
-        console.log(is_authenticated, is_empty, is_from_inspire);
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -365,7 +364,6 @@ export class PopUp extends Control {
     }
 
     getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=true, is_authenticated=false) {
-        console.log('is_authenticated', is_authenticated);
         this.toggleControl(isload)
         this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading, is_authenticated})
     }
