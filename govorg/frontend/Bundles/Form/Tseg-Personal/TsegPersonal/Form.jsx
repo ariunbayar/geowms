@@ -409,7 +409,7 @@ export class Forms extends Component {
                     'success',
                     false,
                     null,
-                    () => this.props.data.history.push(`/gov/froms/tseg-info/tsegpersonal/tseg-personal/`)
+                    () => this.props.data.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/`)
                 )
             }
             else{
@@ -554,7 +554,7 @@ export class Forms extends Component {
                         'success',
                         false,
                         null,
-                        () => this.props.data.history.push('/gov/froms/tseg-info/tsegpersonal/tseg-personal/'),
+                        () => this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/'),
                     )
                 }
                 else {
@@ -598,7 +598,7 @@ export class Forms extends Component {
                         'success',
                         false,
                         null,
-                        null,
+                        () => this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/'),
                     )
                 }
                 else {

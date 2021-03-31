@@ -767,7 +767,7 @@ export class FormTseg extends Component {
                             text=''
                             has_button={false}
                             modalAction={null}
-                            modalClose={() => this.props.data.history.push( `/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/`)}
+                            modalClose={() => this.props.data.history.push( `/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/`)}
                         />
 
                     </div>
