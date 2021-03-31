@@ -907,15 +907,14 @@ def erguul_list(request, payload):
 @login_required(login_url='/gov/secure/login/')
 def get_erguulInfo(request, pk):
     location = EmployeeAddress.objects.filter(employee_id=pk).first()
+    erguul = EmployeeErguul.objects.filter(address_id=pk).first()
+    status = ErguulTailbar.objects.filter(erguul_id=erguul.id).first()
     local_lvl1 = location.level_1
     local_lvl2 = location.level_2
-    erguul = EmployeeErguul.objects.all()
-    erguul = erguul.filter(address_id=pk).first()
     erguul_level_3 = erguul.level_3
     erguul_street = erguul.street
     erguul_date_starttime = erguul.date_start.strftime('%Y-%m-%d')
     erguul_date_endtime = erguul.date_end.strftime('%Y-%m-%d')
-    status = ErguulTailbar.objects.filter(erguul_id=erguul.id).first()
     desc = status.description
     status = status.state
     if status == 1:
