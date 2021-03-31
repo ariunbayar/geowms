@@ -83,6 +83,7 @@ export class Forms extends Component {
             timer: null,
             geo_id: '',
             is_open_modal: false,
+            point_role_list: props.point_role_list,
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -128,6 +129,13 @@ export class Forms extends Component {
         const t_type = this.props.data.match.params.t_type
         if(id || geo_id) {
             this.tsegUpdate(id, geo_id)
+        }
+    }
+
+    componentDidUpdate(pP, pS) {
+        const { point_role_list } = this.props
+        if (pP.point_role_list !== point_role_list) {
+            this.setState({point_role_list})
         }
     }
 
@@ -594,9 +602,8 @@ export class Forms extends Component {
     }
 
     render() {
-        const { point_classes, point_types, ondor_types, only_see, no_buttons, latlongx, latlongy } = this.state
+        const { point_classes, point_types, ondor_types, only_see, no_buttons, latlongx, latlongy, point_role_list} = this.state
         const error_msg = this.state.error_msg
-
         let back_url
         let button_name
         if (this.props.data.match.params?.geo_id) {
@@ -1228,32 +1235,38 @@ export class Forms extends Component {
                                                     </button>
                                                 :
                                                     <div className="float-right">
-                                                        <button
-                                                            type='button'
-                                                            className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                                            onClick={() => this.requestModalOpen(
-                                                                this.successPoint,
-                                                                `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
-                                                                'Баталгаажуулах',
-                                                                'nogoon',
-                                                                'Баталгаажуулах',
-                                                            )}
-                                                        >
-                                                            Баталгаажуулах
-                                                        </button>
-                                                        <button
-                                                            type='button'
-                                                            className="btn gp-btn-primary waves-effect waves-light"
-                                                            onClick={() => this.requestModalOpen(
-                                                                this.rejectPoint,
-                                                                `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
-                                                                'Татгалзах',
-                                                                'warning',
-                                                                'Татгалзах',
-                                                            )}
-                                                        >
-                                                            Татгалзах
-                                                        </button>
+                                                        {
+                                                            point_role_list && point_role_list.PERM_APPROVE &&
+                                                            <button
+                                                                type='button'
+                                                                className="btn gp-btn-outline-primary waves-effect waves-light"
+                                                                onClick={() => this.requestModalOpen(
+                                                                    this.successPoint,
+                                                                    `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
+                                                                    'Баталгаажуулах',
+                                                                    'nogoon',
+                                                                    'Баталгаажуулах',
+                                                                )}
+                                                            >
+                                                                Баталгаажуулах
+                                                            </button>
+                                                        }
+                                                        {
+                                                            point_role_list && point_role_list.PERM_REVOKE &&
+                                                            <button
+                                                                type='button'
+                                                                className="btn gp-btn-outline-primary waves-effect waves-light ml-1"
+                                                                onClick={() => this.requestModalOpen(
+                                                                    this.rejectPoint,
+                                                                    `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
+                                                                    'Татгалзах',
+                                                                    'warning',
+                                                                    'Татгалзах',
+                                                                )}
+                                                            >
+                                                                Татгалзах
+                                                            </button>
+                                                        }
                                                     </div>
                                             :
                                                 null
@@ -1283,7 +1296,7 @@ export class Forms extends Component {
                             model_type_icon={this.state.modal_type}
                         />
                     </div>
-                 </Form>
+                </Form>
                 )
             }}
         </Formik>

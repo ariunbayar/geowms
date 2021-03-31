@@ -14,9 +14,17 @@ export const service = {
     rejectPoint,
     getInspireList,
     getTseg,
+    getEmpRole,
 }
 
 const prefix = '/gov/api/tseg-personal'
+
+function getEmpRole() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch('/gov/emp-role/tseg-roles/', requestOptions).then(handleResponse)
+}
 
 function tsegPersonalList(page, perpage, query){
 

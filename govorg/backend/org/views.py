@@ -539,11 +539,30 @@ def set_config(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def emp_tseg_roles(request):
-    employee = get_object_or_404(Employee, user=request.user, is_admin=True)
+    inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+    employee = get_object_or_404(Employee, user=request.user)
+    point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
+    if point_feature_id:
+        employee = get_object_or_404(Employee, user__username=request.user)
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+        perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
+
+        for perm_kind in perm_kinds:
+            if perm_kind == EmpPermInspire.PERM_VIEW:
+                inspire_roles['PERM_VIEW'] = True
+            elif perm_kind == EmpPermInspire.PERM_CREATE:
+                inspire_roles['PERM_CREATE'] = True
+            elif perm_kind == EmpPermInspire.PERM_REMOVE:
+                inspire_roles['PERM_REMOVE'] = True
+            elif perm_kind == EmpPermInspire.PERM_UPDATE:
+                inspire_roles['PERM_UPDATE'] = True
+            elif perm_kind == EmpPermInspire.PERM_APPROVE:
+                inspire_roles['PERM_APPROVE'] = True
+            elif perm_kind == EmpPermInspire.PERM_REVOKE:
+                inspire_roles['PERM_REVOKE'] = True
 
     rsp = {
-        'success': True,
-        'info': 'Амжилттай хадгаллаа'
+        'point_role_list': inspire_roles,
     }
 
     return JsonResponse(rsp)

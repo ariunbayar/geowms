@@ -82,6 +82,9 @@ export class PortalDataTable extends Component {
         if(pp.is_user !== this.props.is_user) {
             this.setState({ is_user: this.props.is_user })
         }
+        if(pp.нэмэлт_талбарууд !== this.props.нэмэлт_талбарууд) {
+            this.setState({ нэмэлт_талбарууд: this.props.нэмэлт_талбарууд })
+        }
     }
 
     render() {
@@ -91,11 +94,11 @@ export class PortalDataTable extends Component {
             хайлт, color, max_data, table_head_color, is_user
         } = this.state
         return (
-           <div>
-               {хайлт == "closed" && нэмэх_товч == '' && max_data == 'closed'
-               ?
-               null
-               :
+            <div>
+                {хайлт == "closed" && нэмэх_товч == '' && max_data == 'closed'
+                ?
+                null
+                :
                 <div className="row">
                     {
                         хайлт == "open" &&
@@ -112,7 +115,7 @@ export class PortalDataTable extends Component {
                     }
                     {
                         max_data == 'open' &&
-                            <div className="col">
+                            <div className="col-md-6">
                                 <div className="row text-right">
                                     <div className="col">
                                         <strong className={`text-right mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
@@ -162,7 +165,7 @@ export class PortalDataTable extends Component {
                                                 <a><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
                                             </th>
                                         )}
-                                        {нэмэлт_талбарууд && нэмэлт_талбарууд.map((item, index) =>
+                                        {(нэмэлт_талбарууд && нэмэлт_талбарууд.length >0 ) && нэмэлт_талбарууд.map((item, index) =>
                                             <th key={index}>{item.title}</th>
                                         )}
                                     </tr>

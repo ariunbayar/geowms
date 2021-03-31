@@ -1966,6 +1966,18 @@ def _save_property_zero(geo_id, values):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_success(request, id):
+
+    employee = get_object_or_404(Employee, user=request.user)
+    point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
+    perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id, perm_kind=EmpPermInspire.PERM_APPROVE)
+
+    if not perm_kind:
+        rsp = {
+                    'success': False,
+                    'msg':'Танд баталгаажуулах эрх алга байна.'
+                }
+        return JsonResponse(rsp)
+
     qs = TsegRequest.objects
     qs = qs.filter(pk=id)
     if qs:
