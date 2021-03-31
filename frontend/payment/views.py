@@ -1004,7 +1004,7 @@ def _make_property_code_value(mdata):
                         if code_qs:
                             code = code_qs.first()
                             if prop['value_type_id'] == 'multi-select':
-                                code_qs = _filter_Model([{'top_code_list_id': code.top_code_list_id}], Model=LCodeLists)
+                                code_qs = _filter_Model([{'code_list_id': code.top_code_list_id}], Model=LCodeLists)
                                 if code_qs:
                                     top_code = code_qs.first()
                                     prop['property_code'] = 'aimag'
