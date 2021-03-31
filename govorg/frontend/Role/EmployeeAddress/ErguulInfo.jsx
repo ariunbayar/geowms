@@ -8,6 +8,10 @@ export class ErguulInfo extends Component {
         super(props)
 
         this.state = {
+            employee: {
+                first_name: '',
+                last_name: '',
+            },
             id: this.props.match.params.id,
         }
         this.getDetail = this.getDetail.bind(this)
@@ -80,41 +84,41 @@ export class ErguulInfo extends Component {
                     <BackButton {...this.props} name={'Буцах'} navlink_url={'/gov/perm/erguuleg/'}></BackButton>
                     <div className="col-6 ">
                         <div className="row">
-                            <dt className="col-md-3">Овог, нэр:</dt>
-                            <dd className="col-md-9">
+                            <dt className="col-sm-6 col-xl-3">Овог, нэр:</dt>
+                            <dd className="col-sm-6 col-xl-9">
                                 { last_name }, { first_name }
                             </dd>
-                            <dt className="col-md-12">Эргүүл хийсэн газар:</dt>
-                            <dt className="col-md-3">Хот/Аймаг:</dt>
-                            <dd className="col-md-9">
+                            <dt className="col-sm-12 col-xl-12">Эргүүл хийсэн газар:</dt>
+                            <dt className="col-sm-6 col-xl-3">Хот/Аймаг:</dt>
+                            <dd className="col-sm-6 col-xl-9">
                                 { local_lvl1 }
                             </dd>
-                            <dt className="col-md-3"> Дүүрэг/Сум:</dt>
-                            <dd className="col-md-9">
+                            <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
+                            <dd className="col-sm-6 col-xl-9">
                                 { local_lvl2}
                             </dd>
-                            <dt className="col-md-3">Хороо/баг:</dt>
-                            <dd className="col-md-9">
+                            <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
+                            <dd className="col-sm-6 col-xl-9">
                                 { erguul_level3}
                             </dd>
-                            <dt className="col-md-3">Гудамж:</dt>
-                            <dd className="col-md-9 pb-4">
+                            <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
+                            <dd className="col-sm-6 col-xl-9 pb-4">
                                 { erguul_street}
                             </dd>
                         </div>
                     </div>
                         <div className="col-6">
                             <div className="row">
-                                <dt className="col-md-3">Эхэлсэн хугацаа:</dt>
-                                <dd className="col-md-9">
+                                <dt className="col-sm-6 col-xl-3">Эхэлсэн хугацаа:</dt>
+                                <dd className="col-sm-6 col-xl-9">
                                     { date_start}
                                 </dd>
-                                <dt className="col-md-3">Дууссан хугацаа:</dt>
-                                <dd className="col-md-9">
+                                <dt className="col-sm-6 col-xl-3">Дууссан хугацаа:</dt>
+                                <dd className="col-sm-6 col-xl-9">
                                     { date_end}
                                 </dd>
-                                <dt className="col-md-3">Төлөв:</dt>
-                                <dd className="col-md-9 text-success">
+                                <dt className="col-sm-6 col-xl-3">Төлөв:</dt>
+                                <dd className="col-sm-6 col-xl-9 text-success">
                                     { status }
                                 </dd>
                         </div>
@@ -122,7 +126,7 @@ export class ErguulInfo extends Component {
                 </div>
                 <div className="row pb-5">
                     <div className="col-12">
-                        <div> <b>Тайлбар</b> </div>
+                        <div> <b>Тайлбар:</b> </div>
                             <div>
                             { desc }
                             </div>
