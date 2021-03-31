@@ -20,6 +20,7 @@ export const service = {
     saveTailbar,
     getErguul,
     getSelectValue,
+    getAllOrg,
 }
 
 const prefix = "/gov/api/role/employee"
@@ -98,10 +99,10 @@ function getGeom(geo_id) {
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }
 
-function getAddresses(all_user) {
+function getAddresses(choose, value) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({all_user}),
+        body: JSON.stringify({choose, value}),
     }
     return fetch(`${prefix}/addresses/`, requestOptions).then(handleResponse)
 }
@@ -170,4 +171,11 @@ function getWherePos(id) {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/${id}/get-erguulInfo/`, requestOptions).then(handleResponse)
+}
+
+function getAllOrg() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`/back/api/org/get-all-org/`, requestOptions).then(handleResponse)
 }

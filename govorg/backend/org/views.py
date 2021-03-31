@@ -33,6 +33,7 @@ from govorg.backend.utils import (
 from main.decorators import ajax_required
 from main import utils
 from main.components import Datatable
+from django.views.decorators.cache import cache_page
 
 def _get_properties_by_feature(initial_qs, feature_ids):
 
@@ -319,7 +320,7 @@ def dashboard_list(request, payload, geo_id):
     ]
 
     initial_qs = CovidDashboardLog.objects
-    initial_qs = initial_qs.filter(geo_id=geo_id)
+    initial_qs = initial_qs.filter(geo_id=geo_id).order_by('-updated_at')
     if initial_qs:
         datatable = Datatable(
             model=CovidDashboardLog,
@@ -439,6 +440,7 @@ def get_covid_dashboard_id(request, geo_id):
 
 
 @login_required(login_url='/gov/secure/login/')
+# @cache_page(60 * 15)
 def frontend(request):
 
     employee = get_object_or_404(Employee, user=request.user)

@@ -687,11 +687,18 @@ def _get_feature_collection(employees):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_addresses(request, payload):
-    all_user = payload.get('all_user')
+    value = payload.get('value')
+    choose = payload.get('choose')
     employee = get_object_or_404(Employee, user=request.user)
     if employee.is_admin:
-        if all_user:
+        if choose == 'all':
             employees = Employee.objects.all()
+        elif choose == 'level':
+            org = Org.objects.filter(level=value)
+            employees = Employee.objects.filter(org_id__in=org)
+        elif choose == 'org':
+            org = get_object_or_404(Org, id=value)
+            employees = Employee.objects.filter(org=org)
         else:
             org = employee.org
             employees = Employee.objects

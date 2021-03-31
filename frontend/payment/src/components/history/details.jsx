@@ -127,16 +127,16 @@ export class Details extends Component {
                                                                 {key + 1}
                                                             </th>
                                                             <td>
-                                                                {value.name}
+                                                                {value['PointNumber']}
                                                             </td>
                                                             <td scope="">
-                                                                {value.mpoint.aimag}
+                                                                {value['aimag']}
                                                             </td>
                                                             <td scope="">
-                                                                {value.mpoint.sum}
+                                                                {value['sum']}
                                                             </td>
                                                             <td scope="">
-                                                                {value.mpoint.undur}
+                                                                {value['elevationValue'] || "Хоосон"}
                                                             </td>
                                                             <td>
                                                                 {value.amount}₮
@@ -145,8 +145,8 @@ export class Details extends Component {
                                                                 items.is_success
                                                                 ?
                                                                     <td scope="">
-                                                                        {value.file_name &&
-                                                                            <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value.file_name}/`}>
+                                                                        {value['PointNumber'] && items.export_file &&
+                                                                            <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value['PointNumber']}/`}>
                                                                                 файл
                                                                             </a>
                                                                         }
@@ -241,7 +241,7 @@ export class Details extends Component {
                         }
                         </div>
                         {
-                            !is_loading && (polygon.length > 0 || points.length > 0) &&
+                            !is_loading && (polygon && polygon.length > 0 || points && points.length > 0) &&
                             <div className="row py-3">
                                 <div className="col-md-6 py-0 my-3">
                                     <div id="payment">

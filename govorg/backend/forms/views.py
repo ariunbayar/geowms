@@ -1988,7 +1988,7 @@ def tseg_personal_success(request, id):
                 state=TsegRequest.STATE_APPROVE,
                 new_geo_id=new_geo_id,
             )
-            _send_data_to_pdf(value.values, value.pdf_id, value)
+            # _send_data_to_pdf(value.values, value.pdf_id, value)
 
             rsp = {
                 'success': True,

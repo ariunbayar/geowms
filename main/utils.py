@@ -7,6 +7,7 @@ import base64
 import re
 import unicodedata
 import importlib
+import pyproj
 
 import json
 from django.apps import apps
@@ -32,6 +33,7 @@ from backend.token.utils import TokenGeneratorUserValidationEmail
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
 from main.inspire import GEoIdGenerator
 import uuid
+from django.core.cache import cache
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -861,10 +863,28 @@ def get_key_and_compare(dict, item):
     return value
 
 
-def lat_long_to_utm(lat, longi):
-    point = Point([lat, longi], srid=4326)
-    utm = point.transform(3857, clone=True)
-    return utm.coords
+def lat_long_to_utm(y, x, insys=4326):
+
+    def _calc_outsys():
+        if 114 < y < 120:
+            outsys = 50
+        elif 108 < y < 114:
+            outsys = 49
+        elif 102 < y < 108:
+            outsys = 48
+        elif 96 < y < 102:
+            outsys = 47
+        elif 90 < y < 96:
+            outsys = 46
+        elif 84 < y < 90:
+            outsys = 45
+        return outsys
+
+    inproj = pyproj.CRS('EPSG:' + str(insys))
+    outproj = pyproj.CRS('EPSG:326' + str(_calc_outsys()))
+    value = pyproj.transform(inproj, outproj, x, y)
+
+    return value
 
 
 def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
@@ -1080,7 +1100,7 @@ def get_properties(feature_id, get_all=False):
         return property_qs, l_feature_c_qs, data_type_c_qs
 
 
-def _value_types():
+def value_types():
     return [
         {'value_type': 'value_number', 'value_names': ['double', 'number']},
         {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
@@ -1097,7 +1117,7 @@ def json_load(data):
 
 def make_value_dict(value, properties_qs, is_display=False):
     value = json_load(value)
-    for types in _value_types():
+    for types in value_types():
         for prop in properties_qs.values():
             for key, val in value.items():
                 if prop['value_type_id'] in types['value_names'] and key == prop['property_code']:
@@ -1179,7 +1199,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:
@@ -1379,3 +1399,11 @@ def get_code_list_id_from_name(code_list_name, property_code):
                 break
 
     return code_list_id
+
+
+# cache set end get
+def geo_cache(key_name, key, qs, time):
+    chache_data = cache.get('{}_{}'.format(key_name, key))
+    if not chache_data:
+        cache.set('{}_{}'.format(key_name, key), qs, time)
+    return qs

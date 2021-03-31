@@ -139,6 +139,23 @@ const payment = {
 
 }
 
+const qpay = {
+
+    get: function() {
+        const requestOptions = getGetOptions()
+        return fetch('/back/api/config/qpay/', requestOptions).then(handleResponse)
+    },
+
+    save: function(values) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify(values),
+        }
+        return fetch('/back/api/config/qpay/save/', opts).then(handleResponse)
+    },
+
+}
+
 const inspire = {
     get_value_type_fields: function() {
         const requestOptions = getGetOptions()
@@ -163,6 +180,7 @@ export const service = {
         qgis: qgis,
         dan: dan,
         payment: payment,
+        qpay: qpay,
         inspire: inspire,
     },
     getDisk,

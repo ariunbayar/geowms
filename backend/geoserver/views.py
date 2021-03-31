@@ -13,14 +13,15 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
 from django.views.decorators.csrf import csrf_exempt
+from main.decorators import get_conf_geoserver
 
 
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def layers(request):
+@get_conf_geoserver
+def layers(request, conf_geoserver):
 
-    config = geoserver.get_connection_conf()
 
     HEADERS = {
         'Content-Type': 'application/json',
@@ -28,13 +29,14 @@ def layers(request):
     }
 
     AUTH = HTTPBasicAuth(
-        config['geoserver_user'],
-        config['geoserver_pass'],
+        conf_geoserver['geoserver_user'],
+        conf_geoserver['geoserver_pass'],
     )
 
-    base_url = 'http://{host}:{port}/geoserver/rest/layers'.format(
-        host=config['geoserver_host'],
-        port=config['geoserver_port'],
+    base_url = '{protocol}://{host}:{port}/geoserver/rest/layers'.format(
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port'],
+        protocol=conf_geoserver['geoserver_protocol'],
     )
 
     rsp = requests.get(
