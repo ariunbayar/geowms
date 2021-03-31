@@ -1,6 +1,7 @@
 import os
 import glob
 import csv
+import datetime
 from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,10 @@ from backend.payment.models import PaymentPoint
 from backend.payment.models import PaymentPolygon
 from backend.payment.models import PaymentLayer
 from backend.wmslayer.models import WMSLayer
+from backend.inspire.models import LFeatures
+from backend.inspire.models import LProperties
+from backend.inspire.models import MDatas
+from backend.inspire.models import LCodeLists
 from geoportal_app.models import User
 from govorg.backend.forms.models import TsegUstsan, Mpoint_view
 from main.utils import resize_b64_to_sizes
@@ -186,63 +191,69 @@ def tsegAdd(request):
     return JsonResponse({'success': True})
 
 
-def _get_attribute_name_from_file(content):
-    att = dict()
-    for idx in range(0, len(content)):
-        if content[idx].lower() == 'aimag':
-            att['aimag'] = idx
-        if content[idx].lower() == 'sum':
-            att['sum_name'] = idx
-        if content[idx].lower() == 'point_name':
-            att['point_name'] = idx
-        if content[idx].lower() == 'pid':
-            att['pid'] = idx
-        if content[idx].lower() == 'ondor':
-            att['ondor'] = idx
-    return att
+def _get_feature_id(feature_code):
+    feat_qs = LFeatures.objects
+    feat_qs = feat_qs.filter(feature_code=feature_code)
+    return feat_qs
 
 
-def _get_items_with_file(content, att_names):
-    point_info = {
-        'undur': content[att_names['ondor']] or 'Өндөр байхгүй',
-        'aimag': content[att_names['aimag']],
-        'sum': content[att_names['sum_name']],
-    }
-    return point_info
+def _get_filter_dicts():
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_code__iexact='pointnumber')
+    prop = prop_qs.first()
+
+    feature_qs = _get_feature_id('gnp-gp-gp')
+    if feature_qs:
+
+        feature = feature_qs.first()
+        property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
+        data = utils.get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
+
+        for prop_dict in prop_qs.values():
+            for type in utils.value_types():
+                if prop_dict['value_type_id'] in type['value_names']:
+                    filter_value_type = type['value_type']
+                    break
+    return data, filter_value_type
 
 
-def _get_info_from_file(point_id, pdf_id):
-    found_items = dict()
-    file_list = [
-        f for f in glob.glob(os.path.join(settings.FILES_ROOT, "*.csv"))
-    ]
-    for a_file in file_list:
-        with open(a_file, 'rt') as f:
-            contents = csv.reader(f)
-            contents = list(contents)
-            for idx in range(0, len(contents)):
-                if idx == 0:
-                    att_names = _get_attribute_name_from_file(contents[idx])
-                else:
-                    content = contents[idx]
-                    # check_pdf_path = '/home/odk/Desktop/pdfs/tseg-personal-file'
-                    if str(content[att_names['pid']]) == str(pdf_id) and str(content[att_names['point_name']]) == str(point_id):
-                        found_items = _get_items_with_file(content, att_names)
-    return found_items
+def _filter_Model(filters, Model=MDatas):
+    qs = Model.objects
+    for search in filters:
+        qs = qs.filter(**search)
+    return qs
 
 
 def _get_tseg_detail(payment):
     points = list()
     pay_points = PaymentPoint.objects.filter(payment=payment)
     for point in pay_points:
-        point_info = _get_info_from_file(point.point_id, point.pdf_id)
-        if point_info:
-            points.append({
-                'name': point.point_name,
-                'amount': point.amount,
-                'file_name': point.pdf_id,
-                'mpoint': point_info
-            })
+        data, filter_value_type = _get_filter_dicts()
+        filter_value = dict()
+        filter_value[filter_value_type] = point.pdf_id
+        mdata_qs = _filter_Model([data, filter_value])
+        mdata = mdata_qs.first()
+        point_info = utils.get_mdata_value('gnp-gp-gp', mdata.geo_id, is_display=True)
+        info = dict()
+        for key, value in point_info.items():
+            if isinstance(value, datetime.datetime):
+                point_info[key] = utils.datetime_to_string(value)
+            if key == 'AdministrativeUnitSubClass':
+                code_qs = _filter_Model([{'code_list_id': point_info[key]}], Model=LCodeLists)
+                if code_qs:
+                    code = code_qs.first()
+                    if code.top_code_list_id:
+                        top_code_qs = _filter_Model([{'top_code_list_id': code.top_code_list_id}], Model=LCodeLists)
+                        if top_code_qs:
+                            top_code = top_code_qs.first()
+                            info['aimag'] = top_code.code_list_name
+                            info['sum'] =  code.code_list_name
+                    else:
+                        info['aimag'] = code.code_list_name
+            info[key] = value
+        info['amount'] = point.amount
+        points.append(info)
+
     return points
 
 

@@ -161,7 +161,7 @@ export  class Countries extends Component {
                                         data-target={`#collapse-theme${theme_idx}`}
                                         aria-expanded="false"
                                         aria-controls={`collapse-theme${theme_idx}`}
-                                        onClick={(e) => this.activeView(e.currentTarget, 'theme', theme.geo_id)}>
+                                        onClick={(e) => this.activeView(e.currentTarget, 'theme', theme.geo_id, theme.name)}>
                                         <i className="icon expand-icon fa fa-plus" id={`${theme_idx}`}></i>
                                         <span className="bold">&nbsp;&nbsp;{theme.name}</span>
                                         <div className="col-auto float-right list-group-count">{theme.batlagdsan_tohioldol_too}</div>
@@ -176,7 +176,7 @@ export  class Countries extends Component {
                                                         data-target={`#collapse-packages${theme_idx}${pack_idx}`}
                                                         aria-expanded="false"
                                                         aria-controls={`collapse-packages${theme_idx}${pack_idx}`}
-                                                        onClick={(e) => this.activeView(e.currentTarget, 'package', packages.geo_id)}>
+                                                        onClick={(e) => this.activeView(e.currentTarget, 'package', packages.geo_id, packages.name)}>
                                                         <i className="icon expand-icon fa fa-plus ml-4" id={`${theme_idx}-${pack_idx}`}></i>
                                                         <span  className="bold">&nbsp;&nbsp;{packages.name}</span>
                                                         <div className="col-auto float-right list-group-count">{packages.batlagdsan_tohioldol_too}</div>
@@ -187,7 +187,7 @@ export  class Countries extends Component {
                                                                 <ul className="list-group" key={idx}>
                                                                     <li className="list-group-item list-group-hover rounded mt-0"
                                                                         id={`${theme_idx}-${pack_idx}-${idx}`}
-                                                                        onClick={(e) => this.activeView(e.currentTarget, 'feature', feature.geo_id)}>
+                                                                        onClick={(e) => this.activeView(e.currentTarget, 'feature', feature.geo_id, feature.name)}>
                                                                         <i style={{paddingLeft: "40px"}}></i> &nbsp;
                                                                         <span  className="p-0" id={`${theme_idx}-${pack_idx}-${idx}`}> {feature.name}</span>
                                                                         <div className="col-auto float-right list-group-count">{feature.batlagdsan_tohioldol_too}</div>
