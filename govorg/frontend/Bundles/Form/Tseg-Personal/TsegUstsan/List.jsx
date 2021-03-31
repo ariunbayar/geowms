@@ -23,13 +23,20 @@ export class List extends Component {
             modal_alert_status: 'closed',
             timer: null,
             modal_text: '',
-            modal_icon: ''
+            modal_icon: '',
+            point_role_list: props.point_role_list,
         }
         this.paginate = this.paginate.bind(this)
         this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+    }
+
+    componentDidUpdate(pP, pS) {
+        if(pP.point_role_list != this.props.point_role_list) {
+            this.setState({point_role_list})
+        }
     }
 
     paginate (page, query) {

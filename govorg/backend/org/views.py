@@ -144,17 +144,23 @@ def _emp_role(org, user):
     themes = []
     employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    point_perm_view = False
+    point_perms = []
+    point_perm = {'PERM_VIEW': False, 'PERM_REMOVE':False}
     if emp_perm:
-
-        point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
+        point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first()
         feature_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
         if feature_ids:
             qs = LFeatures.objects.filter(feature_id__in=feature_ids)
+
             if point_feature_id:
-                if point_feature_id in feature_ids:
-                    qs = qs.exclude(feature_id=point_feature_id)
-                    point_perm_view = True
+                point_id = point_feature_id.feature_id
+                if point_id in feature_ids:
+                    qs = qs.exclude(feature_id=point_id)
+                    point_perms = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_id, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
+                    if point_perms:
+                        point_perm['PERM_VIEW'] = True
+                        if EmpPermInspire.PERM_REMOVE in point_perms:
+                            point_perm['PERM_REMOVE'] = True
 
             package_ids = list(qs.distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
             theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
@@ -189,7 +195,7 @@ def _emp_role(org, user):
     return {
         'themes': themes,
         'package_features': package_features,
-        'point_perm_view': point_perm_view
+        'point_perms': point_perm
     }
 
 
@@ -530,39 +536,6 @@ def set_config(request, payload):
     rsp = {
         'success': True,
         'info': 'Амжилттай хадгаллаа'
-    }
-
-    return JsonResponse(rsp)
-
-
-@require_GET
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def emp_tseg_roles(request):
-    inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
-    employee = get_object_or_404(Employee, user=request.user)
-    point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
-    if point_feature_id:
-        employee = get_object_or_404(Employee, user__username=request.user)
-        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-        perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
-
-        for perm_kind in perm_kinds:
-            if perm_kind == EmpPermInspire.PERM_VIEW:
-                inspire_roles['PERM_VIEW'] = True
-            elif perm_kind == EmpPermInspire.PERM_CREATE:
-                inspire_roles['PERM_CREATE'] = True
-            elif perm_kind == EmpPermInspire.PERM_REMOVE:
-                inspire_roles['PERM_REMOVE'] = True
-            elif perm_kind == EmpPermInspire.PERM_UPDATE:
-                inspire_roles['PERM_UPDATE'] = True
-            elif perm_kind == EmpPermInspire.PERM_APPROVE:
-                inspire_roles['PERM_APPROVE'] = True
-            elif perm_kind == EmpPermInspire.PERM_REVOKE:
-                inspire_roles['PERM_REVOKE'] = True
-
-    rsp = {
-        'point_role_list': inspire_roles,
     }
 
     return JsonResponse(rsp)

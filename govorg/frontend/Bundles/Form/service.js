@@ -23,7 +23,7 @@ function getEmpRole() {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch('/gov/emp-role/tseg-roles/', requestOptions).then(handleResponse)
+    return fetch(`${prefix}/tseg-roles/` , requestOptions).then(handleResponse)
 }
 
 function tsegPersonalList(page, perpage, query){

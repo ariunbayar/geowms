@@ -97,6 +97,7 @@ urlpatterns = [
 
         path('tseg-personal/', include(([
             path('', forms_views.tsegPersonal, name='tseg-personal'),
+            path('tseg-roles/', forms_views.emp_tseg_roles, name='tseg-roles'),
             path('findSum/', forms_views.findSum, name='findSum'),
             path('find-point/', forms_views.findPoints, name='find-point'),
             path('success-point/<int:id>/', forms_views.tseg_personal_success, name='tseg-personal-batalgaajuulah'),
@@ -188,7 +189,6 @@ urlpatterns = [
         path('dahsb-list/<str:geo_id>/', org_views.dashboard_list),
         path('save-covid-dashboard-log/', org_views.save_dashboard_log),
         path('remove-dashboard/<int:pk>/', org_views.remove_dashboard),
-        path('emp-role/tseg-roles/', org_views.emp_tseg_roles),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

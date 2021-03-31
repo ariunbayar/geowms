@@ -183,7 +183,7 @@ export class Forms extends Component {
                         this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
                     }
                     else{
-                        this.setState({ hors_error: true, checkError: error})
+                        this.setState({ hors_error: true, checkError: ''})
                     }
                 })
             }

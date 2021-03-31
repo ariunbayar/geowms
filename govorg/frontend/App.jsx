@@ -93,6 +93,7 @@ export class App extends Component {
     render() {
         const { org_role, employee, allowed_geom, obeg_employee, covid_configs, covid_dashboard } = this.props.org
         const { emp_role , approve, revoke, base_layer_list } = this.state
+        var point_perms = emp_role.point_perms
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -149,7 +150,7 @@ export class App extends Component {
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
                                 {
-                                    emp_role.point_perm_view &&
+                                    point_perms &&  point_perms.PERM_VIEW &&
                                     <MenuItem
                                         icon="gp-text-primary fa fa-circle-o"
                                         url="/gov/froms/tseg-info/tsegpersonal/"
@@ -157,7 +158,7 @@ export class App extends Component {
                                     >
                                     <ul className="sidebar-submenu">
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
-                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
+                                        {point_perms.PERM_REMOVE && <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>}
                                         <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/inspire-tseg/" text="Цэгийн жагсаалт"></MenuItem>
                                     </ul>
                                 </MenuItem>
