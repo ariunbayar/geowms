@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import {service} from '../Employee/service'
+import './style.css'
 
 export default class SearchSelects extends Component {
 
@@ -180,7 +181,7 @@ export default class SearchSelects extends Component {
                         >
                             Байгууллага/Түвшин
                         </button>
-                        <div className="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                        <div className="dropdown-menu dropdown-menu-right bundle-view-scroll" aria-labelledby="dropdownMenuButton">
                             {
                                 levels.length > 0 &&
                                     <>
