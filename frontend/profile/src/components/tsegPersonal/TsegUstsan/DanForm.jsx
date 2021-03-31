@@ -247,7 +247,10 @@ export class DanForm extends Component {
                         <div className="container">
                         <div>
                             <div className="col-md-12 mb-4 my-3">
-                                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/дэд-сан/`}></BackButton>
+                                <a href="#" className="btn gp-outline-primary"
+                                    onClick={this.props.history.goBack}>
+                                    <i className="fa fa-angle-double-left"></i> Буцах
+                                </a>
                                 <div className="float-right h4">Цэгийн мэдээлэл</div>
                             </div>
                         </div>
