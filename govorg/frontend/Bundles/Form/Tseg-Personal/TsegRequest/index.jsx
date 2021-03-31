@@ -59,14 +59,12 @@ class TsegRequest extends Component {
         }
     }
 
-
     componentDidUpdate(pP, pS) {
         const { point_role_list } = this.props
         if( pP.point_role_list != point_role_list ) {
             this.setState({point_role_list})
         }
     }
-
 
     render() {
         const {

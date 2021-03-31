@@ -205,7 +205,7 @@ export class Forms extends Component {
             })
         }
 
-         if(this.state.hors_shinj_baidal == ''){
+        if(this.state.hors_shinj_baidal == ''){
             alert(" Хөрсний шинж байдлыг тодорхойлно уу !!!")
             this.setState({
                 checkError: error,
@@ -1236,36 +1236,38 @@ export class Forms extends Component {
                                                 :
                                                     <div className="float-right">
                                                         {
-                                                            point_role_list && point_role_list.PERM_APPROVE &&
-                                                            <button
-                                                                type='button'
-                                                                className="btn gp-btn-outline-primary waves-effect waves-light"
-                                                                onClick={() => this.requestModalOpen(
-                                                                    this.successPoint,
-                                                                    `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
-                                                                    'Баталгаажуулах',
-                                                                    'nogoon',
-                                                                    'Баталгаажуулах',
-                                                                )}
-                                                            >
-                                                                Баталгаажуулах
-                                                            </button>
+                                                            point_role_list && point_role_list.PERM_APPROVE
+                                                            &&
+                                                                <button
+                                                                    type='button'
+                                                                    className="btn gp-btn-outline-primary waves-effect waves-light"
+                                                                    onClick={() => this.requestModalOpen(
+                                                                        this.successPoint,
+                                                                        `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
+                                                                        'Баталгаажуулах',
+                                                                        'nogoon',
+                                                                        'Баталгаажуулах',
+                                                                    )}
+                                                                >
+                                                                    Баталгаажуулах
+                                                                </button>
                                                         }
                                                         {
-                                                            point_role_list && point_role_list.PERM_REVOKE &&
-                                                            <button
-                                                                type='button'
-                                                                className="btn gp-btn-outline-primary waves-effect waves-light ml-1"
-                                                                onClick={() => this.requestModalOpen(
-                                                                    this.rejectPoint,
-                                                                    `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
-                                                                    'Татгалзах',
-                                                                    'warning',
-                                                                    'Татгалзах',
-                                                                )}
-                                                            >
-                                                                Татгалзах
-                                                            </button>
+                                                            point_role_list && point_role_list.PERM_REVOKE
+                                                            &&
+                                                                <button
+                                                                    type='button'
+                                                                    className="btn gp-btn-outline-primary waves-effect waves-light ml-1"
+                                                                    onClick={() => this.requestModalOpen(
+                                                                        this.rejectPoint,
+                                                                        `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
+                                                                        'Татгалзах',
+                                                                        'warning',
+                                                                        'Татгалзах',
+                                                                    )}
+                                                                >
+                                                                    Татгалзах
+                                                                </button>
                                                         }
                                                     </div>
                                             :

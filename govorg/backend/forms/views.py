@@ -763,10 +763,10 @@ def tseg_inspire_list(request, payload):
     check_point, info = _check_tseg_role(perm_name, request.user)
     if not check_point:
         rsp = {
-                'items': 1,
-                'total_page': [],
-                'page': 1,
-                }
+            'items': 1,
+            'total_page': [],
+            'page': 1,
+        }
         return JsonResponse(rsp)
 
     property_codes = ['GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue', 'localId', 'PointNumber']
@@ -1505,9 +1505,9 @@ def tsegUstsanSuccess(request, payload):
         check_point, info = _check_tseg_role(perm_name, request.user)
         if not check_point:
             rsp = {
-                        'success': False,
-                        'msg': info
-                    }
+                'success': False,
+                'msg': info
+            }
             return JsonResponse(rsp)
 
         if geo_id['geo_id']:
@@ -2048,9 +2048,9 @@ def tseg_personal_success(request, id):
     check_point, info = _check_tseg_role(perm_name, request.user)
     if not check_point:
         rsp = {
-                    'success': False,
-                    'msg': info
-                }
+            'success': False,
+            'msg': info
+        }
         return JsonResponse(rsp)
 
     qs = TsegRequest.objects
@@ -2237,7 +2237,6 @@ def get_tseg(request, payload):
     return JsonResponse({
         'coord': coord
     })
-
 
 
 @require_GET

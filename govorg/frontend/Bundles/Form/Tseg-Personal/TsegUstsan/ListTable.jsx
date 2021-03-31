@@ -63,8 +63,7 @@ export default class ListTable extends Component {
                 </td>
                 <td>
                     {
-                        (point_role_list && point_role_list.PERM_UPDATE) &&
-                        !is_removed
+                        (point_role_list && point_role_list.PERM_UPDATE) && !is_removed
                         &&
                             <NavLink to={`/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/${id}/засах`}>
                                 <i className="fa fa-pencil-square-o text-success" aria-hidden="true"></i>
@@ -73,16 +72,17 @@ export default class ListTable extends Component {
                 </td>
                 <td>
                     {
-                        (point_role_list && point_role_list.PERM_REVOKE) &&
-                        <button href="#" className={`btn ${!is_removed ? ' gp-btn-primary' : "btn-success"}`} disabled={is_removed ? 'disabled': ''} aria-hidden="true" onClick={this.handleModalSuccessOpen}>
-                        {
-                            is_removed
-                            ?
-                                'Баталгаажсан'
-                            :
-                                'Баталгаажуулах'
-                        }
-                    </button>
+                        (point_role_list && point_role_list.PERM_REVOKE)
+                        &&
+                            <button href="#" className={`btn ${!is_removed ? ' gp-btn-primary' : "btn-success"}`} disabled={is_removed ? 'disabled': ''} aria-hidden="true" onClick={this.handleModalSuccessOpen}>
+                            {
+                                is_removed
+                                ?
+                                    'Баталгаажсан'
+                                :
+                                    'Баталгаажуулах'
+                            }
+                            </button>
                     }
                     {is_modal_success_open &&
                         <Modal
@@ -98,12 +98,11 @@ export default class ListTable extends Component {
                 </td>
                 <td>
                     {
-                        (point_role_list && point_role_list.PERM_REMOVE) &&
-                        !is_removed
+                        (point_role_list && point_role_list.PERM_REMOVE) && !is_removed
                         &&
-                            <a href="#" onClick={this.handleModalDeleteOpen}>
-                                <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                            </a>
+                        <a href="#" onClick={this.handleModalDeleteOpen}>
+                            <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
+                        </a>
                     }
                     {is_modal_delete_open &&
                         <Modal
