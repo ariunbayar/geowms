@@ -3,6 +3,7 @@ import ImageUploader from 'react-images-upload'
 import {service} from './service'
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import {validationSchemaDan} from './validationSchema'
+import BackButton from "@utils/Button/BackButton"
 
 export class DanForm extends Component {
 
@@ -246,9 +247,7 @@ export class DanForm extends Component {
                         <div className="container">
                         <div>
                             <div className="col-md-12 mb-4 my-3">
-                                <a href="#" className="btn gp-outline-primary" onClick={this.props.history.push(`/profile/tseg-personal/`)}>
-                                    <i className="fa fa-angle-double-left"></i> Буцах
-                                </a>
+                                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/дэд-сан/`}></BackButton>
                                 <div className="float-right h4">Цэгийн мэдээлэл</div>
                             </div>
                         </div>
