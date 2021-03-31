@@ -145,7 +145,7 @@ export class Details extends Component {
                                                                 items.is_success
                                                                 ?
                                                                     <td scope="">
-                                                                        {value['PointNumber'] &&
+                                                                        {value['PointNumber'] && items.export_file &&
                                                                             <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value['PointNumber']}/`}>
                                                                                 файл
                                                                             </a>

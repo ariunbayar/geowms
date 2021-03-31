@@ -251,6 +251,7 @@ def _get_tseg_detail(payment):
                     else:
                         info['aimag'] = code.code_list_name
             info[key] = value
+        info['amount'] = point.amount
         points.append(info)
 
     return points
