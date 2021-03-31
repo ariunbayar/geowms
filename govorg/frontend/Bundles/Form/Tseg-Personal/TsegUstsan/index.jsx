@@ -23,7 +23,7 @@ export class TsegUstsan extends Component {
         return (
             <Switch>
                 <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/"} component={(props) =><List {...props} point_role_list={point_role_list}/>}/>
-                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/add/"} component={(data)=><FormTseg data={data} point_role_list={point_role_list}/>}/>
+                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/add/"} component={(data)=><FormTseg data={data}/>}/>
                 <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/:id/засах"} component={(data)=><FormTseg data={data}/>}/>
             </Switch>
         )

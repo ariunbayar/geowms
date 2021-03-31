@@ -689,7 +689,7 @@ def tseg_personal_list(request, payload):
 
     perm_name = EmpPermInspire.PERM_VIEW
     check_point, info = _check_tseg_role(perm_name, request.user)
-    if not check_point:
+    if check_point:
         requests = TsegRequest.objects
         requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
         if requests:
@@ -759,6 +759,15 @@ def tseg_inspire_list(request, payload):
     qs = _get_model_qs(LFeatures, {'feature_code': 'gnp-gp-gp'})
     feature = qs.first()
     feature_id = feature.feature_id
+    perm_name = EmpPermInspire.PERM_VIEW
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        rsp = {
+                'items': 1,
+                'total_page': [],
+                'page': 1,
+                }
+        return JsonResponse(rsp)
 
     property_codes = ['GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue', 'localId', 'PointNumber']
 
@@ -1492,6 +1501,15 @@ def tsegUstsanSuccess(request, payload):
 
     with transaction.atomic():
         geo_id = utils.get_mdata_value('gnp-gp-gp', tseg_request.tseg_id, is_display=True)
+        perm_name = EmpPermInspire.PERM_APPROVE
+        check_point, info = _check_tseg_role(perm_name, request.user)
+        if not check_point:
+            rsp = {
+                        'success': False,
+                        'msg': info
+                    }
+            return JsonResponse(rsp)
+
         if geo_id['geo_id']:
 
             mdatas_qs = MDatas.objects
@@ -1538,32 +1556,27 @@ def tsegUstsanList(request, payload):
     query = payload.get('query')
     sort_name = payload.get('sort_name')
     total_page = []
+    if not sort_name:
+        sort_name = 'id'
+    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by(sort_name)
 
-    perm_name = EmpPermInspire.PERM_REMOVE
-    check_point, info = _check_tseg_role(perm_name, request.user)
-
-    if check_point:
-        if not sort_name:
-            sort_name = 'id'
-        tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by(sort_name)
-
-        total_items = Paginator(tsegs, per_page)
-        items_page = total_items.page(page)
-        page_items = items_page.object_list
-        for item in items_page.object_list:
-            display_items.append({
-                'id': item.id,
-                'tseg_id': item.tseg_id,
-                'email': item.email,
-                'name': item.name,
-                'alban_tushaal': item.alban_tushaal,
-                'phone': item.phone,
-                'oiroltsoo_bairlal': item.oiroltsoo_bairlal,
-                'evdersen_baidal': item.evdersen_baidal,
-                'nohtsol_baidal': item.shaltgaan,
-                'is_removed': item.is_removed
-            })
-        total_page = total_items.num_pages
+    total_items = Paginator(tsegs, per_page)
+    items_page = total_items.page(page)
+    page_items = items_page.object_list
+    for item in items_page.object_list:
+        display_items.append({
+            'id': item.id,
+            'tseg_id': item.tseg_id,
+            'email': item.email,
+            'name': item.name,
+            'alban_tushaal': item.alban_tushaal,
+            'phone': item.phone,
+            'oiroltsoo_bairlal': item.oiroltsoo_bairlal,
+            'evdersen_baidal': item.evdersen_baidal,
+            'nohtsol_baidal': item.shaltgaan,
+            'is_removed': item.is_removed
+        })
+    total_page = total_items.num_pages
 
     rsp = {
         'items': display_items,
@@ -1578,6 +1591,14 @@ def tsegUstsanList(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanRemove(request, payload):
+    perm_name = EmpPermInspire.PERM_REMOVE
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        return JsonResponse({
+            'success': False,
+            'info': 'Танд цэг утсгах эрх байхгүй байн'
+        })
+
     pk = payload.get('id')
     tseg_ustsan = TsegUstsan.objects.get(pk=pk)
     if tseg_ustsan:
@@ -1594,9 +1615,16 @@ def tsegUstsanRemove(request, payload):
         if tseg_ustsan.img_omno:
             tseg_ustsan.img_omno.delete(save=False)
         tseg_ustsan.delete()
-        return JsonResponse({'success': True})
+
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай устгалаа'
+        })
     else:
-        return JsonResponse({'success': False})
+        return JsonResponse({
+            'success': False,
+            'info': 'Цэг устгахад алдаа гарлаа'
+        })
 
 
 @require_POST

@@ -144,8 +144,7 @@ def _emp_role(org, user):
     themes = []
     employee = Employee.objects.filter(org_id=org.id, user__username=user).first()
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-    point_perms = []
-    point_perm = {'PERM_VIEW': False, 'PERM_REMOVE':False}
+    point_perm = {'PERM_VIEW': False}
     if emp_perm:
         point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first()
         feature_ids = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
@@ -156,11 +155,7 @@ def _emp_role(org, user):
                 point_id = point_feature_id.feature_id
                 if point_id in feature_ids:
                     qs = qs.exclude(feature_id=point_id)
-                    point_perms = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_id, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
-                    if point_perms:
-                        point_perm['PERM_VIEW'] = True
-                        if EmpPermInspire.PERM_REMOVE in point_perms:
-                            point_perm['PERM_REMOVE'] = True
+                    point_perm['PERM_VIEW'] = True
 
             package_ids = list(qs.distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
             theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
