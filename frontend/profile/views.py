@@ -125,10 +125,6 @@ def tsegSearch(request, payload):
 def tsegAdd(request):
     tseg_dugaar = request.POST.get('tsegiin_dugaar')
 
-    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__icontains=tseg_dugaar).first()
-    if mpoint.point_id != tseg_dugaar:
-        return JsonResponse({'success': False})
-
     oiroltsoo_bairlal = request.POST.get('oiroltsoo_bairlal')
     evdersen_baidal = request.POST.get('evdersen_baidal')
     shaltgaan = request.POST.get('nohtsol_baidal')

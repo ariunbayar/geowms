@@ -88,17 +88,17 @@ export class DanForm extends Component {
             const error = this.state.error
             this.error_msg = []
             this.setState({ checkError: error })
-            service.searchTseg(e.target.value).then(({items, names}) => {
-                if(items !== false){
-                    this.setState({items, tseg_dugaar_error:false , checkError:[] })
-                    const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
-                    this.setState({oiroltsoo_bairlal})
-                    this.optionVal(items)
-                }
-                else{
-                    this.setState({ tseg_dugaar_error: true, checkError: error })
-                }
-            })
+            // service.searchTseg(e.target.value).then(({items, names}) => {
+            //     if(items !== false){
+            //         this.setState({items, tseg_dugaar_error:false , checkError:[] })
+            //         const oiroltsoo_bairlal = names[0]['aimag_ner'] + ' аймгийн ' + names[0]['sum_ner'] + ' сум, '
+            //         this.setState({oiroltsoo_bairlal})
+            //         this.optionVal(items)
+            //     }
+            //     else{
+            //         this.setState({ tseg_dugaar_error: true, checkError: error })
+            //     }
+            // })
             // .catch(error => {
             //     console.log("Алдаа гарсан байна. " ,error.text)
             //     this.props.history.push('/profile/api/')
@@ -243,323 +243,326 @@ export class DanForm extends Component {
                     const has_error = Object.keys(errors).length > 0
                     const error_bn = Object.keys(checkError).length > 0
                     return (
-                    <Form>
-                        <div className="container">
-                        <div>
-                            <div className="col-md-12 mb-4 my-3">
-                                <a href="#" className="btn gp-outline-primary"
-                                    onClick={this.props.history.goBack}>
-                                    <i className="fa fa-angle-double-left"></i> Буцах
-                                </a>
-                                <div className="float-right h4">Цэгийн мэдээлэл</div>
-                            </div>
-                        </div>
-                        <table className="table table-bordered">
-                            <tbody>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">1.</th>
-                                    <th style={{width: "15%"}}>Цэгийн дугаар:
-                                    <br/>
-                                    </th>
-                                    <td colSpan="4" scope="rowgroup">
-                                        <div className="input-group">
-                                            <input
-                                                name="tsegiin_dugaar"
-                                                type="text"
-                                                id="tsegiin_dugaar"
-                                                list="tsegList"
-                                                className={'form-control ' + (tseg_dugaar_error || this.error_msg.length > 0 ? 'is-invalid' : '')}
-                                                onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
-                                            />
-                                            <div
-                                                type="button"
-                                                onMouseOver={(e) => this.handleBoxOver('evdersen_baidal',e)}
-                                                onMouseLeave={(e) => this.handleBoxLeave('evdersen_baidal',e)}
-                                                className="d-flex justify-content-center"
-                                            >
-                                            <span className="mb-1 input-group-addon fa-stack fa-lg">
-                                                <i className="fa fa-square fa-stack-2x"  style={{color: `${this.state.showTsegAlert ? "#1969c3" : `#034ea2`}`}} aria-hidden="true"></i>
-                                                <i className="fa fa-exclamation fa-stack-1x fa-inverse" style={{color:'white'}}></i>
-                                                <i className="fa">
-                                                <div className={`alert alert-dark rounded position-absolute d-none`+
-                                                            `${this.state.showTsegAlert ? " d-block" : ""}`}
-                                                            role="alert"
-                                                >
-                                                    <p className="alert-heading h6">Санамж!</p>
-                                                    <p className="small">Бүртгэлтэй Цэгийн дугаарыг хийх ёстойг анхаарна уу</p>
+                        <Form>
+                            <div className="container">
+                                <div>
+                                    <div className="col-md-12 mb-4 my-3">
+                                        <button
+                                            className="btn gp-outline-primary"
+                                            onClick={() => {
+                                                this.props.setButton(true)
+                                            }}
+                                        >
+                                            <i className="fa fa-angle-double-left"></i> Буцах
+                                        </button>
+                                        <div className="float-right h4">Цэгийн мэдээлэл</div>
+                                    </div>
+                                </div>
+                                <table className="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row">1.</th>
+                                            <th style={{width: "15%"}}>Цэгийн дугаар:
+                                            <br/>
+                                            </th>
+                                            <td colSpan="4" scope="rowgroup">
+                                                <div className="input-group">
+                                                    <input
+                                                        name="tsegiin_dugaar"
+                                                        type="text"
+                                                        id="tsegiin_dugaar"
+                                                        list="tsegList"
+                                                        className={'form-control ' + (tseg_dugaar_error || this.error_msg.length > 0 ? 'is-invalid' : '')}
+                                                        onChange={(e) => this.handleSearchWithTseg('tsegiin_dugaar', e)}
+                                                    />
+                                                    <div
+                                                        type="button"
+                                                        onMouseOver={(e) => this.handleBoxOver('evdersen_baidal',e)}
+                                                        onMouseLeave={(e) => this.handleBoxLeave('evdersen_baidal',e)}
+                                                        className="d-flex justify-content-center"
+                                                    >
+                                                    <span className="mb-1 input-group-addon fa-stack fa-lg">
+                                                        <i className="fa fa-square fa-stack-2x"  style={{color: `${this.state.showTsegAlert ? "#1969c3" : `#034ea2`}`}} aria-hidden="true"></i>
+                                                        <i className="fa fa-exclamation fa-stack-1x fa-inverse" style={{color:'white'}}></i>
+                                                        <i className="fa">
+                                                        <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                                    `${this.state.showTsegAlert ? " d-block" : ""}`}
+                                                                    role="alert"
+                                                        >
+                                                            <p className="alert-heading h6">Санамж!</p>
+                                                            <p className="small">Бүртгэлтэй Цэгийн дугаарыг хийх ёстойг анхаарна уу</p>
+                                                        </div>
+                                                        </i>
+                                                    </span>
+                                                    </div>
+                                                    {this.error_msg}
                                                 </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row">2.</th>
+                                            <th style={{width: "15%"}}>Ойролцоо байрлал:</th>
+                                            <td colSpan="4" scope="rowgroup">
+                                                <input
+                                                    name="oiroltsoo_bairlal"
+                                                    type="text"
+                                                    id="oiroltsoo_bairlal"
+                                                    className={'form-control' + (bairlal_error || this.bairlal_msg.length > 0 ? ' is-invalid' : '')}
+                                                    onChange = {(e) => this.handleInput('oiroltsoo_bairlal', e)}
+                                                    value = {oiroltsoo_bairlal}
+                                                />
+                                                {bairlal_error ? <div className="invalid-feedback">Хоосон байна.</div> : null}
+                                                {this.bairlal_msg}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row">3.</th>
+                                            <th style={{width: "15%"}}>Эвдэрсэн байдал:</th>
+                                            <td colSpan="4" scope="rowgroup">
+                                                <Field
+                                                    as = "select"
+                                                    name="evdersen_baidal"
+                                                    type="text"
+                                                    id="evdersen_baidal"
+                                                    className={'form-control' +
+                                                        (errors.evdersen_baidal &&
+                                                            touched.evdersen_baidal ? ' is-invalid' : '')}
+                                                >
+                                                    <option value="">--- Сонгоно уу ---</option>
+                                                    <option value="Эвдэрсэн">Эвдэрсэн</option>
+                                                    <option value="Төв гэмтсэн">Төв гэмтсэн</option>
+                                                    <option value="Хазайсан">Хазайсан</option>
+                                                    <option value="Дарагдсан">Дарагдсан</option>
+                                                    <option value="Бусад">Бусад</option>
+                                                </Field>
+                                                <ErrorMessage name="evdersen_baidal" component="div" className="invalid-feedback" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row">4.</th>
+                                            <th style={{width: "15%"}}>Нөхцөл/шалтгаан:</th>
+                                            <td colSpan="4" scope="rowgroup">
+                                                <Field
+                                                    className={'form-control ' +
+                                                        (errors.nohtsol_baidal &&
+                                                            touched.nohtsol_baidal ? ' is-invalid' : '')}
+                                                    component="textarea"
+                                                    name='nohtsol_baidal'
+                                                    id="nohtsol_baidal"
+                                                    type="textarea"
+                                                />
+                                                <ErrorMessage name="nohtsol_baidal" component="div" className="invalid-feedback"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row">5.</th>
+                                            <th
+                                                className="text-center"
+                                                colSpan="4"
+                                                scope="rowgroup"
+                                                style={{width: "15%"}}
+                                            >
+                                                Орчны фото зураг:
+                                                <div
+                                                    type="button"
+                                                    onMouseOver={(e) => this.handleBoxOver('zurag', e)}
+                                                    onMouseLeave={(e) => this.handleBoxLeave('zurag', e)}
+                                                    className="float-right"
+                                                >
+                                                <i className="fa fa-exclamation-circle float-right">
+                                                    <div className={`alert alert-dark rounded position-absolute d-none`+
+                                                                `${this.state.showBox ? " d-block" : ""}`}
+                                                                role="alert"
+                                                                style={{zIndex:'1'}}
+                                                    >
+                                                        <h6 className="alert-heading">Санамж!</h6>
+                                                        <p>Зургийн хэмжээ "1MB" байна. ".jpg" ".jpeg" болон ".png" байх ёстой</p>
+                                                    </div>
                                                 </i>
-                                            </span>
-                                            </div>
-                                            {tseg_dugaar_error? <div className="invalid-feedback">Уучлаарай ийм нэртэй "Цэгийн дугаар алга" Дахин шалгана уу.</div> : null}
-                                            {this.error_msg}
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">2.</th>
-                                    <th style={{width: "15%"}}>Ойролцоо байрлал:</th>
-                                    <td colSpan="4" scope="rowgroup">
-                                        <input
-                                            name="oiroltsoo_bairlal"
-                                            type="text"
-                                            id="oiroltsoo_bairlal"
-                                            className={'form-control' + (bairlal_error || this.bairlal_msg.length > 0 ? ' is-invalid' : '')}
-                                            onChange = {(e) => this.handleInput('oiroltsoo_bairlal', e)}
-                                            value = {oiroltsoo_bairlal}
-                                        />
-                                        {bairlal_error ? <div className="invalid-feedback">Хоосон байна.</div> : null}
-                                        {this.bairlal_msg}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">3.</th>
-                                    <th style={{width: "15%"}}>Эвдэрсэн байдал:</th>
-                                    <td colSpan="4" scope="rowgroup">
-                                        <Field
-                                            as = "select"
-                                            name="evdersen_baidal"
-                                            type="text"
-                                            id="evdersen_baidal"
-                                            className={'form-control' +
-                                                (errors.evdersen_baidal &&
-                                                    touched.evdersen_baidal ? ' is-invalid' : '')}
-                                        >
-                                            <option value="">--- Сонгоно уу ---</option>
-                                            <option value="Эвдэрсэн">Эвдэрсэн</option>
-                                            <option value="Төв гэмтсэн">Төв гэмтсэн</option>
-                                            <option value="Хазайсан">Хазайсан</option>
-                                            <option value="Дарагдсан">Дарагдсан</option>
-                                            <option value="Бусад">Бусад</option>
-                                        </Field>
-                                        <ErrorMessage name="evdersen_baidal" component="div" className="invalid-feedback" />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">4.</th>
-                                    <th style={{width: "15%"}}>Нөхцөл/шалтгаан:</th>
-                                    <td colSpan="4" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' +
-                                                (errors.nohtsol_baidal &&
-                                                    touched.nohtsol_baidal ? ' is-invalid' : '')}
-                                            component="textarea"
-                                            name='nohtsol_baidal'
-                                            id="nohtsol_baidal"
-                                            type="textarea"
-                                        />
-                                        <ErrorMessage name="nohtsol_baidal" component="div" className="invalid-feedback"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">5.</th>
-                                    <th
-                                        className="text-center"
-                                        colSpan="4"
-                                        scope="rowgroup"
-                                        style={{width: "15%"}}
-                                    >
-                                        Орчны фото зураг:
-                                        <div
-                                            type="button"
-                                            onMouseOver={(e) => this.handleBoxOver('zurag', e)}
-                                            onMouseLeave={(e) => this.handleBoxLeave('zurag', e)}
-                                            className="float-right"
-                                        >
-                                        <i className="fa fa-exclamation-circle float-right">
-                                            <div className={`alert alert-dark rounded position-absolute d-none`+
-                                                        `${this.state.showBox ? " d-block" : ""}`}
-                                                        role="alert"
-                                                        style={{zIndex:'1'}}
-                                            >
-                                                <h6 className="alert-heading">Санамж!</h6>
-                                                <p>Зургийн хэмжээ "1MB" байна. ".jpg" ".jpeg" болон ".png" байх ёстой</p>
-                                            </div>
-                                        </i>
-                                        </div>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "0%"}} scope="row"></th>
-                                    <th className="text-center" colSpan="2" scope="rowgroup">холоос</th>
-                                    <th className="text-center" colSpan="2" scope="rowgroup">ойроос</th>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row"></th>
-                                    <th colSpan="2" scope="rowgroup" style={{width: "50%"}}>
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'zurag_hol')}
-                                            imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={1529173}
-                                            singleImage={true}
-                                            label=''
-                                            fileSizeError='Хэт их байна "1MB" зураг'
-                                            fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
-                                        />
-                                    </th>
-                                    <th colSpan="2" scope="rowgroup">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'zurag_oir')}
-                                            imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={1529173}
-                                            singleImage={true}
-                                            label=''
-                                            fileSizeError='Хэт их байна "1MB" зураг'
-                                            fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
-                                        />
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row"></th>
-                                    <td colSpan="4" scope="rowgroup">
-                                    <button type="button" className="btn gp-btn-primary btn-block" onClick={(e) => this.showMore(e)}>
-                                        {showMore
-                                        ?
-                                        <div><i className="fa fa-caret-up" aria-hidden="true"></i> <b>Хаах</b></div>
-                                        :
-                                        <div><i className="fa fa-caret-down" aria-hidden="true"></i> <b>Илүү олон</b></div>
-                                        }
-                                    </button>
-                                    </td>
-                                </tr>
-                                <tr className={showMore ? 'd-show' : "d-none"}>
-                                    <th style={{width: "5%"}} scope="row"></th>
-                                    <th className="text-center" colSpan="2" scope="rowgroup">Баруун</th>
-                                    <th className="text-center" colSpan="2" scope="rowgroup">Зүүн</th>
-                                </tr>
-                                <tr className={showMore ? 'd-show' : "d-none"}>
-                                    <th style={{width: "5%"}} scope="row"></th>
-                                    <th colSpan="2" scope="rowgroup">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'zurag_baruun')}
-                                            imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={1529173}
-                                            singleImage={true}
-                                            label=''
-                                            fileSizeError='Хэт их байна "1MB" зураг'
-                                            fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
-                                        />
-                                    </th>
-                                    <th colSpan="2" scope="rowgroup">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'zurag_zuun')}
-                                            imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={1529173}
-                                            singleImage={true}
-                                            label=''
-                                            fileSizeError='Хэт их байна "1MB" зураг'
-                                            fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
-                                        />
-                                    </th>
-                                </tr>
-                                <tr className={showMore ? 'd-show' : "d-none"}>
-                                    <th style={{width: "5%"}} scope="row"></th>
-                                    <th className="text-center" colSpan="2" scope="rowgroup">Хойно</th>
-                                    <th className="text-center" colSpan="2" scope="rowgroup">Өмнө</th>
-                                </tr>
-                                <tr className={showMore ? 'd-show' : "d-none"}>
-                                    <th style={{width: "5%"}} scope="row"></th>
-                                    <th colSpan="2" scope="rowgroup">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'zurag_hoid')}
-                                            imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={1529173}
-                                            singleImage={true}
-                                            label=''
-                                            fileSizeError='Хэт их байна "1MB" зураг'
-                                            fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
-                                        />
-                                    </th>
-                                    <th colSpan="2" scope="rowgroup">
-                                        <ImageUploader
-                                            withPreview={true}
-                                            withIcon={false}
-                                            buttonText='Зураг оруулах'
-                                            onChange={(e) =>this.onDrop(e, 'zurag_omno')}
-                                            imgExtension={['.jepg', '.jpg', '.png']}
-                                            maxFileSize={1529173}
-                                            singleImage={true}
-                                            label=''
-                                            fileSizeError='Хэт их байна "1MB" зураг'
-                                            fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
-                                        />
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">6.</th>
-                                    <th style={{width: "15%"}}>Сэргээх талаар таны санал:</th>
-                                    <td colSpan="4" scope="rowgroup">
-                                        <Field
-                                            className={'form-control ' +
-                                                (errors.sergeeh_sanal &&
-                                                    touched.sergeeh_sanal ? ' is-invalid' : '')}
-                                            as="select"
-                                            name='sergeeh_sanal'
-                                            id="sergeeh_sanal"
-                                            type="textarea"
-                                        >
-                                            <option value="">--- Сонгоно уу ---</option>
-                                            <option value="Шаардлагагүй">Шаардлагагүй</option>
-                                            <option value="Сэргээх">Сэргээх</option>
-                                            <option value="Шилжүүлэх">Шилжүүлэх</option>
-                                            <option value="Шинээр байгуулах">Шинээр байгуулах</option>
-                                        </Field>
-                                        <ErrorMessage name="sergeeh_sanal" component="div" className="invalid-feedback"/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th style={{width: "5%"}} scope="row">7.</th>
-                                    <th style={{width: "15%"}}>GPS-ийн хэмжилт хийх боломжтой эсэх:</th>
-                                    <td colSpan="2" scope="rowgroup">
-                                        <div className="col-md-12">
-                                            <input
-                                                type="checkbox"
-                                                id="hemjilt_hiih_bolomj1"
-                                                checked={this.state.hemjilt_hiih_bolomj ? true : false}
-                                                onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, true)}
-                                            ></input>
-                                            <label htmlFor="hemjilt_hiih_bolomj1">Тийм</label>
-                                            <br/>
-                                            <br/>
-                                            <input
-                                                type="checkbox"
-                                                id="hemjilt_hiih_bolomj2"
-                                                checked={this.state.hemjilt_hiih_bolomj ? false : true}
-                                                onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, false)}
-                                            >
-                                            </input>
-                                            <label htmlFor="hemjilt_hiih_bolomj2">Үгүй</label>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div>
-                        <button type="submit" className="btn gp-btn-primary" disabled={isSubmitting || has_error || Object.keys(this.state.checkError).length > 0}>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "0%"}} scope="row"></th>
+                                            <th className="text-center" colSpan="2" scope="rowgroup">холоос</th>
+                                            <th className="text-center" colSpan="2" scope="rowgroup">ойроос</th>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row"></th>
+                                            <th colSpan="2" scope="rowgroup" style={{width: "50%"}}>
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'zurag_hol')}
+                                                    imgExtension={['.jepg', '.jpg', '.png']}
+                                                    maxFileSize={1529173}
+                                                    singleImage={true}
+                                                    label=''
+                                                    fileSizeError='Хэт их байна "1MB" зураг'
+                                                    fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
+                                                />
+                                            </th>
+                                            <th colSpan="2" scope="rowgroup">
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'zurag_oir')}
+                                                    imgExtension={['.jepg', '.jpg', '.png']}
+                                                    maxFileSize={1529173}
+                                                    singleImage={true}
+                                                    label=''
+                                                    fileSizeError='Хэт их байна "1MB" зураг'
+                                                    fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
+                                                />
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row"></th>
+                                            <td colSpan="4" scope="rowgroup">
+                                            <button type="button" className="btn gp-btn-primary btn-block" onClick={(e) => this.showMore(e)}>
+                                                {showMore
+                                                ?
+                                                <div><i className="fa fa-caret-up" aria-hidden="true"></i> <b>Хаах</b></div>
+                                                :
+                                                <div><i className="fa fa-caret-down" aria-hidden="true"></i> <b>Илүү олон</b></div>
+                                                }
+                                            </button>
+                                            </td>
+                                        </tr>
+                                        <tr className={showMore ? 'd-show' : "d-none"}>
+                                            <th style={{width: "5%"}} scope="row"></th>
+                                            <th className="text-center" colSpan="2" scope="rowgroup">Баруун</th>
+                                            <th className="text-center" colSpan="2" scope="rowgroup">Зүүн</th>
+                                        </tr>
+                                        <tr className={showMore ? 'd-show' : "d-none"}>
+                                            <th style={{width: "5%"}} scope="row"></th>
+                                            <th colSpan="2" scope="rowgroup">
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'zurag_baruun')}
+                                                    imgExtension={['.jepg', '.jpg', '.png']}
+                                                    maxFileSize={1529173}
+                                                    singleImage={true}
+                                                    label=''
+                                                    fileSizeError='Хэт их байна "1MB" зураг'
+                                                    fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
+                                                />
+                                            </th>
+                                            <th colSpan="2" scope="rowgroup">
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'zurag_zuun')}
+                                                    imgExtension={['.jepg', '.jpg', '.png']}
+                                                    maxFileSize={1529173}
+                                                    singleImage={true}
+                                                    label=''
+                                                    fileSizeError='Хэт их байна "1MB" зураг'
+                                                    fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
+                                                />
+                                            </th>
+                                        </tr>
+                                        <tr className={showMore ? 'd-show' : "d-none"}>
+                                            <th style={{width: "5%"}} scope="row"></th>
+                                            <th className="text-center" colSpan="2" scope="rowgroup">Хойно</th>
+                                            <th className="text-center" colSpan="2" scope="rowgroup">Өмнө</th>
+                                        </tr>
+                                        <tr className={showMore ? 'd-show' : "d-none"}>
+                                            <th style={{width: "5%"}} scope="row"></th>
+                                            <th colSpan="2" scope="rowgroup">
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'zurag_hoid')}
+                                                    imgExtension={['.jepg', '.jpg', '.png']}
+                                                    maxFileSize={1529173}
+                                                    singleImage={true}
+                                                    label=''
+                                                    fileSizeError='Хэт их байна "1MB" зураг'
+                                                    fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
+                                                />
+                                            </th>
+                                            <th colSpan="2" scope="rowgroup">
+                                                <ImageUploader
+                                                    withPreview={true}
+                                                    withIcon={false}
+                                                    buttonText='Зураг оруулах'
+                                                    onChange={(e) =>this.onDrop(e, 'zurag_omno')}
+                                                    imgExtension={['.jepg', '.jpg', '.png']}
+                                                    maxFileSize={1529173}
+                                                    singleImage={true}
+                                                    label=''
+                                                    fileSizeError='Хэт их байна "1MB" зураг'
+                                                    fileTypeError='энэ зураг буруу байна. Зөвхөн .jpeg, .png өргөтгөлтэй зураг'
+                                                />
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row">6.</th>
+                                            <th style={{width: "15%"}}>Сэргээх талаар таны санал:</th>
+                                            <td colSpan="4" scope="rowgroup">
+                                                <Field
+                                                    className={'form-control ' +
+                                                        (errors.sergeeh_sanal &&
+                                                            touched.sergeeh_sanal ? ' is-invalid' : '')}
+                                                    as="select"
+                                                    name='sergeeh_sanal'
+                                                    id="sergeeh_sanal"
+                                                    type="textarea"
+                                                >
+                                                    <option value="">--- Сонгоно уу ---</option>
+                                                    <option value="Шаардлагагүй">Шаардлагагүй</option>
+                                                    <option value="Сэргээх">Сэргээх</option>
+                                                    <option value="Шилжүүлэх">Шилжүүлэх</option>
+                                                    <option value="Шинээр байгуулах">Шинээр байгуулах</option>
+                                                </Field>
+                                                <ErrorMessage name="sergeeh_sanal" component="div" className="invalid-feedback"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style={{width: "5%"}} scope="row">7.</th>
+                                            <th style={{width: "15%"}}>GPS-ийн хэмжилт хийх боломжтой эсэх:</th>
+                                            <td colSpan="2" scope="rowgroup">
+                                                <div className="col-md-12">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="hemjilt_hiih_bolomj1"
+                                                        checked={this.state.hemjilt_hiih_bolomj ? true : false}
+                                                        onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, true)}
+                                                    ></input>
+                                                    <label htmlFor="hemjilt_hiih_bolomj1">Тийм</label>
+                                                    <br/>
+                                                    <br/>
+                                                    <input
+                                                        type="checkbox"
+                                                        id="hemjilt_hiih_bolomj2"
+                                                        checked={this.state.hemjilt_hiih_bolomj ? false : true}
+                                                        onChange={(e) => this.handleCheckGroup('hemjilt_hiih_bolomj', e, false)}
+                                                    >
+                                                    </input>
+                                                    <label htmlFor="hemjilt_hiih_bolomj2">Үгүй</label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div>
+                                <button type="submit" className="btn gp-btn-primary m-2" disabled={isSubmitting || has_error}>
                                     {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                     {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
                                     {!isSubmitting && 'Нэмэх' }
                                 </button>
-                        </div>
-                        <datalist id="tsegList">
-                            {this.datalist}
-                        </datalist>
-                    </div>
+                                </div>
+                                <datalist id="tsegList">
+                                    {this.datalist}
+                                </datalist>
+                            </div>
                     </Form>
                 )}
             }
