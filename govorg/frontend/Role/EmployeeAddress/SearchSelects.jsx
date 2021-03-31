@@ -181,7 +181,7 @@ export default class SearchSelects extends Component {
                         >
                             Байгууллага/Түвшин
                         </button>
-                        <div className="dropdown-menu dropdown-menu-right bundle-view-scroll" aria-labelledby="dropdownMenuButton">
+                        <div className="dropdown-menu dropdown-menu-right org-list-scroll" aria-labelledby="dropdownMenuButton">
                             {
                                 levels.length > 0 &&
                                     <>
