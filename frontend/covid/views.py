@@ -189,6 +189,25 @@ def get_nema(request, bundle_id):
     return JsonResponse(rsp)
 
 
+def format_relative_date(date):
+    date = date.replace(tzinfo=None)
+
+    now = datetime.now()
+    diff = (now - date).seconds
+    a=str(diff//3600)
+    b=str((diff%3600)//60)
+    c=str((diff%3600)%60)
+    return_time = ''
+
+    if a != '0':
+        return_time = return_time + "{} цаг ".format(a)
+    if b != '0':
+        return_time = return_time + "{} минут ".format(b)
+    if c != '0':
+        return_time = return_time + "{} секунд".format(c)
+    return return_time
+
+
 @require_GET
 @ajax_required
 def get_covid_data(request, geo_id):
@@ -265,6 +284,25 @@ def get_covid_state(request, geo_id):
                             'prev_data': last_day_data[1][f.name] if len(last_day_data) > 1 else 0,
                             'color': color
                         })
+
+    onoodor_data = qs.first()
+    ochigdor_data = qs_log.order_by('-updated_at').first()
+    onoodor_counts_obj = {
+        'vaccine_hiisen_too': onoodor_data.vaccine_hiisen_too,
+        'batlagdsan_tohioldol_too': onoodor_data.batlagdsan_tohioldol_too,
+        'edgersen_humuus_too': onoodor_data.edgersen_humuus_too,
+        'emchlegdej_bui_humuus_too': onoodor_data.emchlegdej_bui_humuus_too,
+        'nas_barsan_hunii_too': onoodor_data.nas_barsan_hunii_too,
+        'medeelel_shinchlegdsen_time': format_relative_date(onoodor_data.updated_at)
+    }
+
+    ochigdor_counts_obj = {
+        'vaccine_hiisen_too': ochigdor_data.vaccine_hiisen_too if ochigdor_data else '0',
+        'batlagdsan_tohioldol_too': ochigdor_data.batlagdsan_tohioldol_too if ochigdor_data else '0',
+        'edgersen_humuus_too': ochigdor_data.edgersen_humuus_too if ochigdor_data else '0',
+        'emchlegdej_bui_humuus_too': ochigdor_data.emchlegdej_bui_humuus_too if ochigdor_data else '0',
+        'nas_barsan_hunii_too': ochigdor_data.nas_barsan_hunii_too if ochigdor_data else '0',
+    }
 
     covid_data_ogj = qs.first()
 
@@ -370,6 +408,8 @@ def get_covid_state(request, geo_id):
         'success': True,
         'count_datas': count_datas,
         'count_covid_datas': count_covid_datas,
+        'ochigdor_counts_obj': ochigdor_counts_obj,
+        'onoodor_counts_obj': onoodor_counts_obj,
         'charts': {
             'piechart_one': piechart_one,
             'linechart_all': linechart_all
@@ -443,7 +483,7 @@ def _for_mongol_list():
 @ajax_required
 def get_data_dashboard(request):
     initial_qs = CovidDashboard.objects
-    parents = initial_qs.filter(parent_id__isnull=True)
+    parents = initial_qs.filter(parent_id__isnull=True).order_by('name')
     data = _make_json_for_dashb(initial_qs, parents)
 
     updated = parents.first().updated_at
@@ -460,23 +500,23 @@ def get_data_dashboard(request):
 
     qs_log = CovidDashboardLog.objects.filter(parent_id__isnull=True)
     last_day_data = qs_log.order_by('-updated_at').values()
-    zuruu = dict()
-    if last_day_data:
-        if len(last_day_data) < 1:
-            last_day_data = last_day_data[1]
-            mongol = parents.values()[0]
-            for name in _for_mongol_list():
-                zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
-        else:
-            mongol = parents.values()[0]
-            for name in _for_mongol_list():
-                zuruu[name + "_zuruu"] = str(mongol[name])
+    # zuruu = dict()
+    # if last_day_data:
+    #     if len(last_day_data) < 1:
+    #         last_day_data = last_day_data[1]
+    #         mongol = parents.values()[0]
+    #         for name in _for_mongol_list():
+    #             zuruu[name + "_zuruu"] = str(mongol[name] - last_day_data[name])
+    #     else:
+    #         mongol = parents.values()[0]
+    #         for name in _for_mongol_list():
+    #             zuruu[name + "_zuruu"] = str(mongol[name])
 
     rsp = {
         'success': True,
         'data': data,
         'update_time': msg,
-        'zuruu': zuruu if zuruu else '',
+        'zuruu': '',
     }
     return JsonResponse(rsp)
 
