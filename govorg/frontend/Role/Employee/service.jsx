@@ -14,6 +14,7 @@ export const service = {
     formOptions,
     getEmpInfo,
     getErguulegFields,
+    getWherePos,
     saveErguul,
     getFieldTailbar,
     saveTailbar,
@@ -162,4 +163,11 @@ function getSelectValue() {
         ...getGetOptions(),
     }
     return fetch(`/back/api/org/get-select-values/`, requestOptions).then(handleResponse)
+}
+
+function getWherePos(id) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${id}/get-erguulInfo/`, requestOptions).then(handleResponse)
 }

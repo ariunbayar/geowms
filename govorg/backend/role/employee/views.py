@@ -894,3 +894,38 @@ def erguul_list(request, payload):
         }
 
     return JsonResponse(rsp)
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_erguulInfo(request, pk):
+    location = EmployeeAddress.objects.filter(employee_id=pk).first()
+    local_lvl1 = location.level_1
+    local_lvl2 = location.level_2
+    erguul = EmployeeErguul.objects.all()
+    erguul = erguul.filter(address_id=pk).first()
+    erguul_level_3 = erguul.level_3
+    erguul_street = erguul.street
+    erguul_date_starttime = erguul.date_start.strftime('%Y-%m-%d')
+    erguul_date_endtime = erguul.date_end.strftime('%Y-%m-%d')
+    status = ErguulTailbar.objects.filter(erguul_id=erguul.id).first()
+    desc = status.description
+    status = status.state
+    if status == 1:
+        status = "Гарсан"
+    elif status == 2:
+        status = "Гараагүй"
+    else:
+        status = "Гарч байгаа"
+    rsp = {
+        'success': True,
+        'desc': desc,
+        'local_lvl1':local_lvl1,
+        'local_lvl2':local_lvl2,
+        'status': status,
+        'date_start': erguul_date_starttime,
+        'date_end': erguul_date_endtime,
+        'erguul_level3': erguul_level_3,
+        'erguul_street': erguul_street,
+    }
+    return JsonResponse(rsp)
