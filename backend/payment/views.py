@@ -11,6 +11,7 @@ from .models import Payment, PaymentPoint
 
 from django.contrib.postgres.search import SearchVector
 
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)

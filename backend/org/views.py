@@ -1771,3 +1771,24 @@ def get_select_values(request):
         'pro_classes': pro_classes,
     }
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_all_org(request):
+
+    qs = Org.objects
+    org_qs = qs.all()
+    org_list = list(org_qs.values())
+
+    levels_qs = qs.values('level').annotate(Count('level')).order_by('level')
+    levels_qs = list(levels_qs)
+    levels = [level['level'] for level in levels_qs]
+
+    rsp = {
+        'success': True,
+        'org_list': org_list,
+        'levels': levels,
+    }
+
+    return JsonResponse(rsp)

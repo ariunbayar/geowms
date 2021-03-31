@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.theme.default.min.css" %}">
   <link rel="stylesheet" href="{% static "assets/bootstrap/css/animate.min.css" %}">
   <link href="{% static "assets/bootstrap/css/font-awesome.min.css" %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static "assets/admin/css/app-style.css" %}">
 </head>
 <style type="text/css">
   body {
@@ -103,16 +104,9 @@
           <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
             <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
           </li>
-          <li class="nav-item {% if url_name == "meta-data" %}active{% endif %}">
-            <a class="nav-link" href="http://192.168.10.95:8080/geonetwork/srv/mon/catalog.search#/home">МЕТА ДАТА</a>
-          </li>
           <li class="nav-item {% if url_name == "page:help" %}active{% endif %}">
             <a class="nav-link" href="{% url "page:help" %}">ТУСЛАМЖ</a>
           </li>
-          <li class="nav-item {% if url_name == "page:statistics" %}active{% endif %}">
-            <a class="nav-link" href="{% url "page:statistics" %}">СТАТИСТИК</a>
-          </li>
-
           {% if user.is_authenticated and user.is_superuser %}
           <li class="nav-item">
             <a class="nav-link" href="{% url "backend:webapp" %}"><i class="fa fa-cog"></i> УДИРДАГЧИЙН ХЭСЭГ</i></a>

@@ -320,7 +320,7 @@ def dashboard_list(request, payload, geo_id):
     ]
 
     initial_qs = CovidDashboardLog.objects
-    initial_qs = initial_qs.filter(geo_id=geo_id)
+    initial_qs = initial_qs.filter(geo_id=geo_id).order_by('-updated_at')
     if initial_qs:
         datatable = Datatable(
             model=CovidDashboardLog,

@@ -31,6 +31,7 @@ import { AlertRoot } from "./ShopControls/alert"
 import Loader from '@utils/Loader'
 import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
+import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
 
 
 export default class InspireMap extends Component {
@@ -67,7 +68,9 @@ export default class InspireMap extends Component {
             layer_2405: '',
             vectorSource: null,
             search_date: '',
-            is_search_bar: props.is_search_bar || false
+            is_search_bar: props.is_search_bar || true,
+            is_menu_bar: props.is_menu_bar || 'open',
+            is_menu_bar_all: props.is_menu_bar_all || 'open',
         }
 
         this.controls = {
@@ -400,6 +403,7 @@ export default class InspireMap extends Component {
                             ...layer,
                             wms_or_cache_ur,
                             tile: new Tile({
+                                preload: 6,
                                 minZoom: layer.zoom_start,
                                 maxZoom: layer.zoom_stop,
                                 source: new WMTS({
@@ -417,11 +421,13 @@ export default class InspireMap extends Component {
                                     }),
                                     style: '',
                                     wrapX: true,
+                                    tileLoadFunction: securedImageWMS
                                 }),
                                 code: layer.code
                             }),
-                            wms_tile: new Image({
-                                source: new ImageWMS({
+                            wms_tile: new Tile({
+                                preload: 6,
+                                source: new TileWMS({
                                     projection: this.state.projection,
                                     ratio: 1,
                                     url: url,
@@ -431,9 +437,10 @@ export default class InspireMap extends Component {
                                         'VERSION': '1.1.1',
                                         "STYLES": '',
                                         "exceptions": 'application/vnd.ogc.se_inimage',
-                                    }
+                                    },
+                                    tileLoadFunction: securedImageWMS
                                 }),
-                                code: layer.code
+                                code: layer.code,
                             })
                         }
                     }),
@@ -494,8 +501,8 @@ export default class InspireMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Image({
-                            source: new ImageWMS({
+                        layer = new Tile({
+                            source: new TileWMS({
                                 ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
@@ -504,7 +511,8 @@ export default class InspireMap extends Component {
                                     'VERSION': '1.1.1',
                                     "STYLES": '',
                                     "exceptions": 'application/vnd.ogc.se_inimage',
-                                }
+                                },
+                                tileLoadFunction: securedImageWMS
                             }),
                             name: base_layer_name,
                         })
@@ -525,6 +533,7 @@ export default class InspireMap extends Component {
                                     resolutions: resolutions,
                                     matrixIds: gridNames,
                                 }),
+                                tileLoadFunction: securedImageWMS,
                                 style: '',
                                 wrapX: true,
                             }),
@@ -1213,7 +1222,7 @@ export default class InspireMap extends Component {
 
 
     render() {
-        const {is_loading, is_search_bar} = this.state
+        const {is_loading, is_search_bar, is_menu_bar, is_menu_bar_all} = this.state
         const height = this.props.height ? this.props.height : '80vh'
 
         const Menu_comp = () => {
@@ -1258,13 +1267,13 @@ export default class InspireMap extends Component {
         const settings_component = () => {
             return(
                 <div>
-                    <h4>Тун удахгүй</h4>
+                    <button class="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i class="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
                 </div>
             )
         }
 
         var items = []
-        items.push({
+        is_menu_bar == 'open' && items.push({
             "key": "menus",
             "icon": "fa fa-bars",
             "title": "Давхаргууд",
@@ -1289,9 +1298,9 @@ export default class InspireMap extends Component {
                     style={{height: `${height}`,}}
                     className="mw-100 px-0 mx-0"
                 >
-                    <SideBar
+                    {is_menu_bar_all == 'open' &&<SideBar
                         items = {items}
-                    />
+                    />}
                 </div>
             </div>
         )
