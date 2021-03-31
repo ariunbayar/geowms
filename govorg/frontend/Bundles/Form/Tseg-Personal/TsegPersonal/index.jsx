@@ -15,9 +15,11 @@ export class TsegPersonal extends Component {
             point_role_list: props.point_role_list,
         }
     }
+
     componentDidUpdate(pP, pS) {
-        if(pP.point_role_list != this.props.point_role_list) {
-            this.setState({point_role_list})
+        const { point_role_list } = this.props
+        if(pP.point_role_list != point_role_list) {
+            this.setState({ point_role_list })
         }
     }
 

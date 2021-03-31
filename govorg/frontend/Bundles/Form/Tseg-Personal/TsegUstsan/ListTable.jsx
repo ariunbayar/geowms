@@ -43,7 +43,7 @@ export default class ListTable extends Component {
     render() {
         const idx = this.props.idx
         const {id,email,name,alban_tushaal,utas,tseg_id, is_removed} = this.props.values
-        const {is_modal_success_open, is_modal_delete_open, point_role_list}=this.state
+        const {is_modal_success_open, is_modal_delete_open, point_role_list} = this.state
         return (
             <tr>
                 <td scope="col">
@@ -73,7 +73,7 @@ export default class ListTable extends Component {
                 </td>
                 <td>
                     {
-                        (point_role_list && point_role_list.PERM_APPROVE) &&
+                        (point_role_list && point_role_list.PERM_REVOKE) &&
                         <button href="#" className={`btn ${!is_removed ? ' gp-btn-primary' : "btn-success"}`} disabled={is_removed ? 'disabled': ''} aria-hidden="true" onClick={this.handleModalSuccessOpen}>
                         {
                             is_removed

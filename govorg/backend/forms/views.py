@@ -816,14 +816,14 @@ def tseg_inspire_list(request, payload):
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_remove(request, id):
 
-    perm_name = EmpPermInspire.PERM_APPROVE
+    perm_name = EmpPermInspire.PERM_REVOKE
     check_point, info = _check_tseg_role(perm_name, request.user)
 
     if not check_point:
         rsp = {
-                    'success': False,
-                    'msg': 'Танд цуцлах эрх алга байна.'
-                }
+            'success': False,
+            'msg': 'Танд цуцлах эрх алга байна.'
+        }
         return JsonResponse(rsp)
 
     qs = TsegRequest.objects
