@@ -9,7 +9,7 @@ export class ErguulDetail extends Component {
         this.state = {
             refresh: false,
             талбарууд: [
-                {'field': 'fullname', "title": 'Хэрэглэгчийн овог, нэр','has_action': true},
+                {'field': 'fullname', "title": 'Хэрэглэгчийн овог, нэр', 'has_action': true},
                 {'field': 'part_time', "title": 'Ээлж', 'has_action': true},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'date_start', "title": 'Эхлэх огноо'},

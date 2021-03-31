@@ -37,19 +37,19 @@ export class ErguulInfo extends Component {
                 local_lvl1,
                 local_lvl2,
                 desc,
-                }) => {
+            }) => {
             if(success){
                 this.setState({
-                first_name,
-                last_name,
-                erguul_level3,
-                erguul_street,
-                date_start,
-                date_end,
-                status,
-                local_lvl1,
-                local_lvl2,
-                desc,
+                    first_name,
+                    last_name,
+                    erguul_level3,
+                    erguul_street,
+                    date_start,
+                    date_end,
+                    status,
+                    local_lvl1,
+                    local_lvl2,
+                    desc,
                 })
             }
         })

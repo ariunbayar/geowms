@@ -906,10 +906,10 @@ def erguul_list(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_erguulInfo(request, pk):
-    location = EmployeeAddress.objects.filter(employee_id=pk).first()
+    location = EmployeeAddress.objects.filter(id=pk).first()
     erguul = EmployeeErguul.objects.filter(address_id=pk).first()
     status = ErguulTailbar.objects.filter(erguul_id=erguul.id).first()
-    name = get_object_or_404(Employee, id=pk)
+    name = get_object_or_404(Employee, id=location.employee.id)
     name = name.user
     local_lvl1 = location.level_1
     local_lvl2 = location.level_2
@@ -930,8 +930,8 @@ def get_erguulInfo(request, pk):
         'first_name': name.first_name,
         'last_name': name.last_name,
         'desc': desc,
-        'local_lvl1':local_lvl1,
-        'local_lvl2':local_lvl2,
+        'local_lvl1': local_lvl1,
+        'local_lvl2': local_lvl2,
         'status': status,
         'date_start': erguul_date_starttime,
         'date_end': erguul_date_endtime,
