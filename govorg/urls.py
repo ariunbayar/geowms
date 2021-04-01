@@ -112,7 +112,7 @@ urlpatterns = [
 
         path('tseg-ustsan/', include(([
             path('', forms_views.tsegUstsan, name='tseg-ustsan'),
-            path('success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
+            path('success/', forms_views.tseg_ustsan_success, name='tseg-ustsan-success'),
             path('list/', forms_views.tsegUstsanList, name='tseg-ustsan-list'),
             path('remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
             path('edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),

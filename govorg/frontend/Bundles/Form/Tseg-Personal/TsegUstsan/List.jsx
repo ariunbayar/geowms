@@ -5,6 +5,7 @@ import ListTable from "./ListTable"
 import {service} from './service'
 import {Pagination} from '../../../../components/pagination/pagination'
 import ModalAlert from "@utils/Modal/ModalAlert"
+import Loader from "@utils/Loader"
 
 
 export class List extends Component {
@@ -23,7 +24,8 @@ export class List extends Component {
             modal_alert_status: 'closed',
             timer: null,
             modal_text: '',
-            modal_icon: ''
+            modal_icon: '',
+            is_loading: false,
         }
         this.paginate = this.paginate.bind(this)
         this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
@@ -57,6 +59,7 @@ export class List extends Component {
     }
 
     handleTsegSuccess(id){
+        this.setLoading(true)
         service.tseg_success(id).then(({ success }) => {
             if (success) {
                 this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
@@ -68,6 +71,7 @@ export class List extends Component {
                 this.paginate(1,"")
                 this.modalCloseTime()
             }
+            this.setLoading(false)
         })
     }
 
@@ -96,7 +100,12 @@ export class List extends Component {
         this.setState({modal_alert_status: "closed"})
     }
 
+    setLoading(is_loading) {
+        this.setState({ is_loading })
+    }
+
     render() {
+        const { is_loading } = this.state
         return (
             <div className="card">
                 <div  className="card-body">
@@ -113,6 +122,7 @@ export class List extends Component {
                             value={this.state.searchQuery}
                         />
                         <div className="table-responsive">
+                            <Loader is_loading={is_loading}/>
                             <table className="table table-fluid my-4">
                                 <thead>
                                     <tr>
@@ -139,6 +149,7 @@ export class List extends Component {
                                             values={tseg}
                                             handleTsegSuccess={() => this.handleTsegSuccess(tseg.id)}
                                             handleRemove={() => this.handleRemove(tseg.id)}
+                                            setLoading={this.setLoading}
                                         />
                                     ))
                                 }

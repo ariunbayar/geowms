@@ -141,12 +141,16 @@ export class DanForm extends Component {
                     setStatus('saved')
                     setSubmitting(false)
                 }, 1000)
-                this.props.history.push( `/profile/tseg-personal/`)
+                this.props.setButton(true)
             }
             if(!success){
                 setStatus('failed')
                 setSubmitting(false)
             }
+        })
+        .catch(() => {
+            //TODO
+            alert('Алдаа гарсан байна')
         })
     }
 

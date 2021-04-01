@@ -1,16 +1,12 @@
-import os
-import glob
-import csv
 import datetime
-from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.paginator import Paginator
-from main.decorators import ajax_required
+
 from backend.payment.models import Payment
 from backend.payment.models import PaymentPoint
 from backend.payment.models import PaymentPolygon
@@ -20,11 +16,12 @@ from backend.inspire.models import LFeatures
 from backend.inspire.models import LProperties
 from backend.inspire.models import MDatas
 from backend.inspire.models import LCodeLists
-from geoportal_app.models import User
+from backend.org.models import Employee
 from govorg.backend.forms.models import TsegUstsan, Mpoint_view
-from main.utils import resize_b64_to_sizes
-from django.core.files.uploadedfile import SimpleUploadedFile
+from geoportal_app.models import User
+
 from main import utils
+from main.decorators import ajax_required
 
 
 @require_GET
@@ -141,30 +138,35 @@ def tsegAdd(request):
     img_hoino = request.POST.get('zurag_hoid')
     img_omno = request.POST.get('zurag_omno')
     if img_holoos:
-        [image_x2] = resize_b64_to_sizes(img_holoos, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_holoos, [(720, 720)])
         img_holoos = SimpleUploadedFile('img.png', image_x2)
     if img_oiroos:
-        [image_x2] = resize_b64_to_sizes(img_oiroos, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_oiroos, [(720, 720)])
         img_oiroos = SimpleUploadedFile('img.png', image_x2)
     if img_baruun:
-        [image_x2] = resize_b64_to_sizes(img_baruun, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_baruun, [(720, 720)])
         img_baruun = SimpleUploadedFile('img.png', image_x2)
     if img_zuun:
-        [image_x2] = resize_b64_to_sizes(img_zuun, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_zuun, [(720, 720)])
         img_zuun = SimpleUploadedFile('img.png', image_x2)
     if img_hoino:
-        [image_x2] = resize_b64_to_sizes(img_hoino, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_hoino, [(720, 720)])
         img_hoino = SimpleUploadedFile('img.png', image_x2)
     if img_omno:
-        [image_x2] = resize_b64_to_sizes(img_omno, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_omno, [(720, 720)])
         img_omno = SimpleUploadedFile('img.png', image_x2)
 
-    users = User.objects.filter(id=request.user.id)
-    for user in users:
-        email = user.email
-        baiguulla = 'ДАН'
-        alban_tushaal = 'ДАН'
-        phone = ''
+    user = User.objects.filter(id=request.user.id).first()
+    employee_qs = Employee.objects.filter(user=user)
+    email = user.email
+    baiguulla = 'ДАН'
+    alban_tushaal = 'ДАН'
+    phone = ''
+    if employee_qs:
+        employee = employee_qs.first()
+        alban_tushaal = employee.position.name
+        baiguulla = employee.org.name
+        phone = employee.phone_number
 
     TsegUstsan.objects.create(
         email=email,
