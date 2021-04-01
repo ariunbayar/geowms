@@ -1007,12 +1007,10 @@ def _make_property_code_value(mdata):
                                 code_qs = _filter_Model([{'code_list_id': code.top_code_list_id}], Model=LCodeLists)
                                 if code_qs:
                                     top_code = code_qs.first()
-                                    prop['property_code'] = 'aimag'
-                                    dict_value = top_code.code_list_name
+                                    value['aimag'] = top_code.code_list_name
                                     value['sum'] = code.code_list_name
                                 else:
-                                    prop['property_code'] = 'aimag'
-                                    dict_value = code.code_list_name
+                                    value['aimag'] = code.code_list_name
                             else:
                                 dict_value = code.code_list_name
                     if prop['property_code'] == 'Nomenclature':
@@ -1257,10 +1255,10 @@ def createPdf(values):
     pdf.ln(70)
     if 'PointNearPhoto' in values:
         if values['PointNearPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 91, w = 92, h = 60, type = '', link = '')
     if 'PointFarPhoto' in values:
         if values['PointFarPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 91, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
