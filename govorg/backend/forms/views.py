@@ -1401,8 +1401,8 @@ def tsegUstsan(request):
         users = User.objects.filter(id=request.user.id)
         for user in users:
             email = user.email
-            baiguulla = ''
-            alban_tushaal = ''
+            baiguulla = 'Дан'
+            alban_tushaal = 'Дан'
             phone = ''
 
     if tseg_id != -1:
@@ -1491,16 +1491,49 @@ def tsegUstsan(request):
         return JsonResponse({'success': True})
 
 
+def _get_feature_id(feature_code):
+    feat_qs = LFeatures.objects
+    feat_qs = feat_qs.filter(feature_code=feature_code)
+    return feat_qs
+
+
+def _get_filter_dicts(property_code):
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_code__iexact=property_code)
+    prop = prop_qs.first()
+
+    feature_qs = _get_feature_id('gnp-gp-gp')
+    if feature_qs:
+
+        feature = feature_qs.first()
+        property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
+        data = utils.get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
+
+        for prop_dict in prop_qs.values():
+            for type in utils.value_types():
+                if prop_dict['value_type_id'] in type['value_names']:
+                    filter_value_type = type['value_type']
+                    break
+    return data, filter_value_type
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def tsegUstsanSuccess(request, payload):
+def tseg_ustsan_success(request, payload):
     pk = payload.get('id')
 
     tseg_request = get_object_or_404(TsegUstsan, pk=pk)
 
     with transaction.atomic():
-        geo_id = utils.get_mdata_value('gnp-gp-gp', tseg_request.tseg_id, is_display=True)
+
+        data, filter_value_type = _get_filter_dicts('PointNumber')
+        search = dict()
+        search[filter_value_type] = tseg_request.tseg_id
+
+        mdatas_qs = MDatas.objects
+        mdatas_qs = mdatas_qs.filter(**data, **search)
+
         perm_name = EmpPermInspire.PERM_APPROVE
         check_point, info = _check_tseg_role(perm_name, request.user)
         if not check_point:
@@ -1510,14 +1543,16 @@ def tsegUstsanSuccess(request, payload):
             }
             return JsonResponse(rsp)
 
-        if geo_id['geo_id']:
+        if mdatas_qs:
+
+            geo_id = mdatas_qs.first().geo_id
 
             mdatas_qs = MDatas.objects
-            mdatas_qs = mdatas_qs.filter(**geo_id)
+            mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
             mdatas_qs.delete()
 
             mgeo_qs = MGeoDatas.objects
-            mgeo_qs = mgeo_qs.filter(**geo_id)
+            mgeo_qs = mgeo_qs.filter(geo_id=geo_id)
             mgeo_qs.delete()
 
             tseg_request.is_removed = True
