@@ -35,32 +35,44 @@ export class CreateStyle extends Component {
             only_clicked: false,
             prev_style_name: '',
         }
-        this.handleValues = this.handleValues.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
     }
 
-    handleValues(e) {
+    handleOnChange(e) {
         const {
             style_size, style_color, fill_color, wellknownname,
-            wellknowshape, div_angle, color_opacity, dashed_line_length, dashed_line_gap
+            wellknowshape, div_angle, color_opacity, dashed_line_length, dashed_line_gap,
+            min_range, max_range, had_chosen
         } = this.state
-        this.style_datas.push({
-            'range_number': e.target.value,
-            'style_color': style_color,
-            'style_size': style_size,
-            'fill_color':  fill_color,
-            'wellknownname': wellknownname,
-            'wellknowshape': wellknowshape,
-            'div_angle': div_angle,
-            'color_opacity': color_opacity,
-            'dashed_line_length': dashed_line_length,
-            'dashed_line_gap': dashed_line_gap
-        })
-        this.setState({had_chosen: e.target.value})
-    }
-
-    handleOnChange(e) {
+        var input_name = e.target.name
+        if(input_name == 'range_number') {
+            for(var i=1; i <= e.target.value; i++) {
+                this.style_datas.push({
+                    'range_number': i,
+                    'min_range': min_range,
+                    'max_range': max_range,
+                    'style_color': style_color,
+                    'style_size': style_size,
+                    'fill_color':  fill_color,
+                    'wellknownname': wellknownname,
+                    'wellknowshape': wellknowshape,
+                    'div_angle': div_angle,
+                    'color_opacity': color_opacity,
+                    'dashed_line_length': dashed_line_length,
+                    'dashed_line_gap': dashed_line_gap
+                })
+            }
+        }
+        if (input_name != 'range_number' && input_name != 'had_chosen') {
+            if(this.style_datas.length > 0) {
+                if (had_chosen) {
+                    const search = obj => obj.range_number == had_chosen
+                    var index_of = this.style_datas.findIndex(search)
+                    this.style_datas[index_of][input_name] = e.target.value
+                }
+            }
+        }
         this.setState({[e.target.name]:e.target.value})
     }
 
@@ -71,7 +83,7 @@ export class CreateStyle extends Component {
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
             had_chosen, shape_type, check_style,
-            min_range, max_range,
+            min_range, max_range
         } = this.state
 
         if(
@@ -91,15 +103,17 @@ export class CreateStyle extends Component {
         }
 
         if(pS.had_chosen !== had_chosen){
-            this.setState({
-                check_style:false, style_color: '#800000',
-                style_size: 1, fill_color:  '#C0C0C0',
-                wellknownname: '', wellknowshape: '',
-                div_angle: '', color_opacity: 0.3,
-                dashed_line_length: 0, dashed_line_gap: 0,
-                min_range: 0, max_range: 0,
-                shape_type: '', only_clicked: false
-            })
+            if (had_chosen) {
+                this.setState({
+                    check_style:false, style_color: '#800000',
+                    style_size: 1, fill_color:  '#C0C0C0',
+                    wellknownname: '', wellknowshape: '',
+                    div_angle: '', color_opacity: 0.3,
+                    dashed_line_length: 0, dashed_line_gap: 0,
+                    min_range: 0, max_range: 0,
+                    shape_type: '', only_clicked: false
+                })
+            }
         }
     }
 
@@ -142,7 +156,6 @@ export class CreateStyle extends Component {
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
                 wellknowshape, div_angle, only_clicked,
-                style_datas,
 
             } = this.state
             return (
@@ -195,10 +208,11 @@ export class CreateStyle extends Component {
                                     <label htmlFor="had_chosen">Утга авах range</label>
                                     <select
                                         className="form-control"
-                                        onChange={(e) => this.handleValues(e)}
+                                        name="had_chosen"
+                                        onChange={(e) => this.handleOnChange(e)}
                                         value={had_chosen}
                                     >
-                                        <option className="col-md-12">-------------------------------</option>
+                                        <option className="col-md-12">----------------------------</option>
                                     {
                                         (() => {
                                             const rows = [];
@@ -213,7 +227,7 @@ export class CreateStyle extends Component {
                             </div>
                                 <div className="col-md-12 px-0">
                                     {
-                                        had_chosen
+                                        range_number
                                         &&
                                         <div className="col-md-12 px-0">
                                             <div className="row col-md-12 text-center">
@@ -404,7 +418,7 @@ export class CreateStyle extends Component {
                             dashed_line_length={dashed_line_length}
                             dashed_line_gap={dashed_line_gap}
                             only_clicked={only_clicked}
-                            style_datas={style_datas}
+                            style_datas={this.style_datas}
                         />
                     </div>
                 </div>

@@ -36,11 +36,14 @@ export default class StyleMap extends Component {
                 wellknownname: props.wellknownname,
                 is_loading: false,
                 style_datas: props.style_datas,
+                zoom_level: ''
             }
 
             this.loadMapData = this.loadMapData.bind(this)
             this.loadMap = this.loadMap.bind(this)
             this.handleZoom = this.handleZoom.bind(this)
+            this.handleZoomIn = this.handleZoomIn.bind(this)
+            this.StyleFunction = this.StyleFunction.bind(this)
 
             this.controls = {
                 zoomControl: new ZoomControl(),
@@ -60,21 +63,22 @@ export default class StyleMap extends Component {
             fill_color, style_name,
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
-            geom_type, only_clicked
+            geom_type, only_clicked, style_datas,
+            min_range, max_range
         } = this.props
-
+        const { zoom_level} = this.state
         if(
             pP.style_color != style_color || pP.style_size != style_size
             || pP.fill_color != fill_color || pP.style_name != style_name ||
             pP.dashed_line_gap != dashed_line_gap || pP.dashed_line_length != dashed_line_length ||
             pP.color_opacity != color_opacity || pP.wellknownname != wellknownname||
-            pP.geom_type != geom_type
+            pP.geom_type != geom_type, pP.style_datas != style_datas || pP.min_range != min_range || pP.max_range != max_range
         ){
             this.setState({
                 style_size, fill_color,
                 style_color, style_name, color_opacity, wellknownname,
                 dashed_line_gap, dashed_line_length,
-                min_range: 0, max_range: 0, geom_type
+                min_range, max_range, geom_type, style_datas
             })
         }
 
@@ -82,6 +86,9 @@ export default class StyleMap extends Component {
             if (this.props.only_clicked) {
                 this.loadMapData()
             }
+        }
+        if(pS.zoom_level != zoom_level) {
+            this.handleZoomIn(zoom_level)
         }
     }
 
@@ -105,39 +112,24 @@ export default class StyleMap extends Component {
         this.map = map
     }
 
-    handleZoom(event) {
-        var current_zoom = event.map.getView().getZoom()
-        this.controls.zoomControl.setCoordinate(current_zoom)
-        if ( 18 <= current_zoom && current_zoom <= 21) {
-            var highlightStyle = new Style({
-                stroke: new Stroke({
-                    color: 'green',
-                    width: 4
-                }),
-                fill: new Fill({
-                    color: 'green'
-                }),
-                zIndex: 1
-            });
-            this.map.getLayers().forEach(layer => {
-                if (layer && layer.get('id') === 'style_layer') {
-                    var features = layer.getSource().getFeatures()
-                    features.forEach(function(feature){
-                        feature.setStyle(highlightStyle)
-                    })
-                }
-            });
-        }
-    }
+    StyleFunction(style_type, values) {
 
-    loadMapData(){
+        // var highlightStyle = new Style({
+        //     stroke: new Stroke({
+        //         color: 'green',
+        //         width: 4
+        //     }),
+        //     fill: new Fill({
+        //         color: 'green'
+        //     }),
+        //     zIndex: 1
+        // });
         const {
-                style_state, style_color, style_size,
-                fill_color, style_name, view_name,url,
-                defualt_url, geom_type, dashed_line_gap,
-                dashed_line_length, color_opacity, wellknownname,
-                dataProjection, featureProjection,style_datas
-        } = this.state
+            style_color, style_size,
+            fill_color, dashed_line_gap,
+            dashed_line_length, color_opacity, wellknownname
+        } = values
+
         if (wellknownname){
             var { points, radius, angle, rotation, radius2} = 0
             if (wellknownname == 'square') {
@@ -192,7 +184,7 @@ export default class StyleMap extends Component {
                 })
             }
 
-        const styles_new = {
+        var styles_new = {
             'MultiPolygon': new Style({
                 stroke: new Stroke({
                     color: style_color,
@@ -247,8 +239,46 @@ export default class StyleMap extends Component {
                 image: point_style
             }),
         };
+        return styles_new[style_type];
+    }
 
+    handleZoomIn(current_zoom) {
+        const { style_datas } = this.state
+        var styles = this.StyleFunction
+        if (style_datas && Object.keys(style_datas).length>0) {
+            style_datas.map((values, idx)=>{
+                console.log("min_range", values.min_range)
+                
+            })
+        //     if ( 18 <= current_zoom && current_zoom <= 21) {
+
+        //         this.map.getLayers().forEach(layer => {
+        //             if (layer && layer.get('id') === 'style_layer') {
+        //                 var features = layer.getSource().getFeatures()
+        //                 features.forEach(function(feature){
+        //                     var geom_type =feature.getGeometry().getType()
+        //                     feature.setStyle(styles(geom_type))
+        //                 })
+        //             }
+        //         });
+        //     }
+        }
+    }
+
+    handleZoom(event) {
+        var current_zoom = event.map.getView().getZoom()
+        this.controls.zoomControl.setCoordinate(current_zoom)
+        this.setState({zoom_level: current_zoom})
+    }
+
+    loadMapData(){
+        const {
+            dataProjection, featureProjection, geom_type
+        } = this.state
+        var state_data = this.state
+        var style_done = this.StyleFunction
         this.setState({is_loading: true})
+
         service.getStyleData(geom_type).then(({data}) =>
             {
                 if (data)
@@ -267,8 +297,10 @@ export default class StyleMap extends Component {
                         });
                         const vector_layer = new VectorLayer({
                             source: vectorSource,
-                            style: function (feature) {
-                                return styles_new[feature.getGeometry().getType()];
+                            style: function(feature, resolution){
+                                var hoho = feature.getGeometry().getType();
+                                var style_of_map = style_done(hoho, state_data)
+                                return style_of_map
                             },
                             id: 'style_layer'
                         })
