@@ -932,7 +932,6 @@ def get_erguul_info(request, pk):
         status = "Гарч байгаа",
         indicate = 'text-warning',
 
-
     rsp = {
         'success': True,
         'first_name': name.first_name,

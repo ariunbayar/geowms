@@ -8,8 +8,6 @@ export class ErguulInfo extends Component {
         super(props)
 
         this.state = {
-            employee: {
-            },
             id: this.props.match.params.id,
         }
         this.getPos = this.getPos.bind(this)
