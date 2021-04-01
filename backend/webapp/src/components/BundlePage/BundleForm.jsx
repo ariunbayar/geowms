@@ -174,7 +174,7 @@ export default class BundleForm extends Component {
                         Хадгал
                     </button>
                 </div>
-                <BackButton {...this.props} name={'Буцах'} navlink_url={`/profile/tseg-personal/`}></BackButton>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/дэд-сан/`}></BackButton>
             </>
         )
     }
