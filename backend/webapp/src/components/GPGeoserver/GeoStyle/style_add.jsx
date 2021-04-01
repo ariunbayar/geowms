@@ -18,8 +18,8 @@ export class CreateStyle extends Component {
             dashed_line_length: 0,
             dashed_line_gap: 0,
             check_style_name: '',
-            range_number: 1,
-            had_chosen: 1,
+            range_number: '',
+            had_chosen: '',
             style_name: '',
             style_title: '',
             style_abstract: '',
@@ -70,7 +70,8 @@ export class CreateStyle extends Component {
             fill_color, style_name,
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
-            had_chosen, shape_type, check_style
+            had_chosen, shape_type, check_style,
+            min_range, max_range,
         } = this.state
 
         if(
@@ -84,7 +85,7 @@ export class CreateStyle extends Component {
                 style_size, fill_color,
                 style_color, style_name, color_opacity, wellknownname,
                 dashed_line_gap, dashed_line_length,
-                min_range: 0, max_range: 0, shape_type, check_style: false,
+                min_range,max_range, shape_type, check_style: false,
                 only_clicked: false
             })
         }
@@ -209,36 +210,40 @@ export class CreateStyle extends Component {
                                     </select>
                                 </div>
                             </div>
-                            {
-                                had_chosen &&
                                 <div className="col-md-12 px-0">
-                                    <div className="row col-md-12 text-center">
-                                        <div className="text-center col-md-12">Range <a style={{color: '#0b5394'}}>{had_chosen}</a>-ийн утгууд</div>
-                                    </div>
-                                    <div className="col-md-12 d-flex my-2">
-                                        <div className="col-md-6">
-                                            <label htmlFor="">Min range</label>
-                                            <input
-                                                name='min_range'
-                                                id='id_min_range'
-                                                className="form-control col-12"
-                                                type="number"
-                                                value={min_range}
-                                                onChange={(e) => this.handleOnChange(e)}
-                                            />
+                                    {
+                                        had_chosen
+                                        &&
+                                        <div className="col-md-12 px-0">
+                                            <div className="row col-md-12 text-center">
+                                                <div className="text-center col-md-12">Range <a style={{color: '#0b5394'}}>{had_chosen}</a>-ийн утгууд</div>
+                                            </div>
+                                            <div className="col-md-12 d-flex my-2">
+                                                <div className="col-md-6">
+                                                    <label htmlFor="">Min range</label>
+                                                    <input
+                                                        name='min_range'
+                                                        id='id_min_range'
+                                                        className="form-control col-12"
+                                                        type="number"
+                                                        value={min_range}
+                                                        onChange={(e) => this.handleOnChange(e)}
+                                                    />
+                                                </div>
+                                                <div className="col-md-6 mb-2 mx-0 px-0">
+                                                    <label htmlFor="">Max range</label>
+                                                    <input
+                                                        className="form-control col-12"
+                                                        name="max_range"
+                                                        id="max_range"
+                                                        type="number"
+                                                        value={max_range}
+                                                        onChange={(e) => this.handleOnChange(e)}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="col-md-6 mb-2 mx-0 px-0">
-                                            <label htmlFor="">Max range</label>
-                                            <input
-                                                className="form-control col-12"
-                                                name="max_range"
-                                                id="max_range"
-                                                type="number"
-                                                value={max_range}
-                                                onChange={(e) => this.handleOnChange(e)}
-                                            />
-                                        </div>
-                                    </div>
+                                    }
                                     <div className="col-md-6 mx-3 my-2">
                                         <label htmlFor="">Style-ийн төрөл</label>
                                         <select
@@ -301,7 +306,7 @@ export class CreateStyle extends Component {
                                         {
                                             shape_type == 'PointSymbolizer' &&
                                             <div className='col-md-4 d-inline-block'>
-                                                <label htmlFor="state">Дүрсний сонголт</label>
+                                                <label htmlFor="wellknownname">Дүрсний сонголт</label>
                                                 <select
                                                     className="form-control form-control-sm"
                                                     name="wellknownname"
@@ -382,7 +387,6 @@ export class CreateStyle extends Component {
                                         </button>
                                     </div>
                                 </div>
-                            }
                         </div>
                     </div>
                     <div className="col-md-6">
