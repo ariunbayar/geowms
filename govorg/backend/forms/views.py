@@ -692,6 +692,7 @@ def tseg_personal_list(request, payload):
         requests = TsegRequest.objects
         requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
         if requests:
+            requests = requests.order_by('-created_at')
 
             хувьсах_талбарууд = [
                 {"field": "state", "action": _get_state_color, "new_field": "state"},
@@ -2100,17 +2101,19 @@ def _check_tseg_role(perm_name, user):
 def _check_tseg(values, property_code='PointNumber'):
     msg = ''
     has_tseg = False
+    values = utils.json_load(values)
     if property_code in values:
-        if values[property_code]:
+        value = values.get(property_code)
+        if value:
             data, filter_value_type = _get_filter_dicts(property_code)
             search = dict()
-            search[filter_value_type] = values[property_code]
+            search[filter_value_type] = value
 
             mdatas_qs = MDatas.objects
             mdatas_qs = mdatas_qs.filter(**data, **search)
             if mdatas_qs:
                 has_tseg = True
-                msg = 'Уучлаарай {tseg} цэг бүртгэлтэй байна'.format(tseg=values[property_code])
+                msg = 'Уучлаарай {tseg} цэг бүртгэлтэй байна'.format(tseg=value)
         else:
             msg = 'Цэг олдсонгүй'
     else:
