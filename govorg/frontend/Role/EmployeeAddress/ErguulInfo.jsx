@@ -9,8 +9,6 @@ export class ErguulInfo extends Component {
 
         this.state = {
             employee: {
-                first_name: '',
-                last_name: '',
             },
             id: this.props.match.params.id,
         }
@@ -29,27 +27,29 @@ export class ErguulInfo extends Component {
                 success,
                 first_name,
                 last_name,
+                local_lvl1,
+                local_lvl2,
                 erguul_level3,
                 erguul_street,
                 date_start,
                 date_end,
                 status,
-                local_lvl1,
-                local_lvl2,
                 desc,
+                indicate,
             }) => {
             if(success){
                 this.setState({
                     first_name,
                     last_name,
+                    local_lvl1,
+                    local_lvl2,
                     erguul_level3,
                     erguul_street,
                     date_start,
                     date_end,
                     status,
-                    local_lvl1,
-                    local_lvl2,
                     desc,
+                    indicate,
                 })
             }
         })
@@ -60,20 +60,21 @@ export class ErguulInfo extends Component {
         const {
             first_name,
             last_name,
+            local_lvl1,
+            local_lvl2,
             erguul_level3,
             erguul_street,
             date_start,
             date_end,
             status,
-            local_lvl1,
-            local_lvl2,
             desc,
+            indicate,
         } = this.state
         return (
             <div className="card pl-5">
                 <div className="row mt-4 ">
                     <BackButton {...this.props} name={'Буцах'} navlink_url={'/gov/perm/erguuleg/'}></BackButton>
-                    <div className="col-6 ">
+                    <div className="col-4 ">
                         <div className="row">
                             <dt className="col-sm-6 col-xl-3">Овог, нэр:</dt>
                             <dd className="col-sm-6 col-xl-9">
@@ -88,36 +89,51 @@ export class ErguulInfo extends Component {
                                     { date_end}
                                 </dd>
                                 <dt className="col-sm-6 col-xl-3">Төлөв:</dt>
-                                <dd className="col-sm-6 col-xl-9 text-success">
+                                <dd className={`col-sm-6 col-xl-9 ${indicate}`}>
                                     { status }
                                 </dd>
                         </div>
                     </div>
-                        <div className="col-6">
+                        <div className="col-4">
                             <div className="row">
-                            <h5 className="col-sm-12 col-xl-12 ">
-                                Эргүүл хийсэн газар:
-                            </h5>
-                                <dt className="col-sm-6 col-xl-3">
-                                    Хот/Аймаг:
-                                </dt>
-                                <dd className="col-sm-6 col-xl-9">
-                                    { local_lvl1 }
-                                </dd>
-                                <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
-                                <dd className="col-sm-6 col-xl-9">
-                                    { local_lvl2}
-                                </dd>
-                                <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
-                                <dd className="col-sm-6 col-xl-9">
-                                    { erguul_level3}
-                                </dd>
-                                <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
-                                <dd className="col-sm-6 col-xl-9 pb-4">
-                                    { erguul_street}
-                                </dd>
+                                <h5 className="col-sm-12 col-xl-12 ">
+                                    Эргүүл хийсэн газар:
+                                </h5>
+                                    <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
+                                    <dd className="col-sm-6 col-xl-9">
+                                        { erguul_level3}
+                                    </dd>
+                                    <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
+                                    <dd className="col-sm-6 col-xl-9 pb-4">
+                                        { erguul_street}
+                                    </dd>
                             </div>
-                    </div>
+                        </div>
+                        <div className="col-4">
+                            <div className="row">
+                                <h5 className="col-sm-12 col-xl-12 ">
+                                    Гэрийн хаяг:
+                                </h5>
+                                    <dt className="col-sm-6 col-xl-3">
+                                        Хот/Аймаг:
+                                    </dt>
+                                    <dd className="col-sm-6 col-xl-9">
+                                        { local_lvl1 }
+                                    </dd>
+                                    <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
+                                    <dd className="col-sm-6 col-xl-9">
+                                        { local_lvl2}
+                                    </dd>
+                                    <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
+                                    <dd className="col-sm-6 col-xl-9">
+                                        { erguul_level3}
+                                    </dd>
+                                    <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
+                                    <dd className="col-sm-6 col-xl-9 pb-4">
+                                        { erguul_street}
+                                    </dd>
+                        </div>
+                        </div>
                 </div>
                 <div className="row pb-5 pr-5">
                     <div className="col-12">
@@ -130,7 +146,6 @@ export class ErguulInfo extends Component {
                     </div>
                 </div>
             </div>
-
        )
     }
 }

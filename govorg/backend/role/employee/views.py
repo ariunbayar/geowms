@@ -902,40 +902,49 @@ def erguul_list(request, payload):
 
     return JsonResponse(rsp)
 
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def get_erguulInfo(request, pk):
+def get_erguul_info(request, pk):
     location = EmployeeAddress.objects.filter(id=pk).first()
     erguul = EmployeeErguul.objects.filter(address_id=pk).first()
     status = ErguulTailbar.objects.filter(erguul_id=erguul.id).first()
-    name = get_object_or_404(Employee, id=location.employee.id)
+    name = get_object_or_404(Employee, id=location.employee_id)
     name = name.user
-    local_lvl1 = location.level_1
-    local_lvl2 = location.level_2
     erguul_level_3 = erguul.level_3
     erguul_street = erguul.street
     erguul_date_starttime = erguul.date_start.strftime('%Y-%m-%d')
     erguul_date_endtime = erguul.date_end.strftime('%Y-%m-%d')
-    desc = status.description
-    status = status.state
-    if status == 1:
-        status = "Гарсан"
-    elif status == 2:
-        status = "Гараагүй"
+
+    if status:
+        desc = status.description
+        status = status.state
+        if status == ErguulTailbar.DONE:
+            status = "Гарсан",
+            indicate = 'text-success',
+
+        elif status == ErguulTailbar.NOT_DONE:
+            status = "Гараагүй",
+            indicate = 'text-danger',
+
     else:
-        status = "Гарч байгаа"
+        status = "Гарч байгаа",
+        indicate = 'text-warning',
+
+
     rsp = {
         'success': True,
         'first_name': name.first_name,
         'last_name': name.last_name,
         'desc': desc,
-        'local_lvl1': local_lvl1,
-        'local_lvl2': local_lvl2,
+        'local_lvl1': location.level_1,
+        'local_lvl2': location.level_2,
         'status': status,
         'date_start': erguul_date_starttime,
         'date_end': erguul_date_endtime,
         'erguul_level3': erguul_level_3,
         'erguul_street': erguul_street,
+        'indicate':indicate,
     }
     return JsonResponse(rsp)

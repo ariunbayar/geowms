@@ -28,7 +28,7 @@ urlpatterns = [
                 path('<int:pk>/update/', role_employee_views.update),
                 path('<int:pk>/detail/', role_employee_views.detail),
                 path('<int:pk>/delete/', role_employee_views.delete),
-                path('<int:pk>/get-erguulInfo/', role_employee_views.get_erguulInfo),
+                path('<int:pk>/get-erguulInfo/', role_employee_views.get_erguul_info),
                 path('addresses/', role_employee_views.get_addresses),
                 path('get-erguul/', role_employee_views.get_erguul),
                 path('erguul-list/', role_employee_views.erguul_list),
