@@ -26,12 +26,19 @@ export class List extends Component {
             modal_text: '',
             modal_icon: '',
             is_loading: false,
+            point_role_list: props.point_role_list,
         }
         this.paginate = this.paginate.bind(this)
         this.handleTsegSuccess = this.handleTsegSuccess.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+    }
+
+    componentDidUpdate(pP, pS) {
+        if(pP.point_role_list != this.props.point_role_list) {
+            this.setState({point_role_list})
+        }
     }
 
     paginate (page, query) {
@@ -60,14 +67,14 @@ export class List extends Component {
 
     handleTsegSuccess(id){
         this.setLoading(true)
-        service.tseg_success(id).then(({ success }) => {
+        service.tseg_success(id).then(({ success, msg}) => {
             if (success) {
-                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
+                this.setState({modal_alert_status: 'open', modal_text: msg, modal_icon: 'success'})
                 this.paginate(1,"")
                 this.modalCloseTime()
             }
             else{
-                this.setState({modal_alert_status: 'open', modal_text: 'Баталгаажуулахад алдаа гарлаа', modal_icon: 'danger'})
+                this.setState({modal_alert_status: 'open', modal_text: msg, modal_icon: 'danger'})
                 this.paginate(1,"")
                 this.modalCloseTime()
             }
@@ -76,14 +83,14 @@ export class List extends Component {
     }
 
     handleRemove(id){
-        service.tseg_remove(id).then(({ success }) => {
+        service.tseg_remove(id).then(({ success, info}) => {
             if (success) {
-                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай утсгалаа', modal_icon: 'success'})
+                this.setState({modal_alert_status: 'open', modal_text: info,  modal_icon: 'success'})
                 this.paginate(1,"")
                 this.modalCloseTime()
             }
             else {
-                this.setState({modal_alert_status: 'open', modal_text: 'Утгахад алдаа гарлаа', modal_icon: 'danger'})
+                this.setState({modal_alert_status: 'open', modal_text: info,  modal_icon: 'danger'})
                 this.modalCloseTime()
             }
         })
@@ -105,14 +112,16 @@ export class List extends Component {
     }
 
     render() {
-        const { is_loading } = this.state
+        const { point_role_list, is_loading } = this.state
         return (
             <div className="card">
                 <div  className="card-body">
                     <div className="col-md-12">
-                        <NavLink className="btn gp-btn-primary float-right my-2" to={"/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
-                            Нэмэх
-                        </NavLink>
+                        {
+                            <NavLink className="btn gp-btn-primary float-right my-2" to={"/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/add/"}>
+                                Нэмэх
+                            </NavLink>
+                        }
                         <input
                             type="text"
                             className="form-control col-md-4 float-left"
@@ -150,6 +159,7 @@ export class List extends Component {
                                             handleTsegSuccess={() => this.handleTsegSuccess(tseg.id)}
                                             handleRemove={() => this.handleRemove(tseg.id)}
                                             setLoading={this.setLoading}
+                                            point_role_list={point_role_list}
                                         />
                                     ))
                                 }

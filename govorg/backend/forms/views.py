@@ -24,6 +24,7 @@ from backend.inspire.models import (
     LPackages,
     LThemes,
     LProperties, MDatas, MGeoDatas,
+    EmpPermInspire, EmpPerm
 )
 from backend.org.models import Employee, Org
 from geoportal_app.models import User
@@ -685,36 +686,47 @@ def _get_point_type_name(point_type, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_list(request, payload):
-    requests = TsegRequest.objects
-    requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
-    if requests:
 
-        хувьсах_талбарууд = [
-            {"field": "state", "action": _get_state_color, "new_field": "state"},
-            {"field": "kind", "action": _get_kind_color, "new_field": "kind"},
-            {"field": "point_type", "action": _get_point_type_name, "new_field": "point_type"},
-            {"field": "point_class", "action": _getname, "new_field": "point_class"},
-        ]
+    perm_name = EmpPermInspire.PERM_VIEW
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if check_point:
+        requests = TsegRequest.objects
+        requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
+        if requests:
 
-        datatable = Datatable(
-            initial_qs=requests,
-            model=TsegRequest,
-            payload=payload,
-            хувьсах_талбарууд=хувьсах_талбарууд
-        )
+            хувьсах_талбарууд = [
+                {"field": "state", "action": _get_state_color, "new_field": "state"},
+                {"field": "kind", "action": _get_kind_color, "new_field": "kind"},
+                {"field": "point_type", "action": _get_point_type_name, "new_field": "point_type"},
+                {"field": "point_class", "action": _getname, "new_field": "point_class"},
+            ]
 
-        items, total_page = datatable.get()
-        rsp = {
-            'items': items,
-            'page': payload.get("page"),
-            'total_page': total_page
-        }
+            datatable = Datatable(
+                initial_qs=requests,
+                model=TsegRequest,
+                payload=payload,
+                хувьсах_талбарууд=хувьсах_талбарууд
+            )
+
+            items, total_page = datatable.get()
+            rsp = {
+                'items': items,
+                'page': payload.get("page"),
+                'total_page': total_page
+            }
+        else:
+            rsp = {
+                'items': [],
+                'page': 1,
+                'total_page': 1,
+            }
     else:
         rsp = {
             'items': [],
             'page': 1,
             'total_page': 1,
         }
+
     return JsonResponse(rsp)
 
 
@@ -747,6 +759,15 @@ def tseg_inspire_list(request, payload):
     qs = _get_model_qs(LFeatures, {'feature_code': 'gnp-gp-gp'})
     feature = qs.first()
     feature_id = feature.feature_id
+    perm_name = EmpPermInspire.PERM_VIEW
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        rsp = {
+            'items': 1,
+            'total_page': [],
+            'page': 1,
+        }
+        return JsonResponse(rsp)
 
     property_codes = ['GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue', 'localId', 'PointNumber']
 
@@ -794,6 +815,17 @@ def tseg_inspire_list(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_remove(request, id):
+
+    perm_name = EmpPermInspire.PERM_REVOKE
+    check_point, info = _check_tseg_role(perm_name, request.user)
+
+    if not check_point:
+        rsp = {
+            'success': False,
+            'msg': 'Танд цуцлах эрх алга байна.'
+        }
+        return JsonResponse(rsp)
+
     qs = TsegRequest.objects
     qs = qs.filter(pk=id)
 
@@ -1502,7 +1534,17 @@ def tseg_ustsan_success(request, payload):
         mdatas_qs = MDatas.objects
         mdatas_qs = mdatas_qs.filter(**data, **search)
 
+        perm_name = EmpPermInspire.PERM_APPROVE
+        check_point, info = _check_tseg_role(perm_name, request.user)
+        if not check_point:
+            rsp = {
+                'success': False,
+                'msg': info
+            }
+            return JsonResponse(rsp)
+
         if mdatas_qs:
+
             geo_id = mdatas_qs.first().geo_id
 
             mdatas_qs = MDatas.objects
@@ -1542,11 +1584,13 @@ def tseg_ustsan_success(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanList(request, payload):
+
+    display_items = []
     page = payload.get('page')
     per_page = payload.get('perpage')
     query = payload.get('query')
-    display_items = []
     sort_name = payload.get('sort_name')
+    total_page = []
     if not sort_name:
         sort_name = 'id'
     tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by(sort_name)
@@ -1574,6 +1618,7 @@ def tsegUstsanList(request, payload):
         'page': page,
         'total_page': total_page,
     }
+
     return JsonResponse(rsp)
 
 
@@ -1581,6 +1626,14 @@ def tsegUstsanList(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanRemove(request, payload):
+    perm_name = EmpPermInspire.PERM_REMOVE
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        return JsonResponse({
+            'success': False,
+            'info': 'Танд цэг утсгах эрх байхгүй байн'
+        })
+
     pk = payload.get('id')
     tseg_ustsan = TsegUstsan.objects.get(pk=pk)
     if tseg_ustsan:
@@ -1597,9 +1650,16 @@ def tsegUstsanRemove(request, payload):
         if tseg_ustsan.img_omno:
             tseg_ustsan.img_omno.delete(save=False)
         tseg_ustsan.delete()
-        return JsonResponse({'success': True})
+
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай устгалаа'
+        })
     else:
-        return JsonResponse({'success': False})
+        return JsonResponse({
+            'success': False,
+            'info': 'Цэг устгахад алдаа гарлаа'
+        })
 
 
 @require_POST
@@ -1996,10 +2056,38 @@ def _save_property_zero(geo_id, values):
         MDatas.objects.create(**data)
 
 
+def _check_tseg_role(perm_name, user):
+    check_point = False
+    info = ''
+    point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first()
+    if point_feature_id:
+        employee = get_object_or_404(Employee, user=user)
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+        perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id.feature_id, perm_kind=perm_name, geom=True)
+        if perm_kind:
+            check_point = True
+        else:
+            info = 'Танд баталгаажуулах эрх алга байна !!!'
+    else:
+        info = 'gnp-gp-gp нэртэй feature байхгүй байна !!!'
+
+    return check_point, info
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_success(request, id):
+
+    perm_name = EmpPermInspire.PERM_APPROVE
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        rsp = {
+            'success': False,
+            'msg': info
+        }
+        return JsonResponse(rsp)
+
     qs = TsegRequest.objects
     qs = qs.filter(pk=id)
     if qs:
@@ -2184,3 +2272,36 @@ def get_tseg(request, payload):
     return JsonResponse({
         'coord': coord
     })
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def emp_tseg_roles(request):
+    inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+    employee = get_object_or_404(Employee, user=request.user)
+    point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
+    if point_feature_id:
+        employee = get_object_or_404(Employee, user__username=request.user)
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+        perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
+
+        for perm_kind in perm_kinds:
+            if perm_kind == EmpPermInspire.PERM_VIEW:
+                inspire_roles['PERM_VIEW'] = True
+            elif perm_kind == EmpPermInspire.PERM_CREATE:
+                inspire_roles['PERM_CREATE'] = True
+            elif perm_kind == EmpPermInspire.PERM_REMOVE:
+                inspire_roles['PERM_REMOVE'] = True
+            elif perm_kind == EmpPermInspire.PERM_UPDATE:
+                inspire_roles['PERM_UPDATE'] = True
+            elif perm_kind == EmpPermInspire.PERM_APPROVE:
+                inspire_roles['PERM_APPROVE'] = True
+            elif perm_kind == EmpPermInspire.PERM_REVOKE:
+                inspire_roles['PERM_REVOKE'] = True
+
+    rsp = {
+        'point_role_list': inspire_roles,
+    }
+
+    return JsonResponse(rsp)

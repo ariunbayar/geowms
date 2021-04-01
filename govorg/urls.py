@@ -97,6 +97,7 @@ urlpatterns = [
 
         path('tseg-personal/', include(([
             path('', forms_views.tsegPersonal, name='tseg-personal'),
+            path('tseg-roles/', forms_views.emp_tseg_roles, name='tseg-roles'),
             path('findSum/', forms_views.findSum, name='findSum'),
             path('find-point/', forms_views.findPoints, name='find-point'),
             path('success-point/<int:id>/', forms_views.tseg_personal_success, name='tseg-personal-batalgaajuulah'),
