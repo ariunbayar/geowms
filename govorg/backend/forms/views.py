@@ -1,6 +1,5 @@
 import os
 import json
-from types import coroutine
 import pyproj
 import uuid
 
@@ -693,6 +692,7 @@ def tseg_personal_list(request, payload):
         requests = TsegRequest.objects
         requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
         if requests:
+            requests = requests.order_by('-created_at')
 
             хувьсах_талбарууд = [
                 {"field": "state", "action": _get_state_color, "new_field": "state"},
@@ -1017,49 +1017,73 @@ def findPoints(request, payload):
 def findSum(request, payload):
     try:
         info = []
-        L = payload.get("y")
-        B = payload.get("x")
-        cursor = connections['postgis_db'].cursor()
-        cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
-        geom = cursor.fetchone()
-        if(geom):
-            zoneout=int(L)/6+31
-            instr = ("+proj=longlat +datum=WGS84 +no_defs")
-            outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-            inproj = pyproj.Proj(instr)
-            outproj = pyproj.Proj(outstr)
-            val = pyproj.transform(inproj, outproj, L,B)
+        L = payload.get('y')
+        B = payload.get('x')
+        point = Point([L, B], srid=4326)
+        feature_code = 'bnd-au-au'
+        feature_qs = _get_feature_id(feature_code)
+        feature = feature_qs.first()
+        mgeo_qs = MGeoDatas.objects
+        mgeo_qs = mgeo_qs.filter(feature_id=feature.feature_id)
+        mgeo_qs = mgeo_qs.filter(geo_data__contains=point)
 
-            Brange=[40,44,48,52,56]
-            Letter=['K','L','M','N','O']
+        property_code = 'AdministrativeUnitSubClass'
+
+        feature_id = feature.feature_id
+
+        properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
+        datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
+
+        aimag, sum = '', ''
+
+        for mgeo in mgeo_qs:
+            # level2 = 2
+            level3 = 4
+            geo_id = mgeo.geo_id
+            if len(geo_id) == level3:
+                mdatas_qs = MDatas.objects
+                mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+                for data in datas:
+                    mdatas_qs = mdatas_qs.filter(**data)
+                    if mdatas_qs:
+                        mdatas = mdatas_qs.first()
+                        values = dict()
+                        values[property_code] = mdatas.code_list_id
+                        aimag, sum = _get_aimag_sum(values, property_code)
+                        break
+
+        if aimag or sum:
+            Brange = [40, 44, 48, 52, 56]
+            Letter = ['K', 'L', 'M', 'N', 'O']
             for k in Brange:
-                if k>B:
-                    ind=Brange.index(k)
-                    B0=Letter[ind-1]
-                    Bmin=Brange[ind-1]
+                if k > B:
+                    ind = Brange.index(k)
+                    B0 = Letter[ind - 1]
+                    Bmin = Brange[ind - 1]
                     break
                 else:
                     B0 = "aldaa"
-            zone=int(L/6)+31
-            Lmin=(zone-30)*6-6
-            c=0
-            while Lmin<L:
-                Lmin=Lmin+0.5
-                c=c+1
-            cc=0
-            while Bmin<B:
-                Bmin=Bmin+1/3
-                cc=cc+1
-            cc = (12-cc)*12+c
+
+            zone = int(L / 6) + 31
+            Lmin = (zone - 30) * 6 - 6
+            c = 0
+            while Lmin < L:
+                Lmin = Lmin + 0.5
+                c = c + 1
+            cc = 0
+            while Bmin < B:
+                Bmin = Bmin + 1 / 3
+                cc = cc + 1
+            cc = (12 - cc) * 12 + c
             LA = int(L)
-            LB = int((L-LA)*60)
-            LC = float((L-LA-LB/60)*3600 )
+            LB = int((L-LA) * 60)
+            LC = float((L - LA - LB / 60) * 3600)
             BA = int(B)
-            BB = int((B-BA)*60)
-            BC = float((B-BA-BB/60)*3600 )
+            BB = int((B - BA) * 60)
+            BC = float((B - BA - BB / 60) * 3600)
             info.append({
-                'aimag': geom[0],
-                'sum': geom[1],
+                'aimag': aimag,
+                'sum': sum,
                 "vseg": B0,
                 'zone': zone,
                 'cc': cc,
@@ -2074,6 +2098,29 @@ def _check_tseg_role(perm_name, user):
     return check_point, info
 
 
+def _check_tseg(values, property_code='PointNumber'):
+    msg = ''
+    has_tseg = False
+    values = utils.json_load(values)
+    if property_code in values:
+        value = values.get(property_code)
+        if value:
+            data, filter_value_type = _get_filter_dicts(property_code)
+            search = dict()
+            search[filter_value_type] = value
+
+            mdatas_qs = MDatas.objects
+            mdatas_qs = mdatas_qs.filter(**data, **search)
+            if mdatas_qs:
+                has_tseg = True
+                msg = 'Уучлаарай {tseg} цэг бүртгэлтэй байна'.format(tseg=value)
+        else:
+            msg = 'Цэг олдсонгүй'
+    else:
+        msg = 'Цэг олдсонгүй'
+    return has_tseg, msg
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -2093,29 +2140,36 @@ def tseg_personal_success(request, id):
     if qs:
         with transaction.atomic():
             value = qs.first()
-            feature_qs = _get_model_qs(LFeatures, {'feature_id': value.feature_id})
-            feature_code = feature_qs.first().feature_code
+            has_tseg, msg = _check_tseg(value.values)
+            if not has_tseg:
+                feature_qs = _get_model_qs(LFeatures, {'feature_id': value.feature_id})
+                feature_code = feature_qs.first().feature_code
 
-            geo_json = json.loads(value.geo_json)
-            coroutines = geo_json['coordinates']
+                geo_json = json.loads(value.geo_json)
+                coroutines = geo_json['coordinates']
 
-            new_geo_id = utils.save_value_to_mdatas(value.values, feature_code, [coroutines[0], coroutines[1], 0])
+                new_geo_id = utils.save_value_to_mdatas(value.values, feature_code, [coroutines[0], coroutines[1], 0])
 
-            #TODO arilana hurs hatuu onooson
-            _save_property_zero(new_geo_id, value.values)
+                #TODO arilana hurs hatuu onooson
+                _save_property_zero(new_geo_id, value.values)
 
-            utils.refreshMaterializedView(value.feature_id)
+                utils.refreshMaterializedView(value.feature_id)
 
-            qs.update(
-                state=TsegRequest.STATE_APPROVE,
-                new_geo_id=new_geo_id,
-            )
-            # _send_data_to_pdf(value.values, value.pdf_id, value)
+                qs.update(
+                    state=TsegRequest.STATE_APPROVE,
+                    new_geo_id=new_geo_id,
+                )
+                # _send_data_to_pdf(value.values, value.pdf_id, value)
 
-            rsp = {
-                'success': True,
-                'msg': "Амжилттай боллоо",
-            }
+                rsp = {
+                    'success': True,
+                    'msg': "Амжилттай боллоо",
+                }
+            else:
+                rsp = {
+                    'success': False,
+                    'msg': msg,
+                }
     else:
         rsp = {
             'success': False,
