@@ -2,13 +2,16 @@ import React, { Component } from "react"
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
+import { defaults as defaultControls } from 'ol/control'
 import Tile from 'ol/layer/Tile'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import View from 'ol/View';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Fill, Stroke, Style, Circle as CircleStyle, RegularShape, Image} from 'ol/style';
 import {Vector as VectorLayer} from 'ol/layer';
+
 import { service } from './service'
+import {ZoomControl} from './zoom_control'
 
 
 export default class StyleMap extends Component {
@@ -32,10 +35,16 @@ export default class StyleMap extends Component {
                 color_opacity: props.color_opacity,
                 wellknownname: props.wellknownname,
                 is_loading: false,
+                style_datas: props.style_datas,
             }
 
             this.loadMapData = this.loadMapData.bind(this)
             this.loadMap = this.loadMap.bind(this)
+            this.handleZoom = this.handleZoom.bind(this)
+
+            this.controls = {
+                zoomControl: new ZoomControl(),
+            }
         }
 
     componentDidMount() {
@@ -84,12 +93,41 @@ export default class StyleMap extends Component {
             }),
         ],
         target: 'map',
+        controls: defaultControls().extend([
+            this.controls.zoomControl,
+        ]),
         view: new View({
             center: [11461613.630815497, 5878656.0228370065],
             zoom: 5.041301562246971,
         }),
         });
+        map.on('moveend', this.handleZoom)
         this.map = map
+    }
+
+    handleZoom(event) {
+        var current_zoom = event.map.getView().getZoom()
+        this.controls.zoomControl.setCoordinate(current_zoom)
+        if ( 18 <= current_zoom && current_zoom <= 21) {
+            var highlightStyle = new Style({
+                stroke: new Stroke({
+                    color: 'green',
+                    width: 4
+                }),
+                fill: new Fill({
+                    color: 'green'
+                }),
+                zIndex: 1
+            });
+            this.map.getLayers().forEach(layer => {
+                if (layer && layer.get('id') === 'style_layer') {
+                    var features = layer.getSource().getFeatures()
+                    features.forEach(function(feature){
+                        feature.setStyle(highlightStyle)
+                    })
+                }
+            });
+        }
     }
 
     loadMapData(){
@@ -98,7 +136,7 @@ export default class StyleMap extends Component {
                 fill_color, style_name, view_name,url,
                 defualt_url, geom_type, dashed_line_gap,
                 dashed_line_length, color_opacity, wellknownname,
-                dataProjection, featureProjection,
+                dataProjection, featureProjection,style_datas
         } = this.state
         if (wellknownname){
             var { points, radius, angle, rotation, radius2} = 0
@@ -215,7 +253,6 @@ export default class StyleMap extends Component {
             {
                 if (data)
                 {
-
                     this.map.getLayers().forEach(layer => {
                         if (layer && layer.get('id') === 'aimag') {
                             layer.getSource().clear();
@@ -233,7 +270,7 @@ export default class StyleMap extends Component {
                             style: function (feature) {
                                 return styles_new[feature.getGeometry().getType()];
                             },
-                            id: 'aimag'
+                            id: 'style_layer'
                         })
 
                         this.map.addLayer(vector_layer)
@@ -248,7 +285,7 @@ export default class StyleMap extends Component {
         return (
             <div className="row">
                 <div className="col-md-12 w-100">
-                    <div id="map" style={{height:"80vh"}}></div>
+                    <div id="map" style={{height:"80vh"}}><input className="form-control col-1 position-fixed border border-dark"/></div>
                 </div>
                 {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>

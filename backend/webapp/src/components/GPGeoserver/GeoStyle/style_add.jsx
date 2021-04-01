@@ -141,7 +141,8 @@ export class CreateStyle extends Component {
                 min_range, max_range, dashed_line_gap,
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
-                wellknowshape, div_angle, only_clicked
+                wellknowshape, div_angle, only_clicked,
+                style_datas,
 
             } = this.state
             return (
@@ -403,6 +404,7 @@ export class CreateStyle extends Component {
                             dashed_line_length={dashed_line_length}
                             dashed_line_gap={dashed_line_gap}
                             only_clicked={only_clicked}
+                            style_datas={style_datas}
                         />
                     </div>
                 </div>
