@@ -1019,38 +1019,8 @@ def findSum(request, payload):
         info = []
         L = payload.get('y')
         B = payload.get('x')
-        point = Point([L, B], srid=4326)
-        feature_code = 'bnd-au-au'
-        feature_qs = _get_feature_id(feature_code)
-        feature = feature_qs.first()
-        mgeo_qs = MGeoDatas.objects
-        mgeo_qs = mgeo_qs.filter(feature_id=feature.feature_id)
-        mgeo_qs = mgeo_qs.filter(geo_data__contains=point)
 
-        property_code = 'AdministrativeUnitSubClass'
-
-        feature_id = feature.feature_id
-
-        properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
-        datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
-
-        aimag, sum = '', ''
-
-        for mgeo in mgeo_qs:
-            # level2 = 2
-            level3 = 4
-            geo_id = mgeo.geo_id
-            if len(geo_id) == level3:
-                mdatas_qs = MDatas.objects
-                mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
-                for data in datas:
-                    mdatas_qs = mdatas_qs.filter(**data)
-                    if mdatas_qs:
-                        mdatas = mdatas_qs.first()
-                        values = dict()
-                        values[property_code] = mdatas.code_list_id
-                        aimag, sum = _get_aimag_sum(values, property_code)
-                        break
+        aimag, sum = utils.get_aimag_sum_from_point(L, B)
 
         if aimag or sum:
             Brange = [40, 44, 48, 52, 56]
