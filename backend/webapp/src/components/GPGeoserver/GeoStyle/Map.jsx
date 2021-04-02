@@ -162,16 +162,6 @@ export default class StyleMap extends Component {
 
     StyleFunction(style_type, values) {
 
-        // var highlightStyle = new Style({
-        //     stroke: new Stroke({
-        //         color: 'green',
-        //         width: 4
-        //     }),
-        //     fill: new Fill({
-        //         color: 'green'
-        //     }),
-        //     zIndex: 1
-        // });
         const {
             style_color, style_size,
             fill_color, dashed_line_gap,
