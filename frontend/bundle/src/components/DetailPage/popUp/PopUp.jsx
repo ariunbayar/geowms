@@ -151,7 +151,7 @@ class PopUpCmp extends Component {
         service.checkButtonEnableWithId(geo_id, pdf_id)
             .then(({is_enable, success, geo_id}) => {
                 if(success){
-                    this.setState({ is_enable, pdf_id: geo_id })
+                    this.setState({ is_enable, pdf_id })
                 }
             })
     }

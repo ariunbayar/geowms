@@ -973,8 +973,8 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
 
         filter_value = dict()
         geo_id = point.point_id
-        mdata_geo_id_qs = _filter_Model([{'geo_id', geo_id}])
-        value = point.point_name.zfill(4)
+        mdata_geo_id_qs = _filter_Model([{'geo_id': geo_id}])
+        value = point.pdf_id.zfill(4)
         filter_value[filter_value_type] = value
         mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
         if not mdata_qs:
@@ -1376,7 +1376,6 @@ def download_pdf(request, pk, pdf_id):
     payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
     point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
     # generate the file
-    pdf_id = pdf_id.zfill(4)
     file_name = pdf_id + '.pdf'
     src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', str(payment.id), file_name)
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
@@ -1742,3 +1741,8 @@ def get_contain_geoms(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+# payment = Payment.objects.filter(pk=62).first()
+# folder_name = 'tseg-personal-file'
+# is_created = _create_lavlagaa_infos(payment, folder_name)

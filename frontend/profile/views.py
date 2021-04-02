@@ -189,23 +189,20 @@ def tsegAdd(request):
     return JsonResponse({'success': True})
 
 
-def _filter_Model(filters, Model=MDatas):
-    qs = Model.objects
+def _filter_Model(filters, Model=MDatas, initial_qs=[]):
+    if not initial_qs:
+        initial_qs = Model.objects
     for search in filters:
-        qs = qs.filter(**search)
-    return qs
+        initial_qs = initial_qs.filter(**search)
+    return initial_qs
 
 
 def _get_tseg_detail(payment):
     points = list()
     pay_points = PaymentPoint.objects.filter(payment=payment)
     for point in pay_points:
-        data, filter_value_type = utils.get_filter_dicts()
-        filter_value = dict()
-        filter_value[filter_value_type] = point.pdf_id
-        mdata_qs = _filter_Model([data, filter_value])
-        mdata = mdata_qs.first()
-        point_info = utils.get_mdata_value('gnp-gp-gp', mdata.geo_id, is_display=True)
+        geo_id = point.point_id
+        point_info = utils.get_mdata_value('gnp-gp-gp', geo_id, is_display=True)
         info = dict()
         for key, value in point_info.items():
             if isinstance(value, datetime.datetime):
