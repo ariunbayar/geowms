@@ -878,11 +878,12 @@ def _get_items_with_file(content, mpoint, att_names):
 # print(haha, haha2)
 
 
-def _filter_Model(filters, Model=MDatas):
-    qs = Model.objects
+def _filter_Model(filters, Model=MDatas, initial_qs=[]):
+    if not initial_qs:
+        initial_qs = Model.objects
     for search in filters:
-        qs = qs.filter(**search)
-    return qs
+        initial_qs = initial_qs.filter(**search)
+    return initial_qs
 
 
 def _append_to_list(values, add_values):
@@ -1517,11 +1518,12 @@ def check_button_ebable_pdf(request, payload):
     return JsonResponse(rsp)
 
 
-def _check_in_inspire(point_number):
+def _check_in_inspire(geo_id, pdf_id):
+    mdatas_qs = _filter_Model([{'geo_id': geo_id}])
     data, value_type = utils.get_filter_dicts()
     search = dict()
-    search[value_type] = point_number
-    mdatas_qs = _filter_Model([data, search])
+    search[value_type] = pdf_id
+    mdatas_qs = _filter_Model([data, search], initial_qs=mdatas_qs)
     return mdatas_qs
 
 
@@ -1530,18 +1532,17 @@ def _check_in_inspire(point_number):
 @login_required
 def check_button_ebable_pdf_geo_id(request, payload):
     is_enable = False
-    pdf_id = payload.get('geo_id')
-
-    if pdf_id:
-        pdf_id = pdf_id.lstrip('0')
-        has_pdf = _check_in_inspire(pdf_id)
-        if len(has_pdf) > 0:
+    geo_id = payload.get('geo_id')
+    pdf_id = payload.get('pdf_id')
+    if geo_id:
+        has_pdf = _check_in_inspire(geo_id, pdf_id)
+        if has_pdf:
             is_enable = True
 
     rsp = {
         'success': True,
         'is_enable': is_enable,
-        'pdf_id': pdf_id
+        'geo_id': geo_id
     }
 
     return JsonResponse(rsp)
@@ -1585,6 +1586,8 @@ def get_popup_info(request, payload):
         ]
     )
 
+    geo_id_name = 'geo_id'
+
     for view_qs in views_qs:
         view_name = view_qs.view_name
         viewproperty_ids, property_qs = _get_properties_qs(view_qs)
@@ -1593,7 +1596,7 @@ def get_popup_info(request, payload):
         with connections['default'].cursor() as cursor:
             sql = """
                 SELECT
-                    geo_id, {properties}
+                    {geo_id_name}, {properties}
                 FROM
                     {view_name}
                 WHERE (
@@ -1610,7 +1613,8 @@ def get_popup_info(request, payload):
                 properties=",".join([prop_code['property_code'] for prop_code in properties]),
                 x=coordinate[0],
                 y=coordinate[1],
-                radius=radius
+                radius=radius,
+                geo_id_name=geo_id_name,
             )
             cursor.execute(sql)
             results = [dict((cursor.description[i][0], value)
@@ -1621,6 +1625,8 @@ def get_popup_info(request, payload):
                 datas.append('gp_layer_' + view_qs.view_name)
                 datas.append(list())
                 for key, value in result.items():
+                    if key == geo_id_name:
+                        datas[1].append([key, value, key])
                     for prop in properties:
                         if prop['property_code'].lower() == key and value:
                             datas[1].append([prop['property_name'], value, key])
