@@ -21,30 +21,7 @@ export default class StyleMap extends Component {
             this.controls = {
                 zoomControl: new ZoomControl(),
             }
-            this.zoom_and_scale = [
-                {"level": 21, "min_scale": 0, "max_scale": 133.2955989906115},
-                {"level": 20, "min_scale": 134, "max_scale": 266.591197981223},
-                {"level": 19, "min_scale": 267, "max_scale": 533.182395962446},
-                {"level": 18, "min_scale": 534, "max_scale": 1066.364791924892},
-                {"level": 17, "min_scale": 1067, "max_scale": 2132.729583849784},
-                {"level": 16, "min_scale": 2133, "max_scale": 4265.459167699568},
-                {"level": 15, "min_scale": 4266, "max_scale": 8530.918335399136},
-                {"level": 14, "min_scale": 8531, "max_scale": 17061.83667079827},
-                {"level": 13, "min_scale": 17062, "max_scale": 34123.67334159654},
-                {"level": 12, "min_scale": 34124, "max_scale": 68247.34668319309},
-                {"level": 11, "min_scale": 68248, "max_scale": 136494.69336638617},
-                {"level": 10, "min_scale": 136495, "max_scale": 272989.38673277234},
-                {"level": 9, "min_scale": 272990, "max_scale": 545978.7734655447},
-                {"level": 8, "min_scale": 545979, "max_scale": 1091957.5469310894},
-                {"level": 7, "min_scale": 1091958, "max_scale": 2183915.0938621787},
-                {"level": 6, "min_scale": 2183916, "max_scale": 4367830.1877243575},
-                {"level": 5, "min_scale": 4367831, "max_scale": 8735660.375448715},
-                {"level": 4, "min_scale": 8735661, "max_scale": 17471320.75089743},
-                {"level": 3, "min_scale": 17471321, "max_scale": 34942641.50179486},
-                {"level": 2, "min_scale": 34942642, "max_scale": 69885283.00358972},
-                {"level": 1, "min_scale": 69885284, "max_scale": 139770566.00717944},
-                {"level": 0, "min_scale": 139770566, "max_scale": 279541132.0143589},
-            ]
+
             this.state = {
                 geojson: [],
                 dataProjection: 'EPSG:4326',
@@ -64,7 +41,6 @@ export default class StyleMap extends Component {
                 wellknownname: props.wellknownname,
                 is_loading: false,
                 style_datas: props.style_datas,
-                zoom_level: ''
             }
 
             this.loadMapData = this.loadMapData.bind(this)
@@ -72,6 +48,7 @@ export default class StyleMap extends Component {
             this.handleZoom = this.handleZoom.bind(this)
             this.handleZoomIn = this.handleZoomIn.bind(this)
             this.StyleFunction = this.StyleFunction.bind(this)
+            this.getBaseLog = this.getBaseLog.bind(this)
 
         }
 
@@ -91,7 +68,6 @@ export default class StyleMap extends Component {
             geom_type, only_clicked, style_datas,
             min_range, max_range
         } = this.props
-        const { zoom_level} = this.state
 
         if (pP.color_opacity != color_opacity) {
             this.setState({color_opacity})
@@ -135,9 +111,6 @@ export default class StyleMap extends Component {
             }
         }
 
-        if(pS.zoom_level != zoom_level) {
-            this.handleZoomIn(zoom_level)
-        }
     }
 
     loadMap(){
@@ -161,13 +134,11 @@ export default class StyleMap extends Component {
     }
 
     StyleFunction(style_type, values) {
-
         const {
             style_color, style_size,
             fill_color, dashed_line_gap,
             dashed_line_length, color_opacity, wellknownname
         } = values
-
         if (wellknownname){
             var { points, radius, angle, rotation, radius2} = 0
             if (wellknownname == 'square') {
@@ -236,7 +207,7 @@ export default class StyleMap extends Component {
             }),
             'Polygon': new Style({
                 stroke: new Stroke({
-                    color: style_color,
+                    color: style_color ? style_color : '#21130d',
                     width: style_size,
                     lineDash: dashed_line_length ? [dashed_line_gap, dashed_line_length] : '' ,
                 }),
@@ -251,10 +222,9 @@ export default class StyleMap extends Component {
             }),
             'LineString': new Style({
                 stroke: new Stroke({
-                    color: style_color,
+                    color: style_color ? style_color : '#21130d',
                     width: style_size,
                     lineDash: dashed_line_length ? [dashed_line_gap, dashed_line_length] : '' ,
-                    // linecap: 'round'
                 }),
                 fill: new Fill({
                     color: fill_color,
@@ -266,7 +236,6 @@ export default class StyleMap extends Component {
                     color: style_color,
                     width: style_size,
                     lineDash: dashed_line_length ? [dashed_line_gap, dashed_line_length] : '' ,
-                    // linecap: 'round'
                 }),
                 fill: new Fill({
                     color: fill_color,
@@ -280,35 +249,29 @@ export default class StyleMap extends Component {
         return styles_new[style_type];
     }
 
+    getBaseLog(x, y) {
+        return Math.log(y) / Math.log(x);
+    }
+
     handleZoomIn(current_zoom) {
         const { style_datas } = this.state
-        const search_zoom_level = obj => obj.level == parseInt(current_zoom)
-        var index_of = this.zoom_and_scale.findIndex(search_zoom_level)
-        var var_4326_scale_values = this.zoom_and_scale[index_of]
-        var min_scale = var_4326_scale_values.min_scale
-        var  max_scale= var_4326_scale_values.max_scale
-
+        var all_values =  this.state
         var styles = this.StyleFunction
         if (style_datas && Object.keys(style_datas).length>0) {
             style_datas.map((values, idx)=>{
-                if ((values.min_range && values.max_range) && (min_scale <= values.min_range) && (values.max_range <= max_scale)){
+                var min_range = parseInt(values.min_range)
+                var max_range = parseInt(values.max_range)
+
+                var max_level = 21-parseInt(this.getBaseLog(2, min_range/133))
+                var min_level = 21-parseInt(this.getBaseLog(2, max_range/133))
+
+                if ((min_level <= parseInt(current_zoom)) && (parseInt(current_zoom) <= max_level)){
                     this.map.getLayers().forEach(layer => {
                         if (layer && layer.get('id') === 'style_layer') {
                             var features = layer.getSource().getFeatures()
                             features.forEach(function(feature){
                                 var geom_type =feature.getGeometry().getType()
                                 feature.setStyle(styles(geom_type, values))
-                            })
-                        }
-                    });
-                }
-                else {
-                    this.map.getLayers().forEach(layer => {
-                        if (layer && layer.get('id') === 'style_layer') {
-                            var features = layer.getSource().getFeatures()
-                            features.forEach(function(feature){
-                                var geom_type =feature.getGeometry().getType()
-                                feature.setStyle(styles(geom_type, this.state))
                             })
                         }
                     });
@@ -320,7 +283,7 @@ export default class StyleMap extends Component {
     handleZoom(event) {
         var current_zoom = event.map.getView().getZoom()
         this.controls.zoomControl.setCoordinate(current_zoom)
-        this.setState({zoom_level: current_zoom})
+        this.handleZoomIn(current_zoom)
     }
 
     loadMapData(){

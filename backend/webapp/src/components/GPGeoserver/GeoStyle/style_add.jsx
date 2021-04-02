@@ -34,6 +34,16 @@ export class CreateStyle extends Component {
             ],
             only_clicked: false,
             prev_style_name: '',
+            scale_ranges: [
+                133.2955989906115, 266.591197981223, 533.182395962446,
+                1066.364791924892, 2132.729583849784, 4265.459167699568,
+                8530.918335399136, 17061.83667079827, 34123.67334159654,
+                68247.34668319309, 136494.69336638617, 272989.38673277234,
+                545978.7734655447, 1091957.5469310894, 2183915.0938621787,
+                4367830.1877243575, 8735660.375448715, 17471320.75089743,
+                34942641.50179486, 69885283.00358972, 139770566.00717944,
+                279541132.0143589
+            ]
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
@@ -156,6 +166,7 @@ export class CreateStyle extends Component {
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
                 wellknowshape, div_angle, only_clicked,
+                scale_ranges
 
             } = this.state
             return (
@@ -236,25 +247,31 @@ export class CreateStyle extends Component {
                                             <div className="col-md-12 d-flex my-2">
                                                 <div className="col-md-6">
                                                     <label htmlFor="">Min range</label>
-                                                    <input
-                                                        name='min_range'
-                                                        id='id_min_range'
-                                                        className="form-control col-12"
-                                                        type="number"
+                                                    <select
+                                                        className="form-control"
+                                                        name="min_range"
                                                         value={min_range}
                                                         onChange={(e) => this.handleOnChange(e)}
-                                                    />
+                                                    >
+                                                        <option value={min_range}>{min_range}</option>
+                                                        {scale_ranges.map((value, idy) =>
+                                                            <option value={value}>{value}</option>
+                                                        )}
+                                                    </select>
                                                 </div>
                                                 <div className="col-md-6 mb-2 mx-0 px-0">
                                                     <label htmlFor="">Max range</label>
-                                                    <input
-                                                        className="form-control col-12"
+                                                    <select
+                                                        className="form-control"
                                                         name="max_range"
-                                                        id="max_range"
-                                                        type="number"
                                                         value={max_range}
                                                         onChange={(e) => this.handleOnChange(e)}
-                                                    />
+                                                    >
+                                                        <option value={max_range}>{max_range}</option>
+                                                        {scale_ranges.map((value, idy) =>
+                                                            <option value={value}>{value}</option>
+                                                        )}
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
