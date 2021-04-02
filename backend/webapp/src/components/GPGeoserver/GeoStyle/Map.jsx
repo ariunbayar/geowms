@@ -17,6 +17,34 @@ import {ZoomControl} from './zoom_control'
 export default class StyleMap extends Component {
     constructor(props) {
             super(props)
+
+            this.controls = {
+                zoomControl: new ZoomControl(),
+            }
+            this.zoom_and_scale = [
+                {"level": 21, "min_scale": 0, "max_scale": 133.2955989906115},
+                {"level": 20, "min_scale": 134, "max_scale": 266.591197981223},
+                {"level": 19, "min_scale": 267, "max_scale": 533.182395962446},
+                {"level": 18, "min_scale": 534, "max_scale": 1066.364791924892},
+                {"level": 17, "min_scale": 1067, "max_scale": 2132.729583849784},
+                {"level": 16, "min_scale": 2133, "max_scale": 4265.459167699568},
+                {"level": 15, "min_scale": 4266, "max_scale": 8530.918335399136},
+                {"level": 14, "min_scale": 8531, "max_scale": 17061.83667079827},
+                {"level": 13, "min_scale": 17062, "max_scale": 34123.67334159654},
+                {"level": 12, "min_scale": 34124, "max_scale": 68247.34668319309},
+                {"level": 11, "min_scale": 68248, "max_scale": 136494.69336638617},
+                {"level": 10, "min_scale": 136495, "max_scale": 272989.38673277234},
+                {"level": 9, "min_scale": 272990, "max_scale": 545978.7734655447},
+                {"level": 8, "min_scale": 545979, "max_scale": 1091957.5469310894},
+                {"level": 7, "min_scale": 1091958, "max_scale": 2183915.0938621787},
+                {"level": 6, "min_scale": 2183916, "max_scale": 4367830.1877243575},
+                {"level": 5, "min_scale": 4367831, "max_scale": 8735660.375448715},
+                {"level": 4, "min_scale": 8735661, "max_scale": 17471320.75089743},
+                {"level": 3, "min_scale": 17471321, "max_scale": 34942641.50179486},
+                {"level": 2, "min_scale": 34942642, "max_scale": 69885283.00358972},
+                {"level": 1, "min_scale": 69885284, "max_scale": 139770566.00717944},
+                {"level": 0, "min_scale": 139770566, "max_scale": 279541132.0143589},
+            ]
             this.state = {
                 geojson: [],
                 dataProjection: 'EPSG:4326',
@@ -45,9 +73,6 @@ export default class StyleMap extends Component {
             this.handleZoomIn = this.handleZoomIn.bind(this)
             this.StyleFunction = this.StyleFunction.bind(this)
 
-            this.controls = {
-                zoomControl: new ZoomControl(),
-            }
         }
 
     componentDidMount() {
@@ -67,19 +92,41 @@ export default class StyleMap extends Component {
             min_range, max_range
         } = this.props
         const { zoom_level} = this.state
-        if(
-            pP.style_color != style_color || pP.style_size != style_size
-            || pP.fill_color != fill_color || pP.style_name != style_name ||
-            pP.dashed_line_gap != dashed_line_gap || pP.dashed_line_length != dashed_line_length ||
-            pP.color_opacity != color_opacity || pP.wellknownname != wellknownname||
-            pP.geom_type != geom_type, pP.style_datas != style_datas || pP.min_range != min_range || pP.max_range != max_range
-        ){
-            this.setState({
-                style_size, fill_color,
-                style_color, style_name, color_opacity, wellknownname,
-                dashed_line_gap, dashed_line_length,
-                min_range, max_range, geom_type, style_datas
-            })
+
+        if (pP.color_opacity != color_opacity) {
+            this.setState({color_opacity})
+        }
+
+        if (pP.dashed_line_length != dashed_line_length) {
+            this.setState({dashed_line_length})
+        }
+
+        if (pP.dashed_line_gap != dashed_line_gap) {
+            this.setState({dashed_line_gap})
+        }
+
+        if (pP.wellknownname != wellknownname) {
+            this.setState({wellknownname})
+        }
+
+        if (pP.style_size != style_size) {
+            this.setState({style_size})
+        }
+
+        if (pP.fill_color != fill_color) {
+            this.setState({fill_color})
+        }
+
+        if (pP.style_color != style_color) {
+            this.setState({style_color})
+        }
+
+        if (pP.geom_type != geom_type) {
+            this.setState({geom_type})
+        }
+
+        if (pP.style_datas != style_datas) {
+            this.setState({style_datas})
         }
 
         if (pP.only_clicked != only_clicked) {
@@ -87,6 +134,7 @@ export default class StyleMap extends Component {
                 this.loadMapData()
             }
         }
+
         if(pS.zoom_level != zoom_level) {
             this.handleZoomIn(zoom_level)
         }
@@ -244,24 +292,38 @@ export default class StyleMap extends Component {
 
     handleZoomIn(current_zoom) {
         const { style_datas } = this.state
+        const search_zoom_level = obj => obj.level == parseInt(current_zoom)
+        var index_of = this.zoom_and_scale.findIndex(search_zoom_level)
+        var var_4326_scale_values = this.zoom_and_scale[index_of]
+        var min_scale = var_4326_scale_values.min_scale
+        var  max_scale= var_4326_scale_values.max_scale
+
         var styles = this.StyleFunction
         if (style_datas && Object.keys(style_datas).length>0) {
             style_datas.map((values, idx)=>{
-                console.log("min_range", values.min_range)
-                
+                if ((values.min_range && values.max_range) && (min_scale <= values.min_range) && (values.max_range <= max_scale)){
+                    this.map.getLayers().forEach(layer => {
+                        if (layer && layer.get('id') === 'style_layer') {
+                            var features = layer.getSource().getFeatures()
+                            features.forEach(function(feature){
+                                var geom_type =feature.getGeometry().getType()
+                                feature.setStyle(styles(geom_type, values))
+                            })
+                        }
+                    });
+                }
+                else {
+                    this.map.getLayers().forEach(layer => {
+                        if (layer && layer.get('id') === 'style_layer') {
+                            var features = layer.getSource().getFeatures()
+                            features.forEach(function(feature){
+                                var geom_type =feature.getGeometry().getType()
+                                feature.setStyle(styles(geom_type, this.state))
+                            })
+                        }
+                    });
+                }
             })
-        //     if ( 18 <= current_zoom && current_zoom <= 21) {
-
-        //         this.map.getLayers().forEach(layer => {
-        //             if (layer && layer.get('id') === 'style_layer') {
-        //                 var features = layer.getSource().getFeatures()
-        //                 features.forEach(function(feature){
-        //                     var geom_type =feature.getGeometry().getType()
-        //                     feature.setStyle(styles(geom_type))
-        //                 })
-        //             }
-        //         });
-        //     }
         }
     }
 
@@ -278,7 +340,6 @@ export default class StyleMap extends Component {
         var state_data = this.state
         var style_done = this.StyleFunction
         this.setState({is_loading: true})
-
         service.getStyleData(geom_type).then(({data}) =>
             {
                 if (data)

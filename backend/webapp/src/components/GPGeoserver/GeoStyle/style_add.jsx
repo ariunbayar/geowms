@@ -67,8 +67,8 @@ export class CreateStyle extends Component {
         if (input_name != 'range_number' && input_name != 'had_chosen') {
             if(this.style_datas.length > 0) {
                 if (had_chosen) {
-                    const search = obj => obj.range_number == had_chosen
-                    var index_of = this.style_datas.findIndex(search)
+                    var value = obj => obj.range_number == had_chosen
+                    var index_of = this.style_datas.findIndex(value)
                     this.style_datas[index_of][input_name] = e.target.value
                 }
             }
