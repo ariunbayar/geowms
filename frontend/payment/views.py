@@ -872,12 +872,6 @@ def _get_items_with_file(content, mpoint, att_names):
     return point_info
 
 
-# haha = utils.get_filter_dicts('AdministrativeUnitSubClass')
-# value = '200'
-# haha2 = utils.get_filter_dicts()
-# print(haha, haha2)
-
-
 def _filter_Model(filters, Model=MDatas, initial_qs=[]):
     if not initial_qs:
         initial_qs = Model.objects
@@ -1633,7 +1627,6 @@ def get_popup_info(request, payload):
                             datas[1].append([prop['property_name'], value, key])
                 if datas:
                     infos.append(datas)
-    print(infos)
     rsp = {
         'datas': infos,
     }
@@ -1741,8 +1734,3 @@ def get_contain_geoms(request, payload):
     }
 
     return JsonResponse(rsp)
-
-
-# payment = Payment.objects.filter(pk=62).first()
-# folder_name = 'tseg-personal-file'
-# is_created = _create_lavlagaa_infos(payment, folder_name)
