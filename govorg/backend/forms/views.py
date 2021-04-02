@@ -1,6 +1,5 @@
 import os
 import json
-from types import coroutine
 import pyproj
 import uuid
 
@@ -24,6 +23,7 @@ from backend.inspire.models import (
     LPackages,
     LThemes,
     LProperties, MDatas, MGeoDatas,
+    EmpPermInspire, EmpPerm
 )
 from backend.org.models import Employee, Org
 from geoportal_app.models import User
@@ -685,36 +685,48 @@ def _get_point_type_name(point_type, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_list(request, payload):
-    requests = TsegRequest.objects
-    requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
-    if requests:
 
-        хувьсах_талбарууд = [
-            {"field": "state", "action": _get_state_color, "new_field": "state"},
-            {"field": "kind", "action": _get_kind_color, "new_field": "kind"},
-            {"field": "point_type", "action": _get_point_type_name, "new_field": "point_type"},
-            {"field": "point_class", "action": _getname, "new_field": "point_class"},
-        ]
+    perm_name = EmpPermInspire.PERM_VIEW
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if check_point:
+        requests = TsegRequest.objects
+        requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
+        if requests:
+            requests = requests.order_by('-created_at')
 
-        datatable = Datatable(
-            initial_qs=requests,
-            model=TsegRequest,
-            payload=payload,
-            хувьсах_талбарууд=хувьсах_талбарууд
-        )
+            хувьсах_талбарууд = [
+                {"field": "state", "action": _get_state_color, "new_field": "state"},
+                {"field": "kind", "action": _get_kind_color, "new_field": "kind"},
+                {"field": "point_type", "action": _get_point_type_name, "new_field": "point_type"},
+                {"field": "point_class", "action": _getname, "new_field": "point_class"},
+            ]
 
-        items, total_page = datatable.get()
-        rsp = {
-            'items': items,
-            'page': payload.get("page"),
-            'total_page': total_page
-        }
+            datatable = Datatable(
+                initial_qs=requests,
+                model=TsegRequest,
+                payload=payload,
+                хувьсах_талбарууд=хувьсах_талбарууд
+            )
+
+            items, total_page = datatable.get()
+            rsp = {
+                'items': items,
+                'page': payload.get("page"),
+                'total_page': total_page
+            }
+        else:
+            rsp = {
+                'items': [],
+                'page': 1,
+                'total_page': 1,
+            }
     else:
         rsp = {
             'items': [],
             'page': 1,
             'total_page': 1,
         }
+
     return JsonResponse(rsp)
 
 
@@ -747,6 +759,15 @@ def tseg_inspire_list(request, payload):
     qs = _get_model_qs(LFeatures, {'feature_code': 'gnp-gp-gp'})
     feature = qs.first()
     feature_id = feature.feature_id
+    perm_name = EmpPermInspire.PERM_VIEW
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        rsp = {
+            'items': 1,
+            'total_page': [],
+            'page': 1,
+        }
+        return JsonResponse(rsp)
 
     property_codes = ['GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue', 'localId', 'PointNumber']
 
@@ -794,6 +815,17 @@ def tseg_inspire_list(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_remove(request, id):
+
+    perm_name = EmpPermInspire.PERM_REVOKE
+    check_point, info = _check_tseg_role(perm_name, request.user)
+
+    if not check_point:
+        rsp = {
+            'success': False,
+            'msg': 'Танд цуцлах эрх алга байна.'
+        }
+        return JsonResponse(rsp)
+
     qs = TsegRequest.objects
     qs = qs.filter(pk=id)
 
@@ -985,49 +1017,73 @@ def findPoints(request, payload):
 def findSum(request, payload):
     try:
         info = []
-        L = payload.get("y")
-        B = payload.get("x")
-        cursor = connections['postgis_db'].cursor()
-        cursor.execute('''select "name", "text" from "AdmUnitSum" where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 100)''', [L, B])
-        geom = cursor.fetchone()
-        if(geom):
-            zoneout=int(L)/6+31
-            instr = ("+proj=longlat +datum=WGS84 +no_defs")
-            outstr = ("+proj=tmerc +lat_0=0 +lon_0="+str((zoneout-30)*6-3)+" +k=0.9996 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-            inproj = pyproj.Proj(instr)
-            outproj = pyproj.Proj(outstr)
-            val = pyproj.transform(inproj, outproj, L,B)
+        L = payload.get('y')
+        B = payload.get('x')
+        point = Point([L, B], srid=4326)
+        feature_code = 'bnd-au-au'
+        feature_qs = _get_feature_id(feature_code)
+        feature = feature_qs.first()
+        mgeo_qs = MGeoDatas.objects
+        mgeo_qs = mgeo_qs.filter(feature_id=feature.feature_id)
+        mgeo_qs = mgeo_qs.filter(geo_data__contains=point)
 
-            Brange=[40,44,48,52,56]
-            Letter=['K','L','M','N','O']
+        property_code = 'AdministrativeUnitSubClass'
+
+        feature_id = feature.feature_id
+
+        properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
+        datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
+
+        aimag, sum = '', ''
+
+        for mgeo in mgeo_qs:
+            # level2 = 2
+            level3 = 4
+            geo_id = mgeo.geo_id
+            if len(geo_id) == level3:
+                mdatas_qs = MDatas.objects
+                mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+                for data in datas:
+                    mdatas_qs = mdatas_qs.filter(**data)
+                    if mdatas_qs:
+                        mdatas = mdatas_qs.first()
+                        values = dict()
+                        values[property_code] = mdatas.code_list_id
+                        aimag, sum = _get_aimag_sum(values, property_code)
+                        break
+
+        if aimag or sum:
+            Brange = [40, 44, 48, 52, 56]
+            Letter = ['K', 'L', 'M', 'N', 'O']
             for k in Brange:
-                if k>B:
-                    ind=Brange.index(k)
-                    B0=Letter[ind-1]
-                    Bmin=Brange[ind-1]
+                if k > B:
+                    ind = Brange.index(k)
+                    B0 = Letter[ind - 1]
+                    Bmin = Brange[ind - 1]
                     break
                 else:
                     B0 = "aldaa"
-            zone=int(L/6)+31
-            Lmin=(zone-30)*6-6
-            c=0
-            while Lmin<L:
-                Lmin=Lmin+0.5
-                c=c+1
-            cc=0
-            while Bmin<B:
-                Bmin=Bmin+1/3
-                cc=cc+1
-            cc = (12-cc)*12+c
+
+            zone = int(L / 6) + 31
+            Lmin = (zone - 30) * 6 - 6
+            c = 0
+            while Lmin < L:
+                Lmin = Lmin + 0.5
+                c = c + 1
+            cc = 0
+            while Bmin < B:
+                Bmin = Bmin + 1 / 3
+                cc = cc + 1
+            cc = (12 - cc) * 12 + c
             LA = int(L)
-            LB = int((L-LA)*60)
-            LC = float((L-LA-LB/60)*3600 )
+            LB = int((L-LA) * 60)
+            LC = float((L - LA - LB / 60) * 3600)
             BA = int(B)
-            BB = int((B-BA)*60)
-            BC = float((B-BA-BB/60)*3600 )
+            BB = int((B - BA) * 60)
+            BC = float((B - BA - BB / 60) * 3600)
             info.append({
-                'aimag': geom[0],
-                'sum': geom[1],
+                'aimag': aimag,
+                'sum': sum,
                 "vseg": B0,
                 'zone': zone,
                 'cc': cc,
@@ -1369,8 +1425,8 @@ def tsegUstsan(request):
         users = User.objects.filter(id=request.user.id)
         for user in users:
             email = user.email
-            baiguulla = ''
-            alban_tushaal = ''
+            baiguulla = 'Дан'
+            alban_tushaal = 'Дан'
             phone = ''
 
     if tseg_id != -1:
@@ -1459,24 +1515,68 @@ def tsegUstsan(request):
         return JsonResponse({'success': True})
 
 
+def _get_feature_id(feature_code):
+    feat_qs = LFeatures.objects
+    feat_qs = feat_qs.filter(feature_code=feature_code)
+    return feat_qs
+
+
+def _get_filter_dicts(property_code):
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_code__iexact=property_code)
+    prop = prop_qs.first()
+
+    feature_qs = _get_feature_id('gnp-gp-gp')
+    if feature_qs:
+
+        feature = feature_qs.first()
+        property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
+        data = utils.get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
+
+        for prop_dict in prop_qs.values():
+            for type in utils.value_types():
+                if prop_dict['value_type_id'] in type['value_names']:
+                    filter_value_type = type['value_type']
+                    break
+    return data, filter_value_type
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def tsegUstsanSuccess(request, payload):
+def tseg_ustsan_success(request, payload):
     pk = payload.get('id')
 
     tseg_request = get_object_or_404(TsegUstsan, pk=pk)
 
     with transaction.atomic():
-        geo_id = utils.get_mdata_value('gnp-gp-gp', tseg_request.tseg_id, is_display=True)
-        if geo_id['geo_id']:
+
+        data, filter_value_type = _get_filter_dicts('PointNumber')
+        search = dict()
+        search[filter_value_type] = tseg_request.tseg_id
+
+        mdatas_qs = MDatas.objects
+        mdatas_qs = mdatas_qs.filter(**data, **search)
+
+        perm_name = EmpPermInspire.PERM_APPROVE
+        check_point, info = _check_tseg_role(perm_name, request.user)
+        if not check_point:
+            rsp = {
+                'success': False,
+                'msg': info
+            }
+            return JsonResponse(rsp)
+
+        if mdatas_qs:
+
+            geo_id = mdatas_qs.first().geo_id
 
             mdatas_qs = MDatas.objects
-            mdatas_qs = mdatas_qs.filter(**geo_id)
+            mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
             mdatas_qs.delete()
 
             mgeo_qs = MGeoDatas.objects
-            mgeo_qs = mgeo_qs.filter(**geo_id)
+            mgeo_qs = mgeo_qs.filter(geo_id=geo_id)
             mgeo_qs.delete()
 
             tseg_request.is_removed = True
@@ -1508,11 +1608,13 @@ def tsegUstsanSuccess(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanList(request, payload):
+
+    display_items = []
     page = payload.get('page')
     per_page = payload.get('perpage')
     query = payload.get('query')
-    display_items = []
     sort_name = payload.get('sort_name')
+    total_page = []
     if not sort_name:
         sort_name = 'id'
     tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by(sort_name)
@@ -1540,6 +1642,7 @@ def tsegUstsanList(request, payload):
         'page': page,
         'total_page': total_page,
     }
+
     return JsonResponse(rsp)
 
 
@@ -1547,6 +1650,14 @@ def tsegUstsanList(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanRemove(request, payload):
+    perm_name = EmpPermInspire.PERM_REMOVE
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        return JsonResponse({
+            'success': False,
+            'info': 'Танд цэг утсгах эрх байхгүй байн'
+        })
+
     pk = payload.get('id')
     tseg_ustsan = TsegUstsan.objects.get(pk=pk)
     if tseg_ustsan:
@@ -1563,9 +1674,16 @@ def tsegUstsanRemove(request, payload):
         if tseg_ustsan.img_omno:
             tseg_ustsan.img_omno.delete(save=False)
         tseg_ustsan.delete()
-        return JsonResponse({'success': True})
+
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай устгалаа'
+        })
     else:
-        return JsonResponse({'success': False})
+        return JsonResponse({
+            'success': False,
+            'info': 'Цэг устгахад алдаа гарлаа'
+        })
 
 
 @require_POST
@@ -1962,38 +2080,96 @@ def _save_property_zero(geo_id, values):
         MDatas.objects.create(**data)
 
 
+def _check_tseg_role(perm_name, user):
+    check_point = False
+    info = ''
+    point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first()
+    if point_feature_id:
+        employee = get_object_or_404(Employee, user=user)
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+        perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id.feature_id, perm_kind=perm_name, geom=True)
+        if perm_kind:
+            check_point = True
+        else:
+            info = 'Танд баталгаажуулах эрх алга байна !!!'
+    else:
+        info = 'gnp-gp-gp нэртэй feature байхгүй байна !!!'
+
+    return check_point, info
+
+
+def _check_tseg(values, property_code='PointNumber'):
+    msg = ''
+    has_tseg = False
+    values = utils.json_load(values)
+    if property_code in values:
+        value = values.get(property_code)
+        if value:
+            data, filter_value_type = _get_filter_dicts(property_code)
+            search = dict()
+            search[filter_value_type] = value
+
+            mdatas_qs = MDatas.objects
+            mdatas_qs = mdatas_qs.filter(**data, **search)
+            if mdatas_qs:
+                has_tseg = True
+                msg = 'Уучлаарай {tseg} цэг бүртгэлтэй байна'.format(tseg=value)
+        else:
+            msg = 'Цэг олдсонгүй'
+    else:
+        msg = 'Цэг олдсонгүй'
+    return has_tseg, msg
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tseg_personal_success(request, id):
+
+    perm_name = EmpPermInspire.PERM_APPROVE
+    check_point, info = _check_tseg_role(perm_name, request.user)
+    if not check_point:
+        rsp = {
+            'success': False,
+            'msg': info
+        }
+        return JsonResponse(rsp)
+
     qs = TsegRequest.objects
     qs = qs.filter(pk=id)
     if qs:
         with transaction.atomic():
             value = qs.first()
-            feature_qs = _get_model_qs(LFeatures, {'feature_id': value.feature_id})
-            feature_code = feature_qs.first().feature_code
+            has_tseg, msg = _check_tseg(value.values)
+            if not has_tseg:
+                feature_qs = _get_model_qs(LFeatures, {'feature_id': value.feature_id})
+                feature_code = feature_qs.first().feature_code
 
-            geo_json = json.loads(value.geo_json)
-            coroutines = geo_json['coordinates']
+                geo_json = json.loads(value.geo_json)
+                coroutines = geo_json['coordinates']
 
-            new_geo_id = utils.save_value_to_mdatas(value.values, feature_code, [coroutines[0], coroutines[1], 0])
+                new_geo_id = utils.save_value_to_mdatas(value.values, feature_code, [coroutines[0], coroutines[1], 0])
 
-            #TODO arilana hurs hatuu onooson
-            _save_property_zero(new_geo_id, value.values)
+                #TODO arilana hurs hatuu onooson
+                _save_property_zero(new_geo_id, value.values)
 
-            utils.refreshMaterializedView(value.feature_id)
+                utils.refreshMaterializedView(value.feature_id)
 
-            qs.update(
-                state=TsegRequest.STATE_APPROVE,
-                new_geo_id=new_geo_id,
-            )
-            # _send_data_to_pdf(value.values, value.pdf_id, value)
+                qs.update(
+                    state=TsegRequest.STATE_APPROVE,
+                    new_geo_id=new_geo_id,
+                )
+                # _send_data_to_pdf(value.values, value.pdf_id, value)
 
-            rsp = {
-                'success': True,
-                'msg': "Амжилттай боллоо",
-            }
+                rsp = {
+                    'success': True,
+                    'msg': "Амжилттай боллоо",
+                }
+            else:
+                rsp = {
+                    'success': False,
+                    'msg': msg,
+                }
     else:
         rsp = {
             'success': False,
@@ -2150,3 +2326,36 @@ def get_tseg(request, payload):
     return JsonResponse({
         'coord': coord
     })
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def emp_tseg_roles(request):
+    inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+    employee = get_object_or_404(Employee, user=request.user)
+    point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
+    if point_feature_id:
+        employee = get_object_or_404(Employee, user__username=request.user)
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+        perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
+
+        for perm_kind in perm_kinds:
+            if perm_kind == EmpPermInspire.PERM_VIEW:
+                inspire_roles['PERM_VIEW'] = True
+            elif perm_kind == EmpPermInspire.PERM_CREATE:
+                inspire_roles['PERM_CREATE'] = True
+            elif perm_kind == EmpPermInspire.PERM_REMOVE:
+                inspire_roles['PERM_REMOVE'] = True
+            elif perm_kind == EmpPermInspire.PERM_UPDATE:
+                inspire_roles['PERM_UPDATE'] = True
+            elif perm_kind == EmpPermInspire.PERM_APPROVE:
+                inspire_roles['PERM_APPROVE'] = True
+            elif perm_kind == EmpPermInspire.PERM_REVOKE:
+                inspire_roles['PERM_REVOKE'] = True
+
+    rsp = {
+        'point_role_list': inspire_roles,
+    }
+
+    return JsonResponse(rsp)
