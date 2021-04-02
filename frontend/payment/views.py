@@ -872,68 +872,10 @@ def _get_items_with_file(content, mpoint, att_names):
     return point_info
 
 
-def _get_item_from_mpoint_view(mpoint):
-    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
-    point_info = {
-        'point_id': mpoint.point_name,
-        'ondor': mpoint.ondor,
-        'aimag': mpoint.aimag,
-        'sum': mpoint.sum,
-        'sheet2': mpoint.sheet2,
-        'sheet3': mpoint.sheet3,
-        'n_utm': utm[0],
-        'e_utm': utm[1],
-        't_type': mpoint.t_type,
-        'class_name': mpoint.point_class_name,
-        'pdf_id': mpoint.pid,
-        'org_name': mpoint.org_name if hasattr(mpoint, 'org_name') else 'Геопортал',
-    }
-    return point_info
-
-
-def _get_item_from_inspire(mpoint):
-    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
-    point_info = {
-        'point_id': mpoint.point_name,
-        'ondor': mpoint.ondor,
-        'aimag': mpoint.aimag,
-        'sum': mpoint.sum,
-        'sheet2': mpoint.sheet2,
-        'sheet3': mpoint.sheet3,
-        'n_utm': utm[0],
-        'e_utm': utm[1],
-        't_type': mpoint.t_type,
-        'class_name': mpoint.point_class_name,
-        'pdf_id': mpoint.pid,
-        'org_name': mpoint.org_name if hasattr(mpoint, 'org_name') else 'Геопортал',
-    }
-    return point_info
-
-
-def _get_feature_id(feature_code):
-    feat_qs = LFeatures.objects
-    feat_qs = feat_qs.filter(feature_code=feature_code)
-    return feat_qs
-
-
-def _get_filter_dicts():
-    prop_qs = LProperties.objects
-    prop_qs = prop_qs.filter(property_code__iexact='pointnumber')
-    prop = prop_qs.first()
-
-    feature_qs = _get_feature_id('gnp-gp-gp')
-    if feature_qs:
-
-        feature = feature_qs.first()
-        property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
-        data = utils.get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
-
-        for prop_dict in prop_qs.values():
-            for type in utils.value_types():
-                if prop_dict['value_type_id'] in type['value_names']:
-                    filter_value_type = type['value_type']
-                    break
-    return data, filter_value_type
+# haha = utils.get_filter_dicts('AdministrativeUnitSubClass')
+# value = '200'
+# haha2 = utils.get_filter_dicts()
+# print(haha, haha2)
 
 
 def _filter_Model(filters, Model=MDatas):
@@ -1022,7 +964,7 @@ def _make_property_code_value(mdata):
 
 
 def _class_name_bolon_orgoor_angilah(points, folder_name):
-    data, filter_value_type = _get_filter_dicts()
+    data, filter_value_type = utils.get_filter_dicts()
     values = list()
     tseg_pdfs = list()
 
@@ -1576,7 +1518,7 @@ def check_button_ebable_pdf(request, payload):
 
 
 def _check_in_inspire(point_number):
-    data, value_type = _get_filter_dicts()
+    data, value_type = utils.get_filter_dicts()
     search = dict()
     search[value_type] = point_number
     mdatas_qs = _filter_Model([data, search])
@@ -1651,7 +1593,7 @@ def get_popup_info(request, payload):
         with connections['default'].cursor() as cursor:
             sql = """
                 SELECT
-                    {properties}
+                    geo_id, {properties}
                 FROM
                     {view_name}
                 WHERE (
@@ -1684,7 +1626,7 @@ def get_popup_info(request, payload):
                             datas[1].append([prop['property_name'], value, key])
                 if datas:
                     infos.append(datas)
-
+    print(infos)
     rsp = {
         'datas': infos,
     }
