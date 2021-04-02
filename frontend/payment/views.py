@@ -972,19 +972,21 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
     for point in points:
 
         filter_value = dict()
-        value = point.pdf_id.zfill(4)
+        geo_id = point.point_id
+        mdata_geo_id_qs = _filter_Model([{'geo_id', geo_id}])
+        value = point.point_name.zfill(4)
         filter_value[filter_value_type] = value
-        mdata_qs = _filter_Model([data, filter_value])
+        mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
         if not mdata_qs:
             value = point.pdf_id
             filter_value[filter_value_type] = value
-            mdata_qs = _filter_Model([data, filter_value])
+            mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
             mdata = mdata_qs.first()
         else:
             mdata = mdata_qs.first()
 
         value = _make_property_code_value(mdata)
-        value['geo_id'] = mdata.geo_id
+        value['geo_id'] = geo_id
 
         for_angilah = ['CompanyName', 'GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue']
         value = _check_undur(value)
