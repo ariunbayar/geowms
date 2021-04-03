@@ -1469,6 +1469,11 @@ def _set_text_to_image(texts, image):
     return image
 
 
+def creat_empty_image(n=200, m=200):
+    image = Image.new('RGB', (n, m))
+    return image
+
+
 def _copy_image(img, plus):
     x, y = img.size
 
@@ -1482,47 +1487,60 @@ def _copy_image(img, plus):
     new_img.paste(img, tup)
 
     return new_img
+import random
+
+def password_generate(length=12):
+    chars = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM123456789'
+
+    for p in range(1):
+        password = ''
+        for c in range(length):
+            pwd = random.choice(chars)
+            if password != pwd:
+                password += pwd
+    return password
+
 
 from PIL import Image, ImageFont, ImageDraw
-image_path = 'gp_layer_building_view.jpeg'
-img = Image.open(os.path.join(settings.MEDIA_ROOT, image_path))
+# image_path = 'gp_layer_building_view.jpeg'
+# img = Image.open(os.path.join(settings.MEDIA_ROOT, image_path))
 texts = [
     {
-        'text': 'odko',
-        'xy': [20, 5],
-        'rgb': [100, 255, 255],
-        'size': 24,
+        'text': password_generate(7),
+        'xy': [10, 5],
+        'rgb': [255, 200, 255],
+        'size': 20,
     }
 ]
 plus = 100
 
 # new_img = _copy_image(img, plus)
-new_img = _set_text_to_image(texts, img)
+new_img = creat_empty_image(100, 40)
+new_img = _set_text_to_image(texts, new_img)
 
-# new_img.show() 
+# new_img.show()
 
 new_img.save('text.png')
 
 
 
 # zip lsen file iig unzip hiij front ruu zurag ywuulah code
-payment = get_object_or_404(Payment, id=377)
-image_path = None
+# payment = get_object_or_404(Payment, id=377)
+# image_path = None
 
-if payment.is_success:
-    extract_path = os.path.join(settings.FILES_ROOT, 'image', str(payment.id))
-    path_zip_file = os.path.join(settings.FILES_ROOT, payment.export_file)
-    is_unzipped = utils.unzip(path_zip_file, extract_path)
+# if payment.is_success:
+#     extract_path = os.path.join(settings.FILES_ROOT, 'image', str(payment.id))
+#     path_zip_file = os.path.join(settings.FILES_ROOT, payment.export_file)
+#     is_unzipped = utils.unzip(path_zip_file, extract_path)
 
-if is_unzipped:
-    for root, directories, files in os.walk(extract_path):
-        for filename in files:
-            if filename != 'export.zip':
-                image_path = os.path.join(extract_path, filename)
+# if is_unzipped:
+#     for root, directories, files in os.walk(extract_path):
+#         for filename in files:
+#             if filename != 'export.zip':
+#                 image_path = os.path.join(extract_path, filename)
 
-byte_image = utils.image_to_byte_array(image_path)
-print(byte_image)
-
+# byte_image = utils.image_to_64_byte('text.png')
+# print(byte_image)
 
 
 # get legends

@@ -1008,3 +1008,9 @@ def image_to_byte_array(image_path):
     image.save(img_byte_arr, format=image.format)
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
+
+
+def image_to_64_byte(image_path):
+    with open(image_path, "rb") as image_file:
+        data = base64.b64encode(image_file.read())
+    return data
