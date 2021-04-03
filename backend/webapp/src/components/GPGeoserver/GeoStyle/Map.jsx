@@ -66,7 +66,6 @@ export default class StyleMap extends Component {
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
             geom_type, only_clicked, style_datas,
-            min_range, max_range
         } = this.props
 
         if (pP.color_opacity != color_opacity) {

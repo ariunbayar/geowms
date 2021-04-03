@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import StyleMap from "./Map"
 import { service } from './service'
+import ShowStyleData from './style_data'
 
 
 export class CreateStyle extends Component {
@@ -19,7 +20,7 @@ export class CreateStyle extends Component {
             dashed_line_gap: 0,
             check_style_name: '',
             range_number: '',
-            had_chosen: '',
+            had_chosen: 0,
             style_name: '',
             style_title: '',
             style_abstract: '',
@@ -27,6 +28,7 @@ export class CreateStyle extends Component {
             min_range: 0,
             max_range: 0,
             shape_type: '',
+            label_check: false,
             shape_types: [
                 {"name": 'Point', 'geo_name':'PointSymbolizer'},
                 {"name": 'LineString', 'geo_name':'LineSymbolizer'},
@@ -43,7 +45,8 @@ export class CreateStyle extends Component {
                 4367830.1877243575, 8735660.375448715, 17471320.75089743,
                 34942641.50179486, 69885283.00358972, 139770566.00717944,
                 279541132.0143589
-            ]
+            ],
+            single_select_datas: [],
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
@@ -53,7 +56,7 @@ export class CreateStyle extends Component {
         const {
             style_size, style_color, fill_color, wellknownname,
             wellknowshape, div_angle, color_opacity, dashed_line_length, dashed_line_gap,
-            min_range, max_range, had_chosen
+            min_range, max_range, had_chosen, scale_ranges, shape_types, shape_type
         } = this.state
         var input_name = e.target.name
         if(input_name == 'range_number') {
@@ -70,9 +73,13 @@ export class CreateStyle extends Component {
                     'div_angle': div_angle,
                     'color_opacity': color_opacity,
                     'dashed_line_length': dashed_line_length,
-                    'dashed_line_gap': dashed_line_gap
+                    'dashed_line_gap': dashed_line_gap,
+                    'scale_ranges': scale_ranges,
+                    'shape_types': shape_types,
+                    'shape_type': shape_type,
                 })
             }
+            this.setState({single_select_datas: this.style_datas[0]})
         }
         if (input_name != 'range_number' && input_name != 'had_chosen') {
             if(this.style_datas.length > 0) {
@@ -93,7 +100,7 @@ export class CreateStyle extends Component {
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
             had_chosen, shape_type, check_style,
-            min_range, max_range
+            min_range, max_range, range_number
         } = this.state
 
         if(
@@ -114,15 +121,40 @@ export class CreateStyle extends Component {
 
         if(pS.had_chosen !== had_chosen){
             if (had_chosen) {
+                if (had_chosen > 0) {
+                    var value = this.style_datas[had_chosen-1]
+                }
+                else {
+                    var value = this.style_datas[0]
+                }
                 this.setState({
-                    check_style:false, style_color: '#800000',
+                    style_color: value.style_color,
+                    style_size: value.style_size, fill_color: value.fill_color,
+                    wellknownname: value.wellknownname, wellknowshape: value.wellknowshape,
+                    div_angle: value.div_angle, color_opacity: value.color_opacity,
+                    dashed_line_length: value.dashed_line_length, dashed_line_gap: value.dashed_line_gap,
+                    min_range: value.min_range, max_range: value.max_range,
+                    shape_type: value.shape_type, single_select_datas: value
+                })
+            }
+        }
+
+        if(pS.range_number !== range_number){
+            if (! range_number ) {
+                this.setState({
                     style_size: 1, fill_color:  '#C0C0C0',
                     wellknownname: '', wellknowshape: '',
                     div_angle: '', color_opacity: 0.3,
                     dashed_line_length: 0, dashed_line_gap: 0,
                     min_range: 0, max_range: 0,
-                    shape_type: '', only_clicked: false
+                    shape_type: '', style_color: '#800000', range_number,
                 })
+            }
+            else {
+                if (this.style_datas && this.style_datas.length>0){
+                    var value = this.style_datas[0]
+                    this.setState({single_select_datas: value})
+                }
             }
         }
     }
@@ -166,7 +198,7 @@ export class CreateStyle extends Component {
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
                 wellknowshape, div_angle, only_clicked,
-                scale_ranges
+                scale_ranges, label_check, single_select_datas
 
             } = this.state
             return (
@@ -206,7 +238,7 @@ export class CreateStyle extends Component {
                             </div>
                             <div className="col-md-12 d-flex">
                                 <div className="col-md-6">
-                                    <label htmlFor="range_number">Range-ийн тоо</label>
+                                    <label htmlFor="range_number">Scale-ийн тоо</label>
                                     <input
                                         className="form-control"
                                         name="range_number"
@@ -215,210 +247,56 @@ export class CreateStyle extends Component {
                                         value={range_number}
                                     />
                                 </div>
-                                <div className="col-md-6 mb-2 px-0 mx-0">
-                                    <label htmlFor="had_chosen">Утга авах range</label>
-                                    <select
-                                        className="form-control"
-                                        name="had_chosen"
-                                        onChange={(e) => this.handleOnChange(e)}
-                                        value={had_chosen}
-                                    >
-                                        <option className="col-md-12">----------------------------</option>
-                                    {
-                                        (() => {
-                                            const rows = [];
-                                            for (let i = 1; i <= range_number; i++) {
-                                            rows.push(<option key={i} className="col-md-12">{i}</option>);
-                                            }
-                                            return rows;
-                                        })()
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                                <div className="col-md-12 px-0">
-                                    {
-                                        range_number
-                                        &&
-                                        <div className="col-md-12 px-0">
-                                            <div className="row col-md-12 text-center">
-                                                <div className="text-center col-md-12">Range <a style={{color: '#0b5394'}}>{had_chosen}</a>-ийн утгууд</div>
-                                            </div>
-                                            <div className="col-md-12 d-flex my-2">
-                                                <div className="col-md-6">
-                                                    <label htmlFor="">Min range</label>
-                                                    <select
-                                                        className="form-control"
-                                                        name="min_range"
-                                                        value={min_range}
-                                                        onChange={(e) => this.handleOnChange(e)}
-                                                    >
-                                                        <option value={min_range}>{min_range}</option>
-                                                        {scale_ranges.map((value, idy) =>
-                                                            <option value={value}>{value}</option>
-                                                        )}
-                                                    </select>
-                                                </div>
-                                                <div className="col-md-6 mb-2 mx-0 px-0">
-                                                    <label htmlFor="">Max range</label>
-                                                    <select
-                                                        className="form-control"
-                                                        name="max_range"
-                                                        value={max_range}
-                                                        onChange={(e) => this.handleOnChange(e)}
-                                                    >
-                                                        <option value={max_range}>{max_range}</option>
-                                                        {scale_ranges.map((value, idy) =>
-                                                            <option value={value}>{value}</option>
-                                                        )}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                    <div className="col-md-6 mx-3 my-2">
-                                        <label htmlFor="">Style-ийн төрөл</label>
+                                {
+                                    range_number
+                                    &&
+                                    <div className="col-md-6 d-inline-block ">
+                                        <label htmlFor="range_number"></label>
                                         <select
                                             className="form-control"
-                                            name="shape_type"
-                                            value={shape_type}
+                                            name="had_chosen"
                                             onChange={(e) => this.handleOnChange(e)}
+                                            value={had_chosen}
                                         >
-                                            <option value="">--------------------------</option>
-                                            {shape_types.map((value, idy) =>
-                                                <option value={value.geo_name}>{value.name}</option>
-                                            )}
+                                            <option className="col-md-12" value={''}>----------------------------</option>
+                                        {
+                                            (() => {
+                                                const rows = [];
+                                                for (let i = 1; i <= range_number; i++) {
+                                                rows.push(<option key={i} className="col-md-12">{i}</option>);
+                                                }
+                                                return rows;
+                                            })()
+                                            }
                                         </select>
                                     </div>
-                                    <div>
-                                    {
-                                        shape_type == 'PointSymbolizer' || shape_type == 'PolygonSymbolizer' ?
-                                        <div className="col-md-12">
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-2">Дүрсийн дүүргэлтийн өнгө</label>
-                                                <input
-                                                    type="color"
-                                                    name='fill_color'
-                                                    className="form-control col-4"
-                                                    value= {fill_color}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-2">Хүрээний өнгө</label>
-                                                <input
-                                                    type="color"
-                                                    name='style_color'
-                                                    className="form-control col-4"
-                                                    value= {style_color}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="id_geoserver_user">Хүрээний өргөн</label>
-                                                <input
-                                                    name="style_size"
-                                                    type="number"
-                                                    className="form-control col-4"
-                                                    id="style_size"
-                                                    value = {style_size}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-2">Өнгөний уусгалт</label>
-                                                <input
-                                                    type="number"
-                                                    name='color_opacity'
-                                                    className="form-control col-4"
-                                                    value= {color_opacity}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                        {
-                                            shape_type == 'PointSymbolizer' &&
-                                            <div className='col-md-4 d-inline-block'>
-                                                <label htmlFor="wellknownname">Дүрсний сонголт</label>
-                                                <select
-                                                    className="form-control form-control-sm"
-                                                    name="wellknownname"
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                >
-                                                    <option value="">-----------</option>
-                                                    <option value="square">Дөрвөлжин</option>
-                                                    <option value="triangle">Гурвалжин</option>
-                                                    <option value="star"> Од</option>
-                                                    <option value="x"> Хэрээс</option>
-                                                </select>
-                                            </div>
-                                        }
-                                        </div>
-                                        :
-                                        <div className="col-md-12">
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-2">Өргөн</label>
-                                                <input
-                                                    type="number"
-                                                    name='style_size'
-                                                    className="form-control col-4"
-                                                    value= {style_size}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-2">Өнгө</label>
-                                                <input
-                                                    type="color"
-                                                    name='style_color'
-                                                    className="form-control col-4"
-                                                    value= {style_color}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-0 p-0">Зураас хоорондох зай</label>
-                                                <input
-                                                    type="number"
-                                                    name='dashed_line_gap'
-                                                    className="form-control col-4"
-                                                    value= {dashed_line_gap}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-2">Зураасын урт</label>
-                                                    <input
-                                                        type="number"
-                                                        name='dashed_line_length'
-                                                        className="form-control col-4"
-                                                        value= {dashed_line_length}
-                                                        onChange={(e) => this.handleOnChange(e)}
-                                                    />
-                                            </div>
-                                            <div className="col-md-4 d-inline-block">
-                                                <label htmlFor="color" className="m-2">Өнгөний уусгалт</label>
-                                                <input
-                                                    type="number"
-                                                    name='color_opacity'
-                                                    className="form-control col-4"
-                                                    value= {color_opacity}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                            </div>
-                                        </div>
-                                        }
-                                    </div>
-                                    <div className="col-md-12 my-4">
-                                        <button
-                                            type="button"
-                                            className='btn btn-primary col-md-6 mx-3'
-                                            disabled={check_style}
-                                            onClick={this.handleOnClick}
-                                        >
-                                            Style шалгах
-                                        </button>
-                                    </div>
+                                }
+                            </div>
+                            <div className="col-md-12 px-0">
+                                {
+                                    range_number
+                                    ?
+                                    <ShowStyleData
+                                        value = {single_select_datas}
+                                        handleOnChange = {this.handleOnChange}
+                                    />
+                                    :
+                                    <ShowStyleData
+                                        value = {this.state}
+                                        handleOnChange = {this.handleOnChange}
+                                    />
+                                }
+                                <div className="col-md-12 my-4">
+                                    <button
+                                        type="button"
+                                        className='btn btn-primary col-md-6 mx-3'
+                                        disabled={check_style}
+                                        onClick={this.handleOnClick}
+                                    >
+                                        Style шалгах
+                                    </button>
                                 </div>
+                            </div>
                         </div>
                     </div>
                     <div className="col-md-6">
