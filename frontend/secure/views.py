@@ -108,7 +108,7 @@ def _make_captcha():
             'size': 20,
         }
     ]
-    img = utils.creat_empty_image(100, 33, bg_color=[3,78,162])
+    img = utils.creat_empty_image(100, 33, bg_color=[3, 78, 162])
     img = utils.set_text_to_image(texts, img)
     image_path = 'test.png'
     img.save(image_path)
@@ -124,10 +124,8 @@ def login(request):
         password = request.POST.get('password')
         zurag = request.POST.get('zurag')
         captcha = request.POST.get('captcha')
-        print(zurag)
-        print(captcha)
 
-        if zurag != captcha:
+        if zurag != captcha and not settings.DEBUG:
             messages.warning(request, 'Captcha буруу байна.')
             return redirect('secure:login')
 
@@ -153,9 +151,11 @@ def login(request):
             else:
                 messages.warning(request, 'Нэвтрэх оролдлого амжилтгүй боллоо.')
                 return redirect('secure:login')
+
         except Exception:
             messages.warning(request, 'И-мэйл эсвэл нууц үг буруу байна!!!')
             return redirect('secure:login')
+
     form = LoginForm()
     text, byte_img = _make_captcha()
     return render(request, 'secure/login.html', {'form': form, 'captcha': {"text": text, "byte_img": byte_img}})

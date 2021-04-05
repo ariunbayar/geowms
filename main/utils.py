@@ -1,9 +1,5 @@
 import io
 import os
-
-from PIL import Image,ImageDraw, ImageFont
-from collections import namedtuple
-from io import BytesIO
 import base64
 import random
 import re
@@ -11,41 +7,37 @@ import unicodedata
 import importlib
 import zipfile
 import pyproj
-
+import math
 import json
 
 from collections import namedtuple
 from datetime import timedelta, datetime
 from geojson import Feature
+from PIL import Image, ImageDraw, ImageFont
 
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.measure import D
 from django.conf import settings
 from django.db import connections
-from backend.dedsanbutets.models import ViewNames
-from backend.dedsanbutets.models import ViewProperties
-from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
-from django.contrib.gis.measure import D
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from django.core.cache import cache
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
+from main.inspire import GEoIdGenerator
 
 from backend.config.models import Config
+from backend.config.models import CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
+from backend.dedsanbutets.models import ViewProperties
 from backend.dedsanbutets.models import ViewNames
 from backend.inspire.models import LProperties, MGeoDatas
-from backend.config.models import Config, CovidConfig
-from backend.token.utils import TokenGeneratorUserValidationEmail
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
-from main.inspire import GEoIdGenerator
-import uuid
-from django.core.cache import cache
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -1518,10 +1510,14 @@ def get_aimag_sum_from_point(x, y, is_display=True):
     return aimag, sum
 
 
-## zurag
+# zurag
 def image_to_64_byte(image_path):
     with open(image_path, "rb") as image_file:
-        data ssword_generate(length=12):
+        data = base64.b64encode(image_file.read())
+    return data
+
+
+def password_generate(length=12):
     chars = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM123456789'
 
     for p in range(1):
@@ -1552,11 +1548,7 @@ def set_text_to_image(texts, image):
     draw = ImageDraw.Draw(image)
     for text in texts:
         font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=text['size'])
-        draw.text(tuple(te= base64.b64encode(image_file.read())
-    return data
-
-
-def paxt['xy']), text['text'], tuple(text['rgb']), font)
+        draw.text(tuple(text['xy']), text['text'], tuple(text['rgb']), font)
 
     return image
 
@@ -1565,22 +1557,21 @@ def remove_file(file_path):
     os.remove(file_path)
 
 
-# def _copy_image(img, plus):
-#     x, y = img.size
+def copy_image(img, plus):
 
-#     new_x = x + plus
-#     new_y = y + plus
+    # get legends
+    # duudah hayg
+    # http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&transparent=true&WIDTH=20&HEIGHT=20&LAYER=gp_tn:gp_layer_road_link_view
 
-#     new_img = Image.new('RGBA', (new_x, new_y), 'red')
-#     top = math.floor((new_x - x) / 2)
-#     left = math.floor((new_y - y) / 2)
-#     tup = (top, left)
-#     new_img.paste(img, tup)
+    x, y = img.size
 
-#     return new_img
+    new_x = x + plus
+    new_y = y + plus
 
-# get legends
-# duudah hayg
-# http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&transparent=true&WIDTH=20&HEIGHT=20&LAYER=gp_tn:gp_layer_road_link_view
+    new_img = Image.new('RGBA', (new_x, new_y), 'red')
+    top = math.floor((new_x - x) / 2)
+    left = math.floor((new_y - y) / 2)
+    tup = (top, left)
+    new_img.paste(img, tup)
 
-
+    return new_img
