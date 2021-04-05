@@ -206,7 +206,7 @@ export class Purchase extends Component {
             {
              is_modal_info_open &&
                 <ModalAlert
-                    modalClose = {() => this.handleModalApproveClose()}
+                    modalAction = {() => this.handleModalApproveClose()}
                     text='Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.'
                     title="Худалдан авалтын мэдээлэл"
                     status={this.state.status}

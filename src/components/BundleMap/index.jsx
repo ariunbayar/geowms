@@ -31,6 +31,7 @@ import { AlertRoot } from "./ShopControls/alert"
 import Loader from '@utils/Loader'
 import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
+import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
 
 
 export default class InspireMap extends Component {
@@ -40,6 +41,7 @@ export default class InspireMap extends Component {
         this.sendFeatureInfo = []
         this.is_not_visible_layers = []
         this.saved_aimag_name = ''
+        this.clicked_coordinate = []
         this.state = {
             projection: 'EPSG:3857',
             is_authenticated: false,
@@ -66,7 +68,9 @@ export default class InspireMap extends Component {
             layer_2405: '',
             vectorSource: null,
             search_date: '',
-            is_search_bar: props.is_search_bar || false
+            is_search_bar: props.is_search_bar || true,
+            is_menu_bar: props.is_menu_bar || 'open',
+            is_menu_bar_all: props.is_menu_bar_all || 'open',
         }
 
         this.controls = {
@@ -150,7 +154,7 @@ export default class InspireMap extends Component {
     cartButton(is_cart, point_name, code, point_id, is_again_clicked, geom_name, pdf_id){
         if(is_cart == true){
             this.controls.cart.showModal(
-                this.state.coordinate_clicked,
+                this.clicked_coordinate,
                 is_cart,
                 this.state.x,
                 this.state.y,
@@ -168,7 +172,11 @@ export default class InspireMap extends Component {
         {
             this.setState({is_authenticated})
         })
+
         this.loadMapData()
+        if (this.clicked_coordinate.length > 0) {
+            this.controls.coordinateCopy.setCoordinate(this.clicked_coordinate)
+        }
     }
 
     getFullName(feature) {
@@ -257,9 +265,9 @@ export default class InspireMap extends Component {
     componentDidUpdate(prevProps, prevState) {
         const { vector_source, form_datas, wms_list, center} = this.props
         const { layer_one_tile } = this.state
-        if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
-            this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
-        }
+        // if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
+        //     this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
+        // }
 
         if (prevState.layer_one_tile != layer_one_tile) {
             this.setState({layer_one_tile})
@@ -395,6 +403,7 @@ export default class InspireMap extends Component {
                             ...layer,
                             wms_or_cache_ur,
                             tile: new Tile({
+                                preload: 6,
                                 minZoom: layer.zoom_start,
                                 maxZoom: layer.zoom_stop,
                                 source: new WMTS({
@@ -412,11 +421,13 @@ export default class InspireMap extends Component {
                                     }),
                                     style: '',
                                     wrapX: true,
+                                    tileLoadFunction: securedImageWMS
                                 }),
                                 code: layer.code
                             }),
-                            wms_tile: new Image({
-                                source: new ImageWMS({
+                            wms_tile: new Tile({
+                                preload: 6,
+                                source: new TileWMS({
                                     projection: this.state.projection,
                                     ratio: 1,
                                     url: url,
@@ -426,9 +437,10 @@ export default class InspireMap extends Component {
                                         'VERSION': '1.1.1',
                                         "STYLES": '',
                                         "exceptions": 'application/vnd.ogc.se_inimage',
-                                    }
+                                    },
+                                    tileLoadFunction: securedImageWMS
                                 }),
-                                code: layer.code
+                                code: layer.code,
                             })
                         }
                     }),
@@ -489,8 +501,8 @@ export default class InspireMap extends Component {
                     }
 
                     if (base_layer_info.tilename == "wms") {
-                        layer = new Image({
-                            source: new ImageWMS({
+                        layer = new Tile({
+                            source: new TileWMS({
                                 ratio: 1,
                                 url: base_layer_info.url,
                                 params: {
@@ -499,7 +511,8 @@ export default class InspireMap extends Component {
                                     'VERSION': '1.1.1',
                                     "STYLES": '',
                                     "exceptions": 'application/vnd.ogc.se_inimage',
-                                }
+                                },
+                                tileLoadFunction: securedImageWMS
                             }),
                             name: base_layer_name,
                         })
@@ -520,6 +533,7 @@ export default class InspireMap extends Component {
                                     resolutions: resolutions,
                                     matrixIds: gridNames,
                                 }),
+                                tileLoadFunction: securedImageWMS,
                                 style: '',
                                 wrapX: true,
                             }),
@@ -665,8 +679,8 @@ export default class InspireMap extends Component {
             const projection = event.map.getView().getProjection()
             const map_coord = transformCoordinate(event.coordinate, projection, this.state.projection_display)
             const coordinate_clicked = coordinateFormat(map_coord, '{y},{x}', 6)
-
-            this.setState({ coordinate_clicked })
+            this.clicked_coordinate = coordinate_clicked
+            // this.setState({ coordinate_clicked })
             this.showFeaturesAt(coordinate)
         }
     }
@@ -888,8 +902,7 @@ export default class InspireMap extends Component {
         this.sendFeatureInfo = []
         const overlay = this.overlay
         overlay.setPosition(coordinate)
-
-        this.setState({ pay_modal_check: false })
+        // this.setState({ pay_modal_check: false })
         if (this.props.form_datas) {
 
             this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
@@ -954,44 +967,30 @@ export default class InspireMap extends Component {
                                 .map((key) => [key, feature.get(key)])
                             return [feature.getId(), values]
                         })
-                        if(!this.state.is_draw_open){
-                            if(feature_info.length > 0) {
-                                is_not_inspire = false
-                                this.is_empty = false
-                                if(this.sendFeatureInfo.length > 0) {
-                                    this.sendFeatureInfo.map((feat, idx) => {
-                                        if (feat[0].field_name !== feature_info[0][0]) {
-                                            feature_info.push(geodb_table)
-                                            feature_info.push(code)
-                                            this.sendFeatureInfo.push(feature_info)
-                                        }
-                                    })
-                                }
-                                if (this.sendFeatureInfo.length == 0) {
-                                    feature_info.push(geodb_table)
-                                    feature_info.push(code)
-                                    this.sendFeatureInfo.push(feature_info)
-                                }
-                                if(geodb_table == 'mpoint_view') {
-                                    this.state.vector_layer.setSource(null)
-                                }
-                                if (not_visible_layers.length > 0) {
-                                    this.getPopUpInfo(coordinate, not_visible_layers)
-                                }
-                                else {
-                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
-                                }
+                        if(feature_info.length > 0) {
+                            is_not_inspire = false
+                            this.is_empty = false
+                            if(this.sendFeatureInfo.length > 0) {
+                                this.sendFeatureInfo.map((feat, idx) => {
+                                    if (feat[0].field_name !== feature_info[0][0]) {
+                                        feature_info.push(geodb_table)
+                                        feature_info.push(code)
+                                        this.sendFeatureInfo.push(feature_info)
+                                    }
+                                })
+                            }
+                            if (this.sendFeatureInfo.length == 0) {
+                                feature_info.push(geodb_table)
+                                feature_info.push(code)
+                                this.sendFeatureInfo.push(feature_info)
+                            }
+                            if (not_visible_layers.length > 0) {
+                                this.getPopUpInfo(coordinate, not_visible_layers)
                             }
                             else {
-                                if (not_visible_layers.length == 0) {
-                                    this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
-                                }
+                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
                             }
                         }
-                        else {
-                            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
-                        }
-
                     })
                 }
             }
@@ -1223,7 +1222,7 @@ export default class InspireMap extends Component {
 
 
     render() {
-        const {is_loading, is_search_bar} = this.state
+        const {is_loading, is_search_bar, is_menu_bar, is_menu_bar_all} = this.state
         const height = this.props.height ? this.props.height : '80vh'
 
         const Menu_comp = () => {
@@ -1268,13 +1267,13 @@ export default class InspireMap extends Component {
         const settings_component = () => {
             return(
                 <div>
-                    <h4>Тун удахгүй</h4>
+                    <button class="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i class="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
                 </div>
             )
         }
 
         var items = []
-        items.push({
+        is_menu_bar == 'open' && items.push({
             "key": "menus",
             "icon": "fa fa-bars",
             "title": "Давхаргууд",
@@ -1299,9 +1298,9 @@ export default class InspireMap extends Component {
                     style={{height: `${height}`,}}
                     className="mw-100 px-0 mx-0"
                 >
-                    <SideBar
+                    {is_menu_bar_all == 'open' &&<SideBar
                         items = {items}
-                    />
+                    />}
                 </div>
             </div>
         )

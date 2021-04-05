@@ -146,18 +146,18 @@ function getSum(aimag_name) {
     return fetch('/api/sum/', requestOptions).then(handleResponse)
 }
 
-function checkButtonEnableWithPdf(pdf_id) {
+function checkButtonEnableWithPdf(geo_id) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({pdf_id})
+        body: JSON.stringify({ geo_id })
     }
     return fetch('/payment/check-enable-pdf/', requestOptions).then(handleResponse)
 }
 
-function checkButtonEnableWithId(geo_id) {
+function checkButtonEnableWithId(geo_id, pdf_id) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({geo_id})
+        body: JSON.stringify({ geo_id, pdf_id })
     }
     return fetch('/payment/check-enable-pdf-id/', requestOptions).then(handleResponse)
 }

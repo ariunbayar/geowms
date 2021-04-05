@@ -21,6 +21,7 @@ class InspireTsegList extends Component {
             search_load: false,
             point_types: [],
             point_classes: [],
+            point_role_list: props.point_role_list,
         }
         this.paginate = this.paginate.bind(this)
         this.getFields = this.getFields.bind(this)
@@ -50,7 +51,7 @@ class InspireTsegList extends Component {
     }
 
     render() {
-        const { items, legnth, point_types, point_classes } = this.state
+        const { items, legnth, point_types, point_classes, point_role_list} = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -94,6 +95,7 @@ class InspireTsegList extends Component {
                                                     values={values}
                                                     point_types={point_types}
                                                     point_classes={point_classes}
+                                                    point_role_list={point_role_list}
                                                 />
                                             )
                                         }
@@ -123,7 +125,7 @@ class Rows extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            point_role_list: props.point_role_list
         }
     }
 
@@ -135,7 +137,7 @@ class Rows extends Component {
             center_typ,
             geo_id,
         } = this.props.values
-        const { idx, point_types, point_classes } = this.props
+        const { idx, point_types, point_classes, point_role_list} = this.props
 
         let suljee
         let angi
@@ -177,9 +179,12 @@ class Rows extends Component {
                     {angi}
                 </td>
                 <td>
+                {
+                    (point_role_list && point_role_list.PERM_UPDATE) &&
                     <a href={`/gov/forms/tseg-info/tsegpersonal/inspire-tseg/${geo_id}/засах/`}>
                         <GPIcon icon={`fa fa-pencil-square-o`} color={`text-success`} hover_color={'white'}></GPIcon>
                     </a>
+                }
                 </td>
             </tr>
         );

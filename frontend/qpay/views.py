@@ -41,6 +41,11 @@ def create(request, payload):
                     "error_message": json_data['message'],
                     'success': True,
                 }
+            else:
+                rsp =  {
+                    'error': True,
+                    'error_message': 'Худалдан авалт үүсэхэд алдаа гарсан байна'
+                }
     else:
         rsp =  {
             'error': True,

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import { PortalDataTable } from "@utils/DataTable"
+import { service } from "../../service"
 
 export const makeStateColor = (state) => {
     let color
@@ -45,6 +46,7 @@ class TsegRequest extends Component {
                 {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
                 {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
             ],
+            point_role_list: props.point_role_list,
         }
         this.goSuccess = this.goSuccess.bind(this)
     }
@@ -57,6 +59,13 @@ class TsegRequest extends Component {
         }
     }
 
+    componentDidUpdate(pP, pS) {
+        const { point_role_list } = this.props
+        if( pP.point_role_list != point_role_list ) {
+            this.setState({point_role_list})
+        }
+    }
+
     render() {
         const {
             refresh,
@@ -64,9 +73,13 @@ class TsegRequest extends Component {
             жагсаалтын_холбоос,
             хувьсах_талбарууд,
             custom_query,
-            нэмэх_товч,
             нэмэлт_талбарууд,
+            point_role_list,
         } = this.state
+        var нэмэлт_талбарууд_perm = []
+        if (point_role_list.PERM_UPDATE) {
+            нэмэлт_талбарууд_perm = нэмэлт_талбарууд
+        }
         return (
             <div className="card">
                 <div className="card-body">
@@ -78,10 +91,9 @@ class TsegRequest extends Component {
                         per_page={20}
                         уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                         хувьсах_талбарууд={хувьсах_талбарууд}
-                        нэмэх_товч={нэмэх_товч}
                         custom_query={custom_query}
-                        нэмэлт_талбарууд={нэмэлт_талбарууд}
-                        нэмэх_товч={'/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/'}
+                        нэмэлт_талбарууд={нэмэлт_талбарууд_perm}
+                        нэмэх_товч={ point_role_list.PERM_CREATE ? '/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/' : ''}
                     />
                 </div>
             </div>

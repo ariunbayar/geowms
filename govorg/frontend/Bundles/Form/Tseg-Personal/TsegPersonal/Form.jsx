@@ -79,6 +79,7 @@ export class Forms extends Component {
 
             modal_status: 'closed',
             geo_id: '',
+            point_role_list: props.point_role_list,
         }
         this.onDrop = this.onDrop.bind(this)
         this.onChangeHandler = this.onChangeHandler.bind(this)
@@ -126,6 +127,13 @@ export class Forms extends Component {
         }
     }
 
+    componentDidUpdate(pP, pS) {
+        const { point_role_list } = this.props
+        if (pP.point_role_list !== point_role_list) {
+            this.setState({point_role_list})
+        }
+    }
+
     optionVal(items){
         this.datalist = []
         items.map((item, key) => {
@@ -170,7 +178,7 @@ export class Forms extends Component {
                         this.setState({hors_shinj_baidal_list, hors_error:false , checkError:[] })
                     }
                     else{
-                        this.setState({ hors_error: true, checkError: error})
+                        this.setState({ hors_error: true, checkError: ''})
                     }
                 })
             }
@@ -192,7 +200,7 @@ export class Forms extends Component {
             })
         }
 
-         if(this.state.hors_shinj_baidal == ''){
+        if(this.state.hors_shinj_baidal == ''){
             alert(" Хөрсний шинж байдлыг тодорхойлно уу !!!")
             this.setState({
                 checkError: error,
@@ -641,9 +649,8 @@ export class Forms extends Component {
     }
 
     render() {
-        const { point_classes, point_types, ondor_types, only_see, no_buttons, latlongx, latlongy } = this.state
+        const { point_classes, point_types, ondor_types, only_see, no_buttons, latlongx, latlongy, point_role_list} = this.state
         const error_msg = this.state.error_msg
-
         let back_url
         let button_name
         if (this.props.data.match.params?.geo_id) {
@@ -1275,38 +1282,46 @@ export class Forms extends Component {
                                                     </button>
                                                 :
                                                     <div className="float-right">
-                                                        <button
-                                                            type='button'
-                                                            className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                                            onClick={() => this.modalChange(
-                                                                this.successPoint,
-                                                                `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
-                                                                'Баталгаажуулах',
-                                                                'fa fa-exclamation-circle',
-                                                                'warning',
-                                                                true,
-                                                                'Баталгаажуулах',
-                                                                null,
-                                                            )}
-                                                        >
-                                                            Баталгаажуулах
-                                                        </button>
-                                                        <button
-                                                            type='button'
-                                                            className="btn gp-btn-primary waves-effect waves-light"
-                                                            onClick={() => this.modalChange(
-                                                                this.rejectPoint,
-                                                                `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
-                                                                'Татгалзах',
-                                                                'fa fa-exclamation-circle',
-                                                                'warning',
-                                                                true,
-                                                                'Татгалзах',
-                                                                null,
-                                                            )}
-                                                        >
-                                                            Татгалзах
-                                                        </button>
+                                                        {
+                                                            point_role_list && point_role_list.PERM_APPROVE
+                                                            &&
+                                                                <button
+                                                                    type='button'
+                                                                    className="btn gp-btn-outline-primary waves-effect waves-light"
+                                                                    onClick={() => this.modalChange(
+                                                                        this.successPoint,
+                                                                        `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
+                                                                        'Баталгаажуулах',
+                                                                        'fa fa-exclamation-circle',
+                                                                        'warning',
+                                                                        true,
+                                                                        'Баталгаажуулах',
+                                                                        null,
+                                                                    )}
+                                                                >
+                                                                    Баталгаажуулах
+                                                                </button>
+                                                        }
+                                                        {
+                                                            point_role_list && point_role_list.PERM_REVOKE
+                                                            &&
+                                                                <button
+                                                                    type='button'
+                                                                    className="btn gp-btn-outline-primary waves-effect waves-light ml-1"
+                                                                    onClick={() => this.modalChange(
+                                                                        this.rejectPoint,
+                                                                        `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
+                                                                        'Татгалзах',
+                                                                        'fa fa-exclamation-circle',
+                                                                        'warning',
+                                                                        true,
+                                                                        'Татгалзах',
+                                                                        null,
+                                                                    )}
+                                                                >
+                                                                    Татгалзах
+                                                                </button>
+                                                        }
                                                     </div>
                                             :
                                                 null
@@ -1331,7 +1346,7 @@ export class Forms extends Component {
                             modalClose={this.state.modalClose}
                         />
                     </div>
-                 </Form>
+                </Form>
                 )
             }}
         </Formik>

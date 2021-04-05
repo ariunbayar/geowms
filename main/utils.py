@@ -7,6 +7,7 @@ import base64
 import re
 import unicodedata
 import importlib
+import pyproj
 
 import json
 from django.apps import apps
@@ -862,10 +863,28 @@ def get_key_and_compare(dict, item):
     return value
 
 
-def lat_long_to_utm(lat, longi):
-    point = Point([lat, longi], srid=4326)
-    utm = point.transform(3857, clone=True)
-    return utm.coords
+def lat_long_to_utm(y, x, insys=4326):
+
+    def _calc_outsys():
+        if 114 < y < 120:
+            outsys = 50
+        elif 108 < y < 114:
+            outsys = 49
+        elif 102 < y < 108:
+            outsys = 48
+        elif 96 < y < 102:
+            outsys = 47
+        elif 90 < y < 96:
+            outsys = 46
+        elif 84 < y < 90:
+            outsys = 45
+        return outsys
+
+    inproj = pyproj.CRS('EPSG:' + str(insys))
+    outproj = pyproj.CRS('EPSG:326' + str(_calc_outsys()))
+    value = pyproj.transform(inproj, outproj, x, y)
+
+    return value
 
 
 def get_nearest_geom(coordinate, feature_id, srid=4326, km=1):
@@ -1081,7 +1100,7 @@ def get_properties(feature_id, get_all=False):
         return property_qs, l_feature_c_qs, data_type_c_qs
 
 
-def _value_types():
+def value_types():
     return [
         {'value_type': 'value_number', 'value_names': ['double', 'number']},
         {'value_type': 'value_text', 'value_names': ['boolean', 'multi-text', 'link', 'text']},
@@ -1098,7 +1117,7 @@ def json_load(data):
 
 def make_value_dict(value, properties_qs, is_display=False):
     value = json_load(value)
-    for types in _value_types():
+    for types in value_types():
         for prop in properties_qs.values():
             for key, val in value.items():
                 if prop['value_type_id'] in types['value_names'] and key == prop['property_code']:
@@ -1180,7 +1199,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def _get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:
@@ -1388,3 +1407,84 @@ def geo_cache(key_name, key, qs, time):
     if not chache_data:
         cache.set('{}_{}'.format(key_name, key), qs, time)
     return qs
+
+
+# тухайн property г мдатагаас хайхад бэлэн маягаар гаргаж авах
+def get_filter_dicts(property_code='pointnumber'):
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_code__iexact=property_code)
+    prop = prop_qs.first()
+
+    feature = get_feature_from_code('gnp-gp-gp')
+    property_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature.feature_id)
+    data = get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
+
+    for prop_dict in prop_qs.values():
+        for type in value_types():
+            if prop_dict['value_type_id'] in type['value_names']:
+                filter_value_type = type['value_type']
+                break
+
+    return data, filter_value_type
+
+
+def _get_code_name_with_top(values, code, is_display=True):
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    top_code = ''
+    child_code = ''
+    name_or_id = 'code_list_name'
+    if not is_display:
+        name_or_id = 'code_list_id'
+
+    if code in values:
+        code_list_id = values[code]
+        code_qs = LCodeLists.objects
+        codes_qs = code_qs.filter(code_list_id=code_list_id)
+        if codes_qs:
+            code = codes_qs.values()
+            if code[0]['top_code_list_id']:
+                code_qs = code_qs.filter(code_list_id=code[0]['top_code_list_id']).values()
+                child_code = code[0][name_or_id]
+                top_code = code_qs[0][name_or_id]
+            else:
+                top_code = code[name_or_id]
+
+    return top_code, child_code
+
+
+# inspire аас тухайн дарагдсан цэг ямар газар дарагдсан гэдгийг мэдэх
+def get_aimag_sum_from_point(x, y, is_display=True):
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    point = Point([x, y], srid=4326)
+    feature_code = 'bnd-au-au'
+    feature = get_feature_from_code(feature_code)
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(feature_id=feature.feature_id)
+    mgeo_qs = mgeo_qs.filter(geo_data__contains=point)
+
+    property_code = 'AdministrativeUnitSubClass'
+
+    feature_id = feature.feature_id
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    datas = _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
+
+    aimag, sum = '', ''
+
+    for mgeo in mgeo_qs:
+        # level2 = 2
+        level3 = 4
+        geo_id = mgeo.geo_id
+        if len(geo_id) == level3:
+            mdatas_qs = MDatas.objects
+            mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+            for data in datas:
+                mdatas_qs = mdatas_qs.filter(**data)
+                if mdatas_qs:
+                    mdatas = mdatas_qs.first()
+                    values = dict()
+                    values[property_code] = mdatas.code_list_id
+                    aimag, sum = _get_code_name_with_top(values, property_code, is_display)
+                    break
+
+    return aimag, sum
