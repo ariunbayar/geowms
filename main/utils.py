@@ -1448,7 +1448,7 @@ def get_filter_dicts(property_code='pointnumber'):
     return data, filter_value_type
 
 
-def get_code_name_with_top(values, code, is_display=True):
+def _get_code_name_with_top(values, code, is_display=True):
     LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
     top_code = ''
     child_code = ''
@@ -1461,10 +1461,10 @@ def get_code_name_with_top(values, code, is_display=True):
         code_qs = LCodeLists.objects
         codes_qs = code_qs.filter(code_list_id=code_list_id)
         if codes_qs:
-            code = codes_qs.first()
-            if code.top_code_list_id:
-                code_qs = code_qs.filter(code_list_id=code.top_code_list_id).values()
-                child_code = code[name_or_id]
+            code = codes_qs.values()
+            if code[0]['top_code_list_id']:
+                code_qs = code_qs.filter(code_list_id=code[0]['top_code_list_id']).values()
+                child_code = code[0][name_or_id]
                 top_code = code_qs[0][name_or_id]
             else:
                 top_code = code[name_or_id]
@@ -1504,7 +1504,7 @@ def get_aimag_sum_from_point(x, y, is_display=True):
                     mdatas = mdatas_qs.first()
                     values = dict()
                     values[property_code] = mdatas.code_list_id
-                    aimag, sum = get_code_name_with_top(values, property_code, is_display)
+                    aimag, sum = _get_code_name_with_top(values, property_code, is_display)
                     break
 
     return aimag, sum

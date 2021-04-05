@@ -61,9 +61,7 @@ export default class Erguuleg extends Component {
     render() {
         const { points, is_loading, is_empty, infos, is_open } = this.state
         const { employee } = this.props
-
         const is_admin = employee.is_admin
-
         return (
             <div className="card">
                 <div className="card-body">
@@ -82,7 +80,9 @@ export default class Erguuleg extends Component {
                     {
                         is_open
                         ?
-                            <ErguulDetail/>
+                            <ErguulDetail
+                                {...this.props}
+                            />
                         :
                             <div>
                                 <div className="row">

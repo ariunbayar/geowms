@@ -1015,70 +1015,63 @@ def findPoints(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def findSum(request, payload):
-    try:
-        info = []
-        L = payload.get('y')
-        B = payload.get('x')
+    info = []
+    L = payload.get('y')
+    B = payload.get('x')
 
-        aimag, sum = utils.get_aimag_sum_from_point(L, B)
+    aimag, sum = utils.get_aimag_sum_from_point(L, B)
 
-        if aimag or sum:
-            Brange = [40, 44, 48, 52, 56]
-            Letter = ['K', 'L', 'M', 'N', 'O']
-            for k in Brange:
-                if k > B:
-                    ind = Brange.index(k)
-                    B0 = Letter[ind - 1]
-                    Bmin = Brange[ind - 1]
-                    break
-                else:
-                    B0 = "aldaa"
+    if aimag or sum:
+        Brange = [40, 44, 48, 52, 56]
+        Letter = ['K', 'L', 'M', 'N', 'O']
+        for k in Brange:
+            if k > B:
+                ind = Brange.index(k)
+                B0 = Letter[ind - 1]
+                Bmin = Brange[ind - 1]
+                break
+            else:
+                B0 = "aldaa"
 
-            zone = int(L / 6) + 31
-            Lmin = (zone - 30) * 6 - 6
-            c = 0
-            while Lmin < L:
-                Lmin = Lmin + 0.5
-                c = c + 1
-            cc = 0
-            while Bmin < B:
-                Bmin = Bmin + 1 / 3
-                cc = cc + 1
-            cc = (12 - cc) * 12 + c
-            LA = int(L)
-            LB = int((L-LA) * 60)
-            LC = float((L - LA - LB / 60) * 3600)
-            BA = int(B)
-            BB = int((B - BA) * 60)
-            BC = float((B - BA - BB / 60) * 3600)
-            info.append({
-                'aimag': aimag,
-                'sum': sum,
-                "vseg": B0,
-                'zone': zone,
-                'cc': cc,
-                'BA': BA,
-                'BB': BB,
-                'BC': BC,
-                'LA': LA,
-                'LB': LB,
-                'LC': LC
-            })
-            rsp = {
-                'success': True,
-                'info': info
-            }
-            return JsonResponse(rsp)
-        else:
-            rsp = {
-                'success': False,
-                'info': "Монгол улсын хилийн гадна байна !!!",
-            }
-            return JsonResponse(rsp)
-    except Exception:
+        zone = int(L / 6) + 31
+        Lmin = (zone - 30) * 6 - 6
+        c = 0
+        while Lmin < L:
+            Lmin = Lmin + 0.5
+            c = c + 1
+        cc = 0
+        while Bmin < B:
+            Bmin = Bmin + 1 / 3
+            cc = cc + 1
+        cc = (12 - cc) * 12 + c
+        LA = int(L)
+        LB = int((L-LA) * 60)
+        LC = float((L - LA - LB / 60) * 3600)
+        BA = int(B)
+        BB = int((B - BA) * 60)
+        BC = float((B - BA - BB / 60) * 3600)
+        info.append({
+            'aimag': aimag,
+            'sum': sum,
+            "vseg": B0,
+            'zone': zone,
+            'cc': cc,
+            'BA': BA,
+            'BB': BB,
+            'BC': BC,
+            'LA': LA,
+            'LB': LB,
+            'LC': LC
+        })
+        rsp = {
+            'success': True,
+            'info': info
+        }
+        return JsonResponse(rsp)
+    else:
         rsp = {
             'success': False,
-            'info': "Алдаа гарсан",
+            'info': "Монгол улсын хилийн гадна байна !!!",
         }
         return JsonResponse(rsp)
 
