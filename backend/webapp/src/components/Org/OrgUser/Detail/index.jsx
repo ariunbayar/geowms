@@ -29,6 +29,7 @@ export class Detail extends Component {
                 is_super: false,
             },
             points: [],
+            point: [],
             is_loading: true,
             is_empty: false,
             status_token_refresh: 'initial',
@@ -93,7 +94,15 @@ export class Detail extends Component {
             .getAddress(pk)
             .then(({ success, points }) => {
                 if (success) {
-                    this.setState({ points, is_loading: false })
+                    const feature_length = points.features.length
+                    let obj = Object()
+                    if (feature_length > 1) {
+                        obj['points'] = points
+                    }
+                    else if (feature_length == 1) {
+                        obj['point'] = points
+                    }
+                    this.setState({ ...obj, is_loading: false })
                 }
             })
     }
@@ -147,9 +156,9 @@ export class Detail extends Component {
             status_token_refresh,
             status_delete,
             points,
+            point,
             feature
         } = this.state
-
         return (
             <div className="container-fluid">
                 <div className="row">
@@ -266,7 +275,7 @@ export class Detail extends Component {
                 </div>
                 <AddressMap
                     features={points}
-                    feature={points}
+                    feature={point}
                     setLoading={this.setLoading}
                 />
             </div>

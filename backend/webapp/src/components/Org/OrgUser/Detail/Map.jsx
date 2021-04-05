@@ -46,9 +46,7 @@ export default class AddressMap extends Component {
             this.readFeatures(this.props.features)
         }
         if (pP.feature !== this.props.feature) {
-            if (this.props.feature !== {}) {
-                this.readFeature(this.props.feature)
-            }
+            this.readFeature(this.props.feature)
         }
     }
 
@@ -122,6 +120,7 @@ export default class AddressMap extends Component {
     }
 
     getFullName(feature) {
+        console.log(feature);
         const first_name = feature.getProperties().first_name
         const last_name = feature.getProperties().last_name
         const last_name_conv = last_name.charAt(0).toUpperCase()
@@ -188,7 +187,8 @@ export default class AddressMap extends Component {
 
                             this.extent = extent
                             if (!this.props.is_admin) {
-                                this.map.getView().fit(extent,{ padding: [200, 200, 200, 200], minResolution: 3 })
+                                console.log('suuliih bh ysoti');
+                                this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
                             }
 
                             source.addFeature(line_feature)
@@ -226,16 +226,16 @@ export default class AddressMap extends Component {
     }
 
     readFeature(feature) {
-        const id = 'aimag_sum'
-        this.removeFeatureFromSource(id, 'only_aimag')
         const source = this.vector_layer.getSource()
         const feat =  new GeoJSON().readFeatures(feature, {
             dataProjection: this.state.projection_data,
             featureProjection: this.state.projection_display,
         })[0];
+        const full_name = this.getFullName(feat)
+        const style = this.featureWithTextStyle(full_name)
+        feat.setStyle(style)
         source.addFeature(feat)
-        feat.setProperties({ id })
-        this.map.getView().fit(feat.getGeometry(),{ padding: [200, 200, 200, 200], minResolution: 1 })
+        this.map.getView().fit(feat.getGeometry(), { padding: [200, 200, 200, 200], minResolution: 1 })
     }
 
     readFeatures(features) {
