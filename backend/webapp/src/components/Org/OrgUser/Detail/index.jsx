@@ -7,6 +7,7 @@ import { ButtonTokenRefresh } from "./ButtonTokenRefresh"
 import { ButtonEdit } from "./ButtonEdit"
 import { ButtonDelete } from "./ButtonDelete"
 import { ButtonBack } from "./ButtonBack"
+import AddressMap from "./Map"
 
 
 export class Detail extends Component {
@@ -27,6 +28,10 @@ export class Detail extends Component {
                 is_admin: false,
                 is_super: false,
             },
+            points: [],
+            point: [],
+            is_loading: true,
+            is_empty: false,
             status_token_refresh: 'initial',
             status_delete: 'initial',
         }
@@ -35,10 +40,15 @@ export class Detail extends Component {
         this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
         this.handleDeleteSuccess = this.handleDeleteSuccess.bind(this)
+        this.getAddresses = this.getAddresses.bind(this)
+        this.setLoading = this.setLoading.bind(this)
+        this.getFeature = this.getFeature.bind(this)
     }
 
     componentDidMount(){
         this.fetchDetail()
+        const pk = this.props.match.params.emp
+        this.getAddresses(pk)
     }
 
     fetchDetail() {
@@ -79,6 +89,41 @@ export class Detail extends Component {
         this.props.history.push(`/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/`)
     }
 
+    getAddresses(pk) {
+        service
+            .getAddress(pk)
+            .then(({ success, points }) => {
+                if (success) {
+                    const feature_length = points.features.length
+                    let obj = Object()
+                    if (feature_length > 1) {
+                        obj['points'] = points
+                    }
+                    else if (feature_length == 1) {
+                        obj['point'] = points
+                    }
+                    this.setState({ ...obj, is_loading: false })
+                }
+            })
+    }
+
+    getFeature(feature) {
+        this.setState({ feature })
+    }
+
+    setLoading(is_true) {
+        this.setState({ is_loading: is_true })
+    }
+
+    getPoint(point_coordinate) {
+        let coordinates = point_coordinate
+        if (typeof point_coordinate == 'string') {
+            coordinates = point_coordinate.split(',')
+        }
+        const coordinate = [coordinates[1], coordinates[0]]
+        return coordinate
+    }
+
     render() {
 
         const { level, id, emp } = this.props.match.params
@@ -110,8 +155,10 @@ export class Detail extends Component {
         const {
             status_token_refresh,
             status_delete,
+            points,
+            point,
+            feature
         } = this.state
-
         return (
             <div className="container-fluid">
                 <div className="row">
@@ -226,6 +273,11 @@ export class Detail extends Component {
                     </div>
 
                 </div>
+                <AddressMap
+                    features={points}
+                    feature={point}
+                    setLoading={this.setLoading}
+                />
             </div>
         )
     }
