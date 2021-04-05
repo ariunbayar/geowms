@@ -120,7 +120,6 @@ export default class AddressMap extends Component {
     }
 
     getFullName(feature) {
-        console.log(feature);
         const first_name = feature.getProperties().first_name
         const last_name = feature.getProperties().last_name
         const last_name_conv = last_name.charAt(0).toUpperCase()
@@ -187,7 +186,6 @@ export default class AddressMap extends Component {
 
                             this.extent = extent
                             if (!this.props.is_admin) {
-                                console.log('suuliih bh ysoti');
                                 this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
                             }
 
