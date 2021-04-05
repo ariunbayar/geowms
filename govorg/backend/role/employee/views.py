@@ -915,6 +915,7 @@ def get_erguul_info(request, pk):
     erguul_date_starttime = erguul.date_start.strftime('%Y-%m-%d')
     erguul_date_endtime = erguul.date_end.strftime('%Y-%m-%d')
 
+    desc = 'Хоосон'
     if status:
         desc = status.description
         status = status.state

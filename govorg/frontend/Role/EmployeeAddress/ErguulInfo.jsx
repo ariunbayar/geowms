@@ -115,63 +115,63 @@ export class ErguulInfo extends Component {
                                 </dd>
                         </div>
                     </div>
-                        <div className="col-4">
-                            <div className="row">
-                                <h5 className="col-sm-12 col-xl-12 ">
-                                    Эргүүл хийсэн газар:
-                                </h5>
-                                    <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
-                                    <dd className="col-sm-6 col-xl-9">
-                                        { erguul_level3}
-                                    </dd>
-                                    <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
-                                    <dd className="col-sm-6 col-xl-9 ">
-                                        { erguul_street}
-                                    </dd>
-                                    <dt className="col-sm-6 col-xl-3"> Байр:</dt>
-                                    <dd className="col-sm-6 col-xl-9 ">
-                                        { erguul_apart}
-                                    </dd>
-                            </div>
+                    <div className="col-4">
+                        <div className="row">
+                            <h5 className="col-sm-12 col-xl-12 ">
+                                Эргүүл хийсэн газар:
+                            </h5>
+                            <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
+                            <dd className="col-sm-6 col-xl-9">
+                                { erguul_level3}
+                            </dd>
+                            <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
+                            <dd className="col-sm-6 col-xl-9 ">
+                                { erguul_street}
+                            </dd>
+                            <dt className="col-sm-6 col-xl-3"> Байр:</dt>
+                            <dd className="col-sm-6 col-xl-9 ">
+                                { erguul_apart}
+                            </dd>
                         </div>
-                        <div className="col-4">
-                            <div className="row">
-                                <h5 className="col-sm-12 col-xl-12 ">
-                                    Гэрийн хаяг:
-                                </h5>
-                                    <dt className="col-sm-6 col-xl-3">
-                                        Хот/Аймаг:
-                                    </dt>
-                                    <dd className="col-sm-6 col-xl-9">
-                                        { local_lvl1 }
-                                    </dd>
-                                    <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
-                                    <dd className="col-sm-6 col-xl-9">
-                                        { local_lvl2 }
-                                    </dd>
-                                    <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
-                                    <dd className="col-sm-6 col-xl-9">
-                                        { local_lvl3 }
-                                    </dd>
-                                    <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
-                                    <dd className="col-sm-6 col-xl-9 ">
-                                        { local_street }
-                                    </dd>
-                                    <dt className="col-sm-6 col-xl-3">Байр:</dt>
-                                    <dd className="col-sm-6 col-xl-9 ">
-                                        { local_apart }
-                                    </dd>
-                                    <dt className="col-sm-6 col-xl-3">Хаалганы дугаар:</dt>
-                                    <dd className="col-sm-6 col-xl-9 ">
-                                        { local_dn }
-                                    </dd>
+                    </div>
+                    <div className="col-4">
+                        <div className="row">
+                            <h5 className="col-sm-12 col-xl-12 ">
+                                Гэрийн хаяг:
+                            </h5>
+                            <dt className="col-sm-6 col-xl-3">
+                                Хот/Аймаг:
+                            </dt>
+                            <dd className="col-sm-6 col-xl-9">
+                                { local_lvl1 }
+                            </dd>
+                            <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
+                            <dd className="col-sm-6 col-xl-9">
+                                { local_lvl2 }
+                            </dd>
+                            <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
+                            <dd className="col-sm-6 col-xl-9">
+                                { local_lvl3 }
+                            </dd>
+                            <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
+                            <dd className="col-sm-6 col-xl-9 ">
+                                { local_street }
+                            </dd>
+                            <dt className="col-sm-6 col-xl-3">Байр:</dt>
+                            <dd className="col-sm-6 col-xl-9 ">
+                                { local_apart }
+                            </dd>
+                            <dt className="col-sm-6 col-xl-3">Хаалганы дугаар:</dt>
+                            <dd className="col-sm-6 col-xl-9 ">
+                                { local_dn }
+                            </dd>
                         </div>
-                        </div>
+                    </div>
                 </div>
                 <div className="row pb-5 pr-5">
                     <div className="col-12">
                         <div>
-                            <b>Тайлбар:</b>
+                            <b>Эргүүлд гарсан тайлбар:</b>
                         </div>
                         <div>
                             <a className="ml-4 text-justify">{ desc }</a>
