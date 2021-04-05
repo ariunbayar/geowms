@@ -1552,10 +1552,15 @@ def get_address(request, pk):
 
     feature_collection = FeatureCollection(points)
 
-    rsp = {
-        'success': True,
-        'points': feature_collection,
-    }
+    if not addresses:
+        rsp = {
+            'points': [],
+        }
+    else:
+        rsp = {
+            'success': True,
+            'points': feature_collection,
+        }
     return JsonResponse(rsp)
 
 

@@ -188,7 +188,7 @@ export default class AddressMap extends Component {
 
                             this.extent = extent
                             if (!this.props.is_admin) {
-                                this.map.getView().fit(extent,{ padding: [555, 555, 555, 555], duration: 2000 })
+                                this.map.getView().fit(extent,{ padding: [200, 200, 200, 200], minResolution: 3 })
                             }
 
                             source.addFeature(line_feature)
@@ -235,7 +235,7 @@ export default class AddressMap extends Component {
         })[0];
         source.addFeature(feat)
         feat.setProperties({ id })
-        // this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], duration: 2000 })
+        this.map.getView().fit(feat.getGeometry(),{ padding: [200, 200, 200, 200], minResolution: 1 })
     }
 
     readFeatures(features) {
