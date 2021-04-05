@@ -59,14 +59,14 @@ export class ErguulInfo extends Component {
                     desc,
                 })
             }
-            if (status == 'Гарсан'){
-                this.setState({ indicate:'text-success' })
+            if (status == 'Гарсан') {
+                this.setState({ indicate: 'text-success' })
             }
-            else if (status == 'Гараагүй'){
-                this.setState({ indicate:'text-danger' })
+            else if (status == 'Гараагүй') {
+                this.setState({ indicate: 'text-danger' })
             }
-            else if (status == 'Гарч байгаа'){
-                this.setState({ indicate:'text-warning' })
+            else if (status == 'Гарч байгаа') {
+                this.setState({ indicate: 'text-warning' })
             }
         })
     }

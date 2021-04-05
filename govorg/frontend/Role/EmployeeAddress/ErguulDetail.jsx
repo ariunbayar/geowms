@@ -37,7 +37,6 @@ export class ErguulDetail extends Component {
     }
 
     goLink(values) {
-        console.log(values);
         this.props.history.push(`/gov/perm/erguuleg/${values.id}/details/`)
     }
 

@@ -170,7 +170,7 @@ function getWherePos(id) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`${prefix}/${id}/get-erguulInfo/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/${id}/get-erguul-info/`, requestOptions).then(handleResponse)
 }
 
 function getAllOrg() {
