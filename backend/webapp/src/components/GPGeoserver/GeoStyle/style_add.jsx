@@ -90,6 +90,16 @@ export class CreateStyle extends Component {
                 }
             }
         }
+
+        if (input_name == 'shape_type') {
+            if(this.style_datas.length > 0)
+                {
+                    this.style_datas.map((data,idx) => {
+                        data.shape_type = e.target.value
+                    })
+                }
+        }
+
         this.setState({[e.target.name]:e.target.value})
     }
 
