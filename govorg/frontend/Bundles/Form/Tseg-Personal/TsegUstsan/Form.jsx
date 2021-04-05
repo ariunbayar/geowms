@@ -300,7 +300,6 @@ export class FormTseg extends Component {
             tseg_dugaar_error, oiroltsoo_bairlal, bairlal_error,
             showMore
         } = this.state
-        console.log(this.state.checkError)
         return (
             <Formik
                 initialValues={this.state.values}
@@ -319,7 +318,6 @@ export class FormTseg extends Component {
                     isValid,
                     dirty,
                 }) => {
-                    console.log(errors);
                     if(isSubmitting == true){
                         if(this.state.tseg_dugaar_error == ''){
                             this.error_msg = []
@@ -336,7 +334,6 @@ export class FormTseg extends Component {
                     const checkError = this.state.checkError
                     const has_error = Object.keys(errors).length > 0
                     const error_bn = Object.keys(checkError).length > 0
-                    console.log(has_error);
                     return (
                     <Form>
                         <div className="container p-3 card">

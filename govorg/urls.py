@@ -98,6 +98,7 @@ urlpatterns = [
 
         path('tseg-personal/', include(([
             path('', forms_views.tsegPersonal, name='tseg-personal'),
+            path('tseg-roles/', forms_views.emp_tseg_roles, name='tseg-roles'),
             path('findSum/', forms_views.findSum, name='findSum'),
             path('find-point/', forms_views.findPoints, name='find-point'),
             path('success-point/<int:id>/', forms_views.tseg_personal_success, name='tseg-personal-batalgaajuulah'),
@@ -113,7 +114,7 @@ urlpatterns = [
 
         path('tseg-ustsan/', include(([
             path('', forms_views.tsegUstsan, name='tseg-ustsan'),
-            path('success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
+            path('success/', forms_views.tseg_ustsan_success, name='tseg-ustsan-success'),
             path('list/', forms_views.tsegUstsanList, name='tseg-ustsan-list'),
             path('remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
             path('edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),

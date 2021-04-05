@@ -688,8 +688,9 @@ def _create_lavlagaa_file(class_infos, path):
     pdf = PDF()
     pdf.add_page(orientation='Landscape')
     pdf.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'gzbgzzg-logo.jpg'), x=25, y=8, w=37, h=40)
-    org_name = class_infos['CompanyName']
-    class_name = _check_none(class_infos, 'GeodeticalNetworkPointClassValue')
+    org_name = _check_none(class_infos, 'CompanyName')
+
+    class_name = _check_none(class_infos, 'GeodeticalNetworkPointTypeValue')
     font_name = 'DejaVu'
 
     pdf.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
@@ -744,7 +745,7 @@ def _create_lavlagaa_file(class_infos, path):
         if calc_cell_height == cell_height:
             pdf.ln()
 
-    file_name = class_name + "_" + class_infos['CompanyName']
+    file_name = class_name + "_" + org_name
     file_ext = 'pdf'
     pdf.output(os.path.join(path, file_name + "." + file_ext), 'F')
 
@@ -871,86 +872,21 @@ def _get_items_with_file(content, mpoint, att_names):
     return point_info
 
 
-def _get_item_from_mpoint_view(mpoint):
-    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
-    point_info = {
-        'point_id': mpoint.point_name,
-        'ondor': mpoint.ondor,
-        'aimag': mpoint.aimag,
-        'sum': mpoint.sum,
-        'sheet2': mpoint.sheet2,
-        'sheet3': mpoint.sheet3,
-        'n_utm': utm[0],
-        'e_utm': utm[1],
-        't_type': mpoint.t_type,
-        'class_name': mpoint.point_class_name,
-        'pdf_id': mpoint.pid,
-        'org_name': mpoint.org_name if hasattr(mpoint, 'org_name') else 'Геопортал',
-    }
-    return point_info
-
-
-def _get_item_from_inspire(mpoint):
-    utm = utils.lat_long_to_utm(mpoint.sheet2, mpoint.sheet3)
-    point_info = {
-        'point_id': mpoint.point_name,
-        'ondor': mpoint.ondor,
-        'aimag': mpoint.aimag,
-        'sum': mpoint.sum,
-        'sheet2': mpoint.sheet2,
-        'sheet3': mpoint.sheet3,
-        'n_utm': utm[0],
-        'e_utm': utm[1],
-        't_type': mpoint.t_type,
-        'class_name': mpoint.point_class_name,
-        'pdf_id': mpoint.pid,
-        'org_name': mpoint.org_name if hasattr(mpoint, 'org_name') else 'Геопортал',
-    }
-    return point_info
-
-
-def _get_feature_id(feature_code):
-    feat_qs = LFeatures.objects
-    feat_qs = feat_qs.filter(feature_code=feature_code)
-    return feat_qs
-
-
-def _get_filter_dicts():
-    prop_qs = LProperties.objects
-    prop_qs = prop_qs.filter(property_code__iexact='pointnumber')
-    prop = prop_qs.first()
-
-    feature_qs = _get_feature_id('gnp-gp-gp')
-    if feature_qs:
-
-        feature = feature_qs.first()
-        property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
-        data = utils.get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
-
-        for prop_dict in prop_qs.values():
-            for type in utils.value_types():
-                if prop_dict['value_type_id'] in type['value_names']:
-                    filter_value_type = type['value_type']
-                    break
-    return data, filter_value_type
-
-
-def _filter_Model(filters, Model=MDatas):
-    qs = Model.objects
+def _filter_Model(filters, Model=MDatas, initial_qs=[]):
+    if not initial_qs:
+        initial_qs = Model.objects
     for search in filters:
-        qs = qs.filter(**search)
-    return qs
+        initial_qs = initial_qs.filter(**search)
+    return initial_qs
 
 
 def _append_to_list(values, add_values):
-    if values:
-        for before_value in values:
-            if before_value['CompanyName'] == add_values['CompanyName'] and before_value['GeodeticalNetworkPointClassValue'] == add_values['GeodeticalNetworkPointClassValue']:
-                before_value['infos'].append(add_values['infos'][0])
-                break
-            else:
-                values.append(add_values)
-                break
+    has_already = False
+    for before_value in values:
+        if before_value['CompanyName'] == add_values['CompanyName'] and before_value['GeodeticalNetworkPointTypeValue'] == add_values['GeodeticalNetworkPointTypeValue']:
+            has_already = True
+    if has_already:
+        before_value['infos'].append(add_values['infos'][0])
     else:
         values.append(add_values)
     return values
@@ -1004,38 +940,47 @@ def _make_property_code_value(mdata):
                         if code_qs:
                             code = code_qs.first()
                             if prop['value_type_id'] == 'multi-select':
-                                code_qs = _filter_Model([{'top_code_list_id': code.top_code_list_id}], Model=LCodeLists)
+                                code_qs = _filter_Model([{'code_list_id': code.top_code_list_id}], Model=LCodeLists)
                                 if code_qs:
                                     top_code = code_qs.first()
-                                    prop['property_code'] = 'aimag'
-                                    dict_value = top_code.code_list_name
+                                    value['aimag'] = top_code.code_list_name
                                     value['sum'] = code.code_list_name
                                 else:
-                                    prop['property_code'] = 'aimag'
-                                    dict_value = code.code_list_name
+                                    value['aimag'] = code.code_list_name
                             else:
                                 dict_value = code.code_list_name
                     if prop['property_code'] == 'Nomenclature':
                         value = _get_geom_info(mdata, value)
+                    if prop['property_code'] == 'CompanyName':
+                        if not dict_value:
+                            dict_value = 'Хоосон'
                     value[prop['property_code']] = dict_value
     return value
 
 
 def _class_name_bolon_orgoor_angilah(points, folder_name):
-    data, filter_value_type = _get_filter_dicts()
+    data, filter_value_type = utils.get_filter_dicts()
     values = list()
     tseg_pdfs = list()
 
     for point in points:
 
         filter_value = dict()
+        geo_id = point.point_id
+        mdata_geo_id_qs = _filter_Model([{'geo_id': geo_id}])
         value = point.pdf_id.zfill(4)
         filter_value[filter_value_type] = value
-        mdata_qs = _filter_Model([data, filter_value])
-        mdata = mdata_qs.first()
+        mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
+        if not mdata_qs:
+            value = point.pdf_id
+            filter_value[filter_value_type] = value
+            mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
+            mdata = mdata_qs.first()
+        else:
+            mdata = mdata_qs.first()
 
         value = _make_property_code_value(mdata)
-        value['geo_id'] = mdata.geo_id
+        value['geo_id'] = geo_id
 
         for_angilah = ['CompanyName', 'GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue']
         value = _check_undur(value)
@@ -1066,7 +1011,6 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
             else:
                 infos[key] = val
         for_pdf['infos'].append(infos)
-
         values = _append_to_list(values, for_pdf)
     return values, tseg_pdfs
 
@@ -1078,9 +1022,8 @@ def _create_lavlagaa_infos(payment, folder_name):
         filtered_points, tseg_pdfs = _class_name_bolon_orgoor_angilah(points, folder_name)
         if filtered_points:
             for f_point in filtered_points:
-                if f_point['CompanyName']:
-                    path = _create_folder_payment_id(folder_name, payment.id)
-                    _create_lavlagaa_file(f_point, path)
+                path = _create_folder_payment_id(folder_name, payment.id)
+                _create_lavlagaa_file(f_point, path)
             _file_to_zip(str(payment.id), folder_name, tseg_pdfs)
             payment.export_file = folder_name + '/' + str(payment.id) + '/export.zip'
             payment.save()
@@ -1257,10 +1200,10 @@ def createPdf(values):
     pdf.ln(70)
     if 'PointNearPhoto' in values:
         if values['PointNearPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 91, w = 92, h = 60, type = '', link = '')
     if 'PointFarPhoto' in values:
         if values['PointFarPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 91, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
@@ -1427,7 +1370,6 @@ def download_pdf(request, pk, pdf_id):
     payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
     point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
     # generate the file
-    pdf_id = pdf_id.zfill(4)
     file_name = pdf_id + '.pdf'
     src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', str(payment.id), file_name)
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
@@ -1571,11 +1513,12 @@ def check_button_ebable_pdf(request, payload):
     return JsonResponse(rsp)
 
 
-def _check_in_inspire(point_number):
-    data, value_type = _get_filter_dicts()
+def _check_in_inspire(geo_id, pdf_id):
+    mdatas_qs = _filter_Model([{'geo_id': geo_id}])
+    data, value_type = utils.get_filter_dicts()
     search = dict()
-    search[value_type] = point_number
-    mdatas_qs = _filter_Model([data, search])
+    search[value_type] = pdf_id
+    mdatas_qs = _filter_Model([data, search], initial_qs=mdatas_qs)
     return mdatas_qs
 
 
@@ -1584,18 +1527,17 @@ def _check_in_inspire(point_number):
 @login_required
 def check_button_ebable_pdf_geo_id(request, payload):
     is_enable = False
-    pdf_id = payload.get('geo_id')
-
-    if pdf_id:
-        pdf_id = pdf_id.lstrip('0')
-        has_pdf = _check_in_inspire(pdf_id)
-        if len(has_pdf) > 0:
+    geo_id = payload.get('geo_id')
+    pdf_id = payload.get('pdf_id')
+    if geo_id:
+        has_pdf = _check_in_inspire(geo_id, pdf_id)
+        if has_pdf:
             is_enable = True
 
     rsp = {
         'success': True,
         'is_enable': is_enable,
-        'pdf_id': pdf_id
+        'geo_id': geo_id
     }
 
     return JsonResponse(rsp)
@@ -1639,6 +1581,8 @@ def get_popup_info(request, payload):
         ]
     )
 
+    geo_id_name = 'geo_id'
+
     for view_qs in views_qs:
         view_name = view_qs.view_name
         viewproperty_ids, property_qs = _get_properties_qs(view_qs)
@@ -1647,7 +1591,7 @@ def get_popup_info(request, payload):
         with connections['default'].cursor() as cursor:
             sql = """
                 SELECT
-                    {properties}
+                    {geo_id_name}, {properties}
                 FROM
                     {view_name}
                 WHERE (
@@ -1664,7 +1608,8 @@ def get_popup_info(request, payload):
                 properties=",".join([prop_code['property_code'] for prop_code in properties]),
                 x=coordinate[0],
                 y=coordinate[1],
-                radius=radius
+                radius=radius,
+                geo_id_name=geo_id_name,
             )
             cursor.execute(sql)
             results = [dict((cursor.description[i][0], value)
@@ -1675,12 +1620,13 @@ def get_popup_info(request, payload):
                 datas.append('gp_layer_' + view_qs.view_name)
                 datas.append(list())
                 for key, value in result.items():
+                    if key == geo_id_name:
+                        datas[1].append([key, value, key])
                     for prop in properties:
                         if prop['property_code'].lower() == key and value:
                             datas[1].append([prop['property_name'], value, key])
                 if datas:
                     infos.append(datas)
-
     rsp = {
         'datas': infos,
     }

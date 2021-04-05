@@ -632,7 +632,7 @@ export default class BundleMap extends Component {
                 }
             }
         })
-    return {layer_code, is_feature}
+        return {layer_code, is_feature}
     }
 
     getMetrScale(scale) {
@@ -800,15 +800,19 @@ export default class BundleMap extends Component {
     showFeaturesAt(coordinate) {
         this.is_empty = true
         this.sendFeatureInfo = []
-
+        const { is_authenticated } = this.state
         const overlay = this.overlay
         overlay.setPosition(coordinate)
+        if (is_authenticated) {
+            this.setState({ pay_modal_check: false })
+            this.featureFromUrl(coordinate)
 
-        this.setState({ pay_modal_check: false })
-        this.featureFromUrl(coordinate)
-
-        this.sendFeatureInfo = []
-        this.is_empty = true
+            this.sendFeatureInfo = []
+            this.is_empty = true
+        }
+        else {
+            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, false, true, false, false)
+        }
     }
 
     setSourceInPopUp(mode) {
