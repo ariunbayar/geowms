@@ -9,6 +9,7 @@ export class ErguulInfo extends Component {
 
         this.state = {
             id: this.props.match.params.id,
+            indicate: '',
         }
         this.getPos = this.getPos.bind(this)
     }
@@ -27,13 +28,17 @@ export class ErguulInfo extends Component {
                 last_name,
                 local_lvl1,
                 local_lvl2,
+                local_lvl3,
+                local_street,
+                local_apart,
+                local_dn,
                 erguul_level3,
                 erguul_street,
+                erguul_apart,
                 date_start,
                 date_end,
                 status,
                 desc,
-                indicate,
             }) => {
             if(success){
                 this.setState({
@@ -41,14 +46,27 @@ export class ErguulInfo extends Component {
                     last_name,
                     local_lvl1,
                     local_lvl2,
+                    local_lvl3,
+                    local_street,
+                    local_apart,
+                    local_dn,
                     erguul_level3,
                     erguul_street,
+                    erguul_apart,
                     date_start,
                     date_end,
                     status,
                     desc,
-                    indicate,
                 })
+            }
+            if (status == 'Гарсан'){
+                this.setState({ indicate:'text-success' })
+            }
+            else if (status == 'Гараагүй'){
+                this.setState({ indicate:'text-danger' })
+            }
+            else if (status == 'Гарч байгаа'){
+                this.setState({ indicate:'text-warning' })
             }
         })
     }
@@ -60,8 +78,13 @@ export class ErguulInfo extends Component {
             last_name,
             local_lvl1,
             local_lvl2,
+            local_lvl3,
+            local_street,
+            local_apart,
+            local_dn,
             erguul_level3,
             erguul_street,
+            erguul_apart,
             date_start,
             date_end,
             status,
@@ -102,8 +125,12 @@ export class ErguulInfo extends Component {
                                         { erguul_level3}
                                     </dd>
                                     <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
-                                    <dd className="col-sm-6 col-xl-9 pb-4">
+                                    <dd className="col-sm-6 col-xl-9 ">
                                         { erguul_street}
+                                    </dd>
+                                    <dt className="col-sm-6 col-xl-3"> Байр:</dt>
+                                    <dd className="col-sm-6 col-xl-9 ">
+                                        { erguul_apart}
                                     </dd>
                             </div>
                         </div>
@@ -120,15 +147,23 @@ export class ErguulInfo extends Component {
                                     </dd>
                                     <dt className="col-sm-6 col-xl-3"> Дүүрэг/Сум:</dt>
                                     <dd className="col-sm-6 col-xl-9">
-                                        { local_lvl2}
+                                        { local_lvl2 }
                                     </dd>
                                     <dt className="col-sm-6 col-xl-3">Хороо/баг:</dt>
                                     <dd className="col-sm-6 col-xl-9">
-                                        { erguul_level3}
+                                        { local_lvl3 }
                                     </dd>
                                     <dt className="col-sm-6 col-xl-3">Гудамж:</dt>
-                                    <dd className="col-sm-6 col-xl-9 pb-4">
-                                        { erguul_street}
+                                    <dd className="col-sm-6 col-xl-9 ">
+                                        { local_street }
+                                    </dd>
+                                    <dt className="col-sm-6 col-xl-3">Байр:</dt>
+                                    <dd className="col-sm-6 col-xl-9 ">
+                                        { local_apart }
+                                    </dd>
+                                    <dt className="col-sm-6 col-xl-3">Хаалганы дугаар:</dt>
+                                    <dd className="col-sm-6 col-xl-9 ">
+                                        { local_dn }
                                     </dd>
                         </div>
                         </div>

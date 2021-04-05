@@ -871,7 +871,7 @@ def erguul_list(request, payload):
         qs = EmployeeErguul.objects.filter(address=employee_address)
 
     if qs:
-        оруулах_талбарууд = ['address_id', 'apartment', 'date_start', 'date_end', 'part_time']
+        оруулах_талбарууд = ['id', 'address_id', 'apartment', 'date_start', 'date_end', 'part_time']
         хувьсах_талбарууд = [
             {"field": "part_time", "action": _get_part_time, "new_field": "part_time"},
             {"field": "apartment", "action": _get_state, "new_field": "state"},
@@ -907,13 +907,11 @@ def erguul_list(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_erguul_info(request, pk):
-    location = EmployeeAddress.objects.filter(id=pk).first()
-    erguul = EmployeeErguul.objects.filter(address_id=pk).first()
-    status = ErguulTailbar.objects.filter(erguul_id=erguul.id).first()
+    erguul = EmployeeErguul.objects.filter(pk=pk).first()
+    location = EmployeeAddress.objects.filter(pk=erguul.address_id).first()
+    status = ErguulTailbar.objects.filter(pk=pk).first()
     name = get_object_or_404(Employee, id=location.employee_id)
     name = name.user
-    erguul_level_3 = erguul.level_3
-    erguul_street = erguul.street
     erguul_date_starttime = erguul.date_start.strftime('%Y-%m-%d')
     erguul_date_endtime = erguul.date_end.strftime('%Y-%m-%d')
 
@@ -922,15 +920,12 @@ def get_erguul_info(request, pk):
         status = status.state
         if status == ErguulTailbar.DONE:
             status = "Гарсан",
-            indicate = 'text-success',
 
         elif status == ErguulTailbar.NOT_DONE:
             status = "Гараагүй",
-            indicate = 'text-danger',
 
     else:
         status = "Гарч байгаа",
-        indicate = 'text-warning',
 
     rsp = {
         'success': True,
@@ -939,11 +934,15 @@ def get_erguul_info(request, pk):
         'desc': desc,
         'local_lvl1': location.level_1,
         'local_lvl2': location.level_2,
+        'local_lvl3': location.level_3,
+        'local_street': location.street,
+        'local_apart': location.apartment,
+        'local_dn': location.door_number,
         'status': status,
         'date_start': erguul_date_starttime,
         'date_end': erguul_date_endtime,
-        'erguul_level3': erguul_level_3,
-        'erguul_street': erguul_street,
-        'indicate':indicate,
+        'erguul_level3': erguul.level_3,
+        'erguul_street': erguul.street,
+        'erguul_apart': erguul.apartment,
     }
     return JsonResponse(rsp)

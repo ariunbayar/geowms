@@ -61,7 +61,6 @@ export default class Erguuleg extends Component {
     render() {
         const { points, is_loading, is_empty, infos, is_open } = this.state
         const { employee } = this.props
-
         const is_admin = employee.is_admin
         return (
             <div className="card">

@@ -32,11 +32,13 @@ export class ErguulDetail extends Component {
                 }
             ]
         }
+
         this.goLink = this.goLink.bind(this)
     }
 
     goLink(values) {
-        this.props.history.push(`/gov/perm/erguuleg/${values.address_id}/details/`)
+        console.log(values);
+        this.props.history.push(`/gov/perm/erguuleg/${values.id}/details/`)
     }
 
     getState(key){
