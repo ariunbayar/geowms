@@ -1521,11 +1521,7 @@ def get_aimag_sum_from_point(x, y, is_display=True):
 ## zurag
 def image_to_64_byte(image_path):
     with open(image_path, "rb") as image_file:
-        data = base64.b64encode(image_file.read())
-    return data
-
-
-def password_generate(length=12):
+        data ssword_generate(length=12):
     chars = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM123456789'
 
     for p in range(1):
@@ -1556,7 +1552,11 @@ def set_text_to_image(texts, image):
     draw = ImageDraw.Draw(image)
     for text in texts:
         font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=text['size'])
-        draw.text(tuple(text['xy']), text['text'], tuple(text['rgb']), font)
+        draw.text(tuple(te= base64.b64encode(image_file.read())
+    return data
+
+
+def paxt['xy']), text['text'], tuple(text['rgb']), font)
 
     return image
 

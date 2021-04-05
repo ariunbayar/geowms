@@ -1734,6 +1734,3 @@ def get_contain_geoms(request, payload):
     }
 
     return JsonResponse(rsp)
-
-
-
