@@ -8,7 +8,6 @@ import {Details} from '../components/history/details'
 import Test from './test/Index'
 
 export class App extends Component {
-  // hahahaha
     render() {
         return (
             <BrowserRouter>
