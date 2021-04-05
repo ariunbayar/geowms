@@ -1,8 +1,7 @@
 from django.db import migrations, models
 from django.db import connections
 import requests
-from main.geoserver import getHeader, HEADERS
-
+from main.geoserver import getHeader, HEADERS, get_connection_conf
 
 def _update_layer(layer_name, url):
     BASE_URL, AUTH = getHeader()
@@ -31,33 +30,35 @@ def _update_layer(layer_name, url):
 def _get_detail_geoserver(url):
 
     BASE_URL, AUTH = getHeader()
-    HEADERS = {
-        'accept': 'application/json',
-        'Content-type': 'application/json',
-    }
-    url = BASE_URL + url
-    rsp = requests.get(url, headers=HEADERS, auth=AUTH)
-    if rsp.status_code ==200:
-        return rsp.json()
+    if BASE_URL and AUTH:
+        HEADERS = {
+            'accept': 'application/json',
+            'Content-type': 'application/json',
+        }
+        url = BASE_URL + url
+        rsp = requests.get(url, headers=HEADERS, auth=AUTH)
+        if rsp.status_code ==200:
+            return rsp.json()
 
 
 def update_geoserver_layer_crs(apps, schema_editor):
     url = 'workspaces'
-    workspaces = _get_detail_geoserver(url)
-    if workspaces and workspaces['workspaces']:
-        for ws in workspaces['workspaces']['workspace']:
-            if 'gp_' in ws['name']:
-                data_store_url = url + '/' + ws['name'] + '/datastores'
-                datastores = _get_detail_geoserver(data_store_url)
-                if datastores and datastores['dataStores']:
-                    for ds in datastores['dataStores']['dataStore']:
-                        layer_url = data_store_url + '/' + str(ds['name']) + '/featuretypes'
-                        featuretypes = _get_detail_geoserver(layer_url)
-                        if featuretypes and featuretypes['featureTypes']:
-                            for layer in featuretypes['featureTypes']['featureType']:
-                                put_url = layer_url + '/' + layer['name']
-                                _update_layer(layer['name'], put_url)
-
+    has_config = get_connection_conf()
+    if has_config:
+        workspaces = _get_detail_geoserver(url)
+        if workspaces and workspaces['workspaces']:
+            for ws in workspaces['workspaces']['workspace']:
+                if 'gp_' in ws['name']:
+                    data_store_url = url + '/' + ws['name'] + '/datastores'
+                    datastores = _get_detail_geoserver(data_store_url)
+                    if datastores and datastores['dataStores']:
+                        for ds in datastores['dataStores']['dataStore']:
+                            layer_url = data_store_url + '/' + str(ds['name']) + '/featuretypes'
+                            featuretypes = _get_detail_geoserver(layer_url)
+                            if featuretypes and featuretypes['featureTypes']:
+                                for layer in featuretypes['featureTypes']['featureType']:
+                                    put_url = layer_url + '/' + layer['name']
+                                    _update_layer(layer['name'], put_url)
 
 
 class Migration(migrations.Migration):

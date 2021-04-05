@@ -1,16 +1,17 @@
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import CharField, Value
 from geoportal_app.models import User
-from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
+from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
+from main.components import Datatable
 from backend.inspire.models import (
     EmpRole,
     EmpPerm,
@@ -32,6 +33,27 @@ from govorg.backend.utils import (
 
 from backend.org.forms import EmployeeAddressForm
 
+from backend.org.models import Employee, Org
+from backend.dedsanbutets.models import ViewNames
+from govorg.backend.org_request.models import ChangeRequest
+from govorg.backend.org_request.views import _get_geom
+
+
+def _get_address_state_db_value(address_state):
+    if address_state == EmployeeAddress.STATE_REGULER_CODE:
+        address_state = True
+    else:
+        address_state = False
+    return address_state
+
+
+def _get_address_state_code(address_state):
+    if address_state:
+        address_state = EmployeeAddress.STATE_REGULER_CODE
+    elif not address_state:
+        address_state = EmployeeAddress.STATE_SHORT_CODE
+    return address_state
+
 
 def _get_employee_display(employee):
 
@@ -48,18 +70,25 @@ def _get_employee_display(employee):
     return {
         'username': user.username,
         'id': employee.id,
-        'position': employee.position,
         'is_admin': employee.is_admin,
+        'phone_number': employee.phone_number,
 
         'token': employee.token,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
+        'position': employee.position.name,
+        'position_id': employee.position.id,
+        'state': employee.get_state_display(),
+        'state_id': employee.state,
+        'pro_class_id': employee.pro_class,
+        'pro_class': employee.get_pro_class_display(),
 
         'last_name': user.last_name,
         'first_name': user.first_name,
         'email': user.email,
         'gender': user.gender,
         'register': user.register,
+        'is_user': user.is_user,
 
         'role_name': role,
 
@@ -70,25 +99,79 @@ def _get_employee_display(employee):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
+        'address_state': _get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
+        'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
 
-@require_GET
+def _get_name(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    full_name = user.last_name[0].upper() + '.' + user.first_name.upper()
+    return full_name
+
+
+def _get_email(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    return user.email
+
+
+def _get_role_name(item):
+    role_name = ''
+    role = EmpPerm.objects.filter(employee=item['id']).first()
+    if role and role.emp_role:
+        role_name = role.emp_role.name
+    return role_name
+
+
+def _get_position_name(postition_id, item):
+    position = DefaultPosition.objects.filter(id=postition_id).first()
+    position_name = position.name
+    return position_name
+
+
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def list(request):
+def list(request, payload):
+    is_user = payload.get('is_user')
 
     org = get_object_or_404(Org, employee__user=request.user)
-    employees = Employee.objects.filter(org=org)
+    if is_user:
+        qs = Employee.objects.filter(org=org)
+        qs = qs.filter(user__is_user=True)
+    else:
+        qs = Employee.objects.filter(org=org)
+    if not qs:
+        rsp = {
+            'items': [],
+            'page': payload.get('page'),
+            'total_page': 1,
+        }
+        return JsonResponse(rsp)
 
-    employee_list = [
-        _get_employee_display(employee)
-        for employee in employees
+    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
+    хувьсах_талбарууд = [
+        {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
+        {"field": "user_id", "action": _get_email, "new_field": "user__email"},
+        {"field": "position_id", "action": _get_position_name, "new_field": "position"},
+    ]
+    нэмэлт_талбарууд = [
+        {"field": "role_name", "action": _get_role_name},
     ]
 
+    datatable = Datatable(
+        model=Employee,
+        payload=payload,
+        initial_qs=qs,
+        оруулах_талбарууд=оруулах_талбарууд,
+        нэмэлт_талбарууд=нэмэлт_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд
+    )
+    items, total_page = datatable.get()
     rsp = {
-        'success': True,
-        'employees': employee_list,
+        'items': items,
+        'page': payload.get('page'),
+        'total_page': total_page,
     }
 
     return JsonResponse(rsp)
@@ -98,17 +181,29 @@ def _set_user(user, user_detail):
 
     user.username = user_detail['username']
     user.first_name = user_detail['first_name']
-    user.last_name = user_detail['first_name']
+    user.last_name = user_detail['last_name']
     user.email = user_detail['email']
     user.gender = user_detail['gender']
     user.register = user_detail['register']
+    user.phone_number = user_detail['phone_number']
+    user.is_user = user_detail['is_user']
+
+    is_user = user_detail['is_user']
+    if is_user:
+        user.is_active = True
+    else:
+        user.is_active = False
+
     user.save()
 
 
 def _set_employee(employee, user_detail):
-
-    employee.position = user_detail['position']
+    employee.position_id = int(user_detail['position'])
+    employee.state = int(user_detail['state']) if user_detail['state'] else None
+    employee.pro_class = int(user_detail['pro_class']) if user_detail['pro_class'] else None
     employee.is_admin = user_detail['is_admin']
+    employee.phone_number = user_detail['phone_number']
+
     employee.save()
 
 
@@ -152,14 +247,13 @@ def _employee_validation(user, user_detail):
     position = user_detail['position']
     email = user_detail['email']
     register = user_detail['register']
+    phone_number = user_detail['phone_number']
     if not username:
         errors['username'] = 'Хоосон байна утга оруулна уу.'
     elif len(username) > 150:
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
         errors['position'] = 'Хоосон байна утга оруулна уу.'
-    elif len(position) > 250:
-        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
         errors['first_name'] = 'Хоосон байна утга оруулна уу.'
     elif len(first_name) > 30:
@@ -174,6 +268,12 @@ def _employee_validation(user, user_detail):
         errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
     if not register:
         errors['register'] = 'Хоосон байна утга оруулна уу.'
+    if not phone_number:
+        errors['phone_number'] = 'Хоосон байна утга оруулна уу.'
+    elif len(phone_number) > 8:
+        errors['phone_number'] = '8-с илүүгүй урттай утга оруулна уу!'
+    elif len(phone_number) < 8:
+        errors['phone_number'] = '8 урттай утга оруулна уу!'
     if user:
         if user.email != email:
             if User.objects.filter(email=email).first():
@@ -223,8 +323,10 @@ def create(request, payload):
     apartment = address.get('apartment')
     door_number = address.get('door_number')
     point_coordinate = address.get('point_coordinate')
+    address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
+    is_user = user_detail['is_user'] or False
 
     emp_role_id = payload.get('emp_role_id') or None
     org = get_object_or_404(Org, employee__user=request.user)
@@ -267,6 +369,7 @@ def create(request, payload):
             employee_address.apartment = apartment
             employee_address.door_number = door_number
             employee_address.point = point
+            employee_address.address_state = _get_address_state_code(address_state)
             employee_address.save()
 
             obj_array = []
@@ -275,7 +378,8 @@ def create(request, payload):
                 obj_array.append(emp_perm_inspire)
             EmpPermInspire.objects.bulk_create(obj_array)
 
-            utils.send_approve_email(user)
+            if is_user:
+                utils.send_approve_email(user)
 
         rsp = {
             'success': True,
@@ -302,7 +406,7 @@ def _delete_remove_perm(remove_perms):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
-
+    user_detail = payload.get('user_detail')
     can_update = False
     role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
@@ -316,6 +420,11 @@ def update(request, payload, pk):
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
 
+    address_state = address.get('address_state')
+    address_state = _get_address_state_code(address_state)
+    address['address_state'] = address_state
+    is_user = user_detail['is_user'] or False
+
     if employee.user == request.user:
         can_update = True
     else:
@@ -323,7 +432,7 @@ def update(request, payload, pk):
         can_update = True
 
     if can_update:
-        errors = _employee_validation(employee.user, payload)
+        errors = _employee_validation(employee.user, user_detail)
         if errors:
             return JsonResponse({
                 'success': False,
@@ -368,10 +477,13 @@ def update(request, payload, pk):
                     address_qs.create(employee=employee, **address)
 
                 user = employee.user
-                _set_user(user, payload)
+                _set_user(user, user_detail)
 
                 employee = employee
-                _set_employee(employee, payload)
+                _set_employee(employee, user_detail)
+
+                if is_user:
+                    utils.send_approve_email(user)
 
             return JsonResponse({
                 'success': True,
@@ -528,7 +640,7 @@ def send_mail(request, payload):
 
 def _is_cloned_feature(address_qs):
     is_cloned = False
-    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
+    erguul_id = address_qs.employeeerguul_set.filter(is_over=False)
     if erguul_id:
         is_cloned = True
     return is_cloned
@@ -553,6 +665,7 @@ def _get_feature_collection(employees):
 
         erguul = EmployeeErguul.objects
         erguul = erguul.filter(address=addresses)
+        erguul = erguul.filter(is_over=False)
         erguul = erguul.first()
         if erguul:
             erguul_info = dict()
@@ -570,18 +683,28 @@ def _get_feature_collection(employees):
     return feature_collection
 
 
-@require_GET
+@require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def get_addresses(request):
+def get_addresses(request, payload):
+    value = payload.get('value')
+    choose = payload.get('choose')
     employee = get_object_or_404(Employee, user=request.user)
     if employee.is_admin:
-        org = employee.org
-
-        employees = Employee.objects
-        employees = employees.filter(org=org)
+        if choose == 'all':
+            employees = Employee.objects.all()
+        elif choose == 'level':
+            org = Org.objects.filter(level=value)
+            employees = Employee.objects.filter(org_id__in=org)
+        elif choose == 'org':
+            org = get_object_or_404(Org, id=value)
+            employees = Employee.objects.filter(org=org)
+        else:
+            org = employee.org
+            employees = Employee.objects
+            employees = employees.filter(org=org)
     else:
-        raise 404
+        raise Http404
 
     feature_collection = _get_feature_collection(employees)
 
@@ -594,13 +717,18 @@ def get_addresses(request):
 
 def _get_erguul_qs(employee):
     tailbar = {}
+
     address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+
     erguul_qs = EmployeeErguul.objects
     erguul_qs = erguul_qs.filter(address_id=address_id)
-    erguul = erguul_qs.first()
-    if erguul:
+    erguul_qs = erguul_qs.filter(is_over=False)
+
+    if erguul_qs:
+        erguul = erguul_qs.first()
         tailbar = ErguulTailbar.objects
         tailbar = tailbar.filter(erguul=erguul).values().first()
+
     return tailbar
 
 
@@ -623,7 +751,7 @@ def get_field_tailbar(request):
         tailbar_id = tailbar['id']
     for f in ErguulTailbar._meta.get_fields():
         type_name = f.get_internal_type()
-        not_list = ['ForeignKey', 'AutoField']
+        not_list = ['OneToOneField', 'AutoField']
         if type_name not in not_list:
             not_field = ['created_at']
             if f.name not in not_field:
@@ -657,21 +785,32 @@ def save_field_tailbar(request, payload):
 
     values = payload.get('values')
     pk = payload.get('id')
-    if pk:
-        erguul_qs = ErguulTailbar.objects
-        erguul_qs = erguul_qs.filter(pk=pk)
-        erguul_qs.update(**values)
-    else:
-        address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
-        if address_id:
-            address = get_object_or_404(EmployeeAddress, id=address_id)
-            erguul_id = address.employeeerguul_set.values_list('id', flat=True).first()
-            values['erguul_id'] = erguul_id
-            ErguulTailbar.objects.create(**values)
+
+    with transaction.atomic():
+        if pk:
+            erguul_qs = ErguulTailbar.objects
+            erguul_qs = erguul_qs.filter(pk=pk)
+            erguul_qs.update(**values)
+
+        else:
+            address_id = request.user.employee_set.values_list('employeeaddress', flat=True).first()
+            if address_id:
+                address = get_object_or_404(EmployeeAddress, id=address_id)
+
+                erguul_qs = EmployeeErguul.objects
+                erguul_qs = erguul_qs.filter(address=address)
+                erguul_qs = erguul_qs.filter(is_over=False)
+                erguul = erguul_qs.first()
+
+                erguul_qs.update(is_over=True)
+
+                values['erguul_id'] = erguul.id
+
+                ErguulTailbar.objects.create(**values)
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хадглалаа'
+        'info': 'Амжилттай хадгаллаа'
     }
     return JsonResponse(rsp)
 
@@ -687,4 +826,78 @@ def get_erguul(request):
         'success': True,
         'points': feature_collection,
     }
+    return JsonResponse(rsp)
+
+
+def _get_part_time(part_time, item):
+    return "Үдээс хойш" if part_time == 1 else "Үдээс өмнө"
+
+
+def _get_state(state, item):
+    user = ErguulTailbar.objects.filter(erguul=item['id']).first()
+    if user is not None:
+        state = user.state
+        if state == 1:
+            state = "Гарсан"
+        elif state == 2:
+            state = "Гараагүй"
+    else:
+        state = "Гарч байгаа"
+    return state
+
+
+def _get_fullname(address_id, item):
+    address = EmployeeAddress.objects.filter(id=address_id).first()
+    user = address.employee.user
+    fullname = user.last_name[0].upper() + '.' + user.first_name.upper()
+    return fullname
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def erguul_list(request, payload):
+
+    employee = get_object_or_404(Employee, user=request.user)
+    is_admin = employee.is_admin
+
+    if is_admin:
+        org_id = employee.org.id
+        emp_ids = Employee.objects.filter(org_id=org_id).values_list('id', flat=True)
+        emps_address = EmployeeAddress.objects.filter(employee_id__in=emp_ids).values_list('id', flat=True)
+        qs = EmployeeErguul.objects.filter(address_id__in=emps_address)
+    else:
+        employee_address = EmployeeAddress.objects.filter(employee=employee).first()
+        qs = EmployeeErguul.objects.filter(address=employee_address)
+
+    if qs:
+        оруулах_талбарууд = ['address_id', 'apartment', 'date_start', 'date_end', 'part_time']
+        хувьсах_талбарууд = [
+            {"field": "part_time", "action": _get_part_time, "new_field": "part_time"},
+            {"field": "apartment", "action": _get_state, "new_field": "state"},
+            {"field": "address_id", "action": _get_fullname, "new_field": "fullname"},
+        ]
+
+        datatable = Datatable(
+            model=EmployeeErguul,
+            payload=payload,
+            initial_qs=qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд,
+        )
+        items, total_page = datatable.get()
+
+        rsp = {
+            'items': items,
+            'page': payload.get("page"),
+            'total_page': total_page,
+        }
+    else:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1,
+
+        }
+
     return JsonResponse(rsp)

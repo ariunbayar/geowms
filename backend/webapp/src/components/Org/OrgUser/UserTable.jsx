@@ -1,11 +1,5 @@
 import React, { Component } from "react"
-import { NavLink } from "react-router-dom"
-
-import { Pagination } from "@utils/Pagination"
-
-import ModalAlert from "../../ModalAlert"
-import { UserTableItem } from './UserTableItem'
-import { service } from '../service'
+import { PortalDataTable } from "@utils/DataTable/index"
 
 
 export class UserTable extends Component {
@@ -16,115 +10,91 @@ export class UserTable extends Component {
         super(props)
 
         this.state = {
-            govorg_list: [{},{}],
-            employees: [],
-            employees_length:null,
-            currentPage:1,
-            employeesPerPage:20,
-            searchQuery: '',
-            query_min: false,
-            search_load: false,
-            load: 0,
-            timer: null,
+            refresh: false,
+            жагсаалтын_холбоос: `/back/api/org/level-${props.match.params.level}/${props.match.params.id}/employeeList/`,
+            нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/хэрэглэгч/нэмэх/`,
+            custom_query: {},
+            талбарууд: [
+                {'field': 'first_name', "title": 'Нэр', 'has_action': true},
+                {'field': 'email', "title": 'Цахим шуудан'},
+                {'field': 'position', "title": 'Албан тушаал'},
+                {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
+                {'field': 'created_at', "title": 'Үүссэн'},
+                {'field': 'updated_at', "title": 'Зассан'},
+            ],
+            хувьсах_талбарууд: [
+                {"field": "first_name", "action": (values) => this.go_link(values)},
+                {"field": "email",  "text": ""},
+                {"field": "position",  "text": ""},
+                {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
+                {"field": "created_at",  "text": ""},
+                {"field": "updated_at",  "text": ""},
+            ],
+            is_user: true,
+            drop_name: 'Хэрэглэгч',
         }
-        this.paginate = this.paginate.bind(this)
-        this.handleSearch=this.handleSearch.bind(this)
+        this.handleListChange = this.handleListChange.bind(this)
     }
 
-    paginate (page, query) {
-        const perpage = this.state.employeesPerPage
+    set_icon(value) {
+        var icon
+        if (value) {icon = "fa fa-check-circle-o text-success fa-lg"}
+        else {icon = "fa fa-times-circle-o text-danger fa-lg"}
+
+        return icon
+    }
+
+    go_link(values) {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        this.setState({ currentPage: page })
-            return service
-                .employee_list(page, perpage, query, org_level, org_id)
-                .then(page => {
-                    this.setState({ employees: page.items, employees_length: page.items.length })
-                    return page
-                })
+        this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${values.id}/дэлгэрэнгүй/`)
     }
 
-    handleSearch(field, e) {
-        if(e.target.value.length >= 1)
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value)
-        }
-        else
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value)
-        }
+    handleListChange(is_user, drop_name) {
+        this.setState({ is_user, drop_name })
     }
 
     render() {
-        const {employees, currentPage, employeesPerPage, employees_length} = this.state
-        const id=this.props.values
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
-        return (
-            <div className="my-4">
-                <div className="row">
+        const {
+            refresh,
+            талбарууд,
+            жагсаалтын_холбоос,
+            хувьсах_талбарууд,
+            custom_query,
+            нэмэх_товч,
+            is_user,
+        } = this.state
 
-                    <div className="col-md-12">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="float-sm-left search-bar">
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="searchQuery small-input"
-                                        placeholder="Хайх"
-                                        onChange={(e) => this.handleSearch('searchQuery', e)}
-                                        value={this.state.searchQuery}
-                                    />
-                                    <a><i className="icon-magnifier"></i></a>
-                                </div>
+        return (
+            <div className="card">
+                <div className="card-body">
+                    <div className="d-flex flex-row-reverse mb-2">
+                        <div className="dropdown-menu-right show">
+                            <a className="btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {this.state.drop_name}
+                            </a>
+
+                            <div className="dropdown-menu mr-2" aria-labelledby="dropdownMenuLink">
+                                <button className="dropdown-item" onClick={() => this.handleListChange(true, 'Хэрэглэгч')}>Хэрэглэгч</button>
+                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Бүх ажилчид')}>Бүх ажилчид</button>
                             </div>
-                            <div className="col-md-6">
-                                <div className="float-sm-right">
-                                    <NavLink className="btn gp-btn-primary waves-effect waves-light btn-sm" to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/нэмэх/`}>
-                                        Нэмэх
-                                    </NavLink>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="table-responsive table_wrapper my-2">
-                            <table className="table table_wrapper_table">
-                                <thead>
-                                    <tr>
-                                        <th scope="col"> №</th>
-                                        <th scope="col"> Нэр</th>
-                                        <th scope="col"> Цахим шуудан </th>
-                                        <th scope="col"> Албан тушаал</th>
-                                        <th scope="col"> Админ </th>
-                                        <th scope="col"> Үүссэн </th>
-                                        <th scope="col"> Зассан </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    { employees_length === 0 ?
-                                    <tr><td>Ажилтан бүртгэлгүй байна</td></tr>:
-                                    employees.map((employe, idx) =>
-                                        <UserTableItem
-                                            org_level={org_level}
-                                            org_id={org_id}
-                                            key = {idx}
-                                            idx = {(currentPage*employeesPerPage)-employeesPerPage+idx+1}
-                                            values={employe}
-                                        >
-                                        </UserTableItem>
-                                    )}
-                                </tbody>
-                            </table>
                         </div>
                     </div>
+                    <div className="col-md-12">
+                        <PortalDataTable
+                            refresh={refresh}
+                            color={'bg-dark'}
+                            талбарууд={талбарууд}
+                            жагсаалтын_холбоос={жагсаалтын_холбоос}
+                            per_page={20}
+                            уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
+                            хувьсах_талбарууд={хувьсах_талбарууд}
+                            нэмэх_товч={нэмэх_товч}
+                            custom_query={custom_query}
+                            is_user={is_user}
+                        />
+                    </div>
                 </div>
-                <Pagination
-                    paginate = { this.paginate }
-                    searchQuery = { this.state.searchQuery }
-                    load = { this.state.load }
-                />
             </div>
         )
     }

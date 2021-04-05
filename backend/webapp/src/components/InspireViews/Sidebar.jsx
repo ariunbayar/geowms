@@ -448,7 +448,7 @@ export default class SideBar extends Component {
                                                             onChange={(e) => this.handleOnChange(e)}
                                                         />
                                                     </div>
-                                                    {geom_type == 'Point' ?
+                                                    {geom_type == 'Point' || geom_type =='MultiPoint'?
                                                     <div className='form-group col-md-4'>
                                                         <label htmlFor="state">Дүрсний сонголт</label>
                                                             <select className="form-control form-control-sm"

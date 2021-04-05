@@ -6,14 +6,16 @@ import PIL.Image as Image
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, F, Func
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 from django.conf import settings
+from django.forms.models import model_to_dict
 
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
@@ -31,7 +33,7 @@ from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
@@ -60,6 +62,14 @@ def all(request, payload, level):
     })
 
 
+def _get_address_state_db_value(address_state):
+    if address_state == EmployeeAddress.STATE_REGULER_CODE:
+        address_state = True
+    else:
+        address_state = False
+    return address_state
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -83,15 +93,23 @@ def employee_detail(request, pk):
         'email': user.email,
         'register': user.register,
         'gender': user.gender,
-        'token': employee.token,
+        'is_super': user.is_superuser,
         'is_active': user.is_active,
         'is_sso': user.is_sso,
-        'position': employee.position,
+        'is_user': user.is_user,
+
+        'token': employee.token,
+        'position': employee.position.name,
+        'position_id': employee.position.id,
+        'state': employee.get_state_display(),
+        'state_id': employee.state,
+        'pro_class_id': employee.pro_class,
+        'pro_class': employee.get_pro_class_display(),
         'is_admin': employee.is_admin,
-        'is_super': user.is_superuser,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
         'phone_number': employee.phone_number,
+
         'level_1': address.level_1 if hasattr(address, 'level_1') else '',
         'level_2': address.level_2 if hasattr(address, 'level_2') else '',
         'level_3': address.level_3 if hasattr(address, 'level_3') else '',
@@ -99,6 +117,8 @@ def employee_detail(request, pk):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
+        'address_state': _get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
+        'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
     return JsonResponse({'success': True, 'employee': employees_display})
@@ -134,8 +154,6 @@ def _employee_validation(payload, user):
         errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
     if not position:
         errors['position'] = 'Хоосон байна утга оруулна уу!'
-    elif len(position) > 250:
-        errors['position'] = '250-с илүүгүй урттай утга оруулна уу!'
     if not first_name:
         errors['first_name'] = 'Хоосон байна утга оруулна уу!'
     elif len(first_name) > 30:
@@ -176,6 +194,14 @@ def _employee_validation(payload, user):
     return errors
 
 
+def _get_address_state_code(address_state):
+    if address_state:
+        address_state = EmployeeAddress.STATE_REGULER_CODE
+    elif not address_state:
+        address_state = EmployeeAddress.STATE_SHORT_CODE
+    return address_state
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -184,7 +210,8 @@ def employee_update(request, payload, pk, level):
 
     values = payload.get('values')
     username = values.get('username')
-    position = values.get('position')
+    position = int(values.get('position'))
+    state = int(values.get('state'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -193,9 +220,10 @@ def employee_update(request, payload, pk, level):
     is_admin = values.get('is_admin')
     password = values.get('password')
     is_super = values.get('is_super')
+    pro_class = values.get('pro_class')
     phone_number = values.get('phone_number')
     re_password_mail = values.get('re_password_mail')
-
+    is_user = values.get('is_user')
     address = payload.get('address')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
@@ -204,6 +232,7 @@ def employee_update(request, payload, pk, level):
     apartment = address.get('apartment')
     door_number = address.get('door_number')
     point_coordinate = address.get('point')
+    address_state = address.get('address_state')
     point = _get_point_for_db(point_coordinate)
     address['point'] = point
 
@@ -228,8 +257,13 @@ def employee_update(request, payload, pk, level):
             user.register = register.upper()
             user.username = username
             user.is_superuser = is_super
+            user.is_user = is_user or False
             if password:
                 user.set_password(password)
+            if is_user:
+                user.is_active = True
+            else:
+                user.is_active = False
             user.save()
 
             if re_password_mail:
@@ -237,18 +271,25 @@ def employee_update(request, payload, pk, level):
                 text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
                 utils.send_approve_email(user, subject, text)
 
+            if pro_class:
+                pro_class = int(pro_class)
+            else:
+                pro_class = None
+
             employee = Employee.objects
             employee = employee.filter(user_id=pk)
             employee.update(
                 position=position,
                 is_admin=is_admin,
-                phone_number=phone_number
+                phone_number=phone_number,
+                state=state,
+                pro_class=pro_class,
             )
             employee = employee.first()
 
             address = EmployeeAddress.objects
             address = address.filter(employee=employee)
-
+            address_state = _get_address_state_code(address_state)
             if address:
                 address.update(
                     point=point,
@@ -258,6 +299,7 @@ def employee_update(request, payload, pk, level):
                     street=street,
                     apartment=apartment,
                     door_number=door_number,
+                    address_state=address_state,
                 )
             else:
                 address.create(
@@ -269,7 +311,10 @@ def employee_update(request, payload, pk, level):
                     street=street,
                     apartment=apartment,
                     door_number=door_number,
+                    address_state=address_state,
                 )
+        if is_user:
+            utils.send_approve_email(user)
         rsp = {
             'success': True, 'errors': errors
         }
@@ -304,22 +349,25 @@ def employee_add(request, payload, level, pk):
 
     values = payload.get('values')
     username = values.get('username')
-    position = values.get('position')
+    position = int(values.get('position'))
+    state = int(values.get('state'))
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
     gender = values.get('gender')
+    pro_class = values.get('pro_class')
     register = values.get('register')
     is_admin = values.get('is_admin')
     is_super = values.get('is_super')
     phone_number = values.get('phone_number')
-
+    is_user = values.get('is_user')
     address = payload.get('address')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
     level_3 = address.get('level_3')
     street = address.get('street')
     apartment = address.get('apartment')
+    address_state = address.get('address_state')
     door_number = address.get('door_number')
     point_coordinate = address.get('point')
     point = _get_point_for_db(point_coordinate)
@@ -344,17 +392,29 @@ def employee_add(request, payload, level, pk):
             user.gender = gender
             user.is_superuser = is_super if org.level == 4 else False
             user.register = register.upper()
+            user.is_user = is_user or False
+            if is_user:
+                user.is_active = True
+            else:
+                user.is_active = False
             user.save()
             user.roles.add(2)
             user.save()
 
+            if pro_class:
+                pro_class = int(pro_class)
+            else:
+                pro_class = None
+
             employee = Employee()
-            employee.position = position
+            employee.position_id = position
+            employee.state = state
             employee.org = org
             employee.user_id = user.id
             employee.is_admin = is_admin
             employee.token = TokenGeneratorEmployee().get()
             employee.phone_number = phone_number
+            employee.pro_class = pro_class
             employee.save()
 
             employee_address = EmployeeAddress()
@@ -366,9 +426,11 @@ def employee_add(request, payload, level, pk):
             employee_address.apartment = apartment
             employee_address.door_number = door_number
             employee_address.point = point
+            employee_address.address_state = _get_address_state_code(address_state)
             employee_address.save()
 
-            utils.send_approve_email(user)
+            if is_user:
+                utils.send_approve_email(user)
 
         rsp = {
             'success': True,
@@ -552,18 +614,20 @@ def org_remove(request, payload, level):
 def org_list(request, payload, level):
 
     оруулах_талбарууд = ['id', 'name', 'level', 'num_employees', 'num_systems']
-
+    items = []
+    total_page = 1
     qs = Org.objects.filter(level=level)
-    qs = qs.annotate(num_employees=Count('employee', distinct=True))
-    qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+    if qs:
+        qs = qs.annotate(num_employees=Count('employee', distinct=True))
+        qs = qs.annotate(num_systems=Count('govorg', distinct=True))
 
-    datatable = Datatable(
-        model=Org,
-        initial_qs=qs,
-        payload=payload,
-        оруулах_талбарууд=оруулах_талбарууд
-    )
-    items, total_page = datatable.get()
+        datatable = Datatable(
+            model=Org,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд
+        )
+        items, total_page = datatable.get()
 
     rsp = {
         'items': items,
@@ -602,6 +666,48 @@ def detail(request, level, pk):
     })
 
 
+def _get_employee(employee, filter_from_user):
+    if filter_from_user:
+        emp_obj = Employee.objects.filter(user=employee).first()
+        id = employee.id
+        last_name = employee.last_name
+        first_name = employee.last_name[0].upper() + '.' + employee.first_name.upper()
+        email = employee.email
+        is_active = employee.is_active
+        is_sso = employee.is_sso
+        is_admin = emp_obj.is_admin
+        position = emp_obj.position.name
+        created_at = emp_obj.created_at.strftime('%Y-%m-%d')
+        updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
+    else:
+        user = User.objects.filter(pk=employee.user_id).first()
+        id = user.id
+        last_name = user.last_name
+        first_name = user.last_name[0].upper() + '.' + user.first_name.upper()
+        email = user.email
+        is_active = user.is_active
+        is_sso = user.is_sso
+        is_admin = employee.is_admin
+        position = employee.position.name
+        created_at = employee.created_at.strftime('%Y-%m-%d')
+        updated_at = employee.updated_at.strftime('%Y-%m-%d')
+
+    employee_detail = {
+        'id': id,
+        'last_name': last_name,
+        'first_name': first_name,
+        'email': email,
+        'is_active': is_active,
+        'is_sso': is_sso,
+        'is_admin': is_admin,
+        'position': position,
+        'created_at': created_at,
+        'updated_at': updated_at
+    }
+
+    return employee_detail
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -611,18 +717,32 @@ def employee_list(request, payload, level, pk):
     page = payload.get('page')
     query = payload.get('query') or ''
     per_page = payload.get('perpage')
-    sort_name = payload.get('sort_name')
+    sort_name = payload.get('sort_name') or 'first_name'
+    is_user = payload.get('is_user')
 
-    if not sort_name:
-        sort_name = 'last_name'
-
-    qs = User.objects
-    qs = qs.filter(employee__org=org)
-    qs = qs.annotate(search=SearchVector(
-        'last_name',
-        'first_name',
-        'email')
+    if sort_name == 'first_name' or sort_name == '-first_name' or sort_name == 'email' or sort_name == '-email':
+        qs = User.objects
+        if is_user:
+            qs = qs.filter(employee__org=org, is_user=is_user)
+        else:
+            qs = qs.filter(employee__org=org)
+        qs = qs.annotate(search=SearchVector(
+                'last_name',
+                'first_name',
+                'email'
+            )
         )
+
+    else:
+        qs = Employee.objects
+        qs = qs.filter(org=org)
+        qs = qs.annotate(search=SearchVector(
+                'is_admin',
+                'created_at',
+                'updated_at'
+            )
+        )
+
     if query:
         qs = qs.filter(search__contains=query)
     qs = qs.order_by(sort_name)
@@ -631,20 +751,16 @@ def employee_list(request, payload, level, pk):
     total_items = Paginator(emp_list, per_page)
     items_page = total_items.page(page)
     page_items = items_page.object_list
-    for employe in page_items:
-        emp_obj = Employee.objects.filter(user=employe).first()
-        employees_display.append({
-            'id': employe.id,
-            'last_name': employe.last_name,
-            'first_name': employe.first_name,
-            'email': employe.email,
-            'is_active': employe.is_active,
-            'is_sso': employe.is_sso,
-            'is_admin': emp_obj.is_admin,
-            'position': emp_obj.position,
-            'created_at': emp_obj.created_at.strftime('%Y-%m-%d'),
-            'updated_at': emp_obj.updated_at.strftime('%Y-%m-%d'),
-        })
+
+    for employee in page_items:
+        if sort_name == 'first_name' or sort_name == '-first_name' or sort_name == 'email' or sort_name == '-email':
+            filter_from_user = True
+        else:
+            filter_from_user = False
+
+        employee_detail = _get_employee(employee, filter_from_user)
+        employees_display.append(employee_detail)
+
     total_page = total_items.num_pages
     rsp = {
         'items': employees_display,
@@ -674,37 +790,28 @@ def count_org(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def perm_get_list(request, payload):
-    query = payload.get('query')
-    page = payload.get('page')
-    per_page = payload.get('perpage')
-    list_datas = []
-    sort_name = payload.get('sort_name')
-    if not sort_name:
-        sort_name = 'id'
-    gove_roles = GovRole.objects.annotate(search=SearchVector(
-        'id',
-        'name',
-        'description',
-        'created_by'
-    ) + SearchVector('name'),).filter(search__icontains=query).order_by(sort_name)
 
-    total_items = Paginator(gove_roles, per_page)
-    items_page = total_items.page(page)
+    def _get_user_name(event, item):
+        user = User.objects.filter(pk=event).first()
+        return user.username if user else 'Хоосон'
 
-    for list_data in items_page.object_list:
-        list_datas.append({
-            'id': list_data.id,
-            'name': list_data.name,
-            'description': list_data.description,
-            'created_by': list_data.created_by.username
-        })
+    оруулах_талбарууд = ['id', 'name', 'description', 'created_by_id']
+    хувьсах_талбарууд = [
+        {"field": "created_by_id", "action": _get_user_name, "new_field": "created_by"},
+    ]
+    datatable = Datatable(
+        model=GovRole,
+        payload=payload,
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        оруулах_талбарууд=оруулах_талбарууд
+    )
 
-    total_page = total_items.num_pages
+    items, total_page = datatable.get()
 
     rsp = {
-        'items': list_datas,
-        'page': page,
-        'total_page': total_page,
+        'items': items,
+        'page': payload.get('page'),
+        'total_page': total_page
     }
 
     return JsonResponse(rsp)
@@ -1338,7 +1445,8 @@ def form_options(request, option):
     if option == 'second':
         rsp = {
             'success': True,
-            'secondOrders': admin_levels
+            'secondOrders': admin_levels,
+            'firstOrder_geom': utils.get_1stOrder_geo_id(),
         }
     else:
         rsp = {
@@ -1405,43 +1513,89 @@ def get_addresses(request, level, pk):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_emp_info(request, pk):
-    info = dict()
+def get_emp_info(request, payload, pk):
     employee = get_object_or_404(Employee, pk=pk)
+    is_erguul = payload.get("is_erguul")
+    info = dict()
+    title = ''
+
     info['org_name'] = employee.org.name
     info['last_name'] = employee.user.last_name # ovog
     info['first_name'] = employee.user.first_name
-    info['phone_number'] = employee.phone_number
-    info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
-    info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
-    info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
-    info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
-    info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
-    info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
+    info['phone_number'] = employee.phone_number or ''
+
+    if not is_erguul:
+        info['level_1'] = employee.employeeaddress_set.values_list('level_1', flat=True).first()
+        info['level_2'] = employee.employeeaddress_set.values_list('level_2', flat=True).first()
+        info['level_3'] = employee.employeeaddress_set.values_list('level_3', flat=True).first()
+        info['street'] = employee.employeeaddress_set.values_list('street', flat=True).first()
+        info['apartment'] = employee.employeeaddress_set.values_list('apartment', flat=True).first()
+        info['door_number'] = employee.employeeaddress_set.values_list('door_number', flat=True).first()
+        title = 'Ажилтаны мэдээлэл'
+
+    else:
+        address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+        erguul_qs = EmployeeErguul.objects
+        erguul_qs = erguul_qs.filter(address=address_id)
+        erguul = erguul_qs.first()
+        erguul_address = erguul.level_3 + ", " + erguul.street  + " гудамж " + erguul.apartment + " байр"
+
+        info['erguul_address'] = erguul_address
+        info['part_time'] = erguul.get_part_time_display()
+        info['date_start'] = utils.datetime_to_string(erguul.date_start)
+        info['date_end'] = utils.datetime_to_string(erguul.date_end)
+        title = 'Эргүүлийн мэдээлэл'
 
     rsp = {
         'success': True,
         'info': info,
+        'title': title
     }
     return JsonResponse(rsp)
 
 
+def _get_erguul_qs(employee):
+    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+    erguul_qs = EmployeeErguul.objects
+    erguul_qs = erguul_qs.filter(address_id=address_id)
+    erguul_qs = erguul_qs.filter(is_over=False)
+    erguul = erguul_qs.values().first()
+    return erguul
+
+
+def _get_erguul(erguul, field):
+    value = ''
+    if erguul:
+        value = erguul[field]
+    return value
+
+
 @require_GET
 @ajax_required
-def get_erguuleg_fields(request):
+def get_erguuleg_fields(request, pk):
+    erguul_id = ''
     send_fields = list()
+
+    employee = get_object_or_404(Employee, pk=pk)
+    erguul = _get_erguul_qs(employee)
+
+    if erguul:
+        erguul_id = erguul['id']
+
     for f in EmployeeErguul._meta.get_fields():
         type_name = f.get_internal_type()
-        not_list = ['ForeignKey', 'AutoField']
+        not_list = ['ForeignKey', 'AutoField', 'BooleanField', 'PointField']
         if type_name not in not_list:
             not_field = ['created_at']
             if f.name not in not_field:
                 if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
+                    value = _get_erguul(erguul, f.name)
                     field_type = ''
                     if 'date' in f.name:
                         field_type = 'date'
+                        value = utils.datetime_to_string(value)
                     send_fields.append({
                         'origin_name': f.name,
                         'name': f.verbose_name,
@@ -1449,10 +1603,12 @@ def get_erguuleg_fields(request):
                         'choices': f.choices,
                         'disabled': False,
                         'type': field_type,
+                        'value': value,
                     })
     rsp = {
         'success': True,
         'info': send_fields,
+        'erguul_id': erguul_id,
     }
     return JsonResponse(rsp)
 
@@ -1462,30 +1618,59 @@ def get_erguuleg_fields(request):
 def save_erguul(request, payload):
     hour = ''
 
-    emp_id = payload.get('id')
+    emp_id = payload.get('emp_id')
+    erguul_id = payload.get('erguul_id')
     values = payload.get('values')
-    point_coordinate = payload.get('point')
     photo = payload.get('photo')
 
-    point = _get_point_for_db(point_coordinate)
-    employee = get_object_or_404(Employee, pk=emp_id)
+    employee = get_object_or_404(Employee, id=emp_id)
 
-    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
-    date_start = utils.date_to_timezone(values['date_start']) if 'date_start' in values else ''
-    date_end = utils.date_to_timezone(values['date_end']) if 'date_end' in values else ''
-    part_time = values['part_time'] if 'part_time' in values else ''
+    point = _get_point_for_db(payload.get('point'))
+    values['point'] = point
+
+    if 'date_start' in values:
+        date_start = utils.date_to_timezone(values['date_start'])
+        values['date_start'] = date_start
+
+    if 'date_end' in values:
+        date_end = utils.date_to_timezone(values['date_end'])
+        values['date_end'] = date_end
 
     with transaction.atomic():
-        erguul = EmployeeErguul()
-        erguul.address_id = address_id
-        erguul.level_3 = values['level_3'] if 'level_3' in values else ''
-        erguul.street = values['street'] if 'street' in values else ''
-        erguul.apartment = values['apartment'] if 'apartment' in values else ''
-        erguul.point = point
-        erguul.part_time = part_time
-        erguul.date_start = date_start
-        erguul.date_end = date_end
-        erguul.save()
+        erguul_qs = EmployeeErguul.objects
+        if not erguul_id:
+            address_qs = EmployeeAddress.objects
+            address_qs = address_qs.filter(employee=employee)
+            address_qs = address_qs.first()
+            address_id = address_qs.id
+
+            erguul_qs = erguul_qs.create(address_id=address_id, **values)
+            erguul_id = erguul_qs.id
+            subject = 'Эргүүлд гарах мэдээлэл'
+            update_msg = ''
+            info = 'Амжилттай хадгалсан'
+        else:
+            erguul_qs = erguul_qs.filter(pk=erguul_id)
+            erguul_qs.update(
+                **values
+            )
+            erguul_qs = erguul_qs.first()
+            subject = 'Шинэчилсэн эргүүлд гарах мэдээлэл'
+            update_msg = '<h4>Таны эргүүлд гарах мэдээллийг шинэчилсэн байна</h4>'
+            info = 'Амжилттай зассан'
+
+        def _get_mail_info(item):
+            if item in values:
+                value = values[item]
+            else:
+                erguul_dict = model_to_dict(erguul_qs)
+                value = erguul_dict[item]
+
+            return value
+
+        part_time = _get_mail_info('part_time')
+        date_start = _get_mail_info('date_start')
+        date_end = _get_mail_info('date_end')
 
         if int(part_time) == EmployeeErguul.DAY_TIME:
             hour = EmployeeErguul.DAY_HOUR
@@ -1494,7 +1679,7 @@ def save_erguul(request, payload):
 
         photo = photo.split(',')
         photo = photo[len(photo) - 1]
-        file_name = str(erguul.id) + '.png'
+        file_name = str(erguul_id) + '.png'
         folder_name = 'covid_map'
         path = os.path.join(settings.MEDIA_ROOT, folder_name, file_name)
         if photo:
@@ -1503,29 +1688,30 @@ def save_erguul(request, payload):
             image = Image.open(io.BytesIO(img_byte))
             image.save(path)
 
-        subject = 'Эргүүлд гарах мэдээлэл'
         msg = 'Та энэ заасан газарт ' + utils.datetime_to_string(date_start) + " - " + utils.datetime_to_string(date_end) + " хүртэлх хугацаанд " + hour + " цагийн хооронд эргүүл хийнэ"
         host_name = utils.get_config('EMAIL_HOST_NAME')
         linked_path = 'https://' + host_name + "/media/" + folder_name + "/" + file_name
         to_email = [employee.user.email]
         attach = '''
             <body>
+                {update_msg}
                 <dd>
                     {msg}
                 </dd>
-                <img src={linked_path} />
+                <img src={linked_path} alt='erguul'/>
                 <p>
                     <b>Ногоон цэг</b> нь таны эргүүл хийх газар
+                    <br />
                     <b>Улаан цэг</b> нь таны гэрийн байршил
                 </p>
             </body>
-        '''.format(msg=msg, linked_path=linked_path)
+        '''.format(msg=msg, linked_path=linked_path, update_msg=update_msg)
 
         utils.send_email(subject, msg, to_email, attach)
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хадгалсан',
+        'info': info,
     }
 
     return JsonResponse(rsp)
@@ -1556,4 +1742,53 @@ def get_erguuls(request):
     rsp = {
         'feature_collection': feature_collection,
     }
+    return JsonResponse(rsp)
+
+
+def _get_choices(Model, field_name):
+    choices = list()
+    for f in Model._meta.get_fields():
+        if f.name == field_name:
+            choices = f.choices
+    return choices
+
+
+@require_GET
+@ajax_required
+def get_select_values(request):
+
+    qs = DefaultPosition.objects
+    qs = qs.all()
+    positions = list(qs.values())
+
+    states = _get_choices(Employee, 'state')
+    pro_classes = _get_choices(Employee, 'pro_class')
+
+    rsp = {
+        'success': True,
+        'positions': positions,
+        'states': states,
+        'pro_classes': pro_classes,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_all_org(request):
+
+    qs = Org.objects
+    org_qs = qs.all()
+    org_list = list(org_qs.values())
+
+    levels_qs = qs.values('level').annotate(Count('level')).order_by('level')
+    levels_qs = list(levels_qs)
+    levels = [level['level'] for level in levels_qs]
+
+    rsp = {
+        'success': True,
+        'org_list': org_list,
+        'levels': levels,
+    }
+
     return JsonResponse(rsp)

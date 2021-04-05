@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./style.css";
 
 
-class LinkExternal extends Component {
+class  LinkExternal extends Component {
 
     render() {
         return (
@@ -16,7 +16,7 @@ class LinkExternal extends Component {
 }
 
 
-export class DevPage extends Component {
+export default class DevPage extends Component {
   render() {
     return (
         <div className="row">

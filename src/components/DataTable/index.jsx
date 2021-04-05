@@ -29,6 +29,7 @@ export class PortalDataTable extends Component {
             color: props.color || "dark",
             max_data: props.max_data || 'open',
             table_head_color: props.table_head_color || 'white',
+            is_user: this.props.is_user,
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
@@ -43,11 +44,11 @@ export class PortalDataTable extends Component {
         }
     }
 
-    paginate (page, query, sort_name, per_page, custom_query) {
+    paginate (page, query, sort_name, per_page, custom_query, is_user) {
         const { жагсаалтын_холбоос } = this.state
         this.setState({ уншиж_байгаа_эсэх: true })
         return service
-            .list(жагсаалтын_холбоос, page, per_page, query, sort_name, custom_query)
+            .list(жагсаалтын_холбоос, page, per_page, query, sort_name, custom_query, is_user)
             .then(page => {
                 this.setState({ items: page.items, items_length: page.items.length, уншиж_байгаа_эсэх: false })
                 return page
@@ -72,49 +73,63 @@ export class PortalDataTable extends Component {
         if(pp.custom_query !== this.props.custom_query){
             this.setState({ custom_query: this.props.custom_query })
         }
+        if(pp.жагсаалтын_холбоос !== this.props.жагсаалтын_холбоос) {
+            this.setState({ жагсаалтын_холбоос: this.props.жагсаалтын_холбоос })
+        }
+        if(pp.нэмэх_товч !== this.props.нэмэх_товч) {
+            this.setState({ нэмэх_товч: this.props.нэмэх_товч })
+        }
+        if(pp.is_user !== this.props.is_user) {
+            this.setState({ is_user: this.props.is_user })
+        }
+        if(pp.нэмэлт_талбарууд !== this.props.нэмэлт_талбарууд) {
+            this.setState({ нэмэлт_талбарууд: this.props.нэмэлт_талбарууд })
+        }
     }
 
     render() {
         const { items, current_page, items_length, per_page,
             талбарууд, хоосон_байх_үед_зурвас, нэмэх_товч, уншиж_байх_үед_зурвас,
             уншиж_байгаа_эсэх, хувьсах_талбарууд, нэмэлт_талбарууд,
-            хайлт, color, max_data, table_head_color
+            хайлт, color, max_data, table_head_color, is_user
         } = this.state
         return (
-           <div>
-               {хайлт == "closed" && нэмэх_товч == '' && max_data == 'closed'
-               ?
-               null
-               :
+            <div>
+                {хайлт == "closed" && нэмэх_товч == '' && max_data == 'closed'
+                ?
+                null
+                :
                 <div className="row">
-                    {хайлт == "open" &&
-                        <div className="col-3">
-                            <div className="float-sm-left search-bar">
+                    {
+                        хайлт == "open" &&
+                            <div className="search-bar">
                                 <input
                                     type="text"
                                     className="form-control"
-                                    id="searchQuery small-input"
                                     placeholder="Хайх"
                                     onChange={(e) => this.handleSearch('searchQuery', e)}
                                     value={this.state.searchQuery}
                                 />
                                 <a><i className="icon-magnifier"></i></a>
                             </div>
-                        </div>
                     }
                     {
                         max_data == 'open' &&
-                            <div className="col">
-                                <div className="float-sm-right input-group">
-                                    <strong className={`mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
-                                    <select className="form-control form-control-sm col-2" value={per_page} onChange={(e) => this.setState({per_page: e.target.value})}>
-                                        <option value="10">10</option>
-                                        <option value="20">20</option>
-                                        <option value="30">30</option>
-                                        <option value="40">40</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
+                            <div className="col-md-6">
+                                <div className="row text-right">
+                                    <div className="col">
+                                        <strong className={`text-right mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
+                                    </div>
+                                    <div className="row">
+                                        <select className="form-control form-control-sm" value={per_page} onChange={(e) => this.setState({per_page: e.target.value})}>
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="30">30</option>
+                                            <option value="40">40</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                     }
@@ -134,25 +149,29 @@ export class PortalDataTable extends Component {
                 <div className="row my-2">
                     <div className="col-lg-12">
                         <div className="table-responsive table_wrapper">
+                            <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
                             <table className="table table_wrapper_table">
                                 <thead className={`bg-primary text-${table_head_color}`}>
                                     <tr>
                                         <th scope="col" className={`bg-${color}`}>№</th>
                                         {талбарууд.map((item, index) =>
-                                            <th key={index} className={`bg-${color}`}>
+                                            item.is_sort ?
+                                            <th key={index}>
+                                                {item.title}
+                                            </th>
+                                            :
+                                            <th key={index} onClick={() => this.handleSort(item.field, this.state[item.field])} key={index} className={`bg-${color} ${item.is_center ? 'text-center' : null}`}>
                                                 {item.title}&nbsp;
-                                                <a onClick={() => this.handleSort(item.field, this.state[item.field])}><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
+                                                <a><i className={this.state[item.field] ? "fa fa-caret-up" : "fa fa-caret-down"} aria-hidden="true"></i></a>
                                             </th>
                                         )}
-                                        {нэмэлт_талбарууд && нэмэлт_талбарууд.map((item, index) =>
+                                        {(нэмэлт_талбарууд && нэмэлт_талбарууд.length >0 ) && нэмэлт_талбарууд.map((item, index) =>
                                             <th key={index}>{item.title}</th>
                                         )}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    { уншиж_байгаа_эсэх ?
-                                        <Loader is_loading={уншиж_байгаа_эсэх} text={уншиж_байх_үед_зурвас}/>
-                                        :
+                                    { !уншиж_байгаа_эсэх &&
                                         (items_length === 0 ?
                                             <tr><td>{хоосон_байх_үед_зурвас}</td></tr>:
                                             items.map((login, idx) =>
@@ -170,7 +189,6 @@ export class PortalDataTable extends Component {
                                     }
                                 </tbody>
                             </table>
-                            <Loader is_loading={уншиж_байгаа_эсэх}/>
                         </div>
                         <Pagination
                             refresh={this.state.refresh}
@@ -181,6 +199,7 @@ export class PortalDataTable extends Component {
                             sort_name={this.state.sort_name}
                             per_page={per_page}
                             color={color}
+                            is_user={is_user}
                         />
                     </div>
                 </div>

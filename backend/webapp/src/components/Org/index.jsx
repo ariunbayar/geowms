@@ -6,7 +6,7 @@ import {OrgAdd} from './OrgAdd'
 import {OrgMenu} from './OrgMenu'
 
 
-export class Org extends Component {
+export default class Org extends Component {
 
     constructor(props) {
         super(props)
@@ -16,7 +16,6 @@ export class Org extends Component {
         this.state = {
             user_count: 0,
         }
-
     }
 
     componentDidMount() {
@@ -33,8 +32,6 @@ export class Org extends Component {
 
 
     render() {
-        const { user_count } = this.state;
-        const org_level = this.props.match.params.level
         return (
             <div className="card">
                 <div className="card-body row">

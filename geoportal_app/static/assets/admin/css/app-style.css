@@ -392,6 +392,7 @@ hr {
     font-size: 23px;
     z-index: 1001;
     transition: all 0.3s ease; 
+    background-color: white;
 }
 .geo-back-btn i:hover{
     color: #034ea2;
@@ -4648,30 +4649,6 @@ table.grid td {
     border-bottom-left-radius: .25rem;
 }
 
-
-.footer {
-  bottom: 0px;
-  color: #272727;
-  text-align: center;
-  padding: 12px 30px;
-  position: absolute;
-  right: 0;
-  left: 280px;
-  background-color: #f9f9f9;
-  border-top: 1px solid rgb(223, 223, 255);
-  -webkit-transition: all 0.3s ease;
-  -moz-transition: all 0.3s ease;
-  -o-transition: all 0.3s ease;
-  transition: all 0.3s ease; 
-}
-#wrapper.toggled .footer{
-    position: absolute;
-    left: 0px;
-}
-#wrapper-map.toggled .footer{
-    position: absolute;
-    left: 0px;
-}
 .back-to-top {
   display: none;
   width: 40px;
@@ -5002,10 +4979,7 @@ table.grid td {
     padding-left: 5px;
     padding-right: 5px;
 }
-.footer {
-  position: absolute;
-  left: 0px;
-}
+
 
 #wrapper.toggled #sidebar-wrapper {
     position: fixed;
@@ -5054,10 +5028,6 @@ table.grid td {
 	
 }
 
-#wrapper.toggled .footer{
-    position: absolute;
-    left: 0px;
-}
 #wrapper-map.toggled .menu-icon{
 	margin-left: 0px;
 }
@@ -5067,10 +5037,6 @@ table.grid td {
 	
 }
 
-#wrapper-map.toggled .footer{
-    position: absolute;
-    left: 0px;
-}
 .hidden-xs {
     display: none!important;
 }
@@ -5133,7 +5099,6 @@ table.grid td {
 
 }
 
-
-
-
-
+.navbar-dark .navbar-nav .nav-link {
+    color: white!important;
+}

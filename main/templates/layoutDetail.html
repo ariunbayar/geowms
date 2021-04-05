@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.theme.default.min.css" %}">
   <link rel="stylesheet" href="{% static "assets/bootstrap/css/animate.min.css" %}">
   <link href="{% static "assets/bootstrap/css/font-awesome.min.css" %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static "assets/admin/css/app-style.css" %}">
 </head>
 <style type="text/css">
   body {
@@ -24,6 +25,9 @@
     <div class="container">
       <div class="ml-auto mt-2 mt-lg-0">
         {% if user.is_authenticated %}
+          {% if user and not user.is_sso %}
+            <a href="{% url "org:frontend" %}" class=" btn gp-btn-primary">Байгууллага</a>
+          {% endif %}
           {% if user.is_superuser %}
           <span class="btn gp-btn-primary">
               Нэвтэрсэн хэрэглэгч: {{user.username}}
@@ -36,7 +40,7 @@
           {% endif %}
           <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
         {% else %}
-        <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
+          <a href="{% url "secure:login" %}" class="btn gp-btn-primary">УДИРДАГЧИЙН НЭВТРЭХ ХЭСЭГ</a>
         {% endif %}
       </div>
     </div>
@@ -60,13 +64,13 @@
       <div class="col-md-4 align-self-center">
         <div class="login-reg float-right">
           <div class="ml-auto mt-2 mt-lg-0">
-            {% if user.is_authenticated and user.is_superuser%}
-            {% if not user.is_superuser %}
-            <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
-            {% endif %}
-            {% else %}
-            <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
-            <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
+            {% if user.is_authenticated and user %}
+              {% if not user %}
+                <a href="{% url "secure:logout" %}" class="btn gp-btn-primary">ГАРАХ</a>
+              {% endif %}
+              {% else %}
+                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">БҮРТГҮҮЛЭХ</a>
+                <a href="{% url "secure:loginUser" %}" class="btn gp-btn-primary">НЭВТРЭХ</a>
             {% endif %}
           </div>
           {#              <a href="" class="btn gp-outline-primary"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a>#}
@@ -91,25 +95,18 @@
       <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
         {% with request.resolver_match.url_name as url_name %}
         <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="/covid/">КОВИД-19</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/open-layer/">Нээлттэй өгөгдөл</a>
-          </li>
+          <!-- <li class="nav-item">
+            <a class="nav-link" href="/covid_dashboard/">КОВИД-19</a>
+          </li> -->
+          <!-- <li class="nav-item"> -->
+            <!-- <a class="nav-link" href="/open-layer/">Нээлттэй өгөгдөл</a> -->
+          <!-- </li> -->
           <li class="nav-item {% if url_name == "page:service" %}active{% endif %}">
             <a class="nav-link" href="{% url "page:service" %}">ҮЙЛЧИЛГЭЭ</a>
-          </li>
-          <li class="nav-item {% if url_name == "meta-data" %}active{% endif %}">
-            <a class="nav-link" href="http://192.168.10.95:8080/geonetwork/srv/mon/catalog.search#/home">МЕТА ДАТА</a>
           </li>
           <li class="nav-item {% if url_name == "page:help" %}active{% endif %}">
             <a class="nav-link" href="{% url "page:help" %}">ТУСЛАМЖ</a>
           </li>
-          <li class="nav-item {% if url_name == "page:statistics" %}active{% endif %}">
-            <a class="nav-link" href="{% url "page:statistics" %}">СТАТИСТИК</a>
-          </li>
-
           {% if user.is_authenticated and user.is_superuser %}
           <li class="nav-item">
             <a class="nav-link" href="{% url "backend:webapp" %}"><i class="fa fa-cog"></i> УДИРДАГЧИЙН ХЭСЭГ</i></a>

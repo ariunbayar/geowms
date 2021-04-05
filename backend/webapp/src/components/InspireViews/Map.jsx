@@ -211,8 +211,9 @@ export default class StyleMap extends Component {
 
         if(style_state == 'create_style'){
             this.setState({is_loading: true})
+            console.log("goem_type", geom_type)
             service.getStyleData(geom_type).then(({data}) =>
-                {
+                {console.log("data",data)
                 if (data)
                 {
                         const features = new GeoJSON({
@@ -228,6 +229,7 @@ export default class StyleMap extends Component {
                             return styles_new[feature.getGeometry().getType()];
                           }
                         })
+
                         this.map.addLayer(vector_layer)
                         this.map.getView().fit(vectorSource.getExtent(),{ padding: [200, 200, 200, 200] });
                         this.setState({is_loading: false})
@@ -239,8 +241,8 @@ export default class StyleMap extends Component {
     render() {
         return (
             <div className="row">
-                <div className="col-md-12 px-0">
-                    <div id="map"></div>
+                <div className="col-md-12 m-1 h-100 w-100">
+                    <div id="map" style={{height:"calc( 49vh - 34px - 7px)"}}></div>
                 </div>
                 {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>

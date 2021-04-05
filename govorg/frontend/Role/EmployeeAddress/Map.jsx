@@ -51,6 +51,8 @@ export default class AddressMap extends Component {
 
     componentDidUpdate(pP, pS) {
         if (pP.features !== this.props.features) {
+            const source = this.vector_layer.getSource()
+            source.clear()
             this.readFeatures(this.props.features)
         }
         if (pP.feature !== this.props.feature) {
@@ -131,10 +133,14 @@ export default class AddressMap extends Component {
         return fields
     }
 
-    getEmpInfo(id) {
+    getEmpInfo(id, is_erguul) {
+        if (!is_erguul) {
+            is_erguul = false
+        }
+
         service
-            .getEmpInfo(id)
-            .then(({ success, info }) => {
+            .getEmpInfo(id, is_erguul)
+            .then(({ success, info, title }) => {
                 if (success) {
                     let conv = [
                         {
@@ -166,11 +172,34 @@ export default class AddressMap extends Component {
                             'name': 'Нэр',
                             'disabled': true,
                             'length': 100,
-                        }
+                        },
+                        {
+                            'origin_name': 'date_start',
+                            'name': 'Эхлэх огноо',
+                            'disabled': true,
+                            'length': 100,
+                        },
+                        {
+                            'origin_name': 'date_end',
+                            'name': 'Дуусах огноо',
+                            'disabled': true,
+                            'length': 100,
+                        },
+                        {
+                            'origin_name': 'part_time',
+                            'name': 'Ээлж',
+                            'disabled': true,
+                            'length': 100,
+                        },
+                        {
+                            'origin_name': 'erguul_address',
+                            'name': 'Эргүүлийн хаяг',
+                            'disabled': true,
+                            'length': 100,
+                        },
                     ]
                     const fields = this.makeFields(info, conv)
-                    const title = 'Ажилтны мэдээлэл'
-                    this.controls.form.showForm(true, fields, title, undefined, true)
+                    this.controls.form.showForm(true, fields, title, undefined, '', true)
                 }
             })
     }
@@ -228,7 +257,7 @@ export default class AddressMap extends Component {
                 if (properties.is_cloned) {
                     this.translate.setActive(false)
                 }
-                this.getEmpInfo(id)
+                this.getEmpInfo(id, properties.is_erguul)
             }
             else {
                 this.select.getFeatures().clear();
@@ -286,11 +315,15 @@ export default class AddressMap extends Component {
 
         this.changedFeatureSetColor()
         service
-            .getErguulegFields()
-            .then(({ success, info }) => {
+            .getErguulegFields(id)
+            .then(({ success, info, erguul_id }) => {
                 const title = 'Эргүүлд гарах байршил'
                 this.makeLineString([feature], 'one')
-                this.controls.form.showForm(success, info, title, (val) => this.sendErguuleg(val, this.id, coordinate_clicked))
+                let button_name = 'Хадгалах'
+                if (erguul_id) {
+                    button_name = 'Засах'
+                }
+                this.controls.form.showForm(success, info, title, (val) => this.sendErguuleg(val, this.id, coordinate_clicked, erguul_id), button_name)
             })
     }
 
@@ -363,7 +396,7 @@ export default class AddressMap extends Component {
         }
     }
 
-    downloadImage(val, id, coordinate_clicked) {
+    downloadImage(val, emp_id, coordinate_clicked, erguul_id) {
         const map = this.map
         let photo
         this.props.setLoading(true)
@@ -400,14 +433,14 @@ export default class AddressMap extends Component {
             } else {
                 photo = mapCanvas.toDataURL()
             }
-            this.props.saveErguulPlace(val, id, coordinate_clicked, photo)
+            this.props.saveErguulPlace(val, emp_id, coordinate_clicked, photo, erguul_id)
         });
     }
 
-    sendErguuleg(val, id, coordinate_clicked) {
+    sendErguuleg(val, emp_id, coordinate_clicked, erguul_id) {
         const extent = this.extent
         this.map.getView().fit(extent,{ padding: [200, 200, 200, 200] })
-        this.downloadImage(val, id, coordinate_clicked)
+        this.downloadImage(val, emp_id, coordinate_clicked, erguul_id)
     }
 
     removeFeatureFromSource(featureID, state='') {

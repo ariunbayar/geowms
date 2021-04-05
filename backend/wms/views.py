@@ -25,6 +25,7 @@ def _get_wms_display(request, wms):
         'id': wms.id,
         'name': wms.name,
         'url': wms.url,
+        'wmts_url': wms.cache_url if wms.cache_url else '',
         'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
         'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
@@ -186,9 +187,11 @@ def layerRemove(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def create(request, payload):
 
+    wmst_url = payload.get('wmts_url') or ''
     form = WMSForm(payload)
     if form.is_valid():
         form.instance.created_by = request.user
+        form.instance.cache_url = wmst_url
         form.save()
         return JsonResponse({
             'wms': _get_wms_display(request, form.instance),
@@ -208,6 +211,12 @@ def update(request, payload):
     form = WMSForm(payload, instance=wms)
     is_active = payload.get('is_active')
     url_service = payload.get('url')
+    wmts_url = payload.get('wmts_url')
+
+    if wms:
+        wms.cache_url = wmts_url or None
+        wms.save()
+
     if is_active:
         wms.is_active=True
     else:

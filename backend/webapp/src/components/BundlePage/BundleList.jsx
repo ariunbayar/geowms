@@ -13,12 +13,17 @@ export class BundleList extends Component {
             bundle_list: [],
             modal_alert_status: "closed",
             timer: null,
+            firt_item: {},
+            firt_item_idx: null,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.handleMove = this.handleMove.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.onDrag = this.onDrag.bind(this)
+        this.onDrop = this.onDrop.bind(this)
+        this.onDragOver = this.onDragOver.bind(this)
+        this.handleSwap = this.handleSwap.bind(this)
     }
 
     componentDidMount() {
@@ -42,13 +47,6 @@ export class BundleList extends Component {
         this.modalCloseTime()
     }
 
-    handleMove(event, id, direction) {
-        event.preventDefault()
-        service.move(id, direction).then(({bundle_list, success}) => {
-            if (success) this.setState({bundle_list})
-        })
-    }
-
     modalClose(){
         const org_level = this.props.match.params.level
         this.setState({handleSaveIsLoad:false})
@@ -66,12 +64,37 @@ export class BundleList extends Component {
         }, 2000)
     }
 
+    onDrag(event, item, idx){
+        event.preventDefault();
+        this.setState({
+            firt_item: item,
+            firt_item_idx: idx
+        });
+    }
+
+    onDragOver(event, todo, idx){
+        event.preventDefault();
+    }
+
+    onDrop(event, item, idx){
+        event.preventDefault();
+        const {bundle_list, firt_item, firt_item_idx} = this.state
+        let array = bundle_list
+        array[idx] = firt_item
+        array[firt_item_idx] = item
+        this.handleSwap(firt_item.id, item.id)
+        this.setState({bundle_list: array})
+    }
+
+    handleSwap(swap_one, swap_two) {
+        service.swap(swap_one, swap_two)
+    }
+
     render() {
         return (
             <div className="card">
                 <div className="card-body">
                     <div className="row">
-
                         <div className="col-md-12">
                             <div className="table-responsive table_wrapper">
                             <table className="table table_wrapper_table">
@@ -80,10 +103,6 @@ export class BundleList extends Component {
                                         <th scope="col"> # </th>
                                         <th scope="col"> Сангийн нэр </th>
                                         <th scope="col"> WMS сервис </th>
-                                        <th scope="col"></th>
-                                        <th scope="col"></th>
-                                        <th scope="col"></th>
-                                        <th scope="col"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -93,7 +112,9 @@ export class BundleList extends Component {
                                             idx={idx}
                                             values={values}
                                             handleRemove={() => this.handleRemove(values.id)}
-                                            handleMove={this.handleMove}
+                                            onDrag={this.onDrag}
+                                            onDragOver={this.onDragOver}
+                                            onDrop={this.onDrop}
                                         />
                                     )}
                                 </tbody>

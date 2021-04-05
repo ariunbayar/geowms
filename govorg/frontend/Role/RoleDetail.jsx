@@ -1,8 +1,7 @@
 import React, { Component } from "react"
-import { NavLink } from "react-router-dom"
 import { service } from "./Role/service"
-// import ModalAlert from "../ModalAlert";
 import InsPerms from './Role/GovPerms'
+import BackButton from "@utils/Button/BackButton"
 
 
 export class RoleDetail extends Component {
@@ -69,13 +68,7 @@ export class RoleDetail extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="text-left">
-                            <NavLink to={`/gov/perm/role`}>
-                                <p className="btn gp-outline-primary">
-                                    <i className="fa fa-angle-double-left"></i> Буцах
-                                </p>
-                            </NavLink>
-                        </div>
+                    <BackButton {...this.props} name={'Буцах'} navlink_url={'/gov/perm/role'}></BackButton>
                     <div className="row">
 
                         <div className="form-group col-md-12">

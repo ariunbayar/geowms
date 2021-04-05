@@ -1,26 +1,34 @@
-import React, { Component } from 'react'
+import React, { Component, Suspense } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
-import { System } from "./System"
-import { Meta } from './Meta'
-import { RevokeRequest } from './RevokeRequest'
-import { Password } from './User/Password'
-import { Profile } from './User/Profile'
-import InsPerms from './Role/Role/GovPerms'
-import Gov from './Role/Gov/index'
-import { Employee } from './Role/Employee'
-import { Region } from './Role/Region'
-import Bundles from './Bundles/Inspire'
-import { TuuhenOv } from './Bundles/TuuhenOv'
-import { Forms } from './Bundles/Form'
-import { ZipCode } from './Bundles/Zipcode'
-import OrgRequest from './OrgRequest'
-import ChangeRequest from './Bundles/Inspire/ChangeRequest'
-import {Addresses} from './Role/EmployeeAddress'
-
-import { Help } from './Help'
 import { service } from "./service"
 import MenuItem from "@utils/MenuItem"
-import { Role } from './Role';
+import SuspenseLoader from "@utils/Loader/SuspenseLoader"
+// import CovidConfigs from './Help/CovidConfigs';
+
+const InsPerms  = React.lazy(() => import('./Role/Role/GovPerms'));
+const Gov  = React.lazy(() => import('./Role/Gov/index'));
+const OrgRequest  = React.lazy(() => import('./OrgRequest'));
+const ChangeRequest  = React.lazy(() => import('./Bundles/Inspire/ChangeRequest'));
+const Bundles  = React.lazy(() => import('./Bundles/Inspire'));
+
+const System = React.lazy(() => import("./System"));
+const Meta = React.lazy(() => import('./Meta'));
+const RevokeRequest = React.lazy(() => import('./RevokeRequest'));
+const Password = React.lazy(() => import('./User/Password'));
+const Profile = React.lazy(() => import('./User/Profile'));
+const Employee = React.lazy(() => import('./Role/Employee'));
+const MapRegion = React.lazy(() => import('./Role/Region'));
+const TuuhenOv = React.lazy(() => import('./Bundles/TuuhenOv'));
+const Forms = React.lazy(() => import('./Bundles/Form'));
+const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
+const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
+const Help = React.lazy(() => import('./Help'));
+const Role = React.lazy(() => import('./Role'));
+// const Nema = React.lazy(() => import('./Nema'));
+// const CovidConfig = React.lazy(() => import('./Help/CovidConfigs'));
+// const CovidDashboardConfig = React.lazy(() => import('./Covid'))
+
+const Tseg = React.lazy(() => import('./Bundles/TsegPersonal'));
 
 export class App extends Component {
 
@@ -33,18 +41,27 @@ export class App extends Component {
             emp_role: {},
             approve: false,
             revoke: false,
+            base_layer_list: []
         }
         this.requestCount = this.requestCount.bind(this)
         this.getEmpRoles = this.getEmpRoles.bind(this)
         this.getApproveAndRevoke = this.getApproveAndRevoke.bind(this)
+        this.getBaseLayer = this.getBaseLayer.bind(this)
     }
 
     componentDidMount() {
         Promise.all([
             this.requestCount(),
             this.getEmpRoles(),
-            this.getApproveAndRevoke()
+            this.getApproveAndRevoke(),
+            this.getBaseLayer()
         ])
+    }
+
+    getBaseLayer(){
+        service.loadBaseLayers().then(({base_layer_list}) => {
+            this.setState({base_layer_list})
+        })
     }
 
     requestCount() {
@@ -74,8 +91,10 @@ export class App extends Component {
     }
 
     render() {
-        const { org_role, employee } = this.props.org
-        const { emp_role , approve, revoke } = this.state
+        const { org_role, employee, allowed_geom } = this.props.org
+        // const { obeg_employee, covid_configs, covid_dashboard } = this.props.org
+        const { emp_role , approve, revoke, base_layer_list } = this.state
+        var point_perms = emp_role.point_perms
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -102,6 +121,15 @@ export class App extends Component {
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-assistive-listening-systems" url="/gov/meta/" text="Мета"></MenuItem>
+                        {/* {
+                            obeg_employee &&
+                            <MenuItem icon="gp-text-primary fa fa-star-o" url="/gov/nema/" text="Covid">
+                                <ul className="sidebar-submenu">
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/list/" text="Бүртгэл"></MenuItem>
+                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/nema/map/" text="Газрын зураг"></MenuItem>
+                                </ul>
+                            </MenuItem>
+                        } */}
                         { revoke &&
                             <MenuItem
                                 icon="gp-text-primary fa fa-times-circle"
@@ -122,20 +150,34 @@ export class App extends Component {
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
-                                <MenuItem
-                                    icon="gp-text-primary fa fa-circle-o"
-                                    url="/gov/froms/tseg-info/tsegpersonal/"
-                                    text="Цэгийн мэдээлэл"
-                                >
+                                {
+                                    point_perms &&  point_perms.PERM_VIEW &&
+                                    <MenuItem
+                                        icon="gp-text-primary fa fa-circle-o"
+                                        url="/gov/froms/tseg-info/tsegpersonal/"
+                                        text="Цэгийн мэдээлэл"
+                                    >
                                     <ul className="sidebar-submenu">
-                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
-                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/froms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-personal/" text="Шинэ цэг"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/tseg-ustsan/" text="Цэг устгах"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/forms/tseg-info/tsegpersonal/inspire-tseg/" text="Цэгийн жагсаалт"></MenuItem>
                                     </ul>
                                 </MenuItem>
+                                }
+                                {/* <MenuItem
+                                    icon="gp-text-primary fa fa-circle-o"
+                                    url="/gov/tseg-personal/"
+                                    text="Шинэчилж байгаа Цэгийн мэдээлэл"
+                                >
+                                    <ul className="sidebar-submenu">
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tseg-personal/list/" text="Шинэ цэг"></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tseg-personal/tseg-ustsan/list/" text="Цэг устгах"></MenuItem>
+                                    </ul>
+                                </MenuItem> */}
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
 
                                     {
-                                       Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
+                                    Object.keys(emp_role).length >0  && Object.keys(emp_role.themes).length >0 ? emp_role.themes.map((theme, idx)=>
                                         <MenuItem
                                             key={idx}
                                             icon="gp-text-primary fa fa-circle-o"
@@ -179,37 +221,66 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                             </ul>
                         </MenuItem>
+                        {/* {
+                            employee.is_admin && covid_configs.length > 0
+                            &&
+                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-config/" text="Covid Тохиргоо"></MenuItem>
+                        }
+                        {
+                            covid_dashboard.length > 0
+                            &&
+                                <MenuItem icon="gp-text-primary fa fa-medkit" url="/gov/covid-dashboard-config/" text="Covid Dashboard"></MenuItem>
+                        } */}
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/help/" text="Тусламж"></MenuItem>
                     </ul>
                 </div>
 
                 <div className="clearfix">
                     <div className="content-wrapper">
-                        <Switch>
-                            <Route path={"/gov/froms/"} component={Forms} />
-                            <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
-                            <Route path="/gov/system/" component={System} />
-                            <Route path="/gov/revoke-request/" component={RevokeRequest} />
-                            <Route path="/gov/meta/" component={Meta} />
+                        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачаалж байна."}/>}>
+                            <Switch>
+                                <Route path={"/gov/forms/"} component={Forms} />
+                                <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
 
-                            <Route path="/gov/perm/region/" component={Region} />
-                            <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
-                            <Route path="/gov/role/role/" component={Role} />
-                            <Route path="/gov/org/map/:tid/:pid/:fid/" component={(props) => <Bundles {...props} employee={employee} refreshCount={() => this.requestCount()} />} />
+                                <Route path={"/gov/tseg-personal/"} component={Tseg} />
 
-                            <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
-                            <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
+                                <Route path="/gov/system/" component={System} />
+                                <Route path="/gov/revoke-request/" component={RevokeRequest} />
+                                <Route path="/gov/meta/" component={Meta} />
 
-                            <Route path="/gov/zip-code/" component={ZipCode} />
-                            <Route path="/gov/org-request/" component={OrgRequest} />
-                            <Route path="/gov/history/" component={ChangeRequest} />
-                            <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
-                            <Route exact path="/gov/perm/org/" component={Gov} />
-                            <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} employee={employee} getEmpRoles={this.getEmpRoles}/>}/>
-                            <Route exact path="/gov/help/" component={Help} />
-                            <Route exact path="/gov/profile/" component={Profile} />
-                            <Route exact path="/gov/profile/password/" component={Password} />
-                        </Switch>
+                                <Route path="/gov/perm/region/" component={MapRegion} />
+                                <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
+                                <Route path="/gov/role/role/" component={Role} />
+                                <Route
+                                    path="/gov/org/map/:tid/:pid/:fid/"
+                                    component=
+                                        {
+                                            (props) => <Bundles {...props}
+                                            base_layer_list={base_layer_list}
+                                            employee={employee} refreshCount={() => this.requestCount()}
+                                            org_geom = {allowed_geom}
+                                        />
+                                        }
+                                    />
+
+                                <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
+                                <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
+
+                                <Route path="/gov/zip-code/" component={ZipCode} />
+                                <Route path="/gov/org-request/" component={OrgRequest} />
+                                <Route path="/gov/history/" component={ChangeRequest} />
+                                <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                                <Route exact path="/gov/perm/org/" component={Gov} />
+                                <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} employee={employee} getEmpRoles={this.getEmpRoles}/>}/>
+                                <Route exact path="/gov/help/" component={Help} />
+                                <Route exact path="/gov/profile/" component={Profile} />
+                                <Route exact path="/gov/profile/password/" component={Password} />
+
+                                {/* <Route path="/gov/nema/" component={(props) => <Nema {...props} employee={employee}/>}/>
+                                <Route path="/gov/covid-config/" component={(props) => <CovidConfig {...props} covid_configs={covid_configs}/>} />
+                                <Route path="/gov/covid-dashboard-config/" component={(props) => <CovidDashboardConfig {...props} covid_dashboard={covid_dashboard}/>} /> */}
+                            </Switch>
+                        </Suspense>
                     </div>
                 </div>
             </BrowserRouter>

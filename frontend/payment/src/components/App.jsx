@@ -18,7 +18,7 @@ export class App extends Component {
                 <Route path={"/payment/failed/:id/"} component={Failed} />
                 <Route path={"/payment/history/api/details/:id/"} component={Details} />
                 <Route path="/payment/history/" component={History}/>
-                <Route path="/payment/test/" component={Test}/>
+                {/* <Route path="/payment/test/" component={Test}/> */}
               </Switch>
           </BrowserRouter>
         )

@@ -10,7 +10,6 @@ export const service = {
     employeeUpdate,
     empTokenRefresh,
     sistemCount,
-    employee_list,
     orgList,
     orgAll,
     getBaseLayers,
@@ -20,6 +19,7 @@ export const service = {
     getEmpInfo,
     getErguulegFields,
     saveErguul,
+    getSelectValue,
 }
 
 
@@ -106,14 +106,6 @@ function orgAll(level, id) {
     return fetch(`/back/api/org/level-${level}/${id}/`, requestOptions).then(handleResponse)
 }
 
-function employee_list(page, perpage, query, level, org_id) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({page, perpage, query, level, org_id}),
-    }
-    return fetch(`${prefix}/level-${level}/${org_id}/employeeList/`, requestOptions).then(handleResponse)
-}
-
 function formOptions(option) {
     const opts = getGetOptions()
     return fetch(`/back/api/org/form-options/${option}/`, opts).then(handleResponse)
@@ -137,20 +129,30 @@ function getAddresses(level, id) {
     return fetch(`${prefix}/${level}/${id}/addresses/`, opts).then(handleResponse)
 }
 
-function getEmpInfo(id) {
-    const opts = getGetOptions()
-    return fetch(`${prefix}/${id}/emp-info/`, opts).then(handleResponse)
-}
-
-function getErguulegFields() {
-    const opts = getGetOptions()
-    return fetch(`${prefix}/erguuleg-fields/`, opts).then(handleResponse)
-}
-
-function saveErguul(values, id, point, photo) {
+function getEmpInfo(id, is_erguul) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ values, id, point, photo }),
+        body: JSON.stringify({ is_erguul }),
+    }
+    return fetch(`${prefix}/${id}/emp-info/`, requestOptions).then(handleResponse)
+}
+
+function getErguulegFields(id) {
+    const opts = getGetOptions()
+    return fetch(`${prefix}/${id}/erguuleg-fields/`, opts).then(handleResponse)
+}
+
+function saveErguul(values, emp_id, point, photo, erguul_id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ values, emp_id, point, photo, erguul_id }),
     }
     return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
+}
+
+function getSelectValue() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/get-select-values/`, requestOptions).then(handleResponse)
 }

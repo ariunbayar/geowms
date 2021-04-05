@@ -1,119 +1,106 @@
 import React, { Component } from "react"
-import { Map, View } from 'ol'
-import {defaults as defaultControls, ScaleLine} from 'ol/control'
-import GeoJSON from 'ol/format/GeoJSON';
-import { Vector as VectorLayer } from 'ol/layer'
-import { Vector as VectorSource } from 'ol/source'
-import { Style, Stroke, Fill } from 'ol/style'
+import 'ol/ol.css';
+import Map from 'ol/Map';
+import TileLayer from 'ol/layer/Tile';
 import Tile from 'ol/layer/Tile'
-import TileImage from 'ol/source/TileImage'
-
-import 'ol/ol.css'
-
-import { service } from '../service'
+import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
+import View from 'ol/View';
+import GeoJSON from 'ol/format/GeoJSON';
+import {Fill, Stroke, Style, Circle as CircleStyle, RegularShape, Image} from 'ol/style';
+import {Vector as VectorLayer} from 'ol/layer';
 
 
 export default class MapAllowedGeom extends Component {
-
     constructor(props) {
         super(props)
-
         this.state = {
-            projection: 'EPSG:3857',
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857',
+            geom: props.geom
         }
-
-        this.mapRef = React.createRef()
-
+        this.loadMapData = this.loadMapData.bind(this)
         this.loadMap = this.loadMap.bind(this)
-
-        this.base_layer = null
-        this.setBaseLayer = this.setBaseLayer.bind(this)
+        this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
     }
 
     componentDidMount() {
         this.loadMap()
-        service
-            .getBaseLayers()
-            .then(({ base_layer_list }) => {
-                for (const { url, tilename} of base_layer_list) {
-                    if (tilename == 'xyz') {
-                        this.setBaseLayer(url)
-                        break
-                    }
-                }
-            })
+        this.loadMapData()
     }
 
-    setBaseLayer(url) {
-        this.base_layer.setSource(
-            new TileImage({
-                crossOrigin: 'Anonymous',
-                url: url,
-            }),
-        )
+    componentDidUpdate(pP, pS){
+        if(pP.geom !=this.props.geom){
+            this.loadMapData()
+        }
     }
 
-    loadMap() {
-
-        const base_layer = new Tile()
-
+    loadMap(){
         const vector_layer = new VectorLayer({
+            source: new VectorSource({}),
             style: new Style({
                 stroke: new Stroke({
-                    color: 'rgba(0, 108, 182, 1)',
-                    width: 3
+                    color: 'rgba(100, 255, 0, 1)',
+                    width: 2
                 }),
                 fill: new Fill({
-                    color: 'rgba(0, 108, 182, 0.2)'
+                    color: 'rgba(100, 255, 0, 0.3)'
                 })
-            })
+            }),
         })
 
-        const map_controls = defaultControls().extend([
-            new ScaleLine(),
-        ])
-
-        const view = new View({
-            projection: this.state.projection,
-            center: [11461613.630815497, 5878656.0228370065],
-            zoom: 5.041301562246971,
-        })
+        this.vector_layer = vector_layer
 
         const map = new Map({
-            target: this.mapRef.current,
-            controls: map_controls,
-            layers: [base_layer, vector_layer],
-            view: view,
-        })
+          layers: [
+              new TileLayer({
+                source: new OSM(),
+              }),
+              vector_layer
+          ],
+          target: 'map',
+          view: new View({
+              center: [11461613.630815497, 5878656.0228370065],
+              zoom: 5.041301562246971,
+          }),
+        });
+        this.map = map
+      }
 
-        const { geom } = this.props
-        if (geom) {
-
-            const features = new GeoJSON({
-                dataProjection: 'EPSG:4326',
-                featureProjection: this.state.projection,
-            }).readFeatures(geom)
-
-            vector_layer.setSource(
-                new VectorSource({ features: features })
-            )
-
-            map.getView().fit(
-                features[0].getGeometry(),
-                { padding: [25, 25, 25, 25] }
-            )
+      removeFeatureFromSource(featureID) {
+        const source = this.vector_layer.getSource()
+        const features = source.getFeatures();
+        if (features != null && features.length > 0) {
+            for (var i = 0; i < features.length; i++) {
+                const properties = features[i].getProperties();
+                const id = properties.id;
+                if (id == featureID) {
+                    source.removeFeature(features[i]);
+                    break;
+                }
+            }
         }
+    }
 
-        this.base_layer = base_layer
+    loadMapData(){
+        var {dataProjection, featureProjection} = this.state
+        var {geom } = this.props
+        const id = 'aimag_sum'
+        this.removeFeatureFromSource(id)
+        var feature =  new GeoJSON().readFeatures(geom, {
+            dataProjection: dataProjection,
+            featureProjection: featureProjection,
+        });
+        feature[0].setProperties({ id })
+        this.vector_layer.getSource().addFeature(feature[0])
+        this.map.getView().fit(feature[0].getGeometry(),{ padding: [25, 25, 25, 25]})
     }
 
     render() {
         return (
             <div className="🌍">
-                <h5>Хамрах хүрээ:</h5>
-                <div id="map" ref={ this.mapRef }></div>
-            </div>
+            <h5>Хамрах хүрээ:</h5><br/>
+            <div id="map" style={{ height: 'calc( 50vh - 85px - 15px)'}}></div>
+        </div>
         )
     }
-
 }

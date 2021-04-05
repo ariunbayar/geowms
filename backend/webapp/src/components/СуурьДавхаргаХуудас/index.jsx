@@ -8,7 +8,7 @@ import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
 import './style.css'
 
 
-export class СуурьДавхаргаХуудас extends Component {
+export default class СуурьДавхаргаХуудас extends Component {
 
     constructor(props) {
         super(props)

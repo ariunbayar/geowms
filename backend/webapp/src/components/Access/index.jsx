@@ -7,7 +7,7 @@ import {PageLog} from './PageLog/PageLog'
 import WMSLog from './WMSLog/WMSLog'
 
 
-export class Access extends Component {
+export default class Access extends Component {
 
     constructor(props) {
         super(props)

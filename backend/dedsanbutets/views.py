@@ -56,6 +56,7 @@ def _check_gp_design():
     ds_name = ws_name
     table_name = 'geoserver_desing_view'
     design_space = geoserver.getWorkspace(ws_name)
+    _create_design_view()
     if design_space.status_code == 404:
         geoserver.create_space(ws_name)
 
@@ -66,7 +67,6 @@ def _check_gp_design():
             ds_name,
             ds_name,
         )
-        _create_design_view()
 
     layer_name = 'gp_layer_' + table_name
     check_layer = geoserver.getDataStoreLayer(
@@ -90,7 +90,8 @@ def _check_gp_design():
                         table_name,
                         srs,
                         geom_att,
-                        extends
+                        extends,
+                        False
         )
 
 @require_GET
@@ -745,79 +746,91 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     style_state = values.get('style_state')
     tile_cache_check = values.get('tile_cache_check')
     cache_details = values.get('cache_values')
+    geom_type = values.get('geom_type')
     layer_title = feature.feature_name
 
-    if check_layer.status_code == 200:
-        geoserver.deleteLayerName(ws_name, ds_name, layer_name)
+    if check_layer.status_code != 200:
+        layer_create = geoserver.create_layer(
+                            ws_name,
+                            ds_name,
+                            layer_name,
+                            layer_title,
+                            table_name,
+                            srs,
+                            geom_att,
+                            extends,
+                            False
+        )
 
-    layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends
-    )
+    else:
+        layer_create = geoserver.create_layer(
+                            ws_name,
+                            ds_name,
+                            layer_name,
+                            layer_title,
+                            table_name,
+                            srs,
+                            geom_att,
+                            extends,
+                            True
+        )
 
-    if layer_create.status_code == 201:
-        cache_values = values.get('cache_values')
-        if style_state == 'create_style':
-            style_name = values.get('style_name')
-            if not style_name:
-                return {
-                    'success': False,
-                    'info': 'Style-ийн нэр хоосон байна'
-                }
-            check_style_name = geoserver.check_geoserver_style(style_name)
-            if check_style_name.status_code == 200:
-                return {
-                    'success': False,
-                    'info': 'Style-ийн нэр давхцаж байна'
-                }
-            else:
-                geoserver.create_style(values)
+    if layer_create.status_code == 201 or layer_create.status_code == 200:
+        if geom_type:
+            cache_values = values.get('cache_values')
+            if style_state == 'create_style':
+                style_name = values.get('style_name')
+                if not style_name:
+                    return {
+                        'success': False,
+                        'info': 'Style-ийн нэр хоосон байна'
+                    }
+                check_style_name = geoserver.check_geoserver_style(style_name)
+                if check_style_name.status_code == 200:
+                    return {
+                        'success': False,
+                        'info': 'Style-ийн нэр давхцаж байна'
+                    }
+                else:
+                    geoserver.create_style(values)
+            geoserver.update_layer_style(layer_name, style_name)
+            if tile_cache_check:
+                cache_type = cache_details.get('cache_type')
+                zoom_stop = cache_details.get('zoom_stop')
+                zoom_start = cache_details.get('zoom_start')
+                image_format = cache_details.get('image_format')
+                number_of_cache = cache_details.get('number_of_cache')
+                if int(zoom_start) >21 or int(zoom_stop)>21 or int(number_of_cache)>100:
+                    return {
+                        'success': False,
+                        'info': 'TileCache-ийн max утга хэтэрсэн байна'
+                    }
+                feature_id = feature.feature_id
+                cache_layer = geoserver.create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache)
+                wmts_url = ''
+                if cache_layer.status_code == 200:
+                    cache_field = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+                    if cache_field:
+                        WmtsCacheConfig.objects.filter(id=cache_field.id).update(
+                            img_format=image_format,
+                            zoom_start=zoom_start,
+                            zoom_stop=zoom_stop,
+                            type_of_operation=cache_type,
+                            number_of_tasks_to_use=number_of_cache
+                        )
+                    else:
+                        WmtsCacheConfig.objects.create(
+                            feature_id=feature_id,
+                            img_format=image_format,
+                            zoom_start=zoom_start,
+                            zoom_stop=zoom_stop,
+                            type_of_operation=cache_type,
+                            number_of_tasks_to_use=number_of_cache
+                        )
 
-        geoserver.update_layer_style(layer_name, style_name)
-        zoom_stop = cache_details.get('zoom_stop')
-        zoom_start = cache_details.get('zoom_start')
-        image_format = cache_details.get('image_format')
-        number_of_cache = cache_details.get('number_of_cache')
-        cache_type = 'reseed'
-        if tile_cache_check:
-            cache_type = cache_details.get('cache_type')
-        if int(zoom_start) >21 or int(zoom_stop)>21 or int(number_of_cache)>100:
-            return {
-                'success': False,
-                'info': 'TileCache-ийн max утга хэтэрсэн байна'
-            }
-        feature_id = feature.feature_id
-        cache_layer = geoserver.create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache)
-        wmts_url = ''
-        if cache_layer.status_code == 200:
-            cache_field = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
-            if cache_field:
-                WmtsCacheConfig.objects.filter(id=cache_field.id).update(
-                    img_format=image_format,
-                    zoom_start=zoom_start,
-                    zoom_stop=zoom_stop,
-                    type_of_operation=cache_type,
-                    number_of_tasks_to_use=number_of_cache
-                )
-            else:
-                WmtsCacheConfig.objects.create(
-                    feature_id=feature_id,
-                    img_format=image_format,
-                    zoom_start=zoom_start,
-                    zoom_stop=zoom_stop,
-                    type_of_operation=cache_type,
-                    number_of_tasks_to_use=number_of_cache
-                )
-
-            wmts_url = geoserver.get_wmts_url(ws_name)
-            wms.cache_url = wmts_url
-            wms.save()
+                    wmts_url = geoserver.get_wmts_url(ws_name)
+                    wms.cache_url = wmts_url
+                    wms.save()
 
         return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
@@ -894,7 +907,7 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
             SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
+            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.code_list_id::character varying(1000), b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
@@ -938,7 +951,16 @@ def _create_design_view():
                         ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
                         ST_Transform(geo_data, 4326)
                         ) and
-                        feature_id in (5, 15,23, 17, 81, 38)
+                        feature_id in (
+                            select distinct(f.feature_id)
+                            from m_geo_datas f
+                            inner join l_features lf
+                            on f.feature_id = lf.feature_id
+                            inner join l_packages p
+                            on p.package_id = lf.package_id
+                            inner join l_themes t
+                            on t.theme_id = p.theme_id
+                        )
                 limit 10000
             '''
     with connections['default'].cursor() as cursor:
@@ -951,6 +973,7 @@ def _create_design_view():
 @user_passes_test(lambda u: u.is_superuser)
 def get_style_data(request, payload):
     geom_type = payload.get('geom_type')
+    geom_type = 'ST_' + geom_type
     cursor = connections['default'].cursor()
     sql = '''
             SELECT
@@ -962,9 +985,18 @@ def get_style_data(request, payload):
                     ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
                     ST_Transform(geo_data, 4326)
                     ) and
-                    feature_id in (5, 15,23, 17, 81, 38)
+                    feature_id in (
+                        select distinct(f.feature_id)
+                        from m_geo_datas f
+                        inner join l_features lf
+                        on f.feature_id = lf.feature_id
+                        inner join l_packages p
+                        on p.package_id = lf.package_id
+                        inner join l_themes t
+                        on t.theme_id = p.theme_id
+                    )
                     and
-                    ST_GeometryType(geo_data)  similar to '%{geom_type}%'
+                    ST_GeometryType(geo_data)  similar to '{geom_type}'
             limit 10000
             '''.format(geom_type=geom_type)
     cursor.execute(sql)

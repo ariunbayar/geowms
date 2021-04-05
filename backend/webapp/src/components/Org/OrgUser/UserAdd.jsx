@@ -7,6 +7,7 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 import EmployeeMap from "./Employee_map/Map"
 
+import Loader from "@utils/Loader"
 
 export class UserAdd extends Component {
 
@@ -27,6 +28,8 @@ export class UserAdd extends Component {
                 is_super: false,
                 re_password_mail: false,
                 phone_number: '',
+                state: '',
+                pro_class: '',
             },
             aimag: [],
             sum: [],
@@ -41,17 +44,27 @@ export class UserAdd extends Component {
             sum_geo_id: '',
             horoo_geo_id: '',
             feature: {},
+
             description: '',
             point_coordinate: [],
             point: {},
             street: '',
             apartment: '',
             door_number: '',
+            address_state: true,
 
             modal_alert_status: "closed",
+            is_loading: true,
 
             errors: '',
 
+            firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
+
+            is_user: false,
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -63,10 +76,12 @@ export class UserAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
+        this.getSelectValue()
         if(org_emp){
             this.handleGetAll(org_emp)
         }
@@ -75,12 +90,24 @@ export class UserAdd extends Component {
         }
     }
 
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
+    }
+
     handleGetAll(org_emp){
         service
             .employeeDetail(org_emp)
             .then(({ success, employee }) => {
                 if (success) {
-                    this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
+                    if (org_emp) {
+                        this.getFeildValues(employee.level_1, employee.level_2, employee.level_3)
+                    }
                     this.setState({
                         form_values: {
                             id: employee.id,
@@ -89,16 +116,20 @@ export class UserAdd extends Component {
                             last_name: employee.last_name,
                             email: employee.email,
                             gender: employee.gender,
-                            register:employee.register,
-                            position: employee.position,
+                            register: employee.register,
+                            position: employee.position_id,
                             is_admin: employee.is_admin,
                             is_super: employee.is_super,
                             phone_number: employee.phone_number,
+                            state: employee.state_id,
+                            pro_class: employee.pro_class_id,
+                            is_user: employee.is_user,
                         },
                         point: employee.point,
                         street: employee.street,
                         apartment: employee.apartment,
                         door_number: employee.door_number,
+                        address_state: employee.address_state,
                     })
                 }
             })
@@ -110,7 +141,7 @@ export class UserAdd extends Component {
         const org_id = this.props.match.params.id
         const org_emp = this.props.match.params.emp
 
-        const { street, apartment, door_number, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
+        const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
         const address = {
             'street': street,
             'apartment': apartment,
@@ -119,6 +150,7 @@ export class UserAdd extends Component {
             'level_2': sum_name,
             'level_3': horoo_name,
             'point': point_coordinate,
+            'address_state': address_state,
         }
 
         const payload = {
@@ -203,7 +235,7 @@ export class UserAdd extends Component {
         let array
         service
             .formOptions('second')
-            .then(({ success, secondOrders }) => {
+            .then(({ success, secondOrders, firstOrder_geom }) => {
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
@@ -228,7 +260,7 @@ export class UserAdd extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: secondOrders, ...obj })
+                    this.setState({ aimag: secondOrders, ...obj, is_loading: false, firstOrder_geom })
                 }
             })
     }
@@ -297,7 +329,7 @@ export class UserAdd extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
@@ -306,7 +338,11 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, errors } = this.state
+        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, is_loading,
+            feature, street, apartment, door_number, point, errors, address_state
+        } = this.state
+
+        const { positions, states, pro_classes } = this.state
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -317,15 +353,9 @@ export class UserAdd extends Component {
 
         return (
             <div className="ml-3">
+                <Loader is_loading={is_loading}/>
                 <div className="row">
                     <div className="col-md-4">
-                        <NavLink
-                            to={ org_emp ? url_detail : url_list }
-                            className="btn gp-outline-primary my-1"
-                        >
-                            <i className="fa fa-angle-double-left"></i>
-                            {} Буцах
-                        </NavLink>
                         <Formik
                             enableReinitialize
                             initialValues={form_values}
@@ -334,9 +364,9 @@ export class UserAdd extends Component {
                         >
                         {({
                             errors,
+                            values,
                             isSubmitting,
                         }) => {
-                            const has_error = Object.keys(errors).length > 0
                             return (
                                 <Form>
                                     <div>
@@ -351,7 +381,7 @@ export class UserAdd extends Component {
                                                         type="text"
                                                         placeholder="Нэвтрэх нэр"
                                                     />
-                                                    <ErrorMessage name="username" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="username" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -365,7 +395,7 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Овог"
                                                 />
-                                                <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                                <ErrorMessage name="last_name" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-6">
                                                 <label htmlFor="first_name">Нэр:</label>
@@ -376,20 +406,24 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Нэр"
                                                 />
-                                                <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                                <ErrorMessage name="first_name" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-12">
                                                 <label htmlFor="position">Албан тушаал:</label>
-                                                <Field
-                                                    className={'form-control ' + (errors.position ? 'is-invalid' : '')}
-                                                    name='position'
-                                                    id="id_position"
-                                                    type="text"
-                                                    placeholder="Албан тушаал"
-                                                />
-                                                <ErrorMessage name="position" component="div" className="text-danger"/>
+                                                <Field name="position" as="select" id="position"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.position ? 'is-invalid' : '')}
+                                                >
+                                                    <option value="">--- Албан тушаал сонгоно уу ---</option>
+                                                    {
+                                                        positions.map((item, idx) =>
+                                                            <option key={idx} value={item.id}>{item.name}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="position" component="span" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -402,7 +436,7 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="E-Mail"
                                                 />
-                                                <ErrorMessage name="email" component="div" className="text-danger"/>
+                                                <ErrorMessage name="email" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -429,7 +463,7 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Утасны дугаар"
                                                 />
-                                                <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                <ErrorMessage name="phone_number" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-6">
                                                 <label htmlFor="register">Регистер:</label>
@@ -440,7 +474,41 @@ export class UserAdd extends Component {
                                                     type="text"
                                                     placeholder="Регистер"
                                                 />
-                                                <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                <ErrorMessage name="register" component="div" className="invalid-feedback"/>
+                                            </div>
+                                        </div>
+                                        <div className='form-row'>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_state'>Төлөв:</label>
+                                                <Field name="state" as="select" id="state"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                >
+                                                    <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
+                                                    {
+                                                        states.map((item, idx) =>
+                                                            <option key={idx} value={item[0]}>{item[1]}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="state" component="div" className="invalid-feedback"/>
+                                            </div>
+                                        </div>
+                                        <div className='form-row'>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>
+                                                <Field name="pro_class" as="select" id="pro_class"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.pro_class ? 'is-invalid' : '')}
+                                                >
+                                                    <option value="">--- Мэргэжлийн ангийн бүрэлдэхүүн ---</option>
+                                                    {
+                                                        pro_classes.map((item, idx) =>
+                                                            <option key={idx} value={item[0]}>{item[1]}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {
@@ -455,7 +523,7 @@ export class UserAdd extends Component {
                                                             id="id_re_password_mail"
                                                             type="checkbox"
                                                         />
-                                                        <ErrorMessage name="re_password_mail" component="div" className="text-danger"/>
+                                                        <ErrorMessage name="re_password_mail" component="div" className="invalid-feedback"/>
                                                     </div>
                                                 </div>
                                         }
@@ -468,7 +536,17 @@ export class UserAdd extends Component {
                                                     id="id_is_admin"
                                                     type="checkbox"
                                                 />
-                                                <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                <ErrorMessage name="is_admin" component="div" className="invalid-feedback"/>
+                                            </div>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_is_user'>хэрэглэгч</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_user'
+                                                    id="id_is_user"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_user" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {org_level ==4 &&
@@ -481,7 +559,7 @@ export class UserAdd extends Component {
                                                         id="id_is_super"
                                                         type="checkbox"
                                                     />
-                                                    <ErrorMessage name="is_super" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="is_super" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                         }
@@ -503,7 +581,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="aimag">Аймаг/Хот:</label>
                                 <select
                                     id="aimag"
-                                    className={'form-control ' + (errors.level_1 ? 'is-invalid' : '')}
+                                    className={'custom-select ' + (errors.level_1 ? 'is-invalid' : '')}
                                     aria-label="Default select example"
                                     onChange={(e) => this.handleChange(e, 'aimag', 'sum', ['sum', 'horoo'], 'mongol')}
                                     value={aimag_id}
@@ -518,7 +596,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="sum">Сум/Дүүрэг:</label>
                                 <select
                                     id="sum"
-                                    className={'form-control ' + (errors.level_2 ? 'is-invalid' : '')}
+                                    className={'custom-select ' + (errors.level_2 ? 'is-invalid' : '')}
                                     onChange={(e) => this.handleChange(e, 'sum', 'horoo', ['horoo'], 'aimag')}
                                     value={sum_id}
                                 >
@@ -532,7 +610,7 @@ export class UserAdd extends Component {
                                 <label htmlFor="horoo">Хороо/Баг:</label>
                                 <select
                                     id="horoo"
-                                    className={'form-control ' + (errors.level_3 ? 'is-invalid' : '')}
+                                    className={'custom-select ' + (errors.level_3 ? 'is-invalid' : '')}
                                     onChange={(e) => this.handleChange(e, 'horoo', undefined, [], 'sum')}
                                     value={horoo_id}
                                 >
@@ -557,7 +635,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="form-group col-4">
+                            <div className="form-group col-2">
                                 <label htmlFor="apartment">Байр:</label>
                                 <div className="input-group">
                                     <input
@@ -572,7 +650,7 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="form-group col-4">
+                            <div className="form-group col-2">
                                 <label htmlFor="door_number">Хаалганы дугаар:</label>
                                 <div className="input-group">
                                     <input
@@ -587,9 +665,22 @@ export class UserAdd extends Component {
                                     </div>
                                 </div>
                             </div>
+                            <div className="form-group mt-4">
+                                <div className="form-check">
+                                    <label className="form-check-label" htmlFor="id_address_state">
+                                        Байнгын оршин суугаа хаяг
+                                    </label>
+                                    <input
+                                        onChange={(e) => this.setState({ address_state: e.target.checked })}
+                                        className={'form-check-input col-4 ' + (errors.address_state ? 'is-invalid' : '')}
+                                        type="checkbox"
+                                        id="id_address_state"
+                                        checked={address_state}
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <EmployeeMap
-                            height='75'
                             feature={feature}
                             sendPointCoordinate={this.getPoint}
                             point={point}

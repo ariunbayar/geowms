@@ -12,11 +12,13 @@ from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrg as System
 from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 import main.geoserver as geoserver
+from django.core.cache import cache
+from main.decorators import get_conf_geoserver, get_conf_geoserver_base_url
 
 
 def _get_service_url(request, token):
@@ -26,25 +28,19 @@ def _get_service_url(request, token):
 
 
 @require_GET
-def proxy(request, token, pk=None):
+@get_conf_geoserver_base_url('ows')
+def proxy(request, base_url, token, pk=None):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-    system = get_object_or_404(System, token=token, deleted_by__isnull=True)
-    conf_geoserver = geoserver.get_connection_conf()
-
-    if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
-        raise Http404
-
-    base_url = 'http://{host}:{port}/geoserver/ows'.format(
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port'],
-    )
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
     content = rsp.content
-    allowed_layers = [layer.code for layer in system.wms_layers.all() if layer.wms.is_active]
+
+    system = utils.geo_cache("system", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
+    allowed_layers = utils.geo_cache("allowed_layers", token, [layer.code for layer in system.wms_layers.all() if layer.wms.is_active], 300)
+
     if request.GET.get('REQUEST') == 'GetCapabilities':
         if request.GET.get('SERVICE') == 'WFS':
             content = filter_layers_wfs(content, allowed_layers)
@@ -77,23 +73,17 @@ def proxy(request, token, pk=None):
 
 
 @require_GET
-def json_proxy(request, token, code):
+@get_conf_geoserver_base_url('ows')
+def json_proxy(request, base_url, token, code):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-    conf_geoserver = geoserver.get_connection_conf()
-    system = get_object_or_404(System, token=token, deleted_by__isnull=True)
+    system = utils.geo_cache("system_json", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
 
     if not system.wms_layers.filter(code=code):
         raise Http404
-    if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
-        raise Http404
 
     headers = {**BASE_HEADERS}
-    base_url = 'http://{host}:{port}/geoserver/ows'.format(
-            host=conf_geoserver['geoserver_host'],
-            port=conf_geoserver['geoserver_port'],
-    )
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
         allowed_layers = [code]
@@ -101,17 +91,16 @@ def json_proxy(request, token, code):
             queryargs = {
                 **request.GET
             }
-            rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+            rsp = requests.get(base_url, queryargs, headers=headers, timeout=50)
             content = rsp.content
             content = filter_layers_wfs(content, allowed_layers)
         else:
             raise Http404
 
-
     else:
         queryargs = {
             'service': 'WFS',
-            'version': '1.3.0',
+            'version': '1.0.0',
             'request': 'GetFeature',
             'typeName': code,
             'outputFormat': 'application/json',
@@ -229,22 +218,47 @@ def _get_layer_name(employee):
     return allowed_layers
 
 
+def _get_cql_filter(geo_id):
+    cql_data = utils.get_2d_data(geo_id)
+    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data = cql_data)
+    return cql_filter if cql_data else ''
+
+
+def _get_request_content(base_url, request, geo_id, headers):
+    if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
+
+        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        queryargs = {
+            **request.GET,
+            'cql_filter': cql_filter,
+        }
+
+        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5)
+
+    else:
+        queryargs = request.GET
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+
+    return rsp, queryargs
+
+
 @require_GET
-def qgis_proxy(request, token):
+@get_conf_geoserver_base_url('ows')
+def qgis_proxy(request, base_url, token):
+
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-
-    employee = get_object_or_404(Employee, token=token)
-    allowed_layers = _get_layer_name(employee)
-    conf_geoserver = geoserver.get_connection_conf()
-    base_url = 'http://{host}:{port}/geoserver/ows'.format(
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port'],
-    )
-    queryargs = request.GET
     headers = {**BASE_HEADERS}
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    employee = utils.geo_cache("qgis_employee", token, Employee.objects.filter(token=token).first(), 300)
+    allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee), 300)
+
+    if not employee:
+        raise Http404
+
+    geo_id = employee.org.geo_id
+
+    rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
@@ -271,22 +285,15 @@ def qgis_proxy(request, token):
 
 
 @require_GET
-def geo_design_proxy(request, veiw_name):
+@get_conf_geoserver_base_url('ows')
+def geo_design_proxy(request, base_url, veiw_name):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-    conf_geoserver = geoserver.get_connection_conf()
-
-    if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
-        raise Http404
-
     layer_code = 'gp_layer_' + veiw_name
 
     headers = {**BASE_HEADERS}
-    base_url = 'http://{host}:{port}/geoserver/ows'.format(
-            host=conf_geoserver['geoserver_host'],
-            port=conf_geoserver['geoserver_port'],
-    )
+
     queryargs = {
         **request.GET,
         'layers': layer_code,

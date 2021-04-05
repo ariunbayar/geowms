@@ -1,7 +1,6 @@
 import {handleResponse, getPostOptions, getGetOptions} from '../../components/helpers/service'
 
 export const service = {
-    getListEmployee,
     createEmployee,
     getRole,
     getRoleList,
@@ -19,18 +18,12 @@ export const service = {
     getFieldTailbar,
     saveTailbar,
     getErguul,
+    getSelectValue,
+    getAllOrg,
 }
 
 const prefix = "/gov/api/role/employee"
 const prefix_role = '/gov/api/role'
-
-function getListEmployee() {
-    const requestOptions = {
-        ...getGetOptions(),
-    }
-
-    return fetch(`${prefix}/`, requestOptions).then(handleResponse)
-}
 
 function createEmployee(user_detail, emp_role_id, roles, address) {
     const requestOptions = {
@@ -73,10 +66,10 @@ function deleteEmployee(id) {
     return fetch(`${prefix}/${id}/delete/`, requestOptions).then(handleResponse)
 }
 
-function updateEmployee(username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, add_perm, remove_perm, address) {
+function updateEmployee(user_detail, role_id, id, add_perm, remove_perm, address ) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ username, first_name, last_name, position, email, gender, register, is_admin, role_id, id, add_perm, remove_perm, address })
+        body: JSON.stringify({ user_detail, role_id, id, add_perm, remove_perm, address })
     }
 
     return fetch(`${prefix}/${id}/update/`, requestOptions).then(handleResponse)
@@ -105,9 +98,10 @@ function getGeom(geo_id) {
     return fetch('/payment/get-geom/', requestOptions).then(handleResponse)
 }
 
-function getAddresses() {
+function getAddresses(choose, value) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({choose, value}),
     }
     return fetch(`${prefix}/addresses/`, requestOptions).then(handleResponse)
 }
@@ -119,24 +113,25 @@ function formOptions() {
     return fetch(`/api/aimag/`, requestOptions).then(handleResponse)
 }
 
-function getEmpInfo(id) {
+function getEmpInfo(id, is_erguul) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({ is_erguul }),
     }
     return fetch(`/back/api/org/${id}/emp-info/`, requestOptions).then(handleResponse)
 }
 
-function getErguulegFields() {
+function getErguulegFields(id) {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch(`/back/api/org/erguuleg-fields/`, requestOptions).then(handleResponse)
+    return fetch(`/back/api/org/${id}/erguuleg-fields/`, requestOptions).then(handleResponse)
 }
 
-function saveErguul(values, id, point, photo) {
+function saveErguul(values, emp_id, point, photo, erguul_id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ values, id, point, photo }),
+        body: JSON.stringify({ values, emp_id, point, photo, erguul_id }),
     }
     return fetch(`/back/api/org/save-erguul/`, requestOptions).then(handleResponse)
 }
@@ -161,4 +156,18 @@ function getErguul() {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/get-erguul/`, requestOptions).then(handleResponse)
+}
+
+function getSelectValue() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`/back/api/org/get-select-values/`, requestOptions).then(handleResponse)
+}
+
+function getAllOrg() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`/back/api/org/get-all-org/`, requestOptions).then(handleResponse)
 }
