@@ -1,48 +1,52 @@
+import io
 import os
-
-from PIL import Image
-from collections import namedtuple
-from io import BytesIO
 import base64
+import random
 import re
 import unicodedata
 import importlib
+import zipfile
 import pyproj
-
+import math
 import json
+
+from collections import namedtuple
+from datetime import timedelta, datetime
+from geojson import Feature
+from PIL import Image, ImageDraw, ImageFont
+
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry, Point
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.measure import D
 from django.conf import settings
 from django.db import connections
-from backend.dedsanbutets.models import ViewNames
-from backend.dedsanbutets.models import ViewProperties
-from datetime import timedelta, datetime
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
-from django.contrib.gis.measure import D
-from geojson import Feature
+from django.core.cache import cache
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
 from main.inspire import InspireDataType
 from main.inspire import InspireFeature
-from backend.inspire.models import LProperties, MGeoDatas
-from backend.config.models import Config, CovidConfig
-from backend.token.utils import TokenGeneratorUserValidationEmail
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Point
 from main.inspire import GEoIdGenerator
-import uuid
-from django.core.cache import cache
+
+from backend.config.models import Config
+from backend.config.models import CovidConfig
+from backend.token.utils import TokenGeneratorUserValidationEmail
+from backend.dedsanbutets.models import ViewProperties
+from backend.dedsanbutets.models import ViewNames
+from backend.inspire.models import LProperties, MGeoDatas
 
 
 def resize_b64_to_sizes(src_b64, sizes):
 
     src_bytes = base64.b64decode(src_b64)
-    src_io = BytesIO(src_bytes)
+    src_io = io.BytesIO(src_bytes)
 
     def _resize(image, size):
-        dst = BytesIO()
+        dst = io.BytesIO()
         image.thumbnail(size)
         image.save(dst, format='PNG')
         return dst
@@ -1053,6 +1057,22 @@ def create_index(model_name, field):
     return False
 
 
+def unzip(path_zip_file, extract_path):
+    is_unzipped = False
+
+    with zipfile.ZipFile(path_zip_file, 'r') as zip_ref:
+        is_unzipped = True
+        zip_ref.extractall(extract_path)
+
+    return is_unzipped
+
+
+def image_to_byte_array(image_path):
+    image = Image.open(image_path)
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format=image.format)
+    img_byte_arr = img_byte_arr.getvalue()
+    return img_byte_arr
 # ------------------------------------------------------------------------------------------------
 # feature code oor feature iin qs awah
 def get_feature_from_code(feature_code):
@@ -1407,3 +1427,151 @@ def geo_cache(key_name, key, qs, time):
     if not chache_data:
         cache.set('{}_{}'.format(key_name, key), qs, time)
     return qs
+
+
+# тухайн property г мдатагаас хайхад бэлэн маягаар гаргаж авах
+def get_filter_dicts(property_code='pointnumber'):
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_code__iexact=property_code)
+    prop = prop_qs.first()
+
+    feature = get_feature_from_code('gnp-gp-gp')
+    property_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature.feature_id)
+    data = get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
+
+    for prop_dict in prop_qs.values():
+        for type in value_types():
+            if prop_dict['value_type_id'] in type['value_names']:
+                filter_value_type = type['value_type']
+                break
+
+    return data, filter_value_type
+
+
+def _get_code_name_with_top(values, code, is_display=True):
+    LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
+    top_code = ''
+    child_code = ''
+    name_or_id = 'code_list_name'
+    if not is_display:
+        name_or_id = 'code_list_id'
+
+    if code in values:
+        code_list_id = values[code]
+        code_qs = LCodeLists.objects
+        codes_qs = code_qs.filter(code_list_id=code_list_id)
+        if codes_qs:
+            code = codes_qs.values()
+            if code[0]['top_code_list_id']:
+                code_qs = code_qs.filter(code_list_id=code[0]['top_code_list_id']).values()
+                child_code = code[0][name_or_id]
+                top_code = code_qs[0][name_or_id]
+            else:
+                top_code = code[name_or_id]
+
+    return top_code, child_code
+
+
+# inspire аас тухайн дарагдсан цэг ямар газар дарагдсан гэдгийг мэдэх
+def get_aimag_sum_from_point(x, y, is_display=True):
+    MDatas = apps.get_model('backend_inspire', 'MDatas')
+    point = Point([x, y], srid=4326)
+    feature_code = 'bnd-au-au'
+    feature = get_feature_from_code(feature_code)
+    mgeo_qs = MGeoDatas.objects
+    mgeo_qs = mgeo_qs.filter(feature_id=feature.feature_id)
+    mgeo_qs = mgeo_qs.filter(geo_data__contains=point)
+
+    property_code = 'AdministrativeUnitSubClass'
+
+    feature_id = feature.feature_id
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature_id)
+    datas = _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
+
+    aimag, sum = '', ''
+
+    for mgeo in mgeo_qs:
+        # level2 = 2
+        level3 = 4
+        geo_id = mgeo.geo_id
+        if len(geo_id) == level3:
+            mdatas_qs = MDatas.objects
+            mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
+            for data in datas:
+                mdatas_qs = mdatas_qs.filter(**data)
+                if mdatas_qs:
+                    mdatas = mdatas_qs.first()
+                    values = dict()
+                    values[property_code] = mdatas.code_list_id
+                    aimag, sum = _get_code_name_with_top(values, property_code, is_display)
+                    break
+
+    return aimag, sum
+
+
+# zurag
+def image_to_64_byte(image_path):
+    with open(image_path, "rb") as image_file:
+        data = base64.b64encode(image_file.read())
+    return data
+
+
+def password_generate(length=12):
+    chars = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM123456789'
+
+    for p in range(1):
+        password = ''
+        for c in range(length):
+            pwd = random.choice(chars)
+            if password != pwd:
+                password += pwd
+    return password
+
+
+def creat_empty_image(n=200, m=200, bg_color=[228, 150, 150]):
+    image = Image.new('RGB', (n, m), tuple(bg_color))
+    return image
+
+
+def set_text_to_image(texts, image):
+    """
+    texts = [
+        {
+            'text': password_generate(7),
+            'xy': [10, 5],
+            'rgb': [255, 200, 255],
+            'size': 20,
+        }
+    ]
+    """
+    draw = ImageDraw.Draw(image)
+    for text in texts:
+        font = ImageFont.truetype(settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', size=text['size'])
+        draw.text(tuple(text['xy']), text['text'], tuple(text['rgb']), font)
+
+    return image
+
+
+def remove_file(file_path):
+    os.remove(file_path)
+
+
+def copy_image(img, plus):
+
+    # get legends
+    # duudah hayg
+    # http://localhost:8080/geoserver/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&transparent=true&WIDTH=20&HEIGHT=20&LAYER=gp_tn:gp_layer_road_link_view
+
+    x, y = img.size
+
+    new_x = x + plus
+    new_y = y + plus
+
+    new_img = Image.new('RGBA', (new_x, new_y), 'red')
+    top = math.floor((new_x - x) / 2)
+    left = math.floor((new_y - y) / 2)
+    tup = (top, left)
+    new_img.paste(img, tup)
+
+    return new_img

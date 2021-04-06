@@ -1,16 +1,12 @@
-import os
-import glob
-import csv
 import datetime
-from django.conf import settings
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.paginator import Paginator
-from main.decorators import ajax_required
+
 from backend.payment.models import Payment
 from backend.payment.models import PaymentPoint
 from backend.payment.models import PaymentPolygon
@@ -20,11 +16,12 @@ from backend.inspire.models import LFeatures
 from backend.inspire.models import LProperties
 from backend.inspire.models import MDatas
 from backend.inspire.models import LCodeLists
-from geoportal_app.models import User
+from backend.org.models import Employee
 from govorg.backend.forms.models import TsegUstsan, Mpoint_view
-from main.utils import resize_b64_to_sizes
-from django.core.files.uploadedfile import SimpleUploadedFile
+from geoportal_app.models import User
+
 from main import utils
+from main.decorators import ajax_required
 
 
 @require_GET
@@ -125,10 +122,6 @@ def tsegSearch(request, payload):
 def tsegAdd(request):
     tseg_dugaar = request.POST.get('tsegiin_dugaar')
 
-    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__icontains=tseg_dugaar).first()
-    if mpoint.point_id != tseg_dugaar:
-        return JsonResponse({'success': False})
-
     oiroltsoo_bairlal = request.POST.get('oiroltsoo_bairlal')
     evdersen_baidal = request.POST.get('evdersen_baidal')
     shaltgaan = request.POST.get('nohtsol_baidal')
@@ -145,30 +138,35 @@ def tsegAdd(request):
     img_hoino = request.POST.get('zurag_hoid')
     img_omno = request.POST.get('zurag_omno')
     if img_holoos:
-        [image_x2] = resize_b64_to_sizes(img_holoos, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_holoos, [(720, 720)])
         img_holoos = SimpleUploadedFile('img.png', image_x2)
     if img_oiroos:
-        [image_x2] = resize_b64_to_sizes(img_oiroos, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_oiroos, [(720, 720)])
         img_oiroos = SimpleUploadedFile('img.png', image_x2)
     if img_baruun:
-        [image_x2] = resize_b64_to_sizes(img_baruun, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_baruun, [(720, 720)])
         img_baruun = SimpleUploadedFile('img.png', image_x2)
     if img_zuun:
-        [image_x2] = resize_b64_to_sizes(img_zuun, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_zuun, [(720, 720)])
         img_zuun = SimpleUploadedFile('img.png', image_x2)
     if img_hoino:
-        [image_x2] = resize_b64_to_sizes(img_hoino, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_hoino, [(720, 720)])
         img_hoino = SimpleUploadedFile('img.png', image_x2)
     if img_omno:
-        [image_x2] = resize_b64_to_sizes(img_omno, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_omno, [(720, 720)])
         img_omno = SimpleUploadedFile('img.png', image_x2)
 
-    users = User.objects.filter(id=request.user.id)
-    for user in users:
-        email = user.email
-        baiguulla = 'ДАН'
-        alban_tushaal = 'ДАН'
-        phone = ''
+    user = User.objects.filter(id=request.user.id).first()
+    employee_qs = Employee.objects.filter(user=user)
+    email = user.email
+    baiguulla = 'ДАН'
+    alban_tushaal = 'ДАН'
+    phone = ''
+    if employee_qs:
+        employee = employee_qs.first()
+        alban_tushaal = employee.position.name
+        baiguulla = employee.org.name
+        phone = employee.phone_number
 
     TsegUstsan.objects.create(
         email=email,
@@ -191,49 +189,20 @@ def tsegAdd(request):
     return JsonResponse({'success': True})
 
 
-def _get_feature_id(feature_code):
-    feat_qs = LFeatures.objects
-    feat_qs = feat_qs.filter(feature_code=feature_code)
-    return feat_qs
-
-
-def _get_filter_dicts():
-    prop_qs = LProperties.objects
-    prop_qs = prop_qs.filter(property_code__iexact='pointnumber')
-    prop = prop_qs.first()
-
-    feature_qs = _get_feature_id('gnp-gp-gp')
-    if feature_qs:
-
-        feature = feature_qs.first()
-        property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
-        data = utils.get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
-
-        for prop_dict in prop_qs.values():
-            for type in utils.value_types():
-                if prop_dict['value_type_id'] in type['value_names']:
-                    filter_value_type = type['value_type']
-                    break
-    return data, filter_value_type
-
-
-def _filter_Model(filters, Model=MDatas):
-    qs = Model.objects
+def _filter_Model(filters, Model=MDatas, initial_qs=[]):
+    if not initial_qs:
+        initial_qs = Model.objects
     for search in filters:
-        qs = qs.filter(**search)
-    return qs
+        initial_qs = initial_qs.filter(**search)
+    return initial_qs
 
 
 def _get_tseg_detail(payment):
     points = list()
     pay_points = PaymentPoint.objects.filter(payment=payment)
     for point in pay_points:
-        data, filter_value_type = _get_filter_dicts()
-        filter_value = dict()
-        filter_value[filter_value_type] = point.pdf_id
-        mdata_qs = _filter_Model([data, filter_value])
-        mdata = mdata_qs.first()
-        point_info = utils.get_mdata_value('gnp-gp-gp', mdata.geo_id, is_display=True)
+        geo_id = point.point_id
+        point_info = utils.get_mdata_value('gnp-gp-gp', geo_id, is_display=True)
         info = dict()
         for key, value in point_info.items():
             if isinstance(value, datetime.datetime):
@@ -243,7 +212,7 @@ def _get_tseg_detail(payment):
                 if code_qs:
                     code = code_qs.first()
                     if code.top_code_list_id:
-                        top_code_qs = _filter_Model([{'top_code_list_id': code.top_code_list_id}], Model=LCodeLists)
+                        top_code_qs = _filter_Model([{'code_list_id': code.top_code_list_id}], Model=LCodeLists)
                         if top_code_qs:
                             top_code = top_code_qs.first()
                             info['aimag'] = top_code.code_list_name

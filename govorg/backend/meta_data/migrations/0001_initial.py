@@ -3,6 +3,33 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
+from django.db import connections
+
+
+def _create_pk():
+    cursor = connections['default'].cursor()
+    sql = """
+        ALTER TABLE m_geo_datas
+        ADD CONSTRAINT m_geo_datas_pkey
+        PRIMARY KEY (geo_id)
+    """
+    cursor.execute(sql)
+
+
+def _check_constraint(apps, schema_editor):
+    cursor = connections['default'].cursor()
+    sql = """
+        SELECT c.column_name, c.data_type
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name)
+        JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema
+        AND tc.table_name = c.table_name AND ccu.column_name = c.column_name
+        WHERE constraint_type = 'PRIMARY KEY' and tc.table_name = 'm_geo_datas';
+    """
+    cursor.execute(sql)
+    value = cursor.fetchone()
+    if not value:
+        _create_pk
 
 
 class Migration(migrations.Migration):
@@ -15,6 +42,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(_check_constraint),
+
         migrations.CreateModel(
             name='MetaData',
             fields=[

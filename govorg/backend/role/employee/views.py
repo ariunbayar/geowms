@@ -687,11 +687,18 @@ def _get_feature_collection(employees):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_addresses(request, payload):
-    all_user = payload.get('all_user')
+    value = payload.get('value')
+    choose = payload.get('choose')
     employee = get_object_or_404(Employee, user=request.user)
     if employee.is_admin:
-        if all_user:
+        if choose == 'all':
             employees = Employee.objects.all()
+        elif choose == 'level':
+            org = Org.objects.filter(level=value)
+            employees = Employee.objects.filter(org_id__in=org)
+        elif choose == 'org':
+            org = get_object_or_404(Org, id=value)
+            employees = Employee.objects.filter(org=org)
         else:
             org = employee.org
             employees = Employee.objects
@@ -864,7 +871,7 @@ def erguul_list(request, payload):
         qs = EmployeeErguul.objects.filter(address=employee_address)
 
     if qs:
-        оруулах_талбарууд = ['address_id', 'apartment', 'date_start', 'date_end', 'part_time']
+        оруулах_талбарууд = ['id', 'address_id', 'apartment', 'date_start', 'date_end', 'part_time']
         хувьсах_талбарууд = [
             {"field": "part_time", "action": _get_part_time, "new_field": "part_time"},
             {"field": "apartment", "action": _get_state, "new_field": "state"},
@@ -893,4 +900,49 @@ def erguul_list(request, payload):
 
         }
 
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_erguul_info(request, pk):
+    erguul = get_object_or_404(EmployeeErguul, pk=pk)
+    location = erguul.address
+    status = ErguulTailbar.objects.filter(erguul=erguul).first()
+    user = location.employee.user
+    erguul_date_starttime = utils.datetime_to_string(erguul.date_start)
+    erguul_date_endtime = utils.datetime_to_string(erguul.date_end)
+
+    desc = 'Хоосон'
+    if status:
+        desc = status.description
+        status = status.state
+        if status == ErguulTailbar.DONE:
+            status = "Гарсан",
+
+        elif status == ErguulTailbar.NOT_DONE:
+            status = "Гараагүй",
+
+    else:
+        status = "Гарч байгаа",
+
+    rsp = {
+        'success': True,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'desc': desc,
+        'local_lvl1': location.level_1,
+        'local_lvl2': location.level_2,
+        'local_lvl3': location.level_3,
+        'local_street': location.street,
+        'local_apart': location.apartment,
+        'local_dn': location.door_number,
+        'status': status,
+        'date_start': erguul_date_starttime,
+        'date_end': erguul_date_endtime,
+        'erguul_level3': erguul.level_3,
+        'erguul_street': erguul.street,
+        'erguul_apart': erguul.apartment,
+    }
     return JsonResponse(rsp)

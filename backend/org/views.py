@@ -1515,6 +1515,57 @@ def get_addresses(request, level, pk):
     return JsonResponse(rsp)
 
 
+@require_GET
+@ajax_required
+def get_address(request, pk):
+    points = list()
+
+    user = get_object_or_404(User, pk=pk)
+
+    employee = Employee.objects
+    employee = employee.filter(user=user)
+    employee = employee.first()
+
+    addresses = EmployeeAddress.objects
+    addresses = addresses.filter(employee=employee)
+    addresses = addresses.first()
+
+    if addresses:
+        point_info = dict()
+        point = addresses.point
+        point_info['id'] = addresses.employee.id
+        point_info['first_name'] = addresses.employee.user.first_name  # etseg
+        point_info['last_name'] = addresses.employee.user.last_name  # onooj ogson ner
+        point_info['is_cloned'] = _is_cloned_feature(addresses)
+        feature = utils.get_feature_from_geojson(point.json, properties=point_info)
+        points.append(feature)
+
+    erguul = EmployeeErguul.objects.filter(address=addresses).first()
+    if erguul:
+        erguul_info = dict()
+        point = erguul.point
+        erguul_info['id'] = employee.id
+        erguul_info['is_erguul'] = True
+        erguul_info['first_name'] = employee.user.first_name # etseg
+        erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+
+        feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
+        points.append(feature)
+
+    feature_collection = FeatureCollection(points)
+
+    if not addresses:
+        rsp = {
+            'points': [],
+        }
+    else:
+        rsp = {
+            'success': True,
+            'points': feature_collection,
+        }
+    return JsonResponse(rsp)
+
+
 @require_POST
 @ajax_required
 def get_emp_info(request, payload, pk):
@@ -1772,6 +1823,25 @@ def get_select_values(request):
         'states': states,
         'pro_classes': pro_classes,
     }
+    return JsonResponse(rsp)
+
+
+def get_all_org(request):
+
+    qs = Org.objects
+    org_qs = qs.all()
+    org_list = list(org_qs.values())
+
+    levels_qs = qs.values('level').annotate(Count('level')).order_by('level')
+    levels_qs = list(levels_qs)
+    levels = [level['level'] for level in levels_qs]
+
+    rsp = {
+        'success': True,
+        'org_list': org_list,
+        'levels': levels,
+    }
+
     return JsonResponse(rsp)
 
 
