@@ -78,9 +78,13 @@ def _check_gp_design():
     geom_att, extends = get_colName_type(table_name, 'geo_data')
     if extends:
         srs = extends[0]['find_srid']
+        if srs and srs > 0:
+            srs = srs
+        else:
+            srs = 4326
+
     else:
         srs = 4326
-
     if check_layer.status_code == 404:
         layer_create = geoserver.create_layer(
                         ws_name,
@@ -93,6 +97,7 @@ def _check_gp_design():
                         extends,
                         False
         )
+
 
 @require_GET
 @ajax_required
@@ -943,25 +948,12 @@ def removeView(table_name):
 def _create_design_view():
     sql = '''
             CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
-            SELECT geo_data, ST_GeometryType(geo_data) as field_type, feature_id
-                FROM
-                    m_geo_datas
-                where
-                    ST_Contains(
-                        ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
-                        ST_Transform(geo_data, 4326)
-                        ) and
-                        feature_id in (
-                            select distinct(f.feature_id)
-                            from m_geo_datas f
-                            inner join l_features lf
-                            on f.feature_id = lf.feature_id
-                            inner join l_packages p
-                            on p.package_id = lf.package_id
-                            inner join l_themes t
-                            on t.theme_id = p.theme_id
-                        )
-                limit 10000
+            SELECT
+                ST_GeometryType(get_datas_of_m_geo_datas(feature_id)) as field_type,
+                get_datas_of_m_geo_datas(feature_id)  as geo_data, feature_id
+            FROM
+                m_geo_datas
+            group by feature_id
             '''
     with connections['default'].cursor() as cursor:
         cursor.execute(sql)
@@ -972,6 +964,7 @@ def _create_design_view():
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_style_data(request, payload):
+
     geom_type = payload.get('geom_type')
     if geom_type == 'PointSymbolizer':
         geom_type = 'Point'
@@ -979,39 +972,22 @@ def get_style_data(request, payload):
         geom_type = 'Polygon'
     else:
         geom_type = 'LineString'
-
-    geom_type = 'ST_' + geom_type
+    check_design = _check_gp_design()
     cursor = connections['default'].cursor()
     sql = '''
             SELECT
                 ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
             FROM
-                m_geo_datas
+                geoserver_desing_view
             where
-                ST_Contains(
-                    ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
-                    ST_Transform(geo_data, 4326)
-                    ) and
-                    feature_id in (
-                        select distinct(f.feature_id)
-                        from m_geo_datas f
-                        inner join l_features lf
-                        on f.feature_id = lf.feature_id
-                        inner join l_packages p
-                        on p.package_id = lf.package_id
-                        inner join l_themes t
-                        on t.theme_id = p.theme_id
-                    )
-                    and
-                    ST_GeometryType(geo_data)  similar to '{geom_type}'
-            limit 10000
+                ST_GeometryType(geo_data) like '%{geom_type}%'
+            limit 1000
             '''.format(geom_type=geom_type)
 
     cursor.execute(sql)
     some_attributes = dict_fetchall(cursor)
     some_attributes = list(some_attributes)
     features = []
-
     for i in some_attributes:
         data = get_geoJson(i.get('geom'))
         features.append(data)
@@ -1032,6 +1008,7 @@ def check_styles_name(request, payload):
     return JsonResponse({
         'success': success,
     })
+
 
 @require_POST
 @ajax_required
