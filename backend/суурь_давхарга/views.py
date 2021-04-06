@@ -9,6 +9,7 @@ from main.utils import resize_b64_to_sizes
 from .models import BaseLayer
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
+from backend.config.models import Config
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.core.cache import cache

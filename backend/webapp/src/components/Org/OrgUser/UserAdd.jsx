@@ -57,6 +57,14 @@ export class UserAdd extends Component {
             is_loading: true,
 
             errors: '',
+
+            firstOrder_geom: '',
+
+            positions: [],
+            states: [],
+            pro_classes: [],
+
+            is_user: false,
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -68,10 +76,12 @@ export class UserAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+        this.getSelectValue = this.getSelectValue.bind(this)
     }
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
+        this.getSelectValue()
         if(org_emp){
             this.handleGetAll(org_emp)
         }
@@ -80,6 +90,15 @@ export class UserAdd extends Component {
         }
     }
 
+    getSelectValue() {
+        service
+            .getSelectValue()
+            .then(({ success, positions, states, pro_classes }) => {
+                if (success) {
+                    this.setState({ positions, states, pro_classes })
+                }
+            })
+    }
 
     handleGetAll(org_emp){
         service
@@ -104,6 +123,7 @@ export class UserAdd extends Component {
                             phone_number: employee.phone_number,
                             state: employee.state_id,
                             pro_class: employee.pro_class_id,
+                            is_user: employee.is_user,
                         },
                         point: employee.point,
                         street: employee.street,
@@ -215,7 +235,7 @@ export class UserAdd extends Component {
         let array
         service
             .formOptions('second')
-            .then(({ success, secondOrders }) => {
+            .then(({ success, secondOrders, firstOrder_geom }) => {
                 if (success) {
                     if (level_1) {
                         obj['aimag_id'] = this.getGeomFromJson(level_1, secondOrders)
@@ -240,7 +260,7 @@ export class UserAdd extends Component {
                         obj['horoo_name'] = level_3
                     }
                     this.getGeom(geo_id)
-                    this.setState({ aimag: secondOrders, ...obj, is_loading: false })
+                    this.setState({ aimag: secondOrders, ...obj, is_loading: false, firstOrder_geom })
                 }
             })
     }
@@ -309,7 +329,7 @@ export class UserAdd extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
@@ -322,7 +342,7 @@ export class UserAdd extends Component {
             feature, street, apartment, door_number, point, errors, address_state
         } = this.state
 
-        const { positions, states, pro_classes } = this.props
+        const { positions, states, pro_classes } = this.state
 
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
@@ -517,6 +537,16 @@ export class UserAdd extends Component {
                                                     type="checkbox"
                                                 />
                                                 <ErrorMessage name="is_admin" component="div" className="invalid-feedback"/>
+                                            </div>
+                                            <div className="form-group col-12">
+                                                <label htmlFor='id_is_user'>хэрэглэгч</label>
+                                                <Field
+                                                    className="ml-2"
+                                                    name='is_user'
+                                                    id="id_is_user"
+                                                    type="checkbox"
+                                                />
+                                                <ErrorMessage name="is_user" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {org_level ==4 &&

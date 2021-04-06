@@ -14,6 +14,7 @@ from backend.bundle.models import Bundle
 from backend.inspire.models import LThemes
 
 from .models import Config
+from backend.inspire.models import LValueTypes
 from .models import CovidConfig
 
 from backend.org.models import Org
@@ -205,6 +206,7 @@ def geoserver_configs(request):
         'geoserver_pass': '',
         'geoserver_port': '',
         'geoserver_db_host': '',
+        'geoserver_protocol': '',
     }
 
     configs = Config.objects.filter(name__in=default_values.keys())
@@ -228,6 +230,8 @@ def geoserver_configs_save(request, payload):
         'geoserver_pass',
         'geoserver_port',
         'geoserver_db_host',
+        'geoserver_protocol',
+
     )
 
     for config_name in config_names:
@@ -494,6 +498,55 @@ def _get_line_chart_org(name):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def qpay_configs(request):
+
+    default_values = {
+        'id': '',
+        'register_no': '',
+        'name': '',
+        'email': '',
+        'phone_number': '',
+        'note': '',
+    }
+
+    configs = Config.objects.filter(name__in=default_values.keys())
+
+    rsp = {
+        **default_values,
+        **{conf.name: conf.value for conf in configs},
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def qpay_configs_save(request, payload):
+
+    config_names = (
+        'id',
+        'register_no',
+        'name',
+        'email',
+        'phone_number',
+        'note',
+    )
+
+    for config_name in config_names:
+        Config.objects.update_or_create(
+            name=config_name,
+            defaults={
+                'value': payload.get(config_name, '')
+            }
+        )
+
+    return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
 def covid_configs(request):
 
     default_values = {
@@ -553,11 +606,13 @@ def _get_org_id(default_values):
         'edgersen_humuusiin_too_org',
         'batlagdsan_tohioldol_org',
     }
+    org = []
 
     for default_value in default_values:
         qs = CovidConfig.objects
         qs = qs.filter(name=default_value)
-        org = qs.first().org
+        if qs:
+            org = qs.first().org
         for config_org_id in config_org_ids:
             splited = config_org_id.split("_org")
             conf_name = splited[0]
@@ -638,3 +693,47 @@ def covid_configs_save(request, payload):
                 qs.update(org=payload.get(config_org_id))
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_value_type_fields(request):
+    value_type_qs = LValueTypes.objects.values('value_type_id')
+    value_types = list(value_type_qs)
+
+    config_values = Config.objects.filter(name='value_types').first()
+    initial_values = dict()
+    for value_type in value_types:
+        value = ''
+        if config_values:
+            obj = json.loads(config_values.value)
+            value = obj[value_type['value_type_id']]
+        initial_values[value_type['value_type_id']] = value
+
+    rsp = {
+        'success': True,
+        'value_types': value_types,
+        'initial_values': initial_values,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def save_value_types(request, payload):
+    values = payload.get('values')
+    config_name = 'value_types'
+
+    Config.objects.update_or_create(
+        name=config_name,
+        defaults={
+            'value': json.dumps(payload.get('values', ''))
+        }
+    )
+
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)

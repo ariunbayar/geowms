@@ -26,6 +26,7 @@ from main.utils import (
 )
 import main.geoserver as geoserver
 
+
 # Create your views here.
 def _get_features(package_id):
     feature_data = []
@@ -93,6 +94,7 @@ def _check_gp_design():
                         extends,
                         False
         )
+
 
 @require_GET
 @ajax_required
@@ -177,6 +179,8 @@ def _data_type_configs(data_type_id):
         for data_type_config in data_type_configs:
             property_id = data_type_config.property_id
             properties = LProperties.objects.filter(property_id=property_id)
+            properties = properties.exclude(value_type_id='data-type')
+            properties = properties.exclude(property_code='localId')
             if properties:
                 for prop in properties:
                     property_names.append({
@@ -463,7 +467,7 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
-    check = _create_view(id_list, table_name, data_type_ids, feature_config_id)
+    check = _create_view(id_list, table_name, data_type_ids, feature_config_id, fid)
     if check:
         rsp = _create_geoserver_detail(table_name, theme, user.id, feature, values)
         if rsp['success']:
@@ -701,6 +705,7 @@ def erese(request, payload):
         }
     return JsonResponse(rsp)
 
+
 def get_colName_type(view_name, data):
     cursor = connections['default'].cursor()
     query_index = '''
@@ -734,6 +739,7 @@ def get_colName_type(view_name, data):
 
     return geom_att, some_attributes
 
+
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
 
     geom_att, extends = get_colName_type(table_name, 'geo_data')
@@ -749,7 +755,20 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     geom_type = values.get('geom_type')
     layer_title = feature.feature_name
 
-    if check_layer.status_code == 200:
+    if check_layer.status_code != 200:
+        layer_create = geoserver.create_layer(
+                            ws_name,
+                            ds_name,
+                            layer_name,
+                            layer_title,
+                            table_name,
+                            srs,
+                            geom_att,
+                            extends,
+                            False
+        )
+
+    else:
         layer_create = geoserver.create_layer(
                             ws_name,
                             ds_name,
@@ -762,19 +781,6 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                             True
         )
 
-    else:
-        geoserver.deleteLayerName(ws_name, ds_name, layer_name)
-        layer_create = geoserver.create_layer(
-                            ws_name,
-                            ds_name,
-                            layer_name,
-                            layer_title,
-                            table_name,
-                            srs,
-                            geom_att,
-                            extends,
-                            False
-        )
     if layer_create.status_code == 201 or layer_create.status_code == 200:
         if geom_type:
             cache_values = values.get('cache_values')
@@ -835,6 +841,7 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
         return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
         return {"success": False, 'info': 'Давхарга үүсгэхэд алдаа гарлаа'}
+
 
 def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     layer_responce = []
@@ -898,7 +905,8 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     return layer_responce
 
 
-def _create_view(ids, table_name, data_type_ids, feature_config_id):
+def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
+    ids.sort()
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
@@ -906,8 +914,44 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
-            SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
+            SELECT
+                d.geo_id,
+                d.geo_data,
+                d.geo_id as inspire_id,
+                d.geo_id as localid,
+                {columns},
+                d.feature_id,
+                d.created_on,
+                d.created_by,
+                d.modified_on,
+                d.modified_by
+            FROM
+                crosstab('
+                    select
+                        b.geo_id,
+                        b.property_id,
+                        COALESCE(
+                            b.code_list_id::character varying(1000),
+                            b.value_text::character varying(1000),
+                            b.value_number::character varying(1000),
+                            b.value_date::character varying(1000)
+                        ) as value_text
+                    from
+                        public.m_datas b
+                    inner join
+                        m_geo_datas mg
+                    on
+                        mg.geo_id = b.geo_id
+                    and
+                        mg.feature_id = {feature_id}
+                    where
+                        property_id in ({properties})
+                    and
+                        data_type_id in ({data_type_ids})
+                    and
+                        feature_config_id in ({feature_config_id})
+                    order by 1,2'::text
+                )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
@@ -916,7 +960,9 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
                 feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id]),
-                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
+                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]),
+                feature_id=feature_id,
+            )
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
         with connections['default'].cursor() as cursor:
@@ -925,7 +971,6 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
         return True
     except Exception:
         return False
-
 
 
 def removeView(table_name):
@@ -951,7 +996,16 @@ def _create_design_view():
                         ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
                         ST_Transform(geo_data, 4326)
                         ) and
-                        feature_id in (5, 15,23, 17, 81, 38)
+                        feature_id in (
+                            select distinct(f.feature_id)
+                            from m_geo_datas f
+                            inner join l_features lf
+                            on f.feature_id = lf.feature_id
+                            inner join l_packages p
+                            on p.package_id = lf.package_id
+                            inner join l_themes t
+                            on t.theme_id = p.theme_id
+                        )
                 limit 10000
             '''
     with connections['default'].cursor() as cursor:
@@ -964,6 +1018,7 @@ def _create_design_view():
 @user_passes_test(lambda u: u.is_superuser)
 def get_style_data(request, payload):
     geom_type = payload.get('geom_type')
+    geom_type = 'ST_' + geom_type
     cursor = connections['default'].cursor()
     sql = '''
             SELECT
@@ -975,9 +1030,18 @@ def get_style_data(request, payload):
                     ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
                     ST_Transform(geo_data, 4326)
                     ) and
-                    feature_id in (5, 15,23, 17, 81, 38)
+                    feature_id in (
+                        select distinct(f.feature_id)
+                        from m_geo_datas f
+                        inner join l_features lf
+                        on f.feature_id = lf.feature_id
+                        inner join l_packages p
+                        on p.package_id = lf.package_id
+                        inner join l_themes t
+                        on t.theme_id = p.theme_id
+                    )
                     and
-                    ST_GeometryType(geo_data)  similar to '%{geom_type}%'
+                    ST_GeometryType(geo_data)  similar to '{geom_type}'
             limit 10000
             '''.format(geom_type=geom_type)
     cursor.execute(sql)
@@ -1004,6 +1068,7 @@ def check_styles_name(request, payload):
     return JsonResponse({
         'success': success,
     })
+
 
 @require_POST
 @ajax_required

@@ -12,6 +12,7 @@ from govorg.backend.forms import views as forms_views
 from govorg.backend.meta_data import views as meta_data_views
 from govorg.backend.revoke_request import views as revoke_request_views
 from govorg.backend.secure import views as secure_views
+from govorg.backend.tseg import views as tseg_view
 
 urlpatterns = [
     path('api/', include(([
@@ -27,6 +28,7 @@ urlpatterns = [
                 path('<int:pk>/update/', role_employee_views.update),
                 path('<int:pk>/detail/', role_employee_views.detail),
                 path('<int:pk>/delete/', role_employee_views.delete),
+                path('<int:pk>/get-erguul-info/', role_employee_views.get_erguul_info),
                 path('addresses/', role_employee_views.get_addresses),
                 path('get-erguul/', role_employee_views.get_erguul),
                 path('erguul-list/', role_employee_views.erguul_list),
@@ -43,11 +45,17 @@ urlpatterns = [
             ], 'role'))),
         ], 'role'))),
 
+        path('tseg/', include(([
+            path('', tseg_view.tseg_personal),
+            path('get-fields/', tseg_view.get_tseg_fields),
+        ], 'tseg'))),
+
         path('system/', include(([
             path('', system_views.systemList, name='system'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
         ], 'system'))),
+
 
         path('inspire/', include(([
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
@@ -90,19 +98,23 @@ urlpatterns = [
 
         path('tseg-personal/', include(([
             path('', forms_views.tsegPersonal, name='tseg-personal'),
+            path('tseg-roles/', forms_views.emp_tseg_roles, name='tseg-roles'),
             path('findSum/', forms_views.findSum, name='findSum'),
             path('find-point/', forms_views.findPoints, name='find-point'),
-            path('batalgaajuulah/', forms_views.tsegPersonalSuccess, name='tseg-personal-batalgaajuulah'),
+            path('success-point/<int:id>/', forms_views.tseg_personal_success, name='tseg-personal-batalgaajuulah'),
             path('update/', forms_views.tsegPersonalUpdate, name='tsegPersonalUpdate'),
             path('search/', forms_views.tsegPersonalSearch, name='tsegPersonalSearch'),
             path('searchName/', forms_views.tsegPersonalNameSearch, name='tsegPersonalNameSearch'),
             path('list/', forms_views.tseg_personal_list, name='tseg-personal-list'),
-            path('remove/', forms_views.tsegPersonalRemove, name='tseg-personal-remove'),
+            path('remove-point/<int:id>/', forms_views.tseg_personal_remove, name='tseg-personal-remove'),
+            path('get-field-values/', forms_views.get_field_values),
+            path('get-inspire-list/', forms_views.tseg_inspire_list),
+            path('get-tseg/', forms_views.get_tseg),
         ], 'tseg-personal'))),
 
         path('tseg-ustsan/', include(([
             path('', forms_views.tsegUstsan, name='tseg-ustsan'),
-            path('success/', forms_views.tsegUstsanSuccess, name='tseg-ustsan-success'),
+            path('success/', forms_views.tseg_ustsan_success, name='tseg-ustsan-success'),
             path('list/', forms_views.tsegUstsanList, name='tseg-ustsan-list'),
             path('remove/', forms_views.tsegUstsanRemove, name='tseg-ustsan-remove'),
             path('edit/', forms_views.tsegUstsanEdit, name='tsegUstsanEdit'),
@@ -152,6 +164,9 @@ urlpatterns = [
         path('nema/', include(([
             path('', govorg_inspire_views.nema_list, name='nema_list'),
             path('create/', govorg_inspire_views.create_nema, name='nema_create'),
+            path('update-c2405/', govorg_inspire_views.update_c2405, name='nema_create'),
+            path('get_attr_details/', govorg_inspire_views.get_attr_details, name='get_attr_details'),
+            path('get_nema_choice_list/', govorg_inspire_views.get_nema_choice_list, name='get_nema_choice_list'),
             path('<int:pk>/detail/', govorg_inspire_views.nema_detail, name='nema_detail'),
             path('remove/<int:pk>/', govorg_inspire_views.nema_remove, name='nema_remove'),
         ], 'nema'))),
@@ -168,7 +183,13 @@ urlpatterns = [
         path('', org_views.frontend, name='frontend'),
         path('emp-role/', org_views.emp_role, name='emp-role'),
         path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
-        path('set-config/', org_views.set_config)
+        path('set-config/', org_views.set_config),
+        path('get-covid-dashboard/', org_views.get_covid_dashboard),
+        path('get-covid-dashboard-id/<str:geo_id>/', org_views.get_covid_dashboard_id),
+        path('save-covid-dashboard/', org_views.save_dashboard),
+        path('dahsb-list/<str:geo_id>/', org_views.dashboard_list),
+        path('save-covid-dashboard-log/', org_views.save_dashboard_log),
+        path('remove-dashboard/<int:pk>/', org_views.remove_dashboard),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

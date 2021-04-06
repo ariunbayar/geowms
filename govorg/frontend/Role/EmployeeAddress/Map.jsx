@@ -51,6 +51,8 @@ export default class AddressMap extends Component {
 
     componentDidUpdate(pP, pS) {
         if (pP.features !== this.props.features) {
+            const source = this.vector_layer.getSource()
+            source.clear()
             this.readFeatures(this.props.features)
         }
         if (pP.feature !== this.props.feature) {
@@ -477,7 +479,7 @@ export default class AddressMap extends Component {
         })[0];
         source.addFeature(feat)
         feat.setProperties({ id })
-        this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], duration: 2000 })
+        this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], minResolution: 1 })
     }
 
     readFeatures(features) {

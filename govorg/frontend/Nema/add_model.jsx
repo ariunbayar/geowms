@@ -4,6 +4,8 @@ import * as Yup from 'yup'
 import { service } from './service'
 import ModalAlert from "@utils/Modal/ModalAlert"
 import InspireMap from "@utils/BundleMap"
+import {NemaPP} from './covid_dashboard/components/nemapop'
+import BackButton from "@utils/Button/BackButton"
 
 
 const validationSchema = Yup.object().shape({
@@ -29,6 +31,7 @@ export class ModelAddNema extends Component {
             model_alert_text: '',
             model_alert_icon: 'success',
             timer: null,
+            url:'',
             layer_types: [
                 {'layer_choice': '1', 'choice_value': 'Нээлттэй'},
                 {'layer_choice': '2', 'choice_value': 'Хаалттай'},
@@ -50,7 +53,7 @@ export class ModelAddNema extends Component {
     }
 
     getDetialAll(id) {
-        service.getDetialAll(id).then(({nema_detail_list}) => {
+        service.getDetialAll(id).then(({nema_detail_list, url}) => {
             if( nema_detail_list.length >0 ) {
                 nema_detail_list = nema_detail_list[0]
                 this.setState({
@@ -62,6 +65,7 @@ export class ModelAddNema extends Component {
                         created_at: nema_detail_list.created_at,
                         user_id: nema_detail_list.user_id,
                     },
+                    url
                 })
             }
         })
@@ -104,11 +108,11 @@ export class ModelAddNema extends Component {
         const {
             form_values, modal_alert_status,
             model_alert_text, model_alert_icon,
-            layer_types
+            layer_types, url
         } = this.state
         const id = this.props.match.params.id
         return (
-            <div className="col-md-8">
+            <div className="col-md-12">
                 <div className="row">
                     <div className="col-4 col-md-4 col-xl-4">
                         <div className="row">
@@ -132,7 +136,7 @@ export class ModelAddNema extends Component {
                                                 <div className="form-row col-md-12 d-inline-block text-dark">
                                                     <div className="form-row col-md-12">
                                                         <label htmlFor="" className="col-md-12">
-                                                            <strong>Давхаргын code</strong>
+                                                            <strong>Давхаргын код</strong>
                                                         </label>
                                                         <Field
                                                             type="text"
@@ -212,7 +216,16 @@ export class ModelAddNema extends Component {
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div className="col-8 col-md-8 col-xl-8">
+                        {
+                            id &&
+                            <InspireMap
+                                code={form_values.code }
+                                url={url}
+                                height="55vh"
+                                PPContent={NemaPP}
+                            />
+                        }
                     </div>
                 </div>
                 {
@@ -224,6 +237,7 @@ export class ModelAddNema extends Component {
                         model_type_icon={model_alert_icon}
                     />
                 }
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/gov/nema/list/`}></BackButton>
             </div>
         )
 

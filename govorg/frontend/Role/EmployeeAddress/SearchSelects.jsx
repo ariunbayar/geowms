@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import {service} from '../Employee/service'
+import './style.css'
 
 export default class SearchSelects extends Component {
 
@@ -18,10 +19,15 @@ export default class SearchSelects extends Component {
             aimag_geo_id: '',
             sum_geo_id: '',
             horoo_geo_id: '',
+            firstOrder_geom: '',
+            org_list: [],
+            levels: [],
         }
         this.handleChange = this.handleChange.bind(this)
         this.getGeom = this.getGeom.bind(this)
         this.getFieldValues = this.getFieldValues.bind(this)
+        this.getAllOrg = this.getAllOrg.bind(this)
+        this.handleChoose = this.handleChoose.bind(this)
     }
 
     getGeom(geo_id) {
@@ -37,15 +43,16 @@ export default class SearchSelects extends Component {
     getFieldValues() {
         service
             .formOptions()
-            .then(({ success, info }) => {
+            .then(({ success, info, firstOrder_geom }) => {
                 if (success) {
-                    this.setState({ aimag: info })
+                    this.setState({ aimag: info, firstOrder_geom })
                 }
             })
     }
 
     componentDidMount() {
         this.getFieldValues()
+        this.getAllOrg()
     }
 
     handleChange(e, field, child_field, reset_fields, parent_field) {
@@ -93,7 +100,7 @@ export default class SearchSelects extends Component {
                 geo_id = parent_obj.geo_id
             }
             else {
-                geo_id = 'au_496'
+                geo_id = this.state.firstOrder_geom
             }
             obj[field_geo_id] = geo_id
             this.getGeom(geo_id)
@@ -101,12 +108,26 @@ export default class SearchSelects extends Component {
         this.setState({ [field_id]: idx, ...obj })
     }
 
+    getAllOrg() {
+        service
+            .getAllOrg()
+            .then(({ success, org_list, levels }) => {
+                if (success) {
+                    this.setState({ org_list, levels })
+                }
+            })
+    }
+
+    handleChoose(choose, value) {
+        this.props.handleChoose(choose, value)
+    }
+
     render() {
-        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id } = this.state
+        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, org_list, levels } = this.state
 
         return (
             <div className="form-row">
-                <div className="form-group col-4">
+                <div className="form-group col-3">
                     <label htmlFor="aimag">Аймаг/Хот:</label>
                     <select
                         id="aimag"
@@ -121,7 +142,7 @@ export default class SearchSelects extends Component {
                         )}
                     </select>
                 </div>
-                <div className="form-group col-4">
+                <div className="form-group col-3">
                     <label htmlFor="sum">Сум/Дүүрэг:</label>
                     <select
                         id="sum"
@@ -135,7 +156,7 @@ export default class SearchSelects extends Component {
                         )}
                     </select>
                 </div>
-                <div className="form-group col-4">
+                <div className="form-group col-3">
                     <label htmlFor="horoo">Хороо/Баг:</label>
                     <select
                         id="horoo"
@@ -148,6 +169,46 @@ export default class SearchSelects extends Component {
                             <option key={idx} value={idx}>{data.name}</option>
                         )}
                     </select>
+                </div>
+                <div className="form-group col-3 text-right mt-4">
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-outline-primary btn-sm waves-effect waves-light m-1 dropdown-toggle"
+                            type="button" id="dropdownMenuButton"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                        >
+                            Байгууллага/Түвшин
+                        </button>
+                        <div className="dropdown-menu dropdown-menu-right org-list-scroll" aria-labelledby="dropdownMenuButton">
+                            {
+                                levels.length > 0 &&
+                                    <>
+                                        <div className="dropdown-divider"></div>
+                                        <button className="dropdown-item py-1" value={'all'} onClick={(e) => this.handleChoose('all', e.target.value)}>Бүх байгууллага</button>
+                                        <div className="dropdown-divider"></div>
+                                        <button className="dropdown-item py-1" value={'this_org'} onClick={(e) => this.handleChoose('this_org', e.target.value)}>Энэ байгууллага</button>
+                                        {
+                                            levels.map((level, id) =>
+                                                <>
+                                                    <div className="dropdown-divider"></div>
+                                                    <button key={id} className="dropdown-item py-1" value={level} onClick={(e) => this.handleChoose('level', e.target.value)}>Түвшин-{level}</button>
+                                                    <ul className="mb-1">
+                                                        {
+                                                            org_list.map((data, idx) =>
+                                                                data.level == level &&
+                                                                    <button key={idx} className="dropdown-item py-1 pl-0" value={data.id} onClick={(e) => this.handleChoose('org', e.target.value)}>{data.name}</button>
+                                                            )
+                                                        }
+                                                    </ul>
+                                                </>
+                                            )
+                                        }
+                                    </>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         )

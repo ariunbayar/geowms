@@ -6,20 +6,22 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from main.decorators import ajax_required
-from main import geoserver
+from main import geoserver, update_cache_layer
 from .models import WmtsCacheConfig
 from geoportal_app.models import User
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
+from django.views.decorators.csrf import csrf_exempt
+from main.decorators import get_conf_geoserver
 
 
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def layers(request):
+@get_conf_geoserver
+def layers(request, conf_geoserver):
 
-    config = geoserver.get_connection_conf()
 
     HEADERS = {
         'Content-Type': 'application/json',
@@ -27,13 +29,14 @@ def layers(request):
     }
 
     AUTH = HTTPBasicAuth(
-        config['geoserver_user'],
-        config['geoserver_pass'],
+        conf_geoserver['geoserver_user'],
+        conf_geoserver['geoserver_pass'],
     )
 
-    base_url = 'http://{host}:{port}/geoserver/rest/layers'.format(
-        host=config['geoserver_host'],
-        port=config['geoserver_port'],
+    base_url = '{protocol}://{host}:{port}/geoserver/rest/layers'.format(
+        host=conf_geoserver['geoserver_host'],
+        port=conf_geoserver['geoserver_port'],
+        protocol=conf_geoserver['geoserver_protocol'],
     )
 
     rsp = requests.get(
@@ -298,7 +301,7 @@ def create_group_cache(request, payload, group_name):
 
     detial_list = geoserver.get_layer_group_detail(group_name)
     glayer = detial_list.get('bounds')
-    srs = glayer.get('crs').split(":")[1]
+    srs = glayer.get('crs')
 
     errors = _cache_value_validation(zoom_start, zoom_stop, number_of_cache)
     if errors:
@@ -346,3 +349,10 @@ def create_group_cache(request, payload, group_name):
         'success': True,
         'info': 'Амжилттай хадгалагдлаа'
     })
+
+
+@require_GET
+@csrf_exempt
+def update_geo_cache(request):
+    update_cache_layer.update_web_cache()
+    return JsonResponse({'success': True})

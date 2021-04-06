@@ -5,7 +5,8 @@ import { Map, View, Feature, Overlay } from 'ol'
 import { transform as transformCoordinate, fromLonLat, Projection } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
-import { toLonLat } from 'ol/proj';
+import { toLonLat, get as getProjection } from 'ol/proj';
+import {getCenter} from 'ol/extent';
 import OSM from 'ol/source/OSM';
 import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
@@ -31,8 +32,9 @@ import { PopUp } from './popUp/PopUp'
 import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import ModalAlert from "@utils/Modal/ModalAlert"
-import SideBar from "./SideBar"
+import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
+import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
 
 
 export default class BundleMap extends Component {
@@ -191,12 +193,13 @@ export default class BundleMap extends Component {
                         ...layer,
                         wms_or_cache_ur,
                         tile: new Tile({
+                            preload: 6,
                             minZoom: layer.zoom_start,
                             maxZoom: layer.zoom_stop,
                             source: new WMTS({
-                                url: url,
+                                url: chache_url,
                                 layer: layer.code,
-                                matrixSet: "EPSG:4326",
+                                matrixSet: this.state.projection_display,
                                 format: 'image/png',
                                 projection: this.state.projection_display,
                                 tileGrid: new WMTSTileGrid({
@@ -208,11 +211,14 @@ export default class BundleMap extends Component {
                                 }),
                                 style: '',
                                 wrapX: true,
+                                cacheSize: 1000,
+                                tileLoadFunction: securedImageWMS
                             }),
                         }),
                         wms_tile: new Tile({
+                            preload: 6,
                             source: new TileWMS({
-                                projection: this.state.projection_display,
+                                projection: this.state.projection,
                                 ratio: 1,
                                 url: url,
                                 params: {
@@ -221,7 +227,8 @@ export default class BundleMap extends Component {
                                     'VERSION': '1.1.1',
                                     "STYLES": '',
                                     "exceptions": 'application/vnd.ogc.se_inimage',
-                                }
+                                },
+                                tileLoadFunction: securedImageWMS
                             }),
                         })
                     }
@@ -248,9 +255,8 @@ export default class BundleMap extends Component {
                         layer = new Tile({
                             preload: 6,
                             source: new TileImage({
-                                projection: this.state.projection,
-                                url: base_layer_info.url,
                                 crossOrigin: 'Anonymous',
+                                url: base_layer_info.url,
                             }),
                         })
                     }
@@ -259,7 +265,6 @@ export default class BundleMap extends Component {
                         layer = new Tile({
                             source: new TileWMS({
                                 ratio: 1,
-                                projection: this.state.projection_display,
                                 url: base_layer_info.url,
                                 params: {
                                     'LAYERS': base_layer_info.layers,
@@ -267,7 +272,8 @@ export default class BundleMap extends Component {
                                     'VERSION': '1.1.1',
                                     "STYLES": '',
                                     "exceptions": 'application/vnd.ogc.se_inimage',
-                                }
+                                },
+                                tileLoadFunction: securedImageWMS
                             }),
                             name: base_layer_name,
                         })
@@ -276,8 +282,9 @@ export default class BundleMap extends Component {
                         layer = new Tile({
                             source: new WMTS({
                                 url: base_layer_info.url,
+                                // url: base_layer_info.geoserver_url,
                                 layer: base_layer_info.layers,
-                                matrixSet: "EPSG:4326",
+                                matrixSet: this.state.projection_display,
                                 format: 'image/png',
                                 projection: this.state.projection_display,
                                 tileGrid: new WMTSTileGrid({
@@ -287,6 +294,7 @@ export default class BundleMap extends Component {
                                     resolutions: resolutions,
                                     matrixIds: gridNames,
                                 }),
+                                tileLoadFunction: securedImageWMS,
                                 style: '',
                                 wrapX: true,
                             }),
@@ -369,9 +377,9 @@ export default class BundleMap extends Component {
                 marker_layer,
             ],
             view: new View({
-                projection: this.state.projection_display,
-                center: [104.22667701377826,46.65575592313776],
-                zoom: 6.041301562246971,
+                projection: this.state.projection,
+                center: [11461613.630815497, 5878656.0228370065],
+                zoom: 5.041301562246971,
                 minZoom: 1,
             })
         })
@@ -411,7 +419,21 @@ export default class BundleMap extends Component {
         this.element_closer = elementa.children[0]
     }
 
+    // updateViewProjection() {
+    //     var newProj = getProjection(this.state.projection_display);
+    //     var newProjExtent = newProj.getExtent();
+    //     var newView = new View({
+    //       projection: newProj,
+    //       center: getCenter(newProjExtent || [0, 0, 0, 0]),
+    //       zoom: 1,
+    //       extent: newProjExtent || undefined,
+    //     });
+    //     this.map.setView(newView);
+    // }
+
     handleMapClick(event) {
+        const view = this.map.getView()
+        const projection = view.getProjection()
         if(!this.state.is_draw_open) {
 
             const coordinate = event.coordinate
@@ -519,7 +541,7 @@ export default class BundleMap extends Component {
         const { vector_layer } = this.state
         const features = (this.state.format.readFeatures(buffer_feature, {
             dataProjection: this.state.projection_display,
-            featureProjection: this.state.projection_display,
+            featureProjection: this.state.projection,
         }))
         features[0].setProperties({ id: 'buffer' })
         vector_layer.getSource().addFeature(features[0])
@@ -536,7 +558,6 @@ export default class BundleMap extends Component {
                 name: name,
                 layers: this.is_not_visible_layers.map((layer_code) => {
                     var filtered_layer
-                    var filtered_tile
                     layers.map((layer) => {
                         if (layer_code == layer.code) {
                             filtered_layer = layer
@@ -556,7 +577,7 @@ export default class BundleMap extends Component {
                             }
                             const tile = new Tile ({
                                 source: new TileWMS({
-                                    projection: this.state.projection_display,
+                                    projection: this.state.projection,
                                     url: main_url,
                                     params: {
                                         'LAYERS': layer.code,
@@ -611,7 +632,7 @@ export default class BundleMap extends Component {
                 }
             }
         })
-    return {layer_code, is_feature}
+        return {layer_code, is_feature}
     }
 
     getMetrScale(scale) {
@@ -779,15 +800,19 @@ export default class BundleMap extends Component {
     showFeaturesAt(coordinate) {
         this.is_empty = true
         this.sendFeatureInfo = []
-
+        const { is_authenticated } = this.state
         const overlay = this.overlay
         overlay.setPosition(coordinate)
+        if (is_authenticated) {
+            this.setState({ pay_modal_check: false })
+            this.featureFromUrl(coordinate)
 
-        this.setState({ pay_modal_check: false })
-        this.featureFromUrl(coordinate)
-
-        this.sendFeatureInfo = []
-        this.is_empty = true
+            this.sendFeatureInfo = []
+            this.is_empty = true
+        }
+        else {
+            this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, false, true, false, false)
+        }
     }
 
     setSourceInPopUp(mode) {
@@ -874,7 +899,7 @@ export default class BundleMap extends Component {
                     this.is_not_visible_layers = layers_code
                     const features_col = (this.state.format.readFeatures(features, {
                         dataProjection: this.state.projection_display,
-                        featureProjection: this.state.projection_display,
+                        featureProjection: this.state.projection,
                     }))
                     const style = new Style({
                         image: new CircleStyle({
@@ -913,7 +938,7 @@ export default class BundleMap extends Component {
         const {format} = this.state
         const data = format.writeFeatureObject(features, {
             dataProjection: this.state.projection_display,
-            featureProjection: this.state.projection_display,
+            featureProjection: this.state.projection,
         })
         const changedFeature = JSON.stringify(data)
         return changedFeature
@@ -926,7 +951,7 @@ export default class BundleMap extends Component {
             this.removeFeatureFromSource(id)
             var feature =  new GeoJSON().readFeatures(feature, {
                 dataProjection: this.state.projection_display,
-                featureProjection: this.state.projection_display,
+                featureProjection: this.state.projection,
             });
             feature[0].setProperties({ id })
             vector_layer.getSource().addFeature(feature[0])
@@ -937,7 +962,7 @@ export default class BundleMap extends Component {
 
     transformToLatLong(coordinateList) {
         const geom = coordinateList[0].map((coord, idx) => {
-            const map_coord = transformCoordinate(coord, this.state.projection_display, this.state.projection_display)
+            const map_coord = transformCoordinate(coord, this.state.projection, this.state.projection_display)
               return map_coord
         })
         return geom
@@ -993,15 +1018,15 @@ export default class BundleMap extends Component {
         }
 
         wms_array.map(({ name, layers }, w_idx) => {
-            layers.map(({ id, code, tile }, l_idx) => {
-                if (tile.getVisible()) {
+            layers.map(({ id, code, wms_tile }, l_idx) => {
+                if (wms_tile.getVisible()) {
                     const {layer_code, is_feature} = this.check_inspire_layer(code)
                     if (is_feature) {
                         layer_codes.push(layer_code)
                         layer_ids.push([code, id])
                     }
                 }
-                else if (!tile.getVisible() && this.is_not_visible_layers.length > 0) {
+                else if (!wms_tile.getVisible() && this.is_not_visible_layers.length > 0) {
                         this.is_not_visible_layers.map((layer_code, idx) => {
                             if (layer_code == code) {
                                 layer_ids.push([code, id])
@@ -1132,7 +1157,9 @@ export default class BundleMap extends Component {
         const settings_component = () => {
             return(
                 <div>
-                    <h4>Тун удахгүй</h4>
+                    <div>
+                        <button class="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i class="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
+                    </div>
                 </div>
             )
         }

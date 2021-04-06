@@ -14,21 +14,24 @@ export default class UsersAddress extends Component {
             feature: {},
             is_loading: true,
             is_empty: false,
+            choose: 'this_org',
+            value: '',
         }
         this.getAddresses = this.getAddresses.bind(this)
         this.getFeature = this.getFeature.bind(this)
         this.saveErguulPlace = this.saveErguulPlace.bind(this)
         this.saveErguulTailbar = this.saveErguulTailbar.bind(this)
         this.setLoading = this.setLoading.bind(this)
+        this.handleChoose = this.handleChoose.bind(this)
     }
 
     componentDidMount() {
-        this.getAddresses()
+        this.getAddresses(this.state.choose, this.state.value)
     }
 
-    getAddresses() {
+    getAddresses(choose, value) {
         service
-            .getAddresses()
+            .getAddresses(choose, value)
             .then(({ success, points }) => {
                 if (success) {
                     let is_empty = false
@@ -89,6 +92,10 @@ export default class UsersAddress extends Component {
             })
     }
 
+    handleChoose(choose, value) {
+        this.getAddresses(choose, value)
+    }
+
     render() {
         const { points, feature, is_loading, is_empty } = this.state
         const { employee } = this.props
@@ -100,7 +107,7 @@ export default class UsersAddress extends Component {
                 <div className="card-body">
                     <Loader is_loading={is_loading}/>
                     <div className="col-12">
-                        <SearchSelects sendFeature={this.getFeature} />
+                        <SearchSelects sendFeature={this.getFeature} handleChoose={this.handleChoose} />
                         <AddressMap
                             features={points}
                             feature={feature}

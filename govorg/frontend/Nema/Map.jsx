@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import InspireMap from "@utils/BundleMap"
 import {service} from './service'
+import CovidDashboard from './covid_dashboard'
+
 
 export default class NemaMap extends Component {
 
@@ -9,9 +11,11 @@ export default class NemaMap extends Component {
         this.state = {
             bundle: '',
             is_loading: false,
+            choice_list: []
         }
         this.loadNema = this.loadNema.bind(this)
         this.getDatas = this.getDatas.bind(this)
+        this.handleOnChange = this.handleOnChange.bind(this)
 
     }
 
@@ -28,13 +32,23 @@ export default class NemaMap extends Component {
             })
     }
 
-    loadNema(addNema) {
+    componentDidUpdate(pP, pS) {
+        const { choice_list, bundle} = this.state
+        if ( bundle != pS.bundle ) {
+            this.loadNema( bundle, choice_list )
+        }
+        if( pS.choice_list != choice_list ) {
+            this.loadNema( bundle, choice_list )
+        }
+    }
+
+    loadNema(bundle_id, choice_list) {
         service
-            .getNema()
+            .getNema(bundle_id, choice_list)
             .then(({ success, info, wms_list }) => {
                 if (success) {
                     if (wms_list.length > 0) {
-                        addNema(wms_list)
+                        this.setState({wms_list})
                     }
                 }
                 else {
@@ -43,14 +57,33 @@ export default class NemaMap extends Component {
             })
     }
 
+    handleOnChange(e) {
+        var choice = e.target.name
+        if (e.target.checked) {
+
+            var joined = this.state.choice_list.concat(choice)
+            this.setState({ choice_list: joined})
+
+        } else {
+            var array = [...this.state.choice_list]
+            for (let [i, layer] of array.entries()) {
+                if (layer == choice) {
+                    array.splice(i, 1);
+                }
+            }
+            this.setState({choice_list: array})
+        }
+    }
+
+
     render() {
-        const { bundle } = this.state
+        const { bundle, wms_list } = this.state
+        const { employee } = this.props
         return (
-            <div className="col-lg-12">
-                <InspireMap
-                    bundle={{'id': bundle}}
-                    loadNema={(func) => this.loadNema(func)}
-                />
+            <div className="col-lg-12 p-0 m-0">
+                <div className="col-12 col-md-12 col-xl-12 p-0 m-0">
+                    <CovidDashboard wms_list={wms_list} geo_id={employee.geo_id}/>
+                </div>
             </div>
         )
     }

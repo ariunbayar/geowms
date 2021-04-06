@@ -28,7 +28,7 @@ class PopUpCmp extends Component {
             pdf_id:'',
             is_purchase: false,
             is_enable: false,
-            is_authenticated: false,
+            is_authenticated: props.is_authenticated,
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
@@ -53,7 +53,7 @@ class PopUpCmp extends Component {
         if(pP.datas !== datas && !this.props.is_loading) {
             this.properties = []
             const startNumber = 1
-            this.setState({ startNumber, is_plus: true, is_prev: false })
+            this.setState({ startNumber, is_plus: true, is_prev: false, is_enable: false })
             this.checkModeAndCode(startNumber, datas)
         }
     }
@@ -65,9 +65,9 @@ class PopUpCmp extends Component {
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
         if (plus == datas.length) {
-            this.setState({ is_plus: false, is_prev: true })
+            this.setState({ is_plus: false, is_prev: true, is_enable: false })
         } else {
-            this.setState({ is_plus: true, is_prev: true })
+            this.setState({ is_plus: true, is_prev: true, is_enable: false })
         }
         this.checkModeAndCode(plus, datas)
         this.setState({ startNumber: plus })
@@ -80,9 +80,9 @@ class PopUpCmp extends Component {
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
         if (minus == 1) {
-            this.setState({ is_prev: false, is_plus: true })
+            this.setState({ is_prev: false, is_plus: true, is_enable: false })
         }else {
-            this.setState({ is_plus: true, is_prev: true })
+            this.setState({ is_plus: true, is_prev: true, is_enable: false })
         }
         this.checkModeAndCode(minus, datas)
         this.setState({ startNumber: minus })
@@ -92,6 +92,7 @@ class PopUpCmp extends Component {
         let mode
         let code
         let values
+        let localid
         let geom_name
         this.click_count = 0
         if (datas.length > 0) {
@@ -106,23 +107,21 @@ class PopUpCmp extends Component {
                 geom_name = datas[number - 1][0][0]
             }
             values.map((value, idx) => {
-                if (value[0] == 'point_id') {
+                if (value[0] == 'geo_id') {
                     this.setState({ id: value[1] })
-                }
-                if ((value[0] == 'point_name') || value[2] && value[2].toLowerCase() == 'name') {
-                    this.setState({ name: value[1] })
+                    localid = value[1]
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
-                    this.checkButtonEnableWithPdf(value[1])
+                    // this.checkButtonEnableWithPdf(value[1])
                 }
                 if (value[2] && value[2].toLowerCase() == 'pointnumber') {
-                    this.checkButtonEnableWithId(value[1])
-                    this.setState({ id: value[1] })
+                    this.checkButtonEnableWithId(localid, value[1])
+                    this.setState({ name: value[1] })
                     geom_name = value[1]
                 }
             })
             this.setNowData(number, datas, mode, code, geom_name)
-            // this.props.setSource(mode)
+            this.props.setSource(mode)
         }
     }
 
@@ -148,9 +147,9 @@ class PopUpCmp extends Component {
             })
     }
 
-    checkButtonEnableWithId(geo_id){
-        service.checkButtonEnableWithId(geo_id)
-            .then(({is_enable, success, pdf_id}) => {
+    checkButtonEnableWithId(geo_id, pdf_id){
+        service.checkButtonEnableWithId(geo_id, pdf_id)
+            .then(({is_enable, success, geo_id}) => {
                 if(success){
                     this.setState({ is_enable, pdf_id })
                 }
@@ -220,55 +219,57 @@ class PopUpCmp extends Component {
                     </div>
                     <Loader is_loading={is_loading} />
                     {
-                        is_empty
+                        is_empty && is_authenticated
                         ?
                             <div className="ol-popup-contet text-center">
                                 <b>Хоосон газар сонгосон байна.</b>
                             </div>
                         :
-                            <div className="ol-popup-contet">
-                                {
-                                    data.length >= 1
-                                    &&
-                                        data[0].map((layer, idx) =>
-                                            idx == 1 &&
-                                            layer.map((value, v_idx) =>
-                                                value[0].toLowerCase().startsWith('name')
-                                                && <b key={v_idx}>{value[1]}</b>
-                                            )
-                                        )
-                                }
-                                <hr className="m-1 border border-secondary rounded"/>
-                                <table className="table borderless no-padding">
-                                    <tbody>
-                                        {
-                                            data.length >= 1
-                                            ?
-                                                data[0].map((layer, idx) =>
-                                                    idx == 1 &&
-                                                    layer.map((value, v_idx) =>
-                                                        !value[0].toLowerCase().startsWith('name')
-                                                        &&
-                                                            <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
-                                                                <th className="font-weight-normal">
-                                                                    <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
-                                                                    <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
-                                                                </th>
-                                                            </tr>
-                                                        )
+                            is_authenticated
+                            &&
+                                <div className="ol-popup-contet">
+                                    {
+                                        data.length >= 1
+                                        &&
+                                            data[0].map((layer, idx) =>
+                                                idx == 1 &&
+                                                layer.map((value, v_idx) =>
+                                                    value[0].toLowerCase().startsWith('name')
+                                                    && <b key={v_idx}>{value[1]}</b>
                                                 )
-                                            :
-                                            <tr><th>Хоосон байна</th></tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
+                                            )
+                                    }
+                                    <hr className="m-1 border border-secondary rounded"/>
+                                    <table className="table borderless no-padding">
+                                        <tbody>
+                                            {
+                                                data.length >= 1
+                                                ?
+                                                    data[0].map((layer, idx) =>
+                                                        idx == 1 &&
+                                                        layer.map((value, v_idx) =>
+                                                            value[0] != 'geo_id' && !value[0].toLowerCase().startsWith('name')
+                                                            &&
+                                                                <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
+                                                                    <th className="font-weight-normal">
+                                                                        <b>{value[0].charAt(0).toUpperCase() + value[0].substring(1)}:</b>
+                                                                        <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
+                                                                    </th>
+                                                                </tr>
+                                                        )
+                                                    )
+                                                :
+                                                <tr><th>Хоосон байна</th></tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                     }
                     {!is_authenticated && !is_empty && is_from_inspire
                         ?
-                        <div className="btn-group flex-wrap d-flex justify-content-center">
+                        <div className="m-5">
                             <button
-                                className="btn btn-xs btn-primary mb-2 mx-3"
+                                className="btn btn-primary p-2 mx-4"
                             >
                                 <a className="text-decoration-none text-white" href="/login/">Нэвтрэх</a>
                             </button>
@@ -364,8 +365,8 @@ export class PopUp extends Control {
         this.renderComponent({sendElem, close})
     }
 
-    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=true) {
+    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=true, is_authenticated=false) {
         this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading})
+        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading, is_authenticated})
     }
 }

@@ -1,25 +1,27 @@
-import os
-import glob
-import csv
-from django.conf import settings
+import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.paginator import Paginator
-from main.decorators import ajax_required
+
 from backend.payment.models import Payment
 from backend.payment.models import PaymentPoint
 from backend.payment.models import PaymentPolygon
 from backend.payment.models import PaymentLayer
 from backend.wmslayer.models import WMSLayer
-from geoportal_app.models import User
+from backend.inspire.models import LFeatures
+from backend.inspire.models import LProperties
+from backend.inspire.models import MDatas
+from backend.inspire.models import LCodeLists
+from backend.org.models import Employee
 from govorg.backend.forms.models import TsegUstsan, Mpoint_view
-from main.utils import resize_b64_to_sizes
-from django.core.files.uploadedfile import SimpleUploadedFile
+from geoportal_app.models import User
+
 from main import utils
+from main.decorators import ajax_required
 
 
 @require_GET
@@ -120,10 +122,6 @@ def tsegSearch(request, payload):
 def tsegAdd(request):
     tseg_dugaar = request.POST.get('tsegiin_dugaar')
 
-    mpoint = Mpoint_view.objects.using('postgis_db').filter(point_id__icontains=tseg_dugaar).first()
-    if mpoint.point_id != tseg_dugaar:
-        return JsonResponse({'success': False})
-
     oiroltsoo_bairlal = request.POST.get('oiroltsoo_bairlal')
     evdersen_baidal = request.POST.get('evdersen_baidal')
     shaltgaan = request.POST.get('nohtsol_baidal')
@@ -140,30 +138,35 @@ def tsegAdd(request):
     img_hoino = request.POST.get('zurag_hoid')
     img_omno = request.POST.get('zurag_omno')
     if img_holoos:
-        [image_x2] = resize_b64_to_sizes(img_holoos, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_holoos, [(720, 720)])
         img_holoos = SimpleUploadedFile('img.png', image_x2)
     if img_oiroos:
-        [image_x2] = resize_b64_to_sizes(img_oiroos, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_oiroos, [(720, 720)])
         img_oiroos = SimpleUploadedFile('img.png', image_x2)
     if img_baruun:
-        [image_x2] = resize_b64_to_sizes(img_baruun, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_baruun, [(720, 720)])
         img_baruun = SimpleUploadedFile('img.png', image_x2)
     if img_zuun:
-        [image_x2] = resize_b64_to_sizes(img_zuun, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_zuun, [(720, 720)])
         img_zuun = SimpleUploadedFile('img.png', image_x2)
     if img_hoino:
-        [image_x2] = resize_b64_to_sizes(img_hoino, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_hoino, [(720, 720)])
         img_hoino = SimpleUploadedFile('img.png', image_x2)
     if img_omno:
-        [image_x2] = resize_b64_to_sizes(img_omno, [(720, 720)])
+        [image_x2] = utils.resize_b64_to_sizes(img_omno, [(720, 720)])
         img_omno = SimpleUploadedFile('img.png', image_x2)
 
-    users = User.objects.filter(id=request.user.id)
-    for user in users:
-        email = user.email
-        baiguulla = 'ДАН'
-        alban_tushaal = 'ДАН'
-        phone = ''
+    user = User.objects.filter(id=request.user.id).first()
+    employee_qs = Employee.objects.filter(user=user)
+    email = user.email
+    baiguulla = 'ДАН'
+    alban_tushaal = 'ДАН'
+    phone = ''
+    if employee_qs:
+        employee = employee_qs.first()
+        alban_tushaal = employee.position.name
+        baiguulla = employee.org.name
+        phone = employee.phone_number
 
     TsegUstsan.objects.create(
         email=email,
@@ -186,63 +189,40 @@ def tsegAdd(request):
     return JsonResponse({'success': True})
 
 
-def _get_attribute_name_from_file(content):
-    att = dict()
-    for idx in range(0, len(content)):
-        if content[idx].lower() == 'aimag':
-            att['aimag'] = idx
-        if content[idx].lower() == 'sum':
-            att['sum_name'] = idx
-        if content[idx].lower() == 'point_name':
-            att['point_name'] = idx
-        if content[idx].lower() == 'pid':
-            att['pid'] = idx
-        if content[idx].lower() == 'ondor':
-            att['ondor'] = idx
-    return att
-
-
-def _get_items_with_file(content, att_names):
-    point_info = {
-        'undur': content[att_names['ondor']] or 'Өндөр байхгүй',
-        'aimag': content[att_names['aimag']],
-        'sum': content[att_names['sum_name']],
-    }
-    return point_info
-
-
-def _get_info_from_file(point_id, pdf_id):
-    found_items = dict()
-    file_list = [
-        f for f in glob.glob(os.path.join(settings.FILES_ROOT, "*.csv"))
-    ]
-    for a_file in file_list:
-        with open(a_file, 'rt') as f:
-            contents = csv.reader(f)
-            contents = list(contents)
-            for idx in range(0, len(contents)):
-                if idx == 0:
-                    att_names = _get_attribute_name_from_file(contents[idx])
-                else:
-                    content = contents[idx]
-                    # check_pdf_path = '/home/odk/Desktop/pdfs/tseg-personal-file'
-                    if str(content[att_names['pid']]) == str(pdf_id) and str(content[att_names['point_name']]) == str(point_id):
-                        found_items = _get_items_with_file(content, att_names)
-    return found_items
+def _filter_Model(filters, Model=MDatas, initial_qs=[]):
+    if not initial_qs:
+        initial_qs = Model.objects
+    for search in filters:
+        initial_qs = initial_qs.filter(**search)
+    return initial_qs
 
 
 def _get_tseg_detail(payment):
     points = list()
     pay_points = PaymentPoint.objects.filter(payment=payment)
     for point in pay_points:
-        point_info = _get_info_from_file(point.point_id, point.pdf_id)
-        if point_info:
-            points.append({
-                'name': point.point_name,
-                'amount': point.amount,
-                'file_name': point.pdf_id,
-                'mpoint': point_info
-            })
+        geo_id = point.point_id
+        point_info = utils.get_mdata_value('gnp-gp-gp', geo_id, is_display=True)
+        info = dict()
+        for key, value in point_info.items():
+            if isinstance(value, datetime.datetime):
+                point_info[key] = utils.datetime_to_string(value)
+            if key == 'AdministrativeUnitSubClass':
+                code_qs = _filter_Model([{'code_list_id': point_info[key]}], Model=LCodeLists)
+                if code_qs:
+                    code = code_qs.first()
+                    if code.top_code_list_id:
+                        top_code_qs = _filter_Model([{'code_list_id': code.top_code_list_id}], Model=LCodeLists)
+                        if top_code_qs:
+                            top_code = top_code_qs.first()
+                            info['aimag'] = top_code.code_list_name
+                            info['sum'] =  code.code_list_name
+                    else:
+                        info['aimag'] = code.code_list_name
+            info[key] = value
+        info['amount'] = point.amount
+        points.append(info)
+
     return points
 
 
