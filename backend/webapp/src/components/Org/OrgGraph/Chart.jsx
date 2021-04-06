@@ -7,8 +7,8 @@ export default class Charts extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            page_date: [],
-            page_date_count: [],
+            emp_age: [],
+            count_emps_age: [],
             org_id: props.org_id
         }
         this.handlePageCount=this.handlePageCount.bind(this)
@@ -20,21 +20,21 @@ export default class Charts extends Component {
     handlePageCount(){
         service
             .ageCount(this.state.org_id)
-            .then(({ page_date, page_date_count }) => {
-            if(page_date_count){
-                this.setState({ page_date, page_date_count })
+            .then(({ emp_age, count_emps_age }) => {
+            if(count_emps_age){
+                this.setState({ emp_age, count_emps_age })
             }
         })
 
     }
 
     render() {
-        const {page_date , page_date_count } = this.state
+        const {emp_age , count_emps_age } = this.state
         const dataLine = {
-            labels:page_date,
+            labels:emp_age,
             datasets: [
                 {
-                    label: "Нас",
+                    label: "Насны бүлэглэл",
                     fill: true,
                     lineTension: 0.3,
                     backgroundColor: "rgba(184, 185, 210, .3)",
@@ -45,14 +45,14 @@ export default class Charts extends Component {
                     borderJoinStyle: "miter",
                     pointBorderColor: "rgb(0, 153, 255)",
                     pointBackgroundColor: "rgb(255, 255, 255)",
-                    pointBorderWidth: 10,
+                    pointBorderWidth: 7,
                     pointHoverRadius: 5,
                     pointHoverBackgroundColor: "rgb(0, 0, 0)",
                     pointHoverBorderColor: "rgba(220, 220, 220, 1)",
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: page_date_count
+                    data: count_emps_age
                 },
             ]
         }

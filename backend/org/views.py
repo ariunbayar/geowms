@@ -82,7 +82,6 @@ def employee_detail(request, pk):
     employee = Employee.objects
     employee = employee.filter(user=user)
     employee = employee.first()
-    print(employee)
 
     address = EmployeeAddress.objects
     address = address.filter(employee=employee)
@@ -1813,72 +1812,33 @@ def emp_gender_count(request, pk):
 @ajax_required
 def emp_age_count(request, pk):
 
-    RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
+    date_now = datetime.datetime.now()
+    year = date_now.year
+    year_cut = str(date_now.year)[2:4]  # odoogiin on '2021'
 
-    page_all = RequestEvent.objects.all().order_by('datetime__date').distinct('datetime__date')
-    page_date = []
-    count_emps = []
-    for page in page_all:
-        page_date.append(page.datetime.strftime('%Y-%m-%d'))
-        count_emps.append(RequestEvent.objects.filter(datetime__date=page.datetime).count())
-
-    dateNow = datetime.datetime.now()
-    year = dateNow.year
-    yearCut = str(dateNow.year)[2:4]
-    print(year, 'year')
-    print(yearCut, 'yearCut')
-
+    emp_reg = []
+    emp_age = []
     qs = Employee.objects.filter(org_id=1)
-    emp = []
+
     for employee in qs:
-        emp.append(employee.user.register)
-        print(emp)
-        # emps.append
+        emp_reg.append(employee.user.register)
 
         register = employee.user.register
-        registerCut = register[2:4]
-        print(registerCut, 'registerCut')
-        if -1 < int(registerCut) and int(registerCut) < int(yearCut):
-            age = int(yearCut) - int(registerCut)
-            print(age, '2000 onoos hoish uy')
+        register_cut = register[2:4]
+        if -1 < int(register_cut) and int(register_cut) < int(year_cut):
+            age = int(year_cut) - int(register_cut)
+            emp_age.append(age)
         else:
-            birthYear = str(19) + registerCut
-            age = int(year) - int(birthYear)
-            print(age, '2000 onoos omnoh uyiinhen')
+            birth_year = str(19) + register_cut
+            age = int(year) - int(birth_year)
+            emp_age.append(age)
+    print(emp_age, '-----------------------------')
 
-        rsp = {
-            'page_date': age,  # nas
-        }
+    count_emps_age = [3, 4, 2, 1]
+
     rsp = {
-        'page_date_count': count_emps,  # nasaar buleglesen too
+        'count_emps_age': count_emps_age,  # nasaar buleglesen too
+        'emp_age': emp_age,  # nas
     }
+
     return JsonResponse(rsp)
-
-
-# dateNow = datetime.datetime.now()
-# year = dateNow.year
-# yearCut = str(dateNow.year)[2:4]
-# print(year, 'year')
-# print(yearCut, 'yearCut')
-
-# qs = Employee.objects.filter(org_id=1)
-# emp = []
-# for employee in qs:
-#     emp.append(employee.user.register)
-#     print(emp)
-#     # emps.append
-
-#     register = employee.user.register
-#     registerCut = register[2:4]
-#     print(registerCut, 'registerCut')
-#     if -1 < int(registerCut) and int(registerCut) < int(yearCut):
-#         age = int(yearCut) - int(registerCut)
-#         print(age, '2000 onoos hoish uy')
-#     else:
-#         birthYear = str(19) + registerCut
-#         age = int(year) - int(birthYear)
-#         print(age, '2000 onoos omnoh uyiinhen')
-
-#     rsp = {
-#         'emps_age': age,
-#     }
