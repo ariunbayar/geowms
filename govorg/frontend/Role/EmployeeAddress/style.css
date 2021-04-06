@@ -1,0 +1,25 @@
+.org-list-scroll {
+    overflow-y: scroll;
+    max-height: 45vh;
+    /* opacity: 0; */
+}
+
+.org-list-scroll::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+/* Handle */
+.org-list-scroll::-webkit-scrollbar-thumb {
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+.org-list-scroll::-webkit-scrollbar-thumb:hover {
+    background: #034ea2;
+}
+.org-list-scroll:hover::-webkit-scrollbar-thumb {
+    background: #A9A9A9;
+    border-radius: 10px;
+    transition: 0.4s;
+}
