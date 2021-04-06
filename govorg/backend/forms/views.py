@@ -1211,7 +1211,6 @@ def _get_values(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegPersonal(request):
-
     employee = get_object_or_404(Employee, user=request.user)
     pk = request.POST.get('idx')
     geo_id = request.POST.get('geo_id')
@@ -1572,6 +1571,7 @@ def tseg_ustsan_success(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegUstsanList(request, payload):
+
     display_items = []
     page = payload.get('page')
     per_page = payload.get('perpage')
