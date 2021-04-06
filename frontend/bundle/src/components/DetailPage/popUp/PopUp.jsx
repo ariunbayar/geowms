@@ -92,6 +92,7 @@ class PopUpCmp extends Component {
         let mode
         let code
         let values
+        let localid
         let geom_name
         this.click_count = 0
         if (datas.length > 0) {
@@ -106,15 +107,16 @@ class PopUpCmp extends Component {
                 geom_name = datas[number - 1][0][0]
             }
             values.map((value, idx) => {
-                if (value[0] == 'point_id') {
+                if (value[0] == 'geo_id') {
                     this.setState({ id: value[1] })
+                    localid = value[1]
                 }
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
                     // this.checkButtonEnableWithPdf(value[1])
                 }
                 if (value[2] && value[2].toLowerCase() == 'pointnumber') {
-                    this.checkButtonEnableWithId(value[1])
-                    this.setState({ id: value[1], name: value[1] })
+                    this.checkButtonEnableWithId(localid, value[1])
+                    this.setState({ name: value[1] })
                     geom_name = value[1]
                 }
             })
@@ -145,9 +147,9 @@ class PopUpCmp extends Component {
             })
     }
 
-    checkButtonEnableWithId(geo_id){
-        service.checkButtonEnableWithId(geo_id)
-            .then(({is_enable, success, pdf_id}) => {
+    checkButtonEnableWithId(geo_id, pdf_id){
+        service.checkButtonEnableWithId(geo_id, pdf_id)
+            .then(({is_enable, success, geo_id}) => {
                 if(success){
                     this.setState({ is_enable, pdf_id })
                 }
@@ -246,7 +248,7 @@ class PopUpCmp extends Component {
                                                     data[0].map((layer, idx) =>
                                                         idx == 1 &&
                                                         layer.map((value, v_idx) =>
-                                                            !value[0].toLowerCase().startsWith('name')
+                                                            value[0] != 'geo_id' && !value[0].toLowerCase().startsWith('name')
                                                             &&
                                                                 <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
                                                                     <th className="font-weight-normal">
@@ -254,7 +256,7 @@ class PopUpCmp extends Component {
                                                                         <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
                                                                     </th>
                                                                 </tr>
-                                                            )
+                                                        )
                                                     )
                                                 :
                                                 <tr><th>Хоосон байна</th></tr>

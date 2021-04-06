@@ -458,8 +458,8 @@ def frontend(request):
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
-    covid_configs = _get_covid_configs(org)
-    covid_dashboard = _get_form_fields(CovidDashboard, org)
+    # covid_configs = _get_covid_configs(org)
+    # covid_dashboard = _get_form_fields(CovidDashboard, org)
     context = {
         'org': {
             "org_name": org.name.upper(),
@@ -471,9 +471,9 @@ def frontend(request):
                 'geo_id': org.geo_id or None
             },
             'allowed_geom': geom.json if geom else None,
-            'obeg_employee': True if employee.org.name.lower() == 'обег' else False,
-            'covid_configs': covid_configs,
-            'covid_dashboard': covid_dashboard,
+            # 'obeg_employee': True if employee.org.name.lower() == 'обег' else False,
+            # 'covid_configs': covid_configs,
+            # 'covid_dashboard': covid_dashboard,
         },
     }
 
