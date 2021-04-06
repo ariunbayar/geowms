@@ -26,6 +26,7 @@ from main.utils import (
 )
 import main.geoserver as geoserver
 
+
 # Create your views here.
 def _get_features(package_id):
     feature_data = []
@@ -93,6 +94,7 @@ def _check_gp_design():
                         extends,
                         False
         )
+
 
 @require_GET
 @ajax_required
@@ -703,6 +705,7 @@ def erese(request, payload):
         }
     return JsonResponse(rsp)
 
+
 def get_colName_type(view_name, data):
     cursor = connections['default'].cursor()
     query_index = '''
@@ -735,6 +738,7 @@ def get_colName_type(view_name, data):
     some_attributes = list(some_attributes)
 
     return geom_att, some_attributes
+
 
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
 
@@ -837,6 +841,7 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
         return {"success": True, 'info': 'Амжилттай үүслээ'}
     else:
         return {"success": False, 'info': 'Давхарга үүсгэхэд алдаа гарлаа'}
+
 
 def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     layer_responce = []
@@ -968,7 +973,6 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
         return False
 
 
-
 def removeView(table_name):
     try:
         query = '''
@@ -1064,6 +1068,7 @@ def check_styles_name(request, payload):
     return JsonResponse({
         'success': success,
     })
+
 
 @require_POST
 @ajax_required
