@@ -34,7 +34,7 @@ def _create_pk():
     sql = """
         ALTER TABLE l_themes
         ADD CONSTRAINT l_themes_pkey
-        FOREIGN KEY (theme_id);
+        PRIMARY KEY (theme_id);
     """
     cursor.execute(sql)
 

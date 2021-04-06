@@ -211,33 +211,26 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
     return datas
 
 
-
-
-
-
-
-
 #######################################__Urban__#########################################################3
+# from bson.json_util import dumps, loads, default
+# import json
 
-from bson.json_util import dumps, loads, default
-import json
-
-def mogno_db_urban_all_data():
-    cursor = connections['mongodb'].cursor()
-    cursor = cursor.urban.find()
-    datas = [json.dumps(result, ensure_ascii=False, default=default, separators=(',', ':')) for result in cursor]
-    return datas
-
-
-def mogno_db_collection_names():
-    cursor = connections['mongodb'].cursor()
-    cursor = cursor.collection_names()
-    names = [ c for c in cursor]
-    return names
+# def mogno_db_urban_all_data():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.urban.find()
+#     datas = [json.dumps(result, ensure_ascii=False, default=default, separators=(',', ':')) for result in cursor]
+#     return datas
 
 
-def mogno_db_collection_field_names():
-    cursor = connections['mongodb'].cursor()
-    cursor = cursor.urban.find_one()
-    names = [ c for c in cursor]
-    return names
+# def mogno_db_collection_names():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.collection_names()
+#     names = [ c for c in cursor]
+#     return names
+
+
+# def mogno_db_collection_field_names():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.urban.find_one()
+#     names = [ c for c in cursor]
+#     return names
