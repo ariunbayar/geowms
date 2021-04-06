@@ -426,103 +426,105 @@ def update_layer_style(layer_name, style_name):
     return rsp
 
 
-def create_style(values):
+def create_style(values, style_name, style_title, style_abstract):
     BASE_URL, AUTH = getHeader()
 
-    style_name = values.get('style_name')
-    style_title = values.get('style_title')
-    style_abstract = values.get('style_abstract')
-    style_color = values.get('style_color')
-    fill_color = values.get('fill_color')
-    style_size = values.get('style_size')
-    geom_type = values.get('geom_type')
-    dashed_line_gap = values.get('dashed_line_gap')
-    dashed_line_length = values.get('dashed_line_length')
-    wellknownname = values.get('wellknownname')
-    color_opacity = values.get('color_opacity')
-    if geom_type == 'MultiLineString' or geom_type == 'LineString':
-        geom_type = 'LineSymbolizer'
-        style_content = '''
-            <Rule>
-                <{geom_type}>
-                    <Fill>
-                    <CssParameter name="fill">{fill_color}</CssParameter>
-                    <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
-                    </Fill>
-                    <Stroke>
-                    <CssParameter name="stroke">{stroke_color}</CssParameter>
-                    <CssParameter name="stroke-width">{stroke_width}</CssParameter>
-                    <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
-                    </Stroke>
-                </{geom_type}>
-            </Rule>
+    def _get_style_content(values):
+        geom_type = values.get('shape_type')
+        rule_name = values.get('rule_name')
+        min_range = values.get('min_range')
+        max_range = values.get('max_range')
+        min_range_content = ''
+        max_range_content = ''
+
+        if min_range:
+            min_range_content = '''
+                <MinScaleDenominator>{min_range}</MinScaleDenominator>
+            '''.format( min_range = min_range )
+
+        if max_range:
+            max_range_content = '''
+                <MaxScaleDenominator>{max_range}</MaxScaleDenominator>
+            '''.format( max_range = max_range )
+
+        fill_content = '''
+            <Fill>
+                <CssParameter name="fill">{fill_color}</CssParameter>
+                <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
+            </Fill>
         '''.format(
-            geom_type=geom_type,
-            fill_color=fill_color,
-            fill_opacity=color_opacity,
-            stroke_color=style_color,
-            stroke_width=style_size,
-            dashed_line_length=dashed_line_length,
-            dashed_line_gap=dashed_line_gap
-        )
-    elif geom_type == 'Polygon' or geom_type == 'MultiPolygon':
-        geom_type = 'PolygonSymbolizer'
-        style_content = '''
-            <Rule>
-                <{geom_type}>
-                    <Fill>
-                    <CssParameter name="fill">{fill_color}</CssParameter>
-                    <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
-                    </Fill>
-                    <Stroke>
-                    <CssParameter name="stroke">{stroke_color}</CssParameter>
-                    <CssParameter name="stroke-width">{stroke_width}</CssParameter>
-                    <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
-                    </Stroke>
-                </{geom_type}>
-            </Rule>
-        '''.format(
-            geom_type=geom_type,
-            fill_color=fill_color,
-            fill_opacity=color_opacity,
-            stroke_color=style_color,
-            stroke_width=style_size,
-            dashed_line_length=dashed_line_length,
-            dashed_line_gap=dashed_line_gap
+            fill_color = values.get('fill_color'),
+            fill_opacity = values.get('color_opacity'),
         )
 
-    else:
-        if not wellknownname:
-            wellknownname = 'circle'
+        stroke_content = '''
+            <Stroke>
+                <CssParameter name="stroke">{stroke_color}</CssParameter>
+                <CssParameter name="stroke-width">{stroke_width}</CssParameter>
+                <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
+            </Stroke>
+        '''.format(
+            stroke_color = values.get('style_color'),
+            stroke_width = values.get('style_size'),
+            dashed_line_length = values.get('dashed_line_length'),
+            dashed_line_gap = values.get('dashed_line_gap')
+        )
+
+        if geom_type == 'PointSymbolizer':
+            shape_content = '''
+                            <{geom_type}>
+                                <Graphic>
+                                    <Mark>
+                                        <WellKnownName>{wellknownname}</WellKnownName>
+                                        {fill_content}
+                                        {stroke_content}
+                                    </Mark>
+                                </Graphic>
+                            </{geom_type}>
+                '''.format(
+                    geom_type=geom_type,
+                    wellknownname=values.get('wellknownname'),
+                    fill_content = fill_content,
+                    stroke_content = stroke_content
+                )
+        else:
+            shape_content = '''
+                <{geom_type}>
+                    {fill_content}
+                    {stroke_content}
+                </{geom_type}>
+            '''.format(
+                geom_type = geom_type,
+                fill_content = fill_content,
+                stroke_content = stroke_content
+            )
+
         style_content = '''
                 <Rule>
-                <PointSymbolizer>
-                    <Graphic>
-                    <Mark>
-                        <WellKnownName>{wellknownname}</WellKnownName>
-                            <Fill>
-                            <CssParameter name="fill">{fill_color}</CssParameter>
-                            <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
-                            </Fill>
-                            <Stroke>
-                            <CssParameter name="stroke">{stroke_color}</CssParameter>
-                            <CssParameter name="stroke-width">{stroke_width}</CssParameter>
-                            <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
-                            </Stroke>
-                    </Mark>
-                    </Graphic>
-                </PointSymbolizer>
+                    <Name>{name}</Name>
+                    {min_range_content}
+                    {max_range_content}
+                    {shape_content}
                 </Rule>
-        '''.format(
-            geom_type=geom_type,
-            fill_color=fill_color,
-            fill_opacity=color_opacity,
-            stroke_color=style_color,
-            stroke_width=style_size,
-            dashed_line_length=dashed_line_length,
-            dashed_line_gap=dashed_line_gap,
-            wellknownname=wellknownname
-        )
+            '''.format(
+                name = rule_name,
+                shape_content = shape_content,
+                min_range_content = min_range_content,
+                max_range_content = max_range_content
+            )
+        return style_content
+
+    s_rules = []
+    if values:
+        if isinstance(values, list):
+            if len(values) > 0:
+                for i in range(len(values)):
+                    datas = values[i]
+                    rule = _get_style_content(datas)
+                    s_rules.insert(i, rule)
+                style_content =  styles = ''.join(s_rules)
+        else:
+            style_content = _get_style_content(values)
 
     payload = """
         <StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
@@ -548,7 +550,7 @@ def create_style(values):
     )
     url = 'styles'
     headers = {'Content-type': 'application/vnd.ogc.sld+xml'}
-    rsp = requests.post(BASE_URL + url, headers=headers, auth=AUTH, data=payload.encode('utf-8') )
+    rsp = requests.post(BASE_URL + url, headers=headers, auth=AUTH, data=payload.encode('utf-8'))
     return rsp
 
 

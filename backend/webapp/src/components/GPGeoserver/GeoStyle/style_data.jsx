@@ -98,19 +98,31 @@ export default class ShowStyleData extends Component {
                             value
                             &&
                             <div>
-                                <div className="col-md-6 mx-3 my-2">
-                                    <label htmlFor="">Style-ийн төрөл</label>
-                                    <select
-                                        className="form-control"
-                                        name="shape_type"
-                                        value={value.shape_type}
-                                        onChange={(e) => this.handleOnChange(e)}
-                                    >
-                                        <option value="">--------------------------</option>
-                                        {value.shape_types.map((value, idy) =>
-                                            <option value={value.geo_name}>{value.name}</option>
-                                        )}
-                                    </select>
+                                <div className="col-md-12 d-flex my-2">
+                                    <div className="col-md-6">
+                                        <label htmlFor="">Style-ийн төрөл</label>
+                                        <select
+                                            className="form-control"
+                                            name="shape_type"
+                                            value={value.shape_type}
+                                            onChange={(e) => this.handleOnChange(e)}
+                                        >
+                                            <option value="">--------------------------</option>
+                                            {value.shape_types.map((value, idy) =>
+                                                <option value={value.geo_name}>{value.name}</option>
+                                            )}
+                                        </select>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label htmlFor="rule_name">Rule-ийн нэр</label>
+                                        <input
+                                            type="text"
+                                            name='rule_name'
+                                            className="form-control"
+                                            value= {value.rule_name}
+                                            onChange={(e) => this.handleOnChange(e)}
+                                        />
+                                    </div>
                                 </div>
                                 {
                                     value.shape_type == 'PointSymbolizer' || value.shape_type == 'PolygonSymbolizer' ?

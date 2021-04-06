@@ -413,3 +413,39 @@ def get_style_data(request, payload):
     return JsonResponse({
         'data': FeatureCollection(features)
     })
+
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def create_style(request, payload):
+
+    style_datas = payload.get('style_datas')
+    style_name = payload.get('style_name')
+    style_title = payload.get('style_title')
+    style_abstract = payload.get('style_abstract')
+    if not style_name:
+        return JsonResponse({
+            'success': False,
+            'info': 'Style-ийн нэр хоосон байна.'
+        })
+
+    check_name = geoserver.check_geoserver_style(style_name)
+    if check_name.status_code == 200:
+        return JsonResponse({
+            'success': False,
+            'info': 'Style-ийн нэр давхцаж байна.'
+        })
+
+    rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract)
+    if rsp.status_code == 201:
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгалагдлаа'
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'info': 'Style үүсгэхэд алдаа гарлаа'
+        })

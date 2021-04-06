@@ -10,6 +10,7 @@ export class CreateStyle extends Component {
         this.style_datas = []
         this.state = {
             style_color: '#800000',
+            rule_name: '',
             style_size: 1,
             fill_color:  '#C0C0C0',
             wellknownname: '',
@@ -57,7 +58,7 @@ export class CreateStyle extends Component {
         const {
             style_size, style_color, fill_color, wellknownname,
             wellknowshape, div_angle, color_opacity, dashed_line_length, dashed_line_gap,
-            min_range, max_range, had_chosen, scale_ranges, shape_types, shape_type
+            min_range, max_range, had_chosen, scale_ranges, shape_types, shape_type, rule_name
         } = this.state
         var input_name = e.target.name
         if(input_name == 'range_number') {
@@ -79,6 +80,7 @@ export class CreateStyle extends Component {
                     'scale_ranges': scale_ranges,
                     'shape_types': shape_types,
                     'shape_type': shape_type,
+                    'rule_name': rule_name
                 })
             }
             this.setState({single_select_datas: this.style_datas[0]})
@@ -172,7 +174,18 @@ export class CreateStyle extends Component {
         }
     }
     handleSubmit() {
+        const { style_name, style_title, style_abstract } = this.state
 
+        if (this.style_datas && this.style_datas.length >0 ) {
+            var values = this.style_datas
+        }
+        else {
+            var values = this.state
+        }
+
+        service.createStyle(values, style_name, style_title, style_abstract).then(({success, info}) =>{
+            console.log("info", success, info)
+        })
     }
 
     handleOnClick() {
@@ -306,7 +319,7 @@ export class CreateStyle extends Component {
                                 <div className="col-md-12 my-4">
                                     <button
                                         type="button"
-                                        className='btn btn-primary col-md-6 mx-3'
+                                        className='btn btn-warning col-md-6 mx-3'
                                         disabled={check_style}
                                         onClick={this.handleOnClick}
                                     >
@@ -333,14 +346,14 @@ export class CreateStyle extends Component {
                             style_datas={this.style_datas}
                         />
                     </div>
-                    <div className="col-md-12 my-4">
+                    <div className="col-md-6">
                         <button
                             type="button"
-                            className='btn btn-primary col-md-6 mx-3'
+                            className='btn gp-btn-outline-primary waves-effect waves-light col-md-12 mx-3'
                             disabled={check_style}
                             onClick={this.handleSubmit}
                         >
-                            Style шалгах
+                            Хадгалах
                         </button>
                     </div>
                 </div>
