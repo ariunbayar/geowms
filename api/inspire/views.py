@@ -234,3 +234,26 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 #     cursor = cursor.urban.find_one()
 #     names = [ c for c in cursor]
 #     return names
+
+
+################################## MSSQL ############################################
+
+# 1. sudo su
+# 2. curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+# 3. curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+# 4. sudo apt-get update
+# 5. sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
+# 6. sudo ACCEPT_EULA=Y apt-get install -y mssql-tools
+# 7. echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+# 8. source ~/.bashrc
+# 9. sudo apt-get install -y unixodbc-dev
+# 10. pip install pyodbc
+
+# import pyodbc
+# connection = pyodbc.connect(driver='ODBC Driver 17 for SQL Server', server='192.168.1.4, 1433', database='urban', uid='sa', password='123456')
+# cursor = connection.cursor()
+# sql = """
+#     SELECT TOP (1000) [OBJECTID], [KH_MON], [DUUREG] FROM [urban].[dbo].[ACHB]
+#     """
+# cursor.execute(sql)
+# data = cursor.fetchall()
