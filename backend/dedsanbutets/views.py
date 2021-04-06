@@ -465,7 +465,7 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
-    check = _create_view(id_list, table_name, data_type_ids, feature_config_id)
+    check = _create_view(id_list, table_name, data_type_ids, feature_config_id, fid)
     if check:
         rsp = _create_geoserver_detail(table_name, theme, user.id, feature, values)
         if rsp['success']:
@@ -900,7 +900,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     return layer_responce
 
 
-def _create_view(ids, table_name, data_type_ids, feature_config_id):
+def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
     ids.sort()
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
@@ -909,8 +909,44 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
-            SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, d.geo_id as localid, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
-            FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.code_list_id::character varying(1000), b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
+            SELECT
+                d.geo_id,
+                d.geo_data,
+                d.geo_id as inspire_id,
+                d.geo_id as localid,
+                {columns},
+                d.feature_id,
+                d.created_on,
+                d.created_by,
+                d.modified_on,
+                d.modified_by
+            FROM
+                crosstab('
+                    select
+                        b.geo_id,
+                        b.property_id,
+                        COALESCE(
+                            b.code_list_id::character varying(1000),
+                            b.value_text::character varying(1000),
+                            b.value_number::character varying(1000),
+                            b.value_date::character varying(1000)
+                        ) as value_text
+                    from
+                        public.m_datas b
+                    inner join
+                        m_geo_datas mg
+                    on
+                        mg.geo_id = b.geo_id
+                    and
+                        mg.feature_id = {feature_id}
+                    where
+                        property_id in ({properties})
+                    and
+                        data_type_id in ({data_type_ids})
+                    and
+                        feature_config_id in ({feature_config_id})
+                    order by 1,2'::text
+                )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
@@ -919,7 +955,9 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
                 feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id]),
-                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]))
+                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]),
+                feature_id=feature_id,
+            )
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
         with connections['default'].cursor() as cursor:
