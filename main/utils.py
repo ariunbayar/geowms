@@ -39,6 +39,8 @@ from backend.dedsanbutets.models import ViewProperties
 from backend.dedsanbutets.models import ViewNames
 from backend.inspire.models import LProperties, MGeoDatas
 
+import main.geoserver as geoserver
+
 
 def resize_b64_to_sizes(src_b64, sizes):
 
@@ -1575,3 +1577,102 @@ def copy_image(img, plus):
     new_img.paste(img, tup)
 
     return new_img
+
+
+def get_colName_type(view_name, data):
+    cursor = connections['default'].cursor()
+    query_index = '''
+        select
+            ST_GeometryType(geo_data),
+            Find_SRID('public', '{view_name}', '{data}'),
+            ST_Extent(geo_data)
+        from
+            {view_name} group by geo_data limit 1
+            '''.format(
+                view_name=view_name,
+                data=data
+                )
+
+    sql = '''
+        SELECT
+        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
+        FROM
+        pg_attribute
+        WHERE
+        attrelid = 'public.{view_name}'::regclass AND    attnum > 0
+        ORDER  BY attnum
+        '''.format(view_name=view_name)
+
+    cursor.execute(sql)
+    geom_att = dict_fetchall(cursor)
+    geom_att = list(geom_att)
+    cursor.execute(query_index)
+    some_attributes = dict_fetchall(cursor)
+    some_attributes = list(some_attributes)
+
+    return geom_att, some_attributes
+
+
+def check_gp_design():
+    ws_name = 'gp_design'
+    ds_name = ws_name
+    table_name = 'geoserver_desing_view'
+    design_space = geoserver.getWorkspace(ws_name)
+
+    def _create_design_view():
+        sql = '''
+                CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
+                SELECT
+                    ST_GeometryType(get_datas_of_m_geo_datas(feature_id)) as field_type,
+                    get_datas_of_m_geo_datas(feature_id)  as geo_data, feature_id
+                FROM
+                    m_geo_datas
+                group by feature_id
+                '''
+        with connections['default'].cursor() as cursor:
+            cursor.execute(sql)
+        return True
+
+    _create_design_view()
+    if design_space.status_code == 404:
+        geoserver.create_space(ws_name)
+
+    check_ds_name = geoserver.getDataStore(ws_name, ds_name)
+    if check_ds_name.status_code == 404:
+        geoserver.create_store(
+            ws_name,
+            ds_name,
+            ds_name,
+        )
+
+    layer_name = 'gp_layer_' + table_name
+    check_layer = geoserver.getDataStoreLayer(
+        ws_name,
+        ds_name,
+        layer_name
+    )
+    layer_title = layer_name
+    geom_att, extends = get_colName_type(table_name, 'geo_data')
+    if extends:
+        srs = extends[0]['find_srid']
+        if srs and srs > 0:
+            srs = srs
+        else:
+            srs = 4326
+
+    else:
+        srs = 4326
+    if check_layer.status_code == 404:
+        layer_create = geoserver.create_layer(
+                        ws_name,
+                        ds_name,
+                        layer_name,
+                        layer_title,
+                        table_name,
+                        srs,
+                        geom_att,
+                        extends,
+                        False
+        )
+
+

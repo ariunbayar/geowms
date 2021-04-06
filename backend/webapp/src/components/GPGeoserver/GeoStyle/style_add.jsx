@@ -50,6 +50,7 @@ export class CreateStyle extends Component {
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     handleOnChange(e) {
@@ -163,11 +164,15 @@ export class CreateStyle extends Component {
             }
             else {
                 if (this.style_datas && this.style_datas.length>0){
+                    this.style_datas[0].range_number = range_number
                     var value = this.style_datas[0]
                     this.setState({single_select_datas: value})
                 }
             }
         }
+    }
+    handleSubmit() {
+
     }
 
     handleOnClick() {
@@ -259,7 +264,7 @@ export class CreateStyle extends Component {
                                     />
                                 </div>
                                 {
-                                    range_number
+                                    (range_number && range_number >0)
                                     &&
                                     <div className="col-md-6 d-inline-block">
                                         <label htmlFor="range_number"></label>
@@ -269,7 +274,7 @@ export class CreateStyle extends Component {
                                             onChange={(e) => this.handleOnChange(e)}
                                             value={had_chosen}
                                         >
-                                            <option className="col-md-12" value={''}>----------------------------</option>
+                                            <option className="col-md-12" value={0}></option>
                                         {
                                             (() => {
                                                 const rows = [];
@@ -327,6 +332,16 @@ export class CreateStyle extends Component {
                             only_clicked={only_clicked}
                             style_datas={this.style_datas}
                         />
+                    </div>
+                    <div className="col-md-12 my-4">
+                        <button
+                            type="button"
+                            className='btn btn-primary col-md-6 mx-3'
+                            disabled={check_style}
+                            onClick={this.handleSubmit}
+                        >
+                            Style шалгах
+                        </button>
                     </div>
                 </div>
             )

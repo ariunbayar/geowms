@@ -19,7 +19,7 @@ export default class ShowStyleData extends Component {
             return (
                 <div className="col-md-12 d-inline-block mx-0 px-0">
                     {
-                        value.range_number
+                        (value.range_number && value.range_number > 0)
                         &&
                         <div className="col-md-12 px-0">
                             {
@@ -31,10 +31,10 @@ export default class ShowStyleData extends Component {
                                         <select
                                             className="form-control"
                                             name="max_range"
-                                            value={value.max_range  }
+                                            value={value.max_range}
                                             onChange={(e) => this.handleOnChange(e)}
                                         >
-                                            <option value={value.max_range}>{value.max_range}</option>
+                                            <option value={0}></option>
                                             {[...value.scale_ranges].reverse().map((value, idy) =>
                                                 <option value={value}>{value}</option>
                                             )}
@@ -53,7 +53,7 @@ export default class ShowStyleData extends Component {
                                             value={value.min_range}
                                             onChange={(e) => this.handleOnChange(e)}
                                         >
-                                            <option value={value.min_range}>{value.min_range}</option>
+                                            <option value={0}></option>
                                             {value.scale_ranges.map((value, idy) =>
                                                 <option value={value}>{value}</option>
                                             )}
@@ -69,7 +69,7 @@ export default class ShowStyleData extends Component {
                                             value={value.min_range}
                                             onChange={(e) => this.handleOnChange(e)}
                                         >
-                                            <option value={value.min_range}>{value.min_range}</option>
+                                            <option value={0}></option>
                                             {value.scale_ranges.map((value, idy) =>
                                                 <option value={value}>{value}</option>
                                             )}
@@ -83,7 +83,7 @@ export default class ShowStyleData extends Component {
                                             value={value.max_range}
                                             onChange={(e) => this.handleOnChange(e)}
                                         >
-                                            <option value={value.max_range}>{value.max_range}</option>
+                                            <option value={0}></option>
                                             {[...value.scale_ranges].reverse().map((value, idy) =>
                                                 <option value={value}>{value}</option>
                                             )}

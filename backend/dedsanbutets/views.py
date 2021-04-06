@@ -22,7 +22,9 @@ from geoportal_app.models import User
 from main.utils import (
     dict_fetchall,
     slugifyWord,
-    get_geoJson
+    get_geoJson,
+    check_gp_design,
+    get_colName_type
 )
 import main.geoserver as geoserver
 
@@ -51,54 +53,6 @@ def _get_package(theme_id):
     return package_data
 
 
-def _check_gp_design():
-    ws_name = 'gp_design'
-    ds_name = ws_name
-    table_name = 'geoserver_desing_view'
-    design_space = geoserver.getWorkspace(ws_name)
-    _create_design_view()
-    if design_space.status_code == 404:
-        geoserver.create_space(ws_name)
-
-    check_ds_name = geoserver.getDataStore(ws_name, ds_name)
-    if check_ds_name.status_code == 404:
-        geoserver.create_store(
-            ws_name,
-            ds_name,
-            ds_name,
-        )
-
-    layer_name = 'gp_layer_' + table_name
-    check_layer = geoserver.getDataStoreLayer(
-        ws_name,
-        ds_name,
-        layer_name
-    )
-    layer_title = layer_name
-    geom_att, extends = get_colName_type(table_name, 'geo_data')
-    if extends:
-        srs = extends[0]['find_srid']
-        if srs and srs > 0:
-            srs = srs
-        else:
-            srs = 4326
-
-    else:
-        srs = 4326
-    if check_layer.status_code == 404:
-        layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends,
-                        False
-        )
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -117,7 +71,7 @@ def bundleButetsAll(request):
         else:
             themes.delete()
 
-    check_design = _check_gp_design()
+    check_design = check_gp_design()
     geoserver_style = geoserver.get_styles()
     for style in geoserver_style:
         style_names.append(style.get('name'))
@@ -706,38 +660,7 @@ def erese(request, payload):
         }
     return JsonResponse(rsp)
 
-def get_colName_type(view_name, data):
-    cursor = connections['default'].cursor()
-    query_index = '''
-        select
-            ST_GeometryType(geo_data),
-            Find_SRID('public', '{view_name}', '{data}'),
-            ST_Extent(geo_data)
-        from
-            {view_name} group by geo_data limit 1
-            '''.format(
-                view_name=view_name,
-                data=data
-                )
 
-    sql = '''
-        SELECT
-        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
-        FROM
-        pg_attribute
-        WHERE
-        attrelid = 'public.{view_name}'::regclass AND    attnum > 0
-        ORDER  BY attnum
-        '''.format(view_name=view_name)
-
-    cursor.execute(sql)
-    geom_att = dict_fetchall(cursor)
-    geom_att = list(geom_att)
-    cursor.execute(query_index)
-    some_attributes = dict_fetchall(cursor)
-    some_attributes = list(some_attributes)
-
-    return geom_att, some_attributes
 
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
 
@@ -945,21 +868,6 @@ def removeView(table_name):
         return False
 
 
-def _create_design_view():
-    sql = '''
-            CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
-            SELECT
-                ST_GeometryType(get_datas_of_m_geo_datas(feature_id)) as field_type,
-                get_datas_of_m_geo_datas(feature_id)  as geo_data, feature_id
-            FROM
-                m_geo_datas
-            group by feature_id
-            '''
-    with connections['default'].cursor() as cursor:
-        cursor.execute(sql)
-    return True
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -972,7 +880,7 @@ def get_style_data(request, payload):
         geom_type = 'Polygon'
     else:
         geom_type = 'LineString'
-    check_design = _check_gp_design()
+    heck_design = check_gp_design()
     cursor = connections['default'].cursor()
     sql = '''
             SELECT

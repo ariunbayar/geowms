@@ -4,16 +4,23 @@ from requests.auth import HTTPBasicAuth
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.db import connections
+from geojson import FeatureCollection
 
-from main.decorators import ajax_required
 from main import geoserver, update_cache_layer
+from main.decorators import get_conf_geoserver, ajax_required
 from .models import WmtsCacheConfig
 from geoportal_app.models import User
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
 from django.views.decorators.csrf import csrf_exempt
-from main.decorators import get_conf_geoserver
+import main.geoserver as geoserver
+from main.utils import (
+    dict_fetchall,
+    check_gp_design,
+    get_geoJson
+)
 
 
 @require_GET
@@ -356,3 +363,53 @@ def create_group_cache(request, payload, group_name):
 def update_geo_cache(request):
     update_cache_layer.update_web_cache()
     return JsonResponse({'success': True})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def check_styles_name(request, payload):
+    style_name = payload.get('style_name')
+    success = False
+    check_name = geoserver.check_geoserver_style(style_name)
+    if check_name.status_code != 200:
+        success = True
+    return JsonResponse({
+        'success': success,
+    })
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_style_data(request, payload):
+
+    geom_type = payload.get('geom_type')
+    if geom_type == 'PointSymbolizer':
+        geom_type = 'Point'
+    elif geom_type == 'PolygonSymbolizer':
+        geom_type = 'Polygon'
+    else:
+        geom_type = 'LineString'
+    check_design = check_gp_design()
+    cursor = connections['default'].cursor()
+    sql = '''
+            SELECT
+                ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
+            FROM
+                geoserver_desing_view
+            where
+                ST_GeometryType(geo_data) like '%{geom_type}%'
+            limit 1000
+            '''.format(geom_type=geom_type)
+
+    cursor.execute(sql)
+    some_attributes = dict_fetchall(cursor)
+    some_attributes = list(some_attributes)
+    features = []
+    for i in some_attributes:
+        data = get_geoJson(i.get('geom'))
+        features.append(data)
+    return JsonResponse({
+        'data': FeatureCollection(features)
+    })
