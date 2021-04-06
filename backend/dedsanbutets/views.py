@@ -177,6 +177,8 @@ def _data_type_configs(data_type_id):
         for data_type_config in data_type_configs:
             property_id = data_type_config.property_id
             properties = LProperties.objects.filter(property_id=property_id)
+            properties = properties.exclude(value_type_id='data-type')
+            properties = properties.exclude(property_code='localId')
             if properties:
                 for prop in properties:
                     property_names.append({
@@ -899,6 +901,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
 
 
 def _create_view(ids, table_name, data_type_ids, feature_config_id):
+    ids.sort()
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
     fields = [row.property_code for row in data]
@@ -906,7 +909,7 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id):
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}
                 AS
-            SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
+            SELECT d.geo_id, d.geo_data, d.geo_id as inspire_id, d.geo_id as localid, {columns}, d.feature_id, d.created_on, d.created_by, d.modified_on, d.modified_by
             FROM crosstab('select b.geo_id, b.property_id, COALESCE( b.code_list_id::character varying(1000), b.value_text::character varying(1000), b.value_number::character varying(1000), b.value_date::character varying(1000)) as value_text from public.m_datas b where property_id in ({properties}) and data_type_id in ({data_type_ids}) and feature_config_id in ({feature_config_id}) order by 1,2'::text)
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
