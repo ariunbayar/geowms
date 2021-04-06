@@ -62,7 +62,8 @@ export class CreateStyle extends Component {
         if(input_name == 'range_number') {
             for(var i=1; i <= e.target.value; i++) {
                 this.style_datas.push({
-                    'range_number': i,
+                    'index_of_range': i,
+                    'range_number': e.target.value,
                     'min_range': min_range,
                     'max_range': max_range,
                     'style_color': style_color,
@@ -83,8 +84,8 @@ export class CreateStyle extends Component {
         }
         if (input_name != 'range_number' && input_name != 'had_chosen') {
             if(this.style_datas.length > 0) {
-                if (had_chosen) {
-                    var value = obj => obj.range_number == had_chosen
+                if (had_chosen > 0) {
+                    var value = obj => obj.index_of_range == had_chosen
                     var index_of = this.style_datas.findIndex(value)
                     this.style_datas[index_of][input_name] = e.target.value
                 }
@@ -260,10 +261,10 @@ export class CreateStyle extends Component {
                                 {
                                     range_number
                                     &&
-                                    <div className="col-md-6 d-inline-block ">
+                                    <div className="col-md-6 d-inline-block">
                                         <label htmlFor="range_number"></label>
                                         <select
-                                            className="form-control"
+                                            className="form-control mt-2"
                                             name="had_chosen"
                                             onChange={(e) => this.handleOnChange(e)}
                                             value={had_chosen}
@@ -287,13 +288,14 @@ export class CreateStyle extends Component {
                                     range_number
                                     ?
                                     <ShowStyleData
-                                        value = {single_select_datas}
-                                        handleOnChange = {this.handleOnChange}
+                                        value={single_select_datas}
+                                        handleOnChange={this.handleOnChange}
+                                        had_chosen={had_chosen}
                                     />
                                     :
                                     <ShowStyleData
-                                        value = {this.state}
-                                        handleOnChange = {this.handleOnChange}
+                                        value={this.state}
+                                        handleOnChange={this.handleOnChange}
                                     />
                                 }
                                 <div className="col-md-12 my-4">
