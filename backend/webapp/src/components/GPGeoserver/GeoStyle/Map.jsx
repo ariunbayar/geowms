@@ -251,11 +251,11 @@ export default class StyleMap extends Component {
         const { style_datas } = this.state
         var len_of_datas = Object.keys(style_datas).length
         var styles = this.StyleFunction
-        var current_zoom = parseInt(current_zoom)
+        console.log("len_of_datas", len_of_datas)
         if (0 <= current_zoom && current_zoom <=21) {
+            var current_level = 21-parseInt(current_zoom)
+            var curren_scale = 133.2955989906115*Math.pow(2, current_level)
             if (style_datas && len_of_datas > 0) {
-                var current_level = 21-current_zoom
-                var curren_scale = Math.pow(2, current_level)
                 var scale_number_1 = style_datas[0].max_range
                 var scale_number_n = style_datas[len_of_datas-1].min_range
                 var style_function_datas = []
@@ -265,11 +265,10 @@ export default class StyleMap extends Component {
 
                 else if (curren_scale < scale_number_n) {
                     style_function_datas = style_datas[len_of_datas-1]
-
                 }
 
-                else {
-                    style_datas.slice(1,len_of_datas-2).map((values, idx)=>{
+                else if(len_of_datas > 2) {
+                    style_datas.slice(1,len_of_datas-1).map((values, idx)=>{
                         if ((values.min_range <= curren_scale) && (curren_scale) <= values.max_range){
                             style_function_datas = values
                         }
