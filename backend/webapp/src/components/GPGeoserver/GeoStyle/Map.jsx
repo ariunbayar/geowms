@@ -309,7 +309,7 @@ export default class StyleMap extends Component {
                 if (data)
                 {
                     this.map.getLayers().forEach(layer => {
-                        if (layer && layer.get('id') === 'aimag') {
+                        if (layer && layer.get('id') === 'style_layer') {
                             layer.getSource().clear();
                         }
                     });
