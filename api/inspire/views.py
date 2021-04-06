@@ -1,3 +1,4 @@
+import pyodbc
 from django.db import connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -249,11 +250,35 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 # 9. sudo apt-get install -y unixodbc-dev
 # 10. pip install pyodbc
 
-# import pyodbc
-# connection = pyodbc.connect(driver='ODBC Driver 17 for SQL Server', server='192.168.1.4, 1433', database='urban', uid='sa', password='123456')
-# cursor = connection.cursor()
+
+# def _mssql_settings(port='1433', server='192.168.1.4', database='urban', username='sa', password='123456'):
+#     drivers = pyodbc.drivers()
+#     connection_dict = {
+#         'driver': drivers[0],
+#         'server': server + ', ' + port,
+#         'database': database,
+#         'uid': username,
+#         'password': password
+#     }
+#     return connection_dict
+
+
+# def _mssql_connection(connection_dict):
+#     connection = pyodbc.connect(**connection_dict)
+#     cursor = connection.cursor()
+#     return cursor
+
+
+# def _execute_query(cursor, sql):
+#     cursor.execute(sql)
+#     datas = utils.dict_fetchall(cursor)
+#     return datas
+
+
+# cursor = _mssql_connection(_mssql_settings())
 # sql = """
 #     SELECT TOP (1000) [OBJECTID], [KH_MON], [DUUREG] FROM [urban].[dbo].[ACHB]
-#     """
-# cursor.execute(sql)
-# data = cursor.fetchall()
+# """
+# row = _execute_query(cursor, sql)
+# datas = [item for item in row]
+# print(datas)
