@@ -27,7 +27,7 @@ def create_payment_type(apps, schema_editor):
             if check_data.export_file is not None:
                 exp_file = check_data.export_file
                 if 'shape' in exp_file:
-                    payment.objects.filter(pk=count_id).update(ext_type='shape')
+                    payment.objects.filter(pk=count_id).update(ext_type='shp')
                 elif 'pdf' in exp_file:
                     payment.objects.filter(pk=count_id).update(ext_type='pdf')
                 elif 'tseg' in exp_file:
@@ -35,8 +35,10 @@ def create_payment_type(apps, schema_editor):
                 elif 'image' in exp_file:
                     file_name = str(count_id)
                     folder_name = 'image'
+                    zip_name = 'export.zip'
                     path = os.path.join(settings.FILES_ROOT, folder_name, file_name)
-                    with ZipFile(path + "/export.zip", 'r') as zipObj:
+                    unzip_path = os.path.join(path,zip_name)
+                    with ZipFile(unzip_path, 'r') as zipObj:
                         zipObj.extractall(path+"/")
                     image_format = _detect_format(path)
                     payment.objects.filter(pk=count_id).update(ext_type=image_format)
