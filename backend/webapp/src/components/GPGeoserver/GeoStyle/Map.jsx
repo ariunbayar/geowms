@@ -251,7 +251,6 @@ export default class StyleMap extends Component {
         const { style_datas } = this.state
         var len_of_datas = Object.keys(style_datas).length
         var styles = this.StyleFunction
-        console.log("len_of_datas", len_of_datas)
         if (0 <= current_zoom && current_zoom <=21) {
             var current_level = 21-parseInt(current_zoom)
             var curren_scale = 133.2955989906115*Math.pow(2, current_level)
@@ -274,7 +273,6 @@ export default class StyleMap extends Component {
                         }
                     })
                 }
-
                 this.map.getLayers().forEach(layer => {
                     if (layer && layer.get('id') === 'style_layer') {
                         var features = layer.getSource().getFeatures()
