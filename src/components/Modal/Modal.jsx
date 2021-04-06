@@ -70,7 +70,6 @@ export default class Modal extends Component {
             "modal-backdrop fade" +
             (modal_status == 'open' ? ' show' : '') +
             (modal_status == 'closed' ? ' d-none' : '')
-
         return (
             <Fragment>
                 <div className={className}>

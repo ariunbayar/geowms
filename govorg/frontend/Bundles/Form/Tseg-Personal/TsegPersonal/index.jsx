@@ -28,9 +28,9 @@ export class TsegPersonal extends Component {
             <Switch>
                 <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/"} component={(props) =><TsegRequest {...props} point_role_list={point_role_list}/>}/>
                 <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/add/"} component={(data)=><Forms data={data}/>}/>
-                <Route  exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/засах/"} component={(data)=><Forms data={data}/>}/>
-                <Route  exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/шийдвэрлэх/"} component={(data)=><Forms data={data} only_see={true} point_role_list={point_role_list}/>}/>
-                <Route  exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/харах/"} component={(data)=><Forms data={data} only_see={true} no_buttons={true}/>}/>
+                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/засах/"} component={(data)=><Forms data={data}/>}/>
+                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/шийдвэрлэх/"} component={(data)=><Forms data={data} only_see={true} point_role_list={point_role_list}/>}/>
+                <Route exact path={"/gov/forms/tseg-info/tsegpersonal/tseg-personal/:id/харах/"} component={(data)=><Forms data={data} only_see={true} no_buttons={true}/>}/>
             </Switch>
         )
 

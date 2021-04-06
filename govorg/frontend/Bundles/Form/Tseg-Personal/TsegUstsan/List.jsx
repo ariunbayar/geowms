@@ -72,14 +72,14 @@ export class List extends Component {
                 this.modalChange(
                     'fa fa-check-circle',
                     'success',
-                    'Амжилттай баталгаажлаа'
+                    msg,
                 )
             }
             else{
                 this.modalChange(
                     'fa fa-times-circle',
                     'danger',
-                    'Баталгаажуулахад алдаа гарлаа'
+                    msg,
                 )
             }
             this.paginate(1,"")
@@ -88,22 +88,24 @@ export class List extends Component {
     }
 
     handleRemove(id){
+        this.setLoading(true)
         service.tseg_remove(id).then(({ success, info}) => {
             if (success) {
                 this.modalChange(
                     'fa fa-check-circle',
                     'success',
-                    'Амжилттай утсгалаа'
+                    info,
                 )
-                this.paginate(1,"")
             }
             else {
                 this.modalChange(
                     'fa fa-times-circle',
                     'danger',
-                    'Утгахад алдаа гарлаа'
+                    info,
                 )
             }
+            this.paginate(1,"")
+            this.setLoading(false)
         })
     }
 

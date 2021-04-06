@@ -480,15 +480,17 @@ export class EmployeeEdit extends Component {
     }
 
     modalChange(modal_icon, icon_color, title, text, has_button, modalClose) {
-        this.setState({
-            modal_icon: modal_icon,
-            icon_color: icon_color,
-            title: title,
-            text: text,
-            has_button: has_button,
-            modalClose: modalClose
-        })
-        this.handleModalOpen()
+        this.setState(
+            {
+                modal_icon,
+                icon_color,
+                title,
+                text,
+                has_button,
+                modalClose
+            },
+            () => this.handleModalOpen()
+        )
 
     }
 
@@ -496,10 +498,10 @@ export class EmployeeEdit extends Component {
         this.modalChange(
             'fa fa-exclamation-circle',
             "warning",
+            'Нууц үг солих',
             'Та нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?',
-            '',
             true,
-            null
+            null,
         )
     }
 
@@ -681,7 +683,7 @@ export class EmployeeEdit extends Component {
                                                     }
                                                     {(this.props.employee.username == form_values.username) || this.props.employee.is_admin ?
                                                     <div className="col-md-2 mt-1 text-center"><br/>
-                                                        <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleModalOpen}>
+                                                        <button type="button" className="btn gp-btn-primary btn-sm" aria-hidden="true" onClick={this.handleChangeMail}>
                                                             {} Нууц үг солих имэйл илгээх
                                                         </button>
                                                     </div>

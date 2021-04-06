@@ -81,7 +81,7 @@ export default class ListTable extends Component {
                                 onClick={()  => this.modalChange(
                                     'fa fa-exclamation-circle',
                                     "warning",
-                                    'Тохиргоог устгах',
+                                    'Баталгаажуулах',
                                     `Та "${name}" цэгийг баталгаажуулахдаа итгэлтэй байна уу?`,
                                     true,
                                     this.props.handleTsegSuccess,
@@ -98,36 +98,28 @@ export default class ListTable extends Component {
                             }
                             </button>
                     }
-                    {is_modal_success_open &&
-                        <Modal
-                            modalClose={this.handleModalSuccessClose}
-                            modalAction={this.props.handleTsegSuccess}
-                            text={`Та "${tseg_id}" цэгийг устгахдаа итгэлтэй байна уу?`}
-                            title="Баталгаажуулах уу?"
-                            actionNameBack="    Үгүй"
-                            actionNameDelete="  Тийм"
-                            model_type_icon = "warning"
-                        />
-                    }
                 </td>
                 <td>
                     {
                         (point_role_list && point_role_list.PERM_REMOVE) && !is_removed
                         &&
-                        <a href="#"
-                            onClick={() => this.modalChange(
-                                'fa fa-exclamation-circle',
-                                "warning",
-                                'Тохиргоог устгах',
-                                `Та "${name}" нэртэй цэгийг устгахдаа итгэлтэй байна уу?`,
-                                true,
-                                this.props.handleRemove,
-                                'Тийм',
-                                'Үгүй'
-                            )}
-                        >
-                            <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
-                        </a>
+                            <i
+                                className="fa fa-trash-o text-danger"
+                                role='button'
+                                aria-hidden="true"
+                                onClick={() => this.modalChange(
+                                    'fa fa-exclamation-circle',
+                                    "warning",
+                                    'Тохиргоог устгах',
+                                    `Та "${name}" нэртэй цэгийг устгахдаа итгэлтэй байна уу?`,
+                                    true,
+                                    this.props.handleRemove,
+                                    null,
+                                    'Тийм',
+                                    'Үгүй',
+                                )}
+                            >
+                            </i>
                     }
                 </td>
                 <Modal
