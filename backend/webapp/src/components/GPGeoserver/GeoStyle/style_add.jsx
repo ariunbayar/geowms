@@ -354,7 +354,7 @@ export class CreateStyle extends Component {
                             style_datas={this.style_datas}
                         />
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-md-6 px-4">
                         <button
                             type="button"
                             className='btn gp-btn-outline-primary waves-effect waves-light col-md-12 mx-3'

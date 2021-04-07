@@ -68,7 +68,7 @@ export default class ShowStyleData extends Component {
                             (value && (data_state || had_chosen > 0))
                             &&
                             <div>
-                                <div className="col-md-12 d-flex my-2">
+                                <div className="col-md-12 d-flex mx-0 my-2">
                                     <div className="col-md-6">
                                         <label htmlFor="">Style-ийн төрөл</label>
                                         <select
@@ -83,7 +83,7 @@ export default class ShowStyleData extends Component {
                                             )}
                                         </select>
                                     </div>
-                                    <div className="col-md-6">
+                                    <div className="col-md-6 px-0">
                                         <label htmlFor="rule_name">Rule-ийн нэр</label>
                                         <input
                                             type="text"
