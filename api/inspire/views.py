@@ -251,6 +251,9 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 # 10. pip install pyodbc
 
 
+from django.contrib.gis.geos import GEOSGeometry
+
+
 def _mssql_settings(port='1433', server='192.168.1.4', database='urban', username='sa', password='123456'):
     drivers = pyodbc.drivers()
     connection_dict = {
@@ -288,10 +291,54 @@ def _fix_coordinates(wkt):
     row = _execute_query(cursror, sql)
     datas = [item for item in row]
     wkt = datas[0]['wkt']
-    # geojson = utils.json_load(geojson)
-    # if geojson['type'] == 'Polygon':
-        # print(geojson['coordinates'])
     return wkt
+
+
+def _check_coordiante(geo_json, to_srid=4326):
+    has_problem = False
+
+    geo_json = utils.json_load(geo_json)
+    coordinates = geo_json['coordinates']
+    if 'Multi' in geo_json['type']:
+        coord = coordinates[0][0][0]
+    else:
+        coord = coordinates[0][0]
+
+    x = coord[0]
+    y = coord[1]
+    if x < y:
+        has_problem = True
+
+    return has_problem
+
+
+def _get_wkt(value, from_srid=32648, to_srid=4326):
+    pnt = GEOSGeometry(value, srid=from_srid)
+    pnt.transform(to_srid)
+    has_problem = _check_coordiante(pnt.json, to_srid)
+    wkt = pnt.wkt
+    if has_problem:
+        wkt = _fix_coordinates(wkt)
+    return wkt
+
+
+def _set_3d_dim(wkt, srid=4326):
+    geom = GEOSGeometry(wkt, srid=srid)
+    geom = utils.geoJsonConvertGeom(geom.json)  # set 3d
+    geom = GEOSGeometry(geom, srid=srid)
+    geom = utils.get_geom_for_filter_from_geometry(geom.json, change_to_multi=True)  # set Multi
+    return geom
+
+
+def _create_mgeo(feature_code, geom):
+    feature = utils.get_feature_from_code(feature_code)
+    new_geo_id = GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+    MGeoDatas.objects.create(
+        geo_id=new_geo_id,
+        geo_data=geom,
+        feature_id=feature.feature_id
+    )
+    return new_geo_id
 
 
 cursor = _mssql_connection(_mssql_settings())
@@ -308,13 +355,13 @@ sql = """
     WHERE T.[is_ms_shipped] = 0 and T.[name] = '{table_name}'
     ORDER BY T.[name], AC.[column_id]
 """.format(table_name=table_name)
-print(sql)
+
 row = _execute_query(cursor, sql)
 datas = [item for item in row]
-fields = [
-    data['column_name']
-    for data in datas[:len(datas) - 1]
-]
+fields = list()
+for data in datas[:len(datas) - 1]:
+    fields.append(data['column_name'])
+
 
 select_sql = """
     SELECT [{fields}]
@@ -325,62 +372,35 @@ select_sql = """
 )
 print(select_sql)
 
+# row = _execute_query(cursor, select_sql)
+# datas = [item for item in row]
+# for data in datas:
+#     print(data)
+
+
+
+
+# -------------------------------------------------- mgeo_datas
+
+
 # .STAsText() str
 # .STAsBinary() binary
 # .AsTextZM() str
 # .AsGml gml
 
 
-select_sql = """
-    select objectid, shape.STAsText()
-    FROM D902_AS
-    where objectid = 2
-"""
-print(select_sql)
+# select_sql = """
+#     select objectid, shape.STAsText()
+#     FROM {table_name}
+#     where objectid = 2
+# """.format(table_name=table_name)
+# print(select_sql)
 
 
-cursor = _mssql_connection(_mssql_settings())
-cursor = cursor.execute(select_sql)
-value = cursor.fetchone()
-row = _execute_query(cursor, select_sql)
-datas = [item for item in row]
-for data in datas:
-    print(data)
-
-print(type(value[1]))
-OLD_SRID = 32648
-SRID = 4326
-from django.contrib.gis.geos import GEOSGeometry
-from geojson import MultiPolygon, MultiPoint, MultiLineString
-pnt = GEOSGeometry(value[1], srid=OLD_SRID)
-pnt.transform(SRID)
-wkt = _fix_coordinates(pnt.wkt)
-# print(wkt)
-print(wkt)
-print(type(wkt))
-pnt = GEOSGeometry(wkt, srid=SRID)
-val = utils.geoJsonConvertGeom(pnt.json)
-print(val)
-
-geom_type = GEOSGeometry(val).geom_type
-geom = GEOSGeometry(val, srid=4326)
-if geom_type == 'Point':
-    geom = MultiPoint(geom, srid=4326)
-if geom_type == 'LineString':
-    geom = MultiLineString(geom, srid=4326)
-if geom_type == 'Polygon':
-    geom = MultiPolygon(geom, srid=4326)
-
-
-# print("------------------------------------------------")
-# print("------------------------------------------------")
-# print(geom.wkt)
-# print("------------------------------------------------")
-# print("------------------------------------------------")
-# print(type(val))
-
-# # MGeoDatas.objects.create(
-# #     geo_id='odko1',
-# #     geo_data=geom,
-# #     feature_id=77777
-# # )
+# cursor = _mssql_connection(_mssql_settings())
+# cursor = cursor.execute(select_sql)
+# value = cursor.fetchone()
+# wkt = _get_wkt(value[1])
+# geom = _set_3d_dim(wkt)
+# new_geo_id = _create_mgeo('bu-bb-b', geom)
+# print("saved", new_geo_id)
