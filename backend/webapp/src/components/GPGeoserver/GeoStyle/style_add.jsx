@@ -28,7 +28,8 @@ export class CreateStyle extends Component {
             check_style: true,
             min_range: 0,
             max_range: 0,
-            shape_type: '',
+            geom_type: 'Point',
+            shape_type: 'PointSymbolizer',
             label_check: false,
             shape_types: [
                 {"name": 'Point', 'geo_name':'PointSymbolizer'},
@@ -52,45 +53,52 @@ export class CreateStyle extends Component {
         } = this.state
         var input_name = e.target.name
         if(input_name == 'range_number') {
-            for(var i=1; i <= e.target.value; i++) {
-                this.style_datas.push({
-                    'index_of_range': i,
-                    'range_number': e.target.value,
-                    'min_range': min_range,
-                    'max_range': max_range,
-                    'style_color': style_color,
-                    'style_size': style_size,
-                    'fill_color':  fill_color,
-                    'wellknownname': wellknownname,
-                    'wellknowshape': wellknowshape,
-                    'div_angle': div_angle,
-                    'color_opacity': color_opacity,
-                    'dashed_line_length': dashed_line_length,
-                    'dashed_line_gap': dashed_line_gap,
-                    'shape_types': shape_types,
-                    'shape_type': shape_type,
-                    'rule_name': rule_name
-                })
+            if (e.target.value > 0) {
+                for(var i=1; i <= e.target.value; i++) {
+                    this.style_datas.push({
+                        'index_of_range': i,
+                        'range_number': e.target.value,
+                        'min_range': min_range,
+                        'max_range': max_range,
+                        'style_color': style_color,
+                        'style_size': style_size,
+                        'fill_color':  fill_color,
+                        'wellknownname': wellknownname,
+                        'wellknowshape': wellknowshape,
+                        'div_angle': div_angle,
+                        'color_opacity': color_opacity,
+                        'dashed_line_length': dashed_line_length,
+                        'dashed_line_gap': dashed_line_gap,
+                        'shape_types': shape_types,
+                        'shape_type': shape_type,
+                        'rule_name': rule_name
+                    })
+                }
             }
             this.setState({single_select_datas: this.style_datas[0]})
         }
+
         if (input_name != 'range_number' && input_name != 'had_chosen') {
-            if(this.style_datas.length > 0) {
+            var datas_length = this.style_datas.length
+            if(datas_length > 0) {
                 if (had_chosen > 0) {
                     var value = obj => obj.index_of_range == had_chosen
                     var index_of = this.style_datas.findIndex(value)
                     this.style_datas[index_of][input_name] = e.target.value
+
+                    if (input_name == 'shape_type') {
+                        this.style_datas.map((data,idx) => {
+                            data.shape_type = e.target.value
+                        })
+                    }
                 }
             }
-        }
-
-        if (input_name == 'shape_type') {
-            if(this.style_datas.length > 0)
-                {
-                    this.style_datas.map((data,idx) => {
-                        data.shape_type = e.target.value
-                    })
-                }
+            if (input_name == 'shape_type') {
+                var field_of_data = obj => obj.geo_name == e.target.value
+                var index_of = shape_types.findIndex(field_of_data)
+                var geom_type = shape_types[index_of].name
+                this.setState({geom_type})
+            }
         }
 
         this.setState({[e.target.name]:e.target.value})
@@ -217,7 +225,7 @@ export class CreateStyle extends Component {
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
                 wellknowshape, div_angle, only_clicked,
-                label_check, single_select_datas
+                label_check, single_select_datas, geom_type
 
             } = this.state
             return (
@@ -293,7 +301,7 @@ export class CreateStyle extends Component {
                             </div>
                             <div className="col-md-12 px-0">
                                 {
-                                    range_number
+                                    (range_number && range_number>0)
                                     ?
                                     <ShowStyleData
                                         value={single_select_datas}
@@ -324,7 +332,7 @@ export class CreateStyle extends Component {
                             style_color={style_color}
                             style_size={style_size}
                             fill_color={fill_color}
-                            geom_type={shape_type}
+                            geom_type={geom_type}
                             check_style={check_style}
                             wellknownname={wellknownname}
                             wellknowshape={wellknowshape}

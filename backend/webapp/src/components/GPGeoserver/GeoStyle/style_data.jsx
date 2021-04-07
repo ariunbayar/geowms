@@ -23,7 +23,7 @@ export default class ShowStyleData extends Component {
                         &&
                         <div className="col-md-12 px-0">
                             {
-                                value.index_of_range == 1
+                                (value.index_of_range == 1)
                                 ?
                                 <div className="col-md-12 d-flex my-2">
                                     <div className="col-md-6 mb-2">
@@ -31,31 +31,20 @@ export default class ShowStyleData extends Component {
                                         <input
                                             className="form-control"
                                             name="max_range"
+                                            type="number"
                                             value={value.max_range}
                                             onChange={(e) => this.handleOnChange(e)}
                                         />
                                     </div>
                                 </div>
                                 :
-                                value.index_of_range == value.range_number
-                                ?
                                 <div className="col-md-12 d-flex my-2">
                                     <div className="col-md-6">
                                         <label htmlFor="">Min scale</label>
                                         <input
                                             className="form-control"
                                             name="min_range"
-                                            value={value.min_range}
-                                            onChange={(e) => this.handleOnChange(e)}
-                                        />
-                                    </div>
-                                </div>:
-                                <div className="col-md-12 d-flex my-2">
-                                    <div className="col-md-6">
-                                        <label htmlFor="">Min scale</label>
-                                        <input
-                                            className="form-control"
-                                            name="min_range"
+                                            type="number"
                                             value={value.min_range}
                                             onChange={(e) => this.handleOnChange(e)}
                                         />
@@ -65,6 +54,7 @@ export default class ShowStyleData extends Component {
                                         <input
                                             className="form-control"
                                             name="max_range"
+                                            type="number"
                                             value={value.max_range}
                                             onChange={(e) => this.handleOnChange(e)}
                                         />
@@ -88,8 +78,8 @@ export default class ShowStyleData extends Component {
                                             onChange={(e) => this.handleOnChange(e)}
                                         >
                                             <option value="">--------------------------</option>
-                                            {value.shape_types.map((value, idy) =>
-                                                <option value={value.geo_name}>{value.name}</option>
+                                            {value.shape_types.map((data, idy) =>
+                                                <option value={data.geo_name}>{data.name}</option>
                                             )}
                                         </select>
                                     </div>
@@ -105,18 +95,23 @@ export default class ShowStyleData extends Component {
                                     </div>
                                 </div>
                                 {
-                                    value.shape_type == 'PointSymbolizer' || value.shape_type == 'PolygonSymbolizer' ?
+                                    value.shape_type
+                                    &&
                                     <div className="col-md-12">
-                                        <div className="col-md-4 d-inline-block">
-                                            <label htmlFor="color" className="m-2">Дүрсийн дүүргэлтийн өнгө</label>
-                                            <input
-                                                type="color"
-                                                name='fill_color'
-                                                className="form-control col-4"
-                                                value= {value.fill_color}
-                                                onChange={(e) => this.handleOnChange(e)}
-                                            />
-                                        </div>
+                                        {
+                                            (value.shape_type == 'PointSymbolizer' || value.shape_type == 'PolygonSymbolizer')
+                                            &&
+                                            <div className="col-md-4 d-inline-block">
+                                                <label htmlFor="color" className="m-2">Дүрсийн дүүргэлтийн өнгө</label>
+                                                <input
+                                                    type="color"
+                                                    name='fill_color'
+                                                    className="form-control col-4"
+                                                    value= {value.fill_color}
+                                                    onChange={(e) => this.handleOnChange(e)}
+                                                />
+                                            </div>
+                                        }
                                         <div className="col-md-4 d-inline-block">
                                             <label htmlFor="color" className="m-2">Хүрээний өнгө</label>
                                             <input
@@ -148,8 +143,29 @@ export default class ShowStyleData extends Component {
                                                 onChange={(e) => this.handleOnChange(e)}
                                             />
                                         </div>
+                                        <div className="col-md-4 d-inline-block">
+                                            <label htmlFor="color" className="m-2">Зураасын урт</label>
+                                                <input
+                                                    type="number"
+                                                    name='dashed_line_length'
+                                                    className="form-control col-4"
+                                                    value= {value.dashed_line_length}
+                                                    onChange={(e) => this.handleOnChange(e)}
+                                                />
+                                        </div>
+                                        <div className="col-md-4 d-inline-block">
+                                            <label htmlFor="color" className="m-0 p-0">Зураас хоорондох зай</label>
+                                            <input
+                                                type="number"
+                                                name='dashed_line_gap'
+                                                className="form-control col-4"
+                                                value= {value.dashed_line_gap}
+                                                onChange={(e) => this.handleOnChange(e)}
+                                            />
+                                        </div>
                                     {
-                                        value.shape_type == 'PointSymbolizer' &&
+                                        value.shape_type == 'PointSymbolizer'
+                                        &&
                                         <div className='col-md-4 d-inline-block'>
                                             <label htmlFor="wellknownname">Дүрсний сонголт</label>
                                             <select
@@ -165,59 +181,6 @@ export default class ShowStyleData extends Component {
                                             </select>
                                         </div>
                                     }
-                                    </div>
-                                    :
-                                    <div className="col-md-12">
-                                        <div className="col-md-4 d-inline-block">
-                                            <label htmlFor="color" className="m-2">Өргөн</label>
-                                            <input
-                                                type="number"
-                                                name='style_size'
-                                                className="form-control col-4"
-                                                value= {value.style_size}
-                                                onChange={(e) => this.handleOnChange(e)}
-                                            />
-                                        </div>
-                                        <div className="col-md-4 d-inline-block">
-                                            <label htmlFor="color" className="m-2">Өнгө</label>
-                                            <input
-                                                type="color"
-                                                name='style_color'
-                                                className="form-control col-4"
-                                                value= {value.style_color}
-                                                onChange={(e) => this.handleOnChange(e)}
-                                            />
-                                        </div>
-                                        <div className="col-md-4 d-inline-block">
-                                            <label htmlFor="color" className="m-0 p-0">Зураас хоорондох зай</label>
-                                            <input
-                                                type="number"
-                                                name='dashed_line_gap'
-                                                className="form-control col-4"
-                                                value= {value.dashed_line_gap}
-                                                onChange={(e) => this.handleOnChange(e)}
-                                            />
-                                        </div>
-                                        <div className="col-md-4 d-inline-block">
-                                            <label htmlFor="color" className="m-2">Зураасын урт</label>
-                                                <input
-                                                    type="number"
-                                                    name='dashed_line_length'
-                                                    className="form-control col-4"
-                                                    value= {value.dashed_line_length}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                        </div>
-                                        <div className="col-md-4 d-inline-block">
-                                            <label htmlFor="color" className="m-2">Өнгөний уусгалт</label>
-                                            <input
-                                                type="number"
-                                                name='color_opacity'
-                                                className="form-control col-4"
-                                                value= {value.color_opacity}
-                                                onChange={(e) => this.handleOnChange(e)}
-                                            />
-                                        </div>
                                     </div>
                                 }
                             </div>

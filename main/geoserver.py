@@ -440,12 +440,12 @@ def create_style(values, style_name, style_title, style_abstract):
         if min_range:
             min_range_content = '''
                 <MinScaleDenominator>{min_range}</MinScaleDenominator>
-            '''.format( min_range = min_range )
+            '''.format(min_range = float(min_range))
 
         if max_range:
             max_range_content = '''
                 <MaxScaleDenominator>{max_range}</MaxScaleDenominator>
-            '''.format( max_range = max_range )
+            '''.format(max_range = float(max_range))
 
         fill_content = '''
             <Fill>

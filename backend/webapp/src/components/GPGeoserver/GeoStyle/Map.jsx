@@ -256,33 +256,36 @@ export default class StyleMap extends Component {
             var curren_scale = 133.2955989906115*Math.pow(2, current_level)
             if (style_datas && len_of_datas > 0) {
                 var scale_number_1 = style_datas[0].max_range
-                var scale_number_n = style_datas[len_of_datas-1].min_range
                 var style_function_datas = []
-                if (curren_scale > scale_number_1) {
+                if (curren_scale < scale_number_1) {
                     style_function_datas = style_datas[0]
-                }
-
-                else if (curren_scale < scale_number_n) {
-                    style_function_datas = style_datas[len_of_datas-1]
-                }
-
-                else if(len_of_datas > 2) {
-                    style_datas.slice(1,len_of_datas-1).map((values, idx)=>{
+                    style_datas.slice(1, len_of_datas).map((values, idx)=>{
                         if ((values.min_range <= curren_scale) && (curren_scale) <= values.max_range){
                             style_function_datas = values
                         }
                     })
                 }
-                this.map.getLayers().forEach(layer => {
-                    if (layer && layer.get('id') === 'style_layer') {
-                        var features = layer.getSource().getFeatures()
-                        features.forEach(function(feature){
-                            var geom_type =feature.getGeometry().getType()
-                            feature.setStyle(styles(geom_type, style_function_datas))
-                        })
-                    }
-                })
-
+                if (style_function_datas &&  Object.keys(style_function_datas).length >0){
+                    this.map.getLayers().forEach(layer => {
+                        if (layer && layer.get('id') === 'style_layer') {
+                            var features = layer.getSource().getFeatures()
+                            features.forEach(function(feature){
+                                var geom_type =feature.getGeometry().getType()
+                                feature.setStyle(styles(geom_type, style_function_datas))
+                            })
+                        }
+                    })
+                }
+                else {
+                    this.map.getLayers().forEach(layer => {
+                        if (layer && layer.get('id') === 'style_layer') {
+                            var features = layer.getSource().getFeatures()
+                            features.forEach(function(feature){
+                                feature.setStyle(new Style({}))
+                            })
+                        }
+                    })
+                }
             }
         }
 
@@ -296,7 +299,7 @@ export default class StyleMap extends Component {
 
     loadMapData(){
         const {
-            dataProjection, featureProjection, geom_type
+            dataProjection, featureProjection, geom_type, style_datas
         } = this.state
         var state_data = this.state
         var style_done = this.StyleFunction
@@ -319,7 +322,7 @@ export default class StyleMap extends Component {
                         });
                         const vector_layer = new VectorLayer({
                             source: vectorSource,
-                            style: function(feature, resolution){
+                            style: Object.keys(style_datas).length >0 ? new Style({}) : function(feature, resolution){
                                 var hoho = feature.getGeometry().getType();
                                 var style_of_map = style_done(hoho, state_data)
                                 return style_of_map

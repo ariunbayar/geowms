@@ -385,12 +385,6 @@ def check_styles_name(request, payload):
 def get_style_data(request, payload):
 
     geom_type = payload.get('geom_type')
-    if geom_type == 'PointSymbolizer':
-        geom_type = 'Point'
-    elif geom_type == 'PolygonSymbolizer':
-        geom_type = 'Polygon'
-    else:
-        geom_type = 'LineString'
     check_design = check_gp_design()
     cursor = connections['default'].cursor()
     sql = '''
