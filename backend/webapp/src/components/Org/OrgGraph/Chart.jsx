@@ -12,11 +12,11 @@ export default class Charts extends Component {
         }
         this.handlePageCount=this.handlePageCount.bind(this)
     }
-    componentDidMount(){
+    componentDidMount() {
         this.handlePageCount()
     }
 
-    handlePageCount(){
+    handlePageCount() {
         service
             .ageCount(this.state.org_id)
             .then(({ emp_age, count_emps_age }) => {
@@ -69,8 +69,7 @@ export default class Charts extends Component {
             }
         }
         return (
-            <Line data={dataLine} options={ options } />
+            <Line data={ dataLine } options={ options } />
         )
     }
-
 }
