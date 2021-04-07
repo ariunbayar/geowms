@@ -1135,6 +1135,12 @@ def json_load(data):
     return data
 
 
+def json_dumps(data):
+    if isinstance(data, dict):
+        data = json.dumps(data)
+    return data
+
+
 def make_value_dict(value, properties_qs, is_display=False):
     value = json_load(value)
     for types in value_types():
