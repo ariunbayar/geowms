@@ -33,12 +33,12 @@ export default class GroupList extends Component {
                 </td>
                 <td>
                     <NavLink to={`/back/gp-geoserver/layer-groups/${value}/tile-caching/`}>
-                        <GPIcon icon={"fa fa-shopping-basket"}/>
+                        <GPIcon icon={"fa fa-shopping-basket text-primary"}/>
                     </NavLink>
                 </td>
                 <td>
                     <NavLink className="text-primary" to={`/back/gp-geoserver/layer-groups/${value}/засах/`}>
-                        <GPIcon icon={"fa fa-pencil-square-o"}/>
+                        <GPIcon icon={"fa fa-pencil-square-o text-primary"}/>
                     </NavLink>
                 </td>
                 <td>
