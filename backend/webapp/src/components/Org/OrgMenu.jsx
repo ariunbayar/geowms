@@ -7,6 +7,7 @@ import {OrgSystem} from './OrgSystem'
 import {OrgUser} from './OrgUser'
 import {OrgRole} from './OrgRole'
 import {Addresses} from './OrgUsersAddress'
+import {Graph} from './OrgGraph'
 
 export class OrgMenu extends Component {
 
@@ -126,6 +127,16 @@ export class OrgMenu extends Component {
                         </NavLink>
                     </li>
 
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/graph/`}
+                            className="nav-link"
+                            activeClassName="active"
+                            data-toggle="tab"
+                        >
+                            <i className="fa fa-bar-chart" aria-hidden="true"/>
+                            <span className="hidden-xs"> График мэдээлэл</span>
+                        </NavLink>
+                    </li>
                 </ul>
                 <div className="tab-content">
                     <Switch>
@@ -148,6 +159,10 @@ export class OrgMenu extends Component {
                         <Route
                             path="/back/байгууллага/түвшин/:level/:id/addresses/"
                             component={Addresses}
+                        />
+                        <Route
+                            path="/back/байгууллага/түвшин/:level/:id/graph/"
+                            component={Graph}
                         />
                     </Switch>
                 </div>

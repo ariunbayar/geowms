@@ -1,16 +1,16 @@
 import os
 import io
-import json
 from geojson import FeatureCollection
 import PIL.Image as Image
+import datetime
+from collections import Counter
 
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.postgres.search import SearchVector
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count, F, Func
+from django.db.models import Count, Q
 from django.db import transaction
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
@@ -1135,6 +1135,7 @@ def save_inspire_roles(request, payload, pk):
     return JsonResponse(rsp)
 # baiguulgaa govperm
 
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -1515,6 +1516,7 @@ def get_addresses(request, level, pk):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_address(request, pk):
     points = list()
 
@@ -1566,6 +1568,7 @@ def get_address(request, pk):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_emp_info(request, payload, pk):
     employee = get_object_or_404(Employee, pk=pk)
     is_erguul = payload.get("is_erguul")
@@ -1625,6 +1628,7 @@ def _get_erguul(erguul, field):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_erguuleg_fields(request, pk):
     erguul_id = ''
     send_fields = list()
@@ -1666,6 +1670,7 @@ def get_erguuleg_fields(request, pk):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def save_erguul(request, payload):
     hour = ''
 
@@ -1770,6 +1775,7 @@ def save_erguul(request, payload):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_erguuls(request):
 
     points = list()
@@ -1806,6 +1812,7 @@ def _get_choices(Model, field_name):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_select_values(request):
 
     qs = DefaultPosition.objects
@@ -1826,6 +1833,7 @@ def get_select_values(request):
 
 @require_GET
 @ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_all_org(request):
 
     qs = Org.objects
@@ -1840,6 +1848,71 @@ def get_all_org(request):
         'success': True,
         'org_list': org_list,
         'levels': levels,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def emp_gender_count(request, pk):
+
+    qs = Org.objects
+    qs = qs.filter(id=pk)
+
+    qs = qs.annotate(
+        male_count=Count('employee', filter=Q(employee__user__gender='Эрэгтэй'))
+    )
+    qs = qs.annotate(
+        female_count=Count('employee', filter=Q(employee__user__gender='Эмэгтэй'))
+    )
+    item = qs.first()
+    male_count = item.male_count
+    female_count = item.female_count
+
+    rsp = {
+        'count_male': male_count,
+        'count_female': female_count
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def emp_age_count(request, pk):
+
+    date_now = datetime.datetime.now()
+    year = date_now.year
+    year_cut = str(date_now.year)[2:4]
+
+    emp_reg = []
+    emp_age = []
+    qs = Employee.objects.filter(org_id=pk)
+
+    for employee in qs:
+        emp_reg.append(employee.user.register)
+
+        register = employee.user.register
+        register_cut = register[2:4]
+        if -1 < int(register_cut) and int(register_cut) < int(year_cut):
+            age = int(year_cut) - int(register_cut)
+            emp_age.append(age)
+        else:
+            birth_year = str(19) + register_cut
+            age = int(year) - int(birth_year)
+            emp_age.append(age)
+
+    sorted_age = sorted(emp_age)
+    count_age = Counter(sorted_age)
+    emp_ages = list(count_age.keys())
+    count_emps_age = list(count_age.values())
+
+    rsp = {
+        'count_emps_age': count_emps_age,
+        'emp_age': emp_ages,
     }
 
     return JsonResponse(rsp)
