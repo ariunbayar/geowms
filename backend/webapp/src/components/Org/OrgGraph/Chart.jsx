@@ -42,6 +42,7 @@ export default class Charts extends Component {
                     borderDash: [],
                     borderDashOffset: 0.0,
                     borderJoinStyle: "miter",
+                    borderWidth: 1,
                     pointBorderColor: "rgb(0, 153, 255)",
                     pointBackgroundColor: "rgb(255, 255, 255)",
                     pointBorderWidth: 7,
@@ -51,13 +52,26 @@ export default class Charts extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: count_emps_age
+                    data: count_emps_age,
+                    stepSize: 1,
+                    indexAxis: 'y'
                 },
-            ]
+            ],
         }
-
+        const options = {
+            responsive: true,
+                scales: {
+                    yAxes: [
+                        {
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    ]
+                }
+        }
         return (
-            <Line data={dataLine} options={{ responsive: true }} />
+            <Line data={dataLine} options={ options } />
         )
     }
 
