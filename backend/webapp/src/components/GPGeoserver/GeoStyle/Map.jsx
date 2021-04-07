@@ -137,7 +137,7 @@ export default class StyleMap extends Component {
             fill_color, dashed_line_gap,
             dashed_line_length, color_opacity, wellknownname
         } = values
-        if (wellknownname){
+        if (wellknownname && wellknownname != 'circle'){
             var { points, radius, angle, rotation, radius2} = 0
             if (wellknownname == 'square') {
                     points = 4

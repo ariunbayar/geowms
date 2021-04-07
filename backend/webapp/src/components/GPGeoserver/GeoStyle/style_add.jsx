@@ -13,7 +13,7 @@ export class CreateStyle extends Component {
             rule_name: '',
             style_size: 1,
             fill_color:  '#C0C0C0',
-            wellknownname: '',
+            wellknownname: 'circle',
             wellknowshape: '',
             div_angle: '',
             color_opacity: 0.3,
