@@ -24,7 +24,7 @@ def create_payment_type(apps, schema_editor):
     if payment:
         pay_id = payment.id
         for count_id in range(pay_id):
-            check_data = payment.objects.filter(pk=count_id).first()
+            check_data = Payment.objects.filter(pk=count_id).first()
             if check_data:
                 if check_data.export_file is not None:
                     exp_file = check_data.export_file
