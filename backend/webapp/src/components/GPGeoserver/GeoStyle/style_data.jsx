@@ -15,11 +15,11 @@ export default class ShowStyleData extends Component {
     }
 
     render() {
-            const {value, had_chosen} = this.props
+            const {value, had_chosen, data_state} = this.props
             return (
                 <div className="col-md-12 d-inline-block mx-0 px-0">
                     {
-                        (value.range_number && value.range_number > 0)
+                        (value.range_number && value.range_number > 0 && had_chosen > 0)
                         &&
                         <div className="col-md-12 px-0">
                             {
@@ -65,7 +65,7 @@ export default class ShowStyleData extends Component {
                     }
                     <div>
                         {
-                            value
+                            (value && (data_state || had_chosen > 0))
                             &&
                             <div>
                                 <div className="col-md-12 d-flex my-2">

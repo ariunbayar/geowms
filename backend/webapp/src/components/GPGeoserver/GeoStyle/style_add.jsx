@@ -39,6 +39,7 @@ export class CreateStyle extends Component {
             only_clicked: false,
             prev_style_name: '',
             single_select_datas: [],
+            data_state: true,
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
@@ -75,7 +76,7 @@ export class CreateStyle extends Component {
                     })
                 }
             }
-            this.setState({single_select_datas: this.style_datas[0]})
+            this.setState({single_select_datas: this.style_datas[0], data_state: false})
         }
 
         if (input_name != 'range_number' && input_name != 'had_chosen') {
@@ -156,7 +157,7 @@ export class CreateStyle extends Component {
         }
 
         if(pS.range_number !== range_number){
-            if (! range_number ) {
+            if (! range_number || range_number <1) {
                 this.setState({
                     style_size: 1, fill_color:  '#C0C0C0',
                     wellknownname: '', wellknowshape: '',
@@ -164,13 +165,14 @@ export class CreateStyle extends Component {
                     dashed_line_length: 0, dashed_line_gap: 0,
                     min_range: 0, max_range: 0,
                     shape_type: '', style_color: '#800000', range_number,
+                    data_state: true, geom_type: 'Point', shape_type: 'PointSymbolizer',
                 })
             }
             else {
                 if (this.style_datas && this.style_datas.length>0){
                     this.style_datas[0].range_number = range_number
                     var value = this.style_datas[0]
-                    this.setState({single_select_datas: value})
+                    this.setState({single_select_datas: value, data_state: false})
                 }
             }
         }
@@ -230,7 +232,8 @@ export class CreateStyle extends Component {
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
                 wellknowshape, div_angle, only_clicked,
-                label_check, single_select_datas, geom_type
+                label_check, single_select_datas, geom_type,
+                data_state
 
             } = this.state
             return (
@@ -312,11 +315,13 @@ export class CreateStyle extends Component {
                                         value={single_select_datas}
                                         handleOnChange={this.handleOnChange}
                                         had_chosen={had_chosen}
+                                        data_state = {data_state}
                                     />
                                     :
                                     <ShowStyleData
                                         value={this.state}
                                         handleOnChange={this.handleOnChange}
+                                        data_state = {data_state}
                                     />
                                 }
                                 <div className="col-md-12 my-4">
