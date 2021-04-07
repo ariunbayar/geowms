@@ -18,30 +18,32 @@ def _detect_format(image_path):
 
 
 def create_payment_type(apps, schema_editor):
-    payment = apps.get_model('payment', 'payment')
-    pay_id = payment.objects.last().id
+    Payment = apps.get_model('payment', 'payment')
+    payment = Payment.objects.last()
 
-    for count_id in range(pay_id):
-        check_data = payment.objects.filter(pk=count_id).first()
-        if check_data:
-            if check_data.export_file is not None:
-                exp_file = check_data.export_file
-                if 'shape' in exp_file:
-                    payment.objects.filter(pk=count_id).update(ext_type='shp')
-                elif 'pdf' in exp_file:
-                    payment.objects.filter(pk=count_id).update(ext_type='pdf')
-                elif 'tseg' in exp_file:
-                    payment.objects.filter(pk=count_id).update(ext_type='point')
-                elif 'image' in exp_file:
-                    file_name = str(count_id)
-                    folder_name = 'image'
-                    zip_name = 'export.zip'
-                    path = os.path.join(settings.FILES_ROOT, folder_name, file_name)
-                    unzip_path = os.path.join(path,zip_name)
-                    with ZipFile(unzip_path, 'r') as zipObj:
-                        zipObj.extractall(path+"/")
-                    image_format = _detect_format(path)
-                    payment.objects.filter(pk=count_id).update(ext_type=image_format)
+    if payment:
+        pay_id = payment.id
+        for count_id in range(pay_id):
+            check_data = payment.objects.filter(pk=count_id).first()
+            if check_data:
+                if check_data.export_file is not None:
+                    exp_file = check_data.export_file
+                    if 'shape' in exp_file:
+                        payment.objects.filter(pk=count_id).update(ext_type='shp')
+                    elif 'pdf' in exp_file:
+                        payment.objects.filter(pk=count_id).update(ext_type='pdf')
+                    elif 'tseg' in exp_file:
+                        payment.objects.filter(pk=count_id).update(ext_type='point')
+                    elif 'image' in exp_file:
+                        file_name = str(count_id)
+                        folder_name = 'image'
+                        zip_name = 'export.zip'
+                        path = os.path.join(settings.FILES_ROOT, folder_name, file_name)
+                        unzip_path = os.path.join(path,zip_name)
+                        with ZipFile(unzip_path, 'r') as zipObj:
+                            zipObj.extractall(path+"/")
+                        image_format = _detect_format(path)
+                        payment.objects.filter(pk=count_id).update(ext_type=image_format)
 
 
 class Migration(migrations.Migration):
