@@ -12,6 +12,7 @@ export default class Charts extends Component {
         }
         this.handlePageCount=this.handlePageCount.bind(this)
     }
+
     componentDidMount() {
         this.handlePageCount()
     }

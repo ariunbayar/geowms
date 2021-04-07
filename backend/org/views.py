@@ -5,7 +5,7 @@ import PIL.Image as Image
 import datetime
 from collections import Counter
 
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
@@ -1135,6 +1135,7 @@ def save_inspire_roles(request, payload, pk):
     return JsonResponse(rsp)
 # baiguulgaa govperm
 
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -1515,6 +1516,7 @@ def get_addresses(request, level, pk):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_address(request, pk):
     points = list()
 
@@ -1566,6 +1568,7 @@ def get_address(request, pk):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_emp_info(request, payload, pk):
     employee = get_object_or_404(Employee, pk=pk)
     is_erguul = payload.get("is_erguul")
@@ -1625,6 +1628,7 @@ def _get_erguul(erguul, field):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_erguuleg_fields(request, pk):
     erguul_id = ''
     send_fields = list()
@@ -1666,6 +1670,7 @@ def get_erguuleg_fields(request, pk):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def save_erguul(request, payload):
     hour = ''
 
@@ -1770,6 +1775,7 @@ def save_erguul(request, payload):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_erguuls(request):
 
     points = list()
@@ -1806,6 +1812,7 @@ def _get_choices(Model, field_name):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_select_values(request):
 
     qs = DefaultPosition.objects
@@ -1824,6 +1831,9 @@ def get_select_values(request):
     return JsonResponse(rsp)
 
 
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
 def get_all_org(request):
 
     qs = Org.objects
@@ -1845,6 +1855,7 @@ def get_all_org(request):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def emp_gender_count(request, pk):
 
     qs = Org.objects
@@ -1870,6 +1881,7 @@ def emp_gender_count(request, pk):
 
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def emp_age_count(request, pk):
 
     date_now = datetime.datetime.now()
@@ -1899,8 +1911,8 @@ def emp_age_count(request, pk):
     count_emps_age = list(count_age.values())
 
     rsp = {
-        'count_emps_age': count_emps_age,  # nasaar buleglesen too
-        'emp_age': emp_ages,  # nas
+        'count_emps_age': count_emps_age,
+        'emp_age': emp_ages,
     }
 
     return JsonResponse(rsp)
