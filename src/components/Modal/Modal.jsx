@@ -57,6 +57,19 @@ export default class Modal extends Component {
                     () => this.handleModalOpen()
                 )
             }
+        // Modal component value
+            <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
+                />
     */
 
     componentDidMount() {
