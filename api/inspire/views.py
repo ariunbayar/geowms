@@ -244,6 +244,7 @@ def mogno_db_urban_all_data():
 #                             feature_config_id=property_display['feature_config_id'],
 #                             data_type_id=property_display['data_type_id'],
 #                             property_id=property_obj.property_id,
+#                             created_by=end zoriulj goy  too ogoh darana haij olj ustgah,
 #                         )
 #                         if dataaa:
 #                             if property_obj.value_type_id in ['text', 'multi-text', 'boolean', 'link']:
@@ -267,6 +268,7 @@ def mogno_db_urban_all_data():
 
 #             except Exception:
 #                 a = 2
+    ## MDatas.objects.bulk_create(m_datas_objs)
 
 
 # feature_id = 50103
