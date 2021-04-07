@@ -52,23 +52,21 @@ export default class Charts extends Component {
                     pointHoverBorderWidth: 2,
                     pointRadius: 1,
                     pointHitRadius: 10,
-                    data: count_emps_age,
-                    stepSize: 1,
-                    indexAxis: 'y'
+                    data: count_emps_age
                 },
             ],
         }
         const options = {
             responsive: true,
-                scales: {
-                    yAxes: [
-                        {
-                            ticks: {
-                                stepSize: 1
-                            }
+            scales: {
+                yAxes: [
+                    {
+                        ticks: {
+                            stepSize: 10
                         }
-                    ]
-                }
+                    }
+                ]
+            }
         }
         return (
             <Line data={dataLine} options={ options } />
