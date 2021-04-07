@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { Line } from "react-chartjs-2";
 import {service} from "../service"
-// import {service} from "../../Access/service"
 
 export default class Charts extends Component {
     constructor(props) {
@@ -34,7 +33,7 @@ export default class Charts extends Component {
             labels:emp_age,
             datasets: [
                 {
-                    label: "Насны бүлэглэл",
+                    label: "Насны ангилал",
                     fill: true,
                     lineTension: 0.3,
                     backgroundColor: "rgba(184, 185, 210, .3)",

@@ -1,18 +1,16 @@
 import os
 import io
-import json
 from geojson import FeatureCollection
 import PIL.Image as Image
 import datetime
-from django.apps import apps
+from collections import Counter
 
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count, F, Func, Q
+from django.db.models import Count, Q
 from django.db import transaction
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
@@ -1862,14 +1860,6 @@ def emp_gender_count(request, pk):
     male_count = item.male_count
     female_count = item.female_count
 
-    # qs = Employee.objects.filter(org_id=pk)
-    #     users = []
-    #     for employee in qs:
-    #         users.append(employee.user.id)
-
-    #     male_count = User.objects.filter(pk__in=users, gender='Эрэгтэй').count()
-    #     famale_count = User.objects.filter(pk__in=users, gender='Эмэгтэй').count()
-
     rsp = {
         'count_male': male_count,
         'count_female': female_count
@@ -1884,11 +1874,11 @@ def emp_age_count(request, pk):
 
     date_now = datetime.datetime.now()
     year = date_now.year
-    year_cut = str(date_now.year)[2:4]  # odoogiin on '2021'
+    year_cut = str(date_now.year)[2:4]
 
     emp_reg = []
     emp_age = []
-    qs = Employee.objects.filter(org_id=1)
+    qs = Employee.objects.filter(org_id=pk)
 
     for employee in qs:
         emp_reg.append(employee.user.register)
@@ -1902,9 +1892,9 @@ def emp_age_count(request, pk):
             birth_year = str(19) + register_cut
             age = int(year) - int(birth_year)
             emp_age.append(age)
-    print(emp_age, '-----------------------------')
 
-    count_emps_age = [3, 4, 2, 1]
+    count_age = Counter(emp_age)
+    count_emps_age = list(count_age.values())
 
     rsp = {
         'count_emps_age': count_emps_age,  # nasaar buleglesen too
