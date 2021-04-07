@@ -4,7 +4,7 @@ import {NavLink} from "react-router-dom"
 import FormTable from './FormTable'
 import {service} from '../../service'
 import {Pagination} from '../../../../components/pagination/pagination'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 export class FormList extends Component {
 
@@ -20,17 +20,20 @@ export class FormList extends Component {
             query_min: false,
             error: false,
             error_msg: [],
-            modal_alert_status: 'closed',
-            timer: null,
-            modal_text: '',
-            modal_icon: ''
+
+            modal_status: 'closed',
+            modal_icon: 'fa fa-check-circle',
+            icon_color: 'success',
+            title: '',
+            text: '',
+            has_button: false,
         }
 
         this.paginate = this.paginate.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     paginate (page, query) {
@@ -60,9 +63,12 @@ export class FormList extends Component {
     handleRemove(id, t_type) {
         service.tsegPersonalRemove(id, t_type).then(({success}) => {
             if (success) {
-                this.setState({modal_alert_status: 'open', modal_text: 'Амжилттай устлаа', modal_icon: 'success'})
+                this.modalChange('fa fa-check-circle', "success", 'Амжилттай устлаа', '', false)
                 this.paginate(1, this.state.searchQuery)
-                this.modalCloseTime()
+            }
+            else
+            {
+                this.modalChange('fa fa-times-circle', "danger", 'Устгахад алдаа гарлаа', '', false)
             }
         })
     }
@@ -70,34 +76,31 @@ export class FormList extends Component {
     handleSuccess(point_type, objectid, point_class, t_type) {
         service.tsegPersonalSuccess(point_type, objectid, point_class, t_type).then(({success, msg}) => {
             if(success){
-                this.setState( {modal_alert_status: 'open', error: !success, error_msg: msg, modal_text: 'Амжилттай баталгаажлаа', modal_icon: 'success'})
+                this.modalChange('fa fa-check-circle', "success", 'Амжилттай баталгаажлаа', '', false)
                 this.paginate(1, this.state.searchQuery)
-                this.modalCloseTime('success')
             }
             else
             {
-                this.setState({ modal_alert_status: 'open', error: false, error_msg: [], modal_text: 'Баталгаажлахад алдаа гарлаа', modal_icon: 'danger' })
-                this.modalCloseTime('danger')
+                this.modalChange('fa fa-times-circle', "danger", 'Баталгаажлахад алдаа гарлаа', '', false)
             }
         })
     }
 
-    modalCloseTime(value){
-        if(value == 'success'){
-            this.state.timer = setTimeout(() => {
-                this.setState({modal_alert_status: "closed"})
-            }, 2000)
-        }
-        else{
-            this.state.timer = setTimeout(() => {
-                this.setState({modal_alert_status: "closed"})
-            }, 2000)
-        }
+    modalChange(modal_icon, icon_color, title, text, has_button) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+        })
+        this.handleModalOpen()
     }
 
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -157,11 +160,14 @@ export class FormList extends Component {
                                     paginate = {this.paginate}
                                     searchQuery = {this.state.searchQuery}
                             />
-                            <ModalAlert
-                                modalAction={() => this.modalClose()}
-                                status={this.state.modal_alert_status}
-                                title={this.state.modal_text}
-                                model_type_icon = {this.state.modal_icon}
+                            <Modal
+                                modal_status={this.state.modal_status}
+                                modal_icon={this.state.modal_icon}
+                                icon_color={this.state.icon_color}
+                                title={this.state.title}
+                                has_button={this.state.has_button}
+                                text={this.state.text}
+                                modalAction={this.props.onClick}
                             />
                         </div>
                     </div>

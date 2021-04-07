@@ -129,7 +129,6 @@ def get_property_data_display2(perm_list, prop, feature_id, geom):
             }
 
 
-
 def get_all_child_feature(feature_id):
 
     data_type_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).exclude(data_type_id__isnull=True).values_list('data_type_id', flat=True))

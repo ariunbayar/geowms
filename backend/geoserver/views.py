@@ -99,7 +99,7 @@ def remove_layer_group(request, payload):
 
         return JsonResponse({
             'success': False,
-            'info': 'Layer Group үүсэхэд алдаа гарлаа'
+            'info': 'Layer Group устгахад алдаа гарлаа'
         })
 
     cache_layer = WmtsCacheConfig.objects.filter(group_name=group_name).first()

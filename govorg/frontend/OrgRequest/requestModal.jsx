@@ -23,15 +23,18 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                     <div className="col-md-4">
                         <button
                             className="btn gp-btn-primary"
-                            onClick={() => handleModalOpen(
+                            onClick={() => modalChange(
                                 'reject',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог татгалзах",
                                 `Та ${
                                     get_modal_text(values.kind)
                                 }
-                                татгалзахдаа итгэлтэй байна уу ?`,
-                                "Тохиргоог татгалзах",
-                                "success",
-                                " татгалзах"
+                                татгалзахдаа итгэлтэй байна уу?`,
+                                true,
+                                "татгалзах",
+                                this.handleModalAction
                             )}
                         >
                             Татгалзах
@@ -40,15 +43,18 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                     <div className="ml-auto mr-3">
                         <button
                             className="btn gp-btn-outline-primary"
-                            onClick={() => handleModalOpen(
+                            onClick={() => modalChange(
                                 'approve',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог зөвшөөрөх",
                                 `Та ${
                                     get_modal_text(values.kind)
                                 }
-                                зөвшөөрөхдөө итгэлтэй байна уу ?`,
-                                "Тохиргоог зөвшөөрөх",
-                                "warning",
-                                "зөвшөөрөх"
+                                зөвшөөрөхдөө итгэлтэй байна уу?`,
+                                true,
+                                "зөвшөөрөх",
+                                this.handleModalAction
                             )}
                         >
                             Зөвшөөрөх
@@ -93,41 +99,35 @@ export default class RequestModal extends Component {
 
         this.state = {
             status: "initial",
-            is_modal_approve_open: false,
-            is_modal_reject_open: false,
 
-            modal_status: "closed",
             action_type: '',
-            text: '',
+            modal_status: "closed",
+            modal_icon: 'fa fa-check-circle',
+            icon_color: 'success',
             title: '',
+            text: '',
             model_type_icon: '',
+            has_button: false,
             action_name: '',
+            modalClose: null,
 
             values: props.values
         }
 
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
-        this.handleModalClose = this.handleModalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalAction = this.handleModalAction.bind(this)
         this.selectedFeature = this.selectedFeature.bind(this)
         this.handleRequestApprove = this.handleRequestApprove.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+
     }
 
-    handleModalClose(){
-        this.setState({ modal_status: "closed" })
-    }
-
-    handleModalOpen(action_type, text, title, model_type_icon, action_name){
-
-        this.setState({
-            modal_status: "open",
-            action_type,
-            text,
-            title,
-            model_type_icon,
-            action_name
+    handleModalOpen(){
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
         })
     }
 
@@ -154,7 +154,7 @@ export default class RequestModal extends Component {
 
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
 
-        this.setState({ is_loading: true, modal_status: "closed" })
+        this.setState({ is_loading: true })
         if(this.state.action_type == 'reject')
         {
            this.handleRequestReject(ids, feature_id)
@@ -165,73 +165,99 @@ export default class RequestModal extends Component {
     }
 
     handleRequestReject(ids, feature_id,) {
-        const open_modal = true
-        let modal_info
-        let modal_type
         service
             .requestReject(ids, feature_id)
             .then(({ success, info }) => {
                 if(success) {
-                    modal_type = 'success'
-                    modal_info = info
+                    this.modalChange(
+                        '',
+                        'fa fa-check-circle',
+                        'success',
+                        info,
+                        '',
+                        false,
+                        "",
+                        this.handleModalClose
+                    )
                 }
                 else {
-                    modal_type = 'warning'
-                    modal_info = info
+                    this.modalChange(
+                        '',
+                        'fa fa-times-circle',
+                        'danger',
+                        info,
+                        '',
+                        false,
+                        "",
+                        this.handleModalClose
+                    )
                 }
-                this.setState({ is_loading: false })
-                this.props.refreshData(open_modal, modal_info, modal_type)
             })
             .catch((error) => {
                 if(error == 'Bad Request') {
-                    modal_type = 'danger'
-                    modal_info = 'Алдаа гарлаа. Обьект олдсонгүй'
-                    this.setState({ is_loading: false })
+                    this.modalChange(
+                        '',
+                        'fa fa-exclamation-circle',
+                        'warning',
+                        'Алдаа гарлаа. Обьект олдсонгүй',
+                        '',
+                        false,
+                        "",
+                        this.handleModalClose
+                    )
                 }
-            }).finally(() => this.setState({ status: 'closed' }))
+            })
+            this.setState({ is_loading: false })
     }
 
     handleRequestApprove(ids, feature_id){
-        const open_modal = true
-        let modal_info
-        let modal_type
         service
             .requestApprove(ids, feature_id)
             .then(({ success, info }) => {
                 if(success) {
-                    modal_info = info
-                    modal_type = 'success'
+                    this.modalChange(
+                        '',
+                        'fa fa-check-circle',
+                        'success',
+                        info,
+                        '',
+                        false,
+                        "",
+                        this.handleModalClose
+                    )
                 }
                 else {
-                    modal_info = info
-                    modal_type = 'warning'
+                    this.modalChange(
+                        '',
+                        'fa fa-times-circle',
+                        'danger',
+                        info,
+                        '',
+                        false,
+                        "",
+                        this.handleModalClose
+                    )
                 }
-                this.setState({ is_loading: false })
-                this.props.refreshData(open_modal, modal_info, modal_type)
-            }).catch((error) => {
-                if(error == 'Bad Request')
-                {
-                    this.setState({ is_loading: false })
-                    modal_info = 'Алдаа гарсан байна'
-                    modal_type = 'danger'
-                    this.props.refreshData(open_modal, modal_info, modal_type)
-                }
-            }).finally(() => this.setState({ status: 'closed' }))
+            })
+            .catch((error) => {
+                if(error == 'Bad Request') {
+                    this.modalChange(
+                        '',
+                        'fa fa-exclamation-circle',
+                        'warning',
+                        'Алдаа гарлаа',
+                        '',
+                        false,
+                        "",
+                        this.handleModalClose
+                        )
+                    }
+                })
+            this.setState({ is_loading: false })
     }
 
     componentDidMount() {
         if (this.state.status == "initial") this.handleOpen()
-    }
-
-    componentDidUpdate(prevProps) {
-        if (this.props.status != prevProps.status) {
-            if (["initial", "open"].includes(this.props.status)) {
-                this.handleOpen()
-            }
-            if (["closing", "closed"].includes(this.props.status)) {
-                this.handleClose()
-            }
-        }
     }
 
     handleOpen() {
@@ -256,10 +282,29 @@ export default class RequestModal extends Component {
         }
     }
 
+    modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
+        this.setState({
+            action_type,
+            modal_icon,
+            icon_color,
+            title,
+            text,
+            has_button,
+            action_name,
+            modalClose
+        })
+        this.handleModalOpen()
+    }
+
+    handleModalClose() {
+        this.setState({ is_loading: false })
+        this.props.refreshData()
+    }
+
     render () {
 
         const selected_form_json = this.state.form_json
-        const { is_loading,  modal_status, text, title, model_type_icon, action_name, status, selected_value, values } = this.state
+        const { is_loading, status, selected_value, values } = this.state
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -301,7 +346,7 @@ export default class RequestModal extends Component {
                                                             ?
                                                                 form_json && <FormJson form_json={form_json} />
                                                             :
-                                                                selected_form_json && <FormJson form_json={selected_form_json} handleModalOpen={this.handleModalOpen} values={selected_value}/>
+                                                                selected_form_json && <FormJson form_json={selected_form_json} handleModalOpen={this.modalChange} values={selected_value}/>
                                                         }
                                                         <div className={selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
                                                             <RequestMap values={values} selectedFeature={this.selectedFeature}/>
@@ -316,8 +361,11 @@ export default class RequestModal extends Component {
                                 <div className="row my-2 mr-1 float-right">
                                     <button
                                         type="button mr-2 ml-2"
-                                        onClick={() => this.handleModalOpen(
+                                        onClick={() => this.modalChange(
                                             'reject',
+                                            'fa fa-exclamation-circle',
+                                            'warning',
+                                            "Тохиргоог татгалзах",
                                             `Та ${
                                                 values.length == 1
                                                     ?
@@ -329,10 +377,10 @@ export default class RequestModal extends Component {
                                                     :
                                                     null
                                             }
-                                            татгалзахдаа итгэлтэй байна уу ?`,
-                                            "Тохиргоог татгалзах",
-                                            "success",
-                                            " татгалзах"
+                                            татгалзахдаа итгэлтэй байна уу?`,
+                                            true,
+                                            "татгалзах",
+                                            this.handleModalAction
                                         )}
                                         className="btn gp-btn-primary waves-effect waves-light"
                                     >
@@ -340,8 +388,11 @@ export default class RequestModal extends Component {
                                     </button>
                                     <button
                                         type="button mr-2 ml-2"
-                                        onClick={() => this.handleModalOpen(
+                                        onClick={() => this.modalChange(
                                             'approve',
+                                            'fa fa-exclamation-circle',
+                                            'warning',
+                                            "Тохиргоог зөвшөөрөх",
                                             `Та ${
                                                 values.length == 1
                                                     ?
@@ -353,10 +404,10 @@ export default class RequestModal extends Component {
                                                     :
                                                     null
                                             }
-                                            зөвшөөрөхдөө итгэлтэй байна уу ?`,
-                                            "Тохиргоог зөвшөөрөх",
-                                            "warning",
-                                            "зөвшөөрөх"
+                                            зөвшөөрөхдөө итгэлтэй байна уу?`,
+                                            true,
+                                            "зөвшөөрөх",
+                                            this.handleModalAction
                                         )}
                                         className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
                                     >
@@ -368,13 +419,15 @@ export default class RequestModal extends Component {
                         </div>
                     </div>
                     <Modal
-                        modalAction={() => this.handleModalAction()}
-                        modalClose={() => this.handleModalClose()}
-                        text={text}
-                        title={title}
-                        status={modal_status}
-                        model_type_icon={model_type_icon}
-                        actionNameDelete={action_name}
+                        modal_status={this.state.modal_status}
+                        modal_icon={this.state.modal_icon}
+                        icon_color={this.state.icon_color}
+                        title={this.state.title}
+                        has_button={this.state.has_button}
+                        text={this.state.text}
+                        modalAction={this.handleModalAction}
+                        actionNameDelete={this.state.action_name}
+                        modalClose={this.state.modalClose}
                     />
                 </div>
                 <div className={classNameBackdrop}></div>

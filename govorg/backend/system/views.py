@@ -5,11 +5,13 @@ from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
-from backend.govorg.models import GovOrg
+from backend.govorg.models import GovOrg, GovOrgWMSLayer
 from backend.wms.models import WMS
 from main import utils
 from django.contrib.auth.decorators import login_required
 from main.components import Datatable
+import requests
+import json
 
 
 def _get_govorg_display(govorg):
@@ -49,18 +51,40 @@ def systemList(request, payload):
     return JsonResponse(rsp)
 
 
+def _get_attribute(request, wms):
+
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    queryargs = request.GET
+    headers = {**BASE_HEADERS}
+    base_url = wms.url + '?service=wfs&version=2.0.0&request=DescribeFeatureType&outputFormat=application/json'
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=20)
+    if rsp.status_code == 200:
+        content = rsp.content.decode("utf-8")
+        content = json.loads(content)
+        return content
+    return []
+
+
 def _get_wmslayer(request, system, wms):
     layer_list = []
     system_local_base_url = utils.get_config('system_local_base_url')
     for wmslayer in wms.wmslayer_set.all():
-        layer_list.append({
-            'id': wmslayer.id,
-            'code': wmslayer.code,
-            'name': wmslayer.name,
-            'title': wmslayer.title,
-            'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[system.token, wmslayer.code])),
-            'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[system.token, wmslayer.code]),
-        })
+        govorg_layers = GovOrgWMSLayer.objects.filter(govorg=system, wms_layer=wmslayer).first()
+        attributes = []
+        if govorg_layers:
+            if govorg_layers.attributes:
+                attributes = json.loads(govorg_layers.attributes)
+            layer_list.append({
+                'id': govorg_layers.id,
+                'attributes': attributes,
+                'code': wmslayer.code,
+                'name': wmslayer.name,
+                'title': wmslayer.title,
+                'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[system.token, wmslayer.code])),
+                'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[system.token, wmslayer.code]),
+            })
     return layer_list
 
 
@@ -73,6 +97,7 @@ def _get_system_detail_display(request, system):
             'is_active': wms.is_active,
             'url': wms.url,
             'layer_list': _get_wmslayer(request, system, wms),
+            'attributes': _get_attribute(request, wms),
         }
         for wms in WMS.objects.all()
     ]

@@ -1,3 +1,4 @@
+# import pyodbc
 from django.db import connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -211,8 +212,73 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
     return datas
 
 
+#######################################__Urban__#########################################################3
+# from bson.json_util import dumps, loads, default
+# import json
+
+# def mogno_db_urban_all_data():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.urban.find()
+#     datas = [json.dumps(result, ensure_ascii=False, default=default, separators=(',', ':')) for result in cursor]
+#     return datas
 
 
+# def mogno_db_collection_names():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.collection_names()
+#     names = [ c for c in cursor]
+#     return names
 
 
+# def mogno_db_collection_field_names():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.urban.find_one()
+#     names = [ c for c in cursor]
+#     return names
 
+
+################################## MSSQL ############################################
+
+# 1. sudo su
+# 2. curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+# 3. curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+# 4. sudo apt-get update
+# 5. sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
+# 6. sudo ACCEPT_EULA=Y apt-get install -y mssql-tools
+# 7. echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+# 8. source ~/.bashrc
+# 9. sudo apt-get install -y unixodbc-dev
+# 10. pip install pyodbc
+
+
+# def _mssql_settings(port='1433', server='192.168.1.4', database='urban', username='sa', password='123456'):
+#     drivers = pyodbc.drivers()
+#     connection_dict = {
+#         'driver': drivers[0],
+#         'server': server + ', ' + port,
+#         'database': database,
+#         'uid': username,
+#         'password': password
+#     }
+#     return connection_dict
+
+
+# def _mssql_connection(connection_dict):
+#     connection = pyodbc.connect(**connection_dict)
+#     cursor = connection.cursor()
+#     return cursor
+
+
+# def _execute_query(cursor, sql):
+#     cursor.execute(sql)
+#     datas = utils.dict_fetchall(cursor)
+#     return datas
+
+
+# cursor = _mssql_connection(_mssql_settings())
+# sql = """
+#     SELECT TOP (1000) [OBJECTID], [KH_MON], [DUUREG] FROM [urban].[dbo].[ACHB]
+# """
+# row = _execute_query(cursor, sql)
+# datas = [item for item in row]
+# print(datas)

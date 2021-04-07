@@ -92,6 +92,8 @@ urlpatterns = [
         path('save-erguul/', org_views.save_erguul),
         path('get-erguul/', org_views.get_erguuls),
         path('get-select-values/', org_views.get_select_values),
+        path('<int:pk>/emp-gender-count/', org_views.emp_gender_count),
+        path('<int:pk>/emp-age-count/', org_views.emp_age_count),
         path('get-all-org/', org_views.get_all_org),
     ], 'org'))),
 
@@ -112,6 +114,7 @@ urlpatterns = [
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('үүсгэх/', govorg_views.хадгалах),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах),
+        path('<int:pk>/att-save/', govorg_views.set_attributes),
         path('<int:pk>/refresh-token/', govorg_views.refresh_token, name='refresh-token'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),

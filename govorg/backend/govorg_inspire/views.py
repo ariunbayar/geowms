@@ -26,11 +26,13 @@ from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
 from backend.inspire.models import LCodeLists
 from backend.inspire.models import LProperties
+from backend.inspire.models import LDataTypes
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
+from backend.inspire.models import LDataTypeConfigs
+from backend.inspire.models import LFeatureConfigs
 from backend.org.models import Employee, Org, NemaWMS
-
 from govorg.backend.org_request.models import ChangeRequest
 from govorg.backend.org_request.views import _get_geom
 
@@ -335,7 +337,7 @@ def _get_type(value_type_id):
     return value_type
 
 
-def _get_property(ob, roles, lproperties):
+def _get_property(ob, roles, lproperties, data_type_id=None):
 
     data = ''
     value_type = ''
@@ -358,6 +360,7 @@ def _get_property(ob, roles, lproperties):
 
     return {
         'pk': ob.get('id'),
+        'data_type_id': data_type_id,
         'property_name': lproperties.property_name,
         'property_id': lproperties.property_id,
         'property_code': lproperties.property_code,
@@ -376,16 +379,42 @@ def _get_property(ob, roles, lproperties):
 def detail(request, gid, fid, tid):
     property_ids = []
     properties = []
+    data_types = {}
+    data_type_id = []
+    data_types_tmp = []
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_details = get_emp_property_roles(employee, fid)
     if property_ids:
-        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('property_id', 'value_text', 'value_number', 'value_date', 'id').order_by('property_id')
+        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('data_type_id', 'property_id', 'value_text', 'value_number', 'value_date', 'id').order_by('property_id')
         for prop in mdatas:
-            lproperty = LProperties.objects.filter(property_id=prop.get('property_id')).first()
-            properties.append(_get_property(prop, property_details, lproperty))
+            lproperty = LProperties.objects.filter(property_id=prop.get('property_id'))
+            lproperty = lproperty.exclude(value_type_id='data-type')
+            lproperty = lproperty.exclude(property_code='localId')
+            lproperty = lproperty.first()
+            if lproperty:
+
+                l_data_types = LDataTypes.objects.filter(data_type_id=prop.get('data_type_id')).first()
+
+                if l_data_types.data_type_id in data_type_id:
+                    data_types[l_data_types.data_type_id]['property_ids'].append(lproperty.property_id)
+                else:
+                    data_type_id.append(l_data_types.data_type_id)
+                    data_types[l_data_types.data_type_id] = {
+                        'data_type_name': l_data_types.data_type_name,
+                        'data_type_code': l_data_types.data_type_code,
+                        'data_type_name_eng': l_data_types.data_type_name_eng,
+                        'data_type_id': l_data_types.data_type_id,
+                        'property_ids': [lproperty.property_id],
+                    }
+
+                properties.append(_get_property(prop, property_details, lproperty, l_data_types.data_type_id))
+        for i, value in data_types.items():
+            data_types_tmp.append(value)
+
     rsp = {
         'success': True,
-        'datas': properties
+        'datas': properties,
+        'data_types': data_types_tmp
     }
 
     return JsonResponse(rsp)
@@ -398,24 +427,80 @@ def detailCreate(request, tid, pid, fid):
     property_ids = []
     property_roles = []
     org_propties_front = []
+    data_type_ids = []
+    data_types = {}
+    data_types_tmp = []
     value_data = {
         'pk': '',
         'value_text': '',
         'value_date': '',
         'value_number': ''
         }
+    f_configs = LFeatureConfigs.objects.filter(feature_id=fid)
     employee = get_object_or_404(Employee, user__username=request.user)
     property_ids, property_roles = get_emp_property_roles(employee, fid)
 
-    if property_ids:
-        for prop in property_ids:
-            lproperty = LProperties.objects.filter(property_id=prop).first()
-            org_propties_front.append(_get_property(value_data, property_roles, lproperty))
+    for f_config in f_configs:
+        data_type_id = f_config.data_type_id
+        data_types_obj = LDataTypes.objects.filter(data_type_id=data_type_id).first()
+        data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type_id)
+        for data_type_config in data_type_configs:
+            if data_type_config.property_id in property_ids:
+                lproperty = LProperties.objects.filter(property_id=data_type_config.property_id)
+                lproperty = lproperty.exclude(value_type_id='data-type')
+                lproperty = lproperty.exclude(property_code='localId')
+                lproperty = lproperty.first()
+                if lproperty:
+                    org_propties_front.append(_get_property(value_data, property_roles, lproperty, data_types_obj.data_type_id))
+                    if data_type_id in data_type_ids:
+                        data_types[data_types_obj.data_type_id]['property_ids'].append(data_type_config.property_id)
+                    else:
+                        data_type_ids.append(data_type_id)
+                        data_types[data_types_obj.data_type_id] = {
+                            'data_type_name': data_types_obj.data_type_name,
+                            'data_type_code': data_types_obj.data_type_code,
+                            'data_type_name_eng': data_types_obj.data_type_name_eng,
+                            'data_type_id': data_types_obj.data_type_id,
+                            'property_ids': [data_type_config.property_id],
+                        }
+
+    for i, value in data_types.items():
+        data_types_tmp.append(value)
     rsp = {
         'success': True,
-        'datas': org_propties_front
+        'datas': org_propties_front,
+        'data_types': data_types_tmp
     }
     return JsonResponse(rsp)
+
+
+def _data_type_ids_of_feature(feature_id):
+    data_type_ids = []
+    data_types = {}
+    data_types_tmp = []
+    f_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    for f_config in f_configs:
+        data_type_id = f_config.data_type_id
+        data_types_obj = LDataTypes.objects.filter(data_type_id=data_type_id).first()
+        data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type_id)
+        for data_type_config in data_type_configs:
+
+            if data_type_id in data_type_ids:
+                data_types[data_types_obj.data_type_id]['property_ids'].append(data_type_config.property_id)
+            else:
+                data_type_ids.append(data_type_id)
+                data_types[data_types_obj.data_type_id] = {
+                    'data_type_name': data_types_obj.data_type_name,
+                    'data_type_code': data_types_obj.data_type_code,
+                    'data_type_name_eng': data_types_obj.data_type_name_eng,
+                    'data_type_id': data_types_obj.data_type_id,
+                    'property_ids': [data_type_config.property_id],
+                }
+
+    for i, value in data_types.items():
+        data_types_tmp.append(value)
+
+    return data_types_tmp or []
 
 
 @require_POST
