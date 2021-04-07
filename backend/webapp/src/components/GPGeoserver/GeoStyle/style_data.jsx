@@ -28,17 +28,12 @@ export default class ShowStyleData extends Component {
                                 <div className="col-md-12 d-flex my-2">
                                     <div className="col-md-6 mb-2">
                                         <label htmlFor="">Max scale</label>
-                                        <select
+                                        <input
                                             className="form-control"
                                             name="max_range"
                                             value={value.max_range}
                                             onChange={(e) => this.handleOnChange(e)}
-                                        >
-                                            <option value={0}></option>
-                                            {[...value.scale_ranges].reverse().map((value, idy) =>
-                                                <option value={value}>{value}</option>
-                                            )}
-                                        </select>
+                                        />
                                     </div>
                                 </div>
                                 :
@@ -47,47 +42,32 @@ export default class ShowStyleData extends Component {
                                 <div className="col-md-12 d-flex my-2">
                                     <div className="col-md-6">
                                         <label htmlFor="">Min scale</label>
-                                        <select
+                                        <input
                                             className="form-control"
                                             name="min_range"
                                             value={value.min_range}
                                             onChange={(e) => this.handleOnChange(e)}
-                                        >
-                                            <option value={0}></option>
-                                            {value.scale_ranges.map((value, idy) =>
-                                                <option value={value}>{value}</option>
-                                            )}
-                                        </select>
+                                        />
                                     </div>
                                 </div>:
                                 <div className="col-md-12 d-flex my-2">
                                     <div className="col-md-6">
                                         <label htmlFor="">Min scale</label>
-                                        <select
+                                        <input
                                             className="form-control"
                                             name="min_range"
                                             value={value.min_range}
                                             onChange={(e) => this.handleOnChange(e)}
-                                        >
-                                            <option value={0}></option>
-                                            {value.scale_ranges.map((value, idy) =>
-                                                <option value={value}>{value}</option>
-                                            )}
-                                        </select>
+                                        />
                                     </div>
                                     <div className="col-md-6 mb-2 mx-0 px-0">
                                         <label htmlFor="">Max scale</label>
-                                        <select
+                                        <input
                                             className="form-control"
                                             name="max_range"
                                             value={value.max_range}
                                             onChange={(e) => this.handleOnChange(e)}
-                                        >
-                                            <option value={0}></option>
-                                            {[...value.scale_ranges].reverse().map((value, idy) =>
-                                                <option value={value}>{value}</option>
-                                            )}
-                                        </select>
+                                        />
                                     </div>
                                 </div>
                             }
