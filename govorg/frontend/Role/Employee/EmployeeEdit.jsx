@@ -286,7 +286,7 @@ export class EmployeeEdit extends Component {
                     this.modalChange(
                         'fa fa-check-circle',
                         "success",
-                        'Амжилттай хадгалаа',
+                        'Амжилттай хадгаллаа',
                         '',
                         false,
                         this.handleHistory
