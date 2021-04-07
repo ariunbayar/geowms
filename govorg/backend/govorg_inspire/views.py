@@ -387,22 +387,27 @@ def detail(request, gid, fid, tid):
     if property_ids:
         mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('data_type_id', 'property_id', 'value_text', 'value_number', 'value_date', 'id').order_by('property_id')
         for prop in mdatas:
-            lproperty = LProperties.objects.filter(property_id=prop.get('property_id')).first()
-            l_data_types = LDataTypes.objects.filter(data_type_id=prop.get('data_type_id')).first()
+            lproperty = LProperties.objects.filter(property_id=prop.get('property_id'))
+            lproperty = lproperty.exclude(value_type_id='data-type')
+            lproperty = lproperty.exclude(property_code='localId')
+            lproperty = lproperty.first()
+            if lproperty:
 
-            if l_data_types.data_type_id in data_type_id:
-                data_types[l_data_types.data_type_id]['property_ids'].append(lproperty.property_id)
-            else:
-                data_type_id.append(l_data_types.data_type_id)
-                data_types[l_data_types.data_type_id] = {
-                    'data_type_name': l_data_types.data_type_name,
-                    'data_type_code': l_data_types.data_type_code,
-                    'data_type_name_eng': l_data_types.data_type_name_eng,
-                    'data_type_id': l_data_types.data_type_id,
-                    'property_ids': [lproperty.property_id],
-                }
+                l_data_types = LDataTypes.objects.filter(data_type_id=prop.get('data_type_id')).first()
 
-            properties.append(_get_property(prop, property_details, lproperty, l_data_types.data_type_id))
+                if l_data_types.data_type_id in data_type_id:
+                    data_types[l_data_types.data_type_id]['property_ids'].append(lproperty.property_id)
+                else:
+                    data_type_id.append(l_data_types.data_type_id)
+                    data_types[l_data_types.data_type_id] = {
+                        'data_type_name': l_data_types.data_type_name,
+                        'data_type_code': l_data_types.data_type_code,
+                        'data_type_name_eng': l_data_types.data_type_name_eng,
+                        'data_type_id': l_data_types.data_type_id,
+                        'property_ids': [lproperty.property_id],
+                    }
+
+                properties.append(_get_property(prop, property_details, lproperty, l_data_types.data_type_id))
         for i, value in data_types.items():
             data_types_tmp.append(value)
 
@@ -440,21 +445,25 @@ def detailCreate(request, tid, pid, fid):
         data_types_obj = LDataTypes.objects.filter(data_type_id=data_type_id).first()
         data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type_id)
         for data_type_config in data_type_configs:
-
-            if data_type_id in data_type_ids:
-                data_types[data_types_obj.data_type_id]['property_ids'].append(data_type_config.property_id)
-            else:
-                data_type_ids.append(data_type_id)
-                data_types[data_types_obj.data_type_id] = {
-                    'data_type_name': data_types_obj.data_type_name,
-                    'data_type_code': data_types_obj.data_type_code,
-                    'data_type_name_eng': data_types_obj.data_type_name_eng,
-                    'data_type_id': data_types_obj.data_type_id,
-                    'property_ids': [data_type_config.property_id],
-                }
             if data_type_config.property_id in property_ids:
-                lproperty = LProperties.objects.filter(property_id=data_type_config.property_id).first()
-                org_propties_front.append(_get_property(value_data, property_roles, lproperty, data_types_obj.data_type_id))
+                lproperty = LProperties.objects.filter(property_id=data_type_config.property_id)
+                lproperty = lproperty.exclude(value_type_id='data-type')
+                lproperty = lproperty.exclude(property_code='localId')
+                lproperty = lproperty.first()
+                if lproperty:
+                    org_propties_front.append(_get_property(value_data, property_roles, lproperty, data_types_obj.data_type_id))
+                    if data_type_id in data_type_ids:
+                        data_types[data_types_obj.data_type_id]['property_ids'].append(data_type_config.property_id)
+                    else:
+                        data_type_ids.append(data_type_id)
+                        data_types[data_types_obj.data_type_id] = {
+                            'data_type_name': data_types_obj.data_type_name,
+                            'data_type_code': data_types_obj.data_type_code,
+                            'data_type_name_eng': data_types_obj.data_type_name_eng,
+                            'data_type_id': data_types_obj.data_type_id,
+                            'property_ids': [data_type_config.property_id],
+                        }
+
     for i, value in data_types.items():
         data_types_tmp.append(value)
     rsp = {
