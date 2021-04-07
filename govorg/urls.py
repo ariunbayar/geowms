@@ -34,6 +34,7 @@ urlpatterns = [
                 path('erguul-list/', role_employee_views.erguul_list),
                 path('get-field-tailbar/', role_employee_views.get_field_tailbar),
                 path('save-field-tailbar/', role_employee_views.save_field_tailbar),
+                path('<int:pk>/refresh-token/', role_employee_views.refresh_token),
             ], 'employee'))),
             path('', include(([
                 path('', role_views.list),
@@ -53,9 +54,7 @@ urlpatterns = [
         path('system/', include(([
             path('', system_views.systemList, name='system'),
             path('<int:pk>/detail/', system_views.detail, name='detail'),
-            path('<int:pk>/detail/', system_views.detail, name='detail'),
         ], 'system'))),
-
 
         path('inspire/', include(([
             path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),

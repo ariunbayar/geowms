@@ -6,7 +6,6 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {service} from '../../service'
 import {validationSchema} from './validationSchema'
 import Maps from '../../../../components/map/Map'
-import ModalAlert from "@utils/Modal/ModalAlert"
 import Modal from "@utils/Modal/Modal"
 
 export class Forms extends Component {
@@ -77,12 +76,9 @@ export class Forms extends Component {
             hors_shinj_baidal_list:[],
             checkNull:[],
             bairshil_error:false,
-            modal_alert_status: 'closed',
-            modal_title: '',
-            modal_type: '',
-            timer: null,
+
+            modal_status: 'closed',
             geo_id: '',
-            is_open_modal: false,
             point_role_list: props.point_role_list,
         }
         this.onDrop = this.onDrop.bind(this)
@@ -97,13 +93,12 @@ export class Forms extends Component {
         this.handleCoordinatCheck = this.handleCoordinatCheck.bind(this)
         this.handleSearchWithName = this.handleSearchWithName.bind(this)
         this.checkError = this.checkError.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.getFieldValues = this.getFieldValues.bind(this)
         this.successPoint = this.successPoint.bind(this)
         this.rejectPoint = this.rejectPoint.bind(this)
         this.loadTseg = this.loadTseg.bind(this)
-        this.requestModalOpen = this.requestModalOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
     handleBoxOver (e){
@@ -412,10 +407,18 @@ export class Forms extends Component {
         form_datas.append('t_type', t_type)
         service.tsegPersonal(form_datas).then(({success, name, ids}) => {
             if (success) {
-                this.setState({ modal_alert_status: 'open', modal_title: 'Амжилттай хадгаллаа', modal_type: 'success' })
                 setStatus('saved')
                 setSubmitting(false)
-                this.modalCloseTime()
+                this.modalChange(
+                    null,
+                    '',
+                    'Амжилттай хадгаллаа',
+                    'fa fa-check-circle',
+                    'success',
+                    false,
+                    null,
+                    () => this.props.data.history.push(`/gov/forms/tseg-info/tsegpersonal/tseg-personal/`)
+                )
             }
             else{
                 setSubmitting(false)
@@ -525,27 +528,23 @@ export class Forms extends Component {
 
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-            this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/')
-        }, 2000)
-    }
-
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
-        this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/')
-    }
-
-    requestModalOpen(modalAction, modalText, modalTitle, modalType, modalButtonName) {
+    modalChange(modalAction, text, title, modal_icon, icon_color, has_button, actionNameDelete, modalClose) {
         this.setState({
-            is_open_modal: true,
             modalAction,
-            modalText,
-            modalTitle,
-            modalType,
-            modalButtonName,
+            text,
+            title,
+            modal_icon,
+            icon_color,
+            has_button,
+            actionNameDelete,
+            modalClose
+        })
+        this.handleModalOpen()
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
         })
     }
 
@@ -555,17 +554,41 @@ export class Forms extends Component {
             .successPoint(id)
             .then(({success, msg}) => {
                 if (success) {
-                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'success'})
-                    this.modalCloseTime()
+                    this.modalChange(
+                        null,
+                        '',
+                        msg,
+                        'fa fa-check-circle',
+                        'success',
+                        false,
+                        null,
+                        () => this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/'),
+                    )
                 }
                 else {
-                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'danger'})
-                    this.modalCloseTime()
+                    this.modalChange(
+                        null,
+                        '',
+                        msg,
+                        'fa fa-times-circle',
+                        'danger',
+                        false,
+                        null,
+                        null,
+                    )
                 }
             })
             .catch(() => {
-                this.setState({modal_alert_status: "open", modal_title: 'Алдаа гарсан байна', modal_type: 'danger'})
-                this.modalCloseTime()
+                this.modalChange(
+                    null,
+                    '',
+                    msg,
+                    'fa fa-times-circle',
+                    'danger',
+                    false,
+                    null,
+                    null,
+                )
             })
     }
 
@@ -575,17 +598,41 @@ export class Forms extends Component {
             .rejectPoint(id)
             .then(({success, msg}) => {
                 if (success) {
-                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'success'})
-                    this.modalCloseTime()
+                    this.modalChange(
+                        null,
+                        '',
+                        msg,
+                        'fa fa-check-circle',
+                        'success',
+                        false,
+                        null,
+                        () => this.props.data.history.push('/gov/forms/tseg-info/tsegpersonal/tseg-personal/'),
+                    )
                 }
                 else {
-                    this.setState({modal_alert_status: "open", modal_title: msg, modal_type: 'danger'})
-                    this.modalCloseTime()
+                    this.modalChange(
+                        null,
+                        '',
+                        msg,
+                        'fa fa-times-circle',
+                        'danger',
+                        false,
+                        null,
+                        null,
+                    )
                 }
             })
             .catch(() => {
-                this.setState({modal_alert_status: "open", modal_title: 'Алдаа гарсан байна', modal_type: 'danger'})
-                this.modalCloseTime()
+                this.modalChange(
+                    null,
+                    '',
+                    msg,
+                    'fa fa-times-circle',
+                    'danger',
+                    false,
+                    null,
+                    null,
+                )
             })
     }
 
@@ -1241,12 +1288,15 @@ export class Forms extends Component {
                                                                 <button
                                                                     type='button'
                                                                     className="btn gp-btn-outline-primary waves-effect waves-light"
-                                                                    onClick={() => this.requestModalOpen(
+                                                                    onClick={() => this.modalChange(
                                                                         this.successPoint,
                                                                         `Та ${this.state.tesgiin_ner} цэгийг баталгаажуулахдаа итгэлтэй байна уу ?`,
                                                                         'Баталгаажуулах',
-                                                                        'nogoon',
+                                                                        'fa fa-exclamation-circle',
+                                                                        'warning',
+                                                                        true,
                                                                         'Баталгаажуулах',
+                                                                        null,
                                                                     )}
                                                                 >
                                                                     Баталгаажуулах
@@ -1258,12 +1308,15 @@ export class Forms extends Component {
                                                                 <button
                                                                     type='button'
                                                                     className="btn gp-btn-outline-primary waves-effect waves-light ml-1"
-                                                                    onClick={() => this.requestModalOpen(
+                                                                    onClick={() => this.modalChange(
                                                                         this.rejectPoint,
                                                                         `Та ${this.state.tesgiin_ner} цэгийг татгалзахдаа итгэлтэй байна уу ?`,
                                                                         'Татгалзах',
+                                                                        'fa fa-exclamation-circle',
                                                                         'warning',
+                                                                        true,
                                                                         'Татгалзах',
+                                                                        null,
                                                                     )}
                                                                 >
                                                                     Татгалзах
@@ -1281,21 +1334,16 @@ export class Forms extends Component {
                                 </div>
                             </div>
                         </div>
-                        {this.state.is_open_modal &&
-                            <Modal
-                                modalClose={() => this.setState({ is_open_modal: false })}
-                                modalAction={this.state.modalAction}
-                                text={this.state.modalText}
-                                title={this.state.modalTitle}
-                                model_type_icon={this.state.modalType}
-                                actionNameDelete={this.state.modalButtonName}
-                            />
-                        }
-                        <ModalAlert
-                            modalAction={() => this.modalClose()}
-                            status={this.state.modal_alert_status}
-                            title={this.state.modal_title}
-                            model_type_icon={this.state.modal_type}
+                        <Modal
+                            modal_status={this.state.modal_status}
+                            modalAction={this.state.modalAction}
+                            text={this.state.text}
+                            title={this.state.title}
+                            modal_icon={this.state.modal_icon}
+                            icon_color={this.state.icon_color}
+                            has_button={this.state.has_button}
+                            actionNameDelete={this.state.actionNameDelete}
+                            modalClose={this.state.modalClose}
                         />
                     </div>
                 </Form>

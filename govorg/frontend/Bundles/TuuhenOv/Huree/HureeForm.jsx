@@ -2,7 +2,7 @@ import React, { Component } from "react"
 
 import {service} from '../service'
 import HureeFormTable from "./HureeFormTable"
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class HureeForm extends Component {
@@ -17,17 +17,15 @@ export class HureeForm extends Component {
             y: 0,
             handle_save_succes_huree: false,
             save_is_error: false,
-            modal_alert_status: 'closed',
-            timer: null,
-            text: ''
+            modal_status: 'closed',
         }
 
         this.handleRemove = this.handleRemove.bind(this)
         this.handleInput = this.handleInput.bind(this)
         this.handleHureeSave = this.handleHureeSave.bind(this)
         this.hureeData = this.hureeData.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
 
     }
 
@@ -59,9 +57,13 @@ export class HureeForm extends Component {
         const tuuh_soyl_huree_id = this.props.tuuh_soyl_huree_id
         service.hureeDelete(ayul_id, tuuhen_ov, tuuh_soyl_huree_id).then(({success}) => {
             if(success){
-                this.setState({text: 'устгалаа', modal_alert_status: 'open'})
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    'Амжилттай устгалаа'
+                )
                 this.props.loadRows()
-                this.modalCloseTime()
+                this.hureeData()
             }
         })
     }
@@ -78,25 +80,33 @@ export class HureeForm extends Component {
         else{
             service.hureeCreate(dursgalt_id, x, y, tuuh_soyl_huree_id).then(({success}) => {
                 if (success) {
-                    this.setState({text: 'нэмлээ', modal_alert_status: 'open'})
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        'success',
+                        'Амжилттай нэмлээ'
+                    )
                     this.props.loadRows()
-                    this.modalCloseTime()
+                    this.hureeData()
                 }
             })
         }
     }
 
-    modalCloseTime() {
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: 'closed', handle_save_succes_huree:false, save_is_error:false})
-            this.hureeData()
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    modalClose() {
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: 'closed', handle_save_succes_huree:false, save_is_error:false})
-        this.hureeData()
+    modalChange(modal_icon, icon_color, title) {
+        this.setState({
+            modal_icon,
+            icon_color,
+            title,
+            handle_save_succes_huree: false,
+            save_is_error:false,
+        })
+        this.handleModalOpen()
     }
 
     render() {
@@ -171,11 +181,14 @@ export class HureeForm extends Component {
                         </tr>
                     </tbody>
                 </table>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title={`Амжилттай ${this.state.text}`}
-                    model_type_icon = "success"
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    text=''
+                    has_button={false}
+                    modalAction={null}
                 />
             </div>
         )

@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
 
 import { service } from './Role/service'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 import InsPerms from './Role/GovPerms'
 import BackButton from "@utils/Button/BackButton"
 
@@ -28,47 +28,36 @@ export class RoleAdd extends Component {
             },
             edit: false,
             handleSaveIsLoad: false,
-            modal_alert_status: "closed",
-            timer: null,
+            modal_status: "closed",
             is_continue: false,
             gov_perm_id: this.props.org_roles.gov_perm_id
         }
         this.handleSave = this.handleSave.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.getValue = this.getValue.bind(this)
         this.getAllValue = this.getAllValue.bind(this)
         this.removeItemFromArray = this.removeItemFromArray.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     handleSave(values, { setStatus, setSubmitting, setErrors }) {
         const {gov_perm_id } = this.state
         service.createRole(gov_perm_id, values.role_name, values.role_description, this.perms).then(({success, errors}) => {
             if (success) {
-                this.setState({modal_alert_status: "open"})
+                this.setState({ handleSaveIsLoad: false })
+                this.handleModalOpen()
                 setStatus('saved')
                 setSubmitting(false)
-                this.modalCloseTime()
-            }else{
+            } else {
                 setErrors(errors)
                 setSubmitting(false)
             }
         })
     }
 
-    modalClose() {
-        this.setState({ handleSaveIsLoad: false })
-        this.props.history.push(`/gov/perm/role/`)
-        this.setState({ modal_alert_status: "closed" })
-        clearTimeout(this.state.timer)
-    }
-
-    modalCloseTime() {
-        setTimeout(() => {
-            this.setState({ handleSaveIsLoad: false })
-            this.props.history.push(`/gov/perm/role/`)
-            this.setState({ modal_alert_status: "closed" })
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     handleUserSearch(field, e) {
@@ -205,12 +194,15 @@ export class RoleAdd extends Component {
                         }}
                     </Formik>
                 </div>
-
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай хадгаллаа"
-                    model_type_icon = "success"
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon='fa fa-check-circle'
+                    icon_color='success'
+                    title='Амжилттай хадгаллаа'
+                    text=''
+                    has_button={false}
+                    modalAction={null}
+                    modalClose={() => this.props.history.push(`/gov/perm/role/`)}
                 />
             </div>
         )

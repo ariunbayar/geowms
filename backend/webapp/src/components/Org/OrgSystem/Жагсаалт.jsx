@@ -2,7 +2,6 @@ import React, { Component } from "react"
 
 import { PortalDataTable } from "@utils/DataTable/index"
 import Modal from "@utils/Modal/Modal"
-import ModalAlert from "@utils/Modal/ModalAlert"
 import {service} from './service'
 
 
@@ -27,7 +26,7 @@ export class Жагсаалт extends Component {
                 {'field': 'created_at', "title": 'Үүсгэсэн огноо'},
             ],
             хувьсах_талбарууд: [
-                {"field": "name", "action": (values) => this.go_link(values)},
+                {"field": "name", "action": (values) => this.goLink(values)},
                 {"field": "token",  "text": ""},
                 {"field": "created_at",  "text": ""},
             ],
@@ -36,7 +35,7 @@ export class Жагсаалт extends Component {
                     "title": 'Засах',
                     "text": '', "icon":
                     'fa fa-pencil-square-o text-success',
-                    "action": (values) => this.go_detial(values),
+                    "action": (values) => this.goDetail(values),
                 },
                 {
                     "title": 'Устгах',
@@ -46,39 +45,58 @@ export class Жагсаалт extends Component {
                 }
             ],
 
-            modal_status: "closed",
-            modal_alert_status: 'initial',
-            values: {}
+            values: {},
+            modal_status: 'closed'
         }
 
-        this.go_link = this.go_link.bind(this)
+        this.goLink = this.goLink.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleModalClose = this.handleModalClose.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
+        this.goDetail = this.goDetail.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
-    go_link(values) {
+    modalChange(modal_icon, icon_color, title, text, has_button) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+        })
+    }
+
+    goLink(values) {
         const {org_level, org_id} = this.state
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${values.id}/дэлгэрэнгүй/`)
     }
 
-    go_detial(values) {
+    goDetail(values) {
         const {org_level, org_id} = this.state
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${values.id}/засах/`)
     }
 
     handleRemoveAction(values){
         this.setState({values})
-        this.handleModalOpen()
+        setTimeout(() => {
+            this.handleModalOpen(true)
+        }, 150)
     }
 
-    handleModalOpen(){
-        this.setState({modal_status: 'open'})
-    }
-
-    handleModalClose(){
-        this.setState({modal_status: 'closed',})
+    handleModalOpen(has_button){
+        if (has_button) {
+            this.modalChange(
+                'fa fa-exclamation-circle',
+                "warning",
+                'Систем устгах',
+                `Та "${this.state.values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+                true
+            )
+        }
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     handleRemove() {
@@ -86,16 +104,12 @@ export class Жагсаалт extends Component {
         service.remove(values.id).then(({success}) => {
             if (success) {
                 this.setState({
-                    refresh: !this.state.refresh,
-                    modal_alert_status: success ? 'success' : 'fail'
+                    refresh: !this.state.refresh
                 })
-                this.handleModalClose()
+                this.modalChange('fa fa-check-circle', "success", 'Амжилттай устгалаа', '', false)
+                this.handleModalOpen(false)
             }
         })
-    }
-
-    modalAlertClose() {
-        this.setState({modal_alert_status: 'closed'})
     }
 
     render() {
@@ -107,9 +121,6 @@ export class Жагсаалт extends Component {
             custom_query,
             нэмэх_товч,
             нэмэлт_талбарууд,
-            values,
-            modal_status,
-            modal_alert_status,
         } = this.state
         return (
             <div className="card">
@@ -130,18 +141,13 @@ export class Жагсаалт extends Component {
                     </div>
                 </div>
                 <Modal
-                    text={`Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                    title={'Систем устгах'}
-                    model_type_icon={'success'}
-                    status={modal_status}
-                    modalClose={this.handleModalClose}
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    has_button={this.state.has_button}
+                    text={this.state.text}
                     modalAction={this.handleRemove}
-                />
-                <ModalAlert
-                    status={ modal_alert_status == 'success' ? 'open' : 'closed' }
-                    title="Системийг амжилттай устгалаа!"
-                    model_type_icon="success"
-                    modalAction={() => this.modalAlertClose()}
                 />
             </div>
         )

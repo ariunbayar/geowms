@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from "react"
-import Modal from "../Modal"
 
 import {service} from './service'
 

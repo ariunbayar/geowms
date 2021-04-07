@@ -57,13 +57,7 @@ export default class OpenMapModal extends Component {
                 {is_modal_request_open &&
                     <RequestModal
                         modalClose={this.closeModalMap}
-                        modalAction={() => this.handleRequestApprove()}
-                        modalAlertOpen={this.modalAlertOpen}
-                        title={title}
-                        button_name={button_name}
-                        values={this.values}
                         refreshData={this.props.refreshData}
-                        timeCloseModal={this.props.timeCloseModal}
                     />
                 }
             </div>

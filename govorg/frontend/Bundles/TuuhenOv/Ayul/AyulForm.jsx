@@ -2,7 +2,7 @@ import React, { Component } from "react"
 
 import {service} from '../service'
 import AyulFormTable from "./AyulFormTable"
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class AyulForm extends Component {
@@ -17,17 +17,15 @@ export class AyulForm extends Component {
             y: 0,
             save_is_error: false,
             handle_save_succes_huree: false,
-            modal_alert_status: 'closed',
-            timer: null,
-            text: ""
+            modal_status: 'closed',
         }
 
         this.handleRemove = this.handleRemove.bind(this)
         this.handleInput = this.handleInput.bind(this)
         this.handleHureeSave = this.handleHureeSave.bind(this)
         this.hureeData = this.hureeData.bind(this)
-        this.modalClose = this.modalCloseTime.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     handleInput(field, e) {
@@ -38,7 +36,6 @@ export class AyulForm extends Component {
         this.hureeData()
     }
 
-
     componentDidUpdate(prevProps, prevState){
         if(prevProps.x !== this.props.x)
         {
@@ -46,8 +43,6 @@ export class AyulForm extends Component {
             this.setState({ x, y })
         }
     }
-
-
 
     hureeData(){
         service.ayulAll(this.props.dursgalt_id).then(({ayul_data}) => {
@@ -60,14 +55,16 @@ export class AyulForm extends Component {
         const ayul_id = id
         service.ayulDelete(ayul_id, tuuhen_ov).then(({success}) => {
             if(success){
-                this.setState({modal_alert_status: 'open', text: "устгалаа"})
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    'Амжилттай устгалаа'
+                )
                 this.props.loadAyuulRows()
-                this.modalCloseTime()
                 this.hureeData()
             }
         })
     }
-
 
     handleHureeSave(){
         this.setState({handle_save_succes_huree:true})
@@ -79,9 +76,12 @@ export class AyulForm extends Component {
         else{
             service.ayulCreate(dursgalt_id, x, y).then(({success}) => {
                 if (success) {
-                    this.setState({modal_alert_status: 'open', text: "нэмлээ"})
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        'success',
+                        'Амжилттай нэмлээ'
+                    )
                     this.props.loadAyuulRows()
-                    this.modalCloseTime()
                     this.hureeData()
                 }
             })
@@ -89,16 +89,21 @@ export class AyulForm extends Component {
 
     }
 
-    modalCloseTime() {
-        this.state.timer = setTimeout(() => {
-            this.setState({handle_save_succes_huree:false, save_is_error:false, modal_alert_status: 'closed'})
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    modalClose() {
-        this.setState({handle_save_succes_huree:false, save_is_error:false})
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: 'closed'})
+    modalChange(modal_icon, icon_color, title) {
+        this.setState({
+            modal_icon,
+            icon_color,
+            title,
+            handle_save_succes_huree: false,
+            save_is_error:false,
+        })
+        this.handleModalOpen()
     }
 
     render() {
@@ -169,11 +174,14 @@ export class AyulForm extends Component {
                         </tr>
                     </tbody>
                 </table>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title={`Амжилттай ${this.state.text}`}
-                    model_type_icon = "success"
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    text=''
+                    has_button={false}
+                    modalAction={null}
                 />
             </div>
         )

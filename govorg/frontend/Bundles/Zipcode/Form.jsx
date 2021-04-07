@@ -3,7 +3,7 @@ import React, { Component } from "react"
 import Maps from './map/Map'
 import {service} from './service'
 import FormTable from './FormTable'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class Forms extends Component {
@@ -35,10 +35,7 @@ export class Forms extends Component {
             root2: '',
             root3: '',
             root4: -1,
-            modal_alert_status: 'closed',
-            timer: null,
-            modal_text: '',
-            modal_icon: ''
+            modal_status: 'closed',
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -50,8 +47,8 @@ export class Forms extends Component {
         this.handleEdit = this.handleEdit.bind(this)
         this.handlefeatureDataRead = this.handlefeatureDataRead.bind(this)
         this.handleInpuZereg = this.handleInpuZereg.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
     handleInpuZereg(value){
         this.setState({search_table: value, search_query: '0'})
@@ -230,14 +227,20 @@ export class Forms extends Component {
                    this.getAimag()
                    this.handleSearch(this.state.search_query,this.state.search_table)
                 }, 1000);
-                this.setState({modal_text: "Амжилттай хадгаллаа", modal_icon: 'success', modal_alert_status: 'open'})
-                this.modalCloseTime()
-            }else{
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    "Амжилттай хадгаллаа"
+                )
+            } else {
                 setTimeout(() => {
                     this.setState({handle_save:false})
                 }, 1000);
-                this.setState({modal_text: "Алдаа гарлаа", modal_icon: 'danger', modal_alert_status: 'open'})
-                this.modalCloseTime()
+                this.modalChange(
+                    'fa fa-check-circle',
+                    'success',
+                    "Алдаа гарлаа"
+                )
             }
         })
     }
@@ -265,15 +268,20 @@ export class Forms extends Component {
         })
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
+    modalChange(modal_icon, icon_color, title) {
+        alert('lol')
+        this.setState({
+            modal_icon,
+            icon_color,
+            title,
+        })
+        this.handleModalOpen()
     }
 
     render() {
@@ -397,11 +405,14 @@ export class Forms extends Component {
                         </div>
                     </div>
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title={this.state.modal_text}
-                    model_type_icon = {this.state.modal_icon}
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    text=''
+                    has_button={false}
+                    modalAction={null}
                 />
             </div>
         )
