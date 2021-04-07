@@ -91,6 +91,11 @@ export class CreateStyle extends Component {
                             data.shape_type = e.target.value
                         })
                     }
+                    if (input_name == 'wellknownname') {
+                        this.style_datas.map((data,idx) => {
+                            data.wellknownname = e.target.value
+                        })
+                    }
                 }
             }
             if (input_name == 'shape_type') {

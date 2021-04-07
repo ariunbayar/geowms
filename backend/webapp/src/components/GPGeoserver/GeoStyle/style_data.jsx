@@ -173,7 +173,7 @@ export default class ShowStyleData extends Component {
                                                 name="wellknownname"
                                                 onChange={(e) => this.handleOnChange(e)}
                                             >
-                                                <option value="">-----------</option>
+                                                <option value=""></option>
                                                 <option value="square">Дөрвөлжин</option>
                                                 <option value="triangle">Гурвалжин</option>
                                                 <option value="star"> Од</option>

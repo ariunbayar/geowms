@@ -257,7 +257,7 @@ export default class StyleMap extends Component {
             if (style_datas && len_of_datas > 0) {
                 var scale_number_1 = style_datas[0].max_range
                 var style_function_datas = []
-                if (curren_scale < scale_number_1) {
+                if (curren_scale <= scale_number_1) {
                     style_function_datas = style_datas[0]
                     style_datas.slice(1, len_of_datas).map((values, idx)=>{
                         if ((values.min_range <= curren_scale) && (curren_scale) <= values.max_range){
