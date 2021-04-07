@@ -1893,12 +1893,14 @@ def emp_age_count(request, pk):
             age = int(year) - int(birth_year)
             emp_age.append(age)
 
-    count_age = Counter(emp_age)
+    sorted_age = sorted(emp_age)
+    count_age = Counter(sorted_age)
+    emp_ages = list(count_age.keys())
     count_emps_age = list(count_age.values())
 
     rsp = {
         'count_emps_age': count_emps_age,  # nasaar buleglesen too
-        'emp_age': emp_age,  # nas
+        'emp_age': emp_ages,  # nas
     }
 
     return JsonResponse(rsp)
