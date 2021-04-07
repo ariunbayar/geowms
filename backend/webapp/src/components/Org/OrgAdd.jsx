@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react"
-import {NavLink} from "react-router-dom"
 import {service} from "./service"
-import ModalAlert from "../ModalAlert"
+import Modal from "@utils/Modal/Modal"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 import Loader from "@utils/Loader"
@@ -14,8 +13,7 @@ export class OrgAdd extends Component {
         super(props)
 
         this.state = {
-            modal_alert_status: "closed",
-            timer: null,
+            modal_status: "closed",
             roles: [],
             secondOrders: [],
             secondOrder_value: -1,
@@ -37,7 +35,9 @@ export class OrgAdd extends Component {
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
-        this.modalClose = this.modalClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleRefresh = this.handleRefresh.bind(this)
         this.formOptions = this.formOptions.bind(this)
         this.handle2ndOrderChange = this.handle2ndOrderChange.bind(this)
         this.handle3rdOrderChange = this.handle3rdOrderChange.bind(this)
@@ -181,11 +181,20 @@ export class OrgAdd extends Component {
         }
         service.org_add(org_level, datas).then(({success, errors}) => {
             if (success) {
-                this.setState({modal_alert_status: "open"})
-                this.props.refreshCount()
+                this.modalChange(
+                    'fa fa-check-circle',
+                    null,
+                    'success',
+                    'Амжилттай хадгаллаа',
+                    '',
+                    false,
+                    '',
+                    '',
+                    null,
+                    this.handleRefresh
+                )
                 setStatus('saved')
                 setSubmitting(false)
-                this.modalCloseTime()
             } else {
                 setErrors(errors)
                 setSubmitting(false)
@@ -193,16 +202,36 @@ export class OrgAdd extends Component {
         })
     }
 
-    modalClose(){
-        const org_level = this.props.match.params.level
-        this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    modalCloseTime(){
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
+    handleRefresh() {
         const org_level = this.props.match.params.level
-        this.state.timer = setTimeout(() => {
+        this.props.refreshCount()
+        setTimeout(() => {
             this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
-        }, 2000)
+        }, 150)
     }
 
     render() {
@@ -337,11 +366,17 @@ export class OrgAdd extends Component {
                         </div>
                     )}}
                 </Formik>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай хадгаллаа"
-                    model_type_icon = "success"
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
                 />
                 <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/байгууллага/түвшин/${org_level}/`}></BackButton>
             </div>
