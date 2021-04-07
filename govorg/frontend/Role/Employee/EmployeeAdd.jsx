@@ -680,6 +680,7 @@ export class EmployeeAdd extends Component {
                     title='Амжилттай нэмлээ'
                     has_button={false}
                     text=''
+                    modalClose={this.modalClose}
                 />
                 <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
             </div>
