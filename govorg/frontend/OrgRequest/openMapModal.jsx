@@ -58,6 +58,7 @@ export default class OpenMapModal extends Component {
                     <RequestModal
                         modalClose={this.closeModalMap}
                         refreshData={this.props.refreshData}
+                        values={this.values}
                     />
                 }
             </div>

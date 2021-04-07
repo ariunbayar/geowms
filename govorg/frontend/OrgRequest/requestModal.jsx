@@ -334,7 +334,7 @@ export default class RequestModal extends Component {
                                     </div>
                                 </div>
                                 {
-                                    values.length > 0
+                                    values && values.length > 0
                                     ?
                                         values.map((value, idx) => {
                                             const { form_json } = value
