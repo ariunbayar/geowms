@@ -10,25 +10,17 @@ export default class FormTable extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
+            modal_status: 'closed'
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
     }
-
 
     handleModalDeleteOpen(event) {
         event.preventDefault()
-        this.setState({is_modal_delete_open: true})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
-    }
-    componentDidUpdate(prevProps){
-        if(prevProps.values !== this.props.values) this.setState({is_modal_delete_open: false})
-
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -37,7 +29,6 @@ export default class FormTable extends Component {
         return (
             <tr>
                 <th>{idx + 1}</th>
-
                 <th>{dugaar}</th>
                 <th>{aimagname}</th>
                 <th>{sumname}</th>
@@ -58,15 +49,16 @@ export default class FormTable extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-                    {this.state.is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та "${dugaar}" бүртгэлийн дугаарыг устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                            model_type_icon = "success"
-                        />
-                    }
+                    <Modal
+                        modal_status={this.state.modal_status}
+                        modal_icon='fa fa-exclamation-circle'
+                        icon_color='warning'
+                        title='Тохиргоог устгах'
+                        has_button={true}
+                        text={`Та "${dugaar}" бүртгэлийн дугаарыг устгахдаа итгэлтэй байна уу?`}
+                        modalAction={this.props.handleRemove}
+                        actionNameDelete="Устгах"
+                    />
                 </th>
             </tr>
         )

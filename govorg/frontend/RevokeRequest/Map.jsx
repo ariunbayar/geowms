@@ -22,10 +22,20 @@ export class RequestMap extends Component {
         this.state = {
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
-            is_open_modal: false,
+
+            modal_status: 'closed',
+            modal_icon: '',
+            icon_color: '',
+            title: '',
+            text: '',
+            has_button: false,
+            action_name: '',
         }
         this.loadMapData = this.loadMapData.bind(this)
         this.loadMap = this.loadMap.bind(this)
+
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidMount() {
@@ -129,17 +139,28 @@ export class RequestMap extends Component {
         }
     }
 
-  changeState(state, button_state) {
-    this.setState({ is_open_modal: true, state, button_state })
-  }
+  handleModalOpen() {
+    this.setState({ modal_status: 'open' }, () => {
+        this.setState({ modal_status: 'initial' })
+    })
+}
 
-  closeModal() {
-    this.setState({ is_open_modal: false })
+  modalChange(state, modal_icon, icon_color, title, text, has_button, action_name) {
+    this.setState({
+      state,
+      modal_icon,
+      icon_color,
+      title,
+      text,
+      has_button,
+      action_name
+    })
+    this.handleModalOpen()
   }
 
   render() {
     const { geom_name, form_json, id } = this.props
-    const { is_open_modal, state, button_state } = this.state
+    const { state } = this.state
     return (
       <div className="container-fluid">
         <div className={'show d-block modal fade text-wrap'} tabIndex="-1" role="dialog" aria-hidden="true">
@@ -172,28 +193,46 @@ export class RequestMap extends Component {
                 </div>
               </div>
               <div className="modal-footer">
-                <button className="btn gp-btn-primary text-center" onClick={() => this.changeState('reject', 'Татгалзах')}>
+                <button
+                  className="btn gp-btn-primary text-center"
+                  onClick={() => this.modalChange(
+                    'reject',
+                    'fa fa-exclamation-circle',
+                    'warning',
+                    'Өөрчлөлт татгалзах',
+                    'Та татгалзахдаа итгэлтэй байна уу?',
+                    true,
+                    'Татгалзах',
+                  )}
+                >
                   <a className="text-succes">Татгалзах</a>
                 </button>
-                <button className="btn gp-btn-outline-primary text-center" onClick={() => this.changeState('approve', 'Цуцлах')}>
+                <button
+                  className="btn gp-btn-outline-primary text-center"
+                  onClick={() => this.modalChange(
+                    'approve',
+                    'fa fa-exclamation-circle',
+                    'warning',
+                    'Өөрчлөлт цуцлах',
+                    'Та цуцлахдаа итгэлтэй байна уу?',
+                    true,
+                    'Цуцлах',
+                  )}
+                >
                   <a className="text-succes">Цуцлах</a>
                 </button>
               </div>
-              {
-                is_open_modal
-                ?
-                  <Modal
-                      modalClose={() => this.closeModal()}
-                      modalAction = {() => this.props.stateButton(id, state)}
-                      text={`Та ${button_state.toLowerCase()}даа итгэлтэй байна уу ?`}
-                      title={`Тохиргоог ${button_state.toLowerCase()}`}
-                      status={this.state.status}
-                      model_type_icon = "success"
-                      actionNameDelete={button_state}
-                  />
-                  :
-                    null
-              }
+              <Modal
+                  modal_status={this.state.modal_status}
+                  modal_icon={this.state.modal_icon}
+                  icon_color={this.state.icon_color}
+                  title={this.state.title}
+                  has_button={this.state.has_button}
+                  text={this.state.text}
+                  modalAction = {() => this.props.stateButton(id, state)}
+                  actionNameDelete='Тийм'
+                  actionNameBack="Үгүй"
+              />
             </div>
             </div>
           </div>

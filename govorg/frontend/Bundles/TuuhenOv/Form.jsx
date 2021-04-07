@@ -5,7 +5,7 @@ import { service } from './service'
 import { validationSchema } from './validationSchema'
 import { HureeEdit } from './HureeEdit'
 import Maps from '../../components/map/Map'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class Forms extends Component {
@@ -22,8 +22,7 @@ export class Forms extends Component {
             },
             aimagname: '',
             sumname: '',
-            modal_alert_status: "closed",
-            timer: null
+            modal_status: "closed",
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleInput = this.handleInput.bind(this)
@@ -31,8 +30,7 @@ export class Forms extends Component {
         this.hureeAdd = this.hureeAdd.bind(this)
         this.handleRefresh = this.handleRefresh.bind(this)
         this.handleXY = this.handleXY.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     hureeRemove(id) {
@@ -100,8 +98,6 @@ export class Forms extends Component {
             service.update(form_datas, this.state.aimagname, this.state.sumname).then(({ success }) => {
                 if (success) {
                     setStatus('saved')
-                    this.setState({ modal_alert_status: "open" })
-                    this.modalCloseTime()
                 }
             })
         }
@@ -110,24 +106,16 @@ export class Forms extends Component {
             service.create(form_datas, this.state.aimagname, this.state.sumname).then(({ success }) => {
                 if (success) {
                     setStatus('saved')
-                    this.setState({ modal_alert_status: "open" })
-                    this.modalCloseTime()
                 }
             })
         }
+        this.handleModalOpen()
     }
 
-    modalClose() {
-        clearTimeout(this.state.timer)
-        this.setState({ modal_alert_status: "closed" })
-        this.props.history.push(`/gov/tuuhen-ov/`)
-    }
-
-    modalCloseTime() {
-        this.state.timer = setTimeout(() => {
-            this.setState({ modal_alert_status: "closed" })
-            this.props.history.push(`/gov/tuuhen-ov/`)
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -274,11 +262,15 @@ export class Forms extends Component {
                                             {!isSubmitting && 'Нэмэх'}
                                         </button>
                                     </div>
-                                    <ModalAlert
-                                        modalAction={() => this.modalClose()}
-                                        status={this.state.modal_alert_status}
+                                    <Modal
+                                        modal_status={this.state.modal_status}
+                                        modal_icon='fa fa-check-circle'
+                                        icon_color='success'
                                         title="Амжилттай нэмлээ"
-                                        model_type_icon="success"
+                                        text=''
+                                        has_button={false}
+                                        modalAction={null}
+                                        modalClose={() => this.props.history.push(`/gov/tuuhen-ov/`)}
                                     />
                                 </div>
                             </div>

@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import {service} from './Role/service'
-import ModalAlert from "@utils/Modal/ModalAlert"
 import { PortalDataTable } from "@utils/DataTable/index"
 import Modal from "@utils/Modal/Modal"
 
@@ -10,8 +9,6 @@ export class List extends Component {
         super(props)
         this.state = {
             perms: props.perms,
-            modal_status: "closed",
-            alert_modal_status: "closed",
             refresh: false,
             жагсаалтын_холбоос: '/gov/api/role/role-list/',
             нэмэх_товч: '/gov/perm/role/add/',
@@ -39,36 +36,47 @@ export class List extends Component {
                 }
             ],
             values: {},
-            title: "",
-            icon: ""
+            icon: "",
+            modal_status: 'closed'
         }
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleModalClose = this.handleModalClose.bind(this)
-        this.modalClose = this.modalClose.bind(this)
+
+        this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
-    }
-
-    modalClose(){
-        this.setState({alert_modal_status: 'closed'})
-    }
-
-    modalOpen(title, icon){
-        this.setState({alert_modal_status: 'open', title, icon})
     }
 
     handleRemoveAction(values){
         this.setState({values})
-        this.handleModalOpen()
+        this.handleModalOpen(values)
     }
 
-    handleModalOpen(){
-        this.setState({modal_status: 'open'})
+    handleModalOpen(values){
+        this.modalChange(
+            'fa fa-exclamation-circle',
+            "warning",
+            'Тохиргоог устгах',
+            `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+            true
+        )
     }
 
-    handleModalClose(){
-        this.setState({modal_status: 'closed'})
+    modalChange(modal_icon, icon_color, title, text, has_button) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+        })
+        this.modalOpen()
+    }
+
+    modalOpen(){
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     detai_go_link(values){
@@ -82,11 +90,23 @@ export class List extends Component {
     handleRemove() {
         const { id } = this.state.values
         service.deleteRole(id).then(({ success }) => {
-            if(success){
+            if (success) {
                 this.setState({refresh: !this.state.refresh})
-                this.modalOpen("Амжилттай устлаа", "success")
-            }else{
-                this.modalOpen("Алдаа гарлаа", "danger")
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "success",
+                    'Амжилттай устгалаа',
+                    '',
+                    false
+                )
+            } else {
+                this.modalChange(
+                    'fa fa-times-circle',
+                    "danger",
+                    'Усгахад алдаа гарлаа',
+                    '',
+                    false
+                )
             }
         })
     }
@@ -99,10 +119,7 @@ export class List extends Component {
             хувьсах_талбарууд,
             нэмэх_товч,
             нэмэлт_талбарууд,
-            modal_status,
             values,
-            alert_modal_status,
-            title, icon
         } = this.state
         return (
             <div className="card">
@@ -120,18 +137,14 @@ export class List extends Component {
                     />
                 </div>
                 <Modal
-                    text={`Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                    title={'Тохиргоог устгах'}
-                    model_type_icon={'success'}
-                    status={modal_status}
-                    modalClose={this.handleModalClose}
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    has_button={this.state.has_button}
+                    text={this.state.text}
                     modalAction={this.handleRemove}
-                />
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={alert_modal_status}
-                    title={title}
-                    model_type_icon={icon}
+                    actionNameDelete="Устгах"
                 />
             </div>
         );
