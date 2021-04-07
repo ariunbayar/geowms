@@ -277,7 +277,7 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 
 # cursor = _mssql_connection(_mssql_settings())
 
-# table_name = 'D902_AS'
+# table_name = 'BUILDING_ALS3'
 # sql = """
 #     SELECT OBJECT_SCHEMA_NAME(T.[object_id],DB_ID()) AS [Schema],
 #             T.[name] AS [table_name], AC.[name] AS [column_name],
@@ -313,7 +313,7 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 
 
 # select_sql = """
-#     select objectid, shape.AsTextZM()
+#     select objectid, shape.STAsText()
 #     FROM D902_AS
 #     where objectid = 2
 # """
@@ -323,14 +323,17 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 # cursor = _mssql_connection(_mssql_settings())
 # cursor = cursor.execute(select_sql)
 # value = cursor.fetchone()
-# # row = _execute_query(cursor, select_sql)
-# # datas = [item for item in row]
+# row = _execute_query(cursor, select_sql)
+# datas = [item for item in row]
+# for data in datas:
+#     print(data)
 
 # print(type(value[1]))
 # print(value[1])
 # OLD_SRID = 32648
 # SRID = 4326
-# from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, MultiPoint, MultiLineString
+# from django.contrib.gis.geos import GEOSGeometry
+# from geojson import MultiPolygon, MultiPoint, MultiLineString
 # pnt = GEOSGeometry(value[1], srid=OLD_SRID)
 # pnt.transform(SRID)
 # print(pnt.json)
@@ -339,17 +342,17 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 
 # geom_type = GEOSGeometry(val).geom_type
 # geom = GEOSGeometry(val, srid=4326)
-# if geom_type == 'Point':
-#     geom = MultiPoint(geom, srid=4326)
-# if geom_type == 'LineString':
-#     geom = MultiLineString(geom, srid=4326)
-# if geom_type == 'Polygon':
-#     geom = MultiPolygon(geom, srid=4326)
+# # if geom_type == 'Point':
+# #     geom = MultiPoint(geom, srid=4326)
+# # if geom_type == 'LineString':
+# #     geom = MultiLineString(geom, srid=4326)
+# # if geom_type == 'Polygon':
+# #     geom = MultiPolygon(geom, srid=4326)
 
 
 # print("------------------------------------------------")
 # print("------------------------------------------------")
-# print(geom.json)
+# print(geom.wkt)
 # print("------------------------------------------------")
 # print("------------------------------------------------")
 # print(type(val))
