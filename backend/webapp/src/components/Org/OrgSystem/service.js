@@ -6,7 +6,8 @@ export const service = {
     remove,
     detail,
     getWMSList,
-    tokenRefresh
+    tokenRefresh,
+    setSystemAtt
 }
 
 
@@ -64,4 +65,14 @@ function getWMSList() {
     }
 
     return fetch(`/back/wms/all/`, opts).then(handleResponse)
+}
+
+function setSystemAtt(array, pk) {
+
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({array}),
+    }
+
+    return fetch(`/back/api/систем/${pk}/att-save/`, opts).then(handleResponse)
 }

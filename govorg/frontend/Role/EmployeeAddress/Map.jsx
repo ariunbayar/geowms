@@ -479,7 +479,7 @@ export default class AddressMap extends Component {
         })[0];
         source.addFeature(feat)
         feat.setProperties({ id })
-        this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], duration: 2000 })
+        this.map.getView().fit(feat.getGeometry(),{ padding: [50, 50, 50, 50], minResolution: 1 })
     }
 
     readFeatures(features) {

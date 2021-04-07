@@ -27,4 +27,5 @@ class GovOrg(models.Model):
 class GovOrgWMSLayer(models.Model):
     govorg = models.ForeignKey('backend_govorg.GovOrg', on_delete=models.CASCADE)
     wms_layer = models.ForeignKey('backend_wmslayer.WMSLayer', on_delete=models.CASCADE)
+    attributes = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
