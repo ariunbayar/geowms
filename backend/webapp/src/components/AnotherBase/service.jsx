@@ -18,6 +18,13 @@ function insertToInspire(table_name, columns) {
     return fetch(`${mssql_prefix}/insert-to-inspire/`, requestOptions).then(handleResponse)
 }
 
+function getProperties() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${mssql_prefix}/get-properties/`, requestOptions).then(handleResponse)
+}
+
 const mssql_config = {
 
     get: function() {
@@ -38,4 +45,5 @@ export const service = {
     getAttributes,
     insertToInspire,
     mssql_config,
+    getProperties,
 }

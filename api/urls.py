@@ -34,5 +34,6 @@ urlpatterns = [
         path('get-attributes/', mssql_views.get_attributes),
         path('connection/get/', mssql_views.get_connection_config),
         path('connection/save/', mssql_views.save_connection_config),
+        path('get-properties/', mssql_views.get_properties),
     ], 'mssql'))),
 ]

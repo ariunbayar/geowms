@@ -2,13 +2,15 @@ import React, { Component } from 'react';
 import { Switch, Route } from "react-router-dom"
 
 import ConnectionConfig from './ConnectionConfig'
+import MssqlForm from './MssqlForm'
 
 class index extends Component {
     render() {
         return (
             <div className="card-body">
                  <Switch>
-                    <Route path={"/back/another-base/mssql/"} component={ConnectionConfig}/>
+                    <Route path={"/back/another-base/mssql/insert/"} component={MssqlForm}/>
+                    <Route exact path={"/back/another-base/mssql/"} component={ConnectionConfig}/>
                 </Switch>
             </div>
         );

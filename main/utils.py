@@ -940,8 +940,9 @@ def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
 
     geom_type = geometry['type']
     if change_to_multi:
-        geom_type = 'Multi' + geometry['type']
-
+        if 'Multi' not in geometry['type']:
+            geom_type = 'Multi' + geometry['type']
+    print(geom_type)
     class_ = getattr(module, geom_type)
     geom = class_(polygonlist)
 

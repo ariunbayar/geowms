@@ -4,10 +4,12 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
+from django.db import connections
 
 from backend.config.models import Config
 from backend.inspire.models import MGeoDatas
 from backend.inspire.models import MDatas
+from backend.inspire.models import LProperties
 
 from main.decorators import ajax_required
 from main import utils
@@ -18,14 +20,21 @@ from main import utils
 CONNECTION_NAME = 'MSSQL_CONNECTION'
 
 
-def _mssql_settings(port='1433', server='192.168.1.4', database='urban', username='sa', password='123456'):
+def _get_settings():
+    mssql_settings = utils.get_config(CONNECTION_NAME)
+    mssql_settings = utils.json_load(mssql_settings)
+    mssql_settings = _mssql_settings(**mssql_settings)
+    return mssql_settings
+
+
+def _mssql_settings(msssql_port='1433', msssql_server='192.168.1.4', msssql_database='urban', msssql_username='sa', msssql_password='123456'):
     drivers = pyodbc.drivers()
     connection_dict = {
         'driver': drivers[0],
-        'server': server + ', ' + port,
-        'database': database,
-        'uid': username,
-        'password': password
+        'server': msssql_server + ', ' + msssql_port,
+        'database': msssql_database,
+        'uid': msssql_username,
+        'password': msssql_password
     }
     return connection_dict
 
@@ -105,8 +114,16 @@ def _insert_mgeo_datas(feature_code, geom):
     return new_geo_id
 
 
-def _insert_mdatas(geo_id, row_datas):
-    MDatas.objects.create(geo_id=geo_id, **row_datas)
+def _insert_mdatas(geo_id, row_datas, feature_code, property_ids):
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_id__in=property_ids)
+    prop_codes = list(prop_qs.values_list('property_code', flat=True))
+    feature = utils.get_feature_from_code(feature_code)
+    properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
+    datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, prop_codes)
+    for data in datas:
+        print(data, row_datas)
+        # MDatas.objects.create(geo_id=geo_id, **row_datas)
 
 
 @require_POST
@@ -114,8 +131,7 @@ def _insert_mdatas(geo_id, row_datas):
 @user_passes_test(lambda u: u.is_superuser)
 def get_attributes(request, payload):
     table_name = payload.get('table_name')
-    mssql_settings = utils.get_config(CONNECTION_NAME)
-    mssql_settings = _mssql_settings(mssql_settings)
+    mssql_settings = _get_settings()
 
     sql = """
         SELECT OBJECT_SCHEMA_NAME(T.[object_id],DB_ID()) AS [Schema],
@@ -131,7 +147,12 @@ def get_attributes(request, payload):
 
     cursor = _mssql_connection(mssql_settings)
     row = _execute_query(cursor, sql)
-    fields = [item for item in row]
+    not_display_columns = ['OBJECTID', 'Shape']
+    fields = [
+        item['column_name']
+        for item in row
+        if item['column_name'] not in not_display_columns
+    ]
 
     rsp = {
         'success': True,
@@ -153,15 +174,19 @@ def get_attributes(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def insert_to_inspire(request, payload):
     table_name = payload.get('table_name')
-    mssql_settings = utils.get_config(CONNECTION_NAME)
-    mssql_settings = _mssql_settings(mssql_settings)
+    mssql_settings = _get_settings()
 
     fields = list()
 
-    columns = payload.get("column")
+    columns = payload.get("columns")
+    feature_code = 'bu-bb-b'
 
-    for column in columns.keys():
+    objectid = 'OBJECTID'
+
+    for column in columns.values():
         fields.append(column)
+
+    fields.append(objectid)
 
     select_sql = """
         SELECT [{fields}]
@@ -177,24 +202,29 @@ def insert_to_inspire(request, payload):
         shape_sql = """
             SELECT shape.STAsText()
             FROM {table_name}
-            WHERE OBJECT_ID = {object_id}
+            WHERE {where_object_id} = {object_id}
         """.format(
+            where_object_id=objectid,
             table_name=table_name,
-            object_id=item['OBJECT_ID']
+            object_id=item[objectid]
         )
 
         cursor = _mssql_connection(mssql_settings)
         cursor = cursor.execute(shape_sql)
         value = cursor.fetchone()
-        wkt = _get_wkt(value[1])
+        wkt = _get_wkt(value[0])
         geom = _set_3d_dim(wkt)
-        new_geo_id = _insert_mgeo_datas('bu-bb-b', geom)
+        # new_geo_id = _insert_mgeo_datas(feature_code, geom)
 
         row_datas = dict()
-        for column, property_code in columns.items():
-            row_datas[property_code] = item[column]
+        property_ids = [
+            property_id
+            for property_id in columns.keys()
+        ]
 
-        _insert_mdatas(new_geo_id, row_datas)
+        print(property_ids)
+
+        # _insert_mdatas(new_geo_id, row_datas, feature_code, property_ids)
 
     rsp = {
         'success': True,
@@ -228,3 +258,39 @@ def save_connection_config(request, payload):
     config_qs.update(value=values)
 
     return JsonResponse({"success": True})
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_properties(request):
+
+    sql = """
+        select lp.property_id, lp.property_name, lp.property_code
+        from l_themes t
+        inner join l_packages p
+        on t.theme_id = p.theme_id
+        inner join l_features f
+        on f.package_id = p.package_id
+        inner join l_feature_configs lfc
+        on lfc.feature_id = f.feature_id
+        inner join l_data_type_configs ld
+        on lfc.data_type_id = ld.data_type_id
+        inner join l_data_types lt
+        on lt.data_type_id = ld.data_type_id
+        inner join l_properties lp
+        on lp.property_id = ld.property_id
+        where t.theme_code = 'bu'
+        and f.feature_code = 'bu-bb-b'
+    """
+    cursor = connections['default'].cursor()
+    cursor.execute(sql)
+    rows = utils.dict_fetchall(cursor)
+    rows = list(rows)
+
+    rsp = {
+        'success': True,
+        'properties': rows,
+    }
+
+    return JsonResponse(rsp)

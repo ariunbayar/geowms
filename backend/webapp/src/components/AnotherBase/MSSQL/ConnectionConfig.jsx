@@ -3,6 +3,7 @@ import { Formik, Form, Field} from 'formik'
 import * as Yup from 'yup'
 
 import {service} from '../service'
+import BackButton from "@utils/Button/BackButton"
 
 
 const validationSchema = Yup.object().shape({
@@ -225,6 +226,7 @@ class ConnectionConfig extends Component {
                         }}
                     </Formik>
                 </div>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/another-base/`}></BackButton>
             </div>
         )
     }
