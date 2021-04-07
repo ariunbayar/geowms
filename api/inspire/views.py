@@ -251,103 +251,125 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 # 10. pip install pyodbc
 
 
-# def _mssql_settings(port='1433', server='192.168.1.4', database='urban', username='sa', password='123456'):
-#     drivers = pyodbc.drivers()
-#     connection_dict = {
-#         'driver': drivers[0],
-#         'server': server + ', ' + port,
-#         'database': database,
-#         'uid': username,
-#         'password': password
-#     }
-#     return connection_dict
+def _mssql_settings(port='1433', server='192.168.1.4', database='urban', username='sa', password='123456'):
+    drivers = pyodbc.drivers()
+    connection_dict = {
+        'driver': drivers[0],
+        'server': server + ', ' + port,
+        'database': database,
+        'uid': username,
+        'password': password
+    }
+    return connection_dict
 
 
-# def _mssql_connection(connection_dict):
-#     connection = pyodbc.connect(**connection_dict)
-#     cursor = connection.cursor()
-#     return cursor
+def _mssql_connection(connection_dict):
+    connection = pyodbc.connect(**connection_dict)
+    cursor = connection.cursor()
+    return cursor
 
 
-# def _execute_query(cursor, sql):
-#     cursor.execute(sql)
-#     datas = utils.dict_fetchall(cursor)
-#     return datas
+def _execute_query(cursor, sql):
+    cursor.execute(sql)
+    datas = utils.dict_fetchall(cursor)
+    return datas
 
 
-# cursor = _mssql_connection(_mssql_settings())
-
-# table_name = 'BUILDING_ALS3'
-# sql = """
-#     SELECT OBJECT_SCHEMA_NAME(T.[object_id],DB_ID()) AS [Schema],
-#             T.[name] AS [table_name], AC.[name] AS [column_name],
-#             TY.[name] AS system_data_type, AC.[max_length],
-#             AC.[precision], AC.[scale], AC.[is_nullable], AC.[is_ansi_padded]
-#     FROM sys.[tables] AS T
-#     INNER JOIN sys.[all_columns] AC ON T.[object_id] = AC.[object_id]
-#     INNER JOIN sys.[types] TY ON AC.[system_type_id] = TY.[system_type_id] AND AC.[user_type_id] = TY.[user_type_id]
-#     WHERE T.[is_ms_shipped] = 0 and T.[name] = '{table_name}'
-#     ORDER BY T.[name], AC.[column_id]
-# """.format(table_name=table_name)
-# print(sql)
-# row = _execute_query(cursor, sql)
-# datas = [item for item in row]
-# fields = [
-#     data['column_name']
-#     for data in datas[:len(datas) - 1]
-# ]
-
-# select_sql = """
-#     SELECT [{fields}]
-#     FROM [dbo].[{table_name}]
-# """.format(
-#     fields="]\n          ,[".join(fields),
-#     table_name=table_name,
-# )
-# print(select_sql)
-
-# # .STAsText() str
-# # .STAsBinary() binary
-# # .AsTextZM() str
-# # .AsGml gml
+def _fix_coordinates(wkt):
+    sql = """
+        SELECT
+            ST_AsEWKT(
+                ST_FlipCoordinates(
+                    GeomFromEWKT('{wkt}')
+                )
+            ) as wkt;
+        """.format(wkt=wkt)
+    cursror = connections['default'].cursor()
+    row = _execute_query(cursror, sql)
+    datas = [item for item in row]
+    wkt = datas[0]['wkt']
+    # geojson = utils.json_load(geojson)
+    # if geojson['type'] == 'Polygon':
+        # print(geojson['coordinates'])
+    return wkt
 
 
-# select_sql = """
-#     select objectid, shape.STAsText()
-#     FROM D902_AS
-#     where objectid = 2
-# """
-# print(select_sql)
+cursor = _mssql_connection(_mssql_settings())
+
+table_name = 'BUILDING_ALS3'
+sql = """
+    SELECT OBJECT_SCHEMA_NAME(T.[object_id],DB_ID()) AS [Schema],
+            T.[name] AS [table_name], AC.[name] AS [column_name],
+            TY.[name] AS system_data_type, AC.[max_length],
+            AC.[precision], AC.[scale], AC.[is_nullable], AC.[is_ansi_padded]
+    FROM sys.[tables] AS T
+    INNER JOIN sys.[all_columns] AC ON T.[object_id] = AC.[object_id]
+    INNER JOIN sys.[types] TY ON AC.[system_type_id] = TY.[system_type_id] AND AC.[user_type_id] = TY.[user_type_id]
+    WHERE T.[is_ms_shipped] = 0 and T.[name] = '{table_name}'
+    ORDER BY T.[name], AC.[column_id]
+""".format(table_name=table_name)
+print(sql)
+row = _execute_query(cursor, sql)
+datas = [item for item in row]
+fields = [
+    data['column_name']
+    for data in datas[:len(datas) - 1]
+]
+
+select_sql = """
+    SELECT [{fields}]
+    FROM [dbo].[{table_name}]
+""".format(
+    fields="]\n          ,[".join(fields),
+    table_name=table_name,
+)
+print(select_sql)
+
+# .STAsText() str
+# .STAsBinary() binary
+# .AsTextZM() str
+# .AsGml gml
 
 
-# cursor = _mssql_connection(_mssql_settings())
-# cursor = cursor.execute(select_sql)
-# value = cursor.fetchone()
-# row = _execute_query(cursor, select_sql)
-# datas = [item for item in row]
-# for data in datas:
-#     print(data)
+select_sql = """
+    select objectid, shape.STAsText()
+    FROM D902_AS
+    where objectid = 2
+"""
+print(select_sql)
 
-# print(type(value[1]))
-# print(value[1])
-# OLD_SRID = 32648
-# SRID = 4326
-# from django.contrib.gis.geos import GEOSGeometry
-# from geojson import MultiPolygon, MultiPoint, MultiLineString
-# pnt = GEOSGeometry(value[1], srid=OLD_SRID)
-# pnt.transform(SRID)
-# print(pnt.json)
-# val = utils.geoJsonConvertGeom(pnt.json)
-# print(val)
 
-# geom_type = GEOSGeometry(val).geom_type
-# geom = GEOSGeometry(val, srid=4326)
-# # if geom_type == 'Point':
-# #     geom = MultiPoint(geom, srid=4326)
-# # if geom_type == 'LineString':
-# #     geom = MultiLineString(geom, srid=4326)
-# # if geom_type == 'Polygon':
-# #     geom = MultiPolygon(geom, srid=4326)
+cursor = _mssql_connection(_mssql_settings())
+cursor = cursor.execute(select_sql)
+value = cursor.fetchone()
+row = _execute_query(cursor, select_sql)
+datas = [item for item in row]
+for data in datas:
+    print(data)
+
+print(type(value[1]))
+OLD_SRID = 32648
+SRID = 4326
+from django.contrib.gis.geos import GEOSGeometry
+from geojson import MultiPolygon, MultiPoint, MultiLineString
+pnt = GEOSGeometry(value[1], srid=OLD_SRID)
+pnt.transform(SRID)
+wkt = _fix_coordinates(pnt.wkt)
+# print(wkt)
+print(wkt)
+print(type(wkt))
+pnt = GEOSGeometry(wkt, srid=SRID)
+val = utils.geoJsonConvertGeom(pnt.json)
+print(val)
+
+geom_type = GEOSGeometry(val).geom_type
+geom = GEOSGeometry(val, srid=4326)
+if geom_type == 'Point':
+    geom = MultiPoint(geom, srid=4326)
+if geom_type == 'LineString':
+    geom = MultiLineString(geom, srid=4326)
+if geom_type == 'Polygon':
+    geom = MultiPolygon(geom, srid=4326)
 
 
 # print("------------------------------------------------")
