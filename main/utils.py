@@ -798,6 +798,11 @@ def date_to_timezone(input_date):
     return naive_time
 
 
+def year_to_timezone(input_date):
+    naive_time = datetime.strptime(input_date, '%Y').replace(tzinfo=timezone.utc)
+    return naive_time
+
+
 def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
     display = list()
     for item in items.values():
