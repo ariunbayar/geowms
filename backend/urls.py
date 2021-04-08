@@ -43,6 +43,8 @@ urlpatterns = [
         path('mssql/save/', geoserver_another_database.mssql_save),
         path('mongo/get/<int:pk>/', geoserver_another_database.mongo_get),
         path('mongo/save/', geoserver_another_database.mongo_save),
+        path('mongo/tables/<int:pk>/', geoserver_another_database.mongo_sables),
+        path('mongo/fields/<int:pk>/<str:name>/', geoserver_another_database.mongo_fields),
         path('remove/<int:pk>/', geoserver_another_database.remove),
     ], 'another-database'))),
 

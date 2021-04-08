@@ -13,6 +13,8 @@ from main.decorators import ajax_required
 from main.components import Datatable
 from main import utils
 from .models import AnotherDatabaseTable, AnotherDatabase
+from .mongo_utils import mogno_db_collection_names, _mssql_settings, mongo_config, mogno_db_collection_field_names
+from backend.inspire.models import LPackages, LFeatures
 
 
 @require_POST
@@ -46,10 +48,10 @@ def pagination(request, payload):
     return JsonResponse(rsp)
 
 
-@require_POST
+@require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def mongo_get(request, payload):
+def mongo_get(request, pk):
     another_db = get_object_or_404(AnotherDatabase, pk=pk)
     connection = utils.json_load(another_db.connection)
 
@@ -197,3 +199,56 @@ def remove(request, pk):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mongo_sables(request, pk):
+
+    feautures = []
+    cursor = _mssql_settings(pk)
+    table_names = mogno_db_collection_names(cursor)
+
+    for fea in LFeatures.objects.all():
+        feautures.append({
+            'name': fea.feature_name,
+            'code': fea.feature_code,
+        })
+    rsp = {
+        'success': True,
+        'table_names': table_names or [],
+        'features': feautures
+    }
+
+    return JsonResponse(rsp)
+
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mongo_fields(request, pk, name):
+    print(pk, name)
+    print(pk, name)
+    print(pk, name)
+
+    feautures = []
+    cursor = _mssql_settings(pk)
+    table_names = mogno_db_collection_names(cursor)
+
+    for fea in LFeatures.objects.all():
+        feautures.append({
+            'name': fea.feature_name,
+            'code': fea.feature_code,
+        })
+    rsp = {
+        'success': True,
+        'table_names': table_names or [],
+        'features': feautures
+    }
+
+    return JsonResponse(rsp)
+
+cursor = _mssql_settings(23)
+mogno_db_collection_field_names(cursor, 'urban')

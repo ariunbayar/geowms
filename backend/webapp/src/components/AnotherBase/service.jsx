@@ -55,6 +55,20 @@ const mongo_config = {
         }
         return fetch(`${prefix}/mongo/save/`, opts).then(handleResponse)
     },
+
+    tables: function(id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/mongo/tables/${id}/`, opts).then(handleResponse)
+    },
+
+    fieldNames: function(id, name) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/mongo/fields/${id}/${name}/`, opts).then(handleResponse)
+    },
 }
 
 function remove(pk) {
