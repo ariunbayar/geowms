@@ -14,7 +14,14 @@ from main.decorators import ajax_required
 from main.components import Datatable
 from main import utils
 from .models import AnotherDatabaseTable, AnotherDatabase
-from .mongo_utils import mogno_db_collection_names, _mongo_settings, mongo_config, mogno_db_collection_field_names
+from .mongo_utils import (
+    mogno_db_collection_names,
+    _mongo_settings,
+    mongo_config,
+    mogno_db_collection_field_names,
+    insert_data_from_mongo,
+    all_data_from_selected_table,
+)
 from backend.inspire.models import LPackages, LFeatures
 
 
@@ -295,10 +302,12 @@ def get_inspire_shatlal(request):
 def update(request, pk):
 
 
-    # cursor = _mongo_settings(pk)
-    # another_base_data = get_object_or_404(AnotherDatabaseTable, pk=)
+    another_data_base = get_object_or_404(AnotherDatabase, pk=pk)
+    another_base_data = get_object_or_404(AnotherDatabaseTable, another_database=another_data_base)
 
-
+    table_name = another_base_data.table_name
+    feature_code = another_base_data.feature_code
+    field_config = another_base_data.field_config
 
 
     rsp = {
@@ -311,8 +320,34 @@ def update(request, pk):
 
 pk = 1
 another_data_base = get_object_or_404(AnotherDatabase, pk=pk)
+# base_name = another_data_base.name
+
 another_base_data = get_object_or_404(AnotherDatabaseTable, another_database=another_data_base)
-print(another_base_data.table_name)
-print(another_base_data.feature_code)
-print(another_base_data.field_config)
-# cursor = _mongo_settings(pk)
+
+table_name = another_base_data.table_name
+feature_code = another_base_data.feature_code
+field_config = another_base_data.field_config
+
+cursor = _mongo_settings(pk)
+
+datas = all_data_from_selected_table(cursor, table_name)
+# print(datas)
+
+search_values ={
+    'AGUULAH': 'Агуулах ',
+    'BOLOVSROL': 'Боловсролын байгууллагын барилга ',
+    'BUSAD': 'Бусад барилга ',
+    'DULAAN': 'Дулааны эх үүсвэр ',
+    'EMNELEG': 'Эмнэлгийн барилга ',
+    'GAZRIINTOS': 'Бусад барилга ',
+    'HUDALDAA': 'Худалдаа, нийтийн хоол, ахуй үйлчилгээний барилга ',
+    'MEDEELEL': 'Мэдээлэл, холбоо сүлжээний барилга ',
+    'OLONNIIT': 'Төрөл бүрийн зориулалттай олон нийтийн барилга ',
+    'ORONSUUTS': 'Орон сууц ',
+    'TSAHILGAAN': 'Цахилгаан шугам сүлжээ, дэд станц ',
+    'TUR': 'Түр барилга ',
+    'UILDVER': 'Үйлдвэрийн барилга ',
+    'ZOGSOOL': 'Авто машины зогсоолын барилга '
+}
+
+# insert_data_from_mongo(feature_id, datas, field_name, search_values)
