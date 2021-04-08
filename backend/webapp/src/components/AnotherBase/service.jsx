@@ -2,28 +2,7 @@ import {getGetOptions, getPostOptions, handleResponse} from '../../helpers/servi
 
 const prefix = '/back/another-database'
 
-function getAttributes(table_name) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ table_name }),
-    }
-    return fetch(`${prefix}/get-attributes/`, requestOptions).then(handleResponse)
-}
 
-function insertToInspire(table_name, columns) {
-    const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ table_name, columns }),
-    }
-    return fetch(`${prefix}/insert-to-inspire/`, requestOptions).then(handleResponse)
-}
-
-function getProperties() {
-    const requestOptions = {
-        ...getGetOptions(),
-    }
-    return fetch(`${prefix}/get-properties/`, requestOptions).then(handleResponse)
-}
 
 const mssql_config = {
 
@@ -38,6 +17,38 @@ const mssql_config = {
             body: JSON.stringify(values),
         }
         return fetch(`${prefix}/mssql/save/`, opts).then(handleResponse)
+    },
+    getTableNames: function(connection_id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/get-all-table-names/${connection_id}/`, opts).then(handleResponse)
+    },
+    getAttributes(table_name, id) {
+        const requestOptions = {
+            ...getPostOptions(),
+            body: JSON.stringify({ table_name, id }),
+        }
+        return fetch(`${prefix}/get-attributes/`, requestOptions).then(handleResponse)
+    },
+    insertToInspire(table_name, columns, connection_id) {
+        const requestOptions = {
+            ...getPostOptions(),
+            body: JSON.stringify({ table_name, columns, connection_id }),
+        }
+        return fetch(`${prefix}/insert-to-inspire/`, requestOptions).then(handleResponse)
+    },
+    getProperties() {
+        const requestOptions = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/get-properties/`, requestOptions).then(handleResponse)
+    },
+    getThemeFeatures() {
+        const requestOptions = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/get-inspire-shatlal/`, requestOptions).then(handleResponse)
     },
 }
 
@@ -67,8 +78,5 @@ function remove(pk) {
 export const service = {
     mssql_config,
     mongo_config,
-    getAttributes,
-    insertToInspire,
-    getProperties,
     remove
 }

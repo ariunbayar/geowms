@@ -1,3 +1,4 @@
+from backend.inspire.models import LFeatures, LPackages, LThemes
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -194,6 +195,46 @@ def remove(request, pk):
     connection = utils.json_load(another_db.connection)
     rsp = {
         'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_inspire_shatlal(request):
+
+    theme_list = list()
+    theme_qs = LThemes.objects.all()
+    for theme in theme_qs:
+        theme_dict = dict()
+        theme_dict['id'] = theme.theme_id
+        theme_dict['code'] = theme.theme_code
+        theme_dict['name'] = theme.theme_name
+        package_qs = LPackages.objects.filter(theme_id=theme.theme_id)
+        package_list = list()
+        for pack in package_qs:
+            package_dict = dict()
+            package_dict['id'] = pack.package_id
+            package_dict['code'] = pack.package_code
+            package_dict['name'] = pack.package_name
+            feature_qs = LFeatures.objects.filter(package_id=pack.package_id)
+            feature_list = list()
+            for feature in feature_qs:
+                feature_dict = dict()
+                feature_dict['id'] = feature.feature_id
+                feature_dict['code'] = feature.feature_code
+                feature_dict['name'] = feature.feature_name
+                feature_list.append(feature_dict)
+            package_dict['children'] = feature_list
+            package_list.append(package_dict)
+
+        theme_dict['children'] = package_dict
+        theme_list.append(theme_dict)
+
+    rsp = {
+        'datas': theme_list,
     }
 
     return JsonResponse(rsp)

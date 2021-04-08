@@ -6,14 +6,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.db import connections
 
-from backend.config.models import Config
 from backend.inspire.models import MGeoDatas
 from backend.inspire.models import MDatas
 from backend.inspire.models import LProperties
-from backend.inspire.models import LPackages
-from backend.inspire.models import LFeatures
-from backend.inspire.models import LFeatureConfigs
-from backend.inspire.models import LDataTypeConfigs
+from backend.another_database.models import AnotherDatabase
+from backend.another_database.models import AnotherDatabaseTable
 
 from main.decorators import ajax_required
 from main import utils
@@ -21,11 +18,16 @@ from main import utils
 # Create your views here.
 
 
-CONNECTION_NAME = 'MSSQL_CONNECTION'
+def _get_connection_from_db(connection_id):
+    db_qs = AnotherDatabase.objects
+    db_qs = db_qs.filter(pk=connection_id)
+    db_qs = db_qs.first()
+    connection = db_qs.connection
+    return connection
 
 
-def _get_settings():
-    mssql_settings = utils.get_config(CONNECTION_NAME)
+def _get_settings(connection_id):
+    mssql_settings = _get_connection_from_db(connection_id)
     mssql_settings = utils.json_load(mssql_settings)
     mssql_settings = _mssql_settings(**mssql_settings)
     return mssql_settings
@@ -125,7 +127,7 @@ def _insert_mdatas(geo_id, row_datas, feature_code, property_ids):
     for prop_code in prop_codes:
         data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature_code)
         for property_id, value in row_datas.items():
-            if data['property_id'] == property_id:
+            if str(data['property_id']) == str(property_id):
                 mdata_value = dict()
                 mdata_value[value_type] = value
                 MDatas.objects.create(geo_id=geo_id, **data, **mdata_value)
@@ -136,7 +138,8 @@ def _insert_mdatas(geo_id, row_datas, feature_code, property_ids):
 @user_passes_test(lambda u: u.is_superuser)
 def get_attributes(request, payload):
     table_name = payload.get('table_name')
-    mssql_settings = _get_settings()
+    connection_id = payload.get('id')
+    mssql_settings = _get_settings(connection_id)
 
     sql = """
         SELECT OBJECT_SCHEMA_NAME(T.[object_id],DB_ID()) AS [Schema],
@@ -174,12 +177,39 @@ def get_attributes(request, payload):
 # .AsGml gml
 
 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_all_table_names(request, connection_id):
+    table_names = []
+    mssql_settings = _get_settings(connection_id)
+    sql = """
+        SELECT
+            TABLE_NAME as table_name
+        FROM
+            INFORMATION_SCHEMA.TABLES
+        order by TABLE_NAME
+    """.format(data_base=mssql_settings['database'])
+    cursor = _mssql_connection(mssql_settings)
+    cursor.execute(sql)
+    if cursor:
+        table_names = list(utils.dict_fetchall(cursor))
+
+    rsp = {
+        'success': True,
+        'table_names': table_names,
+    }
+
+    return JsonResponse(rsp)
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def insert_to_inspire(request, payload):
     table_name = payload.get('table_name')
-    mssql_settings = _get_settings()
+    connection_id = payload.get('connection_id')
+    mssql_settings = _get_settings(connection_id)
 
     fields = list()
 
@@ -232,34 +262,6 @@ def insert_to_inspire(request, payload):
         'success': True,
     }
     return JsonResponse(rsp)
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def get_connection_config(request):
-
-    configs = Config.objects.filter(name=CONNECTION_NAME).first()
-
-    value_json = utils.json_load(configs.value)
-
-    rsp = {**value_json}
-
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def save_connection_config(request, payload):
-
-    config_qs = Config.objects
-    config_qs = config_qs.filter(name=CONNECTION_NAME)
-
-    values = utils.json_dumps(payload)
-    config_qs.update(value=values)
-
-    return JsonResponse({"success": True})
 
 
 @require_GET
@@ -321,3 +323,10 @@ def get_properties(request):
     }
 
     return JsonResponse(rsp)
+
+
+
+def _delete_mgeo():
+    MGeoDatas.objects.filter(geo_id__istartswith='BU_BB_B').delete()
+    MDatas.objects.filter(geo_id__istartswith='BU_BB_B').delete()
+# _delete_mgeo()

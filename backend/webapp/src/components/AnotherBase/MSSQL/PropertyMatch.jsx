@@ -32,6 +32,7 @@ class PropertyMatch extends Component {
         super(props);
         this.state = {
             table_name: props.selected_value,
+            connection_id: props.connection_id,
             fields: [],
             properties: [],
             columns: {},
@@ -48,6 +49,7 @@ class PropertyMatch extends Component {
 
     getProperties() {
         service
+            .mssql_config
             .getProperties()
             .then(({ success, properties }) => {
                 if (success) {
@@ -65,8 +67,10 @@ class PropertyMatch extends Component {
     }
 
     getAttributes(table_name) {
+        const { connection_id } = this.state
         service
-            .getAttributes(table_name)
+            .mssql_config
+            .getAttributes(table_name, connection_id)
             .then(({ success, fields }) => {
                 if (success) {
                     this.setState({ fields })
@@ -77,16 +81,26 @@ class PropertyMatch extends Component {
             })
     }
 
-    getValue(property_id, field_name) {
+    getValue(field_name, property_id) {
         const { columns } = this.state
-        columns[field_name] = property_id
+        if (property_id == '') {
+            for (const item in columns) {
+                if (columns[item] == field_name) {
+                    delete columns[item]
+                }
+            }
+        }
+        else {
+            columns[property_id] = field_name
+        }
         this.setState({ columns })
     }
 
     saveMatch() {
-        const { table_name, columns } = this.state
+        const { table_name, columns, connection_id } = this.state
         service
-            .insertToInspire(table_name, columns)
+            .mssql_config
+            .insertToInspire(table_name, columns, connection_id)
             .then(rsp => {
                 console.log(rsp);
             })
