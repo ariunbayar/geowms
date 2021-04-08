@@ -10,6 +10,10 @@ from backend.config.models import Config
 from backend.inspire.models import MGeoDatas
 from backend.inspire.models import MDatas
 from backend.inspire.models import LProperties
+from backend.inspire.models import LPackages
+from backend.inspire.models import LFeatures
+from backend.inspire.models import LFeatureConfigs
+from backend.inspire.models import LDataTypeConfigs
 
 from main.decorators import ajax_required
 from main import utils
@@ -265,24 +269,49 @@ def save_connection_config(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def get_properties(request):
 
+    theme_code = 'bu'
+    feature_code = 'bu-bb-b'
+
     sql = """
-        select lp.property_id, lp.property_name, lp.property_code
-        from l_themes t
-        inner join l_packages p
-        on t.theme_id = p.theme_id
-        inner join l_features f
-        on f.package_id = p.package_id
-        inner join l_feature_configs lfc
-        on lfc.feature_id = f.feature_id
-        inner join l_data_type_configs ld
-        on lfc.data_type_id = ld.data_type_id
-        inner join l_data_types lt
-        on lt.data_type_id = ld.data_type_id
-        inner join l_properties lp
-        on lp.property_id = ld.property_id
-        where t.theme_code = 'bu'
-        and f.feature_code = 'bu-bb-b'
-    """
+        select
+            lp.property_id,
+            lp.property_name,
+            lp.property_code,
+            lp.value_type_id
+        from
+            l_themes t
+        inner join
+            l_packages p
+        on
+            t.theme_id = p.theme_id
+        inner join
+            l_features f
+        on
+            f.package_id = p.package_id
+        inner join
+            l_feature_configs lfc
+        on
+            lfc.feature_id = f.feature_id
+        inner join
+            l_data_type_configs ld
+        on
+            lfc.data_type_id = ld.data_type_id
+        inner join
+            l_data_types lt
+        on
+            lt.data_type_id = ld.data_type_id
+        inner join
+            l_properties lp
+        on
+            lp.property_id = ld.property_id
+        where t.theme_code = '{theme_code}'
+        and f.feature_code = '{feature_code}'
+        and lp.value_type_id != 'data-type'
+        and lp.value_type_id != 'data_type'
+    """.format(
+        theme_code=theme_code,
+        feature_code=feature_code,
+    )
     cursor = connections['default'].cursor()
     cursor.execute(sql)
     rows = utils.dict_fetchall(cursor)
