@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 # import pyodbc
->>>>>>> 229d8e826191d5d89909773ea93ef6aabefcf462
 from django.db import connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -309,9 +306,6 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 # 7. echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
 # 8. source ~/.bashrc
 # 9. sudo apt-get install -y unixodbc-dev
-<<<<<<< HEAD
-# 10. pip install pyodbc
-=======
 # 10. pip install pyodbc
 
 
@@ -346,4 +340,3 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 # row = _execute_query(cursor, sql)
 # datas = [item for item in row]
 # print(datas)
->>>>>>> 229d8e826191d5d89909773ea93ef6aabefcf462
