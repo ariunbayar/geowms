@@ -58,7 +58,7 @@ def mongo_config(pk):
     return cinfigs
 
 
-def _mssql_settings(pk):
+def _mongo_settings(pk):
     cinfigs = mongo_config(pk)
     mongo_engine = cinfigs.get('mongo_engine')
     mongo_client_host = cinfigs.get('mongo_client_host')

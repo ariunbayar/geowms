@@ -76,10 +76,6 @@ INSTALLED_APPS = [
     'api.govorg.apps.GovOrgConfig',
     'api.public.apps.PublicConfig',
 
-    # Another Base
-
-    'api.mssql.apps.MssqlConfig',
-
     # GovOrg apps
 
     'govorg.backend.org.apps.OrgConfig',

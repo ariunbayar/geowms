@@ -36,6 +36,12 @@ export default class List extends Component {
                     "text": '',
                     "icon": 'fa fa-trash-o text-danger',
                     "action": (values) => this.handleRemoveAction(values),
+                },
+                {
+                    "title": 'Устгах',
+                    "text": '',
+                    "icon": 'fa fa-car text-danger',
+                    "action": (values) => this.handleRefreshData(values),
                 }
             ],
             refresh: true,
@@ -48,8 +54,25 @@ export default class List extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.handleRefreshData = this.handleRefreshData.bind(this)
+        this.handleMssql = this.handleMssql.bind(this)
+        this.handleMongo = this.handleMongo.bind(this)
 
     }
+
+    handleRefreshData(values){
+        if(values.db_type == 'MSSQL') this.handleMssql(values)
+        else if(values.db_type == "MONGODB") this.handleMongo(values)
+    }
+
+    handleMssql(values){
+        alert("MSSQL")
+    }
+
+    handleMongo(values){
+        alert("MONGODB")
+    }
+
 
     set_active_color(boolean){
         let color = "text-danger fa fa-times"
