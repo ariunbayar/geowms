@@ -9,11 +9,11 @@ import BackButton from "@utils/Button/BackButton"
 const validationSchema = Yup.object().shape({
     name: Yup.string(),
     definition: Yup.string(),
-    msssql_server: Yup.string(),
-    msssql_port: Yup.string(),
-    msssql_username: Yup.string(),
-    msssql_password: Yup.string(),
-    msssql_database: Yup.string(),
+    mongo_engine: Yup.string(),
+    mongo_client_host: Yup.string(),
+    mongo_client_username: Yup.string(),
+    mongo_client_password: Yup.string(),
+    mongo_database: Yup.string(),
 })
 
 
@@ -28,11 +28,11 @@ class ConnectionConfig extends Component {
                 id: props.match.params.id,
                 name: '',
                 definition: '',
-                msssql_server: '',
-                msssql_port: '',
-                msssql_username: '',
-                msssql_password: '',
-                msssql_database: '',
+                mongo_engine: '',
+                mongo_client_host: '',
+                mongo_client_username: '',
+                mongo_client_password: '',
+                mongo_database: '',
             },
             values: {},
         }
@@ -49,7 +49,7 @@ class ConnectionConfig extends Component {
 
     getConfigs(id) {
         service
-            .mssql_config
+            .mongo_config
             .get(id)
             .then(({values}) => {
                 this.setState({
@@ -73,7 +73,7 @@ class ConnectionConfig extends Component {
 
         setStatus('saving')
         service
-            .mssql_config
+            .mongo_config
             .save(values)
             .then(({ success }) => {
 
@@ -106,7 +106,7 @@ class ConnectionConfig extends Component {
             <div className="card">
 
                 <div className="card-header">
-                    Mssql Connection Тохиргоо
+                    MongoDB Connection Тохиргоо
                 </div>
 
                 <div className="card-body">
@@ -155,54 +155,54 @@ class ConnectionConfig extends Component {
                                                 <ErrorMessage name="definition" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-6 text-wrap">
-                                                <label htmlFor="id_msssql_server">Server IP</label>
+                                                <label htmlFor="id_mongo_engine">ENGINE</label>
                                                 <Field
-                                                    name="msssql_server"
-                                                    id="id_msssql_server"
+                                                    name="mongo_engine"
+                                                    id="id_mongo_engine"
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="msssql_server" component="div" className="invalid-feedback" />
+                                                <ErrorMessage name="mongo_engine" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="id_msssql_port">Server PORT</label>
+                                                <label htmlFor="id_mongo_client_host">Server HOST</label>
                                                 <Field
-                                                    name="msssql_port"
-                                                    id="id_msssql_port"
+                                                    name="mongo_client_host"
+                                                    id="id_mongo_client_host"
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="msssql_port" component="div" className="invalid-feedback" />
+                                                <ErrorMessage name="mongo_client_host" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="id_msssql_username">Username</label>
+                                                <label htmlFor="id_mongo_client_username">Username</label>
                                                 <Field
-                                                    name="msssql_username"
+                                                    name="mongo_client_username"
                                                     type="text"
                                                     className="form-control"
-                                                    id="id_msssql_username"
+                                                    id="id_mongo_client_username"
                                                 />
-                                                <ErrorMessage name="msssql_username" component="div" className="invalid-feedback" />
+                                                <ErrorMessage name="mongo_client_username" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="id_msssql_password">Password</label>
+                                                <label htmlFor="id_mongo_client_password">Password</label>
                                                 <Field
-                                                    name="msssql_password"
+                                                    name="mongo_client_password"
                                                     type="text"
                                                     className="form-control"
-                                                    id="id_msssql_password"
+                                                    id="id_mongo_client_password"
                                                 />
-                                                <ErrorMessage name="msssql_password" component="div" className="invalid-feedback" />
+                                                <ErrorMessage name="mongo_client_password" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="id_msssql_database">Database Name</label>
+                                                <label htmlFor="id_mongo_database">Database Name</label>
                                                 <Field
-                                                    name="msssql_database"
-                                                    id="id_msssql_database"
+                                                    name="mongo_database"
+                                                    id="id_mongo_database"
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="msssql_database" component="div" className="invalid-feedback" />
+                                                <ErrorMessage name="mongo_database" component="div" className="invalid-feedback" />
                                             </div>
                                         </div>
 

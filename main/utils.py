@@ -1138,7 +1138,7 @@ def json_load(data):
 
 def json_dumps(data):
     if isinstance(data, dict):
-        data = json.dumps(data)
+        data = json.dumps(data, ensure_ascii=False)
     return data
 
 

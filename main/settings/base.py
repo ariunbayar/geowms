@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'backend.inspire.apps.InspireConfig',
     'backend.geoserver.apps.GeoserverConfig',
     'backend.token.apps.TokenConfig',
+    'backend.another_database.apps.AnotherDatabaseConfig',
 
     # API apps
 

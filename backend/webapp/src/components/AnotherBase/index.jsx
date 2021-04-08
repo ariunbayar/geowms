@@ -3,6 +3,8 @@ import { Switch, Route } from "react-router-dom"
 
 import ConfigTitles from './ConfigTitles'
 import MSSQL from './MSSQL'
+import MONGO from './MONGO'
+import List from './List'
 
 class index extends Component {
 
@@ -12,10 +14,12 @@ class index extends Component {
 
     render() {
         return (
-            <div className="card">
+            <div className="">
                 <Switch>
-                    <Route path={"/back/another-base/mssql/"} component={MSSQL}/>
-                    <Route exact path={"/back/another-base/"} component={ConfigTitles}/>
+                    <Route path={"/back/another-base/connection/mongo/"} component={MONGO}/>
+                    <Route path={"/back/another-base/connection/mssql/"} component={MSSQL}/>
+                    <Route path={"/back/another-base/connection/"} component={ConfigTitles}/>
+                    <Route exact path={"/back/another-base/"} component={List}/>
                 </Switch>
             </div>
         );
