@@ -798,6 +798,11 @@ def date_to_timezone(input_date):
     return naive_time
 
 
+def year_to_timezone(input_date):
+    naive_time = datetime.strptime(input_date, '%Y').replace(tzinfo=timezone.utc)
+    return naive_time
+
+
 def get_display_items(items, fields, хувьсах_талбарууд=[], нэмэлт_талбарууд=[]):
     display = list()
     for item in items.values():
@@ -1138,7 +1143,7 @@ def json_load(data):
 
 def json_dumps(data):
     if isinstance(data, dict):
-        data = json.dumps(data)
+        data = json.dumps(data, ensure_ascii=False)
     return data
 
 
@@ -1582,3 +1587,16 @@ def copy_image(img, plus):
     new_img.paste(img, tup)
 
     return new_img
+
+
+# Тухай Folder -т байгаа файлуудыг буцаадаг
+def get_all_file_paths(directory):
+
+    file_paths = []
+
+    for root, directories, files in os.walk(directory):
+        for filename in files:
+            filepath = os.path.join(root, filename)
+            file_paths.append(filepath)
+
+    return file_paths

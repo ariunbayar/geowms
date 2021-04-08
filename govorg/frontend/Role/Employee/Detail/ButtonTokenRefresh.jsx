@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from "react"
 
 import Modal from "@utils/Modal/Modal"
-import ModalAlert from "@utils/Modal/ModalAlert"
 
 
 export class ButtonTokenRefresh extends Component {
@@ -9,20 +8,39 @@ export class ButtonTokenRefresh extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            modal_status_confirm: 'closed',
+            modal_status: 'closed',
+            status_token_refresh: false,
         }
         this.handleButtonClick = this.handleButtonClick.bind(this)
-        this.modalClose = this.modalClose.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     handleButtonClick() {
-        this.setState({ modal_status_confirm: 'open' }, () => {
-            this.setState({ modal_status_confirm: 'initial' })
-        })
+        this.modalChange(
+            'fa fa-exclamation-circle',
+            "warning",
+            'Токен шинэчлэх',
+            'Токенийг шинэчилсэнээр уг URL-ээр одоо ашиглаж байгаа газрууд ажиллахгүй болохыг анхаарна уу!',
+            true
+        )
     }
 
-    modalClose() {
-        this.setState({ modal_status_confirm: 'closed' })
+    modalChange(modal_icon, icon_color, title, text, has_button) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+        })
+        this.handleModalOpen()
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open', status_token_refresh: false }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -37,25 +55,14 @@ export class ButtonTokenRefresh extends Component {
                 </span>
 
                 <Modal
-                    text="Токенийг шинэчилсэнээр уг URL-ээр одоо ашиглаж байгаа газрууд ажиллахгүй болохыг анхаарна уу!"
-                    title="Токен шинэчлэх"
-                    model_type_icon="warning"
-                    actionNameDelete="Шинэчлэх"
-                    status={ this.state.modal_status_confirm }
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    has_button={this.state.has_button}
+                    text={this.state.text}
                     modalAction={ this.props.onClick }
-                    modalClose={ this.modalClose }
-                />
-
-                <ModalAlert
-                    status={ this.props.status == 'success' ? 'open' : 'closed' }
-                    title={ this.props.status_info }
-                    model_type_icon="success"
-                />
-
-                <ModalAlert
-                    status={ this.props.status == 'fail' ? 'open' : 'closed' }
-                    title={ this.props.status_info }
-                    model_type_icon="danger"
+                    actionNameDelete="Шинэчлэх"
                 />
 
             </Fragment>

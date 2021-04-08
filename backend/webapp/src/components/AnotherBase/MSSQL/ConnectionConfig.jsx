@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react"
-import { Formik, Form, Field} from 'formik'
+import { Formik, Form, Field, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
 
 import {service} from '../service'
@@ -7,6 +7,8 @@ import BackButton from "@utils/Button/BackButton"
 
 
 const validationSchema = Yup.object().shape({
+    name: Yup.string(),
+    definition: Yup.string(),
     msssql_server: Yup.string(),
     msssql_port: Yup.string(),
     msssql_username: Yup.string(),
@@ -23,6 +25,9 @@ class ConnectionConfig extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
+                id: props.match.params.id,
+                name: '',
+                definition: '',
                 msssql_server: '',
                 msssql_port: '',
                 msssql_username: '',
@@ -38,14 +43,15 @@ class ConnectionConfig extends Component {
     }
 
     componentDidMount() {
-        this.getConfigs()
+        const {id} = this.props.match.params
+        if(id) this.getConfigs(id)
     }
 
-    getConfigs() {
+    getConfigs(id) {
         service
             .mssql_config
-            .get()
-            .then((values) => {
+            .get(id)
+            .then(({values}) => {
                 this.setState({
                     initial_values: values,
                     values,
@@ -101,11 +107,6 @@ class ConnectionConfig extends Component {
 
                 <div className="card-header">
                     Mssql Connection Тохиргоо
-                    <div className="card-action">
-                        <a href="#" onClick={ this.handleEdit }>
-                            <i className="fa fa-edit"></i>
-                        </a>
-                    </div>
                 </div>
 
                 <div className="card-body">
@@ -131,8 +132,28 @@ class ConnectionConfig extends Component {
                         }) => {
                             return (
                                 <Form>
-                                    <fieldset disabled={ !is_editing }>
+                                    <fieldset>
                                         <div className="form-row">
+                                            <div className="form-group col-md-6 text-wrap">
+                                                <label htmlFor="id_name">Нэр</label>
+                                                <Field
+                                                    name="name"
+                                                    id="id_name"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                                <ErrorMessage name="name" component="div" className="invalid-feedback" />
+                                            </div>
+                                            <div className="form-group col-md-6 text-wrap">
+                                                <label htmlFor="id_definition">Тайлбар</label>
+                                                <Field
+                                                    name="definition"
+                                                    id="id_definition"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                                <ErrorMessage name="definition" component="div" className="invalid-feedback" />
+                                            </div>
                                             <div className="form-group col-md-6 text-wrap">
                                                 <label htmlFor="id_msssql_server">Server IP</label>
                                                 <Field
@@ -141,6 +162,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
+                                                <ErrorMessage name="msssql_server" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_msssql_port">Server PORT</label>
@@ -150,6 +172,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
+                                                <ErrorMessage name="msssql_port" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_msssql_username">Username</label>
@@ -159,15 +182,17 @@ class ConnectionConfig extends Component {
                                                     className="form-control"
                                                     id="id_msssql_username"
                                                 />
+                                                <ErrorMessage name="msssql_username" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_msssql_password">Password</label>
                                                 <Field
                                                     name="msssql_password"
-                                                    type="password"
+                                                    type="text"
                                                     className="form-control"
                                                     id="id_msssql_password"
                                                 />
+                                                <ErrorMessage name="msssql_password" component="div" className="invalid-feedback" />
                                             </div>
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="id_msssql_database">Database Name</label>
@@ -177,10 +202,10 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
+                                                <ErrorMessage name="msssql_database" component="div" className="invalid-feedback" />
                                             </div>
                                         </div>
 
-                                        { is_editing &&
                                             <button
                                                 type="submit"
                                                 className="btn gp-btn-primary"
@@ -194,11 +219,10 @@ class ConnectionConfig extends Component {
                                                 }
                                                 {status != 'saving' && 'Хадгалах' }
                                             </button>
-                                        }
 
                                     </fieldset>
 
-                                    { !is_editing && status == 'save_success' &&
+                                    { status == 'save_success' &&
                                         <div className="alert alert-icon-success alert-dismissible" role="alert">
                                             <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
                                             <div className="alert-icon icon-part-success">
@@ -210,7 +234,7 @@ class ConnectionConfig extends Component {
                                         </div>
                                     }
 
-                                    { !is_editing && status == 'save_error' &&
+                                    { status == 'save_error' &&
                                         <div className="alert alert-icon-warning alert-dismissible" role="alert">
                                             <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
                                             <div className="alert-icon icon-part-warning">

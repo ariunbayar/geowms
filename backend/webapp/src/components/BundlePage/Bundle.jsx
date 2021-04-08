@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import "./styles.css";
-import Modal from "../Modal"
 import {NavLink} from "react-router-dom"
 
 

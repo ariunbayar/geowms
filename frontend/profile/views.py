@@ -346,7 +346,7 @@ def user_update_password(request, payload):
     try:
         user.set_password(new_password)
         user.save()
-        return JsonResponse({'success': True, 'msg': 'Нууц үг амжилттай хадгалаа.'})
+        return JsonResponse({'success': True, 'msg': 'Нууц үг амжилттай хадгаллаа.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': 'Нууц үг солиход алдаа гарлаа.'})
 

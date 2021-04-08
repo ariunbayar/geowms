@@ -9,8 +9,9 @@ class index extends Component {
         return (
             <div className="card-body">
                  <Switch>
-                    <Route path={"/back/another-base/mssql/insert/"} component={MssqlForm}/>
-                    <Route exact path={"/back/another-base/mssql/"} component={ConnectionConfig}/>
+                    <Route path={"/back/another-base/connection/mssql/:id/insert/"} component={MssqlForm}/>
+                    <Route path={"/back/another-base/connection/mssql/:id"} component={ConnectionConfig}/>
+                    <Route path={"/back/another-base/connection/mssql/"} component={ConnectionConfig}/>
                 </Switch>
             </div>
         );

@@ -3,6 +3,7 @@ import {NavLink} from 'react-router-dom'
 import {service} from './service'
 import {Notif} from '@utils/Notification'
 import BackButton from "@utils/Button/BackButton"
+import Attributes from './Attributes'
 
 
 export class Detail extends Component {
@@ -124,6 +125,17 @@ export class Detail extends Component {
                                                         </button>
                                                     </span>
                                                 </div>
+                                                <div>
+                                                    <a data-toggle="collapse" data-target={`#collapse-${idx}`} aria-expanded="false" aria-controls={`#collapse-${wms.id + layer.id}`}>Багана эрх</a>
+                                                </div>
+                                                {layer &&
+                                                <Attributes
+                                                    wms={wms}
+                                                    idx={idx}
+                                                    layer={layer}
+                                                    addNotif={this.addNotif}
+                                                ></Attributes>
+                                                }
                                             </li>
                                         )}
                                     </ul>

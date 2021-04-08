@@ -13,6 +13,7 @@ from backend.payment import views as payment_views
 from backend.dedsanbutets import views as dedsan_butets
 import backend.gis.views
 from backend.geoserver import views as geoserver_views
+from backend.another_database import views as geoserver_another_database
 
 app_name = 'backend'
 urlpatterns = [
@@ -35,6 +36,16 @@ urlpatterns = [
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
     ], 'wms'))),
+
+    path('another-database/', include(([
+        path('all/', geoserver_another_database.pagination),
+        path('mssql/get/<int:pk>/', geoserver_another_database.mssql_get),
+        path('mssql/save/', geoserver_another_database.mssql_save),
+        path('mongo/get/<int:pk>/', geoserver_another_database.mongo_get),
+        path('mongo/save/', geoserver_another_database.mongo_save),
+        path('remove/<int:pk>/', geoserver_another_database.remove),
+    ], 'another-database'))),
+
 
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
@@ -92,6 +103,8 @@ urlpatterns = [
         path('save-erguul/', org_views.save_erguul),
         path('get-erguul/', org_views.get_erguuls),
         path('get-select-values/', org_views.get_select_values),
+        path('<int:pk>/emp-gender-count/', org_views.emp_gender_count),
+        path('<int:pk>/emp-age-count/', org_views.emp_age_count),
         path('get-all-org/', org_views.get_all_org),
     ], 'org'))),
 
@@ -112,6 +125,7 @@ urlpatterns = [
         path('<int:pk>/дэлгэрэнгүй/', govorg_views.дэлгэрэнгүй, name='дэлгэрэнгүй'),
         path('үүсгэх/', govorg_views.хадгалах),
         path('<int:pk>/хадгалах/', govorg_views.хадгалах),
+        path('<int:pk>/att-save/', govorg_views.set_attributes),
         path('<int:pk>/refresh-token/', govorg_views.refresh_token, name='refresh-token'),
         path('<int:pk>/устгах/', govorg_views.устгах, name='устгах'),
         path('<int:pk>/тоо/', govorg_views.тоо, name='тоо'),

@@ -17,6 +17,7 @@ export default class Маягт extends Component {
             values: {},
             order_at: '',
             order_no: '',
+            data_types: []
         }
 
         this.onSubmit = this.onSubmit.bind(this)
@@ -67,10 +68,11 @@ export default class Маягт extends Component {
     handleUpdate(gid){
         const fid = this.state.fid
         const tid = this.state.tid
-        service.detail(gid, tid, fid).then(({success, datas}) => {
+        service.detail(gid, tid, fid).then(({success, datas, data_types}) => {
             if(success){
                 this.setState({
                     values:datas,
+                    data_types,
                     is_loading: false
                 })
             }
@@ -78,11 +80,12 @@ export default class Маягт extends Component {
     }
 
     handleCreate(){
-        service.detailCreate(this.state.tid, this.state.pid, this.state.fid).then(({success, datas}) => {
+        service.detailCreate(this.state.tid, this.state.pid, this.state.fid).then(({success, datas, data_types}) => {
             if(success){
                 this.setState({
                     values:datas,
-                    is_loading: false
+                    is_loading: false,
+                    data_types
                 })
             }
         })
@@ -141,7 +144,7 @@ export default class Маягт extends Component {
     }
 
     render() {
-        const { values, id } = this.state
+        const { values, id, data_types } = this.state
         const { modifyend_selected_feature_check, update_geom_from_list, null_form_isload, cancel_button_active, remove_button_active } = this.props
         if (this.state.is_loading) {
             return (
@@ -181,8 +184,13 @@ export default class Маягт extends Component {
                             name="form_values"
                             render={arrayHelpers => (
                             <div>
+                                {data_types.map((data_type, idx) =>
+                                <>
+                                <h5 className="text-center border-bottom">{data_type['data_type_name']}</h5>
                                 {values.form_values && values.form_values.length > 0 ? (
                                 values.form_values.map((friend, index) => (
+                                    data_type['property_ids'].includes(friend.property_id) &&
+                                    data_type['data_type_id'] == friend.data_type_id &&
                                     <div key={index} className="row my-3 ">
                                         <div className="col-md-3">
                                             <label className="col-form-label">{friend.property_name ? friend.property_name : ''}</label>
@@ -232,6 +240,8 @@ export default class Маягт extends Component {
                                 ))
                                 ) : ( null
                                 )}
+                                </>
+                                )}
                                 <div className="row my-3 ">
                                     <div className="col-md-3">
                                         <label className="col-form-label">Тушаалын дугаар</label>
@@ -262,8 +272,8 @@ export default class Маягт extends Component {
                                 <div>
                                     <button type="submit" className="btn btn-block gp-btn-primary">Хянуулах</button>
                                 </div>
-                            </div>
-                            )}
+                            </div>)
+                            }
                         />
                         </Form>
                     )}}

@@ -6,29 +6,29 @@ class ConfigTitles extends Component {
         return (
             <div className="card">
                 <div className="card-header">
-                    Mssql Connection Тохиргоо
+                    Дата бааз сонгох
                 </div>
                 <div className="card-body">
                     <div className="row">
-                        <div className="card col-md-6">
+                        <div className="col-md-12">
                             <div className="card-body">
                                 <NavLink
-                                    to={`/back/another-base/mssql/`}
+                                    to={`/back/another-base/connection/mssql/`}
                                     className="col-md-5 ml-2 text-center"
                                     activeClassName="text-white"
                                 >
-                                    MSSQL ийн тохиргоо
+                                    MSSQL
                                 </NavLink>
                             </div>
                         </div>
-                        <div className="card col-md-6">
+                        <div className="col-md-12">
                             <div className="card-body">
                                 <NavLink
-                                    to={`/back/another-base/mssql/insert/`}
+                                    to={`/back/another-base/connection/mongo/`}
                                     className="col-md-3 ml-2 text-center"
                                     activeClassName="text-white gp-bg-primary"
                                 >
-                                    MSSQL insert
+                                    MongoDB
                                 </NavLink>
                             </div>
                         </div>
