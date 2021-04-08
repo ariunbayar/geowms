@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.db import connections
 
-from backend.inspire.models import MGeoDatas
+from backend.inspire.models import LFeatures, LPackages, MGeoDatas
 from backend.inspire.models import MDatas
 from backend.inspire.models import LProperties
 from backend.another_database.models import AnotherDatabase
@@ -125,13 +125,13 @@ def _set_3d_dim(wkt, srid=4326):
 def _insert_mgeo_datas(feature_code, geom, db):
     feature = utils.get_feature_from_code(feature_code)
     new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
-    MGeoDatas.objects.create(
+    new_geo = MGeoDatas.objects.create(
         geo_id=new_geo_id,
         geo_data=geom,
         feature_id=feature.feature_id,
         modified_by=db.unique_id
     )
-    return new_geo_id
+    return new_geo.geo_id
 
 
 def _insert_mdatas(geo_id, row_datas, feature_code, property_ids, db):
@@ -225,15 +225,26 @@ def get_all_table_names(request, connection_id):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
+def save_to_ano_db_table(request, payload):
+    ano_db_table_qs = AnotherDatabaseTable.objects
+    ano_db_table_qs.create(
+        **payload,
+        created_by=request.user,
+    )
+    return True
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def insert_to_inspire(request, payload):
     table_name = payload.get('table_name')
-    connection_id = payload.get('connection_id')
+    connection_id = payload.get('another_database_id')
+    columns = payload.get("columns")
+    feature_code = payload.get("feature_code")
     mssql_settings, db = _get_settings(connection_id)
 
     fields = list()
-
-    columns = payload.get("columns")
-    feature_code = 'bu-bb-b'
 
     objectid = 'OBJECTID'
 
@@ -276,27 +287,30 @@ def insert_to_inspire(request, payload):
                 row_datas[property_id] = item[field_name]
 
             _insert_mdatas(new_geo_id, row_datas, feature_code, property_ids, db)
-
     rsp = {
         'success': True,
     }
     return JsonResponse(rsp)
 
 
+def _get_theme_code(feature_code):
+    return feature_code.split('-')[0]
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def get_properties(request):
+def get_properties(request, feature_code):
 
-    theme_code = 'bu'
-    feature_code = 'bu-bb-b'
+    theme_code = _get_theme_code(feature_code)
 
     sql = """
         select
             lp.property_id,
             lp.property_name,
             lp.property_code,
-            lp.value_type_id
+            lp.value_type_id,
+            lt.data_type_name
         from
             l_themes t
         inner join
@@ -344,7 +358,47 @@ def get_properties(request):
     return JsonResponse(rsp)
 
 
-def _delete_mgeo_mdata(feature_code='BU_BB_B'):
-    MGeoDatas.objects.filter(geo_id__istartswith=feature_code).delete()
-    MDatas.objects.filter(geo_id__istartswith=feature_code).delete()
-# _delete_mgeo()
+# def _delete_mgeo_mdata(feature_code='BU_BB_B'):
+    # MGeoDatas.objects.filter(geo_id__istartswith=feature_code).delete()
+    # mdata = MDatas.objects.filter(geo_id__istartswith=feature_code)
+    # mdata.delete()
+# _delete_mgeo_mdata()
+
+
+# mssql_settings, db = _get_settings(1)
+
+# select_sql = """
+#     SELECT [{fields}]
+#     FROM [dbo].[{table_name}]
+# """.format(
+#     fields="]\n          ,[".join(['BLDNG_NUMBER', 'BLDNG_NAME']),
+#     table_name='BUILDING_ALS3',
+# )
+
+# cursor = _mssql_connection(mssql_settings)
+# row = _execute_query(cursor, select_sql)
+# too = 1
+# for item in row:
+#     if too == 1:
+#         print(item)
+#         row_datas = {
+#             1: '15',
+#             2: 'Үйлчилгээ'
+#         }
+#         too += 1
+#         prop_qs = LProperties.objects
+#         prop_qs = prop_qs.filter(property_id__in=[1, 2])
+#         prop_codes = list(prop_qs.values_list('property_code', flat=True))
+#         for prop_code in prop_codes:
+#             data, value_type = utils.get_filter_dicts(prop_code, feature_code='bu-bb-b')
+#             for property_id, value in row_datas.items():
+#                 if str(data['property_id']) == str(property_id):
+#                     mdata_value = dict()
+#                     mdata_value[value_type] = value
+#                     print(mdata_value, property_id, data)
+#                     # MDatas.objects.create(
+#                     #     geo_id=geo_id,
+#                     #     **data,
+#                     #     **mdata_value,
+#                     #     modified_by=db.unique_id
+#                     # )

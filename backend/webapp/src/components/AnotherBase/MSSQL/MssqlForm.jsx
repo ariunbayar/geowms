@@ -5,6 +5,7 @@ import SelectFeature from './SelectFeature'
 
 import BackButton from "@utils/Button/BackButton"
 import Loader from "@utils/Loader"
+import Modal from "@utils/Modal/Modal"
 
 import { service } from '../service';
 
@@ -17,10 +18,15 @@ class MssqlForm extends Component {
             table_names: [],
             selected_value: '',
             is_loading: true,
+            modal_status: 'closed',
+            feature_code: '',
         }
         this.handleChange = this.handleChange.bind(this)
         this.getTableNames = this.getTableNames.bind(this)
         this.setLoading = this.setLoading.bind(this)
+        this.setModal = this.setModal.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.getFeatureCode = this.getFeatureCode.bind(this)
     }
 
     componentDidMount() {
@@ -52,14 +58,38 @@ class MssqlForm extends Component {
         this.setState({ is_loading })
     }
 
+    setModal(modalAction, text, title, modal_icon, icon_color, has_button, actionNameDelete, modalClose) {
+        this.setState({
+            modalAction,
+            text,
+            title,
+            modal_icon,
+            icon_color,
+            has_button,
+            actionNameDelete,
+            modalClose
+        })
+        this.handleModalOpen()
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    getFeatureCode(feature_code) {
+        this.setState({ feature_code })
+    }
+
     render() {
-        const { table_names, selected_value, id, is_loading } = this.state
+        const { table_names, selected_value, id, is_loading, feature_code } = this.state
         return (
             <div className="card">
                 <div className="card-body">
-                    <Loader is_loading={is_loading}/>
+                    <Loader is_loading={is_loading} text={'Уншиж байна'}/>
                     <div className="form-row">
-                        <div className="form-group col-md-6">
+                        <div className="form-group col-md-12">
                             <label htmlFor="table_name">Хүснэгтийн нэр</label>
                             <select
                                 className="custom-select"
@@ -77,16 +107,32 @@ class MssqlForm extends Component {
                                 }
                             </select>
                         </div>
-                        <div className="input-group col-md-6">
+                        <div className="input-group col-md-12">
                             <SelectFeature
                                 setLoading={this.setLoading}
+                                sendFeatureCode={this.getFeatureCode}
                             />
                         </div>
                     </div>
+                    <hr />
                     <PropertyMatch
+                        {...this.props}
                         selected_value={selected_value}
                         connection_id={id}
                         setLoading={this.setLoading}
+                        setModal={this.setModal}
+                        feature_code={feature_code}
+                    />
+                    <Modal
+                        modal_status={this.state.modal_status}
+                        modalAction={this.state.modalAction}
+                        text={this.state.text}
+                        title={this.state.title}
+                        modal_icon={this.state.modal_icon}
+                        icon_color={this.state.icon_color}
+                        has_button={this.state.has_button}
+                        actionNameDelete={this.state.actionNameDelete}
+                        modalClose={this.state.modalClose}
                     />
                     <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/another-base/`}></BackButton>
                 </div>

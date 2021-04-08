@@ -14,7 +14,7 @@ from main.decorators import ajax_required
 from main.components import Datatable
 from main import utils
 from .models import AnotherDatabaseTable, AnotherDatabase
-from .mongo_utils import mogno_db_collection_names, _mongo_settings, mongo_config, mogno_db_collection_field_names
+# from .mongo_utils import mogno_db_collection_names, _mongo_settings, mongo_config, mogno_db_collection_field_names
 from backend.inspire.models import LPackages, LFeatures
 
 
@@ -251,8 +251,8 @@ def mongo_fields(request, pk, name):
 
     return JsonResponse(rsp)
 
-cursor = _mongo_settings(23)
-mogno_db_collection_field_names(cursor, 'urban')
+# cursor = _mongo_settings(23)
+# mogno_db_collection_field_names(cursor, 'urban')
 def get_inspire_shatlal(request):
 
     theme_list = list()
@@ -280,7 +280,7 @@ def get_inspire_shatlal(request):
             package_dict['children'] = feature_list
             package_list.append(package_dict)
 
-        theme_dict['children'] = package_dict
+        theme_dict['children'] = package_list
         theme_list.append(theme_dict)
 
     rsp = {

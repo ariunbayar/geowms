@@ -50,8 +50,9 @@ urlpatterns = [
         path('get-inspire-shatlal/', geoserver_another_database.get_inspire_shatlal),
 
         path('insert-to-inspire/', mssql_views.insert_to_inspire),
+        path('save-to-ano-db-table/', mssql_views.save_to_ano_db_table),
         path('get-attributes/', mssql_views.get_attributes),
-        path('get-properties/', mssql_views.get_properties),
+        path('get-properties/<str:feature_code>/', mssql_views.get_properties),
         path('get-all-table-names/<int:connection_id>/', mssql_views.get_all_table_names),
     ], 'another-database'))),
 
