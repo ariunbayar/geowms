@@ -214,7 +214,7 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 
 
 #######################################__Urban__#########################################################3
-from bson.json_util import dumps, loads, default
+# from bson.json_util import dumps, loads, default
 import json
 
 def mogno_db_urban_all_data():

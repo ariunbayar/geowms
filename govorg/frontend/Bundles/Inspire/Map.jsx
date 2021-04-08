@@ -551,6 +551,7 @@ export default class BarilgaSuurinGazar extends Component{
           const selectedFeature_ID = this.state.selectedFeature_ID
           this.setState({ is_selected_feature: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0]  })
           featureID_list.push(selectedFeature_ID)
+          console.log(selectedFeature_ID);
           if(this.state.remove_button_active) this.removeModal()
           if(this.state.cancel_button_active){
             const geom_for_revoke = event.selected[0]
@@ -989,7 +990,8 @@ export default class BarilgaSuurinGazar extends Component{
                     "Үгүй"
               )
               this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-          }
+      console.log(modifyend_selected_feature_check);
+    }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
           }
@@ -1004,6 +1006,7 @@ export default class BarilgaSuurinGazar extends Component{
       const {tid, fid, pid, is_not_mongolia} = this.state
       if (!is_not_mongolia) {
         const id = this.state.selectedFeature_ID
+        console.log(id);
         const { changedFeature, changedJson } = this.state
         this.feature = ''
         if (changedJson) {
