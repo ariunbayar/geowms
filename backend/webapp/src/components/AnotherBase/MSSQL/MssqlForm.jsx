@@ -32,7 +32,7 @@ class MssqlForm extends Component {
         return (
             <div>
                 <div className="form-row">
-                    <div className="form-group">
+                    <div className="form-group col-md-6">
                         <label htmlFor="table_name">Хүснэгтийн нэр</label>
                         <select
                             className="custom-select"
@@ -47,6 +47,17 @@ class MssqlForm extends Component {
                                 )
                             }
                         </select>
+                    </div>
+                    <div className="input-group col-md-6">
+                        <inpuit
+                            className="custom-select mt-2"
+                            id="table_name"
+                            onChange={this.handleChange}
+                            value={selected_value}
+                        />
+                        <div class="input-group-append pb-3">
+                            <span class="input-group-text">.00</span>
+                        </div>
                     </div>
                 </div>
                 <PropertyMatch

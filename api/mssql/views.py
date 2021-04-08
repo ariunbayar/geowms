@@ -122,12 +122,13 @@ def _insert_mdatas(geo_id, row_datas, feature_code, property_ids):
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_id__in=property_ids)
     prop_codes = list(prop_qs.values_list('property_code', flat=True))
-    feature = utils.get_feature_from_code(feature_code)
-    properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature.feature_id)
-    datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, prop_codes)
-    for data in datas:
-        print(data, row_datas)
-        # MDatas.objects.create(geo_id=geo_id, **row_datas)
+    for prop_code in prop_codes:
+        data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature_code)
+        for property_id, value in row_datas.items():
+            if data['property_id'] == property_id:
+                mdata_value = dict()
+                mdata_value[value_type] = value
+                MDatas.objects.create(geo_id=geo_id, **data, **mdata_value)
 
 
 @require_POST
@@ -187,9 +188,7 @@ def insert_to_inspire(request, payload):
 
     objectid = 'OBJECTID'
 
-    for column in columns.values():
-        fields.append(column)
-
+    fields = [column for column in columns.values()]
     fields.append(objectid)
 
     select_sql = """
@@ -216,19 +215,18 @@ def insert_to_inspire(request, payload):
         cursor = _mssql_connection(mssql_settings)
         cursor = cursor.execute(shape_sql)
         value = cursor.fetchone()
-        wkt = _get_wkt(value[0])
-        geom = _set_3d_dim(wkt)
-        # new_geo_id = _insert_mgeo_datas(feature_code, geom)
+        if value:
+            wkt = _get_wkt(value[0])
+            geom = _set_3d_dim(wkt)
+            new_geo_id = _insert_mgeo_datas(feature_code, geom)
 
-        row_datas = dict()
-        property_ids = [
-            property_id
-            for property_id in columns.keys()
-        ]
+            row_datas = dict()
+            property_ids = list()
+            for property_id, field_name in columns.items():
+                property_ids.append(property_id)
+                row_datas[property_id] = item[field_name]
 
-        print(property_ids)
-
-        # _insert_mdatas(new_geo_id, row_datas, feature_code, property_ids)
+            _insert_mdatas(new_geo_id, row_datas, feature_code, property_ids)
 
     rsp = {
         'success': True,
