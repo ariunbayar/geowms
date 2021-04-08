@@ -2,7 +2,6 @@ import requests
 from main import utils
 from .models import AnotherDatabaseTable, AnotherDatabase
 
-import pymongo
 import json
 from pymongo import MongoClient
 
@@ -66,7 +65,6 @@ def _mongo_settings(pk):
     mongo_client_password = cinfigs.get('mongo_client_password')
     mongo_database = cinfigs.get('mongo_database')
 
-    client = MongoClient()
     client = MongoClient(mongo_client_host, 27017)
     cursor = client[mongo_database]
 
