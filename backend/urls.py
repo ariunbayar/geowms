@@ -48,6 +48,7 @@ urlpatterns = [
         path('mongo/fields/<int:pk>/<str:name>/', geoserver_another_database.mongo_fields),
         path('remove/<int:pk>/', geoserver_another_database.remove),
         path('get-inspire-shatlal/', geoserver_another_database.get_inspire_shatlal),
+        path('update/<int:pk>/', geoserver_another_database.update),
 
         path('insert-to-inspire/', mssql_views.insert_to_inspire),
         path('get-attributes/', mssql_views.get_attributes),

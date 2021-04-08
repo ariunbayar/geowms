@@ -208,7 +208,7 @@ def remove(request, pk):
 def mongo_sables(request, pk):
 
     feautures = []
-    cursor = _mssql_settings(pk)
+    cursor = _mongo_settings(pk)
     table_names = mogno_db_collection_names(cursor)
 
     for fea in LFeatures.objects.all():
@@ -251,8 +251,7 @@ def mongo_fields(request, pk, name):
 
     return JsonResponse(rsp)
 
-cursor = _mongo_settings(23)
-mogno_db_collection_field_names(cursor, 'urban')
+
 def get_inspire_shatlal(request):
 
     theme_list = list()
@@ -288,3 +287,32 @@ def get_inspire_shatlal(request):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def update(request, pk):
+
+
+    # cursor = _mongo_settings(pk)
+    # another_base_data = get_object_or_404(AnotherDatabaseTable, pk=)
+
+
+
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+
+pk = 1
+another_data_base = get_object_or_404(AnotherDatabase, pk=pk)
+another_base_data = get_object_or_404(AnotherDatabaseTable, another_database=another_data_base)
+print(another_base_data.table_name)
+print(another_base_data.feature_code)
+print(another_base_data.field_config)
+# cursor = _mongo_settings(pk)

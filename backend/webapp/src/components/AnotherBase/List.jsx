@@ -38,7 +38,7 @@ export default class List extends Component {
                     "action": (values) => this.handleRemoveAction(values),
                 },
                 {
-                    "title": 'Устгах',
+                    "title": 'Бааз шинэчлэх',
                     "text": '',
                     "icon": 'fa fa-car text-danger',
                     "action": (values) => this.handleRefreshData(values),
@@ -71,6 +71,12 @@ export default class List extends Component {
 
     handleMongo(values){
         alert("MONGODB")
+        service.update(values.id).then(({success}) => {
+            if (success) {
+                // this.setState({refresh: !this.state.refresh})
+                // this.handleModalClose()
+            }
+        })
     }
 
 
