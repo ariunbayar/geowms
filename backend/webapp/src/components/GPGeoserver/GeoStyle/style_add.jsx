@@ -2,6 +2,8 @@ import React, { Component } from "react"
 import StyleMap from "./Map"
 import { service } from './service'
 import ShowStyleData from './style_data'
+import Modal from "@utils/Modal/Modal"
+import { modes } from "codemirror"
 
 
 export class CreateStyle extends Component {
@@ -40,6 +42,10 @@ export class CreateStyle extends Component {
             prev_style_name: '',
             single_select_datas: [],
             data_state: true,
+            modal_status: 'closed',
+            modal_icon: 'fa fa-check-circle',
+            icon_color: 'success',
+            modal_text: ''
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
@@ -157,7 +163,7 @@ export class CreateStyle extends Component {
         }
 
         if(pS.range_number !== range_number){
-            if (! range_number || range_number <1) {
+            if (! range_number || range_number < 1) {
                 this.setState({
                     style_size: 1, fill_color:  '#C0C0C0',
                     wellknownname: '', wellknowshape: '',
@@ -179,7 +185,7 @@ export class CreateStyle extends Component {
     }
 
     handleSubmit() {
-        const { style_name, style_title, style_abstract } = this.state
+        const { style_name, style_title, style_abstract, modal_status, icon_color, modal_text, modal_icon}= this.state
 
         if (this.style_datas && this.style_datas.length >0 ) {
             var values = this.style_datas
@@ -189,7 +195,12 @@ export class CreateStyle extends Component {
         }
 
         service.createStyle(values, style_name, style_title, style_abstract).then(({success, info}) =>{
-            console.log("info", success, info)
+            if (success) {
+                this.setState({modal_status: 'open', modal_text: info})
+            }
+            else {
+                this.setState({modal_status: 'open', modal_text: info, modal_icon: 'fa fa-times-circle', icon_color: 'danger'})
+            }
         })
     }
 
@@ -225,15 +236,14 @@ export class CreateStyle extends Component {
                 range_number,
                 had_chosen, style_name,
                 style_title, style_abstract,
-                shape_type, shape_types,
                 fill_color, style_color,
-                style_size, color_opacity,
-                min_range, max_range, dashed_line_gap,
+                style_size, color_opacity,dashed_line_gap,
                 dashed_line_length, check_style,
                 check_style_name, wellknownname,
                 wellknowshape, div_angle, only_clicked,
-                label_check, single_select_datas, geom_type,
-                data_state
+                single_select_datas, geom_type,
+                data_state, modal_status, modal_icon, icon_color,
+                modal_text
 
             } = this.state
             return (
@@ -241,7 +251,7 @@ export class CreateStyle extends Component {
                     <div className="col-md-6">
                         <div className="col-md-12">
                             <div className="col-md-12 mb-2 d-flex">
-                                <label htmlFor="" className="col-md-6 my-2">Style-ийн нэр</label>
+                                <label htmlFor="" className="col-md-6 my-2">Нэр</label>
                                 <input
                                     name='style_name'
                                     id="style_name"
@@ -260,7 +270,7 @@ export class CreateStyle extends Component {
                                 </label>
                             }
                             <div className="col-md-12 mb-2 d-flex">
-                                <label htmlFor="style_title" className="col-md-6 my-2">Style-ийн гарчиг</label>
+                                <label htmlFor="style_title" className="col-md-6 my-2">Гарчиг</label>
                                 <input
                                     name='style_title'
                                     id='style_title'
@@ -270,6 +280,18 @@ export class CreateStyle extends Component {
                                     onChange={(e) => this.handleOnChange(e)}
                                 >
                                 </input>
+                            </div>
+                            <div className="col-md-12 mb-2 d-flex">
+                                <label htmlFor="style_title" className="col-md-6 my-2">Товч тайлбар</label>
+                                <textarea
+                                    name='style_abstract'
+                                    id='style_abstract'
+                                    type="text"
+                                    value={style_abstract}
+                                    className="form-control col-md-6 mt-2"
+                                    onChange={(e) => this.handleOnChange(e)}
+                                >
+                                </textarea>
                             </div>
                             <div className="col-md-12 d-flex">
                                 <div className="col-md-6">
@@ -364,6 +386,14 @@ export class CreateStyle extends Component {
                             Хадгалах
                         </button>
                     </div>
+                    <Modal
+                        modal_status={modal_status}
+                        modal_icon={modal_icon}
+                        icon_color={icon_color}
+                        title='STYLE ХАДГАЛАХ'
+                        text={modal_text}
+                        modalAction={this.modalAction}
+                    />
                 </div>
             )
         }
