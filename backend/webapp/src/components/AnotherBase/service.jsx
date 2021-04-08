@@ -81,6 +81,28 @@ const mongo_config = {
         return fetch(`${prefix}/mongo/save/`, opts).then(handleResponse)
     },
 
+    tableSave: function(id, tableId, field_names, table_name, feature_code) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({tableId, field_names, table_name, feature_code}),
+        }
+        return fetch(`${prefix}/mongo/tables/${id}/save/`, opts).then(handleResponse)
+    },
+
+    tableRemove: function(root_id, id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/mongo/tables/remove/${root_id}/${id}/`, opts).then(handleResponse)
+    },
+
+    tableConfig: function(root_id, id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/mongo/tables/detail/${root_id}/${id}/`, opts).then(handleResponse)
+    },
+
     tables: function(id) {
         const opts = {
             ...getGetOptions(),
@@ -106,5 +128,13 @@ function remove(pk) {
 export const service = {
     mssql_config,
     mongo_config,
-    remove
+    remove,
+    update,
+}
+
+function update(pk) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/update/${pk}/`, requestOptions).then(handleResponse)
 }

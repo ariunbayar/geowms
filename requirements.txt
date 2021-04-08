@@ -19,3 +19,4 @@ django-pwa==1.0.10
 djangorestframework-jwt==1.11.0
 djangorestframework==3.12.2
 pyodbc==4.0.30
+pymongo==3.11.3
