@@ -21,6 +21,7 @@ from .mongo_utils import (
     mogno_db_collection_field_names,
     insert_data_from_mongo,
     all_data_from_selected_table,
+    delete_data_from_mongo
 )
 from backend.inspire.models import LPackages, LFeatures
 
@@ -394,54 +395,40 @@ def get_inspire_shatlal(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def update(request, pk):
-
-
+    search_values = {
+        'AGUULAH': 'Агуулах ',
+        'BOLOVSROL': 'Боловсролын байгууллагын барилга ',
+        'BUSAD': 'Бусад барилга ',
+        'DULAAN': 'Дулааны эх үүсвэр ',
+        'EMNELEG': 'Эмнэлгийн барилга ',
+        'GAZRIINTOS': 'Бусад барилга ',
+        'HUDALDAA': 'Худалдаа, нийтийн хоол, ахуй үйлчилгээний барилга ',
+        'MEDEELEL': 'Мэдээлэл, холбоо сүлжээний барилга ',
+        'OLONNIIT': 'Төрөл бүрийн зориулалттай олон нийтийн барилга ',
+        'ORONSUUTS': 'Орон сууц ',
+        'TSAHILGAAN': 'Цахилгаан шугам сүлжээ, дэд станц ',
+        'TUR': 'Түр барилга ',
+        'UILDVER': 'Үйлдвэрийн барилга ',
+        'ZOGSOOL': 'Авто машины зогсоолын барилга '
+    }
     another_data_base = get_object_or_404(AnotherDatabase, pk=pk)
-    another_base_data = get_object_or_404(AnotherDatabaseTable, another_database=another_data_base)
+    another_base_datas = AnotherDatabaseTable.objects.filter(another_database=another_data_base)
 
-    table_name = another_base_data.table_name
-    feature_code = another_base_data.feature_code
-    field_config = another_base_data.field_config
+    for another_base_data in another_base_datas:
+        table_name = another_base_data.table_name
+        feature_code = another_base_data.feature_code
+        unique_id = another_data_base.unique_id
+        feature_obj = LFeatures.objects.filter(feature_code=feature_code).first()
+        field_config = another_base_data.field_config.replace("'", '"')
+        field_config = utils.json_load(field_config)
+        cursor = _mongo_settings(pk)
+        datas = all_data_from_selected_table(cursor, table_name)
+        delete_data_from_mongo(feature_obj.feature_id, unique_id)
 
+        # insert_data_from_mongo(feature_obj.feature_id, datas, field_config, search_values, unique_id)
 
     rsp = {
         'success': True,
     }
 
     return JsonResponse(rsp)
-
-
-
-# pk = 1
-# another_data_base = get_object_or_404(AnotherDatabase, pk=pk)
-# # base_name = another_data_base.name
-
-# another_base_data = get_object_or_404(AnotherDatabaseTable, another_database=another_data_base)
-
-# table_name = another_base_data.table_name
-# feature_code = another_base_data.feature_code
-# field_config = another_base_data.field_config
-
-# cursor = _mongo_settings(pk)
-
-# datas = all_data_from_selected_table(cursor, table_name)
-# # print(datas)
-
-# search_values ={
-#     'AGUULAH': 'Агуулах ',
-#     'BOLOVSROL': 'Боловсролын байгууллагын барилга ',
-#     'BUSAD': 'Бусад барилга ',
-#     'DULAAN': 'Дулааны эх үүсвэр ',
-#     'EMNELEG': 'Эмнэлгийн барилга ',
-#     'GAZRIINTOS': 'Бусад барилга ',
-#     'HUDALDAA': 'Худалдаа, нийтийн хоол, ахуй үйлчилгээний барилга ',
-#     'MEDEELEL': 'Мэдээлэл, холбоо сүлжээний барилга ',
-#     'OLONNIIT': 'Төрөл бүрийн зориулалттай олон нийтийн барилга ',
-#     'ORONSUUTS': 'Орон сууц ',
-#     'TSAHILGAAN': 'Цахилгаан шугам сүлжээ, дэд станц ',
-#     'TUR': 'Түр барилга ',
-#     'UILDVER': 'Үйлдвэрийн барилга ',
-#     'ZOGSOOL': 'Авто машины зогсоолын барилга '
-# }
-
-# insert_data_from_mongo(feature_id, datas, field_name, search_values)
