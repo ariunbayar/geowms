@@ -208,33 +208,6 @@ def remove(request, pk):
 def mongo_sables(request, pk):
 
     feautures = []
-    cursor = _mssql_settings(pk)
-    table_names = mogno_db_collection_names(cursor)
-
-    for fea in LFeatures.objects.all():
-        feautures.append({
-            'name': fea.feature_name,
-            'code': fea.feature_code,
-        })
-    rsp = {
-        'success': True,
-        'table_names': table_names or [],
-        'features': feautures
-    }
-
-    return JsonResponse(rsp)
-
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def mongo_fields(request, pk, name):
-    print(pk, name)
-    print(pk, name)
-    print(pk, name)
-
-    feautures = []
     cursor = _mongo_settings(pk)
     table_names = mogno_db_collection_names(cursor)
 
@@ -251,8 +224,128 @@ def mongo_fields(request, pk, name):
 
     return JsonResponse(rsp)
 
-cursor = _mongo_settings(23)
-mogno_db_collection_field_names(cursor, 'urban')
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mongo_sables_save(request, payload, pk):
+
+    another_database = get_object_or_404(AnotherDatabase, pk=pk)
+    tableId = payload.get('tableId')
+    field_names = payload.get('field_names')
+    table_name = payload.get('table_name')
+    feature_code = payload.get('feature_code')
+    AnotherDatabaseTable.objects.update_or_create(
+        pk=tableId,
+        defaults={
+            'table_name': table_name,
+            'feature_code': feature_code,
+            'field_config': utils.json_dumps(field_names),
+            'another_database': another_database,
+            'created_by': request.user
+        }
+    )
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mongo_sables_remove(request, root_id, pk):
+
+    another_database = get_object_or_404(AnotherDatabase, pk=root_id)
+    another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=pk, another_database=another_database)
+    another_db_tb.delete()
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mongo_sables_detail(request, root_id, pk):
+
+    another_database = get_object_or_404(AnotherDatabase, pk=root_id)
+    another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=pk, another_database=another_database)
+    field_config = another_db_tb.field_config.replace("'", '"')
+    field_config = utils.json_load(field_config)
+    form_datas = {
+        'id': another_db_tb.id,
+        'field_config': field_config,
+        'table_name': another_db_tb.table_name,
+        'feature_code': another_db_tb.feature_code,
+    }
+
+    rsp = {
+        'success': True,
+        'form_datas': form_datas
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mongo_sables_all(request, payload, pk):
+    another_database = get_object_or_404(AnotherDatabase, pk=pk)
+    def _get_feature_name(feature_code, item):
+        feature = LFeatures.objects.filter(feature_code=feature_code).first()
+        return feature.feature_name or 'Хоосон'
+
+
+    оруулах_талбарууд = ['id', 'table_name', 'feature_code']
+    хувьсах_талбарууд = [{"field": "feature_code", "action": _get_feature_name, "new_field": "feature_code"}]
+    initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
+    if not initial_qs:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1
+        }
+
+        return JsonResponse(rsp)
+    datatable = Datatable(
+        model=AnotherDatabaseTable,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        initial_qs=initial_qs
+    )
+
+    items, total_page = datatable.get()
+    rsp = {
+        'items': items,
+        'page': payload.get("page"),
+        'total_page': total_page
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mongo_fields(request, pk, name):
+    cursor = _mongo_settings(pk)
+    field_names = mogno_db_collection_field_names(cursor, name)
+
+    rsp = {
+        'success': True,
+        'field_names': field_names or [],
+    }
+
+    return JsonResponse(rsp)
+
+
 def get_inspire_shatlal(request):
 
     theme_list = list()

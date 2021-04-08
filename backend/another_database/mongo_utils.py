@@ -13,29 +13,29 @@ def mogno_db_collection_names(cursor):
     return names
 
 
-def _set_obj(array, values, root_field, level):
-    for name, value in values.items():
-        print
-        if level == 1:
-            data_objs = {'real_name': ''}
-        data_objs[root_field + str(level)] = name
+def _set_obj(cursor):
+    array = []
+    for name, value in cursor.items():
+        data_objs = {"real_name": ""}
+        data_objs['name_1'] = name
 
         if isinstance(value, dict):
-            datas = _set_obj([], value, data_objs, root_field, level + 1)
-            if datas:
-                for i in datas:
-                    array.append(i)
-
+            for na, val in value.items():
+                data_objs['name_2'] = na
+                array.append(data_objs)
         else:
+            data_objs["name_2"] = ""
             array.append(data_objs)
-    return array
 
+    return array
 
 
 def mogno_db_collection_field_names(cursor, name):
     cursor = cursor[name]
     cursor = cursor.find_one()
     names_array = []
+    names_array = _set_obj(cursor)
+
 
     # print(json.dumps(names_array))
     return names_array
