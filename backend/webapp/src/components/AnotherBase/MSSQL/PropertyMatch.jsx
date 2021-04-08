@@ -10,6 +10,7 @@ const Match = (props) => {
             <label htmlFor="">{props.column_name}: </label>
             <select
                 name="" id=""
+                className="form-control"
                 onChange={(e) => {
                     props.sendValue(props.column_name, e.target.value)
                 }}
@@ -17,10 +18,11 @@ const Match = (props) => {
                 <option value=""> -- Property Сонгоно уу -- </option>
                 {
                     props.properties.map((prop, idx) =>
-                        <option value={prop.property_id}>{prop.property_name}</option>
+                        <option key={idx} value={prop.property_id}>{prop.property_name}</option>
                     )
                 }
             </select>
+            <br />
         </div>
     )
 }
@@ -112,7 +114,7 @@ class PropertyMatch extends Component {
             <div>
                 {
                     fields.map((field, idx) =>
-                        <Match
+                        <Match key={idx}
                             column_name={field}
                             properties={properties}
                             sendValue={this.getValue}
