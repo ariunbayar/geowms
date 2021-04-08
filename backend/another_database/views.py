@@ -288,3 +288,39 @@ def get_inspire_shatlal(request):
     }
 
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_mssql_tables_list(request, payload):
+
+    def _get_feature_name(feature_code, item):
+        if feature_code:
+            feat_qs = LFeatures.objects
+            feat_qs = feat_qs.filter(feature_code=feature_code)
+            feat = feat_qs.first()
+            feature_code = feat.feature_name
+
+        return feature_code
+
+    оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id']
+    хувьсах_талбарууд = [
+        {"field": "feature_code", "action": _get_feature_name, "new_field": "feature_code"}
+    ]
+
+    datatable = Datatable(
+        model=AnotherDatabaseTable,
+        payload=payload,
+        оруулах_талбарууд=оруулах_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд
+    )
+
+    items, total_page = datatable.get()
+    rsp = {
+        'items': items,
+        'page': payload.get("page"),
+        'total_page': total_page
+    }
+
+    return JsonResponse(rsp)

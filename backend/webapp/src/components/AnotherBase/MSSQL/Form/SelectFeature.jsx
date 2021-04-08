@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { service } from '../service';
+import { service } from '../../service';
 
 const SelectInput = (props) => {
     return (
@@ -36,6 +36,7 @@ class SelectFeature extends Component {
             packs: [],
             features: [],
             feature_code: '',
+            ano_db_table: props.ano_db_table,
         }
 
         this.getThemeFeatures = this.getThemeFeatures.bind(this)
@@ -65,9 +66,15 @@ class SelectFeature extends Component {
         }
     }
 
+    componentDidUpdate(prevProps) {
+        if (prevProps.ano_db_table != this.props.ano_db_table) {
+            this.setState({ ano_db_table: this.props.ano_db_table })
+            console.log('prop', this.props.ano_db_table);
+        }
+    }
+
     render() {
         const { datas, packs, features, feature_code } = this.state
-        console.log(features);
         return (
             <div className="form-row">
                 <SelectInput

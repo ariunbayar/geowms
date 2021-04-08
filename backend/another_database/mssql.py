@@ -196,12 +196,24 @@ def get_attributes(request, payload):
 # .AsGml gml
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def get_all_table_names(request, connection_id):
+def get_all_table_names(request, payload):
     table_names = []
+    connection_id = payload.get('connection_id')
+    table_id = payload.get('table_id')
     mssql_settings, db = _get_settings(connection_id)
+
+    ano_db_table_qs = AnotherDatabaseTable.objects
+    ano_db_table_qs = ano_db_table_qs.filter(pk=table_id)
+    ano_db_table = list(ano_db_table_qs.values())
+    if ano_db_table:
+        ano_db_table = ano_db_table[0]
+        ano_db_table['field_config'] = utils.json_dumps(ano_db_table['field_config'])
+    else:
+        ano_db_table = {}
+
     sql = """
         SELECT
             TABLE_NAME as table_name
@@ -217,6 +229,7 @@ def get_all_table_names(request, connection_id):
     rsp = {
         'success': True,
         'table_names': table_names,
+        'ano_db_table': ano_db_table,
     }
 
     return JsonResponse(rsp)
@@ -359,46 +372,7 @@ def get_properties(request, feature_code):
 
 
 # def _delete_mgeo_mdata(feature_code='BU_BB_B'):
-    # MGeoDatas.objects.filter(geo_id__istartswith=feature_code).delete()
-    # mdata = MDatas.objects.filter(geo_id__istartswith=feature_code)
-    # mdata.delete()
+#     # MGeoDatas.objects.filter(geo_id__istartswith=feature_code).delete()
+#     mdata = MDatas.objects.filter(geo_id__istartswith=feature_code)
+#     mdata.delete()
 # _delete_mgeo_mdata()
-
-
-# mssql_settings, db = _get_settings(1)
-
-# select_sql = """
-#     SELECT [{fields}]
-#     FROM [dbo].[{table_name}]
-# """.format(
-#     fields="]\n          ,[".join(['BLDNG_NUMBER', 'BLDNG_NAME']),
-#     table_name='BUILDING_ALS3',
-# )
-
-# cursor = _mssql_connection(mssql_settings)
-# row = _execute_query(cursor, select_sql)
-# too = 1
-# for item in row:
-#     if too == 1:
-#         print(item)
-#         row_datas = {
-#             1: '15',
-#             2: 'Үйлчилгээ'
-#         }
-#         too += 1
-#         prop_qs = LProperties.objects
-#         prop_qs = prop_qs.filter(property_id__in=[1, 2])
-#         prop_codes = list(prop_qs.values_list('property_code', flat=True))
-#         for prop_code in prop_codes:
-#             data, value_type = utils.get_filter_dicts(prop_code, feature_code='bu-bb-b')
-#             for property_id, value in row_datas.items():
-#                 if str(data['property_id']) == str(property_id):
-#                     mdata_value = dict()
-#                     mdata_value[value_type] = value
-#                     print(mdata_value, property_id, data)
-#                     # MDatas.objects.create(
-#                     #     geo_id=geo_id,
-#                     #     **data,
-#                     #     **mdata_value,
-#                     #     modified_by=db.unique_id
-#                     # )

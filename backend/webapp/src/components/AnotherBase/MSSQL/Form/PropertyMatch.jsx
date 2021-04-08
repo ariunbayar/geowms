@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { service } from '../service';
+import { service } from '../../service';
 
 
 const Match = (props) => {
@@ -39,20 +39,21 @@ class PropertyMatch extends Component {
             properties: [],
             columns: {},
             feature_code: props.feature_code,
+            ano_db_table: props.ano_db_table,
         }
         this.getAttributes = this.getAttributes.bind(this)
         this.getProperties = this.getProperties.bind(this)
         this.getValue = this.getValue.bind(this)
         this.saveMatch = this.saveMatch.bind(this)
+        this.setProperties = this.setProperties.bind(this)
     }
 
     componentDidMount() {
-        const { feature_code } = this.state
+        const { feature_code, ano_db_table } = this.state
         this.getProperties(feature_code)
     }
 
     getProperties(feature_code) {
-        console.log(feature_code);
         service
             .mssql_config
             .getProperties(feature_code)
@@ -73,6 +74,15 @@ class PropertyMatch extends Component {
             this.setState({ feature_code: this.props.feature_code })
             this.getProperties(this.props.feature_code)
         }
+        if (prevProps.ano_db_table != this.props.ano_db_table) {
+            this.setState({ ano_db_table: this.props.ano_db_table })
+            console.log('match', this.props.ano_db_table);
+            this.setProperties(this.props.ano_db_table)
+        }
+    }
+
+    setProperties(ano_db_table) {
+        console.log("")
     }
 
     getAttributes(table_name) {

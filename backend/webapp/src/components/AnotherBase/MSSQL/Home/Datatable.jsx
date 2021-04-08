@@ -1,20 +1,18 @@
 import React, { Component } from "react"
-import {service} from './service'
+import {service} from '../../service'
 import { PortalDataTable } from "@utils/DataTable"
-import Modal from "../Modal"
+import Modal from "@utils/Modal/Modal"
 
 export default class List extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            жагсаалтын_холбоос: '/back/another-database/all/',
+            id: props.match.params.id,
+            жагсаалтын_холбоос: '/back/another-database/mssql/tables/',
             талбарууд: [
-                {'field': 'name', "title": 'Нэр'},
-                {'field': 'definition', "title": 'Тайлбар'},
-                {'field': 'unique_id', "title": 'Таних талбар'},
-                {'field': 'db_type', "title": 'Дата бааз төрөл'},
-                {'field': 'database_updated_at', "title": 'Сүүлд шинэчилсэн'},
+                {'field': 'table_name', "title": 'Хүснэгтийн нэр'},
+                {'field': 'feature_code', "title": 'Feature'},
                 {'field': 'created_at', "title": 'Үүссэн'},
                 {'field': 'updated_at', "title": 'Зассан'},
             ],
@@ -23,26 +21,26 @@ export default class List extends Component {
                     "title": 'Засах',
                     "text": '', "icon":
                     'fa fa-table text-success',
-                    "action": (values) => this.tableGoLink(values),
-                },
-                {
-                    "title": 'Засах',
-                    "text": '', "icon":
-                    'fa fa-pencil-square-o text-success',
                     "action": (values) => this.goLink(values),
                 },
-                {
-                    "title": 'Устгах',
-                    "text": '',
-                    "icon": 'fa fa-trash-o text-danger',
-                    "action": (values) => this.handleRemoveAction(values),
-                },
-                {
-                    "title": 'Устгах',
-                    "text": '',
-                    "icon": 'fa fa-car text-danger',
-                    "action": (values) => this.handleRefreshData(values),
-                }
+                // {
+                //     "title": 'Засах',
+                //     "text": '', "icon":
+                //     'fa fa-pencil-square-o text-success',
+                //     "action": (values) => this.goLink(values),
+                // },
+                // {
+                //     "title": 'Устгах',
+                //     "text": '',
+                //     "icon": 'fa fa-trash-o text-danger',
+                //     "action": (values) => this.handleRemoveAction(values),
+                // },
+                // {
+                //     "title": 'Устгах',
+                //     "text": '',
+                //     "icon": 'fa fa-car text-danger',
+                //     "action": (values) => this.handleRefreshData(values),
+                // }
             ],
             refresh: true,
             modal_status: "closed",
@@ -50,48 +48,17 @@ export default class List extends Component {
         }
         this.handleRemove = this.handleRemove.bind(this)
         this.goLink = this.goLink.bind(this)
-        this.tableGoLink = this.tableGoLink.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
-        this.handleRefreshData = this.handleRefreshData.bind(this)
-        this.handleMssql = this.handleMssql.bind(this)
-        this.handleMongo = this.handleMongo.bind(this)
-
-    }
-
-    handleRefreshData(values){
-        if(values.db_type == 'MSSQL') this.handleMssql(values)
-        else if(values.db_type == "MONGODB") this.handleMongo(values)
-    }
-
-    handleMssql(values){
-        alert("MSSQL")
-    }
-
-    handleMongo(values){
-        alert("MONGODB")
-    }
-
-
-    set_active_color(boolean){
-        let color = "text-danger fa fa-times"
-        if(boolean) color = "text-success fa fa-check"
-        return color
-    }
-
-    tableGoLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/tables/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/insert/`)
     }
 
     goLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/`)
+        this.props.history.push(`/back/another-base/connection/mssql/${values.id}/${values.another_database_id}/update/`)
     }
 
     handleRemove() {
-        const {values} = this.state
+        const { values } = this.state
         service.remove(values.id).then(({success}) => {
             if (success) {
                 this.setState({refresh: !this.state.refresh})
@@ -114,7 +81,7 @@ export default class List extends Component {
     }
 
     render() {
-        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status } = this.state
+        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, id } = this.state
         return (
             <div className="row">
                 <div className="col-lg-12">
@@ -126,7 +93,7 @@ export default class List extends Component {
                                 уншиж_байх_үед_зурвас={"Уншиж байна"}
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
-                                нэмэх_товч={'/back/another-base/connection/'}
+                                нэмэх_товч={`/back/another-base/connection/mssql/${id}/create/`}
                                 refresh={refresh}
                             />
                         </div>
@@ -138,7 +105,7 @@ export default class List extends Component {
                     model_type_icon={'success'}
                     status={modal_status}
                     modalClose={this.handleModalClose}
-                    modalAction={this.handleRemove}
+                    modalAction={(values) => this.handleRemove(values)}
                 />
             </div>
         )

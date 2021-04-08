@@ -7,7 +7,7 @@ import BackButton from "@utils/Button/BackButton"
 import Loader from "@utils/Loader"
 import Modal from "@utils/Modal/Modal"
 
-import { service } from '../service';
+import { service } from '../../service';
 
 class MssqlForm extends Component {
 
@@ -15,11 +15,13 @@ class MssqlForm extends Component {
         super(props);
         this.state = {
             id: props.match.params.id,
+            table_id: props.match.params.table_id,
             table_names: [],
             selected_value: '',
             is_loading: true,
             modal_status: 'closed',
             feature_code: '',
+            ano_db_table: {},
         }
         this.handleChange = this.handleChange.bind(this)
         this.getTableNames = this.getTableNames.bind(this)
@@ -30,17 +32,24 @@ class MssqlForm extends Component {
     }
 
     componentDidMount() {
-        const { id }  = this.props.match.params
-        this.getTableNames(id)
+        const { id, table_id }  = this.props.match.params
+        this.getTableNames(id, table_id)
     }
 
-    getTableNames(connection_id) {
+    getTableNames(connection_id, table_id) {
+        let ano_table_id
+        if (table_id) ano_table_id = table_id
+        if (!table_id) ano_table_id = -1
+
         service
             .mssql_config
-            .getTableNames(connection_id)
-            .then(({ success, table_names }) => {
+            .getTableNames(connection_id, ano_table_id)
+            .then(({ success, table_names, ano_db_table }) => {
                 if (success) {
-                    this.setState({ table_names, is_loading: false })
+                    this.setState({ table_names, is_loading: false, ano_db_table })
+                    if (ano_db_table?.id) {
+                        this.setState({ selected_value: ano_db_table.table_name })
+                    }
                 }
             })
             .catch(() => {
@@ -83,11 +92,14 @@ class MssqlForm extends Component {
     }
 
     render() {
-        const { table_names, selected_value, id, is_loading, feature_code } = this.state
+        const { table_names, selected_value, id, is_loading, feature_code, ano_db_table } = this.state
         return (
             <div className="card">
                 <div className="card-body">
-                    <Loader is_loading={is_loading} text={'Уншиж байна'}/>
+                    <Loader
+                        is_loading={is_loading}
+                        text={'Уншиж байна'}
+                    />
                     <div className="form-row">
                         <div className="form-group col-md-12">
                             <label htmlFor="table_name">Хүснэгтийн нэр</label>
@@ -109,6 +121,7 @@ class MssqlForm extends Component {
                         </div>
                         <div className="input-group col-md-12">
                             <SelectFeature
+                                ano_db_table={ano_db_table}
                                 setLoading={this.setLoading}
                                 sendFeatureCode={this.getFeatureCode}
                             />
@@ -116,6 +129,7 @@ class MssqlForm extends Component {
                     </div>
                     <hr />
                     <PropertyMatch
+                        ano_db_table={ano_db_table}
                         {...this.props}
                         selected_value={selected_value}
                         connection_id={id}
@@ -134,7 +148,11 @@ class MssqlForm extends Component {
                         actionNameDelete={this.state.actionNameDelete}
                         modalClose={this.state.modalClose}
                     />
-                    <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/another-base/`}></BackButton>
+                    <BackButton
+                        {...this.props}
+                        name={'Буцах'}
+                        navlink_url={`/back/another-base/connection/mssql/${id}/tables/`}
+                    />
                 </div>
             </div>
         );
