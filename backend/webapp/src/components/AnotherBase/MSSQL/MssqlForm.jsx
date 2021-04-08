@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import PropertyMatch from './PropertyMatch';
+import BackButton from "@utils/Button/BackButton"
 
 class MssqlForm extends Component {
 
@@ -51,6 +52,7 @@ class MssqlForm extends Component {
                 <PropertyMatch
                     selected_value={selected_value}
                 />
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/another-base/`}></BackButton>
             </div>
         );
     }
