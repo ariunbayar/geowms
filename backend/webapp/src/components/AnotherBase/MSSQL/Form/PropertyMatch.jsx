@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { service } from '../service';
+import { service } from '../../service';
 
 
 const Match = (props) => {
@@ -18,7 +18,7 @@ const Match = (props) => {
                 <option value=""> -- Property Сонгоно уу -- </option>
                 {
                     props.properties.map((prop, idx) =>
-                        <option key={idx} value={prop.property_id}>{prop.property_name}</option>
+                        <option key={idx} value={prop.property_id}>{prop.data_type_name}:  {prop.property_name}</option>
                     )
                 }
             </select>
@@ -38,21 +38,25 @@ class PropertyMatch extends Component {
             fields: [],
             properties: [],
             columns: {},
+            feature_code: props.feature_code,
+            ano_db_table: props.ano_db_table,
         }
         this.getAttributes = this.getAttributes.bind(this)
         this.getProperties = this.getProperties.bind(this)
         this.getValue = this.getValue.bind(this)
         this.saveMatch = this.saveMatch.bind(this)
+        this.setProperties = this.setProperties.bind(this)
     }
 
     componentDidMount() {
-        this.getProperties()
+        const { feature_code, ano_db_table } = this.state
+        this.getProperties(feature_code)
     }
 
-    getProperties() {
+    getProperties(feature_code) {
         service
             .mssql_config
-            .getProperties()
+            .getProperties(feature_code)
             .then(({ success, properties }) => {
                 if (success) {
                     this.setState({ properties })
@@ -66,6 +70,19 @@ class PropertyMatch extends Component {
             this.setState({ table_name: this.props.selected_value })
             this.getAttributes(this.props.selected_value)
         }
+        if (prevProps.feature_code != this.props.feature_code) {
+            this.setState({ feature_code: this.props.feature_code })
+            this.getProperties(this.props.feature_code)
+        }
+        if (prevProps.ano_db_table != this.props.ano_db_table) {
+            this.setState({ ano_db_table: this.props.ano_db_table })
+            console.log('match', this.props.ano_db_table);
+            this.setProperties(this.props.ano_db_table)
+        }
+    }
+
+    setProperties(ano_db_table) {
+        console.log("")
     }
 
     getAttributes(table_name) {
@@ -99,12 +116,38 @@ class PropertyMatch extends Component {
     }
 
     saveMatch() {
-        const { table_name, columns, connection_id } = this.state
+        this.props.setLoading(true)
+        const { table_name, columns, connection_id, feature_code } = this.state
         service
             .mssql_config
-            .insertToInspire(table_name, columns, connection_id)
-            .then(rsp => {
-                console.log(rsp);
+            .saveToDbTable(table_name, columns, connection_id, feature_code)
+            .then(({ success }) => {
+                if (success) {
+                    this.props.setLoading(false)
+                    this.props.setModal(
+                        null,
+                        '',
+                        'Амжилттай хадгаллаа',
+                        'fa fa-check-circle',
+                        'success',
+                        false,
+                        null,
+                        () => this.props.data.history.push(`/back/another-base/`)
+                    )
+                }
+            })
+            .catch(() => {
+                this.props.setLoading(false)
+                this.props.setModal(
+                    null,
+                    '',
+                    'Холболтонд алдааг гарсан байна',
+                    'fa fa-check-circle',
+                    'danger',
+                    false,
+                    null,
+                    null,
+                )
             })
     }
 

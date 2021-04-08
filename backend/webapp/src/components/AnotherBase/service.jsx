@@ -18,32 +18,46 @@ const mssql_config = {
         }
         return fetch(`${prefix}/mssql/save/`, opts).then(handleResponse)
     },
-    getTableNames: function(connection_id) {
+
+    getTableNames: function(connection_id, table_id ) {
         const opts = {
-            ...getGetOptions(),
+            ...getPostOptions(),
+            body: JSON.stringify({ connection_id, table_id }),
         }
-        return fetch(`${prefix}/get-all-table-names/${connection_id}/`, opts).then(handleResponse)
+        return fetch(`${prefix}/mssql/get-all-table-names/`, opts).then(handleResponse)
     },
+
     getAttributes(table_name, id) {
         const requestOptions = {
             ...getPostOptions(),
             body: JSON.stringify({ table_name, id }),
         }
-        return fetch(`${prefix}/get-attributes/`, requestOptions).then(handleResponse)
+        return fetch(`${prefix}/mssql/get-attributes/`, requestOptions).then(handleResponse)
     },
-    insertToInspire(table_name, columns, connection_id) {
+
+    saveToDbTable(table_name, field_config, another_database_id, feature_code) {
         const requestOptions = {
             ...getPostOptions(),
-            body: JSON.stringify({ table_name, columns, connection_id }),
+            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code }),
         }
-        return fetch(`${prefix}/insert-to-inspire/`, requestOptions).then(handleResponse)
+        return fetch(`${prefix}/mssql/save-to-ano-db-table/`, requestOptions).then(handleResponse)
     },
-    getProperties() {
+
+    insertToInspire(table_name, field_config, another_database_id, feature_code) {
+        const requestOptions = {
+            ...getPostOptions(),
+            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code }),
+        }
+        return fetch(`${prefix}/mssql/insert-to-inspire/`, requestOptions).then(handleResponse)
+    },
+
+    getProperties(feature_code) {
         const requestOptions = {
             ...getGetOptions(),
         }
-        return fetch(`${prefix}/get-properties/`, requestOptions).then(handleResponse)
+        return fetch(`${prefix}/mssql/get-properties/${feature_code}/`, requestOptions).then(handleResponse)
     },
+
     getThemeFeatures() {
         const requestOptions = {
             ...getGetOptions(),

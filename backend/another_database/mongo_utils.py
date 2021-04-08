@@ -152,10 +152,9 @@ def insert_data_from_mongo(feature_id, datas, field_names, search_values, unique
     return True
 
 
-def delete_data_from_mongo(feature_id, unique_id):
+def delete_data_from_mongo(unique_id):
 
-    feature_config_id = LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id')
-    m_datas = MDatas.objects.filter(created_by=unique_id, feature_config_id__in=feature_config_id)
+    m_datas = MDatas.objects.filter(created_by=unique_id)
     m_datas.delete()
 
     return True
