@@ -1,30 +1,20 @@
 import React, { Component } from "react"
-import {service} from './service'
+import {service} from '../service'
 import { PortalDataTable } from "@utils/DataTable"
-import Modal from "../Modal"
+import Modal from "../../Modal"
 
 export default class List extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            жагсаалтын_холбоос: '/back/another-database/all/',
+            id: props.match.params.id,
+            жагсаалтын_холбоос: `/back/another-database/mongo/tables/${props.match.params.id}/all/`,
             талбарууд: [
-                {'field': 'name', "title": 'Нэр'},
-                {'field': 'definition', "title": 'Тайлбар'},
-                {'field': 'unique_id', "title": 'Таних талбар'},
-                {'field': 'db_type', "title": 'Дата бааз төрөл'},
-                {'field': 'database_updated_at', "title": 'Сүүлд шинэчилсэн'},
-                {'field': 'created_at', "title": 'Үүссэн'},
-                {'field': 'updated_at', "title": 'Зассан'},
+                {'field': 'table_name', "title": 'Нэр'},
+                {'field': 'feature_code', "title": 'Feature нэр'},
             ],
             нэмэлт_талбарууд: [
-                {
-                    "title": 'Засах',
-                    "text": '', "icon":
-                    'fa fa-table text-success',
-                    "action": (values) => this.tableGoLink(values),
-                },
                 {
                     "title": 'Засах',
                     "text": '', "icon":
@@ -37,12 +27,6 @@ export default class List extends Component {
                     "icon": 'fa fa-trash-o text-danger',
                     "action": (values) => this.handleRemoveAction(values),
                 },
-                {
-                    "title": 'Бааз шинэчлэх',
-                    "text": '',
-                    "icon": 'fa fa-car text-danger',
-                    "action": (values) => this.handleRefreshData(values),
-                }
             ],
             refresh: true,
             modal_status: "closed",
@@ -50,19 +34,12 @@ export default class List extends Component {
         }
         this.handleRemove = this.handleRemove.bind(this)
         this.goLink = this.goLink.bind(this)
-        this.tableGoLink = this.tableGoLink.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
-        this.handleRefreshData = this.handleRefreshData.bind(this)
         this.handleMssql = this.handleMssql.bind(this)
         this.handleMongo = this.handleMongo.bind(this)
 
-    }
-
-    handleRefreshData(values){
-        if(values.db_type == 'MSSQL') this.handleMssql(values)
-        else if(values.db_type == "MONGODB") this.handleMongo(values)
     }
 
     handleMssql(values){
@@ -71,12 +48,6 @@ export default class List extends Component {
 
     handleMongo(values){
         alert("MONGODB")
-        service.update(values.id).then(({success}) => {
-            if (success) {
-                // this.setState({refresh: !this.state.refresh})
-                // this.handleModalClose()
-            }
-        })
     }
 
 
@@ -86,19 +57,14 @@ export default class List extends Component {
         return color
     }
 
-    tableGoLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/insert/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/list/`)
-    }
-
     goLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/`)
+        const {id} = this.state
+        this.props.history.push(`/back/another-base/connection/mongo/${id}/insert/${values.id}/`)
     }
 
     handleRemove() {
-        const {values} = this.state
-        service.remove(values.id).then(({success}) => {
+        const {values, id} = this.state
+        service.mongo_config.tableRemove(id, values.id).then(({success}) => {
             if (success) {
                 this.setState({refresh: !this.state.refresh})
                 this.handleModalClose()
@@ -120,7 +86,7 @@ export default class List extends Component {
     }
 
     render() {
-        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status } = this.state
+        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, id } = this.state
         return (
             <div className="row">
                 <div className="col-lg-12">
@@ -132,7 +98,7 @@ export default class List extends Component {
                                 уншиж_байх_үед_зурвас={"Уншиж байна"}
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
-                                нэмэх_товч={'/back/another-base/connection/'}
+                                нэмэх_товч={`/back/another-base/connection/mongo/${id}/insert/`}
                                 refresh={refresh}
                             />
                         </div>
