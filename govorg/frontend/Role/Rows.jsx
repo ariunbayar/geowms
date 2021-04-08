@@ -10,25 +10,45 @@ export default class RoleTable extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
+            modal_status: 'closed',
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
-    }
-
-
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({ is_modal_delete_open: true })
-    }
-
-    handleModalDeleteClose() {
-        this.setState({ is_modal_delete_open: false })
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidUpdate(prevProps) {
-        if (prevProps.values !== this.props.values) this.setState({ is_modal_delete_open: false })
+        if (prevProps.values !== this.props.values) this.setState({ modal_status: 'closed' })
+
+    }
+
+    handleModalDeleteOpen(event) {
+        event.preventDefault()
+        this.modalClose(
+            'fa fa-exclamation-circle',
+            "warning",
+            'Та устгахдаа итгэлтэй байна уу?',
+            '',
+            true
+        )
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, icon_color, title, text, has_button) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+        })
+        this.handleModalOpen()
 
     }
 
@@ -62,15 +82,16 @@ export default class RoleTable extends Component {
                     <a href="delete" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-                    {this.state.is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та устгахдаа итгэлтэй байна уу?`}
-                            role_name="Тохиргоог устгах"
-                            model_type_icon="success"
-                        />
-                    }
+                    <Modal
+                        modal_status={this.state.modal_status}
+                        modal_icon={this.state.modal_icon}
+                        icon_color={this.state.icon_color}
+                        title={this.state.title}
+                        has_button={this.state.has_button}
+                        text={this.state.text}
+                        modalAction={this.props.handleRemove}
+                        actionNameDelete="Устгах"
+                    />
                 </th>
                 }
             </tr>

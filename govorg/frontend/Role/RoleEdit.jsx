@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
 import { service } from "./Role/service";
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 import InsPerms from './Role/GovPerms'
 import BackButton from "@utils/Button/BackButton"
 
@@ -27,17 +27,16 @@ export class RoleEdit extends Component {
             },
             edit: false,
             handleSaveIsLoad: false,
-            modal_alert_status: "closed",
-            timer: null,
+            modal_status: "closed",
             is_continue: false,
             gov_perm_id: this.props.org_roles.gov_perm_id,
         }
         this.handleSave = this.handleSave.bind(this)
-        this.modalClose = this.modalClose.bind(this)
         this.getAllValue = this.getAllValue.bind(this)
         this.getValue = this.getValue.bind(this)
         this.getRoleDetail = this.getRoleDetail.bind(this)
         this.removeItemFromRemoveRoles = this.removeItemFromRemoveRoles.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     handleSave(values, { setStatus, setSubmitting, setErrors}) {
@@ -48,30 +47,15 @@ export class RoleEdit extends Component {
             .updateRole(id, gov_perm_id, values.role_name, values.role_description, this.remove_perms, this.perms)
             .then(({success, errors}) => {
                 if (success) {
-                    this.setState({modal_alert_status: "open"})
+                    this.setState({ handleSaveIsLoad: false })
+                    this.handleModalOpen()
                     setStatus('saved')
                     setSubmitting(false)
-                    this.modalCloseTime()
-                }else{
+                } else {
                     setErrors(errors)
                     setSubmitting(false)
                 }
             })
-    }
-
-    modalClose() {
-        this.setState({ handleSaveIsLoad: false })
-        this.props.history.push(`/gov/perm/role/`)
-        this.setState({ modal_alert_status: "closed" })
-        clearTimeout(this.state.timer)
-    }
-
-    modalCloseTime() {
-        this.state.timer = setTimeout(() => {
-            this.setState({ handleSaveIsLoad: false })
-            this.props.history.push(`/gov/perm/role/`)
-            this.setState({ modal_alert_status: "closed" })
-        }, 2000)
     }
 
     removeItemFromArray (array, feature_id, property_id, perm_kind, is_role_emp_id, is_true_type) {
@@ -181,6 +165,12 @@ export class RoleEdit extends Component {
             })
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
     render() {
         const { is_continue, initial_values, roles} = this.state
         const { org_roles } = this.props
@@ -264,11 +254,15 @@ export class RoleEdit extends Component {
                         }}
                     </Formik>
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай хадгаллаа"
-                    model_type_icon = "success"
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon='fa fa-check-circle'
+                    icon_color='success'
+                    title='Амжилттай хадгаллаа'
+                    text=''
+                    has_button={false}
+                    modalAction={null}
+                    modalClose={() => this.props.history.push(`/gov/perm/role/`)}
                 />
             </div>
         )

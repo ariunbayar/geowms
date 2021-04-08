@@ -5,6 +5,7 @@ import { ButtonTokenRefresh } from "./ButtonTokenRefresh"
 import { ButtonEdit } from "./ButtonEdit"
 import { ButtonDelete } from "./ButtonDelete"
 import BackButton from "@utils/Button/BackButton"
+import Modal from "@utils/Modal/Modal"
 
 
 export class Detail extends Component {
@@ -36,8 +37,7 @@ export class Detail extends Component {
             is_inspire_role: false,
             is_inspire_role_null: false,
 
-            status_token_refresh: 'initial',
-            status_delete: 'initial',
+            modal_status: 'closed',
         }
 
         this.getDetail = this.getDetail.bind(this)
@@ -45,6 +45,8 @@ export class Detail extends Component {
         this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
         this.handleDeleteSuccess = this.handleDeleteSuccess.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidMount(){
@@ -91,31 +93,48 @@ export class Detail extends Component {
     }
 
     handleTokenRefresh() {
-        this.setState({ status_token_refresh: 'loading' })
         service
             .empTokenRefresh(this.state.employee.id)
             .then(({ success, info }) => {
-                if(success)
+                if (success) {
                     this.getDetail()
-                this.setState({
-                    status_token_refresh: success ? 'success' : 'fail',
-                    info_token_refresh: info
-                })
+                    this.modalChange('fa fa-check-circle', "success", 'Токенийг амжилттай шинэчиллээ!', '', false, null)
+                } else {
+                    this.modalChange('fa fa-times-circle', "danger", 'Алдаа гарлаа!', '', false, null)
+                }
             })
     }
 
     handleDelete() {
-        this.setState({ status_delete: 'loading' })
         const id = this.state.employee.id
         service
             .deleteEmployee(id)
             .then(({ success }) => {
-                this.setState({ status_delete: success ? 'success' : 'fail' })
+                this.modalChange('fa fa-check-circle', "success", 'Албан хаагчийг амжилттай устгалаа!', '', false, this.handleDeleteSuccess)
             })
     }
 
     handleDeleteSuccess() {
         this.props.history.push(`${this.state.prefix}`)
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, icon_color, title, text, has_button, modalClose) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            modalClose: modalClose
+        })
+        this.handleModalOpen()
+
     }
 
     render() {
@@ -149,8 +168,6 @@ export class Detail extends Component {
 
         const {
             status_token_refresh,
-            status_delete,
-            info_token_refresh,
         } = this.state
 
         const { org_roles } = this.props
@@ -161,23 +178,24 @@ export class Detail extends Component {
 
                         <div className="row">
                             <div className="col-md-12 p-0 text-right">
-                                {this.props.employee.is_admin || this.props.employee.username == username ?
-                                <ButtonTokenRefresh
-                                    onClick={ this.handleTokenRefresh }
-                                    status={ status_token_refresh }
-                                    status_info={ info_token_refresh }
-                                />: null
+                                {
+                                    this.props.employee.is_admin || this.props.employee.username == username ?
+                                        <ButtonTokenRefresh onClick={ this.handleTokenRefresh }/>
+                                    :
+                                    null
                                 }
-                                {this.props.employee.is_admin || this.props.employee.username == username ?
-                                <ButtonEdit to={`${prefix}${id}/edit/`}/> : null
+                                {
+                                    this.props.employee.is_admin || this.props.employee.username == username ?
+                                        <ButtonEdit to={`${prefix}${id}/edit/`}/>
+                                    :
+                                    null
                                 }
-                                {this.props.employee.is_admin &&
-                                <ButtonDelete
-                                    status={ status_delete }
-                                    onClick={ this.handleDelete }
-                                    employee_name={ first_name }
-                                    onSuccess={ this.handleDeleteSuccess }
-                                />
+                                {
+                                    this.props.employee.is_admin &&
+                                        <ButtonDelete
+                                            onClick={ this.handleDelete }
+                                            employee_name={ first_name }
+                                        />
                                 }
                             </div>
                         </div>
@@ -306,6 +324,17 @@ export class Detail extends Component {
                     </div>
                 </div>
                 <BackButton {...this.props} name={'Буцах'} navlink_url={prefix}></BackButton>
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    has_button={this.state.has_button}
+                    text={this.state.text}
+                    modalAction={ this.props.onClick }
+                    actionNameDelete="Шинэчлэх"
+                    modalClose={this.state.modalClose}
+                />
             </div>
         )
     }

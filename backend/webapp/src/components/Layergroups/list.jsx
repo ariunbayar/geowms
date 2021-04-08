@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
-import Modal from "../Modal"
+import Modal from "@utils/Modal/Modal"
 import {GPIcon} from "@utils/Tools"
 
 export default class GroupList extends Component {
@@ -12,21 +12,13 @@ export default class GroupList extends Component {
             modal_status: "closed"
         }
 
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
-    handleModalDeleteOpen(){
-        this.setState({modal_status: 'open'})
-    }
-
-    handleModalDeleteClose(){
-        this.setState({modal_status: 'closed'})
-    }
-
-    modalClose(){
-        this.props.handleRemove()
-        this.setState({modal_status: 'closed'})
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -50,18 +42,21 @@ export default class GroupList extends Component {
                     </NavLink>
                 </td>
                 <td>
-                    <a href="#" onClick={this.handleModalDeleteOpen}>
+                    <a href="#" onClick={this.handleModalOpen}>
                         <GPIcon icon={"fa fa-trash-o text-danger"}/>
                     </a>
-                    <Modal
-                        text={`Та "${value}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                        title="Тохиргоог устгах"
-                        model_type_icon="success"
-                        status={this.state.modal_status}
-                        modalClose={this.handleModalDeleteClose}
-                        modalAction={() => this.modalClose()}
-                    />
                 </td>
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon='fa fa-exclamation-circle'
+                    icon_color="warning"
+                    title='Тохиргоог устгах'
+                    text={`Та "${value}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
+                    has_button={true}
+                    modalAction={this.props.handleRemove}
+                    actionNameDelete="Тийм"
+                    actionNameBack="Үгүй"
+                />
             </tr>
         )
     }

@@ -135,7 +135,6 @@ export default class MakeOronZai extends Component {
                                             <OpenMapModal
                                                 values={value}
                                                 refreshData={this.props.refreshData}
-                                                timeCloseModal={this.props.timeCloseModal}
                                             />
                                         </td>
                                     </tr>
@@ -152,7 +151,6 @@ export default class MakeOronZai extends Component {
                             values={collection_of_value}
                             button_name={'Олноор шийдвэрлэх'}
                             refreshData={this.props.refreshData}
-                            timeCloseModal={this.props.timeCloseModal}
                         />
                     :
                         null
