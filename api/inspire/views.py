@@ -214,14 +214,14 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
 
 
 #######################################__Urban__#########################################################3
-from bson.json_util import dumps, loads, default
-import json
+# from bson.json_util import dumps, loads, default
+# import json
 
-def mogno_db_urban_all_data():
-    cursor = connections['mongodb'].cursor()
-    cursor = cursor.urban.find()
-    datas = [json.loads(json.dumps(result, ensure_ascii=False, default=default, separators=(',', ':'))) for result in cursor]
-    return datas
+# def mogno_db_urban_all_data():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.urban.find()
+#     datas = [json.loads(json.dumps(result, ensure_ascii=False, default=default, separators=(',', ':'))) for result in cursor]
+#     return datas
 
 
 # def fucking_insert_data_mongo(feature_id, datas, field_names):
