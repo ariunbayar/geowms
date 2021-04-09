@@ -18,6 +18,8 @@ const validationSchema = Yup.object().shape({
     mongo_client_password: Yup.string(),
     mongo_database: Yup.string()
         .required('хоосон байна!'),
+    mongo_port: Yup.string()
+        .required('хоосон байна!')
 })
 
 
@@ -37,7 +39,7 @@ class ConnectionConfig extends Component {
                 mongo_client_username: '',
                 mongo_client_password: '',
                 mongo_database: '',
-                port: '',
+                mongo_port: '',
             },
             values: {},
         }
@@ -208,14 +210,14 @@ class ConnectionConfig extends Component {
                                                 <p className="text-danger">{errors['mongo_database']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
-                                                <label htmlFor="id_port">Port</label>
+                                                <label htmlFor="id_mongo_port">Port</label>
                                                 <Field
-                                                    name="port"
-                                                    id="id_port"
+                                                    name="mongo_port"
+                                                    id="id_mongo_port"
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="port" component="div" className="invalid-feedback" />
+                                                <ErrorMessage name="mongo_port" component="div" className="invalid-feedback" />
                                             </div>
                                         </div>
 

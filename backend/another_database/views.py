@@ -72,8 +72,9 @@ def mongo_get(request, pk):
         'mongo_engine': connection.get('mongo_engine'),
         'mongo_client_host': connection.get('mongo_client_host'),
         'mongo_client_username': connection.get('mongo_client_username'),
-        'mongo_client_password': connection.get('msssql_password'),
+        'mongo_client_password': connection.get('mongo_client_password'),
         'mongo_database': connection.get('mongo_database'),
+        'mongo_port': connection.get('mongo_port'),
     }
 
     rsp = {
@@ -103,9 +104,10 @@ def mongo_save(request, payload):
         'mongo_client_host': payload.get('mongo_client_host'),
         'mongo_client_username': payload.get('mongo_client_username'),
         'mongo_client_password': payload.get('mongo_client_password'),
+        'mongo_port': payload.get('mongo_port'),
     }
 
-    check_connection, errors = mongo_check_connection(connection['mongo_client_host'], connection['mongo_database'])
+    check_connection, errors = mongo_check_connection(connection['mongo_client_host'], connection['mongo_database'], int(connection['mongo_port']))
     if not check_connection:
         rsp = {
             'success': False,
