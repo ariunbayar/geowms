@@ -1,8 +1,10 @@
+# import pyodbc
 from django.db import connections
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from backend.inspire.models import LFeatures
+from backend.inspire.models import LProperties
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import MDatas
 from backend.inspire.models import MGeoDatas
@@ -211,8 +213,130 @@ def select_query(feature_id, sort_name="geo_id", sort_type="ASC", limit=10, sear
     return datas
 
 
+#######################################__Urban__#########################################################3
+# from bson.json_util import dumps, loads, default
+# import json
+
+# def mogno_db_urban_all_data():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.urban.find()
+#     datas = [json.loads(json.dumps(result, ensure_ascii=False, default=default, separators=(',', ':'))) for result in cursor]
+#     return datas
 
 
+# def fucking_insert_data_mongo(feature_id, datas, field_names):
+
+#     feature_obj = LFeatures.objects.filter(feature_id=feature_id).first()
+#     property_displays = property_of_feature(feature_id)
+#     m_datas_objs = list()
+#     info = []
+#     for data in datas:
+#         for field_name in field_names:
+#             try:
+#                 dataaa = data[field_name['name_1']]
+#                 if field_name['name_2']:
+#                     dataaa = dataaa[field_name['name_2']]
+#                 property_obj = LProperties.objects.filter(property_code=field_name['real_name']).first()
+#                 for property_display in property_displays:
+#                     if property_obj.property_id in property_display['property_ids']:
+#                         mdatas_ob = MDatas(
+#                             geo_id=data['globalId'],
+#                             feature_config_id=property_display['feature_config_id'],
+#                             data_type_id=property_display['data_type_id'],
+#                             property_id=property_obj.property_id,
+#                             created_by=end zoriulj goy  too ogoh darana haij olj ustgah,
+#                         )
+#                         if dataaa:
+#                             if property_obj.value_type_id in ['text', 'multi-text', 'boolean', 'link']:
+#                                 mdatas_ob.value_text = dataaa
+#                             elif property_obj.value_type_id == 'date':
+#                                 mdatas_ob.value_date = utils.year_to_timezone(dataaa)
+#                             elif property_obj.value_type_id in ['single-select', 'multi-select']:
+#                                 mdatas_ob.code_list_id = dataaa
+#                             elif property_obj.value_type_id in ['double', 'number']:
+#                                 mdatas_ob.value_number
+
+#                         print(
+#                             data['globalId'],
+#                             property_display['feature_config_id'],
+#                             property_display['data_type_id'],
+#                             property_obj.property_id,
+#                             dataaa,
+#                         )
+#                         print(mdatas_ob)
+#                         m_datas_objs.append(mdatas_ob)
+
+#             except Exception:
+#                 a = 2
+    ## MDatas.objects.bulk_create(m_datas_objs)
 
 
+# feature_id = 50103
+# datas = mogno_db_urban_all_data()
+# field_name = [
+#     {'real_name': 'namespace', 'name_1': 'step7', 'name_2': 'firstCost'},
+#     {'real_name': 'beginLifespanVersion', 'name_1': 'step7', 'name_2': 'buildArea'},
+# ]
+# feature_id = 50103
+# fucking_insert_data_mongo(feature_id, datas, field_name)
 
+
+# def mogno_db_collection_names():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.collection_names()
+#     names = [ c for c in cursor]
+#     return names
+
+
+# def mogno_db_collection_field_names():
+#     cursor = connections['mongodb'].cursor()
+#     cursor = cursor.urban.find_one()
+#     names = [ c for c in cursor]
+#     return names
+
+
+################################## MSSQL ############################################
+
+# 1. sudo su
+# 2. curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+# 3. curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+# 4. sudo apt-get update
+# 5. sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
+# 6. sudo ACCEPT_EULA=Y apt-get install -y mssql-tools
+# 7. echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+# 8. source ~/.bashrc
+# 9. sudo apt-get install -y unixodbc-dev
+# 10. pip install pyodbc
+
+
+# def _mssql_settings(port='1433', server='192.168.1.4', database='urban', username='sa', password='123456'):
+#     drivers = pyodbc.drivers()
+#     connection_dict = {
+#         'driver': drivers[0],
+#         'server': server + ', ' + port,
+#         'database': database,
+#         'uid': username,
+#         'password': password
+#     }
+#     return connection_dict
+
+
+# def _mssql_connection(connection_dict):
+#     connection = pyodbc.connect(**connection_dict)
+#     cursor = connection.cursor()
+#     return cursor
+
+
+# def _execute_query(cursor, sql):
+#     cursor.execute(sql)
+#     datas = utils.dict_fetchall(cursor)
+#     return datas
+
+
+# cursor = _mssql_connection(_mssql_settings())
+# sql = """
+#     SELECT TOP (1000) [OBJECTID], [KH_MON], [DUUREG] FROM [urban].[dbo].[ACHB]
+# """
+# row = _execute_query(cursor, sql)
+# datas = [item for item in row]
+# print(datas)

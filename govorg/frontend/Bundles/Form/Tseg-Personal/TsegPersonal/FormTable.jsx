@@ -10,19 +10,25 @@ export default class FormTable extends Component {
         super(props)
 
         this.state = {
-            is_modal_delete_open: false,
-            is_modal_success_open: false,
             point_class: '',
             point_type: '',
+
+            modalAction: null,
+            modal_status: 'closed',
+            modal_icon: 'fa fa-check-circle',
+            icon_color: 'success',
+            title: '',
+            text: '',
+            has_button: false,
         }
 
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
         this.handleModalSuccessOpen = this.handleModalSuccessOpen.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handlePointSetName = this.handlePointSetName.bind(this)
         this.handleBoxLeave = this.handleBoxLeave.bind(this)
         this.handleBoxOver = this.handleBoxOver.bind(this)
-        this.successAndClose = this.successAndClose.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
     handleBoxOver (e){
@@ -32,22 +38,47 @@ export default class FormTable extends Component {
     handleBoxLeave(e){
         this.setState({ showBox: false })
     }
-    handleModalDeleteOpen(event) {
-        event.preventDefault()
-        this.setState({is_modal_delete_open: true})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({is_modal_delete_open: false})
-    }
 
     handleModalSuccessOpen(event) {
         event.preventDefault()
-        this.setState({is_modal_success_open: true})
+        this.modalChange(
+            this.props.handleSuccess,
+            'fa fa-exclamation-circle',
+            "warning",
+            'Баталгаажуулах уу?',
+            `Та "${this.props.values.point_name}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`,
+            true
+        )
     }
 
-    handleModalSuccessClose() {
-        this.setState({ is_modal_success_open: false })
+    handleModalDeleteOpen(event) {
+        event.preventDefault()
+        this.modalChange(
+            this.props.handleRemove,
+            'fa fa-exclamation-circle',
+            "warning",
+            'Тохиргоог устгах',
+            `Та "${this.props.values.point_name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+            true
+        )
+    }
+
+    modalChange(modalAction, modal_icon, icon_color, title, text, has_button) {
+        this.setState({
+            modalAction: modalAction,
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+        })
+        this.handleModalOpen()
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     componentDidMount(){
@@ -56,15 +87,9 @@ export default class FormTable extends Component {
 
     componentDidUpdate(prevProps){
         if(prevProps.values !== this.props.values){
-            this.setState({is_modal_delete_open: false, is_modal_success_open: false})
-
-            this.handlePointSetName('point_class', this.props.values.point_class)
+            this.setState({modal_status: 'closed'})
+            this.handlePointSetName('point_class',this.props.values.point_class)
         }
-    }
-
-    successAndClose() {
-        this.setState({ is_modal_success_open: false })
-        this.props.handleSuccess()
     }
 
     handlePointSetName(field, id){
@@ -98,15 +123,6 @@ export default class FormTable extends Component {
                     <a href="#" onClick={this.handleModalDeleteOpen}>
                         <i className="fa fa-trash-o text-danger" aria-hidden="true"></i>
                     </a>
-                    {this.state.is_modal_delete_open &&
-                        <Modal
-                            modalClose={this.handleModalDeleteClose}
-                            modalAction={this.props.handleRemove}
-                            text={`Та "${point_name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                            title="Тохиргоог устгах"
-                            model_type_icon = 'success'
-                        />
-                    }
                 </th>
                 <th>
                     {
@@ -132,17 +148,17 @@ export default class FormTable extends Component {
                         <h6 className="alert-heading">Санамж!</h6>
                         <span>Баталгаажуулснаар шинээр үүссэн болон шинэчилсэн цэгийн мэдээллийг шинэчлэх санал дээр байгаа цэгийн жагсаалтад нэмэх болно.</span>
                     </div>
-                    {this.state.is_modal_success_open &&
-                        <Modal
-                            modalClose={(e) => this.handleModalSuccessClose(e)}
-                            modalAction={() => this.successAndClose()}
-                            text={`Та "${point_name}" энэ цэгийг баталгаажуулахдаа итгэлтэй байна уу?`}
-                            title="Баталгаажуулах уу?"
-                            actionNameBack="    Үгүй"
-                            actionNameDelete="  Тийм"
-                            model_type_icon='warning'
-                        />
-                    }
+                    <Modal
+                        modalAction={this.state.modalAction}
+                        modal_status={this.state.modal_status}
+                        modal_icon={this.state.modal_icon}
+                        icon_color={this.state.icon_color}
+                        title={this.state.title}
+                        text={this.state.text}
+                        has_button={this.state.has_button}
+                        actionNameBack="Үгүй"
+                        actionNameDelete="Тийм"
+                    />
                 </th>
             </tr>
         )

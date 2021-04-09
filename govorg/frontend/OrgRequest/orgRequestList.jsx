@@ -1,7 +1,6 @@
 
 import React, { Component } from "react"
 
-import ModalAlert from "@utils/Modal/ModalAlert"
 import { PortalDataTable } from '@utils/DataTable/index'
 import MakeOronZai from './makeOronZai'
 import OpenMapModal from './openMapModal'
@@ -43,9 +42,6 @@ export default class OrgRequestList extends Component {
             package_id: null,
             feature_id: null,
             is_loading: false,
-            modal_alert_status: "closed",
-            title: '',
-            model_type_icon: '',
             refresh: false,
             талбарууд: [
                 {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': true},
@@ -63,7 +59,7 @@ export default class OrgRequestList extends Component {
                     "field": "theme_name",
                     "component": MakeOronZai,
                     'props': {
-                        'refreshData': (is_modal, title, model_type_icon) => this.refreshData(is_modal, title, model_type_icon),
+                        'refreshData': () => this.refreshData(),
                     }
                 },
                 {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
@@ -73,17 +69,13 @@ export default class OrgRequestList extends Component {
                 "title": 'Шийдвэрлэх',
                 'component': OpenMapModal,
                 'props': {
-                    'refreshData': (is_modal, title, model_type_icon) => this.refreshData(is_modal, title, model_type_icon),
+                    'refreshData': () => this.refreshData(),
                 },
             }],
             is_modal_request_open: false,
             custom_query: {}
         }
 
-        this.modalAlertOpen = this.modalAlertOpen.bind(this)
-        this.modalAlertClose = this.modalAlertClose.bind(this)
-        this.modalAlertCloseTime = this.modalAlertCloseTime.bind(this)
-        this.openModalMap = this.openModalMap.bind(this)
         this.refreshData = this.refreshData.bind(this)
         this.onChangeItems = this.onChangeItems.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
@@ -100,38 +92,8 @@ export default class OrgRequestList extends Component {
             })
     }
 
-    openModalMap(values) {
-        this.setState({ values })
-        this.setState({is_modal_request_open: true})
-    }
-
-    closeModalMap() {
-        this.setState({is_modal_request_open: false})
-    }
-
-    modalAlertOpen(title, model_type_icon){
-        this.setState({modal_alert_status: 'open', title, model_type_icon})
-        this.modalAlertCloseTime()
-    }
-
-    modalAlertClose(){
-        this.setState({ modal_alert_status: "closed", refresh: !this.state.refresh })
-        clearTimeout(this.state.timer)
-    }
-
-    modalAlertCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.modalAlertClose()
-        }, 2000)
-    }
-
-    refreshData(is_modal, title, model_type_icon){
-        if (is_modal) {
-            this.modalAlertOpen(title, model_type_icon)
-        }
-        else {
-            this.setState({ refresh: !this.state.refresh })
-        }
+    refreshData(){
+        this.setState({ refresh: !this.state.refresh })
     }
 
     onChangeItems(value, field, main_module) {
@@ -186,7 +148,7 @@ export default class OrgRequestList extends Component {
     }
 
     render() {
-        const {choices, packages, features, title, model_type_icon, modal_alert_status, modules} = this.state
+        const {choices, packages, features, modules} = this.state
         const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
         return (
             <div className="row">
@@ -296,12 +258,6 @@ export default class OrgRequestList extends Component {
                         custom_query={this.state.custom_query}
                     />
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalAlertClose()}
-                    status={modal_alert_status}
-                    title={title}
-                    model_type_icon={model_type_icon}
-                />
             </div>
         )
     }

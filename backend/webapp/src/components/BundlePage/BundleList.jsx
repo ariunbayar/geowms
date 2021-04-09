@@ -1,8 +1,6 @@
 import React, { Component } from "react"
 import {service} from './service'
 import Bundle from './Bundle'
-import {NavLink} from "react-router-dom"
-import ModalAlert from "../ModalAlert"
 
 export class BundleList extends Component {
 
@@ -11,15 +9,11 @@ export class BundleList extends Component {
         super(props)
         this.state = {
             bundle_list: [],
-            modal_alert_status: "closed",
-            timer: null,
             firt_item: {},
             firt_item_idx: null,
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
         this.onDrag = this.onDrag.bind(this)
         this.onDrop = this.onDrop.bind(this)
         this.onDragOver = this.onDragOver.bind(this)
@@ -41,27 +35,9 @@ export class BundleList extends Component {
         service.remove(id).then(({success}) => {
             if (success){
                 this.handleListUpdated()
-                this.setState({modal_alert_status: "open"})
             }
         })
         this.modalCloseTime()
-    }
-
-    modalClose(){
-        const org_level = this.props.match.params.level
-        this.setState({handleSaveIsLoad:false})
-        this.props.history.push( `/back/дэд-сан/`)
-        this.setState({modal_alert_status: "closed"})
-        clearTimeout(this.state.timer)
-    }
-
-    modalCloseTime(){
-        const org_level = this.props.match.params.level
-        this.state.timer = setTimeout(() => {
-            this.setState({handleSaveIsLoad:false})
-            this.props.history.push( `/back/дэд-сан/`)
-            this.setState({modal_alert_status: "closed"})
-        }, 2000)
     }
 
     onDrag(event, item, idx){
@@ -122,12 +98,6 @@ export class BundleList extends Component {
                             </div>
                         </div>
                     </div>
-                    <ModalAlert
-                        modalAction={() => this.modalClose()}
-                        status={this.state.modal_alert_status}
-                        title="Амжилттай хадгаллаа"
-                        model_type_icon = "success"
-                    />
                 </div>
             </div>
         )

@@ -4,7 +4,7 @@ import {NavLink} from "react-router-dom"
 import FormTable from './FormTable'
 import {service} from './service'
 import {Pagination} from '../../components/pagination/pagination'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class FormList extends Component {
@@ -20,15 +20,13 @@ export class FormList extends Component {
             currentPage: 1,
             msg: [],
             alert: false,
-            modal_alert_status: "closed",
-            timer: null,
+            modal_status: "closed",
         }
 
         this.paginate = this.paginate.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     paginate (page, query) {
@@ -58,28 +56,21 @@ export class FormList extends Component {
     handleRemove(id) {
         service.remove(id).then(({success, msg}) => {
             if (success){
-                this.setState({ msg, alert: success, alert: false, msg: [], modal_alert_status: 'open' })
-                this.modalCloseTime()
-            }else{
-                this.setState({ msg, alert: false })
+                this.setState({ msg: [] })
+                this.handleModalOpen()
+            } else {
                 setTimeout(() => {
-                    this.setState({ alert: false, msg: [] })
+                    this.setState({ msg: [] })
                 }, 3000);
             }
+            this.setState({ msg, alert: success })
         })
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
-        }, 3000);
-        this.paginate(1, "")
-    }
-
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.setState({modal_alert_status: "closed"})
-        this.paginate(1, "")
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -146,11 +137,15 @@ export class FormList extends Component {
                                 paginate = {this.paginate}
                                 searchQuery = {searchQuery}
                             />
-                            <ModalAlert
-                                modalAction={() => this.modalClose()}
-                                status={this.state.modal_alert_status}
+                            <Modal
+                                modal_status={this.state.modal_status}
+                                modal_icon='fa fa-check-circle'
+                                icon_color='success'
                                 title="Амжилттай устгалаа"
-                                model_type_icon = "success"
+                                text=''
+                                has_button={false}
+                                modalAction={null}
+                                modalClose={() => this.paginate(1, "")}
                             />
                         </div>
                     </div>

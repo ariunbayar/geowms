@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import {service} from '../service'
 import {QPay} from '../QPay/Qpay'
-import ModalAlert from '@utils/Modal/ModalAlert'
 import Modal from '@utils/Modal/Modal'
 import EmailModalForm from './EmailModalForm'
 import {Notif} from '@utils/Notification'
@@ -34,6 +33,8 @@ export class PolygonPurchase extends Component {
         this.addNotif = this.addNotif.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
         this.handleUserEmailCheck = this.handleUserEmailCheck.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidMount(){
@@ -49,6 +50,24 @@ export class PolygonPurchase extends Component {
                 this.addNotif('warning', info, 'exclamation')
             }
         }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
+    }
+
+    modalChange(modal_icon, icon_color, title, text, has_button) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+        })
+        this.handleModalOpen()
+
+    }
+
+    handleModalOpen() {
+        this.setState({ is_modal_open: 'open' }, () => {
+            this.setState({ is_modal_open: 'initial' })
+        })
     }
 
     addNotif(style, msg, icon){
@@ -74,14 +93,6 @@ export class PolygonPurchase extends Component {
 
     }
 
-    handleModalOpen(){
-        this.setState({ is_modal_open: 'open' })
-    }
-
-    handleModalClose(){
-        this.setState({ is_modal_open: 'closed' })
-    }
-
     handleFormModalOpen(){
         this.setState({ email_modal_status: 'open' })
     }
@@ -92,7 +103,16 @@ export class PolygonPurchase extends Component {
 
     handleUserEmailCheck(){
         service.userEmailCheck().then(({success}) => {
-            if(success) this.handleModalOpen()
+            if (success) {
+                this.modalChange(
+                    'fa fa-exclamation-circle',
+                    "warning",
+                    'Анхааруулга',
+                    'QPay-ээр төлбөр төлөхөд шимтгэл авахыг анхаарна уу!',
+                    true
+                )
+                this.handleModalOpen()
+            }
             else this.handleFormModalOpen()
         })
     }
@@ -113,6 +133,13 @@ export class PolygonPurchase extends Component {
     }
 
     qPayClose(is_success){
+        this.modalChange(
+            'fa fa-check-circle',
+            "success",
+            'Худалдан авалтын мэдээлэл',
+            'Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.',
+            false
+        )
         this.setState({ qpay_modal_is: false, is_modal_info_open: is_success })
     }
 
@@ -191,12 +218,14 @@ export class PolygonPurchase extends Component {
                         { is_modal_open &&
                             <Modal
                                 modalAction={() => this.handleQpay()}
-                                modalClose={() => this.handleModalClose()}
-                                text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
-                                title="Анхааруулга"
                                 actionNameDelete="Үргэлжлүүлэх"
                                 model_type_icon="warning"
-                                status={is_modal_open}
+                                modal_status={is_modal_open}
+                                modal_icon={this.state.modal_icon}
+                                icon_color={this.state.icon_color}
+                                title={this.state.title}
+                                text={this.state.text}
+                                has_button={this.state.has_button}
                             />
                         }
                         <EmailModalForm
@@ -227,12 +256,13 @@ export class PolygonPurchase extends Component {
 
             {
              is_modal_info_open &&
-                <ModalAlert
-                    model_type_icon='success'
-                    text='Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.'
-                    title="Худалдан авалтын мэдээлэл"
-                    status={this.state.status}
-                    modalAction={() => this.handleModalApproveClose()}
+                <Modal
+                    modal_status={is_modal_info_open}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    text={this.state.text}
+                    has_button={this.state.has_button}
                 />
             }
             <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>

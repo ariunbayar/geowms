@@ -2,7 +2,7 @@ import React, { Component } from "react"
 
 import { service } from "./service"
 import Rows from './Rows'
-import ModalAlert from "@utils/Modal/ModalAlert"
+import Modal from "@utils/Modal/Modal"
 
 
 export class List extends Component {
@@ -13,12 +13,12 @@ export class List extends Component {
             meta_data_list: [],
             alert: false,
             perms: props.perms,
-            modal_alert_status: "closed",
-            timer: null,
+            modal_status: "closed",
         }
 
         this.getAll = this.getAll.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     componentDidMount() {
@@ -35,19 +35,21 @@ export class List extends Component {
             })
     }
 
-    modalClose() {
-        clearTimeout(this.state.timer)
-        this.setState({ modal_alert_status: "closed" })
-    }
-
     handleRemove(id) {
         service
-            .metaDelete(id)
-            .then(({success}) => {
-                if (success) {
-                    this.getAll()
-                }
-            })
+        .metaDelete(id)
+        .then(({success}) => {
+            if (success) {
+                this.getAll()
+                this.handleModalOpen()
+            }
+        })
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render() {
@@ -88,11 +90,14 @@ export class List extends Component {
                             </tbody>
                         </table>
                     </div>
-                    <ModalAlert
-                        modalAction={() => this.modalClose()}
-                        status={this.state.modal_alert_status}
-                        title="Амжилттай устгалаа"
-                        model_type_icon="success"
+                    <Modal
+                        modal_status={this.state.modal_status}
+                        modal_icon='fa fa-check-circle'
+                        icon_color='success'
+                        title='Амжилттай устгалаа'
+                        text=''
+                        has_button={false}
+                        modalAction={null}
                     />
                 </div>
             </div>
