@@ -243,13 +243,11 @@ def get_all_table_names(request, payload):
 def save_to_ano_db_table(request, payload):
     ano_db_table_qs = AnotherDatabaseTable.objects
     payload['field_config'] = utils.json_dumps(payload['field_config'])
-    print(payload)
     insert_datas = {
         key: value
         for key, value in payload.items()
         if key != 'table_id'
     }
-    print(insert_datas)
     insert_datas['updated_by'] = request.user
     ano_db_table_qs.update_or_create(
         pk=payload['table_id'],
@@ -302,8 +300,6 @@ def _insert_to_inspire(table_name, connection_id, columns, feature_code):
             geom = _set_3d_dim(wkt)
             new_geo_id = _insert_mgeo_datas(feature_code, geom, db)
 
-            print(new_geo_id)
-
             row_datas = dict()
             property_ids = list()
             for field_name, property_id in columns.items():
@@ -311,6 +307,7 @@ def _insert_to_inspire(table_name, connection_id, columns, feature_code):
                 row_datas[property_id] = item[field_name]
 
             _insert_mdatas(new_geo_id, row_datas, feature_code, property_ids, db)
+
     rsp = {
         'success': True,
     }
@@ -409,8 +406,6 @@ def refresh_datas(request, connection_id):
         field_config = table.field_config.replace("'", '"')
         columns = utils.json_load(field_config)
         feature_code = table.feature_code
-
-        print(columns)
 
         _insert_to_inspire(table_name, connection_id, columns, feature_code)
 

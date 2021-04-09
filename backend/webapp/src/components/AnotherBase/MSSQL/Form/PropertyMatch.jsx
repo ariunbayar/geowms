@@ -165,7 +165,6 @@ class PropertyMatch extends Component {
 
     render() {
         const { fields, properties, table_id, default_values, columns } = this.state
-        console.log(columns);
         let default_values_keys = Object.keys(default_values)
         return (
             <div>
