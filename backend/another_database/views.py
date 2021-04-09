@@ -469,7 +469,15 @@ def update(request, pk):
     }
     another_data_base = get_object_or_404(AnotherDatabase, pk=pk)
     another_base_datas = AnotherDatabaseTable.objects.filter(another_database=another_data_base)
+    if not another_base_datas:
+        rsp = {
+            'success': False,
+            'all_count': 0,
+            'success_count': 0,
+            'prop_b_count': 0,
+        }
 
+        return JsonResponse(rsp)
     for another_base_data in another_base_datas:
         table_name = another_base_data.table_name
         feature_code = another_base_data.feature_code
