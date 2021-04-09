@@ -192,6 +192,7 @@ urlpatterns = [
         path('check-style-name/', geoserver_views.check_styles_name),
         path('style-data/', geoserver_views.get_style_data),
         path('create-style/', geoserver_views.create_style),
+        path('conver-sld-json/', geoserver_views.conver_sld_json),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

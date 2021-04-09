@@ -1,6 +1,9 @@
 import requests
 from requests.auth import HTTPBasicAuth
 
+import os
+from lxml import etree
+
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -443,3 +446,98 @@ def create_style(request, payload):
             'success': False,
             'info': 'Style үүсгэхэд алдаа гарлаа'
         })
+
+
+def parse_xml_to_json(xml):
+    response = []
+
+    for child in list(xml):
+        tag_name = etree.QName(child.tag)
+        tag_name = tag_name.localname
+        tag_attr = child.attrib.get('name')
+        if len(list(child)) > 0:
+            # if tag_attr:
+            #     tag_name = tag_attr
+            response.append({tag_name : parse_xml_to_json(child)})
+        else:
+            if tag_name == 'CssParameter':
+                tag_name = tag_attr
+            response.append({tag_name : child.text})
+    return response
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def conver_sld_json(request, payload):
+
+    hoho= payload.get('file_content')
+
+
+    tree = etree.fromstring(hoho.encode('utf-8'))
+    content_data= parse_xml_to_json(tree)
+    return JsonResponse({
+        'success': False,
+        'info': 'Style үүсгэхэд алдаа гарлаа'
+    })
+
+
+import os
+from lxml import etree
+from io import StringIO
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+tree = etree.parse(BASE_DIR + '/zoom_based_point.sld')
+
+root = tree.getroot()
+def parseXmlToJson(xml):
+    response = []
+
+    for child in list(xml):
+        tag_name = etree.QName(child.tag)
+        tag_name = tag_name.localname
+        tag_attr = child.attrib.get('name')
+        if len(list(child)) > 0:
+            if tag_attr:
+                tag_name = tag_attr
+            response.append({tag_name : parseXmlToJson(child)})
+        else:
+            if tag_name == 'CssParameter':
+                tag_name = tag_attr
+            response.append({tag_name : child.text})
+    return response
+
+
+content_data = parseXmlToJson(root)
+
+named_layer = content_data[0].get('NamedLayer')
+for i in named_layer:
+    name = i.get('Name')
+    user_style = i.get('UserStyle')
+    if user_style:
+        for style in user_style:
+            feature_type_style = style.get('FeatureTypeStyle')
+            style_title = style.get('style_title')
+            style_abstract = style.get('style_abstract')
+            if feature_type_style:
+                for rule in feature_type_style:
+                    style_rule = rule.get('Rule')
+                    if style_rule:
+                        for attr in style_rule:
+                            rule_name = attr.get('rule_name')
+                            max_range = attr.get('MaxScaleDenominator') or 0
+                            min_range = attr.get('MaxScaleDenominator') or 0
+                            point = attr.get('PolygonSymbolizer')
+                            point = attr.get('PolygonSymbolizer')
+                            point = attr.get('PolygonSymbolizer')
+                            polygon = attr.get('MaxScaleDenominator')
+                            lineString = attr.get('MaxScaleDenominator')
+                            stroke = attr.get('MaxScaleDenominator')
+                            fill = attr.get('MaxScaleDenominator')
+                            if stroke:
+                                for st in stroke:
+                                    style_color = attr.get('stroke')
+                                    style_size = attr.get('stroke-width')
+                                    geom_type = attr.get('stroke-dasharray')
+                            if fill:
+                                for f in fill:
+                                    fill_color = attr.get('fill')
+                                    color_opacity = attr.get('fill-opacity')

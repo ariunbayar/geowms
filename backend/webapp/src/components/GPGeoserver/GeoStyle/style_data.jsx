@@ -79,7 +79,7 @@ export default class ShowStyleData extends Component {
                                         >
                                             <option value="">--------------------------</option>
                                             {value.shape_types.map((data, idy) =>
-                                                <option value={data.geo_name}>{data.name}</option>
+                                                <option value={data.geo_name} key={idy}>{data.name}</option>
                                             )}
                                         </select>
                                     </div>

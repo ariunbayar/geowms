@@ -10,6 +10,7 @@ export class CreateStyle extends Component {
     constructor(props) {
         super(props)
         this.style_datas = []
+        this.file_content = {}
         this.state = {
             style_color: '#800000',
             rule_name: '',
@@ -45,11 +46,26 @@ export class CreateStyle extends Component {
             modal_status: 'closed',
             modal_icon: 'fa fa-check-circle',
             icon_color: 'success',
-            modal_text: ''
+            modal_text: '',
+            sld_file: {}
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.ReadFileContent = this.ReadFileContent.bind(this)
+    }
+
+    ReadFileContent(e) {
+        var file = e.target.files[0]
+        const reader = new FileReader()
+        reader.readAsText(file)
+        reader.onload = () => {
+            var file_content = []
+            file_content = reader.result
+            service.convertSldToJson(file_content).then((style_content) => {
+                console.log(style_content)
+            })
+        }
     }
 
     handleOnChange(e) {
@@ -112,7 +128,6 @@ export class CreateStyle extends Component {
                 this.setState({geom_type})
             }
         }
-
         this.setState({[e.target.name]:e.target.value})
     }
 
@@ -243,7 +258,7 @@ export class CreateStyle extends Component {
                 wellknowshape, div_angle, only_clicked,
                 single_select_datas, geom_type,
                 data_state, modal_status, modal_icon, icon_color,
-                modal_text
+                modal_text, sld_file
 
             } = this.state
             return (
@@ -282,7 +297,7 @@ export class CreateStyle extends Component {
                                 </input>
                             </div>
                             <div className="col-md-12 mb-2 d-flex">
-                                <label htmlFor="style_title" className="col-md-6 my-2">Товч тайлбар</label>
+                                <label htmlFor="style_abstract" className="col-md-6 my-2">Товч тайлбар</label>
                                 <textarea
                                     name='style_abstract'
                                     id='style_abstract'
@@ -292,6 +307,16 @@ export class CreateStyle extends Component {
                                     onChange={(e) => this.handleOnChange(e)}
                                 >
                                 </textarea>
+                            </div>
+                            <div className="col-md-12 mb-2 d-flex">
+                                <label htmlFor="sld_file" className="col-md-6 my-2">Sld file оруулах</label>
+                                <input
+                                    name='sld_file'
+                                    id='sld_file'
+                                    type="file"
+                                    className="form-control mt-2"
+                                    onChange={(e) => this.ReadFileContent(e)}
+                                />
                             </div>
                             <div className="col-md-12 d-flex">
                                 <div className="col-md-6">

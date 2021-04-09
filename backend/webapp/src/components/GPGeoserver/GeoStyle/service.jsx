@@ -2,10 +2,19 @@ import {getGetOptions,handleResponse,getPostOptions} from '../../../helpers/serv
 export const service ={
     checkStyleName,
     getStyleData,
-    createStyle
+    createStyle,
+    convertSldToJson
 }
 
 const prefix = '/back/geoserver/rest'
+
+function convertSldToJson(file_content) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ file_content }),
+    }
+    return fetch(`${prefix}/conver-sld-json/`, opts).then(handleResponse)
+}
 
 function checkStyleName(style_name) {
     const opts = {
