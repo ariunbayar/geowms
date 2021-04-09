@@ -123,7 +123,36 @@ export default class List extends Component {
                     null,
                     null
                 )
+            }else{
+                this.setState({is_loading: false})
+                this.modalChange(
+                    'fa fa-times-circle',
+                    null,
+                    'danger',
+                    'Алдаа гарлаа',
+                    `Мэдээлэл дутуу байна.`,
+                    false,
+                    '',
+                    '',
+                    null,
+                    null
+                )
             }
+
+        }).catch(() => {
+            this.setState({is_loading: false})
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'danger',
+                'Алдаа гарсан байна',
+                ``,
+                false,
+                '',
+                '',
+                null,
+                null
+            )
         })
     }
 

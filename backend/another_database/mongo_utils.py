@@ -158,9 +158,9 @@ def insert_data_from_mongo(feature_id, datas, field_names, search_values, unique
 
 
 def delete_data_from_mongo(unique_id):
-
-    m_datas = MDatas.objects.filter(created_by=unique_id)
-    m_datas.delete()
+    mdata_qs = MDatas.objects.filter(created_by=unique_id)
+    if mdata_qs:
+        mdata_qs.delete()
 
     return True
 
