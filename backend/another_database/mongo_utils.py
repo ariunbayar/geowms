@@ -107,12 +107,14 @@ def all_data_from_selected_table(cursor, table_name):
 
 
 def insert_data_from_mongo(feature_id, datas, field_names, search_values, unique_id):
+    property_bogolson_field_count = 0
     property_displays = property_of_feature(feature_id)
     m_datas_objs = list()
     for data in datas:
         for field_name in field_names:
             try:
                 if field_name['real_name']:
+                    property_bogolson_field_count += 1
 
                     dataaa = data[field_name['name_1']]
                     if field_name['name_2']:
@@ -148,10 +150,13 @@ def insert_data_from_mongo(feature_id, datas, field_names, search_values, unique
 
             except Exception:
                 pass
+    insert_success_count = len(m_datas_objs)
+    insert_all_count = len(datas)
+    property_bogolson_field_count
 
     MDatas.objects.bulk_create(m_datas_objs)
 
-    return True
+    return True, insert_all_count, insert_success_count, property_bogolson_field_count
 
 
 def delete_data_from_mongo(unique_id):

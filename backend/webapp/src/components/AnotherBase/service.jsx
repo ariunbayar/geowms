@@ -35,10 +35,10 @@ const mssql_config = {
         return fetch(`${prefix}/mssql/get-attributes/`, requestOptions).then(handleResponse)
     },
 
-    saveToDbTable(table_name, field_config, another_database_id, feature_code) {
+    saveToDbTable(table_name, field_config, another_database_id, feature_code, table_id) {
         const requestOptions = {
             ...getPostOptions(),
-            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code }),
+            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code, table_id }),
         }
         return fetch(`${prefix}/mssql/save-to-ano-db-table/`, requestOptions).then(handleResponse)
     },
@@ -49,6 +49,13 @@ const mssql_config = {
             body: JSON.stringify({ table_name, field_config, another_database_id, feature_code }),
         }
         return fetch(`${prefix}/mssql/insert-to-inspire/`, requestOptions).then(handleResponse)
+    },
+
+    tableRemove: function(root_id, id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/mongo/tables/remove/${root_id}/${id}/`, opts).then(handleResponse)
     },
 
     getProperties(feature_code) {

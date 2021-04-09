@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { service } from '../service';
+import BackButton from "@utils/Button/BackButton"
 
 class FieldForm extends Component {
 
@@ -37,8 +38,6 @@ class FieldForm extends Component {
 
                 </div>
             </div>
-            
-
         );
     }
 }
@@ -112,7 +111,7 @@ class Form extends Component {
         service.mongo_config.tableSave(id, table_id, field_names, selected_value, feature_value).then(({success}) => {
             if(success){
                 alert("Амжилттай хадгаллаа.")
-                this.props.history.push(`/back/another-base/`)
+                this.props.history.push(`/back/another-base/connection/mongo/${id}/list/`)
             }
         })
     }
@@ -137,7 +136,7 @@ class Form extends Component {
     }
 
     render() {
-        const { table_names, selected_value, features, feature_value, field_names, properties, table_id } = this.state
+        const { table_names, selected_value, features, feature_value, field_names, properties, table_id, id } = this.state
         return (
             <div className="card">
                 <div className="form-row card-body">
@@ -201,6 +200,11 @@ class Form extends Component {
                     </a>
                 </div>
                 }
+                <BackButton
+                    {...this.props}
+                    name={'Буцах'}
+                    navlink_url={`/back/another-base/connection/mongo/${id}/list/`}
+                />
             </div>
         );
     }

@@ -92,7 +92,7 @@ class MssqlForm extends Component {
     }
 
     render() {
-        const { table_names, selected_value, id, is_loading, feature_code, ano_db_table } = this.state
+        const { table_names, selected_value, id, is_loading, feature_code, ano_db_table, table_id } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -108,6 +108,7 @@ class MssqlForm extends Component {
                                 id="table_name"
                                 onChange={this.handleChange}
                                 value={selected_value}
+                                disabled={table_id ? true : false}
                             >
                                 <option value=""> -- Хүснэгтийн нэр сонгоно уу -- </option>
                                 {

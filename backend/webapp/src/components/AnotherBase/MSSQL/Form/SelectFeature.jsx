@@ -9,12 +9,13 @@ const SelectInput = (props) => {
                 className={`custom-select`}
                 onChange={(e) => {
                     if (e.target.value != "-1") {
-                        props.sendValue(props.name, props.datas[e.target.value][props.property])
+                        props.sendValue(props.name, props.datas[e.target.value][props.property], e.target.value)
                     }
                     else {
                         props.sendValue(props.name, [])
                     }
                 }}
+                value={props.value}
             >
                 <option value="-1"> -- Сонгоно уу -- </option>
                 {
@@ -37,10 +38,14 @@ class SelectFeature extends Component {
             features: [],
             feature_code: '',
             ano_db_table: props.ano_db_table,
+            theme_idx: '',
+            pack_idx: '',
+            feat_idx: '',
         }
 
         this.getThemeFeatures = this.getThemeFeatures.bind(this)
         this.getValue = this.getValue.bind(this)
+        this.setSelectValue = this.setSelectValue.bind(this)
     }
 
     componentDidMount() {
@@ -56,25 +61,48 @@ class SelectFeature extends Component {
             })
     }
 
-    getValue(name, value) {
+    getValue(name, value, idx) {
         this.setState({ [name]: value })
         if (name == 'feature_code') {
+            this.setState({ feat_idx: idx })
             this.props.sendFeatureCode(value)
         }
         if (name == 'packs') {
-            this.setState({ features: [] })
+            this.setState({ features: [], theme_idx: idx })
+        }
+        if (name == 'features') {
+            this.setState({ pack_idx: idx })
         }
     }
 
     componentDidUpdate(prevProps) {
         if (prevProps.ano_db_table != this.props.ano_db_table) {
             this.setState({ ano_db_table: this.props.ano_db_table })
-            console.log('prop', this.props.ano_db_table);
+            this.setSelectValue(this.props.ano_db_table);
         }
     }
 
+    setSelectValue(ano_db_table) {
+        let theme_idx
+        let pack_idx
+        let feat_idx
+        const { datas } = this.state
+        datas.map((theme, t_idx) => {
+            theme['children'].map((pack, p_idx) => {
+                pack['children'].map((feat, f_idx) => {
+                    if (feat['code'] == ano_db_table['feature_code']) {
+                        theme_idx = t_idx
+                        pack_idx = p_idx
+                        feat_idx = f_idx
+                    }
+                })
+            })
+        })
+        this.setState({ theme_idx, pack_idx, feat_idx, packs: datas[theme_idx]['children'], features: datas[theme_idx]['children'][pack_idx]['children'] })
+    }
+
     render() {
-        const { datas, packs, features, feature_code } = this.state
+        const { datas, packs, features, feature_code, theme_idx, pack_idx, feat_idx } = this.state
         return (
             <div className="form-row">
                 <SelectInput
@@ -84,6 +112,7 @@ class SelectFeature extends Component {
                     property='children'
                     length='4'
                     label="Theme"
+                    value={theme_idx}
                 />
                 <SelectInput
                     name="features"
@@ -92,6 +121,7 @@ class SelectFeature extends Component {
                     property='children'
                     length='4'
                     label="Package"
+                    value={pack_idx}
                 />
                 <SelectInput
                     name="feature_code"
@@ -100,6 +130,7 @@ class SelectFeature extends Component {
                     property='code'
                     length='4'
                     label="Feature"
+                    value={feat_idx}
                 />
             </div>
         );

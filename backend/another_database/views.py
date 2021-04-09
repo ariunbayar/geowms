@@ -405,7 +405,9 @@ def get_inspire_shatlal(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def get_mssql_tables_list(request, payload):
+def get_mssql_tables_list(request, payload, pk):
+
+    another_database = get_object_or_404(AnotherDatabase, pk=pk)
 
     def _get_feature_name(feature_code, item):
         if feature_code:
@@ -420,12 +422,21 @@ def get_mssql_tables_list(request, payload):
     хувьсах_талбарууд = [
         {"field": "feature_code", "action": _get_feature_name, "new_field": "feature_code"}
     ]
+    initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
+    if not initial_qs:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1
+        }
 
+        return JsonResponse(rsp)
     datatable = Datatable(
         model=AnotherDatabaseTable,
         payload=payload,
         оруулах_талбарууд=оруулах_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        initial_qs=initial_qs
     )
 
     items, total_page = datatable.get()
@@ -471,11 +482,13 @@ def update(request, pk):
         cursor = _mongo_settings(pk)
         datas = all_data_from_selected_table(cursor, table_name)
         delete_data_from_mongo(unique_id)
-
-        insert_data_from_mongo(feature_obj.feature_id, datas, field_config, search_values, unique_id)
+        insert_success, all_count, success_count, prop_b_count = insert_data_from_mongo(feature_obj.feature_id, datas, field_config, search_values, unique_id)
 
     rsp = {
         'success': True,
+        'all_count': all_count,
+        'success_count': success_count,
+        'prop_b_count': prop_b_count,
     }
 
     return JsonResponse(rsp)
