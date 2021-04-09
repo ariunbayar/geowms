@@ -7,13 +7,19 @@ import BackButton from "@utils/Button/BackButton"
 
 
 const validationSchema = Yup.object().shape({
-    name: Yup.string(),
+    name: Yup.string()
+        .required('хоосон байна!'),
     definition: Yup.string(),
-    msssql_server: Yup.string(),
-    msssql_port: Yup.string(),
-    msssql_username: Yup.string(),
-    msssql_password: Yup.string(),
-    msssql_database: Yup.string(),
+    msssql_server: Yup.string()
+        .required('хоосон байна!'),
+    msssql_port: Yup.string()
+        .required('хоосон байна!'),
+    msssql_username: Yup.string()
+        .required('хоосон байна!'),
+    msssql_password: Yup.string()
+        .required('хоосон байна!'),
+    msssql_database: Yup.string()
+        .required('хоосон байна!'),
 })
 
 
@@ -142,7 +148,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="name" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['name']}</p>
                                             </div>
                                             <div className="form-group col-md-6 text-wrap">
                                                 <label htmlFor="id_definition">Тайлбар</label>
@@ -152,7 +158,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="definition" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['definition']}</p>
                                             </div>
                                             <div className="form-group col-md-6 text-wrap">
                                                 <label htmlFor="id_msssql_server">Server IP</label>
@@ -162,7 +168,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="msssql_server" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['msssql_server']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_msssql_port">Server PORT</label>
@@ -172,7 +178,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="msssql_port" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['msssql_port']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_msssql_username">Username</label>
@@ -182,7 +188,7 @@ class ConnectionConfig extends Component {
                                                     className="form-control"
                                                     id="id_msssql_username"
                                                 />
-                                                <ErrorMessage name="msssql_username" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['msssql_username']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_msssql_password">Password</label>
@@ -192,7 +198,7 @@ class ConnectionConfig extends Component {
                                                     className="form-control"
                                                     id="id_msssql_password"
                                                 />
-                                                <ErrorMessage name="msssql_password" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['msssql_password']}</p>
                                             </div>
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="id_msssql_database">Database Name</label>
@@ -202,7 +208,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="msssql_database" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['msssql_database']}</p>
                                             </div>
                                         </div>
 

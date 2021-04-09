@@ -51,6 +51,13 @@ const mssql_config = {
         return fetch(`${prefix}/mssql/insert-to-inspire/`, requestOptions).then(handleResponse)
     },
 
+    tableRemove: function(root_id, id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/mongo/tables/remove/${root_id}/${id}/`, opts).then(handleResponse)
+    },
+
     getProperties(feature_code) {
         const requestOptions = {
             ...getGetOptions(),

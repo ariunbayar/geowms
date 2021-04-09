@@ -3,7 +3,7 @@ from main import utils
 from .models import AnotherDatabaseTable, AnotherDatabase
 
 import json
-from pymongo import MongoClient
+import pymongo
 from django.db import connections
 from bson.json_util import default
 
@@ -90,7 +90,7 @@ def _mongo_settings(pk):
     mongo_client_password = cinfigs.get('mongo_client_password')
     mongo_database = cinfigs.get('mongo_database')
 
-    client = MongoClient(mongo_client_host, 27017)
+    client = pymongo.MongoClient(mongo_client_host, 27017)
     cursor = client[mongo_database]
 
     return cursor
@@ -105,12 +105,14 @@ def all_data_from_selected_table(cursor, table_name):
 
 
 def insert_data_from_mongo(feature_id, datas, field_names, search_values, unique_id):
+    property_bogolson_field_count = 0
     property_displays = property_of_feature(feature_id)
     m_datas_objs = list()
     for data in datas:
         for field_name in field_names:
             try:
                 if field_name['real_name']:
+                    property_bogolson_field_count += 1
 
                     dataaa = data[field_name['name_1']]
                     if field_name['name_2']:
@@ -146,10 +148,13 @@ def insert_data_from_mongo(feature_id, datas, field_names, search_values, unique
 
             except Exception:
                 pass
+    insert_success_count = len(m_datas_objs)
+    insert_all_count = len(datas)
+    property_bogolson_field_count
 
     MDatas.objects.bulk_create(m_datas_objs)
 
-    return True
+    return True, insert_all_count, insert_success_count, property_bogolson_field_count
 
 
 def delete_data_from_mongo(unique_id):
@@ -158,3 +163,23 @@ def delete_data_from_mongo(unique_id):
     m_datas.delete()
 
     return True
+
+
+def mongo_check_connection(mongo_client_host, mongo_database):
+    errors = dict()
+    try:
+        client = pymongo.MongoClient(mongo_client_host, 27017)
+        client.server_info()
+    except pymongo.errors.ConnectionFailure:
+        errors['mongo_client_host'] = 'Уучлаарай холбогдож чадсангүй зөв оруулана уу.'
+        return False, errors
+    try:
+        cursor = client[mongo_database]
+        cursor = cursor.collection_names()
+        if not cursor:
+            errors['mongo_database'] = 'Уучлаарай ийм нэртэй database алга.'
+            return False, errors
+        return True, errors
+    except pymongo.errors.ConnectionFailure:
+        errors['mongo_database'] = 'Уучлаарай ийм нэртэй database алга.'
+        return False, errors

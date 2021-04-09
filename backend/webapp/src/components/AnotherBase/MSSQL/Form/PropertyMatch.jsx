@@ -153,7 +153,7 @@ class PropertyMatch extends Component {
                 this.props.setModal(
                     null,
                     '',
-                    'Холболтонд алдааг гарсан байна',
+                    'Холболтонд алдаа гарсан байна',
                     'fa fa-check-circle',
                     'danger',
                     false,
