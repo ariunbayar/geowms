@@ -1,7 +1,10 @@
 import React, { Component } from "react"
+
 import {service} from '../../service'
+
 import { PortalDataTable } from "@utils/DataTable"
 import Modal from "@utils/Modal/Modal"
+import BackButton from "@utils/Button/BackButton"
 
 export default class List extends Component {
 
@@ -106,6 +109,11 @@ export default class List extends Component {
                     status={modal_status}
                     modalClose={this.handleModalClose}
                     modalAction={(values) => this.handleRemove(values)}
+                />
+                <BackButton
+                    {...this.props}
+                    name={'Буцах'}
+                    navlink_url={`/back/another-base/`}
                 />
             </div>
         )

@@ -222,7 +222,7 @@ def remove(request, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def mongo_sables(request, pk):
+def mongo_tables(request, pk):
 
     feautures = []
     cursor = _mongo_settings(pk)
@@ -245,7 +245,7 @@ def mongo_sables(request, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def mongo_sables_save(request, payload, pk):
+def mongo_tables_save(request, payload, pk):
 
     another_database = get_object_or_404(AnotherDatabase, pk=pk)
     tableId = payload.get('tableId')
@@ -273,7 +273,7 @@ def mongo_sables_save(request, payload, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def mongo_sables_remove(request, root_id, pk):
+def mongo_tables_remove(request, root_id, pk):
 
     another_database = get_object_or_404(AnotherDatabase, pk=root_id)
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=pk, another_database=another_database)
@@ -288,7 +288,7 @@ def mongo_sables_remove(request, root_id, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def mongo_sables_detail(request, root_id, pk):
+def mongo_tables_detail(request, root_id, pk):
 
     another_database = get_object_or_404(AnotherDatabase, pk=root_id)
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=pk, another_database=another_database)
@@ -312,11 +312,11 @@ def mongo_sables_detail(request, root_id, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def mongo_sables_all(request, payload, pk):
+def mongo_tables_all(request, payload, pk):
     another_database = get_object_or_404(AnotherDatabase, pk=pk)
     def _get_feature_name(feature_code, item):
         feature = LFeatures.objects.filter(feature_code=feature_code).first()
-        return feature.feature_name or 'Хоосон'
+        return feature.feature_name if feature else 'Хоосон'
 
 
     оруулах_талбарууд = ['id', 'table_name', 'feature_code']

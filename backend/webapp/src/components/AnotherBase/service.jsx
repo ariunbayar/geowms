@@ -64,6 +64,13 @@ const mssql_config = {
         }
         return fetch(`${prefix}/get-inspire-shatlal/`, requestOptions).then(handleResponse)
     },
+
+    refreshData(connection_id) {
+        const requestOptions = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/mssql/refresh-mssql-datas/${connection_id}/`, requestOptions).then(handleResponse)
+    }
 }
 
 const mongo_config = {
