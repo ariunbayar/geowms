@@ -78,11 +78,9 @@ export default class List extends Component {
     }
 
     handleMongo(values){
-        alert("MONGODB")
         service.update(values.id).then(({success}) => {
             if (success) {
-                // this.setState({refresh: !this.state.refresh})
-                // this.handleModalClose()
+                alert("Амжилттай")
             }
         })
     }

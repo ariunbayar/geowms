@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 import { service } from '../service';
 
-import PropertyMatch from './PropertyMatch';
-
-
-
 class FieldForm extends Component {
 
     constructor(props) {
@@ -113,7 +109,10 @@ class Form extends Component {
     handleSave(){
         const {id, table_id, field_names, feature_value, selected_value} = this.state
         service.mongo_config.tableSave(id, table_id, field_names, selected_value, feature_value).then(({success}) => {
-            if(success) alert("Амжилттай хадгаллаа.")
+            if(success){
+                alert("Амжилттай хадгаллаа.")
+                this.props.history.push(`/back/another-base/`)
+            }
         })
     }
 
