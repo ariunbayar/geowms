@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {service} from './service'
 import { PortalDataTable } from "@utils/DataTable"
 import Modal from "../Modal"
+import Loader from "@utils/Loader"
 
 export default class List extends Component {
 
@@ -44,6 +45,7 @@ export default class List extends Component {
                     "action": (values) => this.handleRefreshData(values),
                 }
             ],
+            is_loading: false,
             refresh: true,
             modal_status: "closed",
             values: {}
@@ -70,8 +72,10 @@ export default class List extends Component {
     }
 
     handleMongo(values){
+        this.setState({is_loading: true})
         service.update(values.id).then(({success}) => {
             if (success) {
+                this.setState({is_loading: false})
                 alert("Амжилттай")
             }
         })
@@ -118,9 +122,13 @@ export default class List extends Component {
     }
 
     render() {
-        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status } = this.state
+        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, is_loading } = this.state
         return (
             <div className="row">
+                <Loader
+                    is_loading={is_loading}
+                    text={'Уншиж байна'}
+                />
                 <div className="col-lg-12">
                     <div className="card">
                         <div className="card-body">
