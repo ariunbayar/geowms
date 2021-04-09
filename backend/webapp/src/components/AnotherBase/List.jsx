@@ -68,13 +68,41 @@ export default class List extends Component {
     }
 
     handleMssql(values){
+        this.setState({is_loading: true})
         service
             .mssql_config
             .refreshData(values.id)
             .then(({success}) => {
                 if (success) {
-                    // this.setState({refresh: !this.state.refresh})
+                    this.setState({is_loading: false})
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        'success',
+                        'Амжилттай боллоо',
+                        ``,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
                 }
+            })
+            .catch(() => {
+                this.setState({is_loading: false})
+                this.modalChange(
+                    'fa fa-check-circle',
+                    null,
+                    'danger',
+                    'Алдаа гарсан байна',
+                    ``,
+                    false,
+                    '',
+                    '',
+                    null,
+                    null
+                )
             })
     }
 
