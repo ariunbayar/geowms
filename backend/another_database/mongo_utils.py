@@ -3,7 +3,7 @@ from main import utils
 from .models import AnotherDatabaseTable, AnotherDatabase
 
 import json
-from pymongo import MongoClient
+import pymongo
 from django.db import connections
 from bson.json_util import default
 
@@ -90,7 +90,7 @@ def _mongo_settings(pk):
     mongo_client_password = cinfigs.get('mongo_client_password')
     mongo_database = cinfigs.get('mongo_database')
 
-    client = MongoClient(mongo_client_host, 27017)
+    client = pymongo.MongoClient(mongo_client_host, 27017)
     cursor = client[mongo_database]
 
     return cursor
@@ -158,3 +158,23 @@ def delete_data_from_mongo(unique_id):
     m_datas.delete()
 
     return True
+
+
+def mongo_check_connection(mongo_client_host, mongo_database):
+    errors = dict()
+    try:
+        client = pymongo.MongoClient(mongo_client_host, 27017)
+        client.server_info()
+    except pymongo.errors.ConnectionFailure:
+        errors['mongo_client_host'] = 'Уучлаарай холбогдож чадсангүй зөв оруулана уу.'
+        return False, errors
+    try:
+        cursor = client[mongo_database]
+        cursor = cursor.collection_names()
+        if not cursor:
+            errors['mongo_database'] = 'Уучлаарай ийм нэртэй database алга.'
+            return False, errors
+        return True, errors
+    except pymongo.errors.ConnectionFailure:
+        errors['mongo_database'] = 'Уучлаарай ийм нэртэй database алга.'
+        return False, errors

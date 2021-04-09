@@ -7,13 +7,17 @@ import BackButton from "@utils/Button/BackButton"
 
 
 const validationSchema = Yup.object().shape({
-    name: Yup.string(),
+    name: Yup.string()
+        .required('хоосон байна!'),
     definition: Yup.string(),
-    mongo_engine: Yup.string(),
-    mongo_client_host: Yup.string(),
+    mongo_engine: Yup.string()
+        .required('хоосон байна!'),
+    mongo_client_host: Yup.string()
+        .required('хоосон байна!'),
     mongo_client_username: Yup.string(),
     mongo_client_password: Yup.string(),
-    mongo_database: Yup.string(),
+    mongo_database: Yup.string()
+        .required('хоосон байна!'),
 })
 
 
@@ -70,24 +74,23 @@ class ConnectionConfig extends Component {
         })
     }
 
-    handleSubmit(values, { setStatus, setValues }) {
+    handleSubmit(values, { setStatus, setValues, setErrors }) {
 
         setStatus('saving')
         service
             .mongo_config
             .save(values)
-            .then(({ success }) => {
+            .then(({ success, errors }) => {
 
                 if (success) {
                     setStatus('save_success')
-                    this.setState({ values })
                 } else {
+                    setErrors(errors)
                     return Promise.reject()
                 }
 
             })
             .catch(() => {
-                setValues(this.state.values)
                 setStatus('save_error')
             })
             .finally(() => {
@@ -133,7 +136,6 @@ class ConnectionConfig extends Component {
                         }) => {
                             return (
                                 <Form>
-                                    <fieldset>
                                         <div className="form-row">
                                             <div className="form-group col-md-6 text-wrap">
                                                 <label htmlFor="id_name">Нэр</label>
@@ -143,7 +145,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="name" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['name']}</p>
                                             </div>
                                             <div className="form-group col-md-6 text-wrap">
                                                 <label htmlFor="id_definition">Тайлбар</label>
@@ -153,7 +155,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="definition" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['definition']}</p>
                                             </div>
                                             <div className="form-group col-md-6 text-wrap">
                                                 <label htmlFor="id_mongo_engine">ENGINE</label>
@@ -163,7 +165,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="mongo_engine" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['mongo_engine']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_mongo_client_host">Server HOST</label>
@@ -173,7 +175,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="mongo_client_host" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['mongo_client_host']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_mongo_client_username">Username</label>
@@ -183,7 +185,7 @@ class ConnectionConfig extends Component {
                                                     className="form-control"
                                                     id="id_mongo_client_username"
                                                 />
-                                                <ErrorMessage name="mongo_client_username" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['mongo_client_username']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_mongo_client_password">Password</label>
@@ -193,7 +195,7 @@ class ConnectionConfig extends Component {
                                                     className="form-control"
                                                     id="id_mongo_client_password"
                                                 />
-                                                <ErrorMessage name="mongo_client_password" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['mongo_client_password']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_mongo_database">Database Name</label>
@@ -203,7 +205,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="mongo_database" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['mongo_database']}</p>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="id_port">Port</label>
@@ -231,7 +233,6 @@ class ConnectionConfig extends Component {
                                                 {status != 'saving' && 'Хадгалах' }
                                             </button>
 
-                                    </fieldset>
 
                                     { status == 'save_success' &&
                                         <div className="alert alert-icon-success alert-dismissible" role="alert">

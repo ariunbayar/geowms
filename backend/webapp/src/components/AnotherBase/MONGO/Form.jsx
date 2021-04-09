@@ -13,7 +13,7 @@ class FieldForm extends Component {
     render() {
         const { data, properties, data_key } = this.props
         return (
-            <div className="row mb-1">
+            <div className="row mb-1 border-bottom pb-1">
                 <div className="col-2">
                     {data.name_1}
                 </div>
@@ -37,6 +37,7 @@ class FieldForm extends Component {
 
                 </div>
             </div>
+            
 
         );
     }
@@ -175,6 +176,18 @@ class Form extends Component {
                 </div>
                 {(field_names && feature_value && properties && field_names.length > 0)  &&
                 <div className="card-body">
+                    <div className="row mb-1 border-bottom pb-1">
+                        <div className="col-2">
+                            Json obj нэр
+                        </div>
+                        <div className="col-2">
+
+                            Json obj доторх Json obj нэр
+                        </div>
+                        <div className="col-4">
+                            property сонгох
+                        </div>
+                    </div>
                     {field_names.map((data, idx) =>
                         <FieldForm
                             data_key={idx}

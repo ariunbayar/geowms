@@ -116,6 +116,7 @@ export default class ConfigEmail extends Component {
                             isValid,
                             dirty,
                         }) => {
+                            console.log(errors)
                             return (
                                 <Form>
                                     <fieldset disabled={ !is_editing }>

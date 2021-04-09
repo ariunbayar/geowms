@@ -21,7 +21,8 @@ from .mongo_utils import (
     mogno_db_collection_field_names,
     insert_data_from_mongo,
     all_data_from_selected_table,
-    delete_data_from_mongo
+    delete_data_from_mongo,
+    mongo_check_connection
 )
 from backend.inspire.models import LPackages, LFeatures
 
@@ -103,6 +104,14 @@ def mongo_save(request, payload):
         'mongo_client_username': payload.get('mongo_client_username'),
         'mongo_client_password': payload.get('mongo_client_password'),
     }
+
+    check_connection, errors = mongo_check_connection(connection['mongo_client_host'], connection['mongo_database'])
+    if not check_connection:
+        rsp = {
+            'success': False,
+            'errors': errors
+        }
+        return JsonResponse(rsp)
 
     connection = utils.json_dumps(connection)
     db_type = AnotherDatabase.MONGODB
