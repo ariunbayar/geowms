@@ -14,7 +14,7 @@ from backend.dedsanbutets import views as dedsan_butets
 import backend.gis.views
 from backend.geoserver import views as geoserver_views
 from backend.another_database import views as geoserver_another_database
-from backend.another_database import mssql as mssql_views
+from backend.another_database import mssql_views as mssql_views
 
 app_name = 'backend'
 urlpatterns = [

@@ -4,7 +4,7 @@ import { service } from '../../service';
 
 
 const Match = (props) => {
-
+    const is_display_value_types = ['text', 'multi-text', 'link', 'boolean']
     return (
         <div>
             <label htmlFor="">{props.column_name}: </label>
@@ -19,6 +19,8 @@ const Match = (props) => {
                 <option value=""> -- Property Сонгоно уу -- </option>
                 {
                     props.properties.map((prop, idx) =>
+                        is_display_value_types.includes(prop.value_type_id)
+                        &&
                         <option key={idx} value={prop.property_id}>{prop.data_type_name}:  {prop.property_name}</option>
                     )
                 }
@@ -51,12 +53,12 @@ class PropertyMatch extends Component {
         this.saveMatch = this.saveMatch.bind(this)
     }
 
-    componentDidMount() {
-        const { feature_code, ano_db_table } = this.state
-        if (ano_db_table.length === 0) {
-            this.getProperties(feature_code)
-        }
-    }
+    // componentDidMount() {
+    //     const { feature_code, ano_db_table } = this.state
+    //     if (Object.keys(ano_db_table).length === 0) {
+    //         this.getProperties(feature_code)
+    //     }
+    // }
 
     getProperties(feature_code, ano_db_table) {
         service
@@ -64,7 +66,7 @@ class PropertyMatch extends Component {
             .getProperties(feature_code)
             .then(({ success, properties }) => {
                 if (success) {
-                    if (ano_db_table) {
+                    if (Object.keys(ano_db_table).length > 0) {
                         const default_values = this.parseString(ano_db_table['field_config'])
                         this.setState({ default_values, columns: default_values, feature_code, properties })
                     }
@@ -82,11 +84,15 @@ class PropertyMatch extends Component {
         }
         if (prevProps.feature_code != this.props.feature_code) {
             this.setState({ feature_code: this.props.feature_code })
-            this.getProperties(this.props.feature_code)
+            if (this.props.feature_code) {
+                this.getProperties(this.props.feature_code, this.props.ano_db_table)
+            }
         }
         if (prevProps.ano_db_table != this.props.ano_db_table) {
             this.setState({ ano_db_table: this.props.ano_db_table })
-            this.setProperties(this.props.ano_db_table)
+            if (this.props.ano_db_table) {
+                this.setProperties(this.props.ano_db_table)
+            }
         }
     }
 
@@ -130,9 +136,12 @@ class PropertyMatch extends Component {
     saveMatch() {
         this.props.setLoading(true)
         const { table_name, columns, connection_id, feature_code, table_id } = this.state
+        let tb_id
+        if (table_id) tb_id = table_id
+        if (!table_id) tb_id = null
         service
             .mssql_config
-            .saveToDbTable(table_name, columns, connection_id, feature_code, table_id)
+            .saveToDbTable(table_name, columns, connection_id, feature_code, tb_id)
             .then(({ success }) => {
                 if (success) {
                     this.props.setLoading(false)
@@ -193,7 +202,7 @@ class PropertyMatch extends Component {
                 {
                     fields.map((field, idx) =>
                         default_values_keys.length > 0
-                        ?
+                        &&
                             !default_values_keys.includes(field)
                             &&
                                 <Match key={idx}
@@ -201,12 +210,6 @@ class PropertyMatch extends Component {
                                     properties={properties}
                                     sendValue={this.getValue}
                                 />
-                        :
-                            <Match key={idx}
-                                column_name={field}
-                                properties={properties}
-                                sendValue={this.getValue}
-                            />
                     )
                 }
                 {

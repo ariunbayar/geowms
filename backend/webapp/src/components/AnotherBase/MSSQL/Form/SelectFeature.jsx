@@ -78,7 +78,9 @@ class SelectFeature extends Component {
     componentDidUpdate(prevProps) {
         if (prevProps.ano_db_table != this.props.ano_db_table) {
             this.setState({ ano_db_table: this.props.ano_db_table })
-            this.setSelectValue(this.props.ano_db_table);
+            if (Object.keys(this.props.ano_db_table).length > 0) {
+                this.setSelectValue(this.props.ano_db_table);
+            }
         }
     }
 
