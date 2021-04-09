@@ -480,11 +480,13 @@ def update(request, pk):
         cursor = _mongo_settings(pk)
         datas = all_data_from_selected_table(cursor, table_name)
         delete_data_from_mongo(unique_id)
-
-        insert_data_from_mongo(feature_obj.feature_id, datas, field_config, search_values, unique_id)
+        insert_success, all_count, success_count, prop_b_count = insert_data_from_mongo(feature_obj.feature_id, datas, field_config, search_values, unique_id)
 
     rsp = {
         'success': True,
+        'all_count': all_count,
+        'success_count': success_count,
+        'prop_b_count': prop_b_count,
     }
 
     return JsonResponse(rsp)
