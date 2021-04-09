@@ -403,7 +403,9 @@ def get_inspire_shatlal(request):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def get_mssql_tables_list(request, payload):
+def get_mssql_tables_list(request, payload, pk):
+
+    another_database = get_object_or_404(AnotherDatabase, pk=pk)
 
     def _get_feature_name(feature_code, item):
         if feature_code:
@@ -418,12 +420,21 @@ def get_mssql_tables_list(request, payload):
     хувьсах_талбарууд = [
         {"field": "feature_code", "action": _get_feature_name, "new_field": "feature_code"}
     ]
+    initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
+    if not initial_qs:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1
+        }
 
+        return JsonResponse(rsp)
     datatable = Datatable(
         model=AnotherDatabaseTable,
         payload=payload,
         оруулах_талбарууд=оруулах_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        initial_qs=initial_qs
     )
 
     items, total_page = datatable.get()

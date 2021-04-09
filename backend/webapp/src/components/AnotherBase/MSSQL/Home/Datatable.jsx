@@ -12,7 +12,7 @@ export default class List extends Component {
         super(props)
         this.state = {
             id: props.match.params.id,
-            жагсаалтын_холбоос: '/back/another-database/mssql/tables/',
+            жагсаалтын_холбоос: `/back/another-database/mssql/tables/${props.match.params.id}/`,
             талбарууд: [
                 {'field': 'table_name', "title": 'Хүснэгтийн нэр'},
                 {'field': 'feature_code', "title": 'Feature'},
@@ -26,24 +26,13 @@ export default class List extends Component {
                     'fa fa-table text-success',
                     "action": (values) => this.goLink(values),
                 },
-                // {
-                //     "title": 'Засах',
-                //     "text": '', "icon":
-                //     'fa fa-pencil-square-o text-success',
-                //     "action": (values) => this.goLink(values),
-                // },
-                // {
-                //     "title": 'Устгах',
-                //     "text": '',
-                //     "icon": 'fa fa-trash-o text-danger',
-                //     "action": (values) => this.handleRemoveAction(values),
-                // },
-                // {
-                //     "title": 'Устгах',
-                //     "text": '',
-                //     "icon": 'fa fa-car text-danger',
-                //     "action": (values) => this.handleRefreshData(values),
-                // }
+                {
+                    "title": 'Устгах',
+                    "text": '',
+                    "icon": 'fa fa-trash-o text-danger',
+                    "action": (values) => this.handleRemoveAction(values),
+                },
+
             ],
             refresh: true,
             modal_status: "closed",
