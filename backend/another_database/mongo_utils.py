@@ -40,14 +40,15 @@ def mogno_db_collection_names(cursor):
 def _set_obj(cursor):
     array = []
     for name, value in cursor.items():
-        data_objs = {"real_name": ""}
-        data_objs['name_1'] = name
-
         if isinstance(value, dict):
             for na, val in value.items():
-                data_objs['name_2'] = na
-                array.append(data_objs)
+                data_objs1 = {"real_name": ""}
+                data_objs1['name_1'] = name
+                data_objs1['name_2'] = na
+                array.append(data_objs1)
         else:
+            data_objs = {"real_name": ""}
+            data_objs['name_1'] = name
             data_objs["name_2"] = ""
             array.append(data_objs)
 
@@ -59,9 +60,6 @@ def mogno_db_collection_field_names(cursor, name):
     cursor = cursor.find_one()
     names_array = []
     names_array = _set_obj(cursor)
-
-
-    # print(json.dumps(names_array))
     return names_array
 
 
@@ -160,9 +158,9 @@ def insert_data_from_mongo(feature_id, datas, field_names, search_values, unique
 
 
 def delete_data_from_mongo(unique_id):
-
-    m_datas = MDatas.objects.filter(created_by=unique_id)
-    m_datas.delete()
+    mdata_qs = MDatas.objects.filter(created_by=unique_id)
+    if mdata_qs:
+        mdata_qs.delete()
 
     return True
 

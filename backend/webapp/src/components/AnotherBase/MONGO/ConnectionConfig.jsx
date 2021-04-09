@@ -217,7 +217,7 @@ class ConnectionConfig extends Component {
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <ErrorMessage name="mongo_port" component="div" className="invalid-feedback" />
+                                                <p className="text-danger">{errors['mongo_port']}</p>
                                             </div>
                                         </div>
 

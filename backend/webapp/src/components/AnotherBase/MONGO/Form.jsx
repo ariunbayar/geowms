@@ -31,7 +31,7 @@ class FieldForm extends Component {
                     <option> -- Property Сонгоно уу -- </option>
                     {
                         properties.map((prop, idx) =>
-                            <option key={idx} value={prop.property_id}>{prop.property_name}</option>
+                            <option key={idx} value={prop.property_id}>{prop.data_type_name}: {prop.property_name}</option>
                         )
                     }
                 </select>
@@ -79,7 +79,7 @@ class Form extends Component {
                     feature_value: form_datas.feature_code,
                     field_names: form_datas.field_config,
                 })
-                this.getProperties()
+                this.getProperties(form_datas.feature_code)
 
             }
         })
@@ -116,10 +116,10 @@ class Form extends Component {
         })
     }
 
-    getProperties(selected_value) {
+    getProperties(feature_code) {
         service
             .mssql_config
-            .getProperties()
+            .getProperties(feature_code)
             .then(({ success, properties }) => {
                 if (success) {
                     this.setState({ properties })

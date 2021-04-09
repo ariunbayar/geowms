@@ -7,6 +7,7 @@ const SelectInput = (props) => {
             <label htmlFor={props.name}>{props.label}</label>
             <select name="" id={props.name}
                 className={`custom-select`}
+                disabled={props.disabled}
                 onChange={(e) => {
                     if (e.target.value != "-1") {
                         props.sendValue(props.name, props.datas[e.target.value][props.property], e.target.value)
@@ -41,6 +42,7 @@ class SelectFeature extends Component {
             theme_idx: '',
             pack_idx: '',
             feat_idx: '',
+            table_id: props.match.params.table_id,
         }
 
         this.getThemeFeatures = this.getThemeFeatures.bind(this)
@@ -104,7 +106,7 @@ class SelectFeature extends Component {
     }
 
     render() {
-        const { datas, packs, features, feature_code, theme_idx, pack_idx, feat_idx } = this.state
+        const { datas, packs, features, feature_code, theme_idx, pack_idx, feat_idx, table_id } = this.state
         return (
             <div className="form-row">
                 <SelectInput
@@ -115,6 +117,7 @@ class SelectFeature extends Component {
                     length='4'
                     label="Theme"
                     value={theme_idx}
+                    disabled={table_id ? true : false}
                 />
                 <SelectInput
                     name="features"
@@ -124,6 +127,7 @@ class SelectFeature extends Component {
                     length='4'
                     label="Package"
                     value={pack_idx}
+                    disabled={table_id ? true : false}
                 />
                 <SelectInput
                     name="feature_code"
@@ -133,6 +137,7 @@ class SelectFeature extends Component {
                     length='4'
                     label="Feature"
                     value={feat_idx}
+                    disabled={table_id ? true : false}
                 />
             </div>
         );

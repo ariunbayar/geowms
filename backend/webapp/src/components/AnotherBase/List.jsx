@@ -123,7 +123,36 @@ export default class List extends Component {
                     null,
                     null
                 )
+            }else{
+                this.setState({is_loading: false})
+                this.modalChange(
+                    'fa fa-times-circle',
+                    null,
+                    'danger',
+                    'Алдаа гарлаа',
+                    `Мэдээлэл дутуу байна.`,
+                    false,
+                    '',
+                    '',
+                    null,
+                    null
+                )
             }
+
+        }).catch(() => {
+            this.setState({is_loading: false})
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'danger',
+                'Алдаа гарсан байна',
+                ``,
+                false,
+                '',
+                '',
+                null,
+                null
+            )
         })
     }
 
@@ -147,7 +176,23 @@ export default class List extends Component {
         const {values} = this.state
         service.remove(values.id).then(({success}) => {
             if (success) {
-                this.setState({refresh: !this.state.refresh})
+                this.setState(
+                    {refresh: !this.state.refresh},
+                    () => {
+                        this.modalChange(
+                            'fa fa-check-circle',
+                            null,
+                            'success',
+                            'Амжилттай устгалаа',
+                            '',
+                            false,
+                            '',
+                            '',
+                            null,
+                            null
+                        )
+                    }
+                )
             }
         })
     }
@@ -161,11 +206,11 @@ export default class List extends Component {
     handleRemoveAction(values){
         this.setState({values})
         this.modalChange(
-            'fa fa-exclamation-triangle',
+            'fa fa-exclamation-circle',
             null,
             'warning',
             'Тохиргоог устгах',
-            `Та "${values.table_name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+            `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
             true,
             '',
             '',
