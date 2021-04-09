@@ -1,10 +1,12 @@
 import pyodbc
+import datetime
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.views.decorators.http import require_POST, require_GET
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
 from django.db import connections
+from django.shortcuts import get_object_or_404
 
 from backend.inspire.models import LFeatures, LPackages, MGeoDatas
 from backend.inspire.models import MDatas
@@ -247,14 +249,7 @@ def save_to_ano_db_table(request, payload):
     return True
 
 
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def insert_to_inspire(request, payload):
-    table_name = payload.get('table_name')
-    connection_id = payload.get('another_database_id')
-    columns = payload.get("columns")
-    feature_code = payload.get("feature_code")
+def _insert_to_inspire(table_name, connection_id, columns, feature_code):
     mssql_settings, db = _get_settings(connection_id)
 
     fields = list()
@@ -371,8 +366,35 @@ def get_properties(request, feature_code):
     return JsonResponse(rsp)
 
 
-# def _delete_mgeo_mdata(feature_code='BU_BB_B'):
-#     # MGeoDatas.objects.filter(geo_id__istartswith=feature_code).delete()
-#     mdata = MDatas.objects.filter(geo_id__istartswith=feature_code)
-#     mdata.delete()
-# _delete_mgeo_mdata()
+def _delete_mgeo_mdata(unique_id):
+    MGeoDatas.objects.filter(modified_by=unique_id).delete()
+    MDatas.objects.filter(modified_by=unique_id).delete()
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def refresh_datas(request, connection_id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=connection_id)
+    ano_db_tablesqs = AnotherDatabaseTable.objects
+    ano_db_tablesqs = ano_db_tablesqs.filter(another_database=ano_db)
+    for table in ano_db_tablesqs:
+        table_name = table.table_name
+        connection_id = ano_db.id
+
+        field_config = table.field_config.replace("'", '"')
+        columns = utils.json_load(field_config)
+        feature_code = table.feature_code
+        unique_id = ano_db.unique_id
+
+        _delete_mgeo_mdata(unique_id)
+        _insert_to_inspire(table_name, connection_id, columns, feature_code)
+
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)

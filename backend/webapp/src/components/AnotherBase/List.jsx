@@ -66,7 +66,15 @@ export default class List extends Component {
     }
 
     handleMssql(values){
-        alert("MSSQL")
+        service
+            .mssql_config
+            .refreshData(values.id)
+            .then(({success}) => {
+                if (success) {
+                    // this.setState({refresh: !this.state.refresh})
+                    // this.handleModalClose()
+                }
+            })
     }
 
     handleMongo(values){
