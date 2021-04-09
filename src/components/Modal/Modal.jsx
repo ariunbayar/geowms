@@ -64,6 +64,7 @@ export default class Modal extends Component {
                 modal_bg={ this.state.modal_bg }
                 icon_color={ this.state.icon_color }
                 title={ this.state.title }
+                text={ this.state.text }
                 has_button={ this.state.has_button }
                 actionNameBack={ this.state.actionNameBack }
                 actionNameDelete={ this.state.actionNameDelete }
