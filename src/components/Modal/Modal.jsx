@@ -13,6 +13,65 @@ export default class Modal extends Component {
         this.handleProceed = this.handleProceed.bind(this)
     }
 
+    /*
+        props-оор дамжуулах утгууд:
+            Заавал өгөх утгууд:
+                modal_status ---> анхны утга closed хааж нээхдээ initial, open
+            Нэмэлт:
+                modal_icon
+                icon_color
+                title
+                text
+                has_button ---> 2 button-г ашиглах уу (true, false)
+                modal_bg ---> background color
+                actionNameBack ---> Үгүй гэдэг утгыг солих
+                actionNameDelete ---> Тийм гэдэг утгыг солих
+                modalClose ---> x товч дарж modal хаахад хийж болох үйлдлүүд
+                modalAction ---> Тийм товч дарж хийж болох үйлдлүүд
+
+        // import:
+            import Modal from "@utils/Modal/Modal"
+
+        // Modal open function:
+            handleModalOpen() {
+                this.setState({ modal_status: 'open' }, () => {
+                    this.setState({ modal_status: 'initial' })
+                })
+            }
+
+        // Modal default value function(Хэрэв has_button==false байвал ModalAlert горимоор ажиллана):
+            modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+                this.setState(
+                    {
+                        modal_icon,
+                        modal_bg,
+                        icon_color,
+                        title,
+                        text,
+                        has_button,
+                        actionNameBack,
+                        actionNameDelete,
+                        modalAction,
+                        modalClose,
+                    },
+                    () => this.handleModalOpen()
+                )
+            }
+        // Modal component value
+            <Modal
+                modal_status={ this.state.modal_status }
+                modal_icon={ this.state.modal_icon }
+                modal_bg={ this.state.modal_bg }
+                icon_color={ this.state.icon_color }
+                title={ this.state.title }
+                has_button={ this.state.has_button }
+                actionNameBack={ this.state.actionNameBack }
+                actionNameDelete={ this.state.actionNameDelete }
+                modalAction={ this.state.modalAction }
+                modalClose={ this.state.modalClose }
+            />
+    */
+
     componentDidMount() {
         if (this.state.modal_status == 'initial') {
             this.handleOpen()
@@ -89,7 +148,7 @@ export default class Modal extends Component {
                                 }
                             </div>
                             <div className="d-flex justify-content-center">
-                                <h5 >{this.props.title}</h5>
+                                <h5 >{ this.props.title && this.props.title }</h5>
                             </div>
                             <div className="modal-body text-center text-wrap ml-2 mr-2 text-justify">
                                 {

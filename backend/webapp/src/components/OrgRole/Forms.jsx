@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import {NavLink} from "react-router-dom"
 import { Formik, Form, Field, ErrorMessage, validateYupSchema} from 'formik'
 import {validationSchema} from './validationSchema'
-import ModalAlert from "../ModalAlert"
+import Modal from "@utils/Modal/Modal"
 import {service} from "./service"
 
 
@@ -15,31 +15,33 @@ export class Forms extends Component {
                 'name': '',
                 'description': ''
             },
-            modal_alert_status: "closed",
-            title: '',
-            icon: '',
-            timer: null,
-
+            modal_status: 'closed',
         }
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
-        this.modalClose = this.modalClose.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
 
     }
     handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
         setStatus('checking')
         setSubmitting(true)
+
         service.createPerm(values).then(({success, errors}) => {
             if(success){
                 setStatus('saved')
                 setSubmitting(false)
-                this.setState({
-                    modal_alert_status: "open",
-                    title: 'Амжилттай хадгаллаа',
-                    icon: 'success'
-                })
-                this.modalCloseTime()
+                this.modalChange(
+                    'fa fa-check-circle',
+                    null,
+                    'success',
+                    'Амжилттай хадгаллаа',
+                    '',
+                    false,
+                    '',
+                    '',
+                    null,
+                    () => this.props.history.push(`/back/org-role/`)
+                )
             } else {
                 setSubmitting(false)
                 setErrors(errors)
@@ -48,15 +50,28 @@ export class Forms extends Component {
 
     }
 
-    modalCloseTime(){
-        this.state.timer = setTimeout(() => {
-            this.props.history.push(`/back/org-role/`)
-        }, 2000)
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
-    modalClose(){
-        clearTimeout(this.state.timer)
-        this.props.history.push(`/back/org-role/`)
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction=null, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
     }
 
     render() {
@@ -139,11 +154,17 @@ export class Forms extends Component {
                         </div>
                     </div>
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title={this.state.title}
-                    model_type_icon = {this.state.icon}
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
                 />
             </div>
         )
