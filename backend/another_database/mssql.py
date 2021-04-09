@@ -131,7 +131,7 @@ def _insert_mgeo_datas(feature_code, geom, db):
         geo_id=new_geo_id,
         geo_data=geom,
         feature_id=feature.feature_id,
-        modified_by=db.unique_id
+        created_by=db.unique_id
     )
     return new_geo.geo_id
 
@@ -150,7 +150,7 @@ def _insert_mdatas(geo_id, row_datas, feature_code, property_ids, db):
                     geo_id=geo_id,
                     **data,
                     **mdata_value,
-                    modified_by=db.unique_id
+                    created_by=db.unique_id
                 )
 
 
@@ -242,11 +242,25 @@ def get_all_table_names(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def save_to_ano_db_table(request, payload):
     ano_db_table_qs = AnotherDatabaseTable.objects
-    ano_db_table_qs.create(
-        **payload,
-        created_by=request.user,
+    payload['field_config'] = utils.json_dumps(payload['field_config'])
+    print(payload)
+    insert_datas = {
+        key: value
+        for key, value in payload.items()
+        if key != 'table_id'
+    }
+    print(insert_datas)
+    insert_datas['updated_by'] = request.user
+    ano_db_table_qs.update_or_create(
+        pk=payload['table_id'],
+        defaults={
+            **insert_datas,
+        }
     )
-    return True
+    rsp = {
+        'success': True
+    }
+    return JsonResponse(rsp)
 
 
 def _insert_to_inspire(table_name, connection_id, columns, feature_code):
@@ -256,7 +270,7 @@ def _insert_to_inspire(table_name, connection_id, columns, feature_code):
 
     objectid = 'OBJECTID'
 
-    fields = [column for column in columns.values()]
+    fields = [column for column in columns.keys()]
     fields.append(objectid)
 
     select_sql = """
@@ -288,9 +302,11 @@ def _insert_to_inspire(table_name, connection_id, columns, feature_code):
             geom = _set_3d_dim(wkt)
             new_geo_id = _insert_mgeo_datas(feature_code, geom, db)
 
+            print(new_geo_id)
+
             row_datas = dict()
             property_ids = list()
-            for property_id, field_name in columns.items():
+            for field_name, property_id in columns.items():
                 property_ids.append(property_id)
                 row_datas[property_id] = item[field_name]
 
@@ -367,8 +383,12 @@ def get_properties(request, feature_code):
 
 
 def _delete_mgeo_mdata(unique_id):
-    MGeoDatas.objects.filter(modified_by=unique_id).delete()
-    MDatas.objects.filter(modified_by=unique_id).delete()
+    mgeo_qs = MGeoDatas.objects.filter(created_by=unique_id)
+    if mgeo_qs:
+        mgeo_qs.delete()
+    mdata_qs = MDatas.objects.filter(created_by=unique_id)
+    if mdata_qs:
+        mdata_qs.delete()
 
 
 @require_GET
@@ -378,6 +398,10 @@ def refresh_datas(request, connection_id):
     ano_db = get_object_or_404(AnotherDatabase, pk=connection_id)
     ano_db_tablesqs = AnotherDatabaseTable.objects
     ano_db_tablesqs = ano_db_tablesqs.filter(another_database=ano_db)
+
+    unique_id = ano_db.unique_id
+    _delete_mgeo_mdata(unique_id)
+
     for table in ano_db_tablesqs:
         table_name = table.table_name
         connection_id = ano_db.id
@@ -385,9 +409,9 @@ def refresh_datas(request, connection_id):
         field_config = table.field_config.replace("'", '"')
         columns = utils.json_load(field_config)
         feature_code = table.feature_code
-        unique_id = ano_db.unique_id
 
-        _delete_mgeo_mdata(unique_id)
+        print(columns)
+
         _insert_to_inspire(table_name, connection_id, columns, feature_code)
 
     ano_db.database_updated_at = datetime.datetime.now()
