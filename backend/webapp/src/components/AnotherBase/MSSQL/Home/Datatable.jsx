@@ -44,7 +44,7 @@ export default class List extends Component {
     }
 
     goLink(values){
-        this.props.history.push(`/back/another-base/connection/mssql/${values.id}/${values.another_database_id}/update/`)
+        this.props.history.push(`/back/another-base/connection/mssql/${values.another_database_id}/${values.id}/update/`)
     }
 
     handleRemove() {

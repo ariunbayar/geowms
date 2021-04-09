@@ -35,10 +35,10 @@ const mssql_config = {
         return fetch(`${prefix}/mssql/get-attributes/`, requestOptions).then(handleResponse)
     },
 
-    saveToDbTable(table_name, field_config, another_database_id, feature_code) {
+    saveToDbTable(table_name, field_config, another_database_id, feature_code, table_id) {
         const requestOptions = {
             ...getPostOptions(),
-            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code }),
+            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code, table_id }),
         }
         return fetch(`${prefix}/mssql/save-to-ano-db-table/`, requestOptions).then(handleResponse)
     },

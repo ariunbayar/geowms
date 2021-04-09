@@ -46,9 +46,11 @@ class MssqlForm extends Component {
             .getTableNames(connection_id, ano_table_id)
             .then(({ success, table_names, ano_db_table }) => {
                 if (success) {
-                    this.setState({ table_names, is_loading: false, ano_db_table })
-                    if (ano_db_table?.id) {
-                        this.setState({ selected_value: ano_db_table.table_name })
+                    if (Object.keys(ano_db_table).length > 0) {
+                        this.setState({ selected_value: ano_db_table.table_name, table_names, is_loading: false, ano_db_table })
+                    }
+                    else {
+                        this.setState({ table_names, is_loading: false, ano_db_table })
                     }
                 }
             })
@@ -92,7 +94,7 @@ class MssqlForm extends Component {
     }
 
     render() {
-        const { table_names, selected_value, id, is_loading, feature_code, ano_db_table } = this.state
+        const { table_names, selected_value, id, is_loading, feature_code, ano_db_table, table_id } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -108,6 +110,7 @@ class MssqlForm extends Component {
                                 id="table_name"
                                 onChange={this.handleChange}
                                 value={selected_value}
+                                disabled={table_id ? true : false}
                             >
                                 <option value=""> -- Хүснэгтийн нэр сонгоно уу -- </option>
                                 {

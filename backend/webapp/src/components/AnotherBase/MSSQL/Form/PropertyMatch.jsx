@@ -4,7 +4,7 @@ import { service } from '../../service';
 
 
 const Match = (props) => {
-
+    const is_display_value_types = ['text', 'multi-text', 'link', 'boolean']
     return (
         <div>
             <label htmlFor="">{props.column_name}: </label>
@@ -14,10 +14,13 @@ const Match = (props) => {
                 onChange={(e) => {
                     props.sendValue(props.column_name, e.target.value)
                 }}
+                defaultValue={props.default_value}
             >
                 <option value=""> -- Property Сонгоно уу -- </option>
                 {
                     props.properties.map((prop, idx) =>
+                        is_display_value_types.includes(prop.value_type_id)
+                        &&
                         <option key={idx} value={prop.property_id}>{prop.data_type_name}:  {prop.property_name}</option>
                     )
                 }
@@ -35,34 +38,43 @@ class PropertyMatch extends Component {
         this.state = {
             table_name: props.selected_value,
             connection_id: props.connection_id,
+            table_id: props.match.params.table_id,
             fields: [],
             properties: [],
             columns: {},
             feature_code: props.feature_code,
             ano_db_table: props.ano_db_table,
+            default_values: {},
         }
         this.getAttributes = this.getAttributes.bind(this)
         this.getProperties = this.getProperties.bind(this)
+        this.setProperties = this.setProperties.bind(this)
         this.getValue = this.getValue.bind(this)
         this.saveMatch = this.saveMatch.bind(this)
-        this.setProperties = this.setProperties.bind(this)
     }
 
-    componentDidMount() {
-        const { feature_code, ano_db_table } = this.state
-        this.getProperties(feature_code)
-    }
+    // componentDidMount() {
+    //     const { feature_code, ano_db_table } = this.state
+    //     if (Object.keys(ano_db_table).length === 0) {
+    //         this.getProperties(feature_code)
+    //     }
+    // }
 
-    getProperties(feature_code) {
+    getProperties(feature_code, ano_db_table) {
         service
             .mssql_config
             .getProperties(feature_code)
             .then(({ success, properties }) => {
                 if (success) {
-                    this.setState({ properties })
+                    if (Object.keys(ano_db_table).length > 0) {
+                        const default_values = this.parseString(ano_db_table['field_config'])
+                        this.setState({ default_values, columns: default_values, feature_code, properties })
+                    }
+                    else {
+                        this.setState({ properties })
+                    }
                 }
             })
-
     }
 
     componentDidUpdate(prevProps) {
@@ -72,17 +84,27 @@ class PropertyMatch extends Component {
         }
         if (prevProps.feature_code != this.props.feature_code) {
             this.setState({ feature_code: this.props.feature_code })
-            this.getProperties(this.props.feature_code)
+            if (this.props.feature_code) {
+                this.getProperties(this.props.feature_code, this.props.ano_db_table)
+            }
         }
         if (prevProps.ano_db_table != this.props.ano_db_table) {
             this.setState({ ano_db_table: this.props.ano_db_table })
-            console.log('match', this.props.ano_db_table);
-            this.setProperties(this.props.ano_db_table)
+            if (this.props.ano_db_table) {
+                this.setProperties(this.props.ano_db_table)
+            }
         }
     }
 
+    parseString(str_obj) {
+        str_obj = str_obj.replaceAll("'", '"')
+        const parsed = JSON.parse(str_obj)
+        return parsed
+    }
+
     setProperties(ano_db_table) {
-        console.log("")
+        let feature_code = ano_db_table['feature_code']
+        this.getProperties(feature_code, ano_db_table)
     }
 
     getAttributes(table_name) {
@@ -103,24 +125,23 @@ class PropertyMatch extends Component {
     getValue(field_name, property_id) {
         const { columns } = this.state
         if (property_id == '') {
-            for (const item in columns) {
-                if (columns[item] == field_name) {
-                    delete columns[item]
-                }
-            }
+            delete columns[field_name]
         }
         else {
-            columns[property_id] = field_name
+            columns[field_name] = property_id
         }
         this.setState({ columns })
     }
 
     saveMatch() {
         this.props.setLoading(true)
-        const { table_name, columns, connection_id, feature_code } = this.state
+        const { table_name, columns, connection_id, feature_code, table_id } = this.state
+        let tb_id
+        if (table_id) tb_id = table_id
+        if (!table_id) tb_id = null
         service
             .mssql_config
-            .saveToDbTable(table_name, columns, connection_id, feature_code)
+            .saveToDbTable(table_name, columns, connection_id, feature_code, tb_id)
             .then(({ success }) => {
                 if (success) {
                     this.props.setLoading(false)
@@ -132,7 +153,7 @@ class PropertyMatch extends Component {
                         'success',
                         false,
                         null,
-                        () => this.props.data.history.push(`/back/another-base/`)
+                        () => this.props.history.push(`/back/another-base/connection/mssql/${connection_id}/tables/`)
                     )
                 }
             })
@@ -152,16 +173,43 @@ class PropertyMatch extends Component {
     }
 
     render() {
-        const { fields, properties } = this.state
+        const { fields, properties, table_id, default_values, columns } = this.state
+        let default_values_keys = Object.keys(default_values)
         return (
             <div>
                 {
                     fields.map((field, idx) =>
-                        <Match key={idx}
-                            column_name={field}
-                            properties={properties}
-                            sendValue={this.getValue}
-                        />
+                        default_values_keys.length > 0
+                        ?
+                            default_values_keys.map((field_name, idx) => {
+                                if (field_name == field) {
+                                    return <Match key={idx}
+                                                column_name={field}
+                                                properties={properties}
+                                                sendValue={this.getValue}
+                                                default_value={default_values[field_name]}
+                                            />
+                                }
+                            })
+                        :
+                            <Match key={idx}
+                                column_name={field}
+                                properties={properties}
+                                sendValue={this.getValue}
+                            />
+                    )
+                }
+                {
+                    fields.map((field, idx) =>
+                        default_values_keys.length > 0
+                        &&
+                            !default_values_keys.includes(field)
+                            &&
+                                <Match key={idx}
+                                    column_name={field}
+                                    properties={properties}
+                                    sendValue={this.getValue}
+                                />
                     )
                 }
                 {
@@ -172,7 +220,13 @@ class PropertyMatch extends Component {
                             className="btn gp-btn-primary"
                             onClick={this.saveMatch}
                         >
-                            Хадгалах
+                            {
+                                table_id
+                                ?
+                                    "Засах"
+                                :
+                                    "Хадгалах"
+                            }
                         </button>
                 }
             </div>
