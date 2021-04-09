@@ -69,7 +69,7 @@ def mongo_config(pk):
     another_db = AnotherDatabase.objects.filter(pk=pk).first()
     connection = utils.json_load(another_db.connection)
 
-    cinfigs = {
+    configs = {
         'id': pk,
         'name': another_db.name,
         'definition': another_db.definition,
@@ -78,19 +78,21 @@ def mongo_config(pk):
         'mongo_client_username': connection.get('mongo_client_username'),
         'mongo_client_password': connection.get('msssql_password'),
         'mongo_database': connection.get('mongo_database'),
+        'mongo_port': connection.get('mongo_port'),
     }
-    return cinfigs
+    return configs
 
 
 def _mongo_settings(pk):
-    cinfigs = mongo_config(pk)
-    mongo_engine = cinfigs.get('mongo_engine')
-    mongo_client_host = cinfigs.get('mongo_client_host')
-    mongo_client_username = cinfigs.get('mongo_client_username')
-    mongo_client_password = cinfigs.get('mongo_client_password')
-    mongo_database = cinfigs.get('mongo_database')
+    configs = mongo_config(pk)
+    mongo_engine = configs.get('mongo_engine')
+    mongo_client_host = configs.get('mongo_client_host')
+    mongo_client_username = configs.get('mongo_client_username')
+    mongo_client_password = configs.get('mongo_client_password')
+    mongo_database = configs.get('mongo_database')
+    mongo_port = int(configs.get('mongo_port'))
 
-    client = pymongo.MongoClient(mongo_client_host, 27017)
+    client = pymongo.MongoClient(mongo_client_host, mongo_port)
     cursor = client[mongo_database]
 
     return cursor
@@ -165,10 +167,10 @@ def delete_data_from_mongo(unique_id):
     return True
 
 
-def mongo_check_connection(mongo_client_host, mongo_database):
+def mongo_check_connection(mongo_client_host, mongo_database, port):
     errors = dict()
     try:
-        client = pymongo.MongoClient(mongo_client_host, 27017)
+        client = pymongo.MongoClient(mongo_client_host, port)
         client.server_info()
     except pymongo.errors.ConnectionFailure:
         errors['mongo_client_host'] = 'Уучлаарай холбогдож чадсангүй зөв оруулана уу.'

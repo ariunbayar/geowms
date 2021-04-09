@@ -18,6 +18,8 @@ const validationSchema = Yup.object().shape({
     mongo_client_password: Yup.string(),
     mongo_database: Yup.string()
         .required('хоосон байна!'),
+    mongo_port: Yup.string()
+        .required('хоосон байна!')
 })
 
 
@@ -37,6 +39,7 @@ class ConnectionConfig extends Component {
                 mongo_client_username: '',
                 mongo_client_password: '',
                 mongo_database: '',
+                mongo_port: '',
             },
             values: {},
         }
@@ -196,7 +199,7 @@ class ConnectionConfig extends Component {
                                                 />
                                                 <p className="text-danger">{errors['mongo_client_password']}</p>
                                             </div>
-                                            <div className="form-group col-md-12">
+                                            <div className="form-group col-md-6">
                                                 <label htmlFor="id_mongo_database">Database Name</label>
                                                 <Field
                                                     name="mongo_database"
@@ -205,6 +208,16 @@ class ConnectionConfig extends Component {
                                                     className="form-control"
                                                 />
                                                 <p className="text-danger">{errors['mongo_database']}</p>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_mongo_port">Port</label>
+                                                <Field
+                                                    name="mongo_port"
+                                                    id="id_mongo_port"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                                <ErrorMessage name="mongo_port" component="div" className="invalid-feedback" />
                                             </div>
                                         </div>
 
