@@ -27,7 +27,7 @@ export class LoginLog extends Component {
                     'color': 'gradient-scooter',
                     'icon': 'icon-people',
                     'text_color': 'text-info',
-                    'state': '',
+                    'state': 'Өнөөдрийн байдлаар',
                     'border_color':'border-info',
                 },
                 {
