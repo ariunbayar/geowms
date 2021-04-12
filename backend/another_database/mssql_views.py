@@ -1,4 +1,4 @@
-# import pyodbc
+import pyodbc
 import datetime
 
 from django.contrib.gis.geos import GEOSGeometry
