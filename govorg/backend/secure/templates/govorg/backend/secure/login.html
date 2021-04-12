@@ -29,6 +29,18 @@
                             {% csrf_token %}
                             {{form|crispy}}
                             <div class="row mb-3">
+                                <div class="col-4">
+                                <img
+                                    id='base64image'
+                                    src='data:image/png;base64,{{ captcha.byte_img }}'
+                                />
+                                <input type="text" name="zurag" class="textinput textInput form-control d-none" value="{{captcha.text}}" required="" id="zurag">
+                                </div>
+                                <div class="col-8">
+                                    <input type="text" name="captcha" placeholder="Кодыг оруулна уу" class="textinput textInput form-control" id="captcha">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
                                 <div class="offset-3 col-6">
                                     <button type="submit" class="btn gp-btn-primary btn-block">Нэвтрэх</button>
                                 </div>
