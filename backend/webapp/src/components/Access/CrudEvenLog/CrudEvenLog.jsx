@@ -100,7 +100,6 @@ export class CrudEvenLog extends Component {
             жагсаалтын_холбоос,
             хувьсах_талбарууд,
         } = this.state
-        console.log(this.state.cards);
         return (
             <div className="card">
                 <div className="card-body">

@@ -5,6 +5,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
 from datetime import datetime
+from django.db.models import Max, Min
 
 from main.decorators import ajax_required
 from geoportal_app.models import User
@@ -279,21 +280,21 @@ def get_card_field(request):
     check_array = list()
     send_fields = list()
     prev_name = ''
-    outlet_log = inlet_log = 0
-    today = datetime.today().strftime('%Y-%m-%d')
     LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
     all_object = LoginEvent.objects.all().order_by('id')
     if all_object:
+        now = datetime.now()
+        login_event = LoginEvent.objects.filter(
+            datetime__year=now.year,
+            datetime__month=now.month,
+            datetime__day=now.day
+        )
+        status = login_event.values_list('login_type', flat=True)
+        outlet_log = status.filter(login_type__in=['0', '2']).count()
+        inlet_log = status.filter(login_type='1').count()
         check_array.append(LoginEvent.objects.filter(pk=1).first().username)
         for index in all_object:
             check_data = index
-            if today == check_data.datetime.strftime('%Y-%m-%d'):
-                if check_data.login_type == 0:
-                    outlet_log += 1
-                elif check_data.login_type == 1:
-                    inlet_log += 1
-                else:
-                    outlet_log += 1
             catche_name = check_data.username
             if prev_name != catche_name:
                 prev_name = catche_name
@@ -301,7 +302,6 @@ def get_card_field(request):
                 check_array.append(prev_name)
         length = len(check_array)
         del check_array[:]
-
         cards = [
             {
                 'value': length,
@@ -328,23 +328,22 @@ def get_card_field(request):
 @user_passes_test(lambda u: u.is_superuser)
 def get_post_detail(request):
     send_fields = list()
-    get_status = post_status = 0
     RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
     all_object = RequestEvent.objects.all().order_by('id')
     if all_object:
-        for index in all_object:
-            method = index.method
-            if(method == 'GET'):
-                get_status += 1
-            else:
-                post_status += 1
+        get_request = RequestEvent.objects.values_list(
+            'method', flat=True
+        ).order_by('id').filter(method='GET').count()
+        post_request = RequestEvent.objects.values_list(
+            'method', flat=True
+        ).order_by('id').filter(method='POST').count()
 
         cards = [
             {
-                'value': get_status,
+                'value': get_request,
             },
             {
-                'value': post_status,
+                'value': post_request,
             },
         ]
 
@@ -363,19 +362,18 @@ def get_post_detail(request):
 @user_passes_test(lambda u: u.is_superuser)
 def get_crud_events(request):
     send_fields = list()
-    crud_created = crud_deleted = crud_updated = cruds = 0
     CrudEvent = apps.get_model('easyaudit', 'CrudEvent')
     all_object = CrudEvent.objects.all().order_by('id')
     if all_object:
-        for index in all_object:
-            cruds = index.event_type
-            if cruds == 1:
-                crud_created += 1
-            elif cruds == 2:
-                crud_updated += 1
-            elif cruds == 3:
-                crud_deleted += 1
-
+        crud_created = CrudEvent.objects.values_list(
+            'event_type', flat=True
+        ).order_by('id').filter(event_type='1').count()
+        crud_updated = CrudEvent.objects.values_list(
+            'event_type', flat=True
+        ).order_by('id').filter(event_type='2').count()
+        crud_deleted = CrudEvent.objects.values_list(
+            'event_type', flat=True
+        ).order_by('id').filter(event_type='3').count()
         cards = [
             {
                 'value': crud_created,
@@ -403,33 +401,29 @@ def get_crud_events(request):
 @user_passes_test(lambda u: u.is_superuser)
 def get_rsp_status(request):
     send_fields = list()
-    rsp_status_200 = rsp_status_301 = rsp_status_404 = rsp_status_500 = 0
     all_object = WMSLog.objects.all().order_by('id')
     if all_object:
-        max_size = WMSLog.objects.filter(pk=1).first().rsp_size
-        min_size = WMSLog.objects.filter(pk=1).first().rsp_size
-        for index in all_object:
-            rsp_status = index.rsp_status
-            rsp_size = index.rsp_size
-            if rsp_size >= max_size:
-                max_size = rsp_size
-            if rsp_size <= min_size:
-                min_size = rsp_size
-            if rsp_status == 200:
-                rsp_status_200 += 1
-            elif rsp_status == 301:
-                rsp_status_301 += 1
-            elif rsp_status == 404:
-                rsp_status_404 += 1
-            else:
-                rsp_status_500 += 1
+        rsp_max = all_object.aggregate(Max('rsp_size')).get('rsp_size__max')
+        rsp_min = all_object.aggregate(Min('rsp_size')).get('rsp_size__min')
+        rsp_status_200 = WMSLog.objects.values_list(
+            'rsp_status', flat=True
+        ).order_by('id').filter(rsp_status='200').count()
+        rsp_status_301 = WMSLog.objects.values_list(
+            'rsp_status', flat=True
+        ).order_by('id').filter(rsp_status='301').count()
+        rsp_status_404 = WMSLog.objects.values_list(
+            'rsp_status', flat=True
+        ).order_by('id').filter(rsp_status='404').count()
+        rsp_status_500 = WMSLog.objects.values_list(
+            'rsp_status', flat=True
+        ).order_by('id').filter(rsp_status='500').count()
 
         cards = [
                 {
-                    'value': max_size,
+                    'value': rsp_max,
                 },
                 {
-                    'value': min_size,
+                    'value': rsp_min,
                 },
                 {
                     'value': rsp_status_200,
@@ -443,7 +437,7 @@ def get_rsp_status(request):
                 {
                     'value': rsp_status_500,
                 },
-            ]
+                ]
 
         for index in cards:
             send_fields.append(index)
@@ -453,12 +447,3 @@ def get_rsp_status(request):
                 'fields': send_fields,
             }
         return JsonResponse(rsp)
-
-
-
-
-
-
-
-
-
