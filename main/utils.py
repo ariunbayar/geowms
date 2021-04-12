@@ -945,10 +945,13 @@ def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
 
     geom_type = geometry['type']
     if change_to_multi:
-        geom_type = 'Multi' + geometry['type']
+        if 'Multi' not in geometry['type']:
+            geom_type = 'Multi' + geometry['type']
 
-    class_ = getattr(module, geom_type)
-    geom = class_(polygonlist)
+            class_ = getattr(module, geom_type)
+            geom = class_(polygonlist)
+        else:
+            geom = polygonlist
 
     return geom
 
@@ -1137,6 +1140,12 @@ def value_types():
 def json_load(data):
     if isinstance(data, str):
         data = json.loads(data)
+    return data
+
+
+def json_dumps(data):
+    if isinstance(data, dict):
+        data = json.dumps(data, ensure_ascii=False)
     return data
 
 
@@ -1435,12 +1444,12 @@ def geo_cache(key_name, key, qs, time):
 
 
 # тухайн property г мдатагаас хайхад бэлэн маягаар гаргаж авах
-def get_filter_dicts(property_code='pointnumber'):
+def get_filter_dicts(property_code='pointnumber', feature_code='gnp-gp-gp'):
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_code__iexact=property_code)
     prop = prop_qs.first()
 
-    feature = get_feature_from_code('gnp-gp-gp')
+    feature = get_feature_from_code(feature_code)
     property_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature.feature_id)
     data = get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
 
