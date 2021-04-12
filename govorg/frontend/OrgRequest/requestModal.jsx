@@ -380,7 +380,7 @@ export default class RequestModal extends Component {
                                             татгалзахдаа итгэлтэй байна уу?`,
                                             true,
                                             "татгалзах",
-                                            this.handleModalAction
+                                            null
                                         )}
                                         className="btn gp-btn-primary waves-effect waves-light"
                                     >
@@ -407,7 +407,7 @@ export default class RequestModal extends Component {
                                             зөвшөөрөхдөө итгэлтэй байна уу?`,
                                             true,
                                             "зөвшөөрөх",
-                                            this.handleModalAction
+                                            null
                                         )}
                                         className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
                                     >

@@ -13,6 +13,8 @@ from backend.payment import views as payment_views
 from backend.dedsanbutets import views as dedsan_butets
 import backend.gis.views
 from backend.geoserver import views as geoserver_views
+from backend.another_database import views as geoserver_another_database
+from backend.another_database import mssql_views as mssql_views
 
 app_name = 'backend'
 urlpatterns = [
@@ -35,6 +37,32 @@ urlpatterns = [
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
     ], 'wms'))),
+
+    path('another-database/', include(([
+        path('all/', geoserver_another_database.pagination),
+        path('mssql/get/<int:pk>/', geoserver_another_database.mssql_get),
+        path('mssql/save/', geoserver_another_database.mssql_save),
+        path('mongo/get/<int:pk>/', geoserver_another_database.mongo_get),
+        path('mongo/save/', geoserver_another_database.mongo_save),
+        path('mongo/tables/<int:pk>/', geoserver_another_database.mongo_tables),
+        path('mongo/tables/<int:pk>/all/', geoserver_another_database.mongo_tables_all),
+        path('mongo/tables/remove/<int:root_id>/<int:pk>/', geoserver_another_database.mongo_tables_remove),
+        path('mongo/tables/detail/<int:root_id>/<int:pk>/', geoserver_another_database.mongo_tables_detail),
+        path('mongo/tables/<int:pk>/save/', geoserver_another_database.mongo_tables_save),
+        path('mongo/fields/<int:pk>/<str:name>/', geoserver_another_database.mongo_fields),
+        path('remove/<int:pk>/', geoserver_another_database.remove),
+        path('get-inspire-shatlal/', geoserver_another_database.get_inspire_shatlal),
+        path('update/<int:pk>/', geoserver_another_database.update),
+
+        # path('mssql/insert-to-inspire/', mssql_views.insert_to_inspire),
+        path('mssql/save-to-ano-db-table/', mssql_views.save_to_ano_db_table),
+        path('mssql/get-attributes/', mssql_views.get_attributes),
+        path('mssql/get-properties/<str:feature_code>/', mssql_views.get_properties),
+        path('mssql/get-all-table-names/', mssql_views.get_all_table_names),
+        path('mssql/tables/<int:pk>/', geoserver_another_database.get_mssql_tables_list),
+        path('mssql/refresh-mssql-datas/<int:connection_id>/', mssql_views.refresh_datas),
+    ], 'another-database'))),
+
 
     path('bundle/', include(([
         path('all/', bundle_views.all, name='all'),
@@ -108,6 +136,10 @@ urlpatterns = [
         path('page-list/', log_views.page_list, name='page-list'),
         path('wms_log_list/', log_views.wms_log_list, name='wms_log_list-list'),
         path('wms_date_count/', log_views.wms_date_count, name='wms_date_count'),
+        path('get-card-field/', log_views.get_card_field, name='get_card-field'),
+        path('get-post-detail/', log_views.get_post_detail, name='get_post_detail'),
+        path('get-crud-events/', log_views.get_crud_events, name='get_crud_events'),
+        path('get-rsp-status/', log_views.get_rsp_status, name='get_rsp_status'),
     ], 'log'))),
 
     path('api/систем/', include(([

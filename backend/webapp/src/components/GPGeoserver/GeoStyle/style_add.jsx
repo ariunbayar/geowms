@@ -63,7 +63,44 @@ export class CreateStyle extends Component {
             var file_content = []
             file_content = reader.result
             service.convertSldToJson(file_content).then((style_content) => {
-                console.log(style_content)
+                if (style_content) {
+                    var style_content = style_content.style_content[0]
+                    var shape_rules = style_content.shape_rules
+                    const { shape_types } = this.state
+                    var len_of_rules = Object.keys(shape_rules).length
+                    if (shape_rules && len_of_rules > 0) {
+                        shape_rules.map((data, idx) => {
+                            this.style_datas.push({
+                                'index_of_range': idx+1,
+                                'range_number': len_of_rules,
+                                'min_range': data.min_range,
+                                'max_range': data.max_range,
+                                'style_color': data.style_color,
+                                'style_size': data.style_size,
+                                'fill_color':  data.fill_color,
+                                'wellknownname': data.wellknownname,
+                                'color_opacity': data.color_opacity,
+                                'dashed_line_length': data.dashed_line_length,
+                                'dashed_line_gap': data.dashed_line_gap,
+                                'shape_types': shape_types,
+                                'shape_type': data.shape_type,
+                                'rule_name': data.rule_name
+                            })
+                        })
+                    }
+                    else{
+
+                    }
+                    var  single_select_datas = this.style_datas[0]
+                    this.setState({
+                        style_name: style_content.style_name,
+                        style_title: style_content.style_title,
+                        style_abstract: style_content.style_abstract,
+                        geom_type: style_content.geom_type,
+                        range_number: len_of_rules,
+                        single_select_datas
+                    })
+                }
             })
         }
     }

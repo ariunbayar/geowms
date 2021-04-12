@@ -448,6 +448,99 @@ def create_style(request, payload):
         })
 
 
+def _get_fill_stroke(data):
+    stroke = data.get('Stroke')
+    fill = data.get('Fill')
+    style_datas = {
+        'style_color': '',
+        'style_size':0,
+        'dashed_line_length':0,
+        'dashed_line_gap':0,
+        'fill_color':'',
+        'wellknownname': 'circle'
+    }
+    if stroke:
+        if stroke.get('stroke'):
+            style_datas['style_color'] = stroke.get('stroke')
+        if stroke.get('stroke-width'):
+            style_datas['style_size'] = stroke.get('stroke-width')
+
+        dashed_line = stroke.get('stroke-dasharray')
+        if dashed_line:
+            dashed_line = dashed_line.split()
+            style_datas['dashed_line_length'] = dashed_line[0]
+            style_datas['dashed_line_gap'] = dashed_line[1]
+    if fill:
+        if fill.get('fill'):
+            style_datas['fill_color'] = fill.get('fill')
+        if fill.get('fill-opacity'):
+            style_datas['color_opacity']= fill.get('fill-opacity')
+
+    return style_datas
+
+
+def _get_style_json(content_data):
+
+    shape_rules= []
+    style_datas = []
+    named_layer = content_data.get('NamedLayer')
+    style_name = named_layer.get('Name') or ''
+    user_style = named_layer.get('UserStyle') or ''
+
+    if user_style:
+        style_title = user_style.get('Title') or ''
+        style_abstract = user_style.get('Abstract') or ''
+        feature_style = user_style.get('FeatureTypeStyle') or ''
+        if feature_style:
+            single_rule_data = {}
+            rules = feature_style.get('Rule') or ''
+            for rule in rules:
+                rule_name = rule.get('Name') or ''
+                max_range = rule.get('MaxScaleDenominator') or 0
+                min_range = rule.get('MinScaleDenominator') or 0
+                shape_data = []
+                if rule.get('LineSymbolizer'):
+                    shape_data = rule.get('LineSymbolizer')
+                    geom_type = 'LineString'
+                    shape_type = 'LineSymbolizer'
+                elif rule.get('PointSymbolizer'):
+                    shape_data = rule.get('PointSymbolizer')
+                    geom_type = 'Point'
+                    shape_type = 'PointSymbolizer'
+                    if shape_data.get('Graphic'):
+                        shape_data = shape_data.get('Graphic')
+                        shape_data = shape_data.get('Mark')
+                else:
+                    shape_data = rule.get('PolygonSymbolizer')
+                    geom_type = 'Polygon'
+                    shape_type = 'PolygonSymbolizer'
+                fil_and_stroke_datas = _get_fill_stroke(shape_data)
+                single_rule_data  = {
+                    'rule_name': rule_name,
+                    'min_range': min_range,
+                    'max_range': max_range,
+                    'style_color': fil_and_stroke_datas.get('style_color') or '',
+                    'style_size': fil_and_stroke_datas.get('style_size') or 1,
+                    'dashed_line_length': fil_and_stroke_datas.get('dashed_line_length') or 0,
+                    'dashed_line_gap': fil_and_stroke_datas.get('dashed_line_gap') or 0,
+                    'fill_color': fil_and_stroke_datas.get('fill_color') or '',
+                    'color_opacity': fil_and_stroke_datas.get('color_opacity') or 0.5,
+                    'wellknownname': fil_and_stroke_datas.get('wellknownname') or 'circle',
+                    'shape_type': shape_type
+                }
+                shape_rules.append(single_rule_data)
+
+    style_datas.append({
+        'style_name': style_name,
+        'style_title': style_title,
+        'geom_type': geom_type,
+        'style_abstract': style_abstract,
+        'shape_rules':  shape_rules
+    })
+
+    return style_datas
+
+
 def _parse_xml_to_json(xml):
     response = {}
 
@@ -455,7 +548,6 @@ def _parse_xml_to_json(xml):
         tag_name = etree.QName(child.tag)
         if tag_name:
             tag_name = tag_name.localname
-        tag_attr = child.attrib.get('name')
         if len(list(child)) > 0:
             tag_in_res = response.get(tag_name) or ''
             if tag_in_res:
@@ -465,9 +557,9 @@ def _parse_xml_to_json(xml):
                 else:
                     for i in tag_in_res:
                         response[tag_name].append(i)
-                response[tag_name].append(parseXmlToJson(child))
+                response[tag_name].append(_parse_xml_to_json(child))
             else:
-                response[tag_name] = parseXmlToJson(child)
+                response[tag_name] = _parse_xml_to_json(child)
         else:
             tag_attr = child.attrib.get('name')
             if tag_attr:
@@ -486,149 +578,7 @@ def conver_sld_json(request, payload):
 
     tree = etree.fromstring(hoho.encode('utf-8'))
     content_data= _parse_xml_to_json(tree)
+    style_datas = _get_style_json(content_data)
     return JsonResponse({
-        'success': False,
-        'info': 'Style үүсгэхэд алдаа гарлаа'
+        'style_content': style_datas
     })
-
-
-import os
-from lxml import etree
-from io import StringIO
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
-tree = etree.parse(BASE_DIR + '/zoom_based_point.sld')
-
-root = tree.getroot()
-
-def parseXmlToJson(xml):
-    response = {}
-
-    for child in list(xml):
-        tag_name = etree.QName(child.tag)
-        if tag_name:
-            tag_name = tag_name.localname
-        tag_attr = child.attrib.get('name')
-        if len(list(child)) > 0:
-            tag_in_res = response.get(tag_name) or ''
-            if tag_in_res:
-                response[tag_name] = []
-                if isinstance(tag_in_res, dict):
-                    response[tag_name].append(tag_in_res)
-                else:
-                    for i in tag_in_res:
-                        response[tag_name].append(i)
-                response[tag_name].append(parseXmlToJson(child))
-            else:
-                response[tag_name] = parseXmlToJson(child)
-        else:
-            tag_attr = child.attrib.get('name')
-            if tag_attr:
-                tag_name = tag_attr
-            response[tag_name] = child.text or ''
-    return response
-
-
-def _get_fill_stroke(data):
-    stroke = j.get('Stroke')
-    fill = j.get('Fill')
-    if stroke:
-        for st in stroke:
-            if st.get('stroke'):
-                style_color = st.get('stroke')
-            if st.get('stroke-width'):
-                style_size = st.get('stroke-width')
-
-            dashed_line = st.get('stroke-dasharray')
-            if dashed_line:
-                dashed_line = dashed_line.split()
-                dashed_line_length = dashed_line[0]
-                dashed_line_gap = dashed_line[1]
-    if fill:
-        for f in fill:
-            if f.get('fill'):
-                fill_color = f.get('fill')
-            if f.get('fill-opacity'):
-                color_opacity = f.get('fill-opacity')
-
-content_data = parseXmlToJson(root)
-named_layer = content_data.get('NamedLayer')
-style_name = named_layer.get('Name') or ''
-user_style = named_layer.get('UserStyle') or ''
-style_title = ''
-style_abstract = ''
-rule_name = ''
-max_range = 0
-min_range = 0
-style_color = ''
-style_size = 0,
-dashed_line_length = 0
-dashed_line_gap = 0
-fill_color = ''
-if user_style:
-    style_title = user_style.get('Title') or ''
-    style_abstract = user_style.get('Abstract') or ''
-    feature_style = user_style.get('FeatureTypeStyle') or ''
-    if feature_style:
-        rules = feature_style.get('Rule') or ''
-        for rule in rules:
-            rule_name = rule.get('Name') or ''
-            max_range = rule.get('MaxScaleDenominator') or 0
-            min_range = rule.get('MinScaleDenominator') or 0
-            shape_data = []
-            if rule.get('LineSymbolizer'):
-                shape_data = rule.get('LineSymbolizer')
-            elif rule.get('PointSymbolizer'):
-                shape_data = rule.get('PointSymbolizer')
-
-            else:
-                shape_data = rule.get('PolygonSymbolizer')
-            # print("shape_data", shape_data)
-
-
-
-
-style_datas = []
-rule_datas = []
-#                             line = attr.get('LineSymbolizer')
-#                             if point:
-#                                 for prule in point:
-#                                     graphic = prule.get('Graphic')
-#                                     if graphic and graphic[0]:
-#                                         mark = graphic[0].get('Mark')
-#                                         for j in mark:
-#                                             stroke = j.get('Stroke')
-#                                             fill = j.get('Fill')
-#                                             if stroke:
-#                                                 for st in stroke:
-#                                                     if st.get('stroke'):
-#                                                         style_color = st.get('stroke')
-#                                                     if st.get('stroke-width'):
-#                                                         style_size = st.get('stroke-width')
-
-#                                                     dashed_line = st.get('stroke-dasharray')
-#                                                     if dashed_line:
-#                                                         dashed_line = dashed_line.split()
-#                                                         dashed_line_length = dashed_line[0]
-#                                                         dashed_line_gap = dashed_line[1]
-#                                             if fill:
-#                                                 for f in fill:
-#                                                     if f.get('fill'):
-#                                                         fill_color = f.get('fill')
-#                                                     if f.get('fill-opacity'):
-#                                                         color_opacity = f.get('fill-opacity')
-#                             single_rule = {
-#                                         'rule_name': rule_name,
-#                                         'max_range': max_range,
-#                                         'min_range': min_range,
-#                                         'style_color': style_color,
-#                                         'style_size': style_size,
-#                                         'dashed_line_length': dashed_line_length,
-#                                         'dashed_line_gap': dashed_line_gap
-#                             }
-#                             rule_datas.append(single_rule)
-# style_datas.append({
-#     'style_name': style_name,
-#     'style_title': style_title,
-#     'style_abstract': style_abstract,
-#     'style_datas': rule_datas
-# })
