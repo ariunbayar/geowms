@@ -274,24 +274,6 @@ def wms_date_count(request):
     return JsonResponse(rsp)
 
 
-# LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
-# now = datetime.now()
-# all_object = LoginEvent.objects.filter(
-#     datetime__year__gte=now.year,
-#     datetime__month__gte=now.month,
-#     datetime__day__gte=now.day
-# ).order_by('id')
-
-
-
-# sssss = all_object.annotate(num_login_type=Count('login_type', distinct=True))
-# for i in sssss:
-#     print(i)
-
-# print(sssss)
-
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -341,6 +323,11 @@ def get_card_field(request):
         }
         return JsonResponse(rsp)
 
+    rsp = {
+        'success': True,
+        'fields': [],
+    }
+    return JsonResponse(rsp)
 
 @require_GET
 @ajax_required
@@ -348,14 +335,15 @@ def get_card_field(request):
 def get_post_detail(request):
     send_fields = list()
     RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
-    all_object = RequestEvent.objects.all().order_by('id')
+    all_object = RequestEvent.objects.first()
     if all_object:
-        get_request = RequestEvent.objects.values_list(
-            'method', flat=True
-        ).order_by('id').filter(method='GET').count()
-        post_request = RequestEvent.objects.values_list(
-            'method', flat=True
-        ).order_by('id').filter(method='POST').count()
+
+        request_ob = RequestEvent.objects
+        request_ob = request_ob.values_list('method', flat=True)
+        request_ob = request_ob.order_by('id')
+
+        get_request = request_ob.filter(method='GET').count()
+        post_request = request_ob.filter(method='POST').count()
 
         cards = [
             {
@@ -374,6 +362,11 @@ def get_post_detail(request):
                 'fields': send_fields,
             }
         return JsonResponse(rsp)
+    rsp = {
+        'success': True,
+        'fields': [],
+    }
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -382,17 +375,13 @@ def get_post_detail(request):
 def get_crud_events(request):
     send_fields = list()
     CrudEvent = apps.get_model('easyaudit', 'CrudEvent')
-    all_object = CrudEvent.objects.all().order_by('id')
+    all_object = CrudEvent.objects.first()
     if all_object:
-        crud_created = CrudEvent.objects.values_list(
-            'event_type', flat=True
-        ).order_by('id').filter(event_type='1').count()
-        crud_updated = CrudEvent.objects.values_list(
-            'event_type', flat=True
-        ).order_by('id').filter(event_type='2').count()
-        crud_deleted = CrudEvent.objects.values_list(
-            'event_type', flat=True
-        ).order_by('id').filter(event_type='3').count()
+        crud_created_obj = CrudEvent.objects.values_list('event_type', flat=True).order_by('id')
+        crud_created = crud_created_obj.filter(event_type='1').count()
+        crud_updated = crud_created_obj.filter(event_type='2').count()
+        crud_deleted = crud_created_obj.filter(event_type='3').count()
+
         cards = [
             {
                 'value': crud_created,
@@ -409,10 +398,16 @@ def get_crud_events(request):
             send_fields.append(index)
 
         rsp = {
-                'success': True,
-                'fields': send_fields,
-            }
+            'success': True,
+            'fields': send_fields,
+        }
         return JsonResponse(rsp)
+
+    rsp = {
+        'success': True,
+        'fields': [],
+    }
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -424,45 +419,45 @@ def get_rsp_status(request):
     if all_object:
         rsp_max = all_object.aggregate(Max('rsp_size')).get('rsp_size__max')
         rsp_min = all_object.aggregate(Min('rsp_size')).get('rsp_size__min')
-        rsp_status_200 = WMSLog.objects.values_list(
-            'rsp_status', flat=True
-        ).order_by('id').filter(rsp_status='200').count()
-        rsp_status_301 = WMSLog.objects.values_list(
-            'rsp_status', flat=True
-        ).order_by('id').filter(rsp_status='301').count()
-        rsp_status_404 = WMSLog.objects.values_list(
-            'rsp_status', flat=True
-        ).order_by('id').filter(rsp_status='404').count()
-        rsp_status_500 = WMSLog.objects.values_list(
-            'rsp_status', flat=True
-        ).order_by('id').filter(rsp_status='500').count()
+        wms_log_objs =  WMSLog.objects.values_list('rsp_status', flat=True).order_by('id')
+
+        rsp_status_200 = wms_log_objs.filter(rsp_status='200').count()
+        rsp_status_301 = wms_log_objs.filter(rsp_status='301').count()
+        rsp_status_404 = wms_log_objs.filter(rsp_status='404').count()
+        rsp_status_500 = wms_log_objs.filter(rsp_status='500').count()
 
         cards = [
-                {
-                    'value': rsp_max,
-                },
-                {
-                    'value': rsp_min,
-                },
-                {
-                    'value': rsp_status_200,
-                },
-                {
-                    'value': rsp_status_301,
-                },
-                {
-                    'value': rsp_status_404,
-                },
-                {
-                    'value': rsp_status_500,
-                },
-                ]
+            {
+                'value': rsp_max,
+            },
+            {
+                'value': rsp_min,
+            },
+            {
+                'value': rsp_status_200,
+            },
+            {
+                'value': rsp_status_301,
+            },
+            {
+                'value': rsp_status_404,
+            },
+            {
+                'value': rsp_status_500,
+            },
+        ]
 
         for index in cards:
             send_fields.append(index)
 
         rsp = {
-                'success': True,
-                'fields': send_fields,
-            }
+            'success': True,
+            'fields': send_fields,
+        }
         return JsonResponse(rsp)
+
+    rsp = {
+        'success': True,
+        'fields': [],
+    }
+    return JsonResponse(rsp)
