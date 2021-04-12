@@ -39,7 +39,7 @@ def login(request):
 
         if zurag != captcha and not settings.DEBUG:
             messages.warning(request, 'Captcha буруу байна.')
-            return redirect('secure:login')
+            return redirect('gov_secure:login')
         try:
             b_user = User.objects.get(email=email)
             username = b_user.username
