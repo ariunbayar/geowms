@@ -38,7 +38,6 @@ class Inputs extends PureComponent {
                 children = item.children
             }
         })
-        console.log(children);
         this.setState({ value, ...children })
         this.props.sendValue(value, name)
     }
@@ -75,15 +74,15 @@ class Inputs extends PureComponent {
                     :
                     type == 'textarea'
                     ?
-                            <textarea
-                                className={className ? className : ' form-control'}
-                                name={name}
-                                id={`id_${name}`}
-                                cols="30"
-                                rows="10"
-                                onChange={(e) => this.handleOnChange(e.target.value, name)}
-                            >
-                            </textarea>
+                        <textarea
+                            className={className ? className : ' form-control'}
+                            name={name}
+                            id={`id_${name}`}
+                            cols="30"
+                            rows="10"
+                            onChange={(e) => this.handleOnChange(e.target.value, name)}
+                        >
+                        </textarea>
                     :
                         <input
                             className={className ? className : ' form-control'}
