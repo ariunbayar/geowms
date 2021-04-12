@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from datetime import datetime
 from django.db.models import Max, Min
 
+from django.db.models import Count, F, Func, Q
 from main.decorators import ajax_required
 from geoportal_app.models import User
 from backend.wms.models import WMSLog
@@ -271,6 +272,24 @@ def wms_date_count(request):
         'wms_log_date_count': wms_login_date_count,
     }
     return JsonResponse(rsp)
+
+
+# LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
+# now = datetime.now()
+# all_object = LoginEvent.objects.filter(
+#     datetime__year__gte=now.year,
+#     datetime__month__gte=now.month,
+#     datetime__day__gte=now.day
+# ).order_by('id')
+
+
+
+# sssss = all_object.annotate(num_login_type=Count('login_type', distinct=True))
+# for i in sssss:
+#     print(i)
+
+# print(sssss)
+
 
 
 @require_GET

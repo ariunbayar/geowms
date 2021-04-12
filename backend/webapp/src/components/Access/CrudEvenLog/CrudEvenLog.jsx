@@ -3,7 +3,7 @@ import {Charts} from './Chart'
 import {RadarChart} from './Radar'
 import { PortalDataTable } from "@utils/DataTable/index"
 import { service } from "../service"
-import Card_body from "../../../../../../src/components/Card_template/Card_body"
+import { Card_body } from "@utils/Card_template/Card_body"
 
 
 export class CrudEvenLog extends Component {
