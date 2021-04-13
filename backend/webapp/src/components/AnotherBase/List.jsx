@@ -103,6 +103,21 @@ export default class List extends Component {
                         null
                     )
                 }
+                else {
+                    this.setState({is_loading: false})
+                    this.modalChange(
+                        'fa fa-time-circle',
+                        null,
+                        'danger',
+                        'Алдаа гарлаа',
+                        ``,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
+                }
             })
     }
 
