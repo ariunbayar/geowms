@@ -522,7 +522,7 @@ def create_style(values, style_name, style_title, style_abstract):
                     datas = values[i]
                     rule = _get_style_content(datas)
                     s_rules.insert(i, rule)
-                style_content =  styles = ''.join(s_rules)
+                style_content = ''.join(s_rules)
         else:
             style_content = _get_style_content(values)
 

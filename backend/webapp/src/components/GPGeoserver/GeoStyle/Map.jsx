@@ -137,60 +137,65 @@ export default class StyleMap extends Component {
             fill_color, dashed_line_gap,
             dashed_line_length, color_opacity, wellknownname
         } = values
-        if (wellknownname && wellknownname != 'circle'){
-            var { points, radius, angle, rotation, radius2} = 0
-            if (wellknownname == 'square') {
-                    points = 4
-                    radius = 10
-                    angle = Math.PI / 4
-            }
-            else if (wellknownname == 'triangle'){
-                    points = 3
-                    radius = 10
-                    rotation = Math.PI / 4
-                    angle = 0
-            }
-            else if (wellknownname == 'star'){
-                    points = 5
-                    radius = 10
-                    radius2 = 4
-                    angle = 0
-            }
-            else if (wellknownname == 'x'){
-                        points =  4
-                        radius = 10
-                        radius2 = 0
-                        angle = 0
-            }
-            var point_style = new RegularShape({
-                    fill: new Fill({
-                        color: fill_color,
-                    }),
-                    stroke: new Stroke({
-                        color: style_color,
-                        width: style_size,
-                        lineDash: dashed_line_length ? [dashed_line_gap, dashed_line_length] : '' ,
-                    }),
-                    points: points,
-                    radius: radius,
-                    radius2: radius2,
-                    rotation: rotation,
-                    angle: angle
-                })
-            }
-        else{
-            var point_style = new CircleStyle({
-                    radius: 5,
-                    fill: new Fill({
-                        color: fill_color,
-                    }),
-                    stroke: new Stroke({
-                        color: style_color,
-                        width: style_size,
-                    }),
-                })
-            }
 
+        {
+            if (style_type == 'Point' || style_type == 'MultiPoint' )
+            {
+                if (wellknownname && wellknownname != 'circle'){
+                        var { points, radius, angle, rotation, radius2} = 0
+                        if (wellknownname == 'square') {
+                                points = 4
+                                radius = 10
+                                angle = Math.PI / 4
+                        }
+                        else if (wellknownname == 'triangle'){
+                                points = 3
+                                radius = 10
+                                rotation = Math.PI / 4
+                                angle = 0
+                        }
+                        else if (wellknownname == 'star'){
+                                points = 5
+                                radius = 10
+                                radius2 = 4
+                                angle = 0
+                        }
+                        else if (wellknownname == 'x'){
+                                    points =  4
+                                    radius = 10
+                                    radius2 = 0
+                                    angle = 0
+                        }
+                        var point_style = new RegularShape({
+                                fill: new Fill({
+                                    color: fill_color,
+                                }),
+                                stroke: new Stroke({
+                                    color: style_color,
+                                    width: style_size,
+                                    lineDash: dashed_line_length ? [dashed_line_gap, dashed_line_length] : '' ,
+                                }),
+                                points: points,
+                                radius: radius,
+                                radius2: radius2,
+                                rotation: rotation,
+                                angle: angle
+                            })
+                        }
+                    else{
+                        var point_style = new CircleStyle({
+                                radius: 5,
+                                fill: new Fill({
+                                    color: fill_color,
+                                }),
+                                stroke: new Stroke({
+                                    color: style_color,
+                                    width: style_size,
+                                }),
+                            })
+                        }
+            }
+        }
         var styles_new = {
             'MultiPolygon': new Style({
                 stroke: new Stroke({

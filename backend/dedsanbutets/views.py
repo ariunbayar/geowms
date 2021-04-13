@@ -54,49 +54,6 @@ def _get_package(theme_id):
     return package_data
 
 
-def _check_gp_design():
-    ws_name = 'gp_design'
-    ds_name = ws_name
-    table_name = 'geoserver_desing_view'
-    design_space = geoserver.getWorkspace(ws_name)
-    _create_design_view()
-    if design_space.status_code == 404:
-        geoserver.create_space(ws_name)
-
-    check_ds_name = geoserver.getDataStore(ws_name, ds_name)
-    if check_ds_name.status_code == 404:
-        geoserver.create_store(
-            ws_name,
-            ds_name,
-            ds_name,
-        )
-
-    layer_name = 'gp_layer_' + table_name
-    check_layer = geoserver.getDataStoreLayer(
-        ws_name,
-        ds_name,
-        layer_name
-    )
-    layer_title = layer_name
-    geom_att, extends = get_colName_type(table_name, 'geo_data')
-    if extends:
-        srs = extends[0]['find_srid']
-    else:
-        srs = 4326
-
-    if check_layer.status_code == 404:
-        layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends,
-                        False
-        )
-
 
 @require_GET
 @ajax_required
@@ -706,38 +663,6 @@ def erese(request, payload):
             'info': 'Алдаа гарсан байна: ' + str(e)
         }
     return JsonResponse(rsp)
-
-
-def get_colName_type(view_name, data):
-    cursor = connections['default'].cursor()
-    query_index = '''
-        select
-            ST_GeometryType(geo_data),
-            Find_SRID('public', '{view_name}', '{data}'),
-            ST_Extent(geo_data)
-        from
-            {view_name} group by geo_data limit 1
-            '''.format(
-                view_name=view_name,
-                data=data
-                )
-
-    sql = '''
-        SELECT
-        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
-        FROM
-        pg_attribute
-        WHERE
-        attrelid = 'public.{view_name}'::regclass AND    attnum > 0
-        ORDER  BY attnum
-        '''.format(view_name=view_name)
-
-    cursor.execute(sql)
-    geom_att = dict_fetchall(cursor)
-    geom_att = list(geom_att)
-    cursor.execute(query_index)
-    some_attributes = dict_fetchall(cursor)
-    some_attributes = list(some_attributes)
 
 
 
