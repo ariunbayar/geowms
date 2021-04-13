@@ -185,7 +185,7 @@ class CronTab extends Component {
                                             </div>
                                         </div>
                                         <div className="form-group col-md-1">
-                                            <label htmlFor="id_crontab_is_active">is active</label>
+                                            <label htmlFor="id_crontab_is_active">Идэвхжүүлэх</label>
                                             <Field
                                                 className="ml-2"
                                                 name='crontab_is_active'
