@@ -12,6 +12,7 @@ from api.utils import replace_src_url
 from backend.payment.models import PaymentLayer
 from main.decorators import ajax_required
 from main.components import Datatable
+from django.views.decorators.csrf import csrf_exempt
 from main import utils
 from .models import AnotherDatabaseTable, AnotherDatabase
 from .mongo_utils import (
@@ -25,7 +26,7 @@ from .mongo_utils import (
     mongo_check_connection
 )
 from backend.inspire.models import LPackages, LFeatures
-
+from crontab import CronTab
 
 @require_POST
 @ajax_required
@@ -450,8 +451,7 @@ def get_mssql_tables_list(request, payload, pk):
 
 
 @require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
+@csrf_exempt
 def update(request, pk):
     search_values = {
         'AGUULAH': 'Агуулах ',
@@ -497,6 +497,169 @@ def update(request, pk):
         'all_count': all_count,
         'success_count': success_count,
         'prop_b_count': prop_b_count,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def crontab_save(request, payload):
+
+    onether_db = get_object_or_404(AnotherDatabase, pk=payload.get('id'))
+
+    crontab = {
+        'minute': payload.get('minute'),
+        'hour': payload.get('hour'),
+        'day': payload.get('day'),
+        'month': payload.get('month'),
+        'day_week': payload.get('day_week'),
+    }
+    onether_db.crontab = crontab
+    onether_db.crontab_is_active = crontab_is_active
+    onether_db.save()
+
+    rsp = {
+        'success': True,
+    }
+
+    return JsonResponse(rsp)
+
+
+def json_to_crostab(obj):
+    text = ''
+    for i, value in obj.items():
+        text = text + value + ' '
+    return text
+
+
+# job.every(4).hours()  == '0 */4 * * *'
+# job.every().dom()     == '0 0 * * *'
+# job.every().month()   == '0 0 0 * *'
+# job.every(2).dows()   == '0 0 * * */2'
+def add_crontab(command, minute, hour, dom, month, dow):
+
+    cron = CronTab(user=True)
+    job = cron.new(command=command)
+    if minute:
+        job.minute.on(minute)
+    if hour:
+        job.hour.on(hour)
+    if dom:
+        job.dom.on(dom)
+    if month:
+        job.month.on(month)
+    if dow:
+        job.dow.on(dow)
+    save_sting = str(job)
+    cron.write()
+    return save_sting
+
+
+def remove_crontab(key):
+    cron = CronTab(user=True)
+    save_string = ''
+    for job in cron:
+        if key in str(job):
+            cron.remove(job)
+            save_string = str(job)
+    cron.write()
+    return save_string
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def crontab_save(request, payload):
+    onether_db = get_object_or_404(AnotherDatabase, pk=payload.get('id'))
+    crontab = {
+        'minute': payload.get('minute'),
+        'hour': payload.get('hour'),
+        'day': payload.get('day'),
+        'month': payload.get('month'),
+        'day_week': payload.get('day_week'),
+    }
+    if onether_db.db_type == AnotherDatabase.MONGODB:
+        url = reverse('backend:another-database:refresh-datas-mongo', args=[payload.get('id')])
+
+    if onether_db.db_type == AnotherDatabase.MSSSQL:
+        url = reverse('backend:another-database:refresh-datas-mssql', args=[payload.get('id')])
+
+    command = 'curl ' + request.build_absolute_uri(url)
+
+    if payload.get('crontab_is_active'):
+
+        return_crontab_string = remove_crontab(url)
+
+        minute = None
+        hour = None
+        dom = None
+        month = None
+        dow = None
+        if payload.get('minute') and payload.get('minute') != '*':
+            minute = int(payload.get('minute'))
+        if payload.get('hour') and payload.get('hour') != '*':
+            hour = int(payload.get('hour'))
+        if payload.get('day') and payload.get('day') != '*':
+            dom = int(payload.get('day'))
+        if payload.get('month') and payload.get('month') != '*':
+            month = int(payload.get('month'))
+        if payload.get('day_week') and payload.get('day_week') != '*':
+            dow = int(payload.get('day_week'))
+
+        return_crontab_string = add_crontab(
+            command,
+            minute,
+            hour,
+            dom,
+            month,
+            dow
+        )
+    else:
+        return_crontab_string = remove_crontab(url)
+
+    onether_db.crontab = utils.json_dumps(crontab)
+    onether_db.crontab_is_active = payload.get('crontab_is_active')
+    onether_db.save()
+
+    rsp = {
+        'success': True,
+        'info': return_crontab_string
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def crontab_detail(request, pk):
+
+    onether_db = get_object_or_404(AnotherDatabase, pk=pk)
+    crontab_obj = utils.json_load(onether_db.crontab)
+    crontab = {
+        'id': pk,
+        'minute': '',
+        'hour': '',
+        'day': '',
+        'month': '',
+        'day_week': '',
+        'crontab_is_active': onether_db.crontab_is_active,
+    }
+    if crontab_obj:
+        crontab = {
+            'id': pk,
+            'minute': crontab_obj.get('minute'),
+            'hour': crontab_obj.get('hour'),
+            'day': crontab_obj.get('day'),
+            'month': crontab_obj.get('month'),
+            'day_week': crontab_obj.get('day_week'),
+            'crontab_is_active': onether_db.crontab_is_active,
+        }
+    rsp = {
+        'success': True,
+        'values': crontab
     }
 
     return JsonResponse(rsp)

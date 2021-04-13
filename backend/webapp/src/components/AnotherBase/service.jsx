@@ -144,6 +144,8 @@ export const service = {
     mongo_config,
     remove,
     update,
+    cronTabSave,
+    cronTabDetail
 }
 
 function update(pk) {
@@ -152,3 +154,20 @@ function update(pk) {
     }
     return fetch(`${prefix}/update/${pk}/`, requestOptions).then(handleResponse)
 }
+
+function cronTabSave(values) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify(values),
+    }
+    return fetch(`${prefix}/crontab-save/`, requestOptions).then(handleResponse)
+}
+
+function cronTabDetail(pk) {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/detail/${pk}/`, requestOptions).then(handleResponse)
+}
+
+
