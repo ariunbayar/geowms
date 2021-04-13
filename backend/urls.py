@@ -136,6 +136,10 @@ urlpatterns = [
         path('page-list/', log_views.page_list, name='page-list'),
         path('wms_log_list/', log_views.wms_log_list, name='wms_log_list-list'),
         path('wms_date_count/', log_views.wms_date_count, name='wms_date_count'),
+        path('get-card-field/', log_views.get_card_field, name='get_card-field'),
+        path('get-post-detail/', log_views.get_post_detail, name='get_post_detail'),
+        path('get-crud-events/', log_views.get_crud_events, name='get_crud_events'),
+        path('get-rsp-status/', log_views.get_rsp_status, name='get_rsp_status'),
     ], 'log'))),
 
     path('api/систем/', include(([

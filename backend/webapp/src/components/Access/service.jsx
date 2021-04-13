@@ -10,6 +10,10 @@ export const service = {
     crudMethodCount,
     crudDateCount,
     WMSDateCount,
+    getCarField,
+    get_post_detail,
+    get_crud_events,
+    get_rsp_status,
 }
 
 
@@ -60,4 +64,32 @@ function crudDateCount() {
 function WMSDateCount(){
     const requestOptions = {...getPostOptions()}
     return fetch(`${prefix}/log/wms_date_count/`, requestOptions).then(handleResponse)
+}
+
+function getCarField() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/log/get-card-field/`, requestOptions).then(handleResponse)
+}
+
+function get_post_detail() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/log/get-post-detail/`, requestOptions).then(handleResponse)
+}
+
+function get_crud_events() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/log/get-crud-events/`, requestOptions).then(handleResponse)
+}
+
+function get_rsp_status() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/log/get-rsp-status/`, requestOptions).then(handleResponse)
 }

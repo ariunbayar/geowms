@@ -4,7 +4,10 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
+from datetime import datetime
+from django.db.models import Max, Min
 
+from django.db.models import Count, F, Func, Q
 from main.decorators import ajax_required
 from geoportal_app.models import User
 from backend.wms.models import WMSLog
@@ -267,5 +270,194 @@ def wms_date_count(request):
     rsp = {
         'wms_log_date': wms_login_date,
         'wms_log_date_count': wms_login_date_count,
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_card_field(request):
+    check_array = list()
+    send_fields = list()
+    prev_name = ''
+    LoginEvent = apps.get_model('easyaudit', 'LoginEvent')
+    all_object = LoginEvent.objects.all().order_by('id')
+    if all_object:
+        now = datetime.now()
+        login_event = LoginEvent.objects.filter(
+            datetime__year=now.year,
+            datetime__month=now.month,
+            datetime__day=now.day
+        )
+        status = login_event.values_list('login_type', flat=True)
+        outlet_log = status.filter(login_type__in=['0', '2']).count()
+        inlet_log = status.filter(login_type='1').count()
+        check_array.append(LoginEvent.objects.filter(pk=1).first().username)
+        for index in all_object:
+            check_data = index
+            catche_name = check_data.username
+            if prev_name != catche_name:
+                prev_name = catche_name
+            if prev_name not in check_array:
+                check_array.append(prev_name)
+        length = len(check_array)
+        del check_array[:]
+        cards = [
+            {
+                'value': length,
+            },
+            {
+                'value': inlet_log,
+            },
+            {
+                'value': outlet_log,
+            },
+        ]
+
+        for index in cards:
+            send_fields.append(index)
+        rsp = {
+            'success': True,
+            'fields': send_fields,
+        }
+        return JsonResponse(rsp)
+
+    rsp = {
+        'success': True,
+        'fields': [],
+    }
+    return JsonResponse(rsp)
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_post_detail(request):
+    send_fields = list()
+    RequestEvent = apps.get_model('easyaudit', 'RequestEvent')
+    all_object = RequestEvent.objects.first()
+    if all_object:
+
+        request_ob = RequestEvent.objects
+        request_ob = request_ob.values_list('method', flat=True)
+        request_ob = request_ob.order_by('id')
+
+        get_request = request_ob.filter(method='GET').count()
+        post_request = request_ob.filter(method='POST').count()
+
+        cards = [
+            {
+                'value': get_request,
+            },
+            {
+                'value': post_request,
+            },
+        ]
+
+        for index in cards:
+            send_fields.append(index)
+
+        rsp = {
+                'success': True,
+                'fields': send_fields,
+            }
+        return JsonResponse(rsp)
+    rsp = {
+        'success': True,
+        'fields': [],
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_crud_events(request):
+    send_fields = list()
+    CrudEvent = apps.get_model('easyaudit', 'CrudEvent')
+    all_object = CrudEvent.objects.first()
+    if all_object:
+        crud_created_obj = CrudEvent.objects.values_list('event_type', flat=True).order_by('id')
+        crud_created = crud_created_obj.filter(event_type='1').count()
+        crud_updated = crud_created_obj.filter(event_type='2').count()
+        crud_deleted = crud_created_obj.filter(event_type='3').count()
+
+        cards = [
+            {
+                'value': crud_created,
+            },
+            {
+                'value': crud_updated,
+            },
+            {
+                'value': crud_deleted,
+            },
+        ]
+
+        for index in cards:
+            send_fields.append(index)
+
+        rsp = {
+            'success': True,
+            'fields': send_fields,
+        }
+        return JsonResponse(rsp)
+
+    rsp = {
+        'success': True,
+        'fields': [],
+    }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_rsp_status(request):
+    send_fields = list()
+    all_object = WMSLog.objects.all().order_by('id')
+    if all_object:
+        rsp_max = all_object.aggregate(Max('rsp_size')).get('rsp_size__max')
+        rsp_min = all_object.aggregate(Min('rsp_size')).get('rsp_size__min')
+        wms_log_objs =  WMSLog.objects.values_list('rsp_status', flat=True).order_by('id')
+
+        rsp_status_200 = wms_log_objs.filter(rsp_status='200').count()
+        rsp_status_301 = wms_log_objs.filter(rsp_status='301').count()
+        rsp_status_404 = wms_log_objs.filter(rsp_status='404').count()
+        rsp_status_500 = wms_log_objs.filter(rsp_status='500').count()
+
+        cards = [
+            {
+                'value': rsp_max,
+            },
+            {
+                'value': rsp_min,
+            },
+            {
+                'value': rsp_status_200,
+            },
+            {
+                'value': rsp_status_301,
+            },
+            {
+                'value': rsp_status_404,
+            },
+            {
+                'value': rsp_status_500,
+            },
+        ]
+
+        for index in cards:
+            send_fields.append(index)
+
+        rsp = {
+            'success': True,
+            'fields': send_fields,
+        }
+        return JsonResponse(rsp)
+
+    rsp = {
+        'success': True,
+        'fields': [],
     }
     return JsonResponse(rsp)
