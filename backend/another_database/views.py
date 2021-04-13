@@ -124,17 +124,21 @@ def mongo_save(request, payload):
     pk = payload.get('id')
 
     unique_id = get_unique_id()
-
-    AnotherDatabase.objects.update_or_create(
-        pk=pk,
-        defaults={
-            'connection': connection,
-            'db_type': db_type,
-            'name': name,
-            'definition': definition,
-            'unique_id': unique_id
-        }
-    )
+    if pk:
+        AnotherDatabase.objects.filter(pk=pk).update(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+        )
+    else:
+        AnotherDatabase.objects.create(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+            unique_id=unique_id,
+        )
 
     rsp = {
         'success': True,
@@ -190,16 +194,21 @@ def mssql_save(request, payload):
 
     unique_id = get_unique_id()
 
-    AnotherDatabase.objects.update_or_create(
-        pk=pk,
-        defaults={
-            'connection': connection,
-            'db_type': db_type,
-            'name': name,
-            'definition': definition,
-            'unique_id': unique_id
-        }
-    )
+    if pk:
+        AnotherDatabase.objects.filter(pk=pk).update(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+        )
+    else:
+        AnotherDatabase.objects.create(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+            unique_id=unique_id,
+        )
 
     rsp = {
         'success': True,
