@@ -573,10 +573,10 @@ def _parse_xml_to_json(xml):
 @user_passes_test(lambda u: u.is_superuser)
 def conver_sld_json(request, payload):
 
-    hoho= payload.get('file_content')
+    file_content= payload.get('file_content')
 
 
-    tree = etree.fromstring(hoho.encode('utf-8'))
+    tree = etree.fromstring(file_content.encode('utf-8'))
     content_data= _parse_xml_to_json(tree)
     style_datas = _get_style_json(content_data)
     return JsonResponse({
