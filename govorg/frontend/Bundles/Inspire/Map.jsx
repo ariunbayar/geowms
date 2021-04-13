@@ -106,6 +106,7 @@ export default class BarilgaSuurinGazar extends Component{
           wfs_url: '',
           api_links: {},
           is_delete_request: false,
+          exactly_modified_feature_id: ''
       }
 
       this.controls = {
@@ -551,7 +552,6 @@ export default class BarilgaSuurinGazar extends Component{
           const selectedFeature_ID = this.state.selectedFeature_ID
           this.setState({ is_selected_feature: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0]  })
           featureID_list.push(selectedFeature_ID)
-          console.log(selectedFeature_ID);
           if(this.state.remove_button_active) this.removeModal()
           if(this.state.cancel_button_active){
             const geom_for_revoke = event.selected[0]
@@ -643,7 +643,7 @@ export default class BarilgaSuurinGazar extends Component{
       const features = event.features.getArray()
       const check = this.checkInMongolia(features)
       if (check) {
-        this.setState({ is_not_mongolia: false })
+        this.setState({ is_not_mongolia: false, exactly_modified_feature_id: this.state.selectedFeature_ID })
         const {format} = this.state
         const data = format.writeFeatureObject(features[0], {
           dataProjection: this.state.dataProjection,
@@ -984,13 +984,12 @@ export default class BarilgaSuurinGazar extends Component{
                     () => this.updateGeom(form_values),
                     true,
                     "Тийм",
-                    `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хянуулах уу`,
+                    `${this.state.exactly_modified_feature_id || build_name} дугаартай мэдээллийг хянуулах уу`,
                     null,
                     "warning",
                     "Үгүй"
               )
               this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-      console.log(modifyend_selected_feature_check);
     }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
@@ -1005,8 +1004,7 @@ export default class BarilgaSuurinGazar extends Component{
     updateGeom(values){
       const {tid, fid, pid, is_not_mongolia} = this.state
       if (!is_not_mongolia) {
-        const id = this.state.selectedFeature_ID
-        console.log(id);
+        const id = this.state.exactly_modified_feature_id
         const { changedFeature, changedJson } = this.state
         this.feature = ''
         if (changedJson) {
@@ -1507,7 +1505,7 @@ export default class BarilgaSuurinGazar extends Component{
                           pid={this.props.match.params.pid}
                           fid={this.props.match.params.fid}
                           geojson={this.state.geojson}
-                          gid={this.state.selectedFeature_ID}
+                          gid={this.state.exactly_modified_feature_id}
                           togle_islaod={this.state.togle_islaod}
                           null_form_isload={this.state.null_form_isload}
                           addNotif={this.addNotif}
