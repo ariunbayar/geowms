@@ -1152,6 +1152,7 @@ export default class BundleMap extends Component {
                         getOnlyFeature={this.getOnlyFeature}
                         resetFilteredOnlyFeature={this.resetFilteredOnlyFeature}
                         setFeatureOnMap={this.setFeatureOnMap}
+                        bundle_id = {this.state.bundle.id}
                     />
                 </div>
             )
@@ -1160,7 +1161,7 @@ export default class BundleMap extends Component {
             return(
                 <div>
                     <div>
-                        <button class="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i class="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
+                        <button className="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i className="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
                     </div>
                 </div>
             )

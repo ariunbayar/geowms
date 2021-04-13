@@ -17,6 +17,7 @@ export const service = {
     getFeatureInfo,
     getGeom,
     getContainGeoms,
+    getFindValues,
 }
 
 function getCookie(name) {
@@ -192,4 +193,12 @@ function getContainGeoms(layers_code, geometry, km_scale) {
         body: JSON.stringify({layers_code, geometry, km_scale})
     }
     return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
+}
+
+function getFindValues(id, value) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({id, value})
+    }
+    return fetch('/api/search/', requestOptions).then(handleResponse)
 }

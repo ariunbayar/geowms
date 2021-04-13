@@ -20,6 +20,7 @@ urlpatterns = [
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
         path('get_user/', bundle_views.get_user, name='get_user'),
+        path('api/search/', bundle_views.get_search_value, name='get_search_value'),
     ], 'bundle'))),
 
     path('', include(([
