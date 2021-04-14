@@ -43,24 +43,32 @@ class SelectFeature extends Component {
             pack_idx: '',
             feat_idx: '',
             table_id: props.match.params.table_id,
+            id: props.match.params.id,
         }
 
-        this.getThemeFeatures = this.getThemeFeatures.bind(this)
         this.getValue = this.getValue.bind(this)
         this.setSelectValue = this.setSelectValue.bind(this)
+        this.setOptions = this.setOptions.bind(this)
     }
 
     componentDidMount() {
-        this.getThemeFeatures()
+        const { id, table_id } = this.state
+        this.setOptions(id, table_id)
     }
 
-    getThemeFeatures() {
-        service
-            .mssql_config
-            .getThemeFeatures()
-            .then(({ datas }) => {
-                this.setState({ datas })
-            })
+    setOptions(connection_id, table_id) {
+        Promise.all([
+            service
+                .mssql_config
+                .getThemeFeatures(),
+            service
+                .mssql_config
+                .getTableNames(connection_id, table_id),
+        ])
+        .then(([{ datas }, { success, ano_db_table }]) => {
+            this.setState({ datas, ano_db_table })
+            this.setSelectValue(ano_db_table)
+        })
     }
 
     getValue(name, value, idx) {
@@ -74,15 +82,6 @@ class SelectFeature extends Component {
         }
         if (name == 'features') {
             this.setState({ pack_idx: idx })
-        }
-    }
-
-    componentDidUpdate(prevProps) {
-        if (prevProps.ano_db_table != this.props.ano_db_table) {
-            this.setState({ ano_db_table: this.props.ano_db_table })
-            if (Object.keys(this.props.ano_db_table).length > 0) {
-                this.setSelectValue(this.props.ano_db_table);
-            }
         }
     }
 

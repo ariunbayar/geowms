@@ -125,7 +125,6 @@ class MssqlForm extends Component {
                         <div className="input-group col-md-12">
                             <SelectFeature
                                 {...this.props}
-                                ano_db_table={ano_db_table}
                                 setLoading={this.setLoading}
                                 sendFeatureCode={this.getFeatureCode}
                             />
