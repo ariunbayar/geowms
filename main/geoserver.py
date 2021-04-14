@@ -681,3 +681,13 @@ def get_layers():
         features = rsp.json()
         return features.get('layers').get('layer')
     return rsp
+
+
+def delete_style(style_name):
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'styles/{style_name}?recurse=true'.format(style_name=style_name)
+    rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    return rsp

@@ -226,6 +226,8 @@ urlpatterns = [
         path('check-style-name/', geoserver_views.check_styles_name),
         path('style-data/', geoserver_views.get_style_data),
         path('create-style/', geoserver_views.create_style),
+        path('style-list/', geoserver_views.style_list),
+        path('style-remove/', geoserver_views.style_remove),
         path('conver-sld-json/', geoserver_views.conver_sld_json),
     ], 'geoserver'))),
 

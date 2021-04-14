@@ -587,3 +587,38 @@ def conver_sld_json(request, payload):
     return JsonResponse({
         'style_content': rsp_style_data,
     })
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def style_list(request):
+
+    style_names = []
+    geoserver_style = geoserver.get_styles()
+    for style in geoserver_style:
+        style_names.append(style.get('name'))
+
+    return JsonResponse({
+        'style_list': style_names,
+    })
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def style_remove(request, payload):
+    style_name = payload.get('style_name')
+    info = ''
+
+    rsp = geoserver.delete_style(style_name)
+    if rsp.status_code != 200:
+        return JsonResponse({
+            'success': False,
+            'info': 'Layer Group устгахад алдаа гарлаа'
+        })
+    else:
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай утсгалаа'
+        })

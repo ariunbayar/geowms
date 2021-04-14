@@ -14,7 +14,7 @@ export default class GPGeoserver extends Component {
                 <div>
                     <Switch>
                         <Route path={"/back/gp-geoserver/layer-groups/"} component={GPGroup}/>
-                        <Route exact path={"/back/gp-geoserver/style/"} component={GPStyle}/>
+                        <Route path={"/back/gp-geoserver/style/"} component={GPStyle}/>
                     </Switch>
                 </div>
             )
