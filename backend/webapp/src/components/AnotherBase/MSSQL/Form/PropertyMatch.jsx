@@ -117,9 +117,6 @@ class PropertyMatch extends Component {
                     this.setState({ fields })
                 }
             })
-            .catch((e) => {
-                alert("Холболтонд алдаа гарсан байна")
-            })
     }
 
     getValue(field_name, property_id) {
