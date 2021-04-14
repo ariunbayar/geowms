@@ -52,7 +52,9 @@ urlpatterns = [
         path('mongo/fields/<int:pk>/<str:name>/', geoserver_another_database.mongo_fields),
         path('remove/<int:pk>/', geoserver_another_database.remove),
         path('get-inspire-shatlal/', geoserver_another_database.get_inspire_shatlal),
-        path('update/<int:pk>/', geoserver_another_database.update),
+        path('update/<int:pk>/', geoserver_another_database.update, name='refresh-datas-mongo'),
+        path('crontab-save/', geoserver_another_database.crontab_save),
+        path('detail/<int:pk>/', geoserver_another_database.crontab_detail),
 
         # path('mssql/insert-to-inspire/', mssql_views.insert_to_inspire),
         path('mssql/save-to-ano-db-table/', mssql_views.save_to_ano_db_table),
@@ -60,7 +62,7 @@ urlpatterns = [
         path('mssql/get-properties/<str:feature_code>/', mssql_views.get_properties),
         path('mssql/get-all-table-names/', mssql_views.get_all_table_names),
         path('mssql/tables/<int:pk>/', geoserver_another_database.get_mssql_tables_list),
-        path('mssql/refresh-mssql-datas/<int:connection_id>/', mssql_views.refresh_datas),
+        path('mssql/refresh-mssql-datas/<int:connection_id>/', mssql_views.refresh_datas, name='refresh-datas-mssql'), # ene shuuuu
     ], 'another-database'))),
 
 

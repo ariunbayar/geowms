@@ -13,6 +13,7 @@ from backend.inspire.models import MDatas
 from backend.inspire.models import LProperties
 from backend.another_database.models import AnotherDatabase
 from backend.another_database.models import AnotherDatabaseTable
+from django.views.decorators.csrf import csrf_exempt
 
 from main.decorators import ajax_required
 from main import utils
@@ -389,8 +390,7 @@ def _delete_mgeo_mdata(unique_id):
 
 
 @require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
+@csrf_exempt
 def refresh_datas(request, connection_id):
     ano_db = get_object_or_404(AnotherDatabase, pk=connection_id)
     ano_db_tablesqs = AnotherDatabaseTable.objects

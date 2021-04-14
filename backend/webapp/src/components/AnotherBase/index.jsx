@@ -5,6 +5,7 @@ import ConfigTitles from './ConfigTitles'
 import MSSQL from './MSSQL'
 import MONGO from './MONGO'
 import List from './List'
+import CronTab from './CronTab'
 
 class index extends Component {
 
@@ -16,6 +17,7 @@ class index extends Component {
         return (
             <div className="">
                 <Switch>
+                    <Route path={"/back/another-base/connection/crontab/:id/"} component={CronTab}/>
                     <Route path={"/back/another-base/connection/mongo/"} component={MONGO}/>
                     <Route path={"/back/another-base/connection/mssql/"} component={MSSQL}/>
                     <Route path={"/back/another-base/connection/"} component={ConfigTitles}/>
