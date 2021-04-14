@@ -101,7 +101,13 @@ class SelectFeature extends Component {
                 })
             })
         })
-        this.setState({ theme_idx, pack_idx, feat_idx, packs: datas[theme_idx] ? datas[theme_idx]['children'] : [], features: datas[theme_idx] ? datas[theme_idx]['children'][pack_idx]['children'] : []})
+        this.setState({
+            theme_idx,
+            pack_idx,
+            feat_idx,
+            packs: datas[theme_idx] ? datas[theme_idx]['children'] : [],
+            features: datas[theme_idx] ? datas[theme_idx]['children'][pack_idx]['children'] : []
+        })
     }
 
     render() {
