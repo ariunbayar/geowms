@@ -87,19 +87,35 @@ export class CreateStyle extends Component {
                                 'rule_name': data.rule_name
                             })
                         })
+                        var  single_select_datas = this.style_datas[0]
+                        this.setState({
+                            style_name: style_content.style_name,
+                            style_title: style_content.style_title,
+                            style_abstract: style_content.style_abstract,
+                            geom_type: style_content.geom_type,
+                            range_number: len_of_rules,
+                            single_select_datas,
+                        })
                     }
                     else{
-
+                        this.setState({
+                            style_name: style_content.style_name,
+                            style_title: style_content.style_title,
+                            style_abstract: style_content.style_abstract,
+                            geom_type: style_content.geom_type,
+                            min_range: style_content.min_range,
+                            max_range: style_content.max_range,
+                            style_color: style_content.style_color,
+                            style_size: style_content.style_size,
+                            fill_color:  style_content.fill_color,
+                            wellknownname: style_content.wellknownname,
+                            color_opacity: style_content.color_opacity,
+                            dashed_line_length: style_content.dashed_line_length,
+                            dashed_line_gap: style_content.dashed_line_gap,
+                            shape_type: style_content.shape_type,
+                            rule_name: style_content.rule_name
+                        })
                     }
-                    var  single_select_datas = this.style_datas[0]
-                    this.setState({
-                        style_name: style_content.style_name,
-                        style_title: style_content.style_title,
-                        style_abstract: style_content.style_abstract,
-                        geom_type: style_content.geom_type,
-                        range_number: len_of_rules,
-                        single_select_datas
-                    })
                 }
             })
         }

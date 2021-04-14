@@ -449,40 +449,62 @@ def create_style(request, payload):
 
 
 def _get_fill_stroke(data):
-    stroke = data.get('Stroke')
-    fill = data.get('Fill')
-    style_datas = {
-        'style_color': '',
-        'style_size':0,
-        'dashed_line_length':0,
-        'dashed_line_gap':0,
-        'fill_color':'',
-        'wellknownname': 'circle'
-    }
+    shape_data = []
+    rule_name = data.get('Name') or ''
+    max_range = data.get('MaxScaleDenominator') or 0
+    min_range = data.get('MinScaleDenominator') or 0
+
+    if data.get('LineSymbolizer'):
+        shape_data = data.get('LineSymbolizer')
+        geom_type = 'LineString'
+        shape_type = 'LineSymbolizer'
+    elif data.get('PointSymbolizer'):
+        shape_data = data.get('PointSymbolizer')
+        geom_type = 'Point'
+        shape_type = 'PointSymbolizer'
+        if shape_data.get('Graphic'):
+            shape_data = shape_data.get('Graphic')
+            shape_data = shape_data.get('Mark')
+    else:
+        shape_data = data.get('PolygonSymbolizer')
+        geom_type = 'Polygon'
+        shape_type = 'PolygonSymbolizer'
+
+    stroke = shape_data.get('Stroke')
+    fill = shape_data.get('Fill')
+    style_datas = {}
     if stroke:
         if stroke.get('stroke'):
-            style_datas['style_color'] = stroke.get('stroke')
+            style_datas['style_color'] = stroke.get('stroke') or ''
         if stroke.get('stroke-width'):
-            style_datas['style_size'] = stroke.get('stroke-width')
+            style_datas['style_size'] = stroke.get('stroke-width') or 1
 
         dashed_line = stroke.get('stroke-dasharray')
         if dashed_line:
             dashed_line = dashed_line.split()
             style_datas['dashed_line_length'] = dashed_line[0]
             style_datas['dashed_line_gap'] = dashed_line[1]
+
     if fill:
         if fill.get('fill'):
-            style_datas['fill_color'] = fill.get('fill')
+            style_datas['fill_color'] = fill.get('fill') or ''
         if fill.get('fill-opacity'):
-            style_datas['color_opacity']= fill.get('fill-opacity')
+            style_datas['color_opacity']= fill.get('fill-opacity') or 0.3
 
-    return style_datas
+    style_datas['rule_name'] = rule_name
+    style_datas['max_range'] = max_range
+    style_datas['min_range'] = min_range
+    style_datas['rule_name'] = rule_name
+    style_datas['shape_type'] = shape_type
+
+
+    return style_datas, geom_type
 
 
 def _get_style_json(content_data):
 
     shape_rules= []
-    style_datas = []
+    style_content = []
     named_layer = content_data.get('NamedLayer')
     style_name = named_layer.get('Name') or ''
     user_style = named_layer.get('UserStyle') or ''
@@ -492,53 +514,37 @@ def _get_style_json(content_data):
         style_abstract = user_style.get('Abstract') or ''
         feature_style = user_style.get('FeatureTypeStyle') or ''
         if feature_style:
-            single_rule_data = {}
             rules = feature_style.get('Rule') or ''
-            for rule in rules:
-                rule_name = rule.get('Name') or ''
-                max_range = rule.get('MaxScaleDenominator') or 0
-                min_range = rule.get('MinScaleDenominator') or 0
-                shape_data = []
-                if rule.get('LineSymbolizer'):
-                    shape_data = rule.get('LineSymbolizer')
-                    geom_type = 'LineString'
-                    shape_type = 'LineSymbolizer'
-                elif rule.get('PointSymbolizer'):
-                    shape_data = rule.get('PointSymbolizer')
-                    geom_type = 'Point'
-                    shape_type = 'PointSymbolizer'
-                    if shape_data.get('Graphic'):
-                        shape_data = shape_data.get('Graphic')
-                        shape_data = shape_data.get('Mark')
-                else:
-                    shape_data = rule.get('PolygonSymbolizer')
-                    geom_type = 'Polygon'
-                    shape_type = 'PolygonSymbolizer'
-                fil_and_stroke_datas = _get_fill_stroke(shape_data)
-                single_rule_data  = {
-                    'rule_name': rule_name,
-                    'min_range': min_range,
-                    'max_range': max_range,
-                    'style_color': fil_and_stroke_datas.get('style_color') or '',
-                    'style_size': fil_and_stroke_datas.get('style_size') or 1,
-                    'dashed_line_length': fil_and_stroke_datas.get('dashed_line_length') or 0,
-                    'dashed_line_gap': fil_and_stroke_datas.get('dashed_line_gap') or 0,
-                    'fill_color': fil_and_stroke_datas.get('fill_color') or '',
-                    'color_opacity': fil_and_stroke_datas.get('color_opacity') or 0.5,
-                    'wellknownname': fil_and_stroke_datas.get('wellknownname') or 'circle',
-                    'shape_type': shape_type
-                }
-                shape_rules.append(single_rule_data)
+            if isinstance(rules, list):
+                for rule in rules:
+                    style_datas, geom_type = _get_fill_stroke(rule)
+                    shape_rules.append(style_datas)
 
-    style_datas.append({
-        'style_name': style_name,
-        'style_title': style_title,
-        'geom_type': geom_type,
-        'style_abstract': style_abstract,
-        'shape_rules':  shape_rules
-    })
+                style_content.append({
+                    'style_name': style_name,
+                    'style_title': style_title,
+                    'geom_type': geom_type,
+                    'shape_rules': shape_rules
+                })
 
-    return style_datas
+            else:
+                style_datas, geom_type = _get_fill_stroke(rules)
+                style_content.append({
+                    'style_name': style_name,
+                    'style_title': style_title,
+                    'geom_type': geom_type,
+                    'shape_rules': shape_rules,
+                    'style_color': style_datas.get('style_color'),
+                    'style_size': style_datas.get('style_size'),
+                    'dashed_line_length': style_datas.get('dashed_line_length'),
+                    'dashed_line_gap': style_datas.get('dashed_line_gap'),
+                    'fill_color': style_datas.get('fill_color'),
+                    'shape_type': style_datas.get('shape_type'),
+                    'wellknownname': style_datas.get('wellknownname'),
+                })
+
+
+    return style_content
 
 
 def _parse_xml_to_json(xml):
@@ -575,10 +581,9 @@ def conver_sld_json(request, payload):
 
     file_content= payload.get('file_content')
 
-
     tree = etree.fromstring(file_content.encode('utf-8'))
-    content_data= _parse_xml_to_json(tree)
-    style_datas = _get_style_json(content_data)
+    content_data = _parse_xml_to_json(tree)
+    rsp_style_data = _get_style_json(content_data)
     return JsonResponse({
-        'style_content': style_datas
+        'style_content': rsp_style_data,
     })
