@@ -2,7 +2,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 import os
-from lxml import etree
+from xml.etree import ElementTree as etree
 
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
@@ -450,6 +450,9 @@ def create_style(request, payload):
 
 def _get_fill_stroke(data):
     shape_data = []
+    geom_type = ''
+    style_datas = []
+    geom_type = ''
     rule_name = data.get('Name') or ''
     max_range = data.get('MaxScaleDenominator') or 0
     min_range = data.get('MinScaleDenominator') or 0
@@ -465,37 +468,38 @@ def _get_fill_stroke(data):
         if shape_data.get('Graphic'):
             shape_data = shape_data.get('Graphic')
             shape_data = shape_data.get('Mark')
-    else:
+    elif data.get('PolygonSymbolizer'):
         shape_data = data.get('PolygonSymbolizer')
         geom_type = 'Polygon'
         shape_type = 'PolygonSymbolizer'
 
-    stroke = shape_data.get('Stroke')
-    fill = shape_data.get('Fill')
-    style_datas = {}
-    if stroke:
-        if stroke.get('stroke'):
-            style_datas['style_color'] = stroke.get('stroke') or ''
-        if stroke.get('stroke-width'):
-            style_datas['style_size'] = stroke.get('stroke-width') or 1
+    if shape_data:
+        stroke = shape_data.get('Stroke')
+        fill = shape_data.get('Fill')
+        style_datas = {}
+        if stroke:
+            if stroke.get('stroke'):
+                style_datas['style_color'] = stroke.get('stroke') or ''
+            if stroke.get('stroke-width'):
+                style_datas['style_size'] = stroke.get('stroke-width') or 1
 
-        dashed_line = stroke.get('stroke-dasharray')
-        if dashed_line:
-            dashed_line = dashed_line.split()
-            style_datas['dashed_line_length'] = dashed_line[0]
-            style_datas['dashed_line_gap'] = dashed_line[1]
+            dashed_line = stroke.get('stroke-dasharray')
+            if dashed_line:
+                dashed_line = dashed_line.split()
+                style_datas['dashed_line_length'] = dashed_line[0]
+                style_datas['dashed_line_gap'] = dashed_line[1]
 
-    if fill:
-        if fill.get('fill'):
-            style_datas['fill_color'] = fill.get('fill') or ''
-        if fill.get('fill-opacity'):
-            style_datas['color_opacity']= fill.get('fill-opacity') or 0.3
+        if fill:
+            if fill.get('fill'):
+                style_datas['fill_color'] = fill.get('fill') or ''
+            if fill.get('fill-opacity'):
+                style_datas['color_opacity']= fill.get('fill-opacity') or 0.3
 
-    style_datas['rule_name'] = rule_name
-    style_datas['max_range'] = max_range
-    style_datas['min_range'] = min_range
-    style_datas['rule_name'] = rule_name
-    style_datas['shape_type'] = shape_type
+        style_datas['rule_name'] = rule_name
+        style_datas['max_range'] = max_range
+        style_datas['min_range'] = min_range
+        style_datas['rule_name'] = rule_name
+        style_datas['shape_type'] = shape_type
 
 
     return style_datas, geom_type
@@ -504,7 +508,7 @@ def _get_fill_stroke(data):
 def _get_style_json(content_data):
 
     shape_rules= []
-    style_content = []
+    style_content = {}
     named_layer = content_data.get('NamedLayer')
     style_name = named_layer.get('Name') or ''
     user_style = named_layer.get('UserStyle') or ''
@@ -518,31 +522,26 @@ def _get_style_json(content_data):
             if isinstance(rules, list):
                 for rule in rules:
                     style_datas, geom_type = _get_fill_stroke(rule)
-                    shape_rules.append(style_datas)
-
-                style_content.append({
-                    'style_name': style_name,
-                    'style_title': style_title,
-                    'geom_type': geom_type,
-                    'shape_rules': shape_rules
-                })
+                    if style_datas and geom_type:
+                        shape_rules.append(style_datas)
+                style_content['shape_rules'] = shape_rules
 
             else:
                 style_datas, geom_type = _get_fill_stroke(rules)
-                style_content.append({
-                    'style_name': style_name,
-                    'style_title': style_title,
-                    'geom_type': geom_type,
-                    'shape_rules': shape_rules,
-                    'style_color': style_datas.get('style_color'),
-                    'style_size': style_datas.get('style_size'),
-                    'dashed_line_length': style_datas.get('dashed_line_length'),
-                    'dashed_line_gap': style_datas.get('dashed_line_gap'),
-                    'fill_color': style_datas.get('fill_color'),
-                    'shape_type': style_datas.get('shape_type'),
-                    'wellknownname': style_datas.get('wellknownname'),
-                })
+                if style_datas and geom_type:
+                    style_content['shape_type'] = style_datas.get('shape_type')
+                    style_content['shape_rules'] = shape_rules
+                    style_content['style_color'] = style_datas.get('style_color')
+                    style_content['style_size'] = style_datas.get('style_size')
+                    style_content['dashed_line_length'] = style_datas.get('dashed_line_length')
+                    style_content['dashed_line_gap'] = style_datas.get('dashed_line_gap')
+                    style_content['fill_color'] = style_datas.get('fill_color')
+                    style_content['wellknownname'] = style_datas.get('wellknownname')
 
+
+        style_content['style_name'] = style_name
+        style_content['style_title'] = style_name
+        style_content['geom_type'] = geom_type
 
     return style_content
 
@@ -553,7 +552,7 @@ def _parse_xml_to_json(xml):
     for child in list(xml):
         tag_name = etree.QName(child.tag)
         if tag_name:
-            tag_name = tag_name.localname
+            tag_name = child.tag.split('}')[1]
         if len(list(child)) > 0:
             tag_in_res = response.get(tag_name) or ''
             if tag_in_res:

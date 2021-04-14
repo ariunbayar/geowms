@@ -68,8 +68,7 @@ export class CreateStyle extends Component {
         this.setState({is_loading: true})
         service.getStyleDetail(style_name).then(({style_content}) => {
             if (style_content) {
-                var styly_content_pass = style_content[0]
-                this.handleSetStyleValues(styly_content_pass)
+                this.handleSetStyleValues(style_content)
             }
         })
     }
@@ -127,6 +126,7 @@ export class CreateStyle extends Component {
             })
         }
     }
+
     ReadFileContent(e) {
         var file = e.target.files[0]
         const reader = new FileReader()
@@ -287,6 +287,7 @@ export class CreateStyle extends Component {
         service.createStyle(values, style_name, style_title, style_abstract).then(({success, info}) =>{
             if (success) {
                 this.setState({modal_status: 'open', modal_text: info})
+                this.props.history.push("/back/gp-geoserver/layer-groups/")
             }
             else {
                 this.setState({modal_status: 'open', modal_text: info, modal_icon: 'fa fa-times-circle', icon_color: 'danger'})
