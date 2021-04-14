@@ -53,8 +53,80 @@ export class CreateStyle extends Component {
         this.handleOnClick = this.handleOnClick.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.ReadFileContent = this.ReadFileContent.bind(this)
+        this.handleStyleDetial = this.handleStyleDetial.bind(this)
+        this.handleSetStyleValues = this.handleSetStyleValues.bind(this)
     }
 
+    componentDidMount() {
+        const style_name = this.props.match.params.style_name
+        if(style_name) {
+            this.handleStyleDetial(style_name)
+        }
+    }
+
+    handleStyleDetial(style_name) {
+        this.setState({is_loading: true})
+        service.getStyleDetail(style_name).then(({style_content}) => {
+            if (style_content) {
+                var styly_content_pass = style_content[0]
+                this.handleSetStyleValues(styly_content_pass)
+            }
+        })
+    }
+
+    handleSetStyleValues(style_content) {
+        var shape_rules = style_content.shape_rules
+        const { shape_types } = this.state
+        var len_of_rules = Object.keys(shape_rules).length
+        if (shape_rules && len_of_rules > 0) {
+            shape_rules.map((data, idx) => {
+                this.style_datas.push({
+                    'index_of_range': idx+1,
+                    'range_number': len_of_rules,
+                    'min_range': data.min_range,
+                    'max_range': data.max_range,
+                    'style_color': data.style_color,
+                    'style_size': data.style_size,
+                    'fill_color':  data.fill_color,
+                    'wellknownname': data.wellknownname,
+                    'color_opacity': data.color_opacity,
+                    'dashed_line_length': data.dashed_line_length,
+                    'dashed_line_gap': data.dashed_line_gap,
+                    'shape_types': shape_types,
+                    'shape_type': data.shape_type,
+                    'rule_name': data.rule_name
+                })
+            })
+            var  single_select_datas = this.style_datas[0]
+            this.setState({
+                style_name: style_content.style_name,
+                style_title: style_content.style_title,
+                style_abstract: style_content.style_abstract,
+                geom_type: style_content.geom_type,
+                range_number: len_of_rules,
+                single_select_datas,
+            })
+        }
+        else{
+            this.setState({
+                style_name: style_content.style_name,
+                style_title: style_content.style_title,
+                style_abstract: style_content.style_abstract,
+                geom_type: style_content.geom_type,
+                min_range: style_content.min_range,
+                max_range: style_content.max_range,
+                style_color: style_content.style_color,
+                style_size: style_content.style_size,
+                fill_color:  style_content.fill_color,
+                wellknownname: style_content.wellknownname,
+                color_opacity: style_content.color_opacity,
+                dashed_line_length: style_content.dashed_line_length,
+                dashed_line_gap: style_content.dashed_line_gap,
+                shape_type: style_content.shape_type,
+                rule_name: style_content.rule_name
+            })
+        }
+    }
     ReadFileContent(e) {
         var file = e.target.files[0]
         const reader = new FileReader()
@@ -64,58 +136,8 @@ export class CreateStyle extends Component {
             file_content = reader.result
             service.convertSldToJson(file_content).then((style_content) => {
                 if (style_content) {
-                    var style_content = style_content.style_content[0]
-                    var shape_rules = style_content.shape_rules
-                    const { shape_types } = this.state
-                    var len_of_rules = Object.keys(shape_rules).length
-                    if (shape_rules && len_of_rules > 0) {
-                        shape_rules.map((data, idx) => {
-                            this.style_datas.push({
-                                'index_of_range': idx+1,
-                                'range_number': len_of_rules,
-                                'min_range': data.min_range,
-                                'max_range': data.max_range,
-                                'style_color': data.style_color,
-                                'style_size': data.style_size,
-                                'fill_color':  data.fill_color,
-                                'wellknownname': data.wellknownname,
-                                'color_opacity': data.color_opacity,
-                                'dashed_line_length': data.dashed_line_length,
-                                'dashed_line_gap': data.dashed_line_gap,
-                                'shape_types': shape_types,
-                                'shape_type': data.shape_type,
-                                'rule_name': data.rule_name
-                            })
-                        })
-                        var  single_select_datas = this.style_datas[0]
-                        this.setState({
-                            style_name: style_content.style_name,
-                            style_title: style_content.style_title,
-                            style_abstract: style_content.style_abstract,
-                            geom_type: style_content.geom_type,
-                            range_number: len_of_rules,
-                            single_select_datas,
-                        })
-                    }
-                    else{
-                        this.setState({
-                            style_name: style_content.style_name,
-                            style_title: style_content.style_title,
-                            style_abstract: style_content.style_abstract,
-                            geom_type: style_content.geom_type,
-                            min_range: style_content.min_range,
-                            max_range: style_content.max_range,
-                            style_color: style_content.style_color,
-                            style_size: style_content.style_size,
-                            fill_color:  style_content.fill_color,
-                            wellknownname: style_content.wellknownname,
-                            color_opacity: style_content.color_opacity,
-                            dashed_line_length: style_content.dashed_line_length,
-                            dashed_line_gap: style_content.dashed_line_gap,
-                            shape_type: style_content.shape_type,
-                            rule_name: style_content.rule_name
-                        })
-                    }
+                    var style_content_pass = style_content.style_content[0]
+                    this.handleSetStyleValues(style_content_pass)
                 }
             })
         }

@@ -5,10 +5,19 @@ export const service ={
     createStyle,
     convertSldToJson,
     getStyleList,
-    removeStyle
+    removeStyle,
+    getStyleDetail
 }
 
 const prefix = '/back/geoserver/rest'
+
+function getStyleDetail(style_name) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ style_name }),
+    }
+    return fetch(`${prefix}/style-detail/`, opts).then(handleResponse)
+}
 
 function removeStyle(style_name) {
     const opts = {

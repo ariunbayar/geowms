@@ -250,11 +250,11 @@ def create_layer_group(request, payload):
 
     else:
         wms_layer = WMSLayer.objects.create(
-                        name=group_title,
-                        code=group_name,
-                        wms=wms,
-                        title=group_title,
-                        feature_price=0,
+            name=group_title,
+            code=group_name,
+            wms=wms,
+            title=group_title,
+            feature_price=0,
         )
 
     return JsonResponse({
@@ -622,3 +622,21 @@ def style_remove(request, payload):
             'success': True,
             'info': 'Амжилттай утсгалаа'
         })
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def style_detail(request, payload):
+
+    style_detail_content = []
+    style_name = payload.get('style_name')
+    check_style_name = geoserver.check_geoserver_style(style_name)
+    style_content = check_style_name.text
+    if check_style_name.status_code == 200:
+        tree = etree.fromstring(style_content.encode('utf-8'))
+        content_data = _parse_xml_to_json(tree)
+        style_detail_content = _get_style_json(content_data)
+    return JsonResponse({
+        'style_content': style_detail_content,
+    })

@@ -228,6 +228,7 @@ urlpatterns = [
         path('create-style/', geoserver_views.create_style),
         path('style-list/', geoserver_views.style_list),
         path('style-remove/', geoserver_views.style_remove),
+        path('style-detail/', geoserver_views.style_detail),
         path('conver-sld-json/', geoserver_views.conver_sld_json),
     ], 'geoserver'))),
 
