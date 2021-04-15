@@ -220,7 +220,7 @@ def create_layer_group(request, payload):
 
     rsp = geoserver.create_layer_group(group_values, group_layers)
     if rsp.status_code != 201:
-       return JsonResponse({
+        return JsonResponse({
             'success': False,
             'info': "Layer group үүсгэхэд алдаа гарлаа"
         })
@@ -667,13 +667,14 @@ def style_detail(request, payload):
         style_detail_datas, check_design = _get_style_json(content_data)
         if check_design:
             simple_details = {
-                'style_name': style_detail_datas.get('style_name') or '',
+                'style_name': style_name,
                 'style_title': style_detail_datas.get('style_title') or '',
                 'style_abstract': style_detail_datas.get('style_abstract') or ''
             }
 
             style_detail_content = style_content
         else:
+            style_detail_datas['style_name'] = style_name
             style_detail_content = style_detail_datas
 
     return JsonResponse({
