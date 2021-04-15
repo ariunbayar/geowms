@@ -49,7 +49,8 @@ export class CreateStyle extends Component {
             modal_text: '',
             sld_file: {},
             check_style_content: true,
-            desing_file_content: []
+            desing_file_content: [],
+            old_style_name: ''
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
@@ -88,6 +89,7 @@ export class CreateStyle extends Component {
             style_name: simple_details.style_name,
             style_title: simple_details.style_title,
             style_abstract: simple_details.style_abstract,
+            old_style_name: simple_details.old_style_name
         })
     }
 
@@ -300,19 +302,23 @@ export class CreateStyle extends Component {
     }
 
     handleSubmit() {
-        const { style_name, style_title, style_abstract, modal_status, icon_color, modal_text, modal_icon}= this.state
+        const { style_name, style_title, style_abstract, desing_file_content, old_style_name}= this.state
+        var  style_update = this.props.match.params.style_name
 
-        if (this.style_datas && this.style_datas.length >0 ) {
+        if (desing_file_content) {
+            values = desing_file_content
+        }
+        else if (this.style_datas && this.style_datas.length > 0 ) {
             var values = this.style_datas
         }
         else {
             var values = this.state
         }
 
-        service.createStyle(values, style_name, style_title, style_abstract).then(({success, info}) =>{
+        service.createStyle(values, style_name, style_title, style_abstract, style_update, old_style_name).then(({success, info}) =>{
             if (success) {
                 this.setState({modal_status: 'open', modal_text: info})
-                this.props.history.push("/back/gp-geoserver/layer-groups/")
+                this.props.history.push("/back/gp-geoserver/style/")
             }
             else {
                 this.setState({modal_status: 'open', modal_text: info, modal_icon: 'fa fa-times-circle', icon_color: 'danger'})
@@ -410,7 +416,7 @@ export class CreateStyle extends Component {
                                 >
                                 </textarea>
                             </div>
-                            { 
+                            {
                                 ! style_update
                                 &&
                                 <div className="col-md-12 mb-2 d-flex">

@@ -58,10 +58,10 @@ function getStyleData(geom_type) {
     return fetch(`${prefix}/style-data/`, opts).then(handleResponse)
 }
 
-function createStyle(style_datas, style_name, style_title, style_abstract) {
+function createStyle(style_datas, style_name, style_title, style_abstract, style_update, old_style_name) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ style_datas, style_name, style_title, style_abstract}),
+        body: JSON.stringify({ style_datas, style_name, style_title, style_abstract, style_update, old_style_name}),
     }
     return fetch(`${prefix}/create-style/`, opts).then(handleResponse)
 }

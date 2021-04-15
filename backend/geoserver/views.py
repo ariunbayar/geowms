@@ -422,6 +422,8 @@ def create_style(request, payload):
     style_name = payload.get('style_name')
     style_title = payload.get('style_title')
     style_abstract = payload.get('style_abstract')
+    style_update = payload.get('style_update')
+    old_style_name = payload.get('old_style_name')
     if not style_name:
         return JsonResponse({
             'success': False,
@@ -430,12 +432,15 @@ def create_style(request, payload):
 
     check_name = geoserver.check_geoserver_style(style_name)
     if check_name.status_code == 200:
-        return JsonResponse({
-            'success': False,
-            'info': 'Style-ийн нэр давхцаж байна.'
-        })
+        if not style_update:
+            return JsonResponse({
+                'success': False,
+                'info': '{style_name} нэртэй style geoserver дээр бүртгэлтэй байна'.format(style_name=style_name)
+            })
+        else:
+            geoserver.delete_style(style_name)
 
-    rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract)
+    rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
     if rsp.status_code == 201:
         return JsonResponse({
             'success': True,
@@ -601,6 +606,7 @@ def conver_sld_json(request, payload):
     if check_design:
         simple_details = {
             'style_name': style_detail_datas.get('style_name') or '',
+            'old_style_name': style_detail_datas.get('style_name') or '',
             'style_title': style_detail_datas.get('style_title') or '',
             'style_abstract': style_detail_datas.get('style_abstract') or ''
         }
