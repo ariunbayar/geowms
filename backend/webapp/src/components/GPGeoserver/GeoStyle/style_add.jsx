@@ -96,6 +96,7 @@ export class CreateStyle extends Component {
     handleSetStyleValues(style_content) {
         var shape_rules = style_content.shape_rules
         const { shape_types } = this.state
+        var old_style_name = this.props.match.params.style_name
         var len_of_rules = Object.keys(shape_rules).length
         if (shape_rules && len_of_rules > 0) {
             shape_rules.map((data, idx) => {
@@ -124,6 +125,7 @@ export class CreateStyle extends Component {
                 geom_type: style_content.geom_type,
                 range_number: len_of_rules,
                 single_select_datas,
+                old_style_name
             })
         }
         else{
@@ -142,7 +144,8 @@ export class CreateStyle extends Component {
                 dashed_line_length: style_content.dashed_line_length,
                 dashed_line_gap: style_content.dashed_line_gap,
                 shape_type: style_content.shape_type,
-                rule_name: style_content.rule_name
+                rule_name: style_content.rule_name,
+                old_style_name
             })
         }
     }
