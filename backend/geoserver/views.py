@@ -444,8 +444,14 @@ def create_style(request, payload):
                     'info': '{style_name} нэртэй style geoserver дээр бүртгэлтэй байна'.format(style_name=style_name)
                 })
         geoserver.delete_style(style_name)
-
+    print("style_datas")
+    print("style_datas")
+    print("style_datas")
+    print("style_datas", style_datas)
     rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
+    print("hoho")
+    print("hoho")
+    print("hoho", rsp.text, rsp.status_code)
     if rsp.status_code == 201:
         return JsonResponse({
             'success': True,

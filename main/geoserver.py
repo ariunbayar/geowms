@@ -521,39 +521,38 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
             values = values.replace(old_style_name, style_name)
             payload = values
 
+        elif isinstance(values, list):
+            if len(values) > 0:
+                for i in range(len(values)):
+                    datas = values[i]
+                    rule = _get_style_content(datas)
+                    s_rules.insert(i, rule)
+                style_content = ''.join(s_rules)
         else:
-            if isinstance(values, list):
-                if len(values) > 0:
-                    for i in range(len(values)):
-                        datas = values[i]
-                        rule = _get_style_content(datas)
-                        s_rules.insert(i, rule)
-                    style_content = ''.join(s_rules)
-            else:
-                style_content = _get_style_content(values)
+            style_content = _get_style_content(values)
 
-            payload = """
-                <StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
-                    xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/.../StyledLayerDescriptor.xsd">
-                    <NamedLayer>
+        payload = """
+            <StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc"
+                xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/.../StyledLayerDescriptor.xsd">
+                <NamedLayer>
+                    <Name>{style_name}</Name>
+                    <UserStyle>
                         <Name>{style_name}</Name>
-                        <UserStyle>
-                            <Name>{style_name}</Name>
-                            <Title>{style_title}</Title>
-                            <Abstract>{style_abstract}</Abstract>
-                            <FeatureTypeStyle>
-                                    {style_content}
-                            </FeatureTypeStyle>
-                        </UserStyle>
-                    </NamedLayer>
-                </StyledLayerDescriptor>
-            """.format(
-                style_name=style_name,
-                style_title=style_title,
-                style_abstract=style_abstract,
-                style_content=style_content
-            )
+                        <Title>{style_title}</Title>
+                        <Abstract>{style_abstract}</Abstract>
+                        <FeatureTypeStyle>
+                                {style_content}
+                        </FeatureTypeStyle>
+                    </UserStyle>
+                </NamedLayer>
+            </StyledLayerDescriptor>
+        """.format(
+            style_name=style_name,
+            style_title=style_title,
+            style_abstract=style_abstract,
+            style_content=style_content
+        )
     url = 'styles'
     headers = {'Content-type': 'application/vnd.ogc.sld+xml'}
     rsp = requests.post(BASE_URL + url, headers=headers, auth=AUTH, data=payload.encode('utf-8'))

@@ -47,7 +47,7 @@ export class CreateStyle extends Component {
             modal_icon: 'fa fa-check-circle',
             icon_color: 'success',
             modal_text: '',
-            sld_file: {},
+            sld_file: '',
             check_style_content: true,
             desing_file_content: [],
             old_style_name: ''
@@ -125,7 +125,8 @@ export class CreateStyle extends Component {
                 geom_type: style_content.geom_type,
                 range_number: len_of_rules,
                 single_select_datas,
-                old_style_name
+                old_style_name,
+                check_style_content: true
             })
         }
         else{
@@ -145,7 +146,8 @@ export class CreateStyle extends Component {
                 dashed_line_gap: style_content.dashed_line_gap,
                 shape_type: style_content.shape_type,
                 rule_name: style_content.rule_name,
-                old_style_name
+                old_style_name,
+                check_style_content: true
             })
         }
     }
@@ -157,16 +159,7 @@ export class CreateStyle extends Component {
         reader.onload = () => {
             var file_content = []
             file_content = reader.result
-            service.convertSldToJson(file_content).then(({style_content, check_style_content, simple_details}) => {
-                if (! check_style_content) {
-                    if (style_content) {
-                        this.handleSetStyleValues(style_content)
-                    }
-                }
-                else {
-                    this.handleSetXml(style_content, simple_details)
-                }
-            })
+            this.setState({sld_file: file_content})
         }
     }
 
@@ -240,7 +233,7 @@ export class CreateStyle extends Component {
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
             had_chosen, shape_type, check_style,
-            min_range, max_range, range_number, check_style_content
+            min_range, max_range, range_number, check_style_content, sld_file
         } = this.state
 
         if(
@@ -302,22 +295,34 @@ export class CreateStyle extends Component {
         if(pS.check_style_content !== check_style_content){
             this.setState({check_style_content})
         }
+        if (pS.sld_file != sld_file) {
+            // desing_file_content
+            this.setState({sld_file, desing_file_content: []})
+            service.convertSldToJson(sld_file).then(({style_content, check_style_content, simple_details}) => {
+                if (! check_style_content) {
+                    if (style_content) {
+                        this.handleSetStyleValues(style_content)
+                    }
+                }
+                else {
+                    this.handleSetXml(style_content, simple_details)
+                }
+            })
+
+        }
     }
+
 
     handleSubmit() {
         const { style_name, style_title, style_abstract, desing_file_content, old_style_name}= this.state
         var  style_update = this.props.match.params.style_name
-
-        if (desing_file_content) {
-            values = desing_file_content
+        var values = this.state
+        if (desing_file_content && desing_file_content.length >0) {
+            var values = desing_file_content
         }
         else if (this.style_datas && this.style_datas.length > 0 ) {
             var values = this.style_datas
         }
-        else {
-            var values = this.state
-        }
-
         service.createStyle(values, style_name, style_title, style_abstract, style_update, old_style_name).then(({success, info}) =>{
             if (success) {
                 this.setState({modal_status: 'open', modal_text: info})
