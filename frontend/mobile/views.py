@@ -4,9 +4,23 @@ from django.shortcuts import render, get_object_or_404
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from backend.inspire.models import LThemes
+from main.inspire import InspireSearchValue
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST, require_GET
+import json
+from backend.inspire.models import MGeoDatas
+from main import utils
 
 
 def all(request):
+    geo_id = request.GET.get('geo_id')
+    geo_json = None
+    if geo_id:
+        geom = utils.get_geom(geo_id)
+        if geom:
+            geo_json = geom.json
+            print(geo_json)
+
     context_list = []
     bundles = Bundle.objects.all()
     for bundle in bundles:
@@ -18,7 +32,13 @@ def all(request):
             'name': theme.theme_name if theme else ''
         }
         context_list.append(bundle_list)
-    return render(request, 'mobile/detail.html', {'bundles': context_list})
+    context = {
+        'bundles': context_list,
+        'geo_data': {
+            'geo_json': geo_json,
+        }
+    }
+    return render(request, 'mobile/detail.html', {'bundles': context})
 
 
 def detail(request, pk):
@@ -39,4 +59,20 @@ def detail(request, pk):
     context = {
         'bundle_display': bundle_display,
     }
+    return JsonResponse(context)
+
+
+@require_POST
+@csrf_exempt
+def search_value(request):
+
+    payload = json.loads(request.body)
+    search_value = payload.get("search_value")
+    ins_search_obj = InspireSearchValue([], [], search_value, 50, 'value_text')
+    search_values = ins_search_obj.get()
+    context = {
+        'success': True,
+        'search_values': search_values,
+    }
+
     return JsonResponse(context)

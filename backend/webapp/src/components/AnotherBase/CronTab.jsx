@@ -108,7 +108,17 @@ class CronTab extends Component {
                 <div className="card-header">
                     CronTab Тохиргоо
                 </div>
-
+                <ul>
+                    <li><b>Minutes</b>&nbsp;скриптийг гүйцэтгэх минуттай тохирч байгаа бөгөөд утга нь 0-ээс 59 хооронд хэлбэлздэг</li>
+                    <li><b>Hours</b>&nbsp;яг цаг, 24 цагийн форматыг зохицуулдаг бөгөөд утга нь 0-ээс 23 хооронд хэлбэлздэг бөгөөд 0 нь шөнийн 12:00 байна.</li>
+                    <li><b>dom</b>&nbsp;гэдэг нь тухайн сарын өдрийг хэлнэ, жишээлбэл та 15 хоног тутамд гүйхийг хүсвэл 15-ыг зааж өгч болно</li>
+                    <li><b>Month</b>&nbsp;гэдэг нь тухайн жилийн аль сар гэдгийг өгнө</li>
+                    <li><b>dow</b>&nbsp;гэдэг нь долоо хоногийн өдөр гэсэн үг бөгөөд энэ нь тоон (0-ээс 7, энд 0 ба 7 нь ням гараг байдаг) эсвэл англи хэл дээрх өдрийн эхний 3 үсэг байж болно: mon, tue, wed, thu, fri, sat, sun.</li>
+                </ul>
+                <ul>
+                    <li><b>(*)</b> Тухайн нэг цаг өдрийг товлохгүй гэж үзвэл</li>
+                    <li><b>(1, 2, 3 ...)</b> Бусад үед тоо ашиглах.</li>
+                </ul>
                 <div className="card-body">
                     <Formik
                         initialValues={ initial_values }
@@ -134,7 +144,7 @@ class CronTab extends Component {
                                 <Form>
                                         <div className="form-row">
                                             <div className="form-group col-md-1 text-wrap">
-                                                <label htmlFor="id_minute">minute</label>
+                                                <label htmlFor="id_minute">Minutes</label>
                                                 <Field
                                                     name="minute"
                                                     id="id_minute"
@@ -144,7 +154,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['minute']}</p>
                                             </div>
                                             <div className="form-group col-md-1 text-wrap">
-                                                <label htmlFor="id_hour">hour</label>
+                                                <label htmlFor="id_hour">Hours</label>
                                                 <Field
                                                     name="hour"
                                                     id="id_hour"
@@ -154,7 +164,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['hour']}</p>
                                             </div>
                                             <div className="form-group col-md-1">
-                                                <label htmlFor="id_day">day(month)</label>
+                                                <label htmlFor="id_day">dom</label>
                                                 <Field
                                                     name="day"
                                                     id="id_day"
@@ -164,7 +174,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['day']}</p>
                                             </div>
                                             <div className="form-group col-md-1">
-                                                <label htmlFor="id_month">month</label>
+                                                <label htmlFor="id_month">Months</label>
                                                 <Field
                                                     name="month"
                                                     type="text"
@@ -174,7 +184,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['month']}</p>
                                             </div>
                                             <div className="form-group col-md-1">
-                                                <label htmlFor="id_day_week">day(week)</label>
+                                                <label htmlFor="id_day_week">dow</label>
                                                 <Field
                                                     name="day_week"
                                                     type="text"

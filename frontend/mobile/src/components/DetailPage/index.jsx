@@ -25,7 +25,7 @@ export class DetailPage extends Component {
 
     render() {
         return (
-            <BundleMap bundle={this.state.bundle} wmsLayerName={this.props.wmsLayerName} wmsLayerScreenIsload={this.state.wmsLayerScreenIsload}/>
+            <BundleMap bundle={this.state.bundle} wmsLayerName={this.props.wmsLayerName} wmsLayerScreenIsload={this.state.wmsLayerScreenIsload} geo_data={this.props.geo_data}/>
         )
     }
 }
