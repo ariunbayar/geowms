@@ -373,13 +373,14 @@ def update_geo_cache(request):
 @user_passes_test(lambda u: u.is_superuser)
 def check_styles_name(request, payload):
     style_name = payload.get('style_name')
-    success = False
-    check_name = geoserver.check_geoserver_style(style_name)
-    if check_name.status_code != 200:
-        success = True
-    return JsonResponse({
-        'success': success,
-    })
+    style_update = payload.get('style_update')
+    info = _check_style_name(style_name, style_update)
+    if info:
+        return JsonResponse({'success': False, 'info': info})
+    else:
+        return JsonResponse({
+            'success': True,
+        })
 
 
 @require_POST
@@ -412,6 +413,21 @@ def get_style_data(request, payload):
     })
 
 
+def _check_style_name(style_name, old_style_name):
+    info = ''
+    if not style_name:
+        info = 'Style-ийн нэр хоосон байна.'
+
+    check_name = geoserver.check_geoserver_style(style_name)
+    check_state = False
+    if check_name.status_code == 200:
+        if old_style_name:
+            if old_style_name != style_name:
+                check_state = True
+        if not old_style_name or check_state:
+            info = '{style_name} нэртэй style geoserver дээр бүртгэлтэй байна'.format(style_name=style_name)
+    return info
+
 
 @require_POST
 @ajax_required
@@ -424,26 +440,12 @@ def create_style(request, payload):
     style_abstract = payload.get('style_abstract')
     style_update = payload.get('style_update')
     old_style_name = payload.get('old_style_name')
-    if not style_name:
-        return JsonResponse({
-            'success': False,
-            'info': 'Style-ийн нэр хоосон байна.'
-        })
+    info = _check_style_name(style_name, style_update)
 
-    check_name = geoserver.check_geoserver_style(style_name)
-    if check_name.status_code == 200:
-        if not style_update:
-            return JsonResponse({
-                'success': False,
-                'info': '{style_name} нэртэй style geoserver дээр бүртгэлтэй байна'.format(style_name=style_name)
-            })
-        else:
-            if old_style_name != style_name:
-                return JsonResponse({
-                    'success': False,
-                    'info': '{style_name} нэртэй style geoserver дээр бүртгэлтэй байна'.format(style_name=style_name)
-                })
-        geoserver.delete_style(style_name)
+    if info:
+        return JsonResponse({'success': False, 'info': info})
+
+    geoserver.delete_style(style_name)
     rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
     if rsp.status_code == 201:
         return JsonResponse({

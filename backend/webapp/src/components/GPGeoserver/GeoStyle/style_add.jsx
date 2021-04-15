@@ -296,8 +296,7 @@ export class CreateStyle extends Component {
             this.setState({check_style_content})
         }
         if (pS.sld_file != sld_file) {
-            // desing_file_content
-            this.setState({sld_file, desing_file_content: []})
+            this.setState({sld_file, desing_file_content: [], style_name: '', style_title: '', style_abstract: '', check_style_name: ''})
             service.convertSldToJson(sld_file).then(({style_content, check_style_content, simple_details}) => {
                 if (! check_style_content) {
                     if (style_content) {
@@ -341,14 +340,15 @@ export class CreateStyle extends Component {
             }
             else{
                 if (style_name != prev_style_name) {
+                    var  style_update = this.props.match.params.style_name
                     this.setState({is_loading:true, prev_style_name: style_name})
-                    service.checkStyleName(style_name).then(({success})=>
+                    service.checkStyleName(style_name, style_update).then(({success, info})=>
                     {
                         if(success){
                             this.setState({is_loading: false, check_style: false, only_clicked: true, check_style_name: ''})
                         }
                         else{
-                            this.setState({is_loading:false, check_style_name: 'Style-ийн нэр давхцаж байна', check_style: true, only_clicked: false})
+                            this.setState({is_loading:false, check_style_name: info, check_style: true, only_clicked: false})
                         }
                     })
                 }

@@ -42,10 +42,10 @@ function convertSldToJson(file_content) {
     return fetch(`${prefix}/conver-sld-json/`, opts).then(handleResponse)
 }
 
-function checkStyleName(style_name) {
+function checkStyleName(style_name, style_update) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ style_name }),
+        body: JSON.stringify({ style_name, style_update }),
     }
     return fetch(`${prefix}/check-style-name/`, opts).then(handleResponse)
 }
