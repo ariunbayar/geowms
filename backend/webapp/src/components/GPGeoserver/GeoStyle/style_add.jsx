@@ -47,7 +47,9 @@ export class CreateStyle extends Component {
             modal_icon: 'fa fa-check-circle',
             icon_color: 'success',
             modal_text: '',
-            sld_file: {}
+            sld_file: {},
+            check_style_content: true,
+            desing_file_content: []
         }
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
@@ -55,6 +57,7 @@ export class CreateStyle extends Component {
         this.ReadFileContent = this.ReadFileContent.bind(this)
         this.handleStyleDetial = this.handleStyleDetial.bind(this)
         this.handleSetStyleValues = this.handleSetStyleValues.bind(this)
+        this.handleSetXml = this.handleSetXml.bind(this)
     }
 
     componentDidMount() {
@@ -66,10 +69,25 @@ export class CreateStyle extends Component {
 
     handleStyleDetial(style_name) {
         this.setState({is_loading: true})
-        service.getStyleDetail(style_name).then(({style_content}) => {
-            if (style_content) {
-                this.handleSetStyleValues(style_content)
+        service.getStyleDetail(style_name).then(({style_content, check_style_content, simple_details}) => {
+            if (! check_style_content) {
+                if (style_content) {
+                    this.handleSetStyleValues(style_content)
+                }
             }
+            else {
+                this.handleSetXml(style_content, simple_details)
+            }
+        })
+    }
+
+    handleSetXml(style_content, simple_details) {
+        this.setState({
+            check_style_content: false,
+            desing_file_content: style_content,
+            style_name: simple_details.style_name,
+            style_title: simple_details.style_title,
+            style_abstract: simple_details.style_abstract,
         })
     }
 
@@ -134,10 +152,14 @@ export class CreateStyle extends Component {
         reader.onload = () => {
             var file_content = []
             file_content = reader.result
-            service.convertSldToJson(file_content).then((style_content) => {
-                if (style_content) {
-                    var style_content_pass = style_content.style_content[0]
-                    this.handleSetStyleValues(style_content_pass)
+            service.convertSldToJson(file_content).then(({style_content, check_style_content, simple_details}) => {
+                if (! check_style_content) {
+                    if (style_content) {
+                        this.handleSetStyleValues(style_content)
+                    }
+                }
+                else {
+                    this.handleSetXml(style_content, simple_details)
                 }
             })
         }
@@ -213,7 +235,7 @@ export class CreateStyle extends Component {
             dashed_line_gap, dashed_line_length,
             color_opacity, wellknownname,
             had_chosen, shape_type, check_style,
-            min_range, max_range, range_number
+            min_range, max_range, range_number, check_style_content
         } = this.state
 
         if(
@@ -271,6 +293,9 @@ export class CreateStyle extends Component {
                     this.setState({single_select_datas: value, data_state: false})
                 }
             }
+        }
+        if(pS.check_style_content !== check_style_content){
+            this.setState({check_style_content})
         }
     }
 
@@ -334,9 +359,10 @@ export class CreateStyle extends Component {
                 wellknowshape, div_angle, only_clicked,
                 single_select_datas, geom_type,
                 data_state, modal_status, modal_icon, icon_color,
-                modal_text, sld_file
+                modal_text, sld_file, check_style_content, desing_file_content
 
             } = this.state
+            var style_update = this.props.match.params.style_name
             return (
                 <div className="row p-2">
                     <div className="col-md-6">
@@ -384,100 +410,129 @@ export class CreateStyle extends Component {
                                 >
                                 </textarea>
                             </div>
-                            <div className="col-md-12 mb-2 d-flex">
-                                <label htmlFor="sld_file" className="col-md-6 my-2">Sld file оруулах</label>
-                                <input
-                                    name='sld_file'
-                                    id='sld_file'
-                                    type="file"
-                                    className="form-control mt-2"
-                                    onChange={(e) => this.ReadFileContent(e)}
-                                />
-                            </div>
-                            <div className="col-md-12 d-flex">
-                                <div className="col-md-6">
-                                    <label htmlFor="range_number">Scale-ийн тоо</label>
+                            { 
+                                ! style_update
+                                &&
+                                <div className="col-md-12 mb-2 d-flex">
+                                    <label htmlFor="sld_file" className="col-md-6 my-2">Sld file оруулах</label>
                                     <input
-                                        className="form-control"
-                                        name="range_number"
-                                        type="number"
-                                        onChange={(e) => this.handleOnChange(e)}
-                                        value={range_number}
+                                        name='sld_file'
+                                        id='sld_file'
+                                        type="file"
+                                        className="form-control mt-2"
+                                        onChange={(e) => this.ReadFileContent(e)}
                                     />
                                 </div>
-                                {
-                                    (range_number && range_number >0)
-                                    &&
-                                    <div className="col-md-6 d-inline-block">
-                                        <label htmlFor="range_number"></label>
-                                        <select
-                                            className="form-control mt-2"
-                                            name="had_chosen"
+                            }
+                            {
+                            check_style_content
+                            ?
+                            <div>
+                                <div className="col-md-12 d-flex">
+                                    <div className="col-md-6">
+                                        <label htmlFor="range_number">Scale-ийн тоо</label>
+                                        <input
+                                            className="form-control"
+                                            name="range_number"
+                                            type="number"
                                             onChange={(e) => this.handleOnChange(e)}
-                                            value={had_chosen}
-                                        >
-                                            <option className="col-md-12" value={0}></option>
-                                        {
-                                            (() => {
-                                                const rows = [];
-                                                for (let i = 1; i <= range_number; i++) {
-                                                rows.push(<option key={i} className="col-md-12">{i}</option>);
-                                                }
-                                                return rows;
-                                            })()
-                                            }
-                                        </select>
+                                            value={range_number}
+                                        />
                                     </div>
-                                }
-                            </div>
-                            <div className="col-md-12 px-0">
-                                {
-                                    (range_number && range_number>0)
-                                    ?
-                                    <ShowStyleData
-                                        value={single_select_datas}
-                                        handleOnChange={this.handleOnChange}
-                                        had_chosen={had_chosen}
-                                        data_state = {data_state}
-                                    />
-                                    :
-                                    <ShowStyleData
-                                        value={this.state}
-                                        handleOnChange={this.handleOnChange}
-                                        data_state = {data_state}
-                                    />
-                                }
-                                <div className="col-md-12 my-4">
-                                    <button
-                                        type="button"
-                                        className='btn btn-warning col-md-6 mx-3'
-                                        disabled={check_style}
-                                        onClick={this.handleOnClick}
-                                    >
-                                        Style шалгах
-                                    </button>
+                                    {
+                                        (range_number && range_number >0)
+                                        &&
+                                        <div className="col-md-6 d-inline-block">
+                                            <label htmlFor="range_number"></label>
+                                            <select
+                                                className="form-control mt-2"
+                                                name="had_chosen"
+                                                onChange={(e) => this.handleOnChange(e)}
+                                                value={had_chosen}
+                                            >
+                                                <option className="col-md-12" value={0}></option>
+                                            {
+                                                (() => {
+                                                    const rows = [];
+                                                    for (let i = 1; i <= range_number; i++) {
+                                                    rows.push(<option key={i} className="col-md-12">{i}</option>);
+                                                    }
+                                                    return rows;
+                                                })()
+                                                }
+                                            </select>
+                                        </div>
+                                    }
+                                </div>
+                                <div className="col-md-12 px-0">
+                                    {
+                                        (range_number && range_number>0)
+                                        ?
+                                        <ShowStyleData
+                                            value={single_select_datas}
+                                            handleOnChange={this.handleOnChange}
+                                            had_chosen={had_chosen}
+                                            data_state = {data_state}
+                                        />
+                                        :
+                                        <ShowStyleData
+                                            value={this.state}
+                                            handleOnChange={this.handleOnChange}
+                                            data_state = {data_state}
+                                        />
+                                    }
+                                    <div className="col-md-12 my-4">
+                                        <button
+                                            type="button"
+                                            className='btn btn-warning col-md-6 mx-3'
+                                            disabled={check_style}
+                                            onClick={this.handleOnClick}
+                                        >
+                                            Style шалгах
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                            :
+                            <div className="col-md-12 d-flex">
+                                <div className="col-md-12">
+                                    <textarea
+                                        name='desing_file_content'
+                                        id='desing_file_content'
+                                        type="text"
+                                        value={desing_file_content}
+                                        className="form-control col-md-12 mt-2 overflow-auto"
+                                        style = {{height: '80vh'}}
+                                        onChange={(e) => this.handleOnChange(e)}
+                                    >
+                                    </textarea>
+                                </div>
+                            </div>
+                            }
                         </div>
                     </div>
                     <div className="col-md-6">
-                        <StyleMap
-                            style_color={style_color}
-                            style_size={style_size}
-                            fill_color={fill_color}
-                            geom_type={geom_type}
-                            check_style={check_style}
-                            wellknownname={wellknownname}
-                            wellknowshape={wellknowshape}
-                            div_angle={div_angle}
-                            color_opacity={color_opacity}
-                            dashed_line_length={dashed_line_length}
-                            dashed_line_gap={dashed_line_gap}
-                            only_clicked={only_clicked}
-                            style_datas={this.style_datas}
-                        />
+                        {
+                            check_style_content
+                            &&
+                            <StyleMap
+                                style_color={style_color}
+                                style_size={style_size}
+                                fill_color={fill_color}
+                                geom_type={geom_type}
+                                check_style={check_style}
+                                wellknownname={wellknownname}
+                                wellknowshape={wellknowshape}
+                                div_angle={div_angle}
+                                color_opacity={color_opacity}
+                                dashed_line_length={dashed_line_length}
+                                dashed_line_gap={dashed_line_gap}
+                                only_clicked={only_clicked}
+                                style_datas={this.style_datas}
+                            />
+                        }
                     </div>
-                    <div className="col-md-6 px-4">
+                    <div className="col-md-6 px-4 mt-2">
                         <button
                             type="button"
                             className='btn gp-btn-outline-primary waves-effect waves-light col-md-12 mx-3'
