@@ -83,14 +83,24 @@ export class CreateStyle extends Component {
     }
 
     handleSetXml(style_content, simple_details) {
-        this.setState({
-            check_style_content: false,
-            desing_file_content: style_content,
-            style_name: simple_details.style_name,
-            style_title: simple_details.style_title,
-            style_abstract: simple_details.style_abstract,
-            old_style_name: simple_details.old_style_name
-        })
+        if (simple_details && Object.keys(simple_details).length > 0) {
+            this.setState({
+                check_style_content: false,
+                desing_file_content: style_content,
+                style_name: simple_details.style_name,
+                style_title: simple_details.style_title,
+                style_abstract: simple_details.style_abstract,
+                old_style_name: simple_details.old_style_name
+            })
+        }
+        else
+        {
+            this.setState({
+                modal_status: 'open', modal_text: 'Буруу форматтай файл байна',
+                modal_icon: 'fa fa-times-circle', icon_color: 'danger'
+            })
+        }
+
     }
 
     handleSetStyleValues(style_content) {

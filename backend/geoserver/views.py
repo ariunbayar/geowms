@@ -463,140 +463,148 @@ def _get_fill_stroke(data):
     shape_data = []
     geom_type = ''
     style_datas = []
-    geom_type = ''
-    rule_name = data.get('Name') or ''
-    max_range = data.get('MaxScaleDenominator') or 0
-    min_range = data.get('MinScaleDenominator') or 0
-    if  data.get('RasterSymbolizer'):
-        return [], '', True
+    try:
+        rule_name = data.get('Name') or ''
+        max_range = data.get('MaxScaleDenominator') or 0
+        min_range = data.get('MinScaleDenominator') or 0
 
-    elif data.get('LineSymbolizer'):
-        shape_data = data.get('LineSymbolizer')
-        geom_type = 'LineString'
-        shape_type = 'LineSymbolizer'
+        if  data.get('RasterSymbolizer'):
+            return [], '', True
 
-    elif data.get('PointSymbolizer'):
-        shape_data = data.get('PointSymbolizer')
-        geom_type = 'Point'
-        shape_type = 'PointSymbolizer'
-        if shape_data.get('Graphic'):
-            shape_data = shape_data.get('Graphic')
-            onlinesource = shape_data.get('ExternalGraphic')
-            if onlinesource:
-                return [], '', True
-            shape_data = shape_data.get('Mark')
+        elif data.get('LineSymbolizer'):
+            shape_data = data.get('LineSymbolizer')
+            geom_type = 'LineString'
+            shape_type = 'LineSymbolizer'
 
-    elif data.get('PolygonSymbolizer'):
-        shape_data = data.get('PolygonSymbolizer')
-        geom_type = 'Polygon'
-        shape_type = 'PolygonSymbolizer'
+        elif data.get('PointSymbolizer'):
+            shape_data = data.get('PointSymbolizer')
+            geom_type = 'Point'
+            shape_type = 'PointSymbolizer'
+            if shape_data.get('Graphic'):
+                shape_data = shape_data.get('Graphic')
+                onlinesource = shape_data.get('ExternalGraphic')
+                if onlinesource:
+                    return [], '', True
+                shape_data = shape_data.get('Mark')
 
-    if shape_data:
-        stroke = shape_data.get('Stroke')
-        fill = shape_data.get('Fill')
-        style_datas = {}
-        if stroke:
-            if stroke.get('stroke'):
-                style_datas['style_color'] = stroke.get('stroke') or ''
-            if stroke.get('stroke-width'):
-                style_datas['style_size'] = stroke.get('stroke-width') or 1
+        elif data.get('PolygonSymbolizer'):
+            shape_data = data.get('PolygonSymbolizer')
+            geom_type = 'Polygon'
+            shape_type = 'PolygonSymbolizer'
 
-            dashed_line = stroke.get('stroke-dasharray')
-            if dashed_line:
-                dashed_line = dashed_line.split()
-                style_datas['dashed_line_length'] = dashed_line[0]
-                style_datas['dashed_line_gap'] = dashed_line[1]
+        if shape_data:
+            stroke = shape_data.get('Stroke')
+            fill = shape_data.get('Fill')
+            style_datas = {}
+            if stroke:
+                if stroke.get('stroke'):
+                    style_datas['style_color'] = stroke.get('stroke') or ''
+                if stroke.get('stroke-width'):
+                    style_datas['style_size'] = stroke.get('stroke-width') or 1
 
-        if fill:
-            graphic_fill = fill.get('GraphicFill')
-            if graphic_fill:
-                return [], '', True
+                dashed_line = stroke.get('stroke-dasharray')
+                if dashed_line:
+                    dashed_line = dashed_line.split()
+                    style_datas['dashed_line_length'] = dashed_line[0]
+                    style_datas['dashed_line_gap'] = dashed_line[1]
 
-            if fill.get('fill'):
-                style_datas['fill_color'] = fill.get('fill') or ''
-            if fill.get('fill-opacity'):
-                style_datas['color_opacity']= fill.get('fill-opacity') or 0.3
+            if fill:
+                graphic_fill = fill.get('GraphicFill')
+                if graphic_fill:
+                    return [], '', True
 
-
-        style_datas['rule_name'] = rule_name
-        style_datas['max_range'] = max_range
-        style_datas['min_range'] = min_range
-        style_datas['rule_name'] = rule_name
-        style_datas['shape_type'] = shape_type
+                if fill.get('fill'):
+                    style_datas['fill_color'] = fill.get('fill') or ''
+                if fill.get('fill-opacity'):
+                    style_datas['color_opacity']= fill.get('fill-opacity') or 0.3
 
 
-    return style_datas, geom_type, False
+            style_datas['rule_name'] = rule_name
+            style_datas['max_range'] = max_range
+            style_datas['min_range'] = min_range
+            style_datas['rule_name'] = rule_name
+            style_datas['shape_type'] = shape_type
+
+            return style_datas, geom_type, False
+
+    except Exception:
+        return style_datas, geom_type, True
 
 
 def _get_style_json(content_data):
 
     shape_rules= []
     style_content = {}
-    named_layer = content_data.get('NamedLayer')
-    style_name = named_layer.get('Name') or ''
-    user_style = named_layer.get('UserStyle') or ''
     check_style = False
-    if user_style:
-        style_title = user_style.get('Title') or ''
-        style_abstract = user_style.get('Abstract') or ''
-        feature_style = user_style.get('FeatureTypeStyle') or ''
-        if feature_style:
-            rules = feature_style.get('Rule') or ''
-            if isinstance(rules, list):
-                for rule in rules:
-                    style_datas, geom_type, check_single= _get_fill_stroke(rule)
-                    if check_single:
-                        check_style = check_single
+    try:
+        if content_data:
+            named_layer = content_data.get('NamedLayer')
+            style_name = named_layer.get('Name') or ''
+            user_style = named_layer.get('UserStyle') or ''
+            if user_style:
+                style_title = user_style.get('Title') or ''
+                style_abstract = user_style.get('Abstract') or ''
+                feature_style = user_style.get('FeatureTypeStyle') or ''
+                if feature_style:
+                    rules = feature_style.get('Rule') or ''
+                    if isinstance(rules, list):
+                        for rule in rules:
+                            style_datas, geom_type, check_single= _get_fill_stroke(rule)
+                            if check_single:
+                                check_style = check_single
 
-                    if style_datas and geom_type and not check_single:
-                        shape_rules.append(style_datas)
-                style_content['shape_rules'] = shape_rules
+                            if style_datas and geom_type and not check_single:
+                                shape_rules.append(style_datas)
+                        style_content['shape_rules'] = shape_rules
 
-            else:
-                style_datas, geom_type, check_style = _get_fill_stroke(rules)
-                if style_datas and geom_type and not check_style:
-                    style_content['shape_type'] = style_datas.get('shape_type')
-                    style_content['shape_rules'] = shape_rules
-                    style_content['style_color'] = style_datas.get('style_color')
-                    style_content['style_size'] = style_datas.get('style_size')
-                    style_content['dashed_line_length'] = style_datas.get('dashed_line_length')
-                    style_content['dashed_line_gap'] = style_datas.get('dashed_line_gap')
-                    style_content['fill_color'] = style_datas.get('fill_color')
-                    style_content['wellknownname'] = style_datas.get('wellknownname')
+                    else:
+                        style_datas, geom_type, check_style = _get_fill_stroke(rules)
+                        if style_datas and geom_type and not check_style:
+                            style_content['shape_type'] = style_datas.get('shape_type')
+                            style_content['shape_rules'] = shape_rules
+                            style_content['style_color'] = style_datas.get('style_color')
+                            style_content['style_size'] = style_datas.get('style_size')
+                            style_content['dashed_line_length'] = style_datas.get('dashed_line_length')
+                            style_content['dashed_line_gap'] = style_datas.get('dashed_line_gap')
+                            style_content['fill_color'] = style_datas.get('fill_color')
+                            style_content['wellknownname'] = style_datas.get('wellknownname')
 
+                style_content['style_name'] = style_name
+                style_content['style_title'] = style_name
+                style_content['style_abstract'] = style_abstract
+                style_content['geom_type'] = geom_type
 
-        style_content['style_name'] = style_name
-        style_content['style_title'] = style_name
-        style_content['style_abstract'] = style_abstract
-        style_content['geom_type'] = geom_type
-
-    return style_content, check_style
-
+        return style_content, check_style
+    except Exception:
+        return [], True
 
 def _parse_xml_to_json(xml):
-    response = {}
-    for child in list(xml):
-        tag_name = etree.QName(child.tag)
-        if tag_name:
-            tag_name = child.tag.split('}')[1]
-        if len(list(child)) > 0:
-            tag_in_res = response.get(tag_name) or ''
-            if tag_in_res:
-                response[tag_name] = []
-                if isinstance(tag_in_res, dict):
-                    response[tag_name].append(tag_in_res)
+    try:
+        response = {}
+        for child in list(xml):
+            tag_name = etree.QName(child.tag)
+            if tag_name:
+                tag_name = child.tag.split('}')[1]
+            if len(list(child)) > 0:
+                tag_in_res = response.get(tag_name) or ''
+                if tag_in_res:
+                    response[tag_name] = []
+                    if isinstance(tag_in_res, dict):
+                        response[tag_name].append(tag_in_res)
+                    else:
+                        for i in tag_in_res:
+                            response[tag_name].append(i)
+                    response[tag_name].append(_parse_xml_to_json(child))
                 else:
-                    for i in tag_in_res:
-                        response[tag_name].append(i)
-                response[tag_name].append(_parse_xml_to_json(child))
+                    response[tag_name] = _parse_xml_to_json(child)
             else:
-                response[tag_name] = _parse_xml_to_json(child)
-        else:
-            tag_attr = child.attrib.get('name')
-            if tag_attr:
-                tag_name = tag_attr
-            response[tag_name] = child.text or ''
-    return response
+                tag_attr = child.attrib.get('name')
+                if tag_attr:
+                    tag_name = tag_attr
+                response[tag_name] = child.text or ''
+        return response
+    except Exception:
+        return []
 
 
 @require_POST
@@ -608,19 +616,20 @@ def conver_sld_json(request, payload):
     tree = etree.fromstring(file_content.encode('utf-8'))
     content_data = _parse_xml_to_json(tree)
     simple_details = []
+    check_design = False
     style_detail_datas, check_design = _get_style_json(content_data)
-    if check_design:
-        simple_details = {
-            'style_name': style_detail_datas.get('style_name') or '',
-            'old_style_name': style_detail_datas.get('style_name') or '',
-            'style_title': style_detail_datas.get('style_title') or '',
-            'style_abstract': style_detail_datas.get('style_abstract') or ''
-        }
-        rsp_style_data = file_content
-
+    if check_design or not style_detail_datas:
+        check_design = True
+        if style_detail_datas:
+            simple_details = {
+                'style_name': style_detail_datas.get('style_name') or '',
+                'old_style_name': style_detail_datas.get('style_name') or '',
+                'style_title': style_detail_datas.get('style_title') or '',
+                'style_abstract': style_detail_datas.get('style_abstract') or ''
+            }
+            rsp_style_data = file_content
     else:
         rsp_style_data = style_detail_datas
-
     return JsonResponse({
         'style_content': rsp_style_data,
         'check_style_content': check_design,
@@ -673,23 +682,28 @@ def style_detail(request, payload):
     style_name = payload.get('style_name')
     check_style_name = geoserver.check_geoserver_style(style_name)
     style_content = check_style_name.text
+    style_title = ''
+    style_abstract = ''
     if check_style_name.status_code == 200:
         tree = etree.fromstring(style_content.encode('utf-8'))
         content_data = _parse_xml_to_json(tree)
         style_detail_datas, check_design = _get_style_json(content_data)
         if check_design:
+            if style_detail_datas:
+                style_abstract = style_detail_datas.get('style_abstract') or ''
+                style_title = style_detail_datas.get('style_title') or ''
+
             simple_details = {
                 'style_name': style_name,
-                'style_title': style_detail_datas.get('style_title') or '',
+                'style_title': style_title,
                 'old_style_name': style_name,
-                'style_abstract': style_detail_datas.get('style_abstract') or ''
+                'style_abstract': style_abstract
             }
 
             style_detail_content = style_content
         else:
             style_detail_datas['style_name'] = style_name
             style_detail_content = style_detail_datas
-
     return JsonResponse({
         'style_content': style_detail_content,
         'check_style_content': check_design,
