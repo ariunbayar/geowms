@@ -124,7 +124,7 @@ export class CreateStyle extends Component {
                     'dashed_line_gap': data.dashed_line_gap,
                     'shape_types': shape_types,
                     'shape_type': data.shape_type,
-                    'rule_name': data.rule_name
+                    'rule_name': data.rule_name,
                 })
             })
             var  single_select_datas = this.style_datas[0]
@@ -136,7 +136,8 @@ export class CreateStyle extends Component {
                 range_number: len_of_rules,
                 single_select_datas,
                 old_style_name,
-                check_style_content: true
+                check_style_content: true,
+                had_chosen: 1
             })
         }
         else{
