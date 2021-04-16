@@ -6,10 +6,18 @@ export const service ={
     getLayers,
     createLayerGroup,
     getGroupCacheList,
-    createGroupCache
+    createGroupCache,
+    getStyleList
 }
 
 const prefix = '/back/geoserver/rest'
+
+function getStyleList() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/style-list/`, opts).then(handleResponse)
+}
 
 function getgrouplist() {
     const opts = {

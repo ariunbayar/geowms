@@ -48,7 +48,12 @@ export class GSPaginate extends Component {
         if (search_query.length >= 1) {
             if (filter_name) {
                 var filter = items.filter(item => {
-                    return item[filter_name].toLowerCase().includes(search_query.toLowerCase())
+                    if (item[filter_name]) {
+                        return item[filter_name].toLowerCase().includes(search_query.toLowerCase())
+                    }
+                    else {
+                        return item.toLowerCase().includes(search_query.toLowerCase())
+                    }
                 })
             }
 
