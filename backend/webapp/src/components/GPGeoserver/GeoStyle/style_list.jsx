@@ -3,27 +3,27 @@ import {service} from './service'
 import {NavLink} from "react-router-dom"
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader"
-import GroupList from './list'
-import { GSPaginate } from "./geo_pagination"
+import { GSPaginate } from "../geo_pagination"
+import {StyleTableList} from "./style_table_list"
 
-export class List extends Component {
+export class StyleList extends Component {
 
     constructor(props) {
 
         super(props)
         this.state = {
-            group_list: [],
+            style_list: [],
             search_query: '',
             currentPage: 1,
-            groupPerPage: 20,
+            stylePerPage: 20,
             is_loading: false,
-            currentGroups: [],
+            currentStyles: [],
 
             modal_status: "closed",
         }
 
         this.handleListUpdated = this.handleListUpdated.bind(this)
-        this.handleGroupDelete = this.handleGroupDelete.bind(this)
+        this.handleStyleDelete = this.handleStyleDelete.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.paginate = this.paginate.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
@@ -35,9 +35,9 @@ export class List extends Component {
 
     handleListUpdated() {
         this.setState({is_loading: true})
-        service.getgrouplist().then(({group_list}) => {
+        service.getStyleList().then(({style_list}) => {
             this.setState({
-                group_list,
+                style_list,
                 is_loading: false})
         })
     }
@@ -52,12 +52,12 @@ export class List extends Component {
         }
     }
 
-    paginate(currentGroups, currentPage, search_query) {
-        this.setState({currentPage, currentGroups, search_query})
+    paginate(currentStyles, currentPage, search_query) {
+        this.setState({currentPage, currentStyles, search_query})
     }
 
-    handleGroupDelete(name){
-        service.remove_layer_group(name).then(({success, info}) =>{
+    handleStyleDelete(name){
+        service.removeStyle(name).then(({success, info}) =>{
             if (success) {
                 this.modalChange(
                     'fa fa-check-circle',
@@ -89,11 +89,10 @@ export class List extends Component {
         })
         this.handleModalOpen()
     }
-
     render() {
         const {
-            group_list, currentGroups, search_query,
-            groupPerPage, currentPage, is_loading,
+            style_list, currentStyles, search_query,
+            stylePerPage, currentPage, is_loading,
         } = this.state
         return (
             <div className="row justify-content-center">
@@ -117,7 +116,7 @@ export class List extends Component {
                             <div className="float-sm-right">
                                 <NavLink
                                     className="btn gp-btn-primary waves-effect waves-light btn-sm"
-                                    to="/back/layer-groups/нэмэх/">
+                                    to="/back/gp-geoserver/style/add/">
                                     Нэмэх
                                 </NavLink>
                             </div>
@@ -129,30 +128,29 @@ export class List extends Component {
                                 <tr>
                                     <th scope="col"> № </th>
                                     <th scope="col"> Нэр </th>
-                                    <th scope="col">TileCaching</th>
                                     <th scope="col">Засах</th>
                                     <th scope="col">Устгах</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                { currentGroups.length ===0 ?
-                                        <tr><td>geoserver дээр group бүртгэлгүй байна</td></tr>:
+                                { currentStyles.length ===0 ?
+                                    <tr><td>geoserver дээр style бүртгэлгүй байна</td></tr>:
 
-                                        currentGroups.map((value, idx) =>
-                                                <GroupList
-                                                    idx={(currentPage*groupPerPage)-groupPerPage+idx+1}
-                                                    value={value}
-                                                    handleRemove={() => this.handleGroupDelete(value)}
-                                                />
+                                    currentStyles.map((value, idx) =>
+                                        <StyleTableList
+                                            idx={(currentPage*stylePerPage)-stylePerPage+idx+1}
+                                            value={value}
+                                            handleRemove={() => this.handleStyleDelete(value)}
+                                        />
                                     )}
                             </tbody>
                         </table>
                     </div>
                     <GSPaginate
                         paginate={ this.paginate }
-                        item_list={ group_list }
+                        item_list={ style_list }
                         search_query={ search_query }
-                        per_page={ groupPerPage }
+                        per_page={ stylePerPage }
                         page={ currentPage }
                     />
                 </div>

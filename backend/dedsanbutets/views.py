@@ -22,7 +22,9 @@ from geoportal_app.models import User
 from main.utils import (
     dict_fetchall,
     slugifyWord,
-    get_geoJson
+    get_geoJson,
+    check_gp_design,
+    get_colName_type
 )
 import main.geoserver as geoserver
 
@@ -52,49 +54,6 @@ def _get_package(theme_id):
     return package_data
 
 
-def _check_gp_design():
-    ws_name = 'gp_design'
-    ds_name = ws_name
-    table_name = 'geoserver_desing_view'
-    design_space = geoserver.getWorkspace(ws_name)
-    _create_design_view()
-    if design_space.status_code == 404:
-        geoserver.create_space(ws_name)
-
-    check_ds_name = geoserver.getDataStore(ws_name, ds_name)
-    if check_ds_name.status_code == 404:
-        geoserver.create_store(
-            ws_name,
-            ds_name,
-            ds_name,
-        )
-
-    layer_name = 'gp_layer_' + table_name
-    check_layer = geoserver.getDataStoreLayer(
-        ws_name,
-        ds_name,
-        layer_name
-    )
-    layer_title = layer_name
-    geom_att, extends = get_colName_type(table_name, 'geo_data')
-    if extends:
-        srs = extends[0]['find_srid']
-    else:
-        srs = 4326
-
-    if check_layer.status_code == 404:
-        layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends,
-                        False
-        )
-
 
 @require_GET
 @ajax_required
@@ -114,7 +73,7 @@ def bundleButetsAll(request):
         else:
             themes.delete()
 
-    check_design = _check_gp_design()
+    check_design = check_gp_design()
     geoserver_style = geoserver.get_styles()
     for style in geoserver_style:
         style_names.append(style.get('name'))
@@ -706,39 +665,6 @@ def erese(request, payload):
     return JsonResponse(rsp)
 
 
-def get_colName_type(view_name, data):
-    cursor = connections['default'].cursor()
-    query_index = '''
-        select
-            ST_GeometryType(geo_data),
-            Find_SRID('public', '{view_name}', '{data}'),
-            ST_Extent(geo_data)
-        from
-            {view_name} group by geo_data limit 1
-            '''.format(
-                view_name=view_name,
-                data=data
-                )
-
-    sql = '''
-        SELECT
-        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
-        FROM
-        pg_attribute
-        WHERE
-        attrelid = 'public.{view_name}'::regclass AND    attnum > 0
-        ORDER  BY attnum
-        '''.format(view_name=view_name)
-
-    cursor.execute(sql)
-    geom_att = dict_fetchall(cursor)
-    geom_att = list(geom_att)
-    cursor.execute(query_index)
-    some_attributes = dict_fetchall(cursor)
-    some_attributes = list(some_attributes)
-
-    return geom_att, some_attributes
-
 
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
 
@@ -985,65 +911,30 @@ def removeView(table_name):
         return False
 
 
-def _create_design_view():
-    sql = '''
-            CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
-            SELECT geo_data, ST_GeometryType(geo_data) as field_type, feature_id
-                FROM
-                    m_geo_datas
-                where
-                    ST_Contains(
-                        ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
-                        ST_Transform(geo_data, 4326)
-                        ) and
-                        feature_id in (
-                            select distinct(f.feature_id)
-                            from m_geo_datas f
-                            inner join l_features lf
-                            on f.feature_id = lf.feature_id
-                            inner join l_packages p
-                            on p.package_id = lf.package_id
-                            inner join l_themes t
-                            on t.theme_id = p.theme_id
-                        )
-                limit 10000
-            '''
-    with connections['default'].cursor() as cursor:
-        cursor.execute(sql)
-    return True
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_style_data(request, payload):
+
     geom_type = payload.get('geom_type')
-    geom_type = 'ST_' + geom_type
+    if geom_type == 'PointSymbolizer':
+        geom_type = 'Point'
+    elif geom_type == 'PolygonSymbolizer':
+        geom_type = 'Polygon'
+    else:
+        geom_type = 'LineString'
+    heck_design = check_gp_design()
     cursor = connections['default'].cursor()
     sql = '''
             SELECT
                 ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
             FROM
-                m_geo_datas
+                geoserver_desing_view
             where
-                ST_Contains(
-                    ST_GeomFromText('POLYGON((107.216638889 47.6465000000001,107.216638889 48.0006666670001,107.621758421 48.0006666670001,107.621758421 47.6465000000001,107.216638889 47.6465000000001))', 4326),
-                    ST_Transform(geo_data, 4326)
-                    ) and
-                    feature_id in (
-                        select distinct(f.feature_id)
-                        from m_geo_datas f
-                        inner join l_features lf
-                        on f.feature_id = lf.feature_id
-                        inner join l_packages p
-                        on p.package_id = lf.package_id
-                        inner join l_themes t
-                        on t.theme_id = p.theme_id
-                    )
-                    and
-                    ST_GeometryType(geo_data)  similar to '{geom_type}'
-            limit 10000
+                ST_GeometryType(geo_data) like '%{geom_type}%'
+            limit 1000
             '''.format(geom_type=geom_type)
+
     cursor.execute(sql)
     some_attributes = dict_fetchall(cursor)
     some_attributes = list(some_attributes)

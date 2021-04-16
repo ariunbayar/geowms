@@ -211,29 +211,28 @@ export default class StyleMap extends Component {
 
         if(style_state == 'create_style'){
             this.setState({is_loading: true})
-            console.log("goem_type", geom_type)
             service.getStyleData(geom_type).then(({data}) =>
-                {console.log("data",data)
-                if (data)
                 {
-                        const features = new GeoJSON({
+                    if (data)
+                        {
+                            const features = new GeoJSON({
                             dataProjection: dataProjection,
                             featureProjection: featureProjection,
-                        }).readFeatures(data)
-                        const vectorSource = new VectorSource({
-                            features: features
-                        });
-                        const vector_layer = new VectorLayer({
-                        source: vectorSource,
-                        style: function (feature) {
-                            return styles_new[feature.getGeometry().getType()];
-                          }
-                        })
+                            }).readFeatures(data)
+                            const vectorSource = new VectorSource({
+                                features: features
+                            });
+                            const vector_layer = new VectorLayer({
+                            source: vectorSource,
+                            style: function (feature) {
+                                return styles_new[feature.getGeometry().getType()];
+                            }
+                            })
 
-                        this.map.addLayer(vector_layer)
-                        this.map.getView().fit(vectorSource.getExtent(),{ padding: [200, 200, 200, 200] });
-                        this.setState({is_loading: false})
-                    }
+                            this.map.addLayer(vector_layer)
+                            this.map.getView().fit(vectorSource.getExtent(),{ padding: [200, 200, 200, 200] });
+                            this.setState({is_loading: false})
+                        }
                 }
             )
         }
