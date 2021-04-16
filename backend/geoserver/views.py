@@ -1,7 +1,6 @@
 import requests
 from requests.auth import HTTPBasicAuth
 
-import os
 from xml.etree import ElementTree as etree
 
 from django.contrib.auth.decorators import user_passes_test
@@ -18,10 +17,8 @@ from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
 from django.views.decorators.csrf import csrf_exempt
-import main.geoserver as geoserver
 from main.utils import (
     dict_fetchall,
-    check_gp_design,
     get_geoJson
 )
 
@@ -31,7 +28,6 @@ from main.utils import (
 @user_passes_test(lambda u: u.is_superuser)
 @get_conf_geoserver
 def layers(request, conf_geoserver):
-
 
     HEADERS = {
         'Content-Type': 'application/json',
@@ -94,8 +90,6 @@ def layer_groups(request):
 @user_passes_test(lambda u: u.is_superuser)
 def remove_layer_group(request, payload):
     group_name = payload.get('group_name')
-    group_status = True
-    info = ''
 
     rsp = geoserver.delete_layer_group(group_name)
     if rsp.status_code != 200:
@@ -138,12 +132,11 @@ def get_group_detial(request, payload):
     if isinstance(glayers, list):
 
         for i in range(len(glayers)):
-            styel_name = ''
             if isinstance(glayers, list):
-                style_name = styles[i].get('name') if not isinstance(styles[i], str)  else ''
+                style_name = styles[i].get('name') if not isinstance(styles[i], str) else ''
 
             elif isinstance(glayers, dict):
-                style_name = styles[0].get('name') if not isinstance(styles[i], str)  else ''
+                style_name = styles[0].get('name') if not isinstance(styles[i], str) else ''
 
             layer_detial.append({
                 'type': glayers[i].get('@type') if glayers[i] else '',
@@ -179,7 +172,6 @@ def get_layer_detial(request):
             'style_name': style_name,
             'type': 'layer'
         })
-
 
     return JsonResponse({
         'layer_list': layer_list,
@@ -237,8 +229,8 @@ def create_layer_group(request, payload):
     else:
         wms = WMS.objects.create(
                 name=group_title,
-                url = wms_url,
-                created_by_id = user.id
+                url=wms_url,
+                created_by_id=user.id
         )
 
     wms_layer = wms.wmslayer_set.filter(wms=wms).first()
@@ -301,8 +293,6 @@ def _cache_value_validation(zoom_start, zoom_stop, number_of_cache):
 @user_passes_test(lambda u: u.is_superuser)
 def create_group_cache(request, payload, group_name):
     values = payload.get('values')
-    success = True
-    info = ''
     image_format = values.get('image_format')
     zoom_start = values.get('zoom_start')
     zoom_stop = values.get('zoom_stop')
@@ -317,7 +307,7 @@ def create_group_cache(request, payload, group_name):
     if errors:
         return JsonResponse({
             'success': False,
-            'errors':errors
+            'errors': errors
         })
 
     cache_layer = geoserver.create_tilelayers_cache(None, group_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache)
@@ -354,7 +344,6 @@ def create_group_cache(request, payload, group_name):
         wms.cache_url = wmts_url
         wms.save()
 
-
     return JsonResponse({
         'success': True,
         'info': 'Амжилттай хадгалагдлаа'
@@ -389,7 +378,6 @@ def check_styles_name(request, payload):
 def get_style_data(request, payload):
 
     geom_type = payload.get('geom_type')
-    check_design = check_gp_design()
     cursor = connections['default'].cursor()
     sql = '''
             SELECT
@@ -468,7 +456,7 @@ def _get_fill_stroke(data):
         max_range = data.get('MaxScaleDenominator') or 0
         min_range = data.get('MinScaleDenominator') or 0
 
-        if  data.get('RasterSymbolizer'):
+        if data.get('RasterSymbolizer'):
             return [], '', True
 
         elif data.get('LineSymbolizer'):
@@ -516,8 +504,7 @@ def _get_fill_stroke(data):
                 if fill.get('fill'):
                     style_datas['fill_color'] = fill.get('fill') or ''
                 if fill.get('fill-opacity'):
-                    style_datas['color_opacity']= fill.get('fill-opacity') or 0.3
-
+                    style_datas['color_opacity'] = fill.get('fill-opacity') or 0.3
 
             style_datas['rule_name'] = rule_name
             style_datas['max_range'] = max_range
@@ -533,7 +520,7 @@ def _get_fill_stroke(data):
 
 def _get_style_json(content_data):
 
-    shape_rules= []
+    shape_rules = []
     style_content = {}
     check_style = False
     try:
@@ -549,7 +536,7 @@ def _get_style_json(content_data):
                     rules = feature_style.get('Rule') or ''
                     if isinstance(rules, list):
                         for rule in rules:
-                            style_datas, geom_type, check_single= _get_fill_stroke(rule)
+                            style_datas, geom_type, check_single = _get_fill_stroke(rule)
                             if check_single:
                                 check_style = check_single
 
@@ -570,13 +557,14 @@ def _get_style_json(content_data):
                             style_content['wellknownname'] = style_datas.get('wellknownname')
 
                 style_content['style_name'] = style_name
-                style_content['style_title'] = style_name
+                style_content['style_title'] = style_title
                 style_content['style_abstract'] = style_abstract
                 style_content['geom_type'] = geom_type
 
         return style_content, check_style
     except Exception:
         return [], True
+
 
 def _parse_xml_to_json(xml):
     try:
@@ -612,7 +600,7 @@ def _parse_xml_to_json(xml):
 @user_passes_test(lambda u: u.is_superuser)
 def conver_sld_json(request, payload):
     rsp_style_data = []
-    file_content= payload.get('file_content')
+    file_content = payload.get('file_content')
     tree = etree.fromstring(file_content.encode('utf-8'))
     content_data = _parse_xml_to_json(tree)
     simple_details = []
@@ -657,7 +645,6 @@ def style_list(request):
 @user_passes_test(lambda u: u.is_superuser)
 def style_remove(request, payload):
     style_name = payload.get('style_name')
-    info = ''
 
     rsp = geoserver.delete_style(style_name)
     if rsp.status_code != 200:

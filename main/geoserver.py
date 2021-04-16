@@ -3,7 +3,6 @@ from backend.config.models import Config
 from django.conf import settings
 
 
-
 HEADERS = {
     'Content-type': 'application/xml',
 }
@@ -71,17 +70,20 @@ def getWorkspace(workspace_name):
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
+
 def getDataStore(workspace_name, datastore_name):
     BASE_URL, AUTH = getHeader()
     url = 'workspaces/{workspace_name}/datastores/{datastore_name}'.format(workspace_name=workspace_name, datastore_name=datastore_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
 
+
 def getDataStoreLayer(workspace_name, datastore_name, layer_name):
     BASE_URL, AUTH = getHeader()
     url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=workspace_name, datastore_name=datastore_name, layer_name=layer_name)
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
+
 
 def deleteWorkSpace(workspace_name):
     BASE_URL, AUTH = getHeader()
@@ -159,7 +161,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
     geom_type = ''
     for i in range(len(attribute_name)):
         if attribute_name[i]['data_type'][:4] == 'char' and attribute_name[i]['column_name'] != 'geo_id':
-            attributes =  '''
+            attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -171,7 +173,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
             attributes_hoho.insert(i, attributes)
         elif attribute_name[i]['data_type'][:4] == 'inte':
-            attributes =  '''
+            attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -182,7 +184,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
             attributes_hoho.insert(i, attributes)
         elif attribute_name[i]['data_type'][:4] == 'text':
-            attributes =  '''
+            attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -193,7 +195,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
             attributes_hoho.insert(i, attributes)
         elif attribute_name[i]['data_type'][:4] == 'time':
-            attributes =  '''
+            attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -207,7 +209,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
             if some_attributes:
                 geom_type = some_attributes[0]['st_geometrytype'][3:]
             if geom_type == 'Point':
-                attributes =  '''
+                attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -218,7 +220,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
                 attributes_hoho.insert(i, attributes)
             elif geom_type == 'LineString':
-                attributes =  '''
+                attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -229,7 +231,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
                 attributes_hoho.insert(i, attributes)
             elif geom_type == 'Polygon':
-                attributes =  '''
+                attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -240,7 +242,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
                 attributes_hoho.insert(i, attributes)
             elif geom_type == 'MultiPoint':
-                attributes =  '''
+                attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -251,7 +253,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
                 attributes_hoho.insert(i, attributes)
             elif geom_type == 'MultiLineString':
-                attributes =  '''
+                attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -262,7 +264,7 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 )
                 attributes_hoho.insert(i, attributes)
             else:
-                attributes =  '''
+                attributes = '''
                 <attribute>
                     <name>{attribute_name}</name>
                     <nillable>true</nillable>
@@ -306,10 +308,10 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 attributes=''.join(attributes_hoho),
             )
     if layer_state:
-        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=workspace_name, datastore_name = datastore_name, layer_name = layer_name)
+        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=workspace_name, datastore_name=datastore_name, layer_name=layer_name)
         rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
     else:
-        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name = datastore_name)
+        url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes'.format(workspace_name=workspace_name, datastore_name=datastore_name)
         rsp = requests.post(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
 
     return rsp
@@ -422,7 +424,7 @@ def update_layer_style(layer_name, style_name):
                 <defaultStyle><name>{style_name}</name></defaultStyle>
                 </layer>
             '''.format(style_name=style_name)
-    rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8') )
+    rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
     return rsp
 
 
@@ -440,12 +442,12 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
         if min_range:
             min_range_content = '''
                 <MinScaleDenominator>{min_range}</MinScaleDenominator>
-            '''.format(min_range = float(min_range))
+            '''.format(min_range=float(min_range))
 
         if max_range:
             max_range_content = '''
                 <MaxScaleDenominator>{max_range}</MaxScaleDenominator>
-            '''.format(max_range = float(max_range))
+            '''.format(max_range=float(max_range))
 
         fill_content = '''
             <Fill>
@@ -453,8 +455,8 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
                 <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
             </Fill>
         '''.format(
-            fill_color = values.get('fill_color'),
-            fill_opacity = values.get('color_opacity'),
+            fill_color=values.get('fill_color'),
+            fill_opacity=values.get('color_opacity'),
         )
 
         stroke_content = '''
@@ -464,10 +466,10 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
                 <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
             </Stroke>
         '''.format(
-            stroke_color = values.get('style_color'),
-            stroke_width = values.get('style_size'),
-            dashed_line_length = values.get('dashed_line_length'),
-            dashed_line_gap = values.get('dashed_line_gap')
+            stroke_color=values.get('style_color'),
+            stroke_width=values.get('style_size'),
+            dashed_line_length=values.get('dashed_line_length'),
+            dashed_line_gap=values.get('dashed_line_gap')
         )
 
         if geom_type == 'PointSymbolizer':
@@ -484,8 +486,8 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
                 '''.format(
                     geom_type=geom_type,
                     wellknownname=values.get('wellknownname'),
-                    fill_content = fill_content,
-                    stroke_content = stroke_content
+                    fill_content=fill_content,
+                    stroke_content=stroke_content
                 )
         else:
             shape_content = '''
@@ -494,9 +496,9 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
                     {stroke_content}
                 </{geom_type}>
             '''.format(
-                geom_type = geom_type,
-                fill_content = fill_content,
-                stroke_content = stroke_content
+                geom_type=geom_type,
+                fill_content=fill_content,
+                stroke_content=stroke_content
             )
 
         style_content = '''
@@ -507,10 +509,10 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
                     {shape_content}
                 </Rule>
             '''.format(
-                name = rule_name,
-                shape_content = shape_content,
-                min_range_content = min_range_content,
-                max_range_content = max_range_content
+                name=rule_name,
+                shape_content=shape_content,
+                min_range_content=min_range_content,
+                max_range_content=max_range_content
             )
         return style_content
 
@@ -563,7 +565,7 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
     layer_name = layer_name
     if ws_name:
         layer_name = ws_name + ':' + layer_name
-    payload='''
+    payload = '''
         <seedRequest>
             <name>{layer_name}</name>
             <srs>
@@ -585,11 +587,10 @@ def create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, 
         srs=srs
     )
 
-
     BASE_URL, AUTH = getCacheHeader()
 
     headers = {'Content-type': 'text/xml'}
-    url = BASE_URL +  'seed/' + '{layer_name}.xml'.format(layer_name=layer_name)
+    url = BASE_URL + 'seed/' + '{layer_name}.xml'.format(layer_name=layer_name)
     rsp = requests.post(url, headers=headers, auth=AUTH, data=payload.encode('utf-8'))
     return rsp
 
@@ -637,12 +638,12 @@ def create_layer_group(group_values, group_layers):
     g_layers = []
     g_styles = []
     for i in range(len(group_layers)):
-        style =  '''
+        style = '''
             <style>{style_name}</style>
             '''.format(
                 style_name=group_layers[i]['style_name']
             )
-        layer =  '''
+        layer = '''
             <layer>{layer_name}</layer>
             '''.format(
                 layer_name=group_layers[i]['layer_name']
@@ -651,26 +652,26 @@ def create_layer_group(group_values, group_layers):
         g_styles.insert(i, style)
 
     payload = '''
-       <layerGroup>
-        <name>{name}</name>
-        <title>{title}</title>
-        <abstractTxt>{abstract}</abstractTxt>
-        <layers>
-            {layers}
-        </layers>
-        <styles>
-            {styles}
-        </styles>
+        <layerGroup>
+            <name>{name}</name>
+            <title>{title}</title>
+            <abstractTxt>{abstract}</abstractTxt>
+            <layers>
+                {layers}
+            </layers>
+            <styles>
+                {styles}
+            </styles>
         </layerGroup>
     '''.format(
-        name = group_values.get('name'),
-        title = group_values.get('title'),
-        abstract = group_values.get('abstract'),
-        layers = ''.join(g_layers),
-        styles = ''.join(g_styles)
+        name=group_values.get('name'),
+        title=group_values.get('title'),
+        abstract=group_values.get('abstract'),
+        layers=''.join(g_layers),
+        styles=''.join(g_styles)
     )
     url = 'layergroups/'
-    rsp = requests.post(BASE_URL+ url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
+    rsp = requests.post(BASE_URL+url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
     return rsp
 
 
