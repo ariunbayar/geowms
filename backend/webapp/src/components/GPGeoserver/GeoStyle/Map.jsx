@@ -347,7 +347,7 @@ export default class StyleMap extends Component {
         return (
             <div className="row">
                 <div className="col-md-12 w-100">
-                    <div id="map" style={{height:"80vh"}}><input className="form-control col-1 position-fixed border border-dark"/></div>
+                    <div id="map" style={{height:"80vh"}}></div>
                 </div>
                 {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
             </div>
