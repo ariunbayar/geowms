@@ -258,15 +258,15 @@ export default class SideBar extends Component {
                     {fid ?
                         <div>
                             {geom_type &&
-                             <fieldset>
-                                  <div className="form-row border m-1 p-1">
-                                        <div className="form-row col-md-12  text-center">
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor="" className="m-2"><h5>tilecache тохируулах</h5></label>
-                                                <input type="checkbox" checked={tile_cache_check} onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
-                                            </div>
+                            <fieldset>
+                                <div className="form-row border m-1 p-1">
+                                    <div className="form-row col-md-12  text-center">
+                                        <div className="form-group col-md-12">
+                                            <label htmlFor="" className="m-2"><h5>tilecache тохируулах</h5></label>
+                                            <input type="checkbox" checked={tile_cache_check} onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
                                         </div>
-                                     {
+                                    </div>
+                                    {
                                         tile_cache_check
                                         &&
                                         <div className="form-row col-md-12">

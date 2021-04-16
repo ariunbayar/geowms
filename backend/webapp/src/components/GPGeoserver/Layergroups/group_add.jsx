@@ -62,7 +62,6 @@ export class GroupAdd extends Component {
         if (group_name) {
             this.getDetialAll(group_name)
         }
-
         Promise.all([
             service.getLayers(),
             service.getStyleList(),
@@ -222,25 +221,25 @@ export class GroupAdd extends Component {
                                             <div className="form-row col-md-12">
                                                 <div className="form-row">
                                                     <div className="form-group col-md-12">
-                                                            <label htmlFor="" >Нэр</label>
-                                                            <Field
-                                                                className={'form-control ' + (errors.name ? 'is-invalid' : '')}
-                                                                name='name'
-                                                                id="name"
-                                                                type="text"
-                                                            />
-                                                            <ErrorMessage name="name" component="div" className="text-danger"/>
+                                                        <label htmlFor="" >Нэр</label>
+                                                        <Field
+                                                            className={'form-control ' + (errors.name ? 'is-invalid' : '')}
+                                                            name='name'
+                                                            id="name"
+                                                            type="text"
+                                                        />
+                                                        <ErrorMessage name="name" component="div" className="text-danger"/>
 
                                                     </div>
                                                     <div className="form-group col-md-12">
-                                                            <label htmlFor="title">Гарчиг</label>
-                                                            <Field
-                                                                className={'form-control '}
-                                                                name='title'
-                                                                id="title"
-                                                                type="text"
-                                                                placeholder="Гарчиг"
-                                                            />
+                                                        <label htmlFor="title">Гарчиг</label>
+                                                        <Field
+                                                            className={'form-control '}
+                                                            name='title'
+                                                            id="title"
+                                                            type="text"
+                                                            placeholder="Гарчиг"
+                                                        />
                                                     </div>
                                                     <div className="form-group col-md-12 mb-2">
                                                         <label htmlFor="abstract">Товч тайлбар</label>
@@ -309,6 +308,18 @@ export class GroupAdd extends Component {
                                                             </div>
                                                         </div>
                                                     }
+                                                    <div className="col-md-12">
+                                                        <div className="form-group col-md-12 px-0">
+                                                            <input
+                                                                className='mr-2 ml-0'
+                                                                name='ws_check'
+                                                                id="ws_check"
+                                                                type='checkbox'
+                                                                onChange={(e) => this.setState({ ws_check: !tile_cache_check})}
+                                                            />
+                                                            <label htmlFor="ws_check">WorkSpace-ээс сонгох</label>
+                                                        </div>
+                                                    </div>
                                                     <div className="col-md-12">
                                                         <div className="row justify-content-center overflow-auto" style={{height: '30vh'}}>
                                                             <table className="table table-wrapper-table">
