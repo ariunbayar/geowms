@@ -41,7 +41,9 @@ export class GroupAdd extends Component {
             values: [],
             modalAction: '',
             style_list: [],
-            more_detail: ''
+            more_detail: '',
+            work_space_list: [],
+            work_space_name: ''
         }
         this.getDetialAll = this.getDetialAll.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -54,6 +56,7 @@ export class GroupAdd extends Component {
         this.modalCloseTime = this.modalCloseTime.bind(this)
         this.handleSelectModel = this.handleSelectModel.bind(this)
         this.setStyleName = this.setStyleName.bind(this)
+        this.getWsDetail = this.getWsDetail.bind(this)
 
     }
 
@@ -65,10 +68,18 @@ export class GroupAdd extends Component {
         Promise.all([
             service.getLayers(),
             service.getStyleList(),
-        ]).then(([{layer_list}, {style_list}]) => {
-            this.setState({layer_detail: layer_list, style_list})
+            service.getWslist(),
+        ]).then(([{layer_list}, {style_list}, {work_space_list}]) => {
+            this.setState({layer_detail: layer_list, style_list, work_space_list})
         })
 
+    }
+
+    getWsDetail(e) {
+        var work_space_name = e.target.value
+        service.getLayers(work_space_name).then(({layer_list}) =>{
+            this.setState({layer_detail: layer_list, work_space_name})
+        })
     }
 
     setStyleName(value, idx) {
@@ -194,8 +205,10 @@ export class GroupAdd extends Component {
             select_layer_status, modal_alert_status,
             model_alert_text, model_alert_icon,
             modalAction, modal_title, values,
-            style_list, more_detail
+            style_list, more_detail, work_space_list,
+            work_space_name
         } = this.state
+
         const group_name = this.props.match.params.group_name
         return (
             <div className="col-md-8"  style={{ minHeight: '72vh'}}>
@@ -308,18 +321,28 @@ export class GroupAdd extends Component {
                                                             </div>
                                                         </div>
                                                     }
-                                                    <div className="col-md-12">
-                                                        <div className="form-group col-md-12 px-0">
-                                                            <input
-                                                                className='mr-2 ml-0'
-                                                                name='ws_check'
-                                                                id="ws_check"
-                                                                type='checkbox'
-                                                                onChange={(e) => this.setState({ ws_check: !tile_cache_check})}
-                                                            />
-                                                            <label htmlFor="ws_check">WorkSpace-ээс сонгох</label>
+                                                    {
+                                                        !group_name &&
+                                                        <div className="col-md-12">
+                                                            <div className="form-group col-md-12 px-0">
+                                                                <label htmlFor="ws_check">WorkSpace-ээс сонгох</label>
+                                                                <select
+                                                                    name='work_space_name'
+                                                                    id='work_space_name'
+                                                                    className="form-control col-md-6"
+                                                                    value={work_space_name}
+                                                                    onChange={(e) => {this.getWsDetail(e)}}
+                                                                >
+                                                                    <option value=''></option>
+                                                                    {
+                                                                        work_space_list.map((value, idy) =>
+                                                                            <option key = {idy} value={value}>{value}</option>
+                                                                        )
+                                                                    }
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    }
                                                     <div className="col-md-12">
                                                         <div className="row justify-content-center overflow-auto" style={{height: '30vh'}}>
                                                             <table className="table table-wrapper-table">

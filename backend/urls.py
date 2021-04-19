@@ -230,6 +230,7 @@ urlpatterns = [
         path('style-remove/', geoserver_views.style_remove),
         path('style-detail/', geoserver_views.style_detail),
         path('conver-sld-json/', geoserver_views.conver_sld_json),
+        path('ws-list/', geoserver_views.get_ws_list),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),
