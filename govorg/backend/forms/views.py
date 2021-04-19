@@ -861,7 +861,7 @@ def tseg_inspire_list(request, payload):
     total_items = Paginator(geo_qs, per_page)
     items_page = total_items.page(page)
 
-    for item in items_page.object_list[:10]:
+    for item in items_page.object_list:
         geo_id = item.geo_id
         mdatas_qs = MDatas.objects
         mdatas_qs = mdatas_qs.filter(geo_id=geo_id)
