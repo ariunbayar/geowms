@@ -332,7 +332,8 @@ def get_properties(request, feature_code):
             lp.property_name,
             lp.property_code,
             lp.value_type_id,
-            lt.data_type_name
+            lt.data_type_name,
+            lt.data_type_id
         from
             l_themes t
         inner join
@@ -371,7 +372,6 @@ def get_properties(request, feature_code):
     cursor.execute(sql)
     rows = utils.dict_fetchall(cursor)
     rows = list(rows)
-
     rsp = {
         'success': True,
         'properties': rows,
