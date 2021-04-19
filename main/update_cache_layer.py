@@ -8,7 +8,7 @@ def update_web_cache():
         if cache_config.feature_id:
             feature_id = cache_config.feature_id
             count_of_feature = MGeoDatas.objects.filter(feature_id=feature_id).count()
-            if count_of_feature != cache_config.feature_count:
+            if count_of_feature != cache_config.feature_count or cache_config.is_modified:
                 l_feature = LFeatures.objects.filter(feature_id=feature_id).first()
                 l_package = LPackages.objects.filter(package_id=l_feature.package_id).first()
                 l_theme = LThemes.objects.filter(theme_id=l_package.theme_id).first().theme_code
@@ -27,4 +27,5 @@ def update_web_cache():
                 )
                 if wmts_config.status_code == 200:
                     cache_config.feature_count = count_of_feature
+                    cache_config.is_modified = False
                     cache_config.save()
