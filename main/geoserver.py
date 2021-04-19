@@ -373,18 +373,6 @@ def get_wmts_url(wms_name):
     return wmts_url
 
 
-def get_legend_url(wms_id, layer_name):
-
-    legend_url = (
-        'https://nsdi.gov.mn/back/wms/WMS/{wms_id}/?'
-        'service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer={layer}'
-    ).format(
-        wms_id=wms_id,
-        layer=layer_name,
-    )
-    return legend_url
-
-
 def get_styles():
 
     BASE_URL, AUTH = getHeader()
@@ -697,3 +685,55 @@ def delete_style(style_name):
     url = 'styles/{style_name}?recurse=true'.format(style_name=style_name)
     rsp = requests.delete(BASE_URL + url, headers=HEADERS, auth=AUTH)
     return rsp
+
+
+def get_detail_geoserver(url):
+
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'accept': 'application/json',
+        'Content-type': 'application/json',
+    }
+
+    url = BASE_URL + url
+    featuretypes = requests.get(url, headers=HEADERS, auth=AUTH)
+    if featuretypes.status_code == 200:
+        return featuretypes.json()
+
+
+
+def get_ws_datastore(ws_url, ws_name):
+
+    data_store_url = ws_url + '/' + ws_name + '/datastores'
+    datastores = _get_detail_geoserver(data_store_url)
+    if datastores and datastores['dataStores']:
+        return datastores['dataStores']['dataStore']
+
+
+def _get_ws_layers_in_wms(ws_name, ws_url):
+
+    ws_detial = []
+    datastores = get_ws_datastore(ws_url, ws_name)
+    if datastores:
+        for ds in datastores:
+            layer_url = ws_url + '/' + ws_name + '/datastores' + '/' + str(ds['name']) + '/featuretypes'
+            featuretypes = _get_detail_geoserver(layer_url)
+            if featuretypes and featuretypes['featureTypes']:
+                for layer in featuretypes['featureTypes']['featureType']:
+                    ws_detial.append(layer['name'])
+    return ws_detial
+
+
+def get_ws_list():
+
+    BASE_URL, AUTH = getHeader()
+    HEADERS = {
+        'Content-type': 'application/json',
+    }
+    url = 'workspaces'
+    rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code == 200:
+        features = rsp.json()
+        return features.get('workspaces').get('workspace')
+    return rsp
+
