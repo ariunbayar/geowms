@@ -6,6 +6,7 @@ import { service } from '../../service'
 import { Pagination } from "@utils/Pagination"
 import { GPIcon } from '@utils/Tools'
 import Modal from "@utils/Modal/Modal"
+import Loader from "@utils/Loader"
 
 class InspireTsegList extends Component {
 
@@ -22,6 +23,7 @@ class InspireTsegList extends Component {
             point_types: [],
             point_classes: [],
             point_role_list: props.point_role_list,
+            is_loading: true,
         }
         this.paginate = this.paginate.bind(this)
         this.getFields = this.getFields.bind(this)
@@ -41,20 +43,28 @@ class InspireTsegList extends Component {
 
     paginate (page, query, sort_name) {
         const { per_page } = this.state
-        this.setState({ current_page: page })
+        this.setState({ current_page: page, is_loading: true })
             return service
                 .getInspireList(page, per_page, query, sort_name)
                 .then(page => {
-                    this.setState({items: page.items, length: page.items.length})
+                    this.setState({items: page.items, length: page.items.length, is_loading: false })
                     return page
                 })
     }
 
+    setLoading(is_loading) {
+        this.setState({ is_loading })
+    }
+
     render() {
-        const { items, legnth, point_types, point_classes, point_role_list} = this.state
+        const { items, legnth, point_types, point_classes, point_role_list, is_loading } = this.state
         return (
             <div className="card">
                 <div className="card-body">
+                    <Loader
+                        is_loading={is_loading}
+                        text={'Уншиж байна'}
+                    />
                     <div className="row ml-1">
                         <div className="col-lg-12">
                             <div className="row pt-4 table-responsive">
