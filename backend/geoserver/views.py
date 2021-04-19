@@ -157,15 +157,42 @@ def get_group_detial(request, payload):
     })
 
 
-@require_GET
+def _get_ws_layers_in_wms(ws_name, ws_url):
+
+    ws_detial = []
+    datastores = []
+    data_store_url = ws_url + '/' + ws_name + '/datastores'
+    datastores = geoserver.get_detail_geoserver(data_store_url)
+    if datastores and datastores['dataStores']:
+        datastores = datastores['dataStores']['dataStore']
+    if datastores:
+        for ds in datastores:
+            layer_url = ws_url + '/' + ws_name + '/datastores' + '/' + str(ds['name']) + '/featuretypes'
+            featuretypes = geoserver.get_detail_geoserver(layer_url)
+            if featuretypes and featuretypes['featureTypes']:
+                for layer in featuretypes['featureTypes']['featureType']:
+                    ws_detial.append(layer['name'])
+
+    return ws_detial
+
+
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def get_layer_detial(request):
+def get_layer_detial(request, payload):
     layer_list = []
+    ws_name = payload.get('ws_name')
+    if ws_name:
+        ws_url = 'workspaces'
+        w_layers = _get_ws_layers_in_wms(ws_name, ws_url)
+    else:
+        w_layers = geoserver.get_layers()
 
-    w_layers = geoserver.get_layers()
     for layer in w_layers:
-        layer_name = layer.get('name')
+        if isinstance(layer, str):
+            layer_name = layer
+        else:
+            layer_name = layer.get('name')
         style_name = geoserver.get_layer_style(layer_name)
         layer_list.append({
             'layer_name': layer_name,
@@ -695,4 +722,19 @@ def style_detail(request, payload):
         'style_content': style_detail_content,
         'check_style_content': check_design,
         'simple_details': simple_details
+    })
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_ws_list(request):
+
+    work_space_list = []
+    work_spaces = geoserver.get_ws_list()
+    for work_space in work_spaces:
+        work_space_list.append(work_space.get('name'))
+
+    return JsonResponse({
+        'work_space_list': work_space_list,
     })

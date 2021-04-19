@@ -37,7 +37,13 @@ export class GroupAdd extends Component {
             model_alert_text: '',
             model_alert_icon: 'success',
             timer: null,
-            old_name: props.match.params.group_name || ''
+            old_name: props.match.params.group_name || '',
+            values: [],
+            modalAction: '',
+            style_list: [],
+            more_detail: '',
+            work_space_list: [],
+            work_space_name: ''
         }
         this.getDetialAll = this.getDetialAll.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -48,6 +54,9 @@ export class GroupAdd extends Component {
         this.handleMoveDown = this.handleMoveDown.bind(this)
         this.handleSwap = this.handleSwap.bind(this)
         this.modalCloseTime = this.modalCloseTime.bind(this)
+        this.handleSelectModel = this.handleSelectModel.bind(this)
+        this.setStyleName = this.setStyleName.bind(this)
+        this.getWsDetail = this.getWsDetail.bind(this)
 
     }
 
@@ -56,11 +65,41 @@ export class GroupAdd extends Component {
         if (group_name) {
             this.getDetialAll(group_name)
         }
-        service.getLayers().then(({layer_list})=> {
-            this.setState({layer_detail:layer_list})
+        Promise.all([
+            service.getLayers(),
+            service.getStyleList(),
+            service.getWslist(),
+        ]).then(([{layer_list}, {style_list}, {work_space_list}]) => {
+            this.setState({layer_detail: layer_list, style_list, work_space_list})
         })
 
     }
+
+    getWsDetail(e) {
+        var work_space_name = e.target.value
+        service.getLayers(work_space_name).then(({layer_list}) =>{
+            this.setState({layer_detail: layer_list, work_space_name})
+        })
+    }
+
+    setStyleName(value, idx) {
+        var detail = this.state.layer_list
+        detail[idx].style_name = value
+        this.setState({layer_list: detail, select_layer_status: false})
+    }
+
+    handleSelectModel(modal_title, modalAction, values, more_detail) {
+        return (
+            this.setState({
+                select_layer_status: true,
+                modalAction: modalAction,
+                modal_title,
+                values,
+                more_detail
+            })
+        )
+    }
+
     componentDidUpdate(pP, pS) {
         if (pS.layer_detail != this.state.layer_detail) {
             this.setState({layer_detail: this.state.layer_detail})
@@ -100,9 +139,9 @@ export class GroupAdd extends Component {
     removeLayer(e, value) {
         var array = [...this.state.layer_list]
         for (let [i, layer] of array.entries()) {
-           if (layer.layer_name == value.layer_name) {
+            if (layer.layer_name == value.layer_name) {
                 array.splice(i, 1);
-           }
+            }
         }
         this.setState({layer_list: array})
     }
@@ -164,8 +203,12 @@ export class GroupAdd extends Component {
         const {
             form_values, layer_list, layer_detail,
             select_layer_status, modal_alert_status,
-            model_alert_text, model_alert_icon
+            model_alert_text, model_alert_icon,
+            modalAction, modal_title, values,
+            style_list, more_detail, work_space_list,
+            work_space_name
         } = this.state
+
         const group_name = this.props.match.params.group_name
         return (
             <div className="col-md-8"  style={{ minHeight: '72vh'}}>
@@ -191,25 +234,25 @@ export class GroupAdd extends Component {
                                             <div className="form-row col-md-12">
                                                 <div className="form-row">
                                                     <div className="form-group col-md-12">
-                                                            <label htmlFor="" >Нэр</label>
-                                                            <Field
-                                                                className={'form-control ' + (errors.name ? 'is-invalid' : '')}
-                                                                name='name'
-                                                                id="name"
-                                                                type="text"
-                                                            />
-                                                            <ErrorMessage name="name" component="div" className="text-danger"/>
+                                                        <label htmlFor="" >Нэр</label>
+                                                        <Field
+                                                            className={'form-control ' + (errors.name ? 'is-invalid' : '')}
+                                                            name='name'
+                                                            id="name"
+                                                            type="text"
+                                                        />
+                                                        <ErrorMessage name="name" component="div" className="text-danger"/>
 
                                                     </div>
                                                     <div className="form-group col-md-12">
-                                                            <label htmlFor="title">Гарчиг</label>
-                                                            <Field
-                                                                className={'form-control '}
-                                                                name='title'
-                                                                id="title"
-                                                                type="text"
-                                                                placeholder="Гарчиг"
-                                                            />
+                                                        <label htmlFor="title">Гарчиг</label>
+                                                        <Field
+                                                            className={'form-control '}
+                                                            name='title'
+                                                            id="title"
+                                                            type="text"
+                                                            placeholder="Гарчиг"
+                                                        />
                                                     </div>
                                                     <div className="form-group col-md-12 mb-2">
                                                         <label htmlFor="abstract">Товч тайлбар</label>
@@ -243,7 +286,7 @@ export class GroupAdd extends Component {
                                                                 <Field
                                                                     type="number"
                                                                     name='miny'
-                                                                    id='minx'
+                                                                    id='miny'
                                                                     disabled={true}
                                                                     placeholder="miny"
                                                                     className="form-control col-3"
@@ -259,7 +302,7 @@ export class GroupAdd extends Component {
                                                                 <Field
                                                                     type="number"
                                                                     name='maxy'
-                                                                    id='maxx'
+                                                                    id='maxy'
                                                                     disabled={true}
                                                                     placeholder="maxy"
                                                                     className="form-control col-3"
@@ -277,7 +320,29 @@ export class GroupAdd extends Component {
                                                                 />
                                                             </div>
                                                         </div>
-                                                        }
+                                                    }
+                                                    {
+                                                        !group_name &&
+                                                        <div className="col-md-12">
+                                                            <div className="form-group col-md-12 px-0">
+                                                                <label htmlFor="ws_check">WorkSpace-ээс сонгох</label>
+                                                                <select
+                                                                    name='work_space_name'
+                                                                    id='work_space_name'
+                                                                    className="form-control col-md-6"
+                                                                    value={work_space_name}
+                                                                    onChange={(e) => {this.getWsDetail(e)}}
+                                                                >
+                                                                    <option value=''></option>
+                                                                    {
+                                                                        work_space_list.map((value, idy) =>
+                                                                            <option key = {idy} value={value}>{value}</option>
+                                                                        )
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    }
                                                     <div className="col-md-12">
                                                         <div className="row justify-content-center overflow-auto" style={{height: '30vh'}}>
                                                             <table className="table table-wrapper-table">
@@ -293,21 +358,43 @@ export class GroupAdd extends Component {
                                                                 </thead>
                                                                 <tbody>
                                                                     {
-                                                                        layer_list.length >0 ? layer_list.map((value, idx) =>
+                                                                        layer_list.length > 0 ? layer_list.map((value, idx) =>
                                                                         <tr key={idx}>
                                                                             <th scope="row">{idx+1}</th>
                                                                             <td>{value.layer_name}</td>
                                                                             <td>{value.type}</td>
-                                                                            <td>{value.style_name}</td>
-                                                                            <td className="text-center">
-                                                                            <a href="#" onClick={(e) => this.handleMoveUp(e, idx)}>
-                                                                                <GPIcon icon={"fa fa-arrow-up text-primary"}/>
-                                                                            </a>
-                                                                            <a href="#" onClick={(e) => this.handleMoveDown(e, idx)}>
-                                                                                <GPIcon icon={"fa fa-arrow-down text-primary"}/>
-                                                                            </a>
+                                                                            <td>
+                                                                                <a
+                                                                                    href="#"
+                                                                                    onClick={
+                                                                                        (e) => this.handleSelectModel(
+                                                                                            'Update Style',
+                                                                                            this.setStyleName,
+                                                                                            style_list,
+                                                                                            idx
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    {value.style_name}
+                                                                                </a>
                                                                             </td>
-                                                                            <td className="text-center">
+                                                                            <td className="text-center mx-0 px-0">
+                                                                                {
+                                                                                    idx != 0
+                                                                                    &&
+                                                                                    <a href="#" onClick={(e) => this.handleMoveUp(e, idx)}>
+                                                                                        <GPIcon icon={"fa fa-arrow-up text-primary float-right"}/>
+                                                                                    </a>
+                                                                                }
+                                                                                {
+                                                                                    idx != layer_list.length-1
+                                                                                    &&
+                                                                                    <a href="#" onClick={(e) => this.handleMoveDown(e, idx)}>
+                                                                                        <GPIcon icon={"fa fa-arrow-down text-primary float-left"}/>
+                                                                                    </a>
+                                                                                }
+                                                                            </td>
+                                                                            <td className="text-center mx-0 px-0">
                                                                                 <a href="#" onClick={(e) => this.removeLayer(e, value)}>
                                                                                     <GPIcon icon={"fa fa-minus-circle text-danger"}/>
                                                                                 </a>
@@ -320,7 +407,16 @@ export class GroupAdd extends Component {
                                                         </div>
                                                         <div className="form-group col-md-12">
                                                             <div className="form-group col-md-12">
-                                                                <a href="#" onClick={(e) => this.setState({ select_layer_status: true})}>
+                                                                <a
+                                                                    href="#"
+                                                                    onClick={
+                                                                        (e) => this.handleSelectModel(
+                                                                            'Давхарга нэмэх',
+                                                                            this.handleSelectedLayers,
+                                                                            layer_detail
+                                                                        )
+                                                                    }
+                                                                >
                                                                     <GPIcon icon={"fa fa-plus-circle text-success mr-4 mt-2"}/>
                                                                     Давхарга нэмэх
                                                                 </a>
@@ -345,18 +441,19 @@ export class GroupAdd extends Component {
                     </div>
                     {select_layer_status &&
                         <ModelSelectLayer
-                            modalClose = {this.modalClose}
-                            modalAction = {this.handleSelectedLayers}
-                            layer_list = {layer_detail}
-                            title = "Давхаргууд"
+                            modalClose={this.modalClose}
+                            modalAction={modalAction}
+                            layer_list={values}
+                            title={modal_title}
+                            more_detail={more_detail}
                         />
                     }
                 </div>
                 <ModalAlert
-                    modalAction = {() => this.modalClose()}
-                    status = {modal_alert_status}
-                    title = {model_alert_text}
-                    model_type_icon = {model_alert_icon}
+                    modalAction={() => this.modalClose()}
+                    status={modal_alert_status}
+                    title={model_alert_text}
+                    model_type_icon={model_alert_icon}
                 />
             </div>
         )

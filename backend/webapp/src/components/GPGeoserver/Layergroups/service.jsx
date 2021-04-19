@@ -6,10 +6,26 @@ export const service ={
     getLayers,
     createLayerGroup,
     getGroupCacheList,
-    createGroupCache
+    createGroupCache,
+    getStyleList,
+    getWslist,
 }
 
 const prefix = '/back/geoserver/rest'
+
+function getWslist() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/ws-list/`, opts).then(handleResponse)
+}
+
+function getStyleList() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/style-list/`, opts).then(handleResponse)
+}
 
 function getgrouplist() {
     const opts = {
@@ -51,9 +67,10 @@ function getGroupDetial(group_name) {
     return fetch(`${prefix}/get_group_detial/`, opts).then(handleResponse)
 }
 
-function getLayers() {
+function getLayers(ws_name) {
     const opts = {
-        ...getGetOptions()
+        ...getPostOptions(),
+        body: JSON.stringify({ ws_name }),
     }
     return fetch(`${prefix}/get_layers/`, opts).then(handleResponse)
 }

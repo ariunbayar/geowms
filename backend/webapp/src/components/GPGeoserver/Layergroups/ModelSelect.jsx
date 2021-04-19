@@ -59,8 +59,8 @@ export default class ModelSelectLayer extends Component {
         }
     }
 
-    handleProceed(event, values) {
-        this.props.modalAction(values)
+    handleProceed(event, values, more_detail) {
+        this.props.modalAction(values, more_detail)
     }
 
     handleOpen() {
@@ -141,7 +141,7 @@ export default class ModelSelectLayer extends Component {
                                                             {(current_page*layerPerPage)-layerPerPage+idx+1}
                                                         </td>
                                                         <td>
-                                                            <a href="#" onClick={(e) => this.handleProceed(e, value)}>{value.layer_name}</a>
+                                                            <a href="#" onClick={(e) => this.handleProceed(e, value, this.props.more_detail)}>{value.layer_name ? value.layer_name : value}</a>
                                                         </td>
                                                     </tr>
                                                     ): <tr><td>geoserver дээр давхарга бүртгэлгүй байна</td></tr>
