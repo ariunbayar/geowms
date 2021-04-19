@@ -18,25 +18,10 @@ export default class SideBar extends Component {
             title: '',
             model_type_icon: 'success',
             view_name: '',
-            style_state: 'create_style',
-            style_color: '#800000',
-            style_size: 1,
-            fill_color:  '#C0C0C0',
-            style_name: props.view_style_name,
-            check_style: false,
             style_names: props.style_names,
             url: props.url,
             defualt_url: props.defualt_url,
             geom_type: props.geom_type,
-            wellknownname: '',
-            wellknowshape: '',
-            div_angle: '',
-            color_opacity: 0.3,
-            dashed_line_length: 0,
-            dashed_line_gap: 0,
-            style_title: '',
-            style_abstract: '',
-            check_style_name: '',
             is_loading: props.property_loading,
             zoom_stop: 0,
             zoom_start: 0,
@@ -54,32 +39,13 @@ export default class SideBar extends Component {
     }
 
     handleOnClick(){
-        const {style_state, style_name} = this.state
-        if (style_state == 'create_style'){
-            if(! style_name){
-                this.setState({check_style_name: 'Style-ийн нэр хоосон байна'})
-            }
-            else{
-                this.setState({is_loading:true})
-                service.checkStyleName(style_name).then(({success})=>
-                {
-                    if(success){
-                        this.setState({is_loading: false, check_style:true})
-                    }
-                    else{
-                        this.setState({is_loading:false, check_style_name: 'Style-ийн нэр давхцаж байна'})
-                    }
-                })
-            }
-        }
-        else{
-            this.setState({check_style:true})
-        }
+        this.setState({check_style:true})
     }
 
     handleOnChange(e){
         this.setState({[e.target.name]:e.target.value})
     }
+
     handleInput(e){
         let id_list = this.state.id_list
         const value = parseInt(e.target.value)
@@ -95,19 +61,13 @@ export default class SideBar extends Component {
         const fid = this.props.fid
         const tid = this.props.tid
         const {
-            id_list, style_state, style_color, style_size,
-            fill_color, style_name, geom_type, wellknownname,
-            wellknowshape, div_angle, color_opacity, dashed_line_length,
-            dashed_line_gap,  style_title, style_abstract,zoom_stop,
+            id_list, style_name, geom_type,zoom_stop,
             zoom_start, number_of_cache, image_format, cache_type, tile_cache_check
         }= this.state
 
         const values = {
-            'style_state': style_state, 'style_color': style_color,
-            'style_size': style_size, 'fill_color': fill_color, 'style_name': style_name,
-            'geom_type': geom_type, 'wellknownname': wellknownname, 'wellknowshape': wellknowshape,
-            'div_angle': div_angle, 'color_opacity': color_opacity, 'dashed_line_length': dashed_line_length,
-            'dashed_line_gap': dashed_line_gap, 'style_title': style_title, 'style_abstract': style_abstract,
+            'style_name': style_name,
+            'geom_type': geom_type,
             'tile_cache_check': tile_cache_check,
             'cache_values': {
                 'zoom_stop': zoom_stop, 'zoom_start':zoom_start, 'number_of_cache': number_of_cache, 'cache_type': cache_type,
@@ -136,26 +96,27 @@ export default class SideBar extends Component {
     }
 
     componentDidUpdate(pP, pS){
-        const {style_color, style_size, fill_color, style_name, style_state, view_name, dashed_line_gap, dashed_line_length, color_opacity, wellknownname, tile_cache_check} = this.state
-        if((pS.style_color != style_color) || pS.style_size != style_size
-            || pS.fill_color != fill_color || pS.style_name != style_name ||
-            pS.dashed_line_gap != dashed_line_gap || pS.dashed_line_length != dashed_line_length ||
-            pS.color_opacity != color_opacity || pS.wellknownname != wellknownname || pS.tile_cache_check != tile_cache_check
-        ){
+        const {style_name, view_name, tile_cache_check} = this.state
+
+        if(pS.style_name != style_name){
             this.setState({
-                check_style:false, style_size, fill_color,
-                style_color, style_name, color_opacity, wellknownname,
-                dashed_line_gap, dashed_line_length, check_style_name: '',
+                check_style:false,
+                style_name,
+            })
+        }
+
+        if(pS.tile_cache_check != tile_cache_check) {
+            this.setState({
+                check_style:false,
+                style_name,
                 tile_cache_check
             })
         }
-        if (pS.style_state != style_state || pP.view_name != this.props.view_name){
+
+        if (pP.view_name != this.props.view_name){
             this.setState({
-                check_style:false, style_size: 1,
-                fill_color: '#C0C0C0', style_color: '#800000',
-                color_opacity: 0.3, style_title: '',
-                wellknownname: '', dashed_line_gap: 0, style_abstract: '',
-                style_name: this.props.view_style_name, check_style_name: ''
+                check_style:false,
+                style_name: this.props.view_style_name
             })
         }
 
@@ -241,15 +202,11 @@ export default class SideBar extends Component {
     render() {
         const {fields, fid, fname} = this.props
         const {
-            style_color, style_size, style_state,
-            check_style, fill_color,
+            check_style, is_loading, cache_type,
             id_list, save_is_load, view_name, style_names,
             style_name, url, defualt_url, geom_type,
-            wellknownname, wellknowshape, div_angle,
-            color_opacity, dashed_line_length, dashed_line_gap,
-            style_title, style_abstract, is_loading,
             zoom_stop, zoom_start, number_of_cache, tile_cache_check,
-            image_format, cache_type
+            image_format
         } = this.state
 
         return (
@@ -257,321 +214,143 @@ export default class SideBar extends Component {
                 <div className="card-body">
                     {fid ?
                         <div>
-                            {geom_type &&
-                             <fieldset>
-                                  <div className="form-row border m-1 p-1">
+                            {
+                                geom_type
+                                &&
+                                <fieldset>
+                                    <div className="form-row border m-1 p-1">
                                         <div className="form-row col-md-12  text-center">
                                             <div className="form-group col-md-12">
                                                 <label htmlFor="" className="m-2"><h5>tilecache тохируулах</h5></label>
                                                 <input type="checkbox" checked={tile_cache_check} onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
                                             </div>
                                         </div>
-                                     {
-                                        tile_cache_check
-                                        &&
-                                        <div className="form-row col-md-12">
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="" className="m-2">Зургийн формат</label>
-                                                <select
-                                                    className="form-control form-control-sm"
-                                                    value={image_format}
-                                                    onChange={(e) => this.setState({ image_format: e.target.value })}
-                                                >
-                                                    <option value="jpeg">jpeg</option>
-                                                    <option value="png">png</option>
-                                                </select>
-                                            </div>
-                                            <div className="form-group col-md-4">
-                                                    <label htmlFor="" className="m-2">Томруулах эхний утга</label>
+                                        {
+                                            tile_cache_check
+                                            &&
+                                            <div className="form-row col-md-12">
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="" className="m-2">Зургийн формат</label>
+                                                    <select
+                                                        className="form-control form-control-sm"
+                                                        value={image_format}
+                                                        onChange={(e) => this.setState({ image_format: e.target.value })}
+                                                    >
+                                                        <option value="jpeg">jpeg</option>
+                                                        <option value="png">png</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                        <label htmlFor="" className="m-2">Томруулах эхний утга</label>
+                                                        <input
+                                                            type="number"
+                                                            name='zoom_start'
+                                                            className={'form-control col-4' + (zoom_start > 21 ? ' is-invalid' : '')}
+                                                            value= {zoom_start}
+                                                            onChange={(e) => this.handleOnChange(e)}
+                                                        />
+                                                        {
+                                                            zoom_start > 21
+                                                            &&
+                                                            <label className="text-danger">
+                                                                Томруулах эхний утга нь хамгийн ихдээ 21 байна
+                                                            </label>
+                                                        }
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="" className="m-2">Томруулах сүүлчийн утга</label>
                                                     <input
                                                         type="number"
-                                                        name='zoom_start'
-                                                        className={'form-control col-4' + (zoom_start > 21 ? ' is-invalid' : '')}
-                                                        value= {zoom_start}
+                                                        name='zoom_stop'
+                                                        className={'form-control col-4' + (zoom_stop > 21 ? ' is-invalid' : '')}
+                                                        value= {zoom_stop}
                                                         onChange={(e) => this.handleOnChange(e)}
                                                     />
                                                     {
-                                                        zoom_start > 21
+                                                        zoom_stop > 21
                                                         &&
                                                         <label className="text-danger">
-                                                            Томруулах эхний утга нь хамгийн ихдээ 21 байна
+                                                            Томруулах сүүлчийн утга нь хамгийн ихдээ 21 байна
                                                         </label>
                                                     }
+                                                </div>
+                                                <div className="form-group col-md-4">
+                                                    <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
+                                                    <select
+                                                        className="form-control form-control-sm"
+                                                        value={cache_type}
+                                                        onChange={(e) => this.setState({ cache_type: e.target.value })}
+                                                    >
+                                                        <option value="seed">seed</option>
+                                                        <option value="reseed">reseed</option>
+                                                        <option value="truncate">Truncate</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-group col-md-4 mr-2">
+                                                    <label htmlFor="number_of_cache" className="m-2">Хэрэглэх таскуудын тоо</label>
+                                                    <input
+                                                        type="number"
+                                                        name='number_of_cache'
+                                                        className={'form-control col-4' + (zoom_stop > 100 ? ' is-invalid' : '')}
+                                                        value= {number_of_cache}
+                                                        onChange={(e) => this.handleOnChange(e)}
+                                                    />
+                                                    {
+                                                        number_of_cache > 100
+                                                        &&
+                                                        <label className="text-danger">
+                                                        Хэрэглэх таскын тоо хамгийн ихдээ 100 байна
+                                                        </label>
+                                                    }
+                                                </div>
                                             </div>
-                                            <div className="form-group col-md-4">
-                                                <label htmlFor="" className="m-2">Томруулах сүүлчийн утга</label>
-                                                <input
-                                                    type="number"
-                                                    name='zoom_stop'
-                                                    className={'form-control col-4' + (zoom_stop > 21 ? ' is-invalid' : '')}
-                                                    value= {zoom_stop}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                                {
-                                                    zoom_stop > 21
-                                                    &&
-                                                    <label className="text-danger">
-                                                        Томруулах сүүлчийн утга нь хамгийн ихдээ 21 байна
-                                                    </label>
-                                                }
-                                            </div>
-                                            <div className="form-group col-md-4">
-                                            <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
-                                            <select
-                                                className="form-control form-control-sm"
-                                                value={cache_type}
-                                                onChange={(e) => this.setState({ cache_type: e.target.value })}
-                                            >
-                                                <option value="seed">seed</option>
-                                                <option value="reseed">reseed</option>
-                                                <option value="truncate">Truncate</option>
-                                            </select>
-                                            </div>
-                                            <div className="form-group col-md-4 mr-2">
-                                                <label htmlFor="number_of_cache" className="m-2">Хэрэглэх таскуудын тоо</label>
-                                                <input
-                                                    type="number"
-                                                    name='number_of_cache'
-                                                    className={'form-control col-4' + (zoom_stop > 100 ? ' is-invalid' : '')}
-                                                    value= {number_of_cache}
-                                                    onChange={(e) => this.handleOnChange(e)}
-                                                />
-                                                 {
-                                                    number_of_cache > 100
-                                                    &&
-                                                    <label className="text-danger">
-                                                    Хэрэглэх таскын тоо хамгийн ихдээ 100 байна
-                                                    </label>
-                                                }
-                                            </div>
-                                        </div>}
-                                </div>
-                                <div className="form-row border m-1 p-2 pl-2">
-                                    <div className="form-row col-md-12 text-center">
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor="color" className="m-2"><h5>давхаргын style тохируулах</h5></label>
-                                            </div>
+                                        }
                                         </div>
-                                    <div className="form-row">
+                                        <div className="form-row border m-1 p-2 pl-2">
+                                            <div className="form-row col-md-12 text-center">
+                                                <div className="form-group col-md-12">
+                                                    <label htmlFor="color" className="m-2"><h5>давхаргын style тохируулах</h5></label>
+                                                </div>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
+                                                <select
+                                                    className="form-control form-control-sm"
+                                                    value={style_name ? style_name : ''}
+                                                    onChange={(e) => this.setState({ style_name: e.target.value })}
+                                                >
+                                                    <option value={style_name}>{style_name ? style_name : ''}</option>
+                                                    {
+                                                        style_names.map((name, idx) =>
+                                                            <option value={name} key={idx}>{name}</option>
+                                                    )}
+                                                </select>
+                                        </div>
                                         <div className="form-group col-md-12">
-                                            <label htmlFor="state">Style-ийн төлөв</label>
-                                            <select
-                                                className="form-control form-control-sm"
-                                                onChange={(e) => this.setState({ style_state: e.target.value })}
-                                                value={style_state}
+                                            <button
+                                                type="button"
+                                                className='btn btn-primary'
+                                                onClick={this.handleOnClick}
                                             >
-                                                <option value="create_style">Style үүсгэх</option>
-                                                <option value="update_style">Үүссэн style-с сонгох</option>
-                                            </select>
+                                                Style-ийг шалгах
+                                            </button>
                                         </div>
-                                    </div>
-                                    {style_state == 'create_style' ?
-                                        <div className="form-row col-md-12">
-                                                <div className="form-group col-md-4">
-                                                    <label htmlFor="color" className="m-2">Style-ийн нэр</label>
-                                                    <input
-                                                        type="text"
-                                                        name='style_name'
-                                                        className="form-control"
-                                                        value= {style_name}
-                                                        onChange={(e) => this.handleOnChange(e)}
-                                                    />
-                                                    {
-                                                        this.state.check_style_name
-                                                        &&
-                                                        <label className="text-danger">
-                                                            {this.state.check_style_name}
-                                                        </label>
-                                                    }
-                                                </div>
-                                                <div className="form-group col-md-4">
-                                                    <label htmlFor="color" className="m-2">Style-ийн гарчиг</label>
-                                                    <input
-                                                        type="text"
-                                                        name='style_title'
-                                                        className="form-control"
-                                                        value= {style_title}
-                                                        onChange={(e) => this.handleOnChange(e)}
+                                        {
+                                            check_style &&
+                                            <div className="form-row col-md-12">
+                                                <div className="form-group col-md-12">
+                                                    <StyleMap
+                                                        style_name={style_name}
+                                                        view_name={view_name}
+                                                        url={url}
+                                                        defualt_url={defualt_url}
+                                                        geom_type={geom_type}
                                                     />
                                                 </div>
-                                                <div className="form-group col-md-4">
-                                                    <label htmlFor="color" className="m-2">Товч тайлбар</label>
-                                                    <input
-                                                        type="text"
-                                                        name='style_abstract'
-                                                        className="form-control"
-                                                        value= {style_abstract}
-                                                        onChange={(e) => this.handleOnChange(e)}
-                                                    />
-                                                </div>
-                                            {
-                                                geom_type == 'Point' || geom_type == 'Polygon' || geom_type == 'MultiPoint'?
-                                                    <div className="form-row col-md-12">
-                                                        <div className="form-group col-md-4">
-                                                            <label htmlFor="color" className="m-2">Дүрсийн дүүргэлтийн өнгө</label>
-                                                            <input
-                                                                type="color"
-                                                                name='fill_color'
-                                                                className="form-control col-4"
-                                                                value= {fill_color}
-                                                                onChange={(e) => this.handleOnChange(e)}
-                                                            />
-                                                        </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="color" className="m-2">Хүрээний өнгө</label>
-                                                        <input
-                                                            type="color"
-                                                            name='style_color'
-                                                            className="form-control col-4"
-                                                            value= {style_color}
-                                                            onChange={(e) => this.handleOnChange(e)}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="id_geoserver_user">Хүрээний өргөн</label>
-                                                        <input
-                                                            name="style_size"
-                                                            type="number"
-                                                            className="form-control col-4"
-                                                            id="style_size"
-                                                            value = {style_size}
-                                                            onChange={(e) => this.handleOnChange(e)}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="color" className="m-2">Өнгөний уусгалт</label>
-                                                        <input
-                                                            type="number"
-                                                            name='color_opacity'
-                                                            className="form-control col-4"
-                                                            value= {color_opacity}
-                                                            onChange={(e) => this.handleOnChange(e)}
-                                                        />
-                                                    </div>
-                                                    {geom_type == 'Point' || geom_type =='MultiPoint'?
-                                                    <div className='form-group col-md-4'>
-                                                        <label htmlFor="state">Дүрсний сонголт</label>
-                                                            <select className="form-control form-control-sm"
-                                                                onChange={(e) => this.setState({ wellknownname: e.target.value })}>
-                                                                <option value="">-----------</option>
-                                                                <option value="square">Дөрвөлжин</option>
-                                                                <option value="triangle">Гурвалжин</option>
-                                                                <option value="star"> Од</option>
-                                                                <option value="x"> Хэрээс</option>
-                                                            </select>
-                                                    </div>
-                                                    :
-                                                ''
-                                                    }
-                                                </div>
-                                                :
-                                                <div className="form-row col-md-12">
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="color" className="m-2">Өргөн</label>
-                                                        <input
-                                                            type="number"
-                                                            name='style_size'
-                                                            className="form-control col-4"
-                                                            value= {style_size}
-                                                            onChange={(e) => this.handleOnChange(e)}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="color" className="m-2">Өнгө</label>
-                                                        <input
-                                                            type="color"
-                                                            name='style_color'
-                                                            className="form-control col-4"
-                                                            value= {style_color}
-                                                            onChange={(e) => this.handleOnChange(e)}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="color" className="m-2">Зураас хоорондох зай</label>
-                                                        <input
-                                                            type="number"
-                                                            name='dashed_line_gap'
-                                                            className="form-control col-4"
-                                                            value= {dashed_line_gap}
-                                                            onChange={(e) => this.handleOnChange(e)}
-                                                        />
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="color" className="m-2">Зураасын урт</label>
-                                                            <input
-                                                                type="number"
-                                                                name='dashed_line_length'
-                                                                className="form-control col-4"
-                                                                value= {dashed_line_length}
-                                                                onChange={(e) => this.handleOnChange(e)}
-                                                            />
-                                                    </div>
-                                                    <div className="form-group col-md-4">
-                                                        <label htmlFor="color" className="m-2">Өнгөний уусгалт</label>
-                                                        <input
-                                                            type="number"
-                                                            name='color_opacity'
-                                                            className="form-control col-4"
-                                                            value= {color_opacity}
-                                                            onChange={(e) => this.handleOnChange(e)}
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                            }
-                                        </div>
-                                        :
-
-                                        <div className="form-group col-md-6">
-                                            <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
-                                            <select
-                                                className="form-control form-control-sm"
-                                                value={style_name ? style_name : ''}
-                                                onChange={(e) => this.setState({ style_name: e.target.value })}
-                                            >
-                                                <option value={style_name}>{style_name ? style_name : ''}</option>
-                                                {
-                                                    style_names.map((name, idx) =>
-                                                        <option value={name} key={idx}>{name}</option>
-                                                )}
-                                            </select>
-                                        </div>
-                                    }
-                                    <div className="form-group col-md-12">
-                                        <button
-                                            type="button"
-                                            className='btn btn-primary'
-                                            onClick={this.handleOnClick}
-                                        >
-                                            Style-ийг шалгах
-                                        </button>
-                                    </div>
-                                    {
-                                        check_style &&
-                                        <div className="form-row col-md-12">
-                                            <div className="form-group col-md-12">
-                                                <StyleMap
-                                                    style_state={style_state}
-                                                    style_color={style_color}
-                                                    style_size={style_size}
-                                                    fill_color={fill_color}
-                                                    style_name={style_name}
-                                                    view_name={view_name}
-                                                    url={url}
-                                                    defualt_url={defualt_url}
-                                                    geom_type={geom_type}
-                                                    wellknownname={wellknownname}
-                                                    wellknowshape={wellknowshape}
-                                                    div_angle={div_angle}
-                                                    color_opacity={color_opacity}
-                                                    dashed_line_length={dashed_line_length}
-                                                    dashed_line_gap={dashed_line_gap}
-                                                />
                                             </div>
-                                        </div>
-                                    }
-                                </div>
-                            </fieldset>
+                                        }
+                                    </div>
+                                </fieldset>
                             }
                             <table className="table table-bordered m-1">
                                 <thead>
