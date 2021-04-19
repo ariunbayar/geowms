@@ -257,12 +257,9 @@ export default class BundleMap extends Component {
             source: new VectorSource({}),
             style: new Style({
                 stroke: new Stroke({
-                    color: 'rgba(100, 255, 0, 1)',
+                    color: 'rgb(51, 204, 204)',
                     width: 2
                 }),
-                fill: new Fill({
-                    color: 'rgba(100, 255, 0, 0.3)'
-                })
             }),
         })
 
