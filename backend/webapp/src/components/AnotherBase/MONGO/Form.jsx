@@ -13,6 +13,40 @@ class FieldForm extends Component {
 
     render() {
         const { data, properties, data_key } = this.props
+        var data_id = []
+        var is_included = false
+        properties.map((row) => {
+            if (data_id.length > 0) {
+                is_included = false
+                data_id.map((data_id) => {
+                    if (data_id == row.data_type_id) {
+                        is_included = true
+                    }
+                })
+            }
+            if (is_included == false) {
+                data_id = data_id.concat(row.data_type_id)
+            }
+        })
+        var list_options =[]
+        data_id.map((data_id) => {
+            list_options.push({
+                data_type_name:'',
+                data_type_id: data_id,
+                children: [],
+            })
+        })
+        properties.map((row) => {
+            list_options.map((list_option, idx) => {
+                if (list_option.data_type_id == row.data_type_id) {
+                    list_option.data_type_name=row.data_type_name
+                    list_option.children.push({
+                        property_name: row.property_name,
+                        property_id: row.property_id,
+                    })
+                }
+            })
+        })
         return (
             <div className="row mb-1 border-bottom pb-1">
                 <div className="col-2">
@@ -30,8 +64,19 @@ class FieldForm extends Component {
                 >
                     <option> -- Property Сонгоно уу -- </option>
                     {
-                        properties.map((prop, idx) =>
-                            <option key={idx} value={prop.property_id}>{prop.data_type_name}: {prop.property_name}</option>
+                        list_options.map((row, idx) =>
+                        // is_display_value_types.includes(prop.value_type_id)
+                        // &&
+
+                            <optgroup key={idx} label={row.data_type_name}>
+
+                                {row.children.map((next_row,idx) =>
+
+                                    <option key={idx} value={next_row.property_id}>{next_row.property_name}</option>
+
+                                )}
+
+                            </optgroup>
                         )
                     }
                 </select>
