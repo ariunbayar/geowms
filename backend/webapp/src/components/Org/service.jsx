@@ -23,6 +23,7 @@ export const service = {
     getSelectValue,
     genderCount,
     ageCount,
+    loadBaseLayers,
 }
 
 
@@ -175,4 +176,20 @@ function genderCount(pk) {
 function ageCount(pk) {
     const requestOptions = getGetOptions()
     return fetch(`${prefix}/${pk}/emp-age-count/`, requestOptions).then(handleResponse)
+}
+
+function _getGetOptions() {
+    return {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    }
+}
+
+function loadBaseLayers() {
+    const requestOptions = {
+        ..._getGetOptions(),
+    }
+    return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }
