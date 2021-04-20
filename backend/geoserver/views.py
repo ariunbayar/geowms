@@ -433,14 +433,18 @@ def _check_style_name(style_name, old_style_name):
     if not style_name:
         info = 'Style-ийн нэр хоосон байна.'
 
-    check_name = geoserver.check_geoserver_style(style_name)
     check_state = False
+
+    if old_style_name:
+        if old_style_name != style_name:
+            check_state = True
+    check_name = geoserver.check_geoserver_style(style_name)
     if check_name.status_code == 200:
-        if old_style_name:
-            if old_style_name != style_name:
-                check_state = True
         if not old_style_name or check_state:
             info = '{style_name} нэртэй style geoserver дээр бүртгэлтэй байна'.format(style_name=style_name)
+
+    if old_style_name:
+        geoserver.delete_style(old_style_name)
     return info
 
 
@@ -460,7 +464,7 @@ def create_style(request, payload):
     if info:
         return JsonResponse({'success': False, 'info': info})
 
-    geoserver.delete_style(style_name)
+    
     rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
     if rsp.status_code == 201:
         return JsonResponse({
