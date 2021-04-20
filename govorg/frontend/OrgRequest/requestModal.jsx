@@ -111,7 +111,7 @@ export default class RequestModal extends Component {
             action_name: '',
             modalClose: null,
 
-            values: props.values
+            values: props.values,
         }
 
         this.handleOpen = this.handleOpen.bind(this)
@@ -153,8 +153,8 @@ export default class RequestModal extends Component {
         const { selected_value, values } = this.state
 
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
-
         this.setState({ is_loading: true })
+
         if(this.state.action_type == 'reject')
         {
            this.handleRequestReject(ids, feature_id)
@@ -179,6 +179,7 @@ export default class RequestModal extends Component {
                         "",
                         this.handleModalClose
                     )
+                    this.setState({ is_loading: false })
                 }
                 else {
                     this.modalChange(
@@ -207,7 +208,6 @@ export default class RequestModal extends Component {
                     )
                 }
             })
-            this.setState({ is_loading: false })
     }
 
     handleRequestApprove(ids, feature_id){
@@ -225,6 +225,7 @@ export default class RequestModal extends Component {
                         "",
                         this.handleModalClose
                     )
+                    this.setState({ is_loading: false })
                 }
                 else {
                     this.modalChange(
@@ -253,7 +254,6 @@ export default class RequestModal extends Component {
                         )
                     }
                 })
-            this.setState({ is_loading: false })
     }
 
     componentDidMount() {
