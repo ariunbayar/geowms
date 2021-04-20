@@ -123,13 +123,13 @@ export class StyleList extends Component {
                         </div>
                     </div>
                     <div className="table-responsive table_wrapper ml-2">
-                        <table className="table table_wrapper_table">
+                        <table className="table table_wrapper_table" >
                             <thead>
                                 <tr>
                                     <th scope="col"> № </th>
                                     <th scope="col"> Нэр </th>
-                                    <th scope="col">Засах</th>
-                                    <th scope="col">Устгах</th>
+                                    <th scope="col" style={{zIndex:1}} >Засах</th>
+                                    <th scope="col" style={{zIndex:1}} >Устгах</th>
                                 </tr>
                             </thead>
                             <tbody>
