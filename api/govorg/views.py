@@ -149,7 +149,6 @@ def json_proxy(request, base_url, token, code):
             'typeName': code,
             'outputFormat': 'application/json',
             "propertyName": [allowed_att],
-            'maxFeatures': 10
         }
 
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)

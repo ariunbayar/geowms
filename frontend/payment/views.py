@@ -1572,6 +1572,7 @@ def get_popup_info(request, payload):
     property_name = None
     property_code = None
     infos = list()
+    value_will_change_types = ['single-select', 'multi-select']
 
     views_qs = ViewNames.objects
     views_qs = views_qs.filter(
@@ -1586,7 +1587,7 @@ def get_popup_info(request, payload):
     for view_qs in views_qs:
         view_name = view_qs.view_name
         viewproperty_ids, property_qs = _get_properties_qs(view_qs)
-        properties = property_qs.values("property_code", "property_name")
+        properties = property_qs.values("property_code", "property_name", "value_type_id")
 
         with connections['default'].cursor() as cursor:
             sql = """
@@ -1624,6 +1625,12 @@ def get_popup_info(request, payload):
                         datas[1].append([key, value, key])
                     for prop in properties:
                         if prop['property_code'].lower() == key and value:
+                            if prop['value_type_id'] in value_will_change_types:
+                                code_list_qs = LCodeLists.objects
+                                code_list_qs = code_list_qs.filter(code_list_id=value)
+                                if code_list_qs:
+                                    code_list = code_list_qs.first()
+                                    value = code_list.code_list_name
                             datas[1].append([prop['property_name'], value, key])
                 if datas:
                     infos.append(datas)

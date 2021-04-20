@@ -674,57 +674,41 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
     else:
         srs = 4326
 
-    style_name = values.get('style_name')
-    style_state = values.get('style_state')
     tile_cache_check = values.get('tile_cache_check')
     cache_details = values.get('cache_values')
     geom_type = values.get('geom_type')
+    style_name = values.get('style_name')
     layer_title = feature.feature_name
 
     if check_layer.status_code != 200:
         layer_create = geoserver.create_layer(
-                            ws_name,
-                            ds_name,
-                            layer_name,
-                            layer_title,
-                            table_name,
-                            srs,
-                            geom_att,
-                            extends,
-                            False
+            ws_name,
+            ds_name,
+            layer_name,
+            layer_title,
+            table_name,
+            srs,
+            geom_att,
+            extends,
+            False
         )
 
     else:
         layer_create = geoserver.create_layer(
-                            ws_name,
-                            ds_name,
-                            layer_name,
-                            layer_title,
-                            table_name,
-                            srs,
-                            geom_att,
-                            extends,
-                            True
+            ws_name,
+            ds_name,
+            layer_name,
+            layer_title,
+            table_name,
+            srs,
+            geom_att,
+            extends,
+            True
         )
 
     if layer_create.status_code == 201 or layer_create.status_code == 200:
         if geom_type:
             cache_values = values.get('cache_values')
-            if style_state == 'create_style':
-                style_name = values.get('style_name')
-                if not style_name:
-                    return {
-                        'success': False,
-                        'info': 'Style-ийн нэр хоосон байна'
-                    }
-                check_style_name = geoserver.check_geoserver_style(style_name)
-                if check_style_name.status_code == 200:
-                    return {
-                        'success': False,
-                        'info': 'Style-ийн нэр давхцаж байна'
-                    }
-                else:
-                    geoserver.create_style(values)
             geoserver.update_layer_style(layer_name, style_name)
             if tile_cache_check:
                 cache_type = cache_details.get('cache_type')
@@ -910,55 +894,6 @@ def removeView(table_name):
     except Exception:
         return False
 
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def get_style_data(request, payload):
-
-    geom_type = payload.get('geom_type')
-    if geom_type == 'PointSymbolizer':
-        geom_type = 'Point'
-    elif geom_type == 'PolygonSymbolizer':
-        geom_type = 'Polygon'
-    else:
-        geom_type = 'LineString'
-    heck_design = check_gp_design()
-    cursor = connections['default'].cursor()
-    sql = '''
-            SELECT
-                ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
-            FROM
-                geoserver_desing_view
-            where
-                ST_GeometryType(geo_data) like '%{geom_type}%'
-            limit 1000
-            '''.format(geom_type=geom_type)
-
-    cursor.execute(sql)
-    some_attributes = dict_fetchall(cursor)
-    some_attributes = list(some_attributes)
-    features = []
-    for i in some_attributes:
-        data = get_geoJson(i.get('geom'))
-        features.append(data)
-    return JsonResponse({
-        'data': FeatureCollection(features)
-    })
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def check_styles_name(request, payload):
-    style_name = payload.get('style_name')
-    success = False
-    check_name = geoserver.check_geoserver_style(style_name)
-    if check_name.status_code != 200:
-        success = True
-    return JsonResponse({
-        'success': success,
-    })
 
 
 @require_POST

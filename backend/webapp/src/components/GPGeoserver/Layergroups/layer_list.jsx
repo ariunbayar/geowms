@@ -139,11 +139,12 @@ export class List extends Component {
                                         <tr><td>geoserver дээр group бүртгэлгүй байна</td></tr>:
 
                                         currentGroups.map((value, idx) =>
-                                                <GroupList
-                                                    idx={(currentPage*groupPerPage)-groupPerPage+idx+1}
-                                                    value={value}
-                                                    handleRemove={() => this.handleGroupDelete(value)}
-                                                />
+                                            <GroupList
+                                                key={idx}
+                                                idx={(currentPage*groupPerPage)-groupPerPage+idx+1}
+                                                value={value}
+                                                handleRemove={() => this.handleGroupDelete(value)}
+                                            />
                                     )}
                             </tbody>
                         </table>
