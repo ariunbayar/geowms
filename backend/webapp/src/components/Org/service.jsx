@@ -178,18 +178,7 @@ function ageCount(pk) {
     return fetch(`${prefix}/${pk}/emp-age-count/`, requestOptions).then(handleResponse)
 }
 
-function _getGetOptions() {
-    return {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    }
-}
-
 function loadBaseLayers() {
-    const requestOptions = {
-        ..._getGetOptions(),
-    }
+    const requestOptions = getGetOptions()
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }

@@ -17,7 +17,7 @@ import { GeoJSON } from 'ol/format'
 import { showForm } from '../../OrgUsersAddress/controls/form'
 import 'ol/ol.css'
 import { BaseLayer } from './controls/BaseLayer'
-import "../../../../../../../govorg/frontend/Bundles/Inspire/styles.css"
+import "./styles.css"
 import { service } from '../../service'
 
 export default class AddressMap extends Component {
@@ -41,10 +41,12 @@ export default class AddressMap extends Component {
         this.changedFeatureSetColor = this.changedFeatureSetColor.bind(this)
         this.makeLineString = this.makeLineString.bind(this)
         this.setBaseLayer = this.setBaseLayer.bind(this)
+        this.loadBaseLayers = this.loadBaseLayers.bind(this)
     }
 
     componentDidMount() {
         this.loadMap()
+        this.loadBaseLayers()
     }
 
     componentDidUpdate(pP, pS) {
@@ -69,7 +71,8 @@ export default class AddressMap extends Component {
                 }),
             }),
         })
-
+        this.setState({vector_layer})
+        vector_layer.setZIndex(10)
         this.vector_layer = vector_layer
 
         const map = new Map({
@@ -90,12 +93,15 @@ export default class AddressMap extends Component {
         map.addControl(this.controls.form)
 
         this.map = map
+    }
+
+    loadBaseLayers() {
         Promise.all([
             service
                 .loadBaseLayers(),])
                 .then(([{base_layer_list}]) => {
                     this.setBaseLayer(base_layer_list)
-        })
+            })
     }
 
     setBaseLayer(base_layer_list){
@@ -171,9 +177,7 @@ export default class AddressMap extends Component {
                 layer.setZIndex(0)
                 this.map.addLayer(layer)
 
-
                 return acc
-
             },
             {
                 base_layers: [],
