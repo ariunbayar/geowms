@@ -77,9 +77,6 @@ export default class AddressMap extends Component {
 
         const map = new Map({
             layers: [
-                new TileLayer({
-                    source: new OSM(),
-                }),
                 vector_layer,
             ],
             target: 'map',
