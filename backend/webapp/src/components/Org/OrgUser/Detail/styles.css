@@ -1,29 +1,23 @@
 .суурь-давхаргууд{
-    right: .0rem;
-    z-index: -100;
-    bottom: 2px;
-    height: 2.1rem;
-    position: absolute;
-
+    right: .5rem;
+    bottom: 70px;
+    position: fixed;
 }
-
 .суурь-давхаргууд > .суурь-давхарга{
     display: block;
-    width: 5.6rem;
-    height: 1.75rem;
+    width: 8rem;
+    height: 4.5rem;
     overflow: hidden;
     margin: 1px;
     border-radius: 2px;
     float: right;
     transition: opacity .15s ease-out;
 }
-
 .суурь-давхаргууд > .суурь-давхарга.active,
 .суурь-давхаргууд:hover > .суурь-давхарга.active:hover,
 .суурь-давхаргууд > .суурь-давхарга:hover {
     opacity: 1;
 }
-
 .суурь-давхаргууд > .суурь-давхарга,
 .суурь-давхаргууд:hover > .суурь-давхарга.active {
     opacity: .7;
