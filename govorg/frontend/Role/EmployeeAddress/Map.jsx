@@ -100,9 +100,6 @@ export default class AddressMap extends Component {
         const map = new Map({
             interactions: defaultInteractions().extend([select, translate]),
             layers: [
-                new TileLayer({
-                    source: new OSM(),
-                }),
                 vector_layer,
             ],
             target: 'map',
