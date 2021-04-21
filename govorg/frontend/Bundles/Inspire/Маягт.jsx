@@ -201,7 +201,18 @@ export default class Маягт extends Component {
                                                     <Field name={`form_values.${index}.data` || ""}
                                                         as="select"
                                                         className="form-control"
-                                                        disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
+                                                        disabled={
+                                                            null_form_isload ?
+                                                                friend.roles['PERM_CREATE']
+                                                            :
+                                                                remove_button_active ?
+                                                                    friend.roles['PERM_REMOVE']
+                                                                :
+                                                                    cancel_button_active ?
+                                                                        friend.roles['PERM_REVOKE']
+                                                                    :
+                                                                        friend.roles['PERM_UPDATE']
+                                                        }
                                                     >
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
@@ -219,7 +230,18 @@ export default class Маягт extends Component {
                                                     name={`form_values.${index}.data` || ""}
                                                     as="select"
                                                     className='form-control'
-                                                    disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
+                                                    disabled={
+                                                        null_form_isload ?
+                                                            friend.roles['PERM_CREATE']
+                                                        :
+                                                            remove_button_active ?
+                                                                friend.roles['PERM_REMOVE']
+                                                            :
+                                                                cancel_button_active ?
+                                                                    friend.roles['PERM_REVOKE']
+                                                                :
+                                                                    friend.roles['PERM_UPDATE']
+                                                    }
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -228,7 +250,18 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data` || ""}
                                                     className='form-control'
-                                                    disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
+                                                    disabled={
+                                                        null_form_isload ?
+                                                            friend.roles['PERM_CREATE']
+                                                        :
+                                                            remove_button_active ?
+                                                                friend.roles['PERM_REMOVE']
+                                                            :
+                                                                cancel_button_active ?
+                                                                    friend.roles['PERM_REVOKE']
+                                                                :
+                                                                    friend.roles['PERM_UPDATE']
+                                                    }
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                 />

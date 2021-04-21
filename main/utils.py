@@ -688,7 +688,7 @@ def get_emp_property_roles(employee, fid):
                         property_roles['PERM_UPDATE'] = False
                     if prop.get('perm_kind') == EmpPermInspire.PERM_APPROVE:
                         property_roles['PERM_APPROVE'] = False
-                    else:
+                    if prop.get('perm_kind') == EmpPermInspire.PERM_REVOKE:
                         property_roles['PERM_REVOKE'] = False
 
             property_details.append({
