@@ -123,7 +123,7 @@ export class StyleList extends Component {
                         </div>
                     </div>
                     <div className="table-responsive table_wrapper ml-2">
-                        <table className="table table_wrapper_table">
+                        <table className="table table_wrapper_table" >
                             <thead>
                                 <tr>
                                     <th scope="col"> № </th>
