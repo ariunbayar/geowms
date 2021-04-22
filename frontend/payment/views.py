@@ -1529,6 +1529,8 @@ def check_button_ebable_pdf_geo_id(request, payload):
     is_enable = False
     geo_id = payload.get('geo_id')
     pdf_id = payload.get('pdf_id')
+    print(geo_id)
+    print(pdf_id)
     if geo_id:
         has_pdf = _check_in_inspire(geo_id, pdf_id)
         if has_pdf:
@@ -1567,7 +1569,12 @@ def get_popup_info(request, payload):
     coordinate = payload.get('coordinate')
     radius = int(payload.get('scale_value'))
     radius = _radius_formula(radius)
-
+    print(layers_code)
+    print(layers_code)
+    print(layers_code)
+    layers_code = ['geodetical_point_view']
+    print(layers_code)
+    print(layers_code)
     value_type = None
     property_name = None
     property_code = None
