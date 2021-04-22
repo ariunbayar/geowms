@@ -186,6 +186,7 @@ export class EmployeeEdit extends Component {
                     if (success) {
                         this.role = []
                         this.setState({ roles, is_inspire_role: true })
+                        this.refreshMap()
                     }
                 })
         }
@@ -263,7 +264,7 @@ export class EmployeeEdit extends Component {
 
 
     handleSubmit(form_values, {setStatus, setSubmitting, setErrors}) {
-        const {id, role_id} = this.state
+        const {id, role_id, is_address_map} = this.state
 
         const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
         const address = {
@@ -278,6 +279,9 @@ export class EmployeeEdit extends Component {
         }
 
         this.checkRoleAndPerm()
+        if(is_address_map) {
+            this.refreshMap()
+        }
         service
             .updateEmployee(form_values, role_id, id, this.perms, this.remove_perms, address)
             .then(({ success, info, errors }) => {
