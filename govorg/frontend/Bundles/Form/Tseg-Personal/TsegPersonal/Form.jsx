@@ -1170,7 +1170,7 @@ export class Forms extends Component {
                                                 </td>
                                             </tr> */}
                                             <tr>
-                                                <th colSpan="1" scope="rowgroup">12.</th>
+                                                <th colSpan="1" scope="rowgroup">11.</th>
                                                 <th colSpan="2" scope="rowgroup">Хөрсний шинж байдал:</th>
                                                 <td colSpan="4" scope="rowgroup">
                                                     <div className="input-group">
@@ -1190,7 +1190,7 @@ export class Forms extends Component {
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th colSpan="1" scope="rowgroup">13.</th>
+                                                <th colSpan="1" scope="rowgroup">12.</th>
                                                 <th colSpan="2" scope="rowgroup">Цэг тэмдэгт суулгасан огноо:</th>
                                                 <td colSpan="3" scope="input-group date">
                                                     <Field
@@ -1206,7 +1206,7 @@ export class Forms extends Component {
                                             {/* TODO */}
                                             {values.suljeenii_torol == '-1' ?
                                             <tr>
-                                                <th colSpan="1" scope="rowgroup">14.</th>
+                                                <th colSpan="1" scope="rowgroup">13.</th>
                                                 <th colSpan="2" scope="rowgroup">Файл 1:</th>
                                                 <td colSpan="3" scope="rowgroup">
                                                     {this.state.file_path11 === '' ? null : <a href={`/media/${this.state.file_path11}`}>{this.state.file_path11}</a>}
@@ -1229,7 +1229,7 @@ export class Forms extends Component {
                                             </tr>: null}
                                             {values.suljeenii_torol == '-1' ?
                                             <tr>
-                                                <th colSpan="1" scope="rowgroup">15.</th>
+                                                <th colSpan="1" scope="rowgroup">14.</th>
                                                 <th colSpan="2" scope="rowgroup">Файл 2:</th>
                                                 <td colSpan="3" scope="rowgroup">
                                                     {this.state.file_path22 === '' ? null : <a href={`/media/${this.state.file_path22}`}>{this.state.file_path22}</a>}
@@ -1254,7 +1254,12 @@ export class Forms extends Component {
                                             </tr>
                                             : null}
                                             <tr>
-                                                <th colSpan="1" scope="rowgroup">16.</th>
+                                                {values.suljeenii_torol == '-1'
+                                                    ?
+                                                        <th colSpan="1" scope="rowgroup">15.</th>
+                                                    :
+                                                        <th colSpan="1" scope="rowgroup">13.</th>
+                                                }
                                                 <th colSpan="2" scope="rowgroup">Албан байгууллага:</th>
                                                 <td colSpan="3" scope="rowgroup">
                                                     <Field
@@ -1268,7 +1273,12 @@ export class Forms extends Component {
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th colSpan="1" scope="rowgroup">17.</th>
+                                                {values.suljeenii_torol == '-1'
+                                                    ?
+                                                        <th colSpan="1" scope="rowgroup">16.</th>
+                                                    :
+                                                        <th colSpan="1" scope="rowgroup">14.</th>
+                                                }
                                                 <th colSpan="2" scope="rowgroup">Албан тушаал:</th>
                                                 <td colSpan="3" scope="rowgroup">
                                                     <Field
@@ -1282,7 +1292,12 @@ export class Forms extends Component {
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th colSpan="1" scope="rowgroup">18.</th>
+                                                {values.suljeenii_torol == '-1'
+                                                    ?
+                                                        <th colSpan="1" scope="rowgroup">17.</th>
+                                                    :
+                                                        <th colSpan="1" scope="rowgroup">15.</th>
+                                                }
                                                 <th colSpan="2" scope="rowgroup">Хувийн хэрэг хөтөлсөн:</th>
                                                 <td colSpan="3" scope="rowgroup">
                                                     <Field
