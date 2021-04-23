@@ -486,6 +486,7 @@ def _get_fill_stroke(data):
         rule_name = data.get('Name') or ''
         max_range = data.get('MaxScaleDenominator') or 0
         min_range = data.get('MinScaleDenominator') or 0
+        
 
         if data.get('RasterSymbolizer'):
             return [], '', True
@@ -505,6 +506,7 @@ def _get_fill_stroke(data):
                 if onlinesource:
                     return [], '', True
                 shape_data = shape_data.get('Mark')
+                wellknownname = shape_data.get('WellKnownName') or 'circle'
 
         elif data.get('PolygonSymbolizer'):
             shape_data = data.get('PolygonSymbolizer')
@@ -540,6 +542,7 @@ def _get_fill_stroke(data):
             style_datas['rule_name'] = rule_name
             style_datas['max_range'] = max_range
             style_datas['min_range'] = min_range
+            style_datas['wellknownname'] = wellknownname
             style_datas['rule_name'] = rule_name
             style_datas['shape_type'] = shape_type
 
