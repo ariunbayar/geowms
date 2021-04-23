@@ -3,6 +3,7 @@ from itertools import groupby
 from django.http import JsonResponse
 from django.shortcuts import render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
+from django.core.cache import cache
 
 from main.decorators import ajax_required
 from backend.dedsanbutets.models import ViewNames
@@ -194,21 +195,25 @@ def sumfind(request, payload):
 def get_search_value(request, payload):
     id = payload.get('id')
     search_value = payload.get('value')
+    pk = cache.get('pk')
+    if pk != id:
+        cache.set('pk', id, 300)
+        theme = get_object_or_404(LThemes, pk=id)
+        theme_id = theme.theme_id
 
-    theme = get_object_or_404(LThemes, pk=id)
-    theme_id = theme.theme_id
+        qs_packages = LPackages.objects
+        qs_packages = qs_packages.filter(theme_id=theme_id)
+        package_ids = list(qs_packages.values_list('package_id', flat=True))
+        qs_features = LFeatures.objects
+        qs_features = qs_features.filter(package_id__in=package_ids)
+        feature_ids = list(qs_features.values_list('feature_id', flat=True))
 
-    qs_packages = LPackages.objects
-    qs_packages = qs_packages.filter(theme_id=theme_id)
-    package_ids = list(qs_packages.values_list('package_id', flat=True))
-
-    qs_features = LFeatures.objects
-    qs_features = qs_features.filter(package_id__in=package_ids)
-    feature_ids = list(qs_features.values_list('feature_id', flat=True))
-
-    qs_feature_configs = LFeatureConfigs.objects
-    qs_feature_configs = qs_feature_configs.filter(feature_id__in=feature_ids)
-    feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
+        qs_feature_configs = LFeatureConfigs.objects
+        qs_feature_configs = qs_feature_configs.filter(feature_id__in=feature_ids)
+        feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
+        cache.set('feature_config_ids', feature_config_ids, 300)
+    else:
+        feature_config_ids = cache.get('feature_config_ids')
 
     qs_datas = MDatas.objects
     qs_datas = qs_datas.annotate(search=SearchVector('value_text'))
@@ -224,6 +229,6 @@ def get_search_value(request, payload):
         datas.append(data)
 
     rsp = {
-        'datas': datas
+        'datas': datas,
     }
     return JsonResponse(rsp)

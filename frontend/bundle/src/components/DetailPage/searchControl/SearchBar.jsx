@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom'
 import {Control} from 'ol/control'
 import {CLASS_CONTROL, CLASS_HIDDEN} from 'ol/css.js'
 import { service } from "../service"
+import './style.css'
 
 
 export class SearchBarComponent extends Component {
@@ -49,6 +50,7 @@ export class SearchBarComponent extends Component {
             search_value: '',
             bundle_id: props.bundle_id,
             search_datas: [],
+            is_searching: false,
         }
 
         this.handleSubmitCoordinate = this.handleSubmitCoordinate.bind(this)
@@ -60,6 +62,7 @@ export class SearchBarComponent extends Component {
         this.resetButton = this.resetButton.bind(this)
         this.setCenterOfMap = this.setCenterOfMap.bind(this)
         this.getGeom = this.getGeom.bind(this)
+        this.handleChange = this.handleChange.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
     }
 
@@ -192,20 +195,27 @@ export class SearchBarComponent extends Component {
         this.props.resetShowArea()
     }
 
-    handleSearch(value) {
+    handleChange(value) {
         this.setState({ search_value: value })
-        service
-            .getFindValues(this.state.bundle_id, value)
-            .then(({ datas }) => {
-                if (datas) {
-                    this.setState({ search_datas: datas })
-                }
-            })
-            .catch(() => alert("Алдаа гарсан байна"))
+    }
+
+    handleSearch() {
+        if (!this.state.is_searching){
+            this.setState({ is_searching: !this.state.is_searching })
+            service
+                .getFindValues(this.state.bundle_id, this.state.search_value)
+                .then(({ datas }) => {
+                    if (datas) {
+                        this.setState({ search_datas: datas })
+                    }
+                    this.setState({ is_searching: !this.state.is_searching })
+                })
+                .catch(() => alert("Алдаа гарсан байна"))
+        }
     }
 
     render() {
-        const {error_msg, sum, aimag, options_scale, horoo, search_datas} = this.state
+        const {error_msg, sum, aimag, options_scale, horoo, search_datas, is_searching} = this.state
         return (
             <div>
                 {/* <div className="form-group  rounded shadow-sm p-3 mb-3 bg-white rounded">
@@ -219,17 +229,33 @@ export class SearchBarComponent extends Component {
                     </div>
                 </div> */}
 
-                <div className="rounded shadow-sm p-2 mb-3 bg-white rounded">
-                    <ul className="list-group list-group-flush">
-                        <input type="search" className="form-control" placeholder="Хайх" value={this.state.search_value} onChange={e => this.handleSearch(e.target.value)}/>
-                        {
-                            search_datas.map((data, idx) =>
-                                <li className="list-group-item" key={idx} value={data.geo_id} onClick={(e) => this.getGeom(e.target.value)}>
-                                    <i className="fa fa-history mr-3 text-secondary">   {data.name}</i>
-                                </li>
-                            )
-                        }
-                    </ul>
+                <div className="rounded shadow-sm px-2 pb-2 mb-3 bg-white rounded row mx-0">
+                    <div className="d-flex justify-content-center">
+                        <div className="search-bundle">
+                            <input
+                                type="search"
+                                className="search-bundle-input"
+                                placeholder="Хайх..."
+                                value={this.state.search_value}
+                                onChange={e => this.handleChange(e.target.value)}
+                            />
+                            <a href="#" className="search-bundle-icon" onClick={this.handleSearch}>
+                                {
+                                    is_searching ?
+                                        <i className="spinner-border text-light"></i>
+                                    :
+                                       <i className="fa fa-search"></i>
+                                }
+                            </a>
+                        </div>
+                    </div>
+                    {
+                    search_datas.map((data, idx) =>
+                            <li className="list-group-item form-control" key={idx} value={data.geo_id} onClick={(e) => this.getGeom(e.target.value)}>
+                                <i className="fa fa-history mr-3 text-secondary">   {data.name}</i>
+                            </li>
+                        )
+                    }
                 </div>
                 <form onSubmit={this.handleSubmitClear} className="rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
