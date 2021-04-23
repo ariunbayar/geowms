@@ -426,10 +426,6 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
         max_range = values.get('max_range')
         min_range_content = ''
         max_range_content = ''
-        print("hoho")
-        print("hoho")
-        print("hoho")
-        print("hoho", values.get('wellknownname'))
         if min_range:
             min_range_content = '''
                 <MinScaleDenominator>{min_range}</MinScaleDenominator>
