@@ -23,14 +23,13 @@ export class LoginLog extends Component {
             хувьсах_талбарууд: [{"field": "login_type", "action": this.get_login_type, "action_type": true,}],
             cards: [
                 {
-                    'name': ' Системд нэвтэрсэн нийт хэрэглэгч ',
+                    'name': ' Нэвтэрсэн хэрэглэгчдийн тоо ',
                     'color': 'gradient-scooter',
                     'icon': 'icon-people',
                     'text_color': 'text-info',
-                    'state':'Өнөөдрийн байдлаар',
+                    'state':'Нийт',
                     'border_color':'border-info',
                     'col_size': 'col-12 col-lg-6 col-xl-4 ',
-                    'hidden':'hidden'
                 },
                 {
                     'name': 'Нэвтэрсэн хэрэглэгч',
@@ -106,7 +105,6 @@ export class LoginLog extends Component {
                         card_state={field.state}
                         border_color={field.border_color}
                         col_size={field.col_size}
-                        hidden={field.hidden}
                     />
                 )}
                 </div>
