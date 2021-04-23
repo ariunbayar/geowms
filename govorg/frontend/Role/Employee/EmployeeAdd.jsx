@@ -85,6 +85,7 @@ export class EmployeeAdd extends Component {
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
+        this.refreshMap = this.refreshMap.bind(this)
 
         this.getSelectValue = this.getSelectValue.bind(this)
     }
@@ -151,7 +152,7 @@ export class EmployeeAdd extends Component {
     }
 
     handleSubmit(user_detail, { setStatus, setSubmitting, setErrors }){
-        const { emp_role_id } = this.state
+        const { emp_role_id, is_address_map} = this.state
 
         const { street, apartment, door_number, address_state, aimag_name, sum_name, horoo_name, point_coordinate } = this.state
         const address = {
@@ -163,6 +164,14 @@ export class EmployeeAdd extends Component {
             'level_3': horoo_name,
             'point_coordinate': point_coordinate,
             'address_state': address_state,
+        }
+        if(is_address_map) {
+            if (is_address_map) {
+                if (this.state.last_geo_id) {
+                    this.getGeom(this.state.last_geo_id)
+                }
+            }
+            this.setState({ is_address_map: !is_address_map })
         }
 
         service
@@ -307,6 +316,20 @@ export class EmployeeAdd extends Component {
             this.getGeom(geo_id)
         }
         this.setState({ [field_id]: idx, ...obj })
+    }
+
+    refreshMap() {
+        const { last_geo_id, is_address_map, is_marker, point } = this.state
+        let obj = Object()
+        obj['is_address_map'] = !is_address_map
+        if (is_address_map) {
+            if (last_geo_id) {
+                obj['is_marker'] = !is_marker
+                obj['point'] = point
+                this.getGeom(last_geo_id)
+            }
+        }
+        this.setState({ ...obj })
     }
 
     getGeomFromJson(geom_name, array) {
@@ -514,14 +537,7 @@ export class EmployeeAdd extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => {
-                                                    if (is_address_map) {
-                                                        if (this.state.last_geo_id) {
-                                                            this.getGeom(this.state.last_geo_id)
-                                                        }
-                                                    }
-                                                    this.setState({ is_address_map: !is_address_map })
-                                                }}>
+                                                <button className="btn btn-primary btn-block mb-2" type="button" onClick={() => this.refreshMap()}>
                                                     {
                                                         !is_address_map ? "Role сонгох" : "Гэрийн хаяг оруулах"
                                                     }
