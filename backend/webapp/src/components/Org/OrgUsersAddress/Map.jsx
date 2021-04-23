@@ -20,6 +20,9 @@ import { СуурьДавхарга } from './../../map/controls/СуурьДа�
 import 'ol/ol.css'
 import "./styles.css"
 import { service } from "../service"
+import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
+import WMTS from 'ol/source/WMTS';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
 
 export default class AddressMap extends Component {
 
@@ -199,7 +202,7 @@ export default class AddressMap extends Component {
             });
 
             map.addControl(this.controls.form)
-            map.addControl(base_layer_control)
+            map.addControl(base_layer_controls)
             this.map = map
         }
     }
