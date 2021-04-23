@@ -171,6 +171,7 @@ export default class ShowStyleData extends Component {
                                             <select
                                                 className="form-control form-control-sm"
                                                 name="wellknownname"
+                                                value={value.wellknownname}
                                                 onChange={(e) => this.handleOnChange(e)}
                                             >
                                                 <option value="circle">Дугуй</option>
