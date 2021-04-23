@@ -444,10 +444,13 @@ export class Forms extends Component {
     }
 
     tsegUpdate(id, geo_id){
+        let return_url
+        if (geo_id) return_url = '/gov/forms/tseg-info/tsegpersonal/inspire-tseg/'
+        if (id) return_url = '/gov/forms/tseg-info/tsegpersonal/tseg-personal/'
         service
             .updateTseg(id, geo_id)
-            .then(({ tseg_display }) => {
-                if(tseg_display) {
+            .then(({ success, tseg_display, msg }) => {
+                if(success) {
                     tseg_display.map((item, idx) =>
                     {
                         var value = item.date
@@ -508,6 +511,30 @@ export class Forms extends Component {
                         }
                     )
                 }
+                else {
+                    this.modalChange(
+                        null,
+                        '',
+                        msg,
+                        'fa fa-check-circle',
+                        'warning',
+                        false,
+                        null,
+                        () => this.props.data.history.push(return_url),
+                    )
+                }
+            })
+            .catch((e) => {
+                this.modalChange(
+                    null,
+                    '',
+                    "Алдаа гарсан байна",
+                    'fa fa-times-circle',
+                    'danger',
+                    false,
+                    null,
+                    () => this.props.data.history.push(return_url),
+                )
             })
     }
 
@@ -642,8 +669,10 @@ export class Forms extends Component {
         if (geo_id || id) {
             service
                 .getTseg(id, geo_id)
-                .then(({ coord }) => {
-                    setTseg(coord)
+                .then(({ success, coord }) => {
+                    if (success) {
+                        setTseg(coord)
+                    }
                 })
         }
     }

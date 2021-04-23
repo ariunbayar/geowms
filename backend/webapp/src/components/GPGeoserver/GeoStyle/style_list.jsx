@@ -128,8 +128,8 @@ export class StyleList extends Component {
                                 <tr>
                                     <th scope="col"> № </th>
                                     <th scope="col"> Нэр </th>
-                                    <th scope="col" style={{zIndex:1}} >Засах</th>
-                                    <th scope="col" style={{zIndex:1}} >Устгах</th>
+                                    <th scope="col">Засах</th>
+                                    <th scope="col">Устгах</th>
                                 </tr>
                             </thead>
                             <tbody>

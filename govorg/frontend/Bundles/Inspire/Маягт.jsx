@@ -143,6 +143,24 @@ export default class Маягт extends Component {
         }
     }
 
+    setDisable(roles){
+        const { modifyend_selected_feature_check, update_geom_from_list, null_form_isload, cancel_button_active, remove_button_active } = this.props
+        var return_data = false
+        if(null_form_isload){
+            return_data = roles['PERM_CREATE']
+        }
+        if(remove_button_active){
+            return_data = roles['PERM_REMOVE']
+        }
+        if(cancel_button_active){
+            return_data = roles['PERM_REVOKE']
+        }
+        if(!null_form_isload && !remove_button_active && !cancel_button_active){
+            return_data = roles['PERM_UPDATE']
+        }
+        return return_data
+    }
+
     render() {
         const { values, id, data_types } = this.state
         const { modifyend_selected_feature_check, update_geom_from_list, null_form_isload, cancel_button_active, remove_button_active } = this.props
@@ -151,6 +169,7 @@ export default class Маягт extends Component {
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
             )
         }
+
         return (
             <div className='overflow-auto card-body'>
                 {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Шинэ цэг</h4>}
@@ -201,7 +220,7 @@ export default class Маягт extends Component {
                                                     <Field name={`form_values.${index}.data` || ""}
                                                         as="select"
                                                         className="form-control"
-                                                        disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
+                                                        disabled={this.setDisable(friend.roles)}
                                                     >
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
@@ -219,7 +238,7 @@ export default class Маягт extends Component {
                                                     name={`form_values.${index}.data` || ""}
                                                     as="select"
                                                     className='form-control'
-                                                    disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
+                                                    disabled={this.setDisable(friend.roles)}
                                                 >
                                                     <option value="true">True</option>
                                                     <option value="false">False</option>
@@ -228,7 +247,7 @@ export default class Маягт extends Component {
                                                 <Field
                                                     name={`form_values.${index}.data` || ""}
                                                     className='form-control'
-                                                    disabled={null_form_isload ? friend.roles['PERM_CREATE'] : friend.roles['PERM_UPDATE']}
+                                                    disabled={this.setDisable(friend.roles)}
                                                     placeholder={friend.property_name}
                                                     type={friend.value_type}
                                                 />

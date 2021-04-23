@@ -819,7 +819,12 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
     ids.sort()
     data = LProperties.objects.filter(property_id__in=ids)
     removeView(table_name)
-    fields = [row.property_code for row in data]
+    fields = list()
+    for row in data:
+        if row.property_code == 'end':
+            fields.append('end_')
+        else:
+            fields.append(row.property_code)
     try:
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}

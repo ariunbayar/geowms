@@ -1,0 +1,107 @@
+.🌍 {
+    position: relative;
+}
+
+.🌍 > #map{
+    width: 16%;
+    height: 600px;
+    right: 5px;
+    position: fixed;
+}
+
+.суурь-давхаргууд{
+    right: .0rem;
+    z-index: -100;
+    bottom: 10px;
+    right: 10px;
+    height: 2.1rem;
+    position: absolute;
+
+}
+.суурь-давхаргууд > .суурь-давхарга{
+    display: block;
+    width: 5.6rem;
+    height: 2.1rem;
+    overflow: hidden;
+    margin: 1px;
+    border-radius: 2px;
+    float: right;
+    transition: opacity .15s ease-out;
+}
+.суурь-давхаргууд > .суурь-давхарга.active,
+.суурь-давхаргууд:hover > .суурь-давхарга.active:hover,
+.суурь-давхаргууд > .суурь-давхарга:hover {
+    opacity: 1;
+}
+.суурь-давхаргууд > .суурь-давхарга,
+.суурь-давхаргууд:hover > .суурь-давхарга.active {
+    opacity: .7;
+}
+
+.ol-full-screen {
+    right: .5rem;
+    top: 58px;
+    width: 57px;
+    height: 57px;
+
+}
+.ol-full-screen .ol-full-screen-false{
+    width: 50px;
+    height: 50px;
+    font-size: 40px;
+
+}
+.ol-full-screen .ol-full-screen-true{
+    width: 50px;
+    height: 50px;
+    font-size: 40px;
+
+}
+.ol-zoom {
+    width: 27px;
+    height: 54px;
+    left: unset;
+    right: .5rem;
+    top: 1px;
+}
+.ol-zoom  .ol-zoom-out{
+    width: 25px;
+    height: 25px;
+    font-size: 25px;
+
+}
+.ol-zoom .ol-zoom-in{
+    width: 25px;
+    height: 25px;
+    font-size: 25px;
+}
+
+.ol-mouse-position {
+    right: 4rem;
+    background: rgba(0,60,136,0.3);
+    border-radius: 4px;
+    padding: 2px .2rem;
+    font-size: smaller;
+    color: #eee;
+    text-align: center;
+    width: 8.8rem;
+    min-height: 1rem;
+}
+
+.coordinate-copy-control {
+    width: 10rem;
+    left: 2%;
+    top: 0.5rem;
+    opacity: 1;
+}
+.coordinate-copy-control.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .25s linear, visibility 0s linear .25s;
+}
+
+.ol-scale-line{
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+}
