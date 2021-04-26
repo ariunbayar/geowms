@@ -409,10 +409,6 @@ export default class BundleMap extends Component {
                                         }
                                     }
                                 }
-                                if(geodb_table == 'covid'){
-                                    this.state.vector_layer.setSource(source)
-                                    this.connectPointToPoint(features)
-                                }
                             }
                         })
                 } else {

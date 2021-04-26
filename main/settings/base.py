@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'frontend.суурь_давхарга.apps.СуурьДавхаргаConfig',
     'frontend.secure.apps.SecureConfig',
     'frontend.payment.apps.PaymentConfig',
-    'frontend.covid.apps.CovidConfig',
     'frontend.open_layer.apps.OpenLayerConfig',
     'frontend.page.apps.PageConfig',
     'frontend.profile.apps.ProfileConfig',
