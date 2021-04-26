@@ -269,7 +269,7 @@ export default class List extends Component {
                                 уншиж_байх_үед_зурвас={"Уншиж байна"}
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
-                                нэмэх_товч={'/back/another-base/connection/'}
+                                нэмэх_товч={'/back/db-export/connection/'}
                                 refresh={refresh}
                             />
                         </div>

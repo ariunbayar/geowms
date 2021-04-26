@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { Switch, Route } from "react-router-dom"
 
-// import ConfigTitles from '../AnotherBase/ConfigTitles'
-// import MSSQL from '../AnotherBase/MSSQL'
-// import MONGO from '../AnotherBase/MONGO'
+import ConfigTitles from './ConfigTitles'
+import PgDB from './PgDb/index'
 import List from './List'
 
 class DBExport extends Component {
@@ -17,9 +16,8 @@ class DBExport extends Component {
             <div className="">
                 <Switch>
                     {/* <Route path={"/back/another-base/connection/crontab/:id/"} component={CronTab}/> */}
-                    {/* <Route path={"/back/another-base/connection/mongo/"} component={MONGO}/> */}
-                    {/* <Route path={"/back/another-base/connection/mssql/"} component={MSSQL}/> */}
-                    {/* <Route path={"/back/another-base/connection/"} component={ConfigTitles}/> */}
+                    <Route path={"/back/db-export/connection/pg/"} component={PgDB}/>
+                    <Route path={"/back/db-export/connection/"} component={ConfigTitles}/>
                     <Route exact path={"/back/db-export/"} component={List}/>
                 </Switch>
             </div>

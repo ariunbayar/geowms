@@ -4,7 +4,7 @@ const prefix = '/back/another-database'
 
 
 
-const mssql_config = {
+const pg_config = {
 
     get: function(pk) {
         const requestOptions = getGetOptions()
@@ -16,7 +16,7 @@ const mssql_config = {
             ...getPostOptions(),
             body: JSON.stringify(values),
         }
-        return fetch(`${prefix}/mssql/save/`, opts).then(handleResponse)
+        return fetch(`${prefix}/pg/db-config-save/`, opts).then(handleResponse)
     },
 
     getTableNames: function(connection_id, table_id ) {
@@ -80,58 +80,6 @@ const mssql_config = {
     }
 }
 
-const mongo_config = {
-
-    get: function(pk) {
-        const requestOptions = getGetOptions()
-        return fetch(`${prefix}/mongo/get/${pk}/`, requestOptions).then(handleResponse)
-    },
-
-    save: function(values) {
-        const opts = {
-            ...getPostOptions(),
-            body: JSON.stringify(values),
-        }
-        return fetch(`${prefix}/mongo/save/`, opts).then(handleResponse)
-    },
-
-    tableSave: function(id, tableId, field_names, table_name, feature_code) {
-        const opts = {
-            ...getPostOptions(),
-            body: JSON.stringify({tableId, field_names, table_name, feature_code}),
-        }
-        return fetch(`${prefix}/mongo/tables/${id}/save/`, opts).then(handleResponse)
-    },
-
-    tableRemove: function(root_id, id) {
-        const opts = {
-            ...getGetOptions(),
-        }
-        return fetch(`${prefix}/mongo/tables/remove/${root_id}/${id}/`, opts).then(handleResponse)
-    },
-
-    tableConfig: function(root_id, id) {
-        const opts = {
-            ...getGetOptions(),
-        }
-        return fetch(`${prefix}/mongo/tables/detail/${root_id}/${id}/`, opts).then(handleResponse)
-    },
-
-    tables: function(id) {
-        const opts = {
-            ...getGetOptions(),
-        }
-        return fetch(`${prefix}/mongo/tables/${id}/`, opts).then(handleResponse)
-    },
-
-    fieldNames: function(id, name) {
-        const opts = {
-            ...getGetOptions(),
-        }
-        return fetch(`${prefix}/mongo/fields/${id}/${name}/`, opts).then(handleResponse)
-    },
-}
-
 function remove(pk) {
     const requestOptions = {
         ...getGetOptions(),
@@ -140,12 +88,12 @@ function remove(pk) {
 }
 
 export const service = {
-    mssql_config,
-    mongo_config,
+    pg_config,
     remove,
     update,
     cronTabSave,
-    cronTabDetail
+    cronTabDetail,
+    DBConfiSave
 }
 
 function update(pk) {
@@ -153,6 +101,14 @@ function update(pk) {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/update/${pk}/`, requestOptions).then(handleResponse)
+}
+
+function DBConfiSave(values) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify(values),
+    }
+    return fetch(`${prefix}/db-config-save/`, requestOptions).then(handleResponse)
 }
 
 function cronTabSave(values) {

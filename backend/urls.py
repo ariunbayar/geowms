@@ -15,6 +15,7 @@ import backend.gis.views
 from backend.geoserver import views as geoserver_views
 from backend.another_database import views as geoserver_another_database
 from backend.another_database import mssql_views as mssql_views
+from backend.another_database import pg_views
 
 app_name = 'backend'
 urlpatterns = [
@@ -63,6 +64,10 @@ urlpatterns = [
         path('mssql/get-all-table-names/', mssql_views.get_all_table_names),
         path('mssql/tables/<int:pk>/', geoserver_another_database.get_mssql_tables_list),
         path('mssql/refresh-mssql-datas/<int:connection_id>/', mssql_views.refresh_datas, name='refresh-datas-mssql'), # ene shuuuu
+
+        #path db-export
+        path('pg/db-config-save/', geoserver_another_database.config_save),
+
     ], 'another-database'))),
 
 
