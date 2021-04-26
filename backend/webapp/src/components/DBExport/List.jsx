@@ -9,7 +9,7 @@ export default class List extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            жагсаалтын_холбоос: `/back/another-database/${false}/all/`,
+            жагсаалтын_холбоос: `/back/another-database/${true}/all/`,
             талбарууд: [
                 {'field': 'name', "title": 'Нэр'},
                 {'field': 'definition', "title": 'Тайлбар'},

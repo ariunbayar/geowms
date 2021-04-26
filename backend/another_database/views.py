@@ -28,28 +28,41 @@ from .mongo_utils import (
 from backend.inspire.models import LPackages, LFeatures
 from crontab import CronTab
 
+
+def _get_out_type(out_type):
+    if out_type == 'false':
+        out_type = False
+    else:
+        out_type = True
+    return out_type
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def pagination(request, payload):
+def pagination(request, payload, out_type):
+    items = []
+    total_page = []
+    out_type = _get_out_type(out_type)
 
     def _get_data_type_name(data_type, item):
         for id, name in AnotherDatabase.DB_CHOICES:
             if id == data_type:
                 return name
 
-
     оруулах_талбарууд = ['id', 'name', 'definition', 'unique_id', 'database_updated_at', 'created_at', 'updated_at', 'db_type']
     хувьсах_талбарууд = [{"field": "db_type", "action": _get_data_type_name, "new_field": "db_type"}]
+    qs = AnotherDatabase.objects
+    qs = qs.filter(is_export=out_type)
+    if qs:
+        datatable = Datatable(
+            model=AnotherDatabase,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд
+        )
 
-    datatable = Datatable(
-        model=AnotherDatabase,
-        payload=payload,
-        оруулах_талбарууд=оруулах_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд
-    )
-
-    items, total_page = datatable.get()
+        items, total_page = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get("page"),

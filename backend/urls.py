@@ -39,7 +39,7 @@ urlpatterns = [
     ], 'wms'))),
 
     path('another-database/', include(([
-        path('all/', geoserver_another_database.pagination),
+        path('<str:out_type>/all/', geoserver_another_database.pagination),
         path('mssql/get/<int:pk>/', geoserver_another_database.mssql_get),
         path('mssql/save/', geoserver_another_database.mssql_save),
         path('mongo/get/<int:pk>/', geoserver_another_database.mongo_get),
