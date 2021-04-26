@@ -66,7 +66,7 @@ export default class MapAllowedGeom extends Component {
         this.map = map
       }
 
-      removeFeatureFromSource(featureID) {
+    removeFeatureFromSource(featureID) {
         const source = this.vector_layer.getSource()
         const features = source.getFeatures();
         if (features != null && features.length > 0) {

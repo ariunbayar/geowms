@@ -32,6 +32,7 @@ class TsegRequest extends Component {
                 {'field': 'point_id', "title": 'Цэгийн дугаар'},
                 {'field': 'point_class', "title": 'Цэгийн анги'},
                 {'field': 'point_type', "title": 'Цэгийн төрөл'},
+                {'field': 'point_location', "title": 'Байршил'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
             ],

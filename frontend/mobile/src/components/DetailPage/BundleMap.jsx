@@ -25,6 +25,7 @@ import {service} from './service'
 import {Sidebar} from './Sidebar'
 import SideBar from "@utils/SideBar"
 import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
+import GeoJSON from 'ol/format/GeoJSON';
 
 
 export default class BundleMap extends Component {
@@ -62,6 +63,8 @@ export default class BundleMap extends Component {
         this.showFeaturesLimit = this.showFeaturesLimit.bind(this)
         this.locationSet = this.locationSet.bind(this)
         this.connectPointToPoint = this.connectPointToPoint.bind(this)
+        this.searchValueAddLayer = this.searchValueAddLayer.bind(this)
+        this.removeSearchValueAddLayer = this.removeSearchValueAddLayer.bind(this)
     }
 
     initMarker() {
@@ -250,6 +253,19 @@ export default class BundleMap extends Component {
                 }
             )
 
+        const search_vector_layer = new VectorLayer({
+            source: new VectorSource({}),
+            style: new Style({
+                stroke: new Stroke({
+                    color: 'rgb(51, 204, 204)',
+                    width: 2
+                }),
+            }),
+        })
+
+        this.search_vector_layer = search_vector_layer
+
+
         const vector_layer = new VectorLayer({
             source: new VectorSource(),
             style: new Style({
@@ -292,6 +308,7 @@ export default class BundleMap extends Component {
                 }, []),
                 vector_layer,
                 marker_layer,
+                search_vector_layer
             ],
             view: new View({
                 projection: this.state.projection,
@@ -303,6 +320,38 @@ export default class BundleMap extends Component {
 
         map.on('click', this.handleMapClick)
         this.map = map
+        this.searchValueAddLayer()
+    }
+
+    searchValueAddLayer(){
+        const { geo_data } = this.props
+        const { projection_display, projection } = this.state
+        if(geo_data.geo_json){
+            const id = 'search_value_layer'
+            this.removeSearchValueAddLayer(id)
+            var feature =  new GeoJSON().readFeatures(geo_data.geo_json, {
+                dataProjection: projection_display,
+                featureProjection: projection,
+            });
+            feature[0].setProperties({ id })
+            this.search_vector_layer.getSource().addFeature(feature[0])
+            this.map.getView().fit(feature[0].getGeometry(),{ padding: [25, 25, 25, 25]})
+        }
+    }
+
+    removeSearchValueAddLayer(featureID) {
+        const source = this.search_vector_layer.getSource()
+        const features = source.getFeatures();
+        if (features != null && features.length > 0) {
+            for (var i = 0; i < features.length; i++) {
+                const properties = features[i].getProperties();
+                const id = properties.id;
+                if (id == featureID) {
+                    source.removeFeature(features[i]);
+                    break;
+                }
+            }
+        }
     }
 
     handleMapClick(event) {

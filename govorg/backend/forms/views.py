@@ -57,6 +57,12 @@ from main import utils
 # Create your models here.
 
 
+def _get_model_qs(Model, search):
+    qs = Model.objects
+    qs = qs.filter(**search)
+    return qs
+
+
 def createPdf(values, requests):
 
     geo_json = json.loads(requests.geo_json)
@@ -681,6 +687,64 @@ def _get_point_type_name(point_type, item):
     return point_type
 
 
+def _make_location_name(aimag, item):
+    location_name = aimag + ', ' + item['sum']
+    return location_name
+
+
+def _get_len_geo_id(geo_id):
+    len_geo_id = len(geo_id)
+    level3 = 4
+    level4 = 6
+    if len_geo_id == level4:
+        len_geo_id = len(geo_id[:level3])
+    return len_geo_id
+
+
+def _get_qs_in_boundary(initial_qs, org):
+    levels = [
+        [2, 'aimag'],
+        [4, 'sum']
+    ]
+
+    property_code = 'text'
+    feature_code = 'bnd-au-au'
+    org_geo_id = org.geo_id
+
+    feature = utils.get_feature_from_code(feature_code)
+    feature_id = feature.feature_id
+
+    properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
+    datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
+
+    mdatas_qs = MDatas.objects
+    mdatas_qs = mdatas_qs.filter(geo_id=org_geo_id)
+    mdatas_qs = mdatas_qs.filter(**datas[0])
+    if mdatas_qs:
+        mdatas_qs = mdatas_qs.values()
+        mdatas_qs = mdatas_qs.first()
+        org_boundary_name = mdatas_qs['value_text']
+
+        len_of_geo_id = _get_len_geo_id(org_geo_id)
+
+        filter_data = dict()
+        for level, level_name in levels:
+            if len_of_geo_id == level:
+                filter_data[level_name] = org_boundary_name
+
+        initial_qs = initial_qs.filter(**filter_data)
+
+    return initial_qs
+
+
+def _get_org_from_request(request):
+    qs = request.user
+    qs = qs.employee_set
+    qs = qs.get(user=request.user)
+    org = qs.org
+    return org
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -689,7 +753,11 @@ def tseg_personal_list(request, payload):
     perm_name = EmpPermInspire.PERM_VIEW
     check_point, info = _check_tseg_role(perm_name, request.user)
     if check_point:
+
+        org = _get_org_from_request(request)
+
         requests = TsegRequest.objects
+        requests = _get_qs_in_boundary(requests, org)
         requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
         if requests:
             requests = requests.order_by('-created_at')
@@ -699,6 +767,7 @@ def tseg_personal_list(request, payload):
                 {"field": "kind", "action": _get_kind_color, "new_field": "kind"},
                 {"field": "point_type", "action": _get_point_type_name, "new_field": "point_type"},
                 {"field": "point_class", "action": _getname, "new_field": "point_class"},
+                {"field": "aimag", "action": _make_location_name, "new_field": "point_location"},
             ]
 
             datatable = Datatable(
@@ -740,6 +809,14 @@ def _get_property_zero(initial_qs):
     return value
 
 
+def _get_geo_data(geo_id):
+    m_geo_qs = MGeoDatas.objects
+    m_geo_qs = m_geo_qs.filter(geo_id=geo_id)
+    m_geo_qs = m_geo_qs.first()
+    geo_data = m_geo_qs.geo_data
+    return geo_data
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -751,6 +828,9 @@ def tseg_inspire_list(request, payload):
     sort_name = payload.get("sort_name")
     if not sort_name:
         sort_name = '-created_on'
+
+    org = _get_org_from_request(request)
+    geo_data = _get_geo_data(org.geo_id)
 
     # qs = _get_model_qs(LThemes, {'theme_code': 'gnp'})
     # theme_id = qs.first().theme_id
@@ -775,7 +855,7 @@ def tseg_inspire_list(request, payload):
     datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes)
 
     qs = MGeoDatas.objects
-    geo_qs = qs.filter(feature_id=feature_id)
+    geo_qs = qs.filter(geo_data__intersects=geo_data, feature_id=feature_id)
     geo_qs = geo_qs.order_by(sort_name)
 
     total_items = Paginator(geo_qs, per_page)
@@ -826,8 +906,19 @@ def tseg_personal_remove(request, id):
         }
         return JsonResponse(rsp)
 
+    org = _get_org_from_request(request)
+
     qs = TsegRequest.objects
-    qs = qs.filter(pk=id)
+    qs = _get_qs_in_boundary(qs, org)
+    if qs:
+        qs = qs.filter(pk=id)
+    else:
+        rsp = {
+            'success': False,
+            'msg': 'Таны хамрах хүрээ биш байна',
+        }
+        return JsonResponse(rsp)
+
 
     if qs:
         qs.update(state=TsegRequest.STATE_REJECT)
@@ -852,6 +943,14 @@ def _get_geom_from_mgeo(geo_id):
     geo = mgeo.geo_data
     geo_json = json.loads(geo.json)
     return geo_json
+
+
+def _get_coords_from_geojson(geo_json):
+    multi = 'Multi'
+    if multi in geo_json['type']:
+        return geo_json['coordinates'][0]
+    else:
+        return geo_json['coordinates'][0]
 
 
 def _get_aimag_sum(values, code):
@@ -886,6 +985,16 @@ def _get_hurs(geo_id):
     return hurs
 
 
+def _check_geo_inside_boundary(geo_id, boundary_geo_id):
+    bnd_qs = MGeoDatas.objects
+    bnd_qs = bnd_qs.filter(geo_id=boundary_geo_id)
+    bnd_qs = bnd_qs.first()
+    bnd_geo_data = bnd_qs.geo_data
+    mgeo_datas = MGeoDatas.objects
+    mgeo_datas = mgeo_datas.filter(geo_id=geo_id, geo_data__intersects=bnd_geo_data)
+    return mgeo_datas
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -893,18 +1002,36 @@ def tsegPersonalUpdate(request, payload):
     pk = payload.get('id')
     geo_id = payload.get('geo_id')
     tseg_display = []
+    org = _get_org_from_request(request)
 
     if pk:
         requests = TsegRequest.objects
+        requests = _get_qs_in_boundary(requests, org)
         requests = requests.filter(pk=pk).first()
-        geo_json = json.loads(requests.geo_json)
-        latlongx = geo_json['coordinates'][0]
-        latlongy = geo_json['coordinates'][1]
+        if requests:
+            geo_json = json.loads(requests.geo_json)
+            latlongx = geo_json['coordinates'][0]
+            latlongy = geo_json['coordinates'][1]
+        else:
+            rsp = {
+                'success': False,
+                'msg': 'Танд эрх байхгүй байна'
+            }
+            return JsonResponse(rsp)
     if geo_id:
-        requests = utils.get_mdata_value('gnp-gp-gp', geo_id, is_display=True)
-        geo_json = _get_geom_from_mgeo(geo_id)
-        latlongx = geo_json['coordinates'][0][0]
-        latlongy = geo_json['coordinates'][0][1]
+        is_inside = _check_geo_inside_boundary(geo_id, org.geo_id)
+        if is_inside:
+            requests = utils.get_mdata_value('gnp-gp-gp', geo_id, is_display=True)
+            geo_json = _get_geom_from_mgeo(geo_id)
+            coordinates = _get_coords_from_geojson(geo_json)
+            latlongx = coordinates[0]
+            latlongy = coordinates[1]
+        else:
+            rsp = {
+                'success': False,
+                'msg': 'Танд эрх байхгүй байна'
+            }
+            return JsonResponse(rsp)
     if requests:
         if geo_json['coordinates']:
             LA = int(float(latlongx))
@@ -917,9 +1044,9 @@ def tsegPersonalUpdate(request, payload):
                 values = json.loads(requests.values)
             if geo_id:
                 values = requests
-
-            sheets = values['Nomenclature']
-            sheets = sheets.split("-")
+            sheets = values['Nomenclature'] if values and 'Nomenclature' in values else ''
+            if sheets:
+                sheets = sheets.split("-")
             data = dict()
             data['latlongx'] = latlongx
             data['latlongy'] = latlongy
@@ -940,9 +1067,9 @@ def tsegPersonalUpdate(request, payload):
             data['alban_tushaal'] = values['EmployeePosition'] if 'EmployeePosition' in values else ''
             data['alban_baiguullga'] = values['CompanyName'] if 'CompanyName' in values else ''
             data['suljeenii_torol'] = values['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in values else ''
-            data['sheet1'] = sheets[0]
-            data['zone'] = int(sheets[1])
-            data['cc'] = int(sheets[2])
+            data['sheet1'] = sheets[0] if sheets else ''
+            data['zone'] = int(sheets[1]) if sheets else ''
+            data['cc'] = int(sheets[2]) if sheets else ''
             data['ondor'] = values['elevationValue'] if 'elevationValue' in values else ''
 
             if pk:
@@ -968,6 +1095,7 @@ def tsegPersonalUpdate(request, payload):
             tseg_display.append(data)
 
     rsp = {
+        'success': True,
         'tseg_display': tseg_display,
     }
 
@@ -1180,12 +1308,6 @@ def _make_request_datas(values, request_values):
     info = 'Амжилттай хадгаллаа'
 
     return success, info
-
-
-def _get_model_qs(Model, search):
-    qs = Model.objects
-    qs = qs.filter(**search)
-    return qs
 
 
 def _get_values(request):
@@ -2272,22 +2394,36 @@ def get_field_values(request):
 def get_tseg(request, payload):
     pk = payload.get('id')
     geo_id = payload.get('geo_id')
-
+    org = _get_org_from_request(request)
     if pk:
         requests = TsegRequest.objects
+        requests = _get_qs_in_boundary(requests, org)
         requests = requests.filter(pk=pk).first()
-        geo_json = json.loads(requests.geo_json)
-        latlongx = geo_json['coordinates'][0]
-        latlongy = geo_json['coordinates'][1]
+        if requests:
+            geo_json = json.loads(requests.geo_json)
+            latlongx = geo_json['coordinates'][0]
+            latlongy = geo_json['coordinates'][1]
+        else:
+            return JsonResponse({
+                'success': False,
+            })
     if geo_id:
-        requests = utils.get_mdata_value('gnp-gp-gp', geo_id, is_display=True)
-        geo_json = _get_geom_from_mgeo(geo_id)
-        latlongx = geo_json['coordinates'][0][0]
-        latlongy = geo_json['coordinates'][0][1]
+        is_inside = _check_geo_inside_boundary(geo_id, org.geo_id)
+        if is_inside:
+            requests = utils.get_mdata_value('gnp-gp-gp', geo_id, is_display=True)
+            geo_json = _get_geom_from_mgeo(geo_id)
+            coordinates = _get_coords_from_geojson(geo_json)
+            latlongx = coordinates[0]
+            latlongy = coordinates[1]
+        else:
+            return JsonResponse({
+                'success': False,
+            })
 
     coord = [latlongx, latlongy]
     return JsonResponse({
-        'coord': coord
+        'success': True,
+        'coord': coord,
     })
 
 

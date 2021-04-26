@@ -43,6 +43,12 @@ export default class List extends Component {
                     "text": '',
                     "icon": 'fa fa-car text-danger',
                     "action": (values) => this.handleRefreshData(values),
+                },
+                {
+                    "title": 'crontab',
+                    "text": '',
+                    "icon": 'fa fa-circle text-danger',
+                    "action": (values) => this.crontabLink(values),
                 }
             ],
             is_loading: false,
@@ -56,10 +62,19 @@ export default class List extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.handleRefreshData = this.handleRefreshData.bind(this)
+        this.crontabLink = this.crontabLink.bind(this)
         this.handleMssql = this.handleMssql.bind(this)
         this.handleMongo = this.handleMongo.bind(this)
         this.modalChange = this.modalChange.bind(this)
 
+    }
+
+
+    crontabLink(values){
+        this.props.history.push(`/back/another-base/connection/crontab/${values.id}/`)
+
+        // if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/tables/`)
+        // else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/list/`)
     }
 
     handleRefreshData(values){
@@ -88,21 +103,21 @@ export default class List extends Component {
                         null
                     )
                 }
-            })
-            .catch(() => {
-                this.setState({is_loading: false})
-                this.modalChange(
-                    'fa fa-check-circle',
-                    null,
-                    'danger',
-                    'Алдаа гарсан байна',
-                    ``,
-                    false,
-                    '',
-                    '',
-                    null,
-                    null
-                )
+                else {
+                    this.setState({is_loading: false})
+                    this.modalChange(
+                        'fa fa-time-circle',
+                        null,
+                        'danger',
+                        'Алдаа гарлаа',
+                        ``,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
+                }
             })
     }
 

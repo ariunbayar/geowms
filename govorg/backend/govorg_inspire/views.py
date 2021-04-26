@@ -336,84 +336,89 @@ def _get_type(value_type_id):
     return value_type
 
 
-def _get_property(ob, roles, lproperties, data_type_id=None):
+def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, gid=None):
+    properties = list()
+    for l_property in qs_l_properties:
+        data = dict()
+        value_type = _get_type(l_property.value_type_id)
+        l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
+        if gid:
+            data['pk'] = gid
+        data['data_type_id'] = l_data_type.data_type_id if l_data_type else ''
+        data['property_id'] = l_property.property_id
+        data['property_name'] = l_property.property_name
+        data['property_code'] = l_property.property_code
+        data['property_definition'] = l_property.property_definition
+        data['value_type_id'] = l_property.value_type_id
+        data['value_type'] = value_type
+        value_text, data_list = _get_data_list_and_value_text(gid, fid, l_data_type.data_type_id, l_property.property_id, value_type)
+        data['data'] =  value_text
+        data['data_list'] =  data_list
+        data['roles'] =  _get_roles(request, fid, l_property.property_id)
+        properties.append(data)
+    return properties
 
-    data = ''
-    value_type = ''
+
+def _get_data_list_and_value_text(gid, fid, data_type_id, property_id, value_type):
     data_list = []
-    property_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
-    value_type = _get_type(lproperties.value_type_id)
-
+    value_text = ''
+    m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id=fid, data_type_id=data_type_id, property_id=property_id).first()
     if value_type == 'option':
-        data_list = _code_list_display(lproperties.property_id)
+        data_list = _code_list_display(property_id)
     elif value_type == 'text':
-        data = ob.get('value_text') or ''
+        value_text = m_datas.value_text if m_datas else ''
     elif value_type == 'number':
-        data = ob.get('value_number') or ''
+        value_text = m_datas.value_number if m_datas else ''
     else:
-        data = _datetime_display(ob.get('value_date') or '')
+        value_text = _datetime_display(m_datas.value_date if m_datas else '')
 
+    return value_text, data_list
+
+
+def _get_roles(request, fid, property_id):
+    employee = get_object_or_404(Employee, user__username=request.user)
+    property_ids, roles = get_emp_property_roles(employee, fid)
+    property_roles = {'PERM_VIEW': True, 'PERM_CREATE':True, 'PERM_REMOVE':True, 'PERM_UPDATE':True, 'PERM_APPROVE':True, 'PERM_REVOKE':True}
     for role in roles:
-        if role.get('property_id') == lproperties.property_id:
+        if role.get('property_id') == property_id:
             property_roles = role.get('roles')
+    return property_roles
 
-    return {
-        'pk': ob.get('id'),
-        'data_type_id': data_type_id,
-        'property_name': lproperties.property_name,
-        'property_id': lproperties.property_id,
-        'property_code': lproperties.property_code,
-        'property_definition': lproperties.property_definition,
-        'value_type_id': lproperties.value_type_id,
-        'value_type': value_type,
-        'data': data,
-        'data_list': data_list,
-        'roles': property_roles
-    }
+
+def _get_data_types(qs_property_ids_of_feature, data_type_ids):
+    qs_data_types = LDataTypes.objects
+    qs_data_types = qs_data_types.filter(data_type_id__in=data_type_ids)
+    data_types = list()
+    for data_type in qs_data_types:
+        data = dict()
+        data['data_type_id'] = data_type.data_type_id
+        data['data_type_name'] = data_type.data_type_name
+        data['data_type_code'] = data_type.data_type_code
+        data['data_type_name_eng'] = data_type.data_type_name_eng
+        check_data_type_ids = list()
+        qs_properties = qs_property_ids_of_feature.filter(data_type_id=data_type.data_type_id)
+        property_ids = list(qs_properties.values_list('property_id', flat=True))
+        data['property_ids'] = property_ids
+        data_types.append(data)
+    return data_types
 
 
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detail(request, gid, fid, tid):
-    property_ids = []
-    properties = []
-    data_types = {}
-    data_type_id = []
-    data_types_tmp = []
-    employee = get_object_or_404(Employee, user__username=request.user)
-    property_ids, property_details = get_emp_property_roles(employee, fid)
-    if property_ids:
-        mdatas = MDatas.objects.filter(geo_id=gid).filter(property_id__in=property_ids).values('data_type_id', 'property_id', 'value_text', 'value_number', 'value_date', 'id').order_by('property_id')
-        for prop in mdatas:
-            lproperty = LProperties.objects.filter(property_id=prop.get('property_id'))
-            lproperty = lproperty.exclude(value_type_id='data-type')
-            lproperty = lproperty.exclude(property_code='localId')
-            lproperty = lproperty.first()
-            if lproperty:
-
-                l_data_types = LDataTypes.objects.filter(data_type_id=prop.get('data_type_id')).first()
-
-                if l_data_types.data_type_id in data_type_id:
-                    data_types[l_data_types.data_type_id]['property_ids'].append(lproperty.property_id)
-                else:
-                    data_type_id.append(l_data_types.data_type_id)
-                    data_types[l_data_types.data_type_id] = {
-                        'data_type_name': l_data_types.data_type_name,
-                        'data_type_code': l_data_types.data_type_code,
-                        'data_type_name_eng': l_data_types.data_type_name_eng,
-                        'data_type_id': l_data_types.data_type_id,
-                        'property_ids': [lproperty.property_id],
-                    }
-
-                properties.append(_get_property(prop, property_details, lproperty, l_data_types.data_type_id))
-        for i, value in data_types.items():
-            data_types_tmp.append(value)
+    qs_feature_configs = LFeatureConfigs.objects
+    qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
+    data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
+    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
+    property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
+    qs_l_properties = LProperties.objects
+    qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature)
 
     rsp = {
         'success': True,
-        'datas': properties,
-        'data_types': data_types_tmp
+        'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, gid),
+        'data_types': _get_data_types(qs_property_ids_of_feature, data_type_ids),
     }
 
     return JsonResponse(rsp)
@@ -423,52 +428,18 @@ def detail(request, gid, fid, tid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detailCreate(request, tid, pid, fid):
-    property_ids = []
-    property_roles = []
-    org_propties_front = []
-    data_type_ids = []
-    data_types = {}
-    data_types_tmp = []
-    value_data = {
-        'pk': '',
-        'value_text': '',
-        'value_date': '',
-        'value_number': ''
-        }
-    f_configs = LFeatureConfigs.objects.filter(feature_id=fid)
-    employee = get_object_or_404(Employee, user__username=request.user)
-    property_ids, property_roles = get_emp_property_roles(employee, fid)
+    qs_feature_configs = LFeatureConfigs.objects
+    qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
+    data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
+    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
+    property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
+    qs_l_properties = LProperties.objects
+    qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature)
 
-    for f_config in f_configs:
-        data_type_id = f_config.data_type_id
-        data_types_obj = LDataTypes.objects.filter(data_type_id=data_type_id).first()
-        data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type_id)
-        for data_type_config in data_type_configs:
-            if data_type_config.property_id in property_ids:
-                lproperty = LProperties.objects.filter(property_id=data_type_config.property_id)
-                lproperty = lproperty.exclude(value_type_id='data-type')
-                lproperty = lproperty.exclude(property_code='localId')
-                lproperty = lproperty.first()
-                if lproperty:
-                    org_propties_front.append(_get_property(value_data, property_roles, lproperty, data_types_obj.data_type_id))
-                    if data_type_id in data_type_ids:
-                        data_types[data_types_obj.data_type_id]['property_ids'].append(data_type_config.property_id)
-                    else:
-                        data_type_ids.append(data_type_id)
-                        data_types[data_types_obj.data_type_id] = {
-                            'data_type_name': data_types_obj.data_type_name,
-                            'data_type_code': data_types_obj.data_type_code,
-                            'data_type_name_eng': data_types_obj.data_type_name_eng,
-                            'data_type_id': data_types_obj.data_type_id,
-                            'property_ids': [data_type_config.property_id],
-                        }
-
-    for i, value in data_types.items():
-        data_types_tmp.append(value)
     rsp = {
         'success': True,
-        'datas': org_propties_front,
-        'data_types': data_types_tmp
+        'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid),
+        'data_types':  _get_data_types(qs_property_ids_of_feature, data_type_ids),
     }
     return JsonResponse(rsp)
 

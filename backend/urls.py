@@ -52,7 +52,9 @@ urlpatterns = [
         path('mongo/fields/<int:pk>/<str:name>/', geoserver_another_database.mongo_fields),
         path('remove/<int:pk>/', geoserver_another_database.remove),
         path('get-inspire-shatlal/', geoserver_another_database.get_inspire_shatlal),
-        path('update/<int:pk>/', geoserver_another_database.update),
+        path('update/<int:pk>/', geoserver_another_database.update, name='refresh-datas-mongo'),
+        path('crontab-save/', geoserver_another_database.crontab_save),
+        path('detail/<int:pk>/', geoserver_another_database.crontab_detail),
 
         # path('mssql/insert-to-inspire/', mssql_views.insert_to_inspire),
         path('mssql/save-to-ano-db-table/', mssql_views.save_to_ano_db_table),
@@ -60,7 +62,7 @@ urlpatterns = [
         path('mssql/get-properties/<str:feature_code>/', mssql_views.get_properties),
         path('mssql/get-all-table-names/', mssql_views.get_all_table_names),
         path('mssql/tables/<int:pk>/', geoserver_another_database.get_mssql_tables_list),
-        path('mssql/refresh-mssql-datas/<int:connection_id>/', mssql_views.refresh_datas),
+        path('mssql/refresh-mssql-datas/<int:connection_id>/', mssql_views.refresh_datas, name='refresh-datas-mssql'), # ene shuuuu
     ], 'another-database'))),
 
 
@@ -194,7 +196,6 @@ urlpatterns = [
 
     path('dedsan-butests/', include(([
         path('all/', dedsan_butets.bundleButetsAll),
-        path('check-style-name/', dedsan_butets.check_styles_name),
         path('prop/<str:code>/', dedsan_butets.Property),
         path('editName/', dedsan_butets.Edit_name),
         path('get-fields/', dedsan_butets.getFields),
@@ -204,7 +205,6 @@ urlpatterns = [
         path('remove/', dedsan_butets.remove),
         path('erese/', dedsan_butets.erese),
         path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
-        path('style-data/', dedsan_butets.get_style_data),
         path('overlaps-feature-get/<str:feature_id>/', dedsan_butets.feature_overlaps_get),
         path('overlaps-feature-set/', dedsan_butets.feature_overlaps_set),
     ], 'dedsan-butests'))),
@@ -219,6 +219,14 @@ urlpatterns = [
         path('get_group_cache_list/', geoserver_views.get_group_cache),
         path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
         path('update_geo_web_cache/', geoserver_views.update_geo_cache),
+        path('check-style-name/', geoserver_views.check_styles_name),
+        path('style-data/', geoserver_views.get_style_data),
+        path('create-style/', geoserver_views.create_style),
+        path('style-list/', geoserver_views.style_list),
+        path('style-remove/', geoserver_views.style_remove),
+        path('style-detail/', geoserver_views.style_detail),
+        path('conver-sld-json/', geoserver_views.conver_sld_json),
+        path('ws-list/', geoserver_views.get_ws_list),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

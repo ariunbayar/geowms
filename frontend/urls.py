@@ -34,6 +34,7 @@ urlpatterns = [
     path('m/', include(([
         path('', mobile_views.all, name='all'),
         path('дэд-сан/<int:pk>/', mobile_views.detail, name='detail'),
+        path('search-text/', mobile_views.search_value, name='search-text'),
     ], 'mobile'))),
 
     path('суурь-давхарга/', include(([

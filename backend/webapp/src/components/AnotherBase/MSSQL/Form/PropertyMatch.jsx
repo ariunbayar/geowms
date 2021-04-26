@@ -5,6 +5,41 @@ import { service } from '../../service';
 
 const Match = (props) => {
     const is_display_value_types = ['text', 'multi-text', 'link', 'boolean']
+    var data_id = []
+    var is_included = false
+    props.properties.map((row) => {
+        if (data_id.length > 0) {
+            is_included = false
+            data_id.map((data_id) => {
+                if (data_id == row.data_type_id) {
+                    is_included = true
+                }
+            })
+        }
+        if (is_included == false) {
+            data_id = data_id.concat(row.data_type_id)
+        }
+    })
+    var list_options =[]
+    data_id.map((data_id) => {
+        list_options.push({
+            data_type_name:'',
+            data_type_id: data_id,
+            children: [],
+        })
+    })
+    props.properties.map((row) => {
+        list_options.map((list_option, idx) => {
+            if (list_option.data_type_id == row.data_type_id) {
+                list_option.data_type_name=row.data_type_name
+                list_option.children.push({
+                    property_name: row.property_name,
+                    property_id: row.property_id,
+                })
+            }
+        })
+
+    })
     return (
         <div>
             <label htmlFor="">{props.column_name}: </label>
@@ -18,10 +53,20 @@ const Match = (props) => {
             >
                 <option value=""> -- Property Сонгоно уу -- </option>
                 {
-                    props.properties.map((prop, idx) =>
-                        is_display_value_types.includes(prop.value_type_id)
-                        &&
-                        <option key={idx} value={prop.property_id}>{prop.data_type_name}:  {prop.property_name}</option>
+                    list_options.map((row, idx) =>
+                        // is_display_value_types.includes(prop.value_type_id)
+                        // &&
+
+                            <optgroup key={idx} label={row.data_type_name}>
+
+                                {row.children.map((next_row,idx) =>
+
+                                    <option key={idx} value={next_row.property_id}>{next_row.property_name}</option>
+
+                                )}
+
+                            </optgroup>
+
                     )
                 }
             </select>
@@ -116,9 +161,6 @@ class PropertyMatch extends Component {
                 if (success) {
                     this.setState({ fields })
                 }
-            })
-            .catch((e) => {
-                alert("Холболтонд алдаа гарсан байна")
             })
     }
 

@@ -269,6 +269,7 @@ export default class BarilgaSuurinGazar extends Component{
       })}
 
       this.setState({map_wms})
+      map_wms.tile.setZIndex(101)
       this.map.addLayer(map_wms.tile);
 
       const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
@@ -547,6 +548,19 @@ export default class BarilgaSuurinGazar extends Component{
           if (this.state.modify_button_active) this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
           this.removeTurning()
           const featureID_list = this.state.featureID_list
+          if (this.state.modify_button_active){
+
+            const features = event.selected
+            this.setState({ is_not_mongolia: false})
+            const {format} = this.state
+            const data = format.writeFeatureObject(features[0], {
+              dataProjection: this.state.dataProjection,
+              featureProjection: this.state.featureProjection,
+            })
+            const changedFeature = JSON.stringify(data)
+            this.setState({ changedFeature, modifyend_selected_feature_check: true })
+
+          }
           if (this.state.modify_button_active) this.DrawButton()
           const selectedFeature_ID = this.state.selectedFeature_ID
           this.setState({ is_selected_feature: true, featureID_list, selectedFeature_ID, modifyend_selected_feature_ID:selectedFeature_ID, null_form_isload:false, selected_feature: event.selected[0]  })
@@ -642,7 +656,7 @@ export default class BarilgaSuurinGazar extends Component{
       const features = event.features.getArray()
       const check = this.checkInMongolia(features)
       if (check) {
-        this.setState({ is_not_mongolia: false })
+        this.setState({ is_not_mongolia: false})
         const {format} = this.state
         const data = format.writeFeatureObject(features[0], {
           dataProjection: this.state.dataProjection,
@@ -989,7 +1003,7 @@ export default class BarilgaSuurinGazar extends Component{
                     "Үгүй"
               )
               this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-          }
+    }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
           }

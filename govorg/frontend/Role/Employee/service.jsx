@@ -21,6 +21,7 @@ export const service = {
     getErguul,
     getSelectValue,
     getAllOrg,
+    loadBaseLayers,
 }
 
 const prefix = "/gov/api/role/employee"
@@ -178,4 +179,9 @@ function getAllOrg() {
         ...getGetOptions(),
     }
     return fetch(`/back/api/org/get-all-org/`, requestOptions).then(handleResponse)
+}
+
+function loadBaseLayers() {
+    const requestOptions = getGetOptions()
+    return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
 }

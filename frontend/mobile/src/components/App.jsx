@@ -39,12 +39,12 @@ export class App extends Component {
         })
     }
     componentDidMount(){
-        const {id, name } = this.props.bundle[0]
+        const {id, name } = this.props.bundle.bundles[0]
         this.wmsLayerId(id, name)
     }
 
     render() {
-        const bundles = this.props.bundle
+        const { bundles, geo_data } = this.props.bundle
         return (
             <div>
                 <div>
@@ -55,6 +55,7 @@ export class App extends Component {
                                     bundle={this.state.bundle}
                                     wmsLayerName={this.wmsLayerName}
                                     wmsLayerScreenIsload={this.state.wmsLayerScreenIsload}
+                                    geo_data={geo_data}
                                 ></DetailPage>
                                 <a className="wmsLayerButtonBack" onClick={() => this.wmsLayerName()}>
                                     <i className="fas fa-layer-group wmsLayerButton" aria-hidden="true"></i>
