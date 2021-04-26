@@ -23,10 +23,11 @@ from .mongo_utils import (
     insert_data_from_mongo,
     all_data_from_selected_table,
     delete_data_from_mongo,
-    mongo_check_connection
+    mongo_check_connection,
 )
 from backend.inspire.models import LPackages, LFeatures
 from crontab import CronTab
+from main.utils import check_pg_connection
 
 
 def _get_out_type(out_type):
@@ -737,20 +738,27 @@ def mssql_save(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def config_save(request, payload):
 
-    connection = {
-        'server': payload.get('pg_host'),
-        'port': payload.get('pg_port'),
-        'username': payload.get('pg_username'),
-        'password': payload.get('pg_password'),
-        'database': payload.get('pg_database'),
-    }
-    connection = utils.json_dumps(connection)
+    server = payload.get('pg_host')
+    port = payload.get('pg_port')
+    username = payload.get('pg_username')
+    password = payload.get('pg_password')
+    database = payload.get('pg_database')
+
     db_type = AnotherDatabase.PgDB
     name = payload.get('name')
     definition = payload.get('definition')
 
     pk = payload.get('id')
-
+    check = check_pg_connection(server, database, port, username, password)
+    if check:
+        connection = {
+            'server': server,
+            'port': port,
+            'username': username,
+            'password': password,
+            'database': database,
+        }
+        connection = utils.json_dumps(connection)
     if pk:
         AnotherDatabase.objects.filter(pk=pk).update(
             connection=connection,

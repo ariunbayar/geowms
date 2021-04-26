@@ -22,7 +22,6 @@ from main import utils
 def config_detail(request, pk):
     another_db = get_object_or_404(AnotherDatabase, pk=pk)
     connection = utils.json_load(another_db.connection)
-
     form_datas = {
         'id': pk,
         'name': another_db.name,

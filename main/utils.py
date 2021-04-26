@@ -9,6 +9,7 @@ import zipfile
 import pyproj
 import math
 import json
+import psycopg2
 
 from collections import namedtuple
 from datetime import timedelta, datetime
@@ -1700,3 +1701,19 @@ def get_all_file_paths(directory):
             file_paths.append(filepath)
 
     return file_paths
+
+
+def check_pg_connection(host, db, port, user, password):
+    try:
+        connection = psycopg2.connect(
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            database=db
+        )
+
+        cursor = connection.cursor()
+        return True
+    except Exception as error:
+        return False
