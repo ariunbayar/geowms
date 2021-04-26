@@ -16,3 +16,26 @@ from main.decorators import ajax_required
 from main import utils
 
 
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def config_detail(request, pk):
+    another_db = get_object_or_404(AnotherDatabase, pk=pk)
+    connection = utils.json_load(another_db.connection)
+
+    form_datas = {
+        'id': pk,
+        'name': another_db.name,
+        'definition': another_db.definition,
+        'pg_host': connection.get('server'),
+        'pg_port': connection.get('port'),
+        'pg_username': connection.get('username'),
+        'pg_password': connection.get('password'),
+        'pg_database': connection.get('database'),
+    }
+
+    rsp = {
+        'success': True,
+        'values': form_datas
+    }
+    return JsonResponse(rsp)

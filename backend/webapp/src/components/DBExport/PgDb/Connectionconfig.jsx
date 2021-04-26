@@ -53,7 +53,7 @@ class ConnectionConfig extends Component {
 
     getConfigs(id) {
         service
-            .pgConfig
+            .pg_config
             .get(id)
             .then(({values}) => {
                 this.setState({

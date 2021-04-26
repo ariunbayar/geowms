@@ -185,6 +185,7 @@ export default class List extends Component {
     goLink(values){
         if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/`)
         else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/`)
+        else if (values.db_type == 'PgDB') this.props.history.push(`/back/db-export/connection/pg/${values.id}/`)
     }
 
     handleRemove() {

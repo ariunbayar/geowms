@@ -10,6 +10,7 @@ class PgDB extends Component {
             <div className="card-body">
                 <Switch>
                     <Route exact path={"/back/db-export/connection/pg/"} component={ConnectionConfig}/>
+                    <Route exact path={"/back/db-export/connection/pg/:id/"} component={ConnectionConfig}/>
                 </Switch>
             </div>
         );

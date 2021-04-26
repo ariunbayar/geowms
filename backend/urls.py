@@ -67,6 +67,7 @@ urlpatterns = [
 
         #path db-export
         path('pg/db-config-save/', geoserver_another_database.config_save),
+        path('pg/get/<int:pk>/', pg_views.config_detail),
 
     ], 'another-database'))),
 

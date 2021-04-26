@@ -8,7 +8,7 @@ const pg_config = {
 
     get: function(pk) {
         const requestOptions = getGetOptions()
-        return fetch(`${prefix}/mssql/get/${pk}/`, requestOptions).then(handleResponse)
+        return fetch(`${prefix}/pg/get/${pk}/`, requestOptions).then(handleResponse)
     },
 
     save: function(values) {

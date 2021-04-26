@@ -11,7 +11,7 @@ export default class List extends Component {
         super(props)
         this.state = {
             id: props.match.params.id,
-            жагсаалтын_холбоос: `/back/another-database/mongo/tables/${props.match.params.id}/all/`,
+            жагсаалтын_холбоос: `/back/another-database/pg/tables/${props.match.params.id}/all/`,
             талбарууд: [
                 {'field': 'table_name', "title": 'Нэр'},
                 {'field': 'feature_code', "title": 'Feature нэр'},
