@@ -127,17 +127,7 @@ def get_pg_table_names(request, conn_id):
         'table_names': table_names or []
     })
 
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def getFields(request, payload):
-    table_fields = []
-    name = payload.get('name')
-    id = payload.get('id')
-    value = payload.get('value')
-    state_name = ''
-
+def _get_pg_table_fields(schema_name, cursor):
     sql = '''
         SELECT
         attname AS column_name, format_type(atttypid, atttypmod) AS data_type
@@ -146,20 +136,34 @@ def getFields(request, payload):
         WHERE
         attrelid = 'public.{schema_name}'::regclass AND    attnum > 0
         ORDER  BY attnum
-    '''.format(schema_name=value)
+    '''.format(schema_name=schema_name)
+    cursor.execute(sql)
+    table_fields = list(utils.dict_fetchall(cursor))
+    return table_fields
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def getFields(request, payload):
+
+    table_fields = []
+    state_name = ''
+    cursor = []
+    name = payload.get('name')
+    id = payload.get('id')
+    value = payload.get('value')
 
     if name == 'table_name':
         form_datas = _get_pg_conf(id)
-        cursor_pg = _get_pg_cursor(form_datas)
-        cursor_pg.execute(sql)
-        table_fields = list(utils.dict_fetchall(cursor_pg))
+        cursor = _get_pg_cursor(form_datas)
         state_name = 'table_fields'
 
     else:
         cursor = connections['default'].cursor()
-        cursor.execute(sql)
-        table_fields = list(utils.dict_fetchall(cursor))
         state_name = 'view_fields'
+
+    table_fields = _get_pg_table_fields(value, cursor)
 
     return JsonResponse({
         'state_name': state_name,
@@ -190,4 +194,33 @@ def save_table(request, payload):
     )
     return JsonResponse({
         'success': True,
+    })
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def table__detail(request, id, table_id):
+    another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
+    field_config = another_db_tb.field_config.replace("'", '"')
+    field_config = utils.json_load(field_config)
+
+    cursor = connections['default'].cursor()
+    view_fields = _get_pg_table_fields(another_db_tb.feature_code, cursor)
+
+    form_datas = _get_pg_conf(id)
+    cursor_pg = _get_pg_cursor(form_datas)
+    table_fields = _get_pg_table_fields(another_db_tb.table_name, cursor_pg)
+    form_datas = {
+        'id': another_db_tb.id,
+        'field_config': field_config,
+        'table_name': another_db_tb.table_name,
+        'feature_code': another_db_tb.feature_code,
+        'view_fields': view_fields,
+        'table_field_names': table_fields
+    }
+
+    return JsonResponse({
+        'success': True,
+        'form_datas': form_datas
     })

@@ -32,15 +32,15 @@ export default class  PgForm extends Component {
     }
 
     handleGetDetial(id, table_id){
-        service.mongo_config.tableConfig(id, table_id).then(({success, form_datas}) => {
+        service.pg_config.tableDetail(id, table_id).then(({success, form_datas}) => {
             if(success){
                 this.setState({
-                    selected_value: form_datas.table_name,
-                    feature_value: form_datas.feature_code,
-                    field_names: form_datas.field_config,
+                    table_name: form_datas.table_name,
+                    view_name: form_datas.feature_code,
+                    matched_feilds: form_datas.field_config,
+                    view_fields: form_datas.view_fields,
+                    table_fields: form_datas.table_field_names
                 })
-                this.getProperties(form_datas.feature_code)
-
             }
         })
     }
@@ -79,6 +79,7 @@ export default class  PgForm extends Component {
     }
 
     handleSetField(key, data){
+        console.log("iish irsen")
         const { view_fields, table_fields, matched_feilds } = this.state
         var values = {
             'table_field': data,
@@ -95,6 +96,8 @@ export default class  PgForm extends Component {
             view_names, view_fields,
             table_fields, matched_feilds
         } = this.state
+        console.log("veiw", view_fields)
+        console.log("table", table_fields)
         return (
             <div className="card">
                 <div className="form-row card-body">

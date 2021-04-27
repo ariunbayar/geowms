@@ -42,6 +42,13 @@ const pg_config = {
         return fetch(`${prefix}/pg/save-table/`, opts).then(handleResponse)
     },
 
+    tableDetail: function(id, table_id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/pg/${id}/${table_id}/table-detail/`, opts).then(handleResponse)
+    },
+
 }
 
 function remove(pk) {

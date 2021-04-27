@@ -14,6 +14,7 @@ class PgDB extends Component {
                     <Route exact path={"/back/db-export/connection/pg/:id/"} component={ConnectionConfig}/>
                     <Route exact path={"/back/db-export/connection/pg/:id/tables/"} component={List}/>
                     <Route exact path={"/back/db-export/connection/pg/:id/create/"} component={PgForm}/>
+                    <Route path={"/back/db-export/connection/pg/:id/:table_id/update/"} component={PgForm}/>
                 </Switch>
             </div>
         );
