@@ -17,7 +17,6 @@ from main.decorators import ajax_required
 from main import utils
 
 
-
 def _get_pg_conf(conn_id):
     another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
     connection = utils.json_load(another_db.connection)
@@ -32,6 +31,12 @@ def _get_pg_conf(conn_id):
         'pg_database': connection.get('database'),
     }
     return form_datas
+
+
+def _get_cursor_pg(conn_id):
+    form_datas = _get_pg_conf(conn_id)
+    cursor_pg = _get_pg_cursor(form_datas)
+    return cursor_pg
 
 
 @require_GET
@@ -90,6 +95,16 @@ def _get_pg_cursor(conn_details):
     return cursor
 
 
+def _get_sql_execute(sql, cursor, fetch_type):
+    cursor.execute(sql)
+    if fetch_type == 'one':
+        values = list(cursor.fetchone())
+    else:
+        values = list(utils.dict_fetchall(cursor))
+
+    return values
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -115,17 +130,15 @@ def get_pg_table_names(request, conn_id):
             and table_schema='public'
     '''
 
-    form_datas = _get_pg_conf(conn_id)
-    cursor_pg = _get_pg_cursor(form_datas)
+    cursor_pg = _get_cursor_pg(conn_id)
+    view_names = _get_sql_execute(sql, cursor, 'all')
+    table_names = _get_sql_execute(sql_pg, cursor_pg, 'all')
 
-    cursor.execute(sql)
-    cursor_pg.execute(sql_pg)
-    view_names = list(utils.dict_fetchall(cursor))
-    table_names = list(utils.dict_fetchall(cursor_pg))
     return JsonResponse({
         'view_names': view_names or [],
         'table_names': table_names or []
     })
+
 
 def _get_pg_table_fields(schema_name, cursor):
     sql = '''
@@ -137,8 +150,7 @@ def _get_pg_table_fields(schema_name, cursor):
         attrelid = 'public.{schema_name}'::regclass AND    attnum > 0
         ORDER  BY attnum
     '''.format(schema_name=schema_name)
-    cursor.execute(sql)
-    table_fields = list(utils.dict_fetchall(cursor))
+    table_fields = _get_sql_execute(sql, cursor, 'all')
     return table_fields
 
 
@@ -155,8 +167,7 @@ def getFields(request, payload):
     value = payload.get('value')
 
     if name == 'table_name':
-        form_datas = _get_pg_conf(id)
-        cursor = _get_pg_cursor(form_datas)
+        cursor = _get_cursor_pg(id)
         state_name = 'table_fields'
 
     else:
@@ -208,8 +219,7 @@ def table__detail(request, id, table_id):
     cursor = connections['default'].cursor()
     view_fields = _get_pg_table_fields(another_db_tb.feature_code, cursor)
 
-    form_datas = _get_pg_conf(id)
-    cursor_pg = _get_pg_cursor(form_datas)
+    cursor_pg = _get_cursor_pg(id)
     table_fields = _get_pg_table_fields(another_db_tb.table_name, cursor_pg)
     form_datas = {
         'id': another_db_tb.id,
@@ -224,3 +234,75 @@ def table__detail(request, id, table_id):
         'success': True,
         'form_datas': form_datas
     })
+
+
+def _get_count_of_someone_db_table(table_name, cursor):
+    sql = '''
+        select
+            count(*)
+        from
+            {table_name}
+    '''.format(
+        table_name=table_name
+    )
+
+    row_count = _get_sql_execute(sql, cursor, 'one')
+
+    return row_count
+
+
+def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
+
+    number_of_row = _get_count_of_someone_db_table(table_name, cursor_pg)
+    if number_of_row[0] and columns:
+        matched_columns = []
+        for i in columns:
+            matched_columns.append(i['view_field'])
+
+        matched_columns = ','.join(matched_columns)
+
+        sql = '''
+            select
+                {column}
+            from
+                {view_name}
+            limit
+                {row_count}
+        '''.format(
+            view_name=feature_code,
+            row_count=number_of_row[0],
+            column=matched_columns
+        )
+        view_datas = _get_sql_execute(sql, cursor, 'all')
+        for view in view_datas:
+            sql_update = '''
+            '''
+
+    return True
+
+
+@require_GET
+@csrf_exempt
+def refresh_datas(request, id):
+
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
+
+    cursor_pg = _get_cursor_pg(id)
+    cursor = connections['default'].cursor()
+
+    for table in ano_db_table_pg:
+        table_name = table.table_name
+        field_config = table.field_config.replace("'", '"')
+        columns = utils.json_load(field_config)
+        feature_code = table.feature_code
+
+        _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code)
+
+    # ano_db.database_updated_at = datetime.datetime.now()
+    # ano_db.save()
+
+    rsp = {
+        'success': True,
+    }

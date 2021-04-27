@@ -49,6 +49,13 @@ const pg_config = {
         return fetch(`${prefix}/pg/${id}/${table_id}/table-detail/`, opts).then(handleResponse)
     },
 
+    refreshTableData: function(id, table_id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/pg/${id}/refresh-table-data/`, opts).then(handleResponse)
+    },
+
 }
 
 function remove(pk) {
@@ -61,17 +68,9 @@ function remove(pk) {
 export const service = {
     pg_config,
     remove,
-    update,
     cronTabSave,
     cronTabDetail,
     DBConfiSave
-}
-
-function update(pk) {
-    const requestOptions = {
-        ...getGetOptions(),
-    }
-    return fetch(`${prefix}/update/${pk}/`, requestOptions).then(handleResponse)
 }
 
 function DBConfiSave(values) {

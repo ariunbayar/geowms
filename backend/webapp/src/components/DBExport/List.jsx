@@ -63,8 +63,7 @@ export default class List extends Component {
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.handleRefreshData = this.handleRefreshData.bind(this)
         this.crontabLink = this.crontabLink.bind(this)
-        this.handleMssql = this.handleMssql.bind(this)
-        this.handleMongo = this.handleMongo.bind(this)
+        this.refreshPgData = this.refreshPgData.bind(this)
         this.modalChange = this.modalChange.bind(this)
 
     }
@@ -78,52 +77,12 @@ export default class List extends Component {
     }
 
     handleRefreshData(values){
-        if(values.db_type == 'MSSQL') this.handleMssql(values)
-        else if(values.db_type == "MONGODB") this.handleMongo(values)
+        if(values.db_type == 'PgDB') this.refreshPgData(values)
     }
 
-    handleMssql(values){
+    refreshPgData(values){
         this.setState({is_loading: true})
-        service
-            .mssql_config
-            .refreshData(values.id)
-            .then(({success}) => {
-                if (success) {
-                    this.setState({is_loading: false})
-                    this.modalChange(
-                        'fa fa-check-circle',
-                        null,
-                        'success',
-                        'Амжилттай боллоо',
-                        ``,
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
-                }
-                else {
-                    this.setState({is_loading: false})
-                    this.modalChange(
-                        'fa fa-time-circle',
-                        null,
-                        'danger',
-                        'Алдаа гарлаа',
-                        ``,
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
-                }
-            })
-    }
-
-    handleMongo(values){
-        this.setState({is_loading: true})
-        service.update(values.id).then(({success, all_count, success_count, prop_b_count}) => {
+        service.pg_config.refreshTableData(values.id).then(({success, all_count, success_count, prop_b_count}) => {
             if (success) {
                 this.setState({is_loading: false})
                 this.modalChange(

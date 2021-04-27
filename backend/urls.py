@@ -73,6 +73,7 @@ urlpatterns = [
         path('pg/get-fields/', pg_views.getFields),
         path('pg/save-table/', pg_views.save_table),
         path('pg/<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
+        path('pg/<int:id>/refresh-table-data/', pg_views.refresh_datas),
     ], 'another-database'))),
 
 
