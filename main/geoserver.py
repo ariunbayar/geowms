@@ -38,7 +38,7 @@ def getCacheHeader():
         conf_geoserver['geoserver_pass'],
     )
 
-    BASE_URL = 'http://{host}:{port}/gwc/rest/'.format(
+    BASE_URL = 'http://{host}:{port}/geoserver/gwc/rest/'.format(
         host=conf_geoserver['geoserver_host'],
         port=conf_geoserver['geoserver_port'],
     )
@@ -56,7 +56,7 @@ def getHeader():
             conf_geoserver['geoserver_pass'],
         )
     if conf_geoserver['geoserver_host'] and conf_geoserver['geoserver_port']:
-        BASE_URL = 'http://{host}:{port}/rest/'.format(
+        BASE_URL = 'http://{host}:{port}/geoserver/rest/'.format(
             host=conf_geoserver['geoserver_host'],
             port=conf_geoserver['geoserver_port'],
         )
