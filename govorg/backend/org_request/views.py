@@ -15,6 +15,7 @@ from django.db import connections, transaction
 from django.db.models import Q
 from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
+from backend.geoserver.models import WmtsCacheConfig
 from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
     LThemes,
@@ -573,7 +574,10 @@ def _request_to_m(request_datas):
 
     elif request_datas['approve_type'] == 'update':
         request_datas['m_geo_datas_qs'].update(geo_data=geom)
-
+        check_wmts = WmtsCacheConfig.objects.filter(feature_id=request_datas['feature_id']).first()
+        if check_wmts:
+            check_wmts.is_modified = True
+            check_wmts.save()
     return success
 
 
