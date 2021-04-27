@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector
+from geojson import FeatureCollection
 
 from backend.inspire.models import (
     MGeoDatas,
@@ -23,6 +24,14 @@ from main.decorators import ajax_required
 from main.utils import refreshMaterializedView
 from main.utils import has_employee_perm
 from main.utils import check_form_json
+from main.utils import (
+    dict_fetchall,
+    date_to_timezone,
+    get_display_items,
+    get_fields,
+    get_feature_from_geojson,
+)
+from main.components import Datatable
 
 
 def _date_to_str(date):
@@ -64,8 +73,182 @@ def _get_employees(request):
     return employees
 
 
-def _get_emp_features(employees, request):
-    employee = employees.filter(user=request.user).first()
+def _хувьсах_талбарууд():
+    хувьсах_талбарууд = [
+        {'field': 'feature_id', 'action': _get_feature_name, "new_field": "feature_name"},
+        {'field': 'package_id', 'action': _get_package_name, "new_field": "package_name"},
+        {'field': 'theme_id', 'action': _get_theme_name, "new_field": "theme_name"},
+        {'field': 'theme_id', 'action': _get_theme_code, "new_field": "theme_code"},
+        {'field': 'employee_id', 'action': _get_employee_name, "new_field": "employee"},
+        {'field': 'employee_id', 'action': _get_org_name, "new_field": "org"},
+        {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
+        {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
+        {'field': 'form_json', 'action': _str_to_json, "new_field": "form_json"},
+        {'field': 'group_id', 'action': _make_group_request, "new_field": "group"},
+        {'field': 'geo_json', 'action': _geojson_to_featurecollection, "new_field": "geo_json"}
+    ]
+
+    return хувьсах_талбарууд
+
+
+def _make_group_request(group_id, item):
+    if not item['form_json'] and not item['geo_json'] and not item['old_geo_id']:
+        display_items = list()
+
+        qs = ChangeRequest.objects
+        qs = qs.filter(group_id=item['id'])
+        if qs.count() > 1:
+            fields = get_fields(ChangeRequest)
+            хувьсах_талбарууд = _хувьсах_талбарууд()
+            display_items = get_display_items(
+                qs,
+                fields,
+                хувьсах_талбарууд
+            )
+        return display_items
+
+
+def _get_feature_name(feature_id, item):
+    qs = LFeatures.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.first()
+    feature_name = qs.feature_name
+    return feature_name
+
+
+def _get_package_name(package_id, item):
+    qs = LPackages.objects
+    qs = qs.filter(package_id=package_id)
+    qs = qs.first()
+    package_name = qs.package_name
+
+    return package_name
+
+
+def _get_theme_name(theme_id, item):
+    qs = LThemes.objects
+    qs = qs.filter(theme_id=theme_id)
+    qs = qs.first()
+    theme_name = qs.theme_name
+
+    return theme_name
+
+
+def _get_theme_code(theme_id, item):
+    qs = LThemes.objects
+    qs = qs.filter(theme_id=theme_id)
+    qs = qs.first()
+    theme_code = qs.theme_code
+
+    return theme_code
+
+
+def _get_employee_name(employee_id, item):
+    first_name = None
+    if employee_id:
+        employee = Employee.objects.filter(id=employee_id).first()
+        first_name = employee.user.first_name
+    return first_name
+
+
+def _get_org_name(employee_id, item):
+    org_name = None
+    if employee_id:
+        employee = Employee.objects.filter(id=employee_id).first()
+        org_name = employee.org.name
+    return org_name
+
+
+def _get_display_text(field, value):
+    for f in ChangeRequest._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == field:
+                for c_id, c_type in f.choices:
+                    if c_id == value:
+                        return c_type
+
+
+def _choice_state_display(state, item):
+    display_name = _get_display_text('state', state)
+    return display_name
+
+
+def _choice_kind_display(kind, item):
+    display_name = _get_display_text('kind', kind)
+    return display_name
+
+
+def _str_to_json(form_json, item):
+    return json.loads(form_json) if form_json  else ''
+
+
+def _geojson_to_featurecollection(geo_json, item):
+    geo_json_list = list()
+    if item['old_geo_id']:
+
+        if item['geo_json']:
+            current_geo_json = get_feature_from_geojson(geo_json)
+            geo_json_list.append(current_geo_json)
+
+        old_geo_data = _get_geom(item['old_geo_id'], item['feature_id'])
+        if old_geo_data:
+            old_geo_data = old_geo_data[0]['geom']
+            old_geo_data = get_feature_from_geojson(old_geo_data)
+            geo_json_list.append(old_geo_data)
+
+    elif geo_json and not item['old_geo_id']:
+        geo_json = get_feature_from_geojson(geo_json)
+        geo_json_list.append(geo_json)
+
+    geo_json = FeatureCollection(geo_json_list)
+    return geo_json
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_list(request, payload):
+
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_features = _get_emp_features(employee)
+
+    if emp_features:
+        qs = ChangeRequest.objects
+        qs = qs.filter(feature_id__in=emp_features)
+        qs = qs.exclude(kind=ChangeRequest.KIND_CREATE)
+        if qs:
+            qs = qs.filter(group_id__isnull=True)
+            datatable = Datatable(
+                model=ChangeRequest,
+                payload=payload,
+                initial_qs=qs,
+                хувьсах_талбарууд=_хувьсах_талбарууд(),
+            )
+            items, total_page = datatable.get()
+
+            rsp = {
+                'items': items,
+                'page': payload.get('page'),
+                'total_page': total_page,
+            }
+
+        else:
+            rsp = {
+                'items': [],
+                'page': 1,
+                'total_page': 1,
+            }
+
+    else:
+        rsp = {
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
+    return JsonResponse(rsp)
+
+
+def _get_emp_features(employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     emp_features = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
     emp_feature = []

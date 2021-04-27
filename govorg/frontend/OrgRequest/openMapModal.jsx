@@ -38,7 +38,7 @@ export default class OpenMapModal extends Component {
         if (!button_name && !this.values) {
             this.values = [values]
         } else if (button_name && !this.values) {
-            this.values = values
+            this.values = [values]
         }
         return (
             <div>
@@ -46,7 +46,7 @@ export default class OpenMapModal extends Component {
                     state == "ШИНЭ" || button_name
                     ?
                         <a
-                            className="btn btn-primary btn-sm text-white"
+                            className="btn btn-primary btn-sm text-white text-capitalize"
                             onClick={this.openModalMapMap}
                         >
                             {title}
@@ -56,6 +56,7 @@ export default class OpenMapModal extends Component {
                 }
                 {is_modal_request_open &&
                     <RequestModal
+                        hide_btn={this.props.hide_btn}
                         modalClose={this.closeModalMap}
                         refreshData={this.props.refreshData}
                         values={this.values}

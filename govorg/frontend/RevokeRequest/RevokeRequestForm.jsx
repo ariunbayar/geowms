@@ -3,6 +3,24 @@ import React, { Component } from "react"
 import {service} from './service'
 import {RevokeRequestTable} from './RevokeRequestTable'
 import { Pagination } from "../components/pagination/pagination"
+import { PortalDataTable } from '@utils/DataTable/index'
+import MakeOronZai from './../OrgRequest/makeOronZai'
+import OpenMapModal from './../OrgRequest/openMapModal'
+
+
+
+const make_org_employee = ({values}) => {
+    return values.org + '/' + values.employee
+}
+
+export const make_state_color = (state) => {
+    let color
+    if (state == "ШИНЭ") color = 'text-warning'
+    else if (state == "ТАТГАЛЗСАН") color = 'text-danger'
+    else if (state == "ЗӨВШӨӨРСӨН") color = 'text-success'
+    else if (state == "ХЯНАХ") color = 'text-success'
+    return color
+}
 
 export default class RevokeRequestForm extends Component {
 
@@ -16,11 +34,49 @@ export default class RevokeRequestForm extends Component {
             revoke_per_page: 20,
             list_length: null,
             search_state: '',
+            state: null,
+            kind: null,
+            search_geom: null,
+            theme_id: null,
+            package_id: null,
+            feature_id: null,
+            is_loading: false,
+            refresh: false,
+            талбарууд: [
+                {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': true},
+                {'field': 'org', "title": 'Байгууллага / мэргэжилтэн', 'has_action': true},
+                {'field': 'order_no', "title": 'Тушаалын дугаар'},
+                {'field': 'order_at', "title": 'Тушаал гарсан огноо'},
+                {'field': 'created_at', "title": 'Огноо'},
+                {'field': 'state', "title": 'Төлөв', 'has_action': true},
+            ],
+            жагсаалтын_холбоос: '/gov/api/revoke_request/',
+            хувьсах_талбарууд: [
+                {"field": "org", "component": make_org_employee},
+                {
+                    "field": "theme_name",
+                    "component": MakeOronZai,
+                    'props': {
+                        'refreshData': () => this.refreshData(),
+                    }
+                },
+                {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
+            ],
+            нэмэлт_талбарууд: [{
+                "title": '',
+                'component': OpenMapModal,
+                'props': {
+                    'button_name' : 'Үзэх',
+                    'hide_btn' : true,
+                    'refreshData': () => this.refreshData(),
+                },
+            }],
         }
         this.setLoading = this.setLoading.bind(this)
         this.paginate = this.paginate.bind(this);
         this.handleState = this.handleState.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
+        this.refreshData = this.refreshData.bind(this)
     }
 
     componentDidUpdate(prevProps, prevState){
@@ -28,6 +84,10 @@ export default class RevokeRequestForm extends Component {
         {
             this.setState({ search_state: this.state.search_state })
         }
+    }
+
+    refreshData(){
+        this.setState({ refresh: !this.state.refresh })
     }
 
     setLoading() {
@@ -66,6 +126,7 @@ export default class RevokeRequestForm extends Component {
 
     render() {
         const { is_loading, items, choices, search_state, current_page, revoke_per_page } = this.state
+        const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -99,7 +160,7 @@ export default class RevokeRequestForm extends Component {
                             </div>
                         </div>
                         <br></br>
-                        <div className="table-responsive">
+                        {/* <div className="table-responsive">
                             <table className="table">
                                 <thead>
                                     <tr>
@@ -127,7 +188,7 @@ export default class RevokeRequestForm extends Component {
                                         </tr>
                                         :
                                         this.state.list_length == 0 ?
-                                        <tr><td className="text-justify">Бүртгэл байхгүй байна</td></tr>:
+                                        <tr><td className="text-justify">Бүртгэл байхгүй байна</td></tr>:''
                                         items.map((req, idx) =>
                                             <RevokeRequestTable
                                                 key={idx}
@@ -140,13 +201,29 @@ export default class RevokeRequestForm extends Component {
                                     }
                                 </tbody>
                             </table>
-                        </div>
-                        <Pagination
+                        </div> */}
+                        {/* <Pagination
                             paginate={this.paginate}
                             search_query={this.state.search_query}
                             sort_name={this.state.sort_name}
                             search_state={search_state}
+                        /> */}
+                         <div className="col-md-12">
+                        <PortalDataTable
+                            refresh={refresh}
+                            color={'primary'}
+                            талбарууд={талбарууд}
+                            жагсаалтын_холбоос={жагсаалтын_холбоос}
+                            per_page={20}
+                            уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
+                            хувьсах_талбарууд={хувьсах_талбарууд}
+                            нэмэлт_талбарууд={нэмэлт_талбарууд}
+                            max_data={'open'}
+                            хайлт={'closed'}
+                            sort_name={'-created_at'}
+                            custom_query={this.state.custom_query}
                         />
+                        </div>
                     </div>
                 </div>
         )
