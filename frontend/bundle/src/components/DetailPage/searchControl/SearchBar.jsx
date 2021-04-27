@@ -6,6 +6,7 @@ import {Control} from 'ol/control'
 import {CLASS_CONTROL, CLASS_HIDDEN} from 'ol/css.js'
 import { service } from "../service"
 import './style.css'
+import Modal from"@utils/Modal/Modal"
 
 
 export class SearchBarComponent extends Component {
@@ -51,6 +52,7 @@ export class SearchBarComponent extends Component {
             bundle_id: props.bundle_id,
             search_datas: [],
             is_searching: false,
+            modal_status: 'closed',
         }
 
         this.handleSubmitCoordinate = this.handleSubmitCoordinate.bind(this)
@@ -64,6 +66,8 @@ export class SearchBarComponent extends Component {
         this.getGeom = this.getGeom.bind(this)
         this.handleChange = this.handleChange.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleChange = this.handleChange.bind(this)
     }
 
     handleSubmitCoordinate(event) {
@@ -128,8 +132,22 @@ export class SearchBarComponent extends Component {
         service
             .getGeom(geo_id)
             .then(({ feature }) => {
-                if (feature) {
+                if (feature != '') {
                     this.props.setFeatureOnMap(feature)
+                }
+                else {
+                    this.modalChange(
+                        'fa fa-exclamation-circle',
+                        '',
+                        'warning',
+                        'GEOM өгөгдөл байхгүй байна',
+                        '',
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
                 }
             })
             .catch((error) => alert("Алдаа гарсан байна"))
@@ -214,6 +232,30 @@ export class SearchBarComponent extends Component {
         }
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
     render() {
         const {error_msg, sum, aimag, options_scale, horoo, search_datas, is_searching} = this.state
         return (
@@ -251,8 +293,8 @@ export class SearchBarComponent extends Component {
                     </div>
                     {
                     search_datas.map((data, idx) =>
-                            <li className="list-group-item form-control" key={idx} value={data.geo_id} onClick={(e) => this.getGeom(e.target.value)}>
-                                <i className="fa fa-history mr-3 text-secondary">   {data.name}</i>
+                            <li className="list-group-item form-control" key={idx} id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>
+                                <i className="fa fa-history mr-3 text-secondary" id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>   {data.name}</i>
                             </li>
                         )
                     }
@@ -445,6 +487,19 @@ export class SearchBarComponent extends Component {
                         </div>
                     </div>
                 </form>
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    text={ this.state.text }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
+                />
             </div>
         )
     }
