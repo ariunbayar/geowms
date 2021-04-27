@@ -11,7 +11,6 @@ const Org = React.lazy(() => import("./Org"))
 const UserPage = React.lazy(() => import("./UserPage"))
 const СуурьДавхаргаХуудас = React.lazy(() => import("./СуурьДавхаргаХуудас"))
 const ConfigPage = React.lazy(() => import("./ConfigPage"))
-// const Covid = React.lazy(() => import("./Covid"))
 const Log = React.lazy(() => import("./Log"))
 const Gis = React.lazy(() => import("./Gis"))
 const Access = React.lazy(() => import("./Access"))
@@ -98,7 +97,6 @@ export default class App extends Component {
                   <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч" count={this.state.user_count}></MenuItem>
                   <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо">
                       <ul className="sidebar-submenu">
-                          {/* <MenuItem icon="fa fa-circle-o" url="/back/covid/" text="COVID"></MenuItem> */}
                           <MenuItem icon="fa fa-circle-o" url="/back/gis/" text="GIS"></MenuItem>
                           <MenuItem icon="fa fa-circle-o" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
                           <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="GeoServer"></MenuItem>
@@ -131,7 +129,6 @@ export default class App extends Component {
                 <Route exact path={"/back/dev/"} component={DevPage} />
                 <Route path={"/back/user/"} component={UserPage} />
                 <Route path={"/back/gis/"} component={Gis} />
-                {/* <Route path={"/back/covid/"} component={Covid} /> */}
                 <Route path={"/back/тохиргоо/"} component={ConfigPage} />
                 <Route path={"/back/error500/"} component={Error500} />
                 <Route path={"/back/дэд-сан/"} component={BundlePage} />

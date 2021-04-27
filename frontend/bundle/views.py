@@ -3,6 +3,7 @@ from itertools import groupby
 from django.http import JsonResponse
 from django.shortcuts import render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
+from django.core.cache import cache
 
 from main.decorators import ajax_required
 from backend.dedsanbutets.models import ViewNames
@@ -10,9 +11,11 @@ from backend.dedsanbutets.models import ViewNames
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
-from backend.inspire.models import LThemes
+from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, MGeoDatas, MDatas
 from main import utils
 from backend.geoserver.models import WmtsCacheConfig
+
+from django.contrib.postgres.search import SearchVector
 
 
 def all(request):
@@ -185,3 +188,47 @@ def sumfind(request, payload):
             'info': "Алдаа гарсан",
         }
         return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def get_search_value(request, payload):
+    id = payload.get('id')
+    search_value = payload.get('value')
+    pk = cache.get('pk')
+    if pk != id:
+        cache.set('pk', id, 300)
+        theme = get_object_or_404(LThemes, pk=id)
+        theme_id = theme.theme_id
+
+        qs_packages = LPackages.objects
+        qs_packages = qs_packages.filter(theme_id=theme_id)
+        package_ids = list(qs_packages.values_list('package_id', flat=True))
+        qs_features = LFeatures.objects
+        qs_features = qs_features.filter(package_id__in=package_ids)
+        feature_ids = list(qs_features.values_list('feature_id', flat=True))
+
+        qs_feature_configs = LFeatureConfigs.objects
+        qs_feature_configs = qs_feature_configs.filter(feature_id__in=feature_ids)
+        feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
+        cache.set('feature_config_ids', feature_config_ids, 300)
+    else:
+        feature_config_ids = cache.get('feature_config_ids')
+
+    qs_datas = MDatas.objects
+    qs_datas = qs_datas.annotate(search=SearchVector('value_text'))
+    qs_datas = qs_datas.filter(feature_config_id__in=feature_config_ids, search__icontains=search_value)
+    first_5_datas = list(qs_datas.order_by('geo_id')[:5])
+
+    datas = list()
+    for obj in first_5_datas:
+        data = dict()
+        data['id'] = obj.id
+        data['geo_id'] = obj.geo_id
+        data['name'] = obj.value_text
+        datas.append(data)
+
+    rsp = {
+        'datas': datas,
+    }
+    return JsonResponse(rsp)

@@ -10,14 +10,10 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime
-
 from backend.bundle.models import Bundle
 from backend.inspire.models import LThemes
-
 from .models import Config
 from backend.inspire.models import LValueTypes
-from .models import CovidConfig
-
 from backend.org.models import Org
 from backend.config.models import Error500
 from main.decorators import ajax_required
@@ -488,16 +484,6 @@ def _get_orgs():
     return orgs
 
 
-def _get_line_chart_org(name):
-    org_id = None
-    qs = CovidConfig.objects
-    qs = qs.filter(name=name)
-    qs = qs.first()
-    if qs:
-        org_id = qs.org_id
-    return org_id
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -543,156 +529,6 @@ def qpay_configs_save(request, payload):
                 'value': payload.get(config_name, '')
             }
         )
-
-    return JsonResponse({"success": True})
-
-
-@require_GET
-@ajax_required
-def covid_configs(request):
-
-    default_values = {
-        'emy_logo': '',
-        'batlagdsan_tohioldol': '',
-        'edgersen_humuusiin_too': '',
-        'emchlegdej_bui_humuus_too': '',
-        'tusgaarlagdsan_humuusiin_too': '',
-        'medeellin_eh_survalj': '',
-        'emiin_sangiin_too': '',
-        'emlegiin_too': '',
-        'niit_eruul_mend_baiguullaga_too': '',
-        'gzbgzzg_logo': '',
-        'title': '',
-        'bundle': '',
-        'shinjilgee_too': '',
-        'nas_barsan_too': '',
-        'erguul_ungu': '',
-    }
-
-    configs = CovidConfig.objects.filter(name__in=default_values.keys())
-    line_chart_datas = CovidConfig.objects.filter(name='line_chart_datas').first()
-
-    values = []
-    if line_chart_datas:
-        values = line_chart_datas.value
-        values = json.loads(values)
-    bundles = _get_bundles() or {}
-    orgs = _get_orgs()
-    default_values = _get_org_id(default_values)
-
-    rsp = {
-        **default_values,
-        **{conf.name: conf.value for conf in configs},
-        'line_chart_datas': values,
-        'line_graph_org': _get_line_chart_org('line_chart_datas'),
-        'bundles': bundles,
-        'orgs': orgs,
-    }
-
-    return JsonResponse(rsp)
-
-
-def _get_org_id(default_values):
-    datas = list()
-    org_datas = dict()
-
-    config_org_ids = {
-        'line_graph_org',
-        'nas_barsan_too_org',
-        'shinjilgee_too_org',
-        'niit_eruul_mend_baiguullaga_too_org',
-        'emlegiin_too_org',
-        'emiin_sangiin_too_org',
-        'tusgaarlagdsan_humuusiin_too_org',
-        'emchlegdej_bui_humuus_too_org',
-        'edgersen_humuusiin_too_org',
-        'batlagdsan_tohioldol_org',
-    }
-    org = []
-
-    for default_value in default_values:
-        qs = CovidConfig.objects
-        qs = qs.filter(name=default_value)
-        if qs:
-            org = qs.first().org
-        for config_org_id in config_org_ids:
-            splited = config_org_id.split("_org")
-            conf_name = splited[0]
-            if conf_name == default_value:
-                if org:
-                    org_datas[config_org_id] = org.id
-
-    for key, value in org_datas.items():
-        default_values[key] = value
-    return default_values
-
-
-@require_POST
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def covid_configs_save(request, payload):
-    config_names = (
-        'emy_logo',
-        'batlagdsan_tohioldol',
-        'edgersen_humuusiin_too',
-        'emchlegdej_bui_humuus_too',
-        'tusgaarlagdsan_humuusiin_too',
-        'medeellin_eh_survalj',
-        'emiin_sangiin_too',
-        'emlegiin_too',
-        'niit_eruul_mend_baiguullaga_too',
-        'gzbgzzg_logo',
-        'title',
-        'bundle',
-        'shinjilgee_too',
-        'nas_barsan_too',
-        'erguul_ungu',
-    )
-
-    config_org_ids = {
-        'line_graph_org',
-        'nas_barsan_too_org',
-        'shinjilgee_too_org',
-        'niit_eruul_mend_baiguullaga_too_org',
-        'emlegiin_too_org',
-        'emiin_sangiin_too_org',
-        'tusgaarlagdsan_humuusiin_too_org',
-        'emchlegdej_bui_humuus_too_org',
-        'edgersen_humuusiin_too_org',
-        'batlagdsan_tohioldol_org',
-    }
-
-    line_chart_datas = payload.get('line_chart_datas')
-    line_chart_datas_obj = CovidConfig.objects.filter(name='line_chart_datas').first()
-
-    if line_chart_datas_obj:
-        line_chart_datas_obj.value = json.dumps(line_chart_datas, ensure_ascii=False)
-        line_chart_datas_obj.save()
-    else:
-        Config.objects.create(
-                name='line_chart_datas',
-                value=json.dumps(line_chart_datas, ensure_ascii=False)
-            )
-
-    for config_name in config_names:
-        CovidConfig.objects.update_or_create(
-            name=config_name,
-            defaults={
-                'value': payload.get(config_name, ''),
-            }
-        )
-        for config_org_id in config_org_ids:
-            if config_org_id != 'line_graph_org':
-                splited = config_org_id.split("_org")
-                conf_name = splited[0]
-                if conf_name == config_name:
-                    qs = CovidConfig.objects
-                    qs = qs.filter(name=config_name)
-                    qs.update(org=payload.get(config_org_id))
-            else:
-                qs = CovidConfig.objects
-                qs = qs.filter(name='line_chart_datas')
-                qs.update(org=payload.get(config_org_id))
 
     return JsonResponse({"success": True})
 

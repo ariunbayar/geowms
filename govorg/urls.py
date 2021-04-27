@@ -160,16 +160,6 @@ urlpatterns = [
             path('revoke-search/', revoke_request_views.revoke_paginate),
         ], 'revoke_request'))),
 
-        path('nema/', include(([
-            path('', govorg_inspire_views.nema_list, name='nema_list'),
-            path('create/', govorg_inspire_views.create_nema, name='nema_create'),
-            path('update-c2405/', govorg_inspire_views.update_c2405, name='nema_create'),
-            path('get_attr_details/', govorg_inspire_views.get_attr_details, name='get_attr_details'),
-            path('get_nema_choice_list/', govorg_inspire_views.get_nema_choice_list, name='get_nema_choice_list'),
-            path('<int:pk>/detail/', govorg_inspire_views.nema_detail, name='nema_detail'),
-            path('remove/<int:pk>/', govorg_inspire_views.nema_remove, name='nema_remove'),
-        ], 'nema'))),
-
     ], 'back_org'))),
 
     path('secure/', include(([
@@ -182,13 +172,6 @@ urlpatterns = [
         path('', org_views.frontend, name='frontend'),
         path('emp-role/', org_views.emp_role, name='emp-role'),
         path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
-        path('set-config/', org_views.set_config),
-        path('get-covid-dashboard/', org_views.get_covid_dashboard),
-        path('get-covid-dashboard-id/<str:geo_id>/', org_views.get_covid_dashboard_id),
-        path('save-covid-dashboard/', org_views.save_dashboard),
-        path('dahsb-list/<str:geo_id>/', org_views.dashboard_list),
-        path('save-covid-dashboard-log/', org_views.save_dashboard_log),
-        path('remove-dashboard/<int:pk>/', org_views.remove_dashboard),
     ], 'org'))),
 
     re_path('^.*', org_views.frontend, name='org'),

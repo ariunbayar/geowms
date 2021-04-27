@@ -5,7 +5,6 @@ from frontend.mobile import views as mobile_views
 from frontend.суурь_давхарга import views as суурь_давхарга
 from frontend.secure import views as secure_views
 from frontend.payment import views as payment_views
-from frontend.covid import views as covid_views
 from frontend.open_layer import views as open_layer_views
 from frontend.page import views as page_views
 from frontend.profile import views as profile_views
@@ -20,6 +19,7 @@ urlpatterns = [
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
         path('дэд-сан/<int:pk>/давхаргууд/', bundle_views.wms_layers, name='wms-layers'),
         path('get_user/', bundle_views.get_user, name='get_user'),
+        path('api/search/', bundle_views.get_search_value, name='get_search_value'),
     ], 'bundle'))),
 
     path('', include(([
@@ -71,15 +71,6 @@ urlpatterns = [
         path('check/', qpay_views.check, name='check'),
     ], 'qpay'))),
 
-    path('covid/', include(([
-        path('get-nema/', covid_views.get_nema),
-        path('get-covid-state/<str:geo_id>/', covid_views.get_covid_state),
-        path('get-data-dashboard/', covid_views.get_data_dashboard),
-        path('<str:geo_id>/geo_data/', covid_views.get_covid_data),
-        path('get-nema/<int:bundle_id>/', covid_views.get_nema),
-        path('get-nema/<int:bundle_id>/all/', covid_views.get_nema_all),
-    ], 'covid'))),
-
     path('profile/api/', include(([
         path('', profile_views.history, name='history'),
         path('all/', profile_views.all, name='all'),
@@ -93,8 +84,6 @@ urlpatterns = [
     ], 'profile'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
-    # re_path('^covid/.*', covid_views.covid_index, name='covid'),
-    # re_path('^covid_dashboard/.*', covid_views.dashboard_index, name='covid_dashboard'),
     # re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
     re_path('^profile/.*', profile_views.history, name='history'),
 

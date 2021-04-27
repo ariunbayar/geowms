@@ -33,7 +33,6 @@ from main.inspire import InspireFeature
 from main.inspire import GEoIdGenerator
 
 from backend.config.models import Config
-from backend.config.models import CovidConfig
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from backend.dedsanbutets.models import ViewProperties
 from backend.dedsanbutets.models import ViewNames
@@ -545,15 +544,6 @@ def _is_domain(domain):
         r'^((http|https):\/\/)?([a-zA-Z0-9]+\.)?([a-zA-Z0-9][a-zA-Z0-9-]*)?((\:[a-zA-Z0-9]{2,6})|(\.[a-zA-Z0-9]{2,6}))$'
     )
     return re.search(pattern, domain) is not None
-
-# Зөвхөн нэг config мэдээллийг буцаана
-# оролт config one name
-def get_covid_config(config_name, Model=CovidConfig):
-
-    default_values = {config_name: ''}
-    configs = Model.objects.filter(name__in=default_values.keys()).first()
-
-    return configs.value if configs else ''
 
 
 # Зөвхөн нэг config мэдээллийг буцаана
