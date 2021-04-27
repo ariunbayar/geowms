@@ -1714,6 +1714,6 @@ def check_pg_connection(host, db, port, user, password):
         )
 
         cursor = connection.cursor()
-        return True
+        return cursor
     except Exception as error:
-        return False
+        return []

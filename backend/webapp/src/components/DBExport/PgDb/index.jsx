@@ -3,6 +3,7 @@ import { Switch, Route } from "react-router-dom"
 
 import List from './List'
 import ConnectionConfig from './Connectionconfig'
+import PgForm from './CreateTable'
 
 class PgDB extends Component {
     render() {
@@ -11,6 +12,8 @@ class PgDB extends Component {
                 <Switch>
                     <Route exact path={"/back/db-export/connection/pg/"} component={ConnectionConfig}/>
                     <Route exact path={"/back/db-export/connection/pg/:id/"} component={ConnectionConfig}/>
+                    <Route exact path={"/back/db-export/connection/pg/:id/tables/"} component={List}/>
+                    <Route exact path={"/back/db-export/connection/pg/:id/create/"} component={PgForm}/>
                 </Switch>
             </div>
         );

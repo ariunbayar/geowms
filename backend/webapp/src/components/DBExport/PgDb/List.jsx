@@ -1,9 +1,8 @@
 import React, { Component } from "react"
-import {service} from '../service'
+import {service} from '../../service'
 import { PortalDataTable } from "@utils/DataTable"
 import Modal from "@utils/Modal/Modal"
 import BackButton from "@utils/Button/BackButton"
-
 
 export default class List extends Component {
 
@@ -13,14 +12,16 @@ export default class List extends Component {
             id: props.match.params.id,
             жагсаалтын_холбоос: `/back/another-database/pg/tables/${props.match.params.id}/all/`,
             талбарууд: [
-                {'field': 'table_name', "title": 'Нэр'},
-                {'field': 'feature_code', "title": 'Feature нэр'},
+                {'field': 'feature_code', "title": 'View-ийн нэр'},
+                {'field': 'table_name', "title": 'Хүснэгтийн нэр'},
+                {'field': 'created_at', "title": 'Үүссэн'},
+                {'field': 'updated_at', "title": 'Зассан'},
             ],
             нэмэлт_талбарууд: [
                 {
                     "title": 'Засах',
                     "text": '', "icon":
-                    'fa fa-pencil-square-o text-success',
+                    'fa fa-table text-success',
                     "action": (values) => this.goLink(values),
                 },
                 {
@@ -29,6 +30,7 @@ export default class List extends Component {
                     "icon": 'fa fa-trash-o text-danger',
                     "action": (values) => this.handleRemoveAction(values),
                 },
+
             ],
             refresh: true,
             modal_status: "closed",
@@ -39,45 +41,19 @@ export default class List extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.modalChange = this.modalChange.bind(this)
-
-    }
-
-    set_active_color(boolean){
-        let color = "text-danger fa fa-times"
-        if(boolean) color = "text-success fa fa-check"
-        return color
     }
 
     goLink(values){
-        const {id} = this.state
-        this.props.history.push(`/back/another-base/connection/mongo/${id}/insert/${values.id}/`)
+        this.props.history.push(`/back/another-base/connection/mssql/${values.another_database_id}/${values.id}/update/`)
     }
 
     handleRemove() {
         const {values, id} = this.state
-        service.mongo_config.tableRemove(id, values.id).then(({success}) => {
+        service.mssql_config.tableRemove(id, values.id).then(({success}) => {
             if (success) {
                 this.setState({refresh: !this.state.refresh})
             }
         })
-    }
-
-    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
-        this.setState(
-            {
-                modal_icon,
-                modal_bg,
-                icon_color,
-                title,
-                text,
-                has_button,
-                actionNameBack,
-                actionNameDelete,
-                modalAction,
-                modalClose,
-            },
-            () => this.handleModalOpen()
-        )
     }
 
     handleModalOpen() {
@@ -102,6 +78,24 @@ export default class List extends Component {
         )
     }
 
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
     render() {
         const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, id } = this.state
         return (
@@ -115,7 +109,7 @@ export default class List extends Component {
                                 уншиж_байх_үед_зурвас={"Уншиж байна"}
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
-                                нэмэх_товч={`/back/another-base/connection/mongo/${id}/insert/`}
+                                нэмэх_товч={`/back/db-export/connection/pg/${id}/create/`}
                                 refresh={refresh}
                             />
                         </div>
@@ -137,7 +131,7 @@ export default class List extends Component {
                 <BackButton
                     {...this.props}
                     name={'Буцах'}
-                    navlink_url={`/back/another-base/`}
+                    navlink_url={`/back/db-export/`}
                 />
             </div>
         )

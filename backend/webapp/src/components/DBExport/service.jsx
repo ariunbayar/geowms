@@ -19,65 +19,29 @@ const pg_config = {
         return fetch(`${prefix}/pg/db-config-save/`, opts).then(handleResponse)
     },
 
-    getTableNames: function(connection_id, table_id ) {
-        const opts = {
-            ...getPostOptions(),
-            body: JSON.stringify({ connection_id, table_id }),
-        }
-        return fetch(`${prefix}/mssql/get-all-table-names/`, opts).then(handleResponse)
-    },
-
-    getAttributes(table_name, id) {
-        const requestOptions = {
-            ...getPostOptions(),
-            body: JSON.stringify({ table_name, id }),
-        }
-        return fetch(`${prefix}/mssql/get-attributes/`, requestOptions).then(handleResponse)
-    },
-
-    saveToDbTable(table_name, field_config, another_database_id, feature_code, table_id) {
-        const requestOptions = {
-            ...getPostOptions(),
-            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code, table_id }),
-        }
-        return fetch(`${prefix}/mssql/save-to-ano-db-table/`, requestOptions).then(handleResponse)
-    },
-
-    insertToInspire(table_name, field_config, another_database_id, feature_code) {
-        const requestOptions = {
-            ...getPostOptions(),
-            body: JSON.stringify({ table_name, field_config, another_database_id, feature_code }),
-        }
-        return fetch(`${prefix}/mssql/insert-to-inspire/`, requestOptions).then(handleResponse)
-    },
-
-    tableRemove: function(root_id, id) {
+    getViewNames: function(connection_id) {
         const opts = {
             ...getGetOptions(),
         }
-        return fetch(`${prefix}/mongo/tables/remove/${root_id}/${id}/`, opts).then(handleResponse)
+        return fetch(`${prefix}/pg/${connection_id}/get-all-view-names/`, opts).then(handleResponse)
     },
 
-    getProperties(feature_code) {
-        const requestOptions = {
-            ...getGetOptions(),
+    fieldNames: function(id, name, value) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({id, name, value}),
         }
-        return fetch(`${prefix}/mssql/get-properties/${feature_code}/`, requestOptions).then(handleResponse)
+        return fetch(`${prefix}/pg/get-fields/`, opts).then(handleResponse)
     },
 
-    getThemeFeatures() {
-        const requestOptions = {
-            ...getGetOptions(),
+    tableSave: function(id, table_id, matched_feilds, view_name, table_name) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({ id, table_id, matched_feilds, view_name, table_name }),
         }
-        return fetch(`${prefix}/get-inspire-shatlal/`, requestOptions).then(handleResponse)
+        return fetch(`${prefix}/pg/save-table/`, opts).then(handleResponse)
     },
 
-    refreshData(connection_id) {
-        const requestOptions = {
-            ...getGetOptions(),
-        }
-        return fetch(`${prefix}/mssql/refresh-mssql-datas/${connection_id}/`, requestOptions).then(handleResponse)
-    }
 }
 
 function remove(pk) {

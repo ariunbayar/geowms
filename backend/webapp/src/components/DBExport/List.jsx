@@ -13,19 +13,13 @@ export default class List extends Component {
             талбарууд: [
                 {'field': 'name', "title": 'Нэр'},
                 {'field': 'definition', "title": 'Тайлбар'},
-                {'field': 'unique_id', "title": 'Таних талбар'},
                 {'field': 'db_type', "title": 'Дата бааз төрөл'},
                 {'field': 'database_updated_at', "title": 'Сүүлд шинэчилсэн'},
                 {'field': 'created_at', "title": 'Үүссэн'},
                 {'field': 'updated_at', "title": 'Зассан'},
             ],
             нэмэлт_талбарууд: [
-                {
-                    "title": 'Засах',
-                    "text": '', "icon":
-                    'fa fa-table text-success',
-                    "action": (values) => this.tableGoLink(values),
-                },
+ 
                 {
                     "title": 'Засах',
                     "text": '', "icon":
@@ -37,6 +31,12 @@ export default class List extends Component {
                     "text": '',
                     "icon": 'fa fa-trash-o text-danger',
                     "action": (values) => this.handleRemoveAction(values),
+                },
+                {
+                    "title": 'Export',
+                    "text": '', "icon":
+                    'fa fa-table text-success',
+                    "action": (values) => this.tableGoLink(values),
                 },
                 {
                     "title": 'Бааз шинэчлэх',
@@ -71,10 +71,10 @@ export default class List extends Component {
 
 
     crontabLink(values){
-        this.props.history.push(`/back/another-base/connection/crontab/${values.id}/`)
+        this.props.history.push(`/back/db-export/connection/crontab/${values.id}/`)
 
-        // if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/tables/`)
-        // else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/list/`)
+        // if(values.db_type == 'MSSQL') this.props.history.push(`/back/db-export/connection/mssql/${values.id}/tables/`)
+        // else if (values.db_type == 'MONGODB') this.props.history.push(`/back/db-export/connection/mongo/${values.id}/list/`)
     }
 
     handleRefreshData(values){
@@ -178,13 +178,14 @@ export default class List extends Component {
     }
 
     tableGoLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/tables/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/list/`)
+        if(values.db_type == 'MSSQL') this.props.history.push(`/back/db-export/connection/mssql/${values.id}/tables/`)
+        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/db-export/connection/mongo/${values.id}/list/`)
+        else if (values.db_type == 'PgDB') this.props.history.push(`/back/db-export/connection/pg/${values.id}/tables/`)
     }
 
     goLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/`)
+        if(values.db_type == 'MSSQL') this.props.history.push(`/back/db-export/connection/mssql/${values.id}/`)
+        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/db-export/connection/mongo/${values.id}/`)
         else if (values.db_type == 'PgDB') this.props.history.push(`/back/db-export/connection/pg/${values.id}/`)
     }
 
