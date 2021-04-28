@@ -58,21 +58,6 @@ def _get_revoke_request_display(revoke_request):
         }
 
 
-def _get_choices_from_model(Model, field_name):
-    choices = []
-    for f in Model._meta.get_fields():
-        if hasattr(f, 'choices'):
-            if f.name == field_name:
-                choices.append(f.choices)
-    return choices
-
-
-def _get_employees(request):
-    org = get_object_or_404(Employee, user=request.user).org
-    employees = Employee.objects.filter(org=org)
-    return employees
-
-
 def _хувьсах_талбарууд():
     хувьсах_талбарууд = [
         {'field': 'feature_id', 'action': _get_feature_name, "new_field": "feature_name"},
