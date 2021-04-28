@@ -17,6 +17,7 @@ export default class  PgForm extends Component {
             view_fields: [],
             table_fields: [],
             matched_feilds: [],
+            selected_data_type: ''
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -79,24 +80,40 @@ export default class  PgForm extends Component {
         })
     }
 
-    handleSetField(key, data){
+    handleSetField(key, e){
         const { view_fields, table_fields, matched_feilds } = this.state
         var values = {
-            'table_field': data,
+            'table_field': e.target.value,
             'view_field': view_fields[key].column_name
         }
         var joined = []
         if (matched_feilds.length > 0) {
                 var value = obj => obj.view_field == view_fields[key].column_name
                 var index_of = matched_feilds.findIndex(value)
-                if (index_of != -1) {
-                    matched_feilds[index_of]['table_field'] = data
-                    joined = matched_feilds
+                if (e.target.value) {
+                    if (index_of != -1) {
+                        matched_feilds[index_of]['table_field'] = e.target.value
+                        joined = matched_feilds
+                    }
+                    else joined = matched_feilds.concat(values)
                 }
-                else joined = matched_feilds.concat(values)
+                else {
+                    var array = [...matched_feilds]
+                    for (let [i, layer] of array.entries()) {
+                        if (layer.view_field == view_fields[key].column_name) {
+                            array.splice(i, 1);
+                        }
+                    }
+                    joined = array
+                }
         }
         else joined = matched_feilds.concat(values)
-        this.setState({ matched_feilds: joined})
+
+        var index = e.target.selectedIndex
+        var optionElement = e.target.childNodes[index]
+        var selected_data_type =  optionElement.getAttribute('name')
+
+        this.setState({ matched_feilds: joined, selected_data_type})
     }
 
     setSelectedField(data) {
@@ -117,7 +134,8 @@ export default class  PgForm extends Component {
             table_names, table_id, id,
             table_name, view_name,
             view_names, view_fields,
-            table_fields, matched_feilds
+            table_fields, matched_feilds,
+            selected_data_type
         } = this.state
         return (
             <div className="card">
@@ -171,6 +189,7 @@ export default class  PgForm extends Component {
                             matched_feilds={matched_feilds}
                             handleSetField={this.handleSetField}
                             setSelectedField={this.setSelectedField(data)}
+                            selected_data_type={selected_data_type}
                         />
                     )}
                     <a className="btn btn-primary text-white m-3" onClick={this.handleSave}>
