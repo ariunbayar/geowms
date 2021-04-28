@@ -7,6 +7,7 @@ export default class  PgForm extends Component {
 
     constructor(props) {
         super(props);
+        this.over_dec = []
         this.state = {
             id: props.match.params.id,
             table_id: props.match.params.table_id,
@@ -74,7 +75,7 @@ export default class  PgForm extends Component {
 
     handleSave(){
         const {id, table_id, matched_feilds, view_name, table_name, table_field_error} = this.state
-        if (! table_field_error.length >0){
+        if (! table_field_error.length >0 && ! this.over_dec.length > 0){
             service.pg_config.tableSave(id, table_id, matched_feilds, view_name, table_name).then(({success}) => {
                 if(success){
                     alert("Амжилттай хадгаллаа.")
@@ -163,7 +164,11 @@ export default class  PgForm extends Component {
             table_fields, matched_feilds,
             selected_data_type, table_field_error
         } = this.state
-        console.log("check", table_field_error)
+        var counts = {};
+        matched_feilds.forEach(function(x) {
+            counts[x.table_field] = (counts[x.table_field] || 0)+1;
+        })
+        this.over_dec = []
         return (
             <div className="card">
                 <div className="form-row card-body">
@@ -208,6 +213,25 @@ export default class  PgForm extends Component {
                 (view_fields && table_fields)
                 &&
                 <div className="card-body">
+                    {
+                        Object.keys(counts).length > 0
+                        &&
+                        <div className="form-group col-md-8">
+                            <label className="mt-1 text-danger text-justify">
+                                {
+                                    Object.keys(counts).map((value, idx)=> {
+                                        if ( counts[value] >1) {
+                                            this.over_dec.push(value)
+                                        }
+                                    }
+                                    )
+                                }
+                                {this.over_dec.length > 0 &&
+                                    this.over_dec.join(', ')  + ' талбар аль хэдийн сонгогдсон байна'
+                                }
+                            </label>
+                        </div>
+                    }
                     {view_fields.map((data, idx) =>
                         <FieldForm
                             data_key={idx}
@@ -224,9 +248,9 @@ export default class  PgForm extends Component {
                         disabled={table_field_error.length > 0}
                         onClick={this.handleSave}
                     >
-                        {table_field_error.length > 0 && <i className="fa fa-spinner fa-spin"></i>}
-                        {table_field_error.length > 0 && <a className="text-light">Алдаатай байна.</a>}
-                        {!table_field_error.length > 0 && 'Хадгалах' }
+                        {(table_field_error.length > 0 || this.over_dec.length > 0) && <i className="fa fa-spinner fa-spin"></i>}
+                        {(table_field_error.length > 0 || this.over_dec.length > 0) && <a className="text-light">Алдаатай байна.</a>}
+                        {!(table_field_error.length > 0 || this.over_dec.length > 0) && 'Хадгалах' }
                     </a>
                 </div>
                 }
