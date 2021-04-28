@@ -18,7 +18,8 @@ export default class  PgForm extends Component {
             table_fields: [],
             matched_feilds: [],
             selected_data_type: '',
-            table_field_error: []
+            table_field_error: [],
+            old_error_name: ''
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -84,7 +85,7 @@ export default class  PgForm extends Component {
     }
 
     handleSetField(key, e){
-        const { view_fields, table_fields, matched_feilds, table_field_error} = this.state
+        const { view_fields, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
         var data = e.target.value
         var values = {
             'table_field': data,
@@ -92,31 +93,32 @@ export default class  PgForm extends Component {
         }
         var joined = []
         var check = false
-        var check_error = [...table_field_error]
+        var check_error = []
+        var error_name = ''
         if(data) {
             if (matched_feilds.length > 0) {
-                if (matched_feilds.length > 0) {
-                            var value = obj => obj.view_field == view_fields[key].column_name
-                            var index_of = matched_feilds.findIndex(value)
-                            if (index_of != -1) {
-                                matched_feilds[index_of]['table_field'] = data
-                                joined = matched_feilds
-                            }
-                            else joined = matched_feilds.concat(values)
-                    }
-                    else joined = matched_feilds.concat(values)
+                var value = obj => obj.view_field == view_fields[key].column_name
+                var index_of = matched_feilds.findIndex(value)
+                if (index_of != -1) {
+                    matched_feilds[index_of]['table_field'] = data
+                    joined = matched_feilds
+                }
+                else {
+                    joined = matched_feilds.concat(values)
+                }
             }
+            else joined = matched_feilds.concat(values)
 
             var index = e.target.selectedIndex
             var optionElement = e.target.childNodes[index]
             var selected_data_type =  optionElement.getAttribute('name')
-            var error_name = table_field_error.filter(item => {
-                return item.toLowerCase().includes(table_fields[key].column_name.toLowerCase())
+            error_name = table_field_error.filter(item => {
+                return item.toLowerCase().includes(data.toLowerCase())
             })
 
-            if ((table_fields[key].data_type.slice(0,4) != selected_data_type.slice(0,4))) {
+            if ((view_fields[key].data_type.slice(0,4) != selected_data_type.slice(0,4))) {
                 if (! error_name.length >0) {
-                    check_error.push(table_fields[key].column_name)
+                    check_error.push(data)
                 }
             }
             else {
@@ -135,42 +137,9 @@ export default class  PgForm extends Component {
         }
 
         if (check || !data) {
-            check_error = table_field_error.filter((field_error) => field_error != table_fields[key].column_name)
+            check_error = []
         }
-        this.setState({ matched_feilds: joined, selected_data_type, table_field_error: check_error})
-
-        // if (matched_feilds.length > 0) {
-        //         var value = obj => obj.view_field == view_fields[key].column_name
-        //         var index_of = matched_feilds.findIndex(value)
-        //         if (data) {
-        //             if (index_of != -1) {
-        //                 matched_feilds[index_of]['table_field'] = data
-        //                 joined = matched_feilds
-        //             }
-        //             else joined = matched_feilds.concat(values)
-        //         }
-        //         else {
-        //             var array = [...matched_feilds]
-        //             for (let [i, layer] of array.entries()) {
-        //                 if (layer.view_field == view_fields[key].column_name) {
-        //                     array.splice(i, 1);
-        //                 }
-        //             }
-        //             joined = array
-        //         }
-        // }
-        // else joined = matched_feilds.concat(values)
-
-
-
-        // var check_error = []
-        // if (view_fields[key].data_type.slice(0,4) != selected_data_type.slice(0,4) ) {
-        //     check_error.push(data)
-        // }
-        // else {
-        //     check_error = table_field_error.filter((field_error) => field_error != data)
-        // }
-
+        this.setState({ matched_feilds: joined, selected_data_type, table_field_error: check_error, old_error_name })
     }
 
     setSelectedField(data) {
@@ -194,6 +163,7 @@ export default class  PgForm extends Component {
             table_fields, matched_feilds,
             selected_data_type, table_field_error
         } = this.state
+        console.log("check", table_field_error)
         return (
             <div className="card">
                 <div className="form-row card-body">
