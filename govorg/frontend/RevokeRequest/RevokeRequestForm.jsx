@@ -1,8 +1,6 @@
 
 import React, { Component } from "react"
 import {service} from './service'
-import {RevokeRequestTable} from './RevokeRequestTable'
-import { Pagination } from "../components/pagination/pagination"
 import { PortalDataTable } from '@utils/DataTable/index'
 import MakeOronZai from './../OrgRequest/makeOronZai'
 import OpenMapModal from './../OrgRequest/openMapModal'
@@ -71,19 +69,22 @@ export default class RevokeRequestForm extends Component {
                     'refreshData': () => this.refreshData(),
                 },
             }],
+            custom_query: {}
         }
         this.setLoading = this.setLoading.bind(this)
-        this.paginate = this.paginate.bind(this);
-        this.handleState = this.handleState.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
         this.refreshData = this.refreshData.bind(this)
     }
 
-    componentDidUpdate(prevProps, prevState){
-        if(prevState.search_state !== this.state.search_state)
-        {
-            this.setState({ search_state: this.state.search_state })
-        }
+
+    componentDidMount() {
+        service
+            .getChoices()
+            .then(({success, modules, choices}) => {
+                if (success) {
+                    this.setState({ modules, choices })
+                }
+            })
     }
 
     refreshData(){
@@ -94,121 +95,101 @@ export default class RevokeRequestForm extends Component {
         this.setState({ is_loading: true })
     }
 
-    paginate(page, query, state) {
-        this.setLoading()
-        const { revoke_per_page } = this.state
-        this.setState({ current_page: page })
-        return service
-            .paginatedList(page, revoke_per_page, query, state)
-            .then(page => {
-                this.setState({ items: page.items, list_length: page.items.length, choices: page.choices, is_loading: false });
-                return page
-            })
+
+    onChangeItems(value, field, main_module) {
+        let module_value
+        let for_search
+        let remove_ids = Object()
+        this.state[main_module].map((module, idx) => {
+            if (module.id == value) {
+                module_value = module[field]
+            }
+        })
+        if (main_module == 'modules') {
+            for_search = 'theme_id'
+            remove_ids['package_id'] = null
+            remove_ids['feature_id'] = null
+        }
+        else if (main_module == 'packages') {
+            for_search = 'package_id'
+            remove_ids['feature_id'] = null
+        }
+        this.setState({ [field]: module_value, [for_search]: value, ...remove_ids })
     }
 
-    handleSearch(field, e) {
-        if(e.target.value.length >= 1)
-        {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value, this.state.search_state)
+    handleSearch() {
+        const { field, state, theme_id, package_id, feature_id } = this.state
+        let custom_query = Object()
+        if (state) custom_query['state'] = state
+        if (theme_id) custom_query['theme_id'] = theme_id
+        if (package_id) custom_query['package_id'] = package_id
+        if (feature_id) custom_query['feature_id'] = feature_id
+        let remove_query = Object()
+        if (!('theme_id' in custom_query)){
+            if ('package_id' in custom_query) {
+                delete custom_query['package_id']
+                remove_query['package_id'] = null
+            }
+            if ('feature_id' in custom_query) {
+                delete custom_query['feature_id']
+                remove_query['feature_id'] = null
+            }
         }
-        else {
-            this.setState({ [field]: e.target.value })
-            this.paginate(1, e.target.value, this.state.search_state)
+
+        if (!('package_id' in custom_query)){
+            if ('feature_id' in custom_query) {
+                delete custom_query['feature_id']
+                remove_query['feature_id'] = null
+            }
         }
+        this.setState({ custom_query, ...remove_query })
     }
 
-    handleState(search_state) {
-        this.setState({ search_state })
-        const { search_query} = this.state
-        this.paginate(1, search_query, search_state)
-    }
 
     render() {
-        const { is_loading, items, choices, search_state, current_page, revoke_per_page } = this.state
+        const { choices, modules } = this.state
         const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
         return (
             <div className="card">
                 <div className="card-body">
                         <div className="col-md-12 row">
-                            <div className="col-md-6">
-                                <label htmlFor="">Хайх</label>
-                                <input
-                                    type="text"
-                                    className="form-control form-control-xs"
-                                    id="search_query"
-                                    placeholder="Хайх утгаа оруулна уу"
-                                    onChange={(e) => this.handleSearch('search_query', e)}
-                                    value={this.state.search_query}
-                                />
-                            </div>
-                            <div className="col-md-6">
-                                <label htmlFor="">Төлөв</label>
-                                <select className="form-control form-control-xs"
-                                    onChange={(e) => this.handleState(e.target.value)}>
-                                    <option value="">--- Төлөвөөр хайх ---</option>
-                                    {
-                                        choices && choices.length > 0
-                                        ?
-                                        choices[0].map((choice, idx) =>
-                                            <option key={idx} value={choice[0]}>{choice[1]}</option>
-                                        )
-                                        :
-                                        null
-                                    }
-                                </select>
-                            </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="">Орон зайн өгөгдөл</label>
+                                        <select className="form-control form-control-xs"
+                                            onChange={(e) => this.onChangeItems(e.target.value, 'packages', 'modules')}
+                                        >
+                                        <option value=''>--- Дэд сангаар хайх ---</option>
+                                        {
+                                            modules && modules.length > 0
+                                            ?
+                                                modules.map((theme, idx) =>
+                                                    <option key={idx} value={theme.id}>{theme.name}</option>
+                                                )
+                                            :
+                                            null
+                                        }
+                                        </select>
+                                </div>
+                                <div className="col-md-6">
+                                    <label htmlFor="">Төлөв</label>
+                                    <select className="form-control form-control-xs"
+                                        onChange={(e) => this.setState({ state: e.target.value })}>
+                                        <option value="">--- Төлөвөөр хайх ---</option>
+                                        {
+                                            choices && choices.length > 0
+                                            ?
+                                            choices[0].map((choice, idx) =>
+                                                <option key={idx} value={choice[0]}>{choice[1]}</option>
+                                            )
+                                            :
+                                            null
+                                        }
+                                    </select>
+                                </div>
+                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right" onClick={() => this.handleSearch()}>Хайх</button>
                         </div>
                         <br></br>
-                        {/* <div className="table-responsive">
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">№</th>
-                                        <th scope="col">Орон зайн өгөгдөл</th>
-                                        <th scope="col">Байгууллага / мэргэжилтэн</th>
-                                        <th scope="col">Тушаалын дугаар</th >
-                                        <th scope="col">Тушаал гарсан огноо</th >
-                                        <th scope="col">Үүссэн огноо</th>
-                                        <th scope="col">Төлөв</th>
-                                        <th scope="col"></th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {
-                                        is_loading
-                                        ?
-                                        <tr>
-                                            <td colSpan="7">
-                                                <div className="d-flex justify-content-center">
-                                                    <div className="spinner-border gp-text-primary" role="status"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        :
-                                        this.state.list_length == 0 ?
-                                        <tr><td className="text-justify">Бүртгэл байхгүй байна</td></tr>:''
-                                        items.map((req, idx) =>
-                                            <RevokeRequestTable
-                                                key={idx}
-                                                idx={(current_page * revoke_per_page) - revoke_per_page + idx + 1}
-                                                values={req}
-                                                paginate={this.paginate}
-                                                setLoading={this.setLoading}
-                                            />
-                                        )
-                                    }
-                                </tbody>
-                            </table>
-                        </div> */}
-                        {/* <Pagination
-                            paginate={this.paginate}
-                            search_query={this.state.search_query}
-                            sort_name={this.state.sort_name}
-                            search_state={search_state}
-                        /> */}
-                         <div className="col-md-12">
+                        <div className="col-md-12">
                         <PortalDataTable
                             refresh={refresh}
                             color={'primary'}

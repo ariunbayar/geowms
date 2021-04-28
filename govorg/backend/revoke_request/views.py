@@ -2,7 +2,7 @@ import json
 
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector
@@ -208,7 +208,6 @@ def _geojson_to_featurecollection(geo_json, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_list(request, payload):
-
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
 
@@ -259,53 +258,117 @@ def _get_emp_features(employee):
     return emp_feature
 
 
-@require_POST
+def _get_emp_inspire_roles(user):
+    employee = Employee.objects.filter(user=user).first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm).distinct('feature_id').values_list('feature_id', flat=True)
+    package_ids = LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True)
+    theme_ids = LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True)
+    return feature_ids, package_ids, theme_ids
+
+
+def _get_features(package_id, feature_ids):
+    features = []
+    inspire_features = LFeatures.objects.filter(package_id=package_id).values('feature_id', 'feature_name')
+    for org_feature in inspire_features:
+        if org_feature['feature_id'] in feature_ids:
+            features.append({
+                'id': org_feature['feature_id'],
+                'name': org_feature['feature_name'],
+            })
+    return features
+
+
+def _get_packages(theme_id, package_ids, feature_ids):
+    packages = []
+    inspire_packages = LPackages.objects.filter(theme_id=theme_id).values('package_id', 'package_name')
+    for package in inspire_packages:
+        if package['package_id'] in package_ids:
+            packages.append({
+                'id': package['package_id'],
+                'name': package['package_name'],
+                'features': _get_features(package['package_id'], feature_ids)
+            })
+    return packages
+
+
+@require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def revoke_paginate(request, payload):
-    employees = _get_employees(request)
-    emp_features = _get_emp_features(employees, request)
+def get_choices(request):
+    choices = []
+    modules = []
+    for f in ChangeRequest._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == 'state':
+                choices.append(f.choices)
+            if f.name == 'kind':
+                choices.append(f.choices)
 
-    page = payload.get('page')
-    per_page = payload.get('per_page')
-    query = payload.get('query') or ''
-    state = payload.get('state')
-
-    revoke_requests = ChangeRequest.objects.annotate(
-        search=SearchVector(
-            'order_no',
-            'employee__user__first_name',
-            'employee__user__last_name'
-        )
-    ).filter(
-        search__icontains=query,
-        kind=ChangeRequest.KIND_REVOKE,
-        feature_id__in=emp_features,
-    ).order_by('-created_at')
-
-    if state:
-        revoke_requests = revoke_requests.filter(
-            state=state
-        )
-
-    total_items = Paginator(revoke_requests, per_page)
-    items_page = total_items.page(page)
-    items = [
-        _get_revoke_request_display(revoke_request)
-        for revoke_request in items_page.object_list
-    ]
-
-    total_page = total_items.num_pages
+    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(request.user)
+    themes = LThemes.objects.filter(theme_id__in=theme_ids)
+    for theme in themes:
+        modules.append({
+            'id': theme.theme_id,
+            'name': theme.theme_name,
+            'packages': _get_packages(theme.theme_id, package_ids, feature_ids)
+        })
 
     rsp = {
-        'items': items,
-        'page': page,
-        'total_page': total_page,
         'success': True,
-        'choices': _get_choices_from_model(ChangeRequest, 'state'),
+        'choices': choices,
+        'modules': modules
     }
-
     return JsonResponse(rsp)
+
+
+# @require_POST
+# @ajax_required
+# @login_required(login_url='/gov/secure/login/')
+# def revoke_paginate(request, payload):
+#     employees = _get_employees(request)
+#     emp_features = _get_emp_features(employees)
+
+#     page = payload.get('page')
+#     per_page = payload.get('per_page')
+#     query = payload.get('query') or ''
+#     state = payload.get('state')
+
+#     revoke_requests = ChangeRequest.objects.annotate(
+#         search=SearchVector(
+#             'order_no',
+#             'employee__user__first_name',
+#             'employee__user__last_name'
+#         )
+#     ).filter(
+#         search__icontains=query,
+#         kind=ChangeRequest.KIND_REVOKE,
+#         feature_id__in=emp_features,
+#     ).order_by('-created_at')
+
+#     if state:
+#         revoke_requests = revoke_requests.filter(
+#             state=state
+#         )
+
+#     total_items = Paginator(revoke_requests, per_page)
+#     items_page = total_items.page(page)
+#     items = [
+#         _get_revoke_request_display(revoke_request)
+#         for revoke_request in items_page.object_list
+#     ]
+
+#     total_page = total_items.num_pages
+
+#     rsp = {
+#         'items': items,
+#         'page': page,
+#         'total_page': total_page,
+#         'success': True,
+#         'choices': _get_choices_from_model(ChangeRequest, 'state'),
+#     }
+
+#     return JsonResponse(rsp)
 
 
 def _change_revoke_request(id, state):
