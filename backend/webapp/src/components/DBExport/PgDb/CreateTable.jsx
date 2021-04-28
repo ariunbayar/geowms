@@ -23,6 +23,7 @@ export default class  PgForm extends Component {
         this.getViewNames = this.getViewNames.bind(this)
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
+        this.setSelectedField = this.setSelectedField.bind(this)
     }
 
     componentDidMount(){
@@ -86,18 +87,29 @@ export default class  PgForm extends Component {
         }
         var joined = []
         if (matched_feilds.length > 0) {
-            var find_view_field = matched_feilds[0]['view_field'].toLowerCase().includes(view_fields[key].column_name.toLowerCase())
-            if (find_view_field) {
                 var value = obj => obj.view_field == view_fields[key].column_name
                 var index_of = matched_feilds.findIndex(value)
-                matched_feilds[index_of]['table_field'] = data
-                joined = matched_feilds
-            }
-            else joined = matched_feilds.concat(values)
+                if (index_of != -1) {
+                    matched_feilds[index_of]['table_field'] = data
+                    joined = matched_feilds
+                }
+                else joined = matched_feilds.concat(values)
         }
         else joined = matched_feilds.concat(values)
-
         this.setState({ matched_feilds: joined})
+    }
+
+    setSelectedField(data) {
+        const { matched_feilds } = this.state
+        var selected_field = ''
+        if (Object.keys(matched_feilds).length > 0) {
+                var field_of_data = obj => obj.view_field == data.column_name
+                var index_of = matched_feilds.findIndex(field_of_data)
+                if (index_of != -1) {
+                    selected_field = matched_feilds[index_of].table_field
+                }
+        }
+        return selected_field
     }
 
     render() {
@@ -154,7 +166,9 @@ export default class  PgForm extends Component {
                             data_key={idx}
                             table_fields={table_fields}
                             data={data}
+                            matched_feilds={matched_feilds}
                             handleSetField={this.handleSetField}
+                            setSelectedField={this.setSelectedField(data)}
                         />
                     )}
                     <a className="btn btn-primary text-white m-3" onClick={this.handleSave}>

@@ -5,19 +5,19 @@ export default class FieldForm extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
         }
     }
 
     render() {
-        const { data, table_fields, data_key } = this.props
+        const { data, table_fields, data_key, setSelectedField} = this.props
+
         return (
             <div className="row mb-1 border-bottom pb-1">
                 <label>
                     {data.column_name}
                 </label>
                 <select
-                    value={data.real_name}
+                    value={setSelectedField}
                     className="custom-select"
                     id="table_name"
                     onChange={(e) => this.props.handleSetField(data_key ,e.target.value)}
