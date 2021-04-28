@@ -325,7 +325,6 @@ def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
     return True
 
 
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)

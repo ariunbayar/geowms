@@ -32,7 +32,8 @@ class CronTab extends Component {
                 day: '',
                 month: '',
                 day_week: '',
-                crontab_is_active: false
+                crontab_is_active: false,
+                is_export: false
             },
             info: '',
             values: {},
@@ -101,7 +102,8 @@ class CronTab extends Component {
             initial_values,
             info
         } = this.state
-
+        var navlink_url = '/back/another-base/'
+        if (initial_values.is_export) { navlink_url = '/back/db-export/' }
         return (
             <div className="card">
 
@@ -109,11 +111,11 @@ class CronTab extends Component {
                     CronTab Тохиргоо
                 </div>
                 <ul>
-                    <li><b>Minutes</b>&nbsp;скриптийг гүйцэтгэх минуттай тохирч байгаа бөгөөд утга нь 0-ээс 59 хооронд хэлбэлздэг</li>
-                    <li><b>Hours</b>&nbsp;яг цаг, 24 цагийн форматыг зохицуулдаг бөгөөд утга нь 0-ээс 23 хооронд хэлбэлздэг бөгөөд 0 нь шөнийн 12:00 байна.</li>
-                    <li><b>dom</b>&nbsp;гэдэг нь тухайн сарын өдрийг хэлнэ, жишээлбэл та 15 хоног тутамд гүйхийг хүсвэл 15-ыг зааж өгч болно</li>
-                    <li><b>Month</b>&nbsp;гэдэг нь тухайн жилийн аль сар гэдгийг өгнө</li>
-                    <li><b>dow</b>&nbsp;гэдэг нь долоо хоногийн өдөр гэсэн үг бөгөөд энэ нь тоон (0-ээс 7, энд 0 ба 7 нь ням гараг байдаг) эсвэл англи хэл дээрх өдрийн эхний 3 үсэг байж болно: mon, tue, wed, thu, fri, sat, sun.</li>
+                    <li><b>Минут</b>&nbsp;скриптийг гүйцэтгэх минуттай тохирч байгаа бөгөөд утга нь 0-ээс 59 хооронд хэлбэлздэг</li>
+                    <li><b>Цаг</b>&nbsp;яг цаг, 24 цагийн форматыг зохицуулдаг бөгөөд утга нь 0-ээс 23 хооронд хэлбэлздэг бөгөөд 0 нь шөнийн 12:00 байна.</li>
+                    <li><b>Өдөр</b>&nbsp;гэдэг нь тухайн сарын өдрийг хэлнэ, жишээлбэл та 15 хоног тутамд гүйхийг хүсвэл 15-ыг зааж өгч болно</li>
+                    <li><b>Сар</b>&nbsp;гэдэг нь тухайн жилийн аль сар гэдгийг өгнө</li>
+                    <li><b>Гараг</b>&nbsp;гэдэг нь долоо хоногийн өдөр гэсэн үг бөгөөд энэ нь тоон (0-ээс 7, энд 0 ба 7 нь ням гараг байдаг) эсвэл англи хэл дээрх өдрийн эхний 3 үсэг байж болно: mon, tue, wed, thu, fri, sat, sun.</li>
                 </ul>
                 <ul>
                     <li><b>(*)</b> Тухайн нэг цаг өдрийг товлохгүй гэж үзвэл</li>
@@ -144,7 +146,7 @@ class CronTab extends Component {
                                 <Form>
                                         <div className="form-row">
                                             <div className="form-group col-md-1 text-wrap">
-                                                <label htmlFor="id_minute">Minutes</label>
+                                                <label htmlFor="id_minute">Минут</label>
                                                 <Field
                                                     name="minute"
                                                     id="id_minute"
@@ -154,7 +156,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['minute']}</p>
                                             </div>
                                             <div className="form-group col-md-1 text-wrap">
-                                                <label htmlFor="id_hour">Hours</label>
+                                                <label htmlFor="id_hour">Цаг</label>
                                                 <Field
                                                     name="hour"
                                                     id="id_hour"
@@ -164,7 +166,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['hour']}</p>
                                             </div>
                                             <div className="form-group col-md-1">
-                                                <label htmlFor="id_day">dom</label>
+                                                <label htmlFor="id_day">Өдөр</label>
                                                 <Field
                                                     name="day"
                                                     id="id_day"
@@ -174,7 +176,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['day']}</p>
                                             </div>
                                             <div className="form-group col-md-1">
-                                                <label htmlFor="id_month">Months</label>
+                                                <label htmlFor="id_month">Сар</label>
                                                 <Field
                                                     name="month"
                                                     type="text"
@@ -184,7 +186,7 @@ class CronTab extends Component {
                                                 <p className="text-danger">{errors['month']}</p>
                                             </div>
                                             <div className="form-group col-md-1">
-                                                <label htmlFor="id_day_week">dow</label>
+                                                <label htmlFor="id_day_week">Гараг</label>
                                                 <Field
                                                     name="day_week"
                                                     type="text"
@@ -244,7 +246,7 @@ class CronTab extends Component {
                                         </div>
                                     }
                                     { info &&
-                                         <div className="alert alert-icon-success alert-dismissible" role="alert">
+                                        <div className="alert alert-icon-success alert-dismissible" role="alert">
                                             <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
                                             <div className="alert-icon icon-part-success">
                                                 <i className="icon-check"></i>
@@ -259,7 +261,7 @@ class CronTab extends Component {
                         }}
                     </Formik>
                 </div>
-                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/another-base/`}></BackButton>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={navlink_url}></BackButton>
             </div>
         )
     }

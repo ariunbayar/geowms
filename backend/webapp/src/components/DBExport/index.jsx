@@ -15,7 +15,6 @@ class DBExport extends Component {
         return (
             <div className="">
                 <Switch>
-                    {/* <Route path={"/back/another-base/connection/crontab/:id/"} component={CronTab}/> */}
                     <Route path={"/back/db-export/connection/pg/"} component={PgDB}/>
                     <Route path={"/back/db-export/connection/"} component={ConfigTitles}/>
                     <Route exact path={"/back/db-export/"} component={List}/>

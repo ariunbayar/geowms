@@ -610,6 +610,9 @@ def crontab_save(request, payload):
     if onether_db.db_type == AnotherDatabase.MSSSQL:
         url = reverse('backend:another-database:refresh-datas-mssql', args=[payload.get('id')])
 
+    if onether_db.db_type == AnotherDatabase.PgDB:
+        url = reverse('backend:another-database:refresh-datas-pg', args=[payload.get('id')])
+
     command = 'curl ' + request.build_absolute_uri(url)
 
     if payload.get('crontab_is_active'):
@@ -670,6 +673,7 @@ def crontab_detail(request, pk):
         'month': '',
         'day_week': '',
         'crontab_is_active': onether_db.crontab_is_active,
+        'is_export': onether_db.is_export
     }
     if crontab_obj:
         crontab = {
@@ -680,6 +684,7 @@ def crontab_detail(request, pk):
             'month': crontab_obj.get('month'),
             'day_week': crontab_obj.get('day_week'),
             'crontab_is_active': onether_db.crontab_is_active,
+            'is_export': onether_db.is_export
         }
     rsp = {
         'success': True,

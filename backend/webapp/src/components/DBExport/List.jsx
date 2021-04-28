@@ -44,12 +44,12 @@ export default class List extends Component {
                     "icon": 'fa fa-car text-danger',
                     "action": (values) => this.handleRefreshData(values),
                 },
-                // {
-                //     "title": 'crontab',
-                //     "text": '',
-                //     "icon": 'fa fa-circle text-danger',
-                //     "action": (values) => this.crontabLink(values),
-                // }
+                {
+                    "title": 'crontab',
+                    "text": '',
+                    "icon": 'fa fa-circle text-danger',
+                    "action": (values) => this.crontabLink(values),
+                }
             ],
             is_loading: false,
             refresh: true,
@@ -70,10 +70,7 @@ export default class List extends Component {
 
 
     crontabLink(values){
-        this.props.history.push(`/back/db-export/connection/crontab/${values.id}/`)
-
-        // if(values.db_type == 'MSSQL') this.props.history.push(`/back/db-export/connection/mssql/${values.id}/tables/`)
-        // else if (values.db_type == 'MONGODB') this.props.history.push(`/back/db-export/connection/mongo/${values.id}/list/`)
+        this.props.history.push(`/back/another-base/connection/crontab/${values.id}/`)
     }
 
     handleRefreshData(values){
