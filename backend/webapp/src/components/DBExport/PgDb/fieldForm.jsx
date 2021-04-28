@@ -12,13 +12,13 @@ export default class FieldForm extends Component {
         const { data, table_fields, data_key, setSelectedField} = this.props
 
         return (
-            <div className="row mb-1 border-bottom pb-1">
-                <label>
+            <div className="col-md-12 mb-1 pb-1">
+                <label className='col-md-4 d-inline-block'>
                     {data.column_name}
                 </label>
                 <select
                     value={setSelectedField}
-                    className="custom-select"
+                    className="form-control col-md-3 d-inline-block"
                     id="table_name"
                     onChange={(e) => this.props.handleSetField(data_key ,e.target.value)}
                 >

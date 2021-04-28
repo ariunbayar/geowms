@@ -122,10 +122,10 @@ export default class  PgForm extends Component {
         return (
             <div className="card">
                 <div className="form-row card-body">
-                    <div className="form-group">
+                    <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Veiw-ийн нэр</label>
                         <select
-                            className="custom-select"
+                            className="form-control"
                             name='view_name'
                             id="id_view_name"
                             onChange={(e) => this.handleChange(e)}
@@ -139,9 +139,11 @@ export default class  PgForm extends Component {
                                 )
                             }
                         </select>
+                    </div>
+                    <div className="form-group col-md-4">
                         <label htmlFor="id_table_name mt-1">Хүснэгтийн нэр</label>
                         <select
-                            className="custom-select"
+                            className="form-control"
                             id="id_table_name"
                             name='table_name'
                             onChange={(e) => this.handleChange(e)}
