@@ -33,7 +33,7 @@ export default class FieldForm extends Component {
                 <select
                     value={setSelectedField}
                     className={
-                        'form-control col-md-3 d-inline-block '
+                        'form-control col-md-3 d-inline-block ml-4'
                         +
                         (
                             field_class_name ? field_class_name : ''
