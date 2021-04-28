@@ -21,7 +21,7 @@ export default class List extends Component {
                 {
                     "title": 'Засах',
                     "text": '', "icon":
-                    'fa fa-table text-success',
+                    'fa fa-pencil-square-o text-success',
                     "action": (values) => this.goLink(values),
                 },
                 {

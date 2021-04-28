@@ -22,7 +22,7 @@ export default class FieldForm extends Component {
                     id="table_name"
                     onChange={(e) => this.props.handleSetField(data_key ,e.target.value)}
                 >
-                    <option></option>
+                    <option>---Хүснэгтийн талбарыг сонгоно уу---</option>
                     {
                         table_fields.map((row, idx) =>
                             <option key={idx} value={row.column_name}>{row.column_name}</option>

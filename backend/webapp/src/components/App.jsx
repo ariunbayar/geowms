@@ -97,7 +97,7 @@ export default class App extends Component {
                   </MenuItem>
                   <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
                   <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч" count={this.state.user_count}></MenuItem>
-                  <MenuItem icon="fa fa-user" url="/back/another-base/" text="Database IO">
+                  <MenuItem icon="fa fa-arrow-circle-o-down" url="/back/another-base/" text="Database IO">
                     <ul className="sidebar-submenu">
                         <MenuItem icon="fa fa-circle-o" url="/back/another-base/" text="Өгөгдөл оруулах"></MenuItem>
                         <MenuItem icon="fa fa-circle-o" url="/back/db-export/" text="Өгөгдөл гаргах"></MenuItem>
