@@ -79,7 +79,7 @@ export default class List extends Component {
 
     refreshPgData(values){
         this.setState({is_loading: true})
-        service.pg_config.refreshTableData(values.id).then(({success}) => {
+        service.pg_config.refreshTableData(values.id).then(({success, info}) => {
             if (success) {
                 this.setState({is_loading: false})
                 this.modalChange(
@@ -101,7 +101,7 @@ export default class List extends Component {
                     null,
                     'danger',
                     'Алдаа гарлаа',
-                    `Мэдээлэл дутуу байна.`,
+                    info,
                     false,
                     '',
                     '',
