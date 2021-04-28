@@ -79,13 +79,24 @@ export default class  PgForm extends Component {
     }
 
     handleSetField(key, data){
-        console.log("iish irsen")
         const { view_fields, table_fields, matched_feilds } = this.state
         var values = {
             'table_field': data,
             'view_field': view_fields[key].column_name
         }
-        var joined = matched_feilds.concat(values)
+        var joined = []
+        if (matched_feilds.length > 0) {
+            var find_view_field = matched_feilds[0]['view_field'].toLowerCase().includes(view_fields[key].column_name.toLowerCase())
+            if (find_view_field) {
+                var value = obj => obj.view_field == view_fields[key].column_name
+                var index_of = matched_feilds.findIndex(value)
+                matched_feilds[index_of]['table_field'] = data
+                joined = matched_feilds
+            }
+            else joined = matched_feilds.concat(values)
+        }
+        else joined = matched_feilds.concat(values)
+
         this.setState({ matched_feilds: joined})
     }
 
@@ -96,8 +107,6 @@ export default class  PgForm extends Component {
             view_names, view_fields,
             table_fields, matched_feilds
         } = this.state
-        console.log("veiw", view_fields)
-        console.log("table", table_fields)
         return (
             <div className="card">
                 <div className="form-row card-body">

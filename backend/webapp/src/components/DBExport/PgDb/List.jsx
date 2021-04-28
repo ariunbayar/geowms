@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import {service} from '../../service'
+import {service} from '../service'
 import { PortalDataTable } from "@utils/DataTable"
 import Modal from "@utils/Modal/Modal"
 import BackButton from "@utils/Button/BackButton"
@@ -44,13 +44,12 @@ export default class List extends Component {
     }
 
     goLink(values){
-        
         this.props.history.push(`/back/db-export/connection/pg/${values.another_database_id}/${values.id}/update/`)
     }
 
     handleRemove() {
         const {values, id} = this.state
-        service.mssql_config.tableRemove(id, values.id).then(({success}) => {
+        service.pg_config.removeTable(id, values.id).then(({success}) => {
             if (success) {
                 this.setState({refresh: !this.state.refresh})
             }

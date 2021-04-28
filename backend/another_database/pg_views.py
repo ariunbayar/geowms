@@ -1,5 +1,6 @@
 import pyodbc
 import datetime
+import psycopg2
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.views.decorators.http import require_POST, require_GET
@@ -90,8 +91,10 @@ def _get_pg_cursor(conn_details):
     user = conn_details.get('pg_username')
     password = conn_details.get('pg_password')
     db = conn_details.get('pg_database')
-    cursor = utils.check_pg_connection(host, db, port, user, password)
-
+    try:
+        cursor = utils.check_pg_connection(host, db, port, user, password)
+    except Exception:
+        cursor = []
     return cursor
 
 
@@ -101,7 +104,6 @@ def _get_sql_execute(sql, cursor, fetch_type):
         values = list(cursor.fetchone())
     else:
         values = list(utils.dict_fetchall(cursor))
-
     return values
 
 
@@ -245,22 +247,23 @@ def _get_count_of_someone_db_table(table_name, cursor):
     '''.format(
         table_name=table_name
     )
-
     row_count = _get_sql_execute(sql, cursor, 'one')
-
     return row_count
+
+
+def _get_row_to_list(field_name, dict_data):
+    row_list = []
+    for i in dict_data:
+        row_list.append(i[field_name])
+    return row_list
 
 
 def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
 
     number_of_row = _get_count_of_someone_db_table(table_name, cursor_pg)
-    if number_of_row[0] and columns:
-        matched_columns = []
-        for i in columns:
-            matched_columns.append(i['view_field'])
-
-        matched_columns = ','.join(matched_columns)
-
+    table_fields = _get_pg_table_fields(table_name, cursor_pg)
+    if number_of_row and columns:
+        matched_view_columns = ','.join(_get_row_to_list('view_field', columns))
         sql = '''
             select
                 {column}
@@ -271,14 +274,68 @@ def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
         '''.format(
             view_name=feature_code,
             row_count=number_of_row[0],
-            column=matched_columns
+            column=matched_view_columns
         )
-        view_datas = _get_sql_execute(sql, cursor, 'all')
-        for view in view_datas:
-            sql_update = '''
-            '''
+        table_field_splits = []
+        for field in range(len(table_fields)):
+            if 'id' in table_fields[field]['column_name']:
+                table_field_split = '''
+                    v.{table_field} = t.{table_field}
+                    '''.format(
+                        table_field=table_fields[field]['column_name'],
+                    )
+                table_field_splits.append(table_field_split)
 
+
+        view_datas = _get_sql_execute(sql, cursor, 'all')
+        for i in range(number_of_row[0]):
+            update_fields = []
+            for j in range(len(columns)):
+                view_field = columns[j]['view_field']
+                table_data = view_datas[i][view_field]
+                table_field = columns[j]['table_field']
+                update_field = '''
+                    {table_field} = '{table_data}'
+                    '''.format(
+                        table_field=table_field,
+                        table_data=table_data
+                    )
+                update_fields.insert(j, update_field)
+
+            sql_update = '''
+                UPDATE
+                    {table_name} AS v
+                SET
+                    {update_fields}
+                FROM
+                    (
+                        SELECT *, row_number() OVER(ORDER BY {any_column}) AS row
+                        FROM {table_name}
+                    ) t
+                WHERE
+                    t.row={nd_row} and {table_field_splits}
+            '''.format(
+                table_name=table_name,
+                update_fields=','.join(update_fields),
+                nd_row=i+1,
+                any_column=table_fields[0]['column_name'],
+                table_field_splits=table_field_splits[0]
+            )
+            cursor_pg.execute(sql_update)
     return True
+
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def remove_pg_table(request, id, table_id):
+
+    pg_table = AnotherDatabaseTable.objects.filter(pk=table_id)
+    pg_table.delete()
+    return JsonResponse({
+        'success': True,
+    })
 
 
 @require_GET
@@ -297,12 +354,11 @@ def refresh_datas(request, id):
         field_config = table.field_config.replace("'", '"')
         columns = utils.json_load(field_config)
         feature_code = table.feature_code
-
         _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code)
 
-    # ano_db.database_updated_at = datetime.datetime.now()
-    # ano_db.save()
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
 
-    rsp = {
+    return JsonResponse({
         'success': True,
-    }
+    })
