@@ -82,7 +82,7 @@ export default class List extends Component {
 
     refreshPgData(values){
         this.setState({is_loading: true})
-        service.pg_config.refreshTableData(values.id).then(({success, all_count, success_count, prop_b_count}) => {
+        service.pg_config.refreshTableData(values.id).then(({success}) => {
             if (success) {
                 this.setState({is_loading: false})
                 this.modalChange(
