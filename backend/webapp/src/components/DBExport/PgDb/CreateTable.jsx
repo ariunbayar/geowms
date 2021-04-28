@@ -17,7 +17,8 @@ export default class  PgForm extends Component {
             view_fields: [],
             table_fields: [],
             matched_feilds: [],
-            selected_data_type: ''
+            selected_data_type: '',
+            table_field_error: []
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -71,49 +72,105 @@ export default class  PgForm extends Component {
     }
 
     handleSave(){
-        const {id, table_id, matched_feilds, view_name, table_name} = this.state
-        service.pg_config.tableSave(id, table_id, matched_feilds, view_name, table_name).then(({success}) => {
-            if(success){
-                alert("Амжилттай хадгаллаа.")
-                this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
-            }
-        })
+        const {id, table_id, matched_feilds, view_name, table_name, table_field_error} = this.state
+        if (! table_field_error.length >0){
+            service.pg_config.tableSave(id, table_id, matched_feilds, view_name, table_name).then(({success}) => {
+                if(success){
+                    alert("Амжилттай хадгаллаа.")
+                    this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
+                }
+            })
+        }
     }
 
     handleSetField(key, e){
-        const { view_fields, table_fields, matched_feilds } = this.state
+        const { view_fields, table_fields, matched_feilds, table_field_error} = this.state
+        var data = e.target.value
         var values = {
-            'table_field': e.target.value,
+            'table_field': data,
             'view_field': view_fields[key].column_name
         }
         var joined = []
-        if (matched_feilds.length > 0) {
-                var value = obj => obj.view_field == view_fields[key].column_name
-                var index_of = matched_feilds.findIndex(value)
-                if (e.target.value) {
-                    if (index_of != -1) {
-                        matched_feilds[index_of]['table_field'] = e.target.value
-                        joined = matched_feilds
+        var check = false
+        var check_error = [...table_field_error]
+        if(data) {
+            if (matched_feilds.length > 0) {
+                if (matched_feilds.length > 0) {
+                            var value = obj => obj.view_field == view_fields[key].column_name
+                            var index_of = matched_feilds.findIndex(value)
+                            if (index_of != -1) {
+                                matched_feilds[index_of]['table_field'] = data
+                                joined = matched_feilds
+                            }
+                            else joined = matched_feilds.concat(values)
                     }
                     else joined = matched_feilds.concat(values)
+            }
+
+            var index = e.target.selectedIndex
+            var optionElement = e.target.childNodes[index]
+            var selected_data_type =  optionElement.getAttribute('name')
+            var error_name = table_field_error.filter(item => {
+                return item.toLowerCase().includes(table_fields[key].column_name.toLowerCase())
+            })
+
+            if ((table_fields[key].data_type.slice(0,4) != selected_data_type.slice(0,4))) {
+                if (! error_name.length >0) {
+                    check_error.push(table_fields[key].column_name)
                 }
-                else {
-                    var array = [...matched_feilds]
-                    for (let [i, layer] of array.entries()) {
-                        if (layer.view_field == view_fields[key].column_name) {
-                            array.splice(i, 1);
-                        }
-                    }
-                    joined = array
-                }
+            }
+            else {
+                check = true
+            }
+
         }
-        else joined = matched_feilds.concat(values)
+        else {
+            var array = [...matched_feilds]
+            for (let [i, layer] of array.entries()) {
+                if (layer.view_field == view_fields[key].column_name) {
+                    array.splice(i, 1);
+                }
+            }
+            joined = array
+        }
 
-        var index = e.target.selectedIndex
-        var optionElement = e.target.childNodes[index]
-        var selected_data_type =  optionElement.getAttribute('name')
+        if (check || !data) {
+            check_error = table_field_error.filter((field_error) => field_error != table_fields[key].column_name)
+        }
+        this.setState({ matched_feilds: joined, selected_data_type, table_field_error: check_error})
 
-        this.setState({ matched_feilds: joined, selected_data_type})
+        // if (matched_feilds.length > 0) {
+        //         var value = obj => obj.view_field == view_fields[key].column_name
+        //         var index_of = matched_feilds.findIndex(value)
+        //         if (data) {
+        //             if (index_of != -1) {
+        //                 matched_feilds[index_of]['table_field'] = data
+        //                 joined = matched_feilds
+        //             }
+        //             else joined = matched_feilds.concat(values)
+        //         }
+        //         else {
+        //             var array = [...matched_feilds]
+        //             for (let [i, layer] of array.entries()) {
+        //                 if (layer.view_field == view_fields[key].column_name) {
+        //                     array.splice(i, 1);
+        //                 }
+        //             }
+        //             joined = array
+        //         }
+        // }
+        // else joined = matched_feilds.concat(values)
+
+
+
+        // var check_error = []
+        // if (view_fields[key].data_type.slice(0,4) != selected_data_type.slice(0,4) ) {
+        //     check_error.push(data)
+        // }
+        // else {
+        //     check_error = table_field_error.filter((field_error) => field_error != data)
+        // }
+
     }
 
     setSelectedField(data) {
@@ -135,7 +192,7 @@ export default class  PgForm extends Component {
             table_name, view_name,
             view_names, view_fields,
             table_fields, matched_feilds,
-            selected_data_type
+            selected_data_type, table_field_error
         } = this.state
         return (
             <div className="card">
@@ -192,8 +249,14 @@ export default class  PgForm extends Component {
                             selected_data_type={selected_data_type}
                         />
                     )}
-                    <a className="btn btn-primary text-white m-3" onClick={this.handleSave}>
-                        Хадгалах
+                    <a
+                        className="btn btn-primary text-white m-3"
+                        disabled={table_field_error.length > 0}
+                        onClick={this.handleSave}
+                    >
+                        {table_field_error.length > 0 && <i className="fa fa-spinner fa-spin"></i>}
+                        {table_field_error.length > 0 && <a className="text-light">Алдаатай байна.</a>}
+                        {!table_field_error.length > 0 && 'Хадгалах' }
                     </a>
                 </div>
                 }

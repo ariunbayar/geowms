@@ -12,11 +12,13 @@ export default class FieldForm extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { data, selected_data_type, selected_field } = this.props
-        if (pP.setSelectedField != this.props.setSelectedField) {
+        const { data, selected_data_type, selected_field, setSelectedField } = this.props
+        if (pP.setSelectedField != setSelectedField) {
             var field_type = ''
-            if ( data.data_type.slice(0,4) != selected_data_type.slice(0,4) ) {
-                field_type = 'is-invalid'
+            if (setSelectedField) {
+                if ( data.data_type.slice(0,4) != selected_data_type.slice(0,4) ) {
+                    field_type = 'is-invalid'
+                }
             }
             this.setState({field_class_name: field_type})
         }
@@ -33,7 +35,7 @@ export default class FieldForm extends Component {
                 <select
                     value={setSelectedField}
                     className={
-                        'form-control col-md-3 d-inline-block ml-4'
+                        'form-control col-md-3 d-inline-block ml-4 '
                         +
                         (
                             field_class_name ? field_class_name : ''

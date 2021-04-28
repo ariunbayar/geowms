@@ -276,6 +276,7 @@ def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
             row_count=number_of_row[0],
             column=matched_view_columns
         )
+
         table_field_splits = []
         for field in range(len(table_fields)):
             if 'id' in table_fields[field]['column_name']:
@@ -285,7 +286,6 @@ def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
                         table_field=table_fields[field]['column_name'],
                     )
                 table_field_splits.append(table_field_split)
-
 
         view_datas = _get_sql_execute(sql, cursor, 'all')
         for i in range(number_of_row[0]):
