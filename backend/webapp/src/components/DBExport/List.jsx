@@ -44,12 +44,12 @@ export default class List extends Component {
                     "icon": 'fa fa-car text-danger',
                     "action": (values) => this.handleRefreshData(values),
                 },
-                {
-                    "title": 'crontab',
-                    "text": '',
-                    "icon": 'fa fa-circle text-danger',
-                    "action": (values) => this.crontabLink(values),
-                }
+                // {
+                //     "title": 'crontab',
+                //     "text": '',
+                //     "icon": 'fa fa-circle text-danger',
+                //     "action": (values) => this.crontabLink(values),
+                // }
             ],
             is_loading: false,
             refresh: true,
@@ -90,7 +90,7 @@ export default class List extends Component {
                     null,
                     'success',
                     'Амжилттай',
-                    `Нийт ${all_count} мөр дата, insert хийгдэх мөр ${prop_b_count} эндээс амжилттай орсон нь ${success_count}`,
+                    ``,
                     false,
                     '',
                     '',
