@@ -41,7 +41,7 @@ export default class RevokeRequestForm extends Component {
             is_loading: false,
             refresh: false,
             талбарууд: [
-                {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': true},
+                {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': false},
                 {'field': 'org', "title": 'Байгууллага / мэргэжилтэн', 'has_action': true},
                 {'field': 'order_no', "title": 'Тушаалын дугаар'},
                 {'field': 'order_at', "title": 'Тушаал гарсан огноо'},
@@ -60,15 +60,26 @@ export default class RevokeRequestForm extends Component {
                 },
                 {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
             ],
-            нэмэлт_талбарууд: [{
-                "title": '',
-                'component': OpenMapModal,
-                'props': {
-                    'button_name' : 'Үзэх',
-                    'hide_btn' : true,
-                    'refreshData': () => this.refreshData(),
+            нэмэлт_талбарууд: [
+                {
+                    "title": 'Шийдвэрлэх',
+                    'component': OpenMapModal,
+                    'props': {
+                        'button_name' : 'Шийдвэрлэх',
+                        'hide_btn' : false,
+                        'refreshData': () => this.refreshData(),
+                    }
                 },
-            }],
+                {
+                    "title": 'Харах',
+                    'component': OpenMapModal,
+                    'props': {
+                        'button_name' : 'Үзэх',
+                        'hide_btn' : true,
+                        'refreshData': () => this.refreshData(),
+                    }
+                }
+            ],
             custom_query: {}
         }
         this.setLoading = this.setLoading.bind(this)

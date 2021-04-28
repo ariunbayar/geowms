@@ -40,7 +40,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                             Татгалзах
                         </button>
                     </div>
-                    <div className="ml-auto mr-3">
+                    <div className="ml-auto kindmr-3">
                         <button
                             className="btn gp-btn-outline-primary"
                             onClick={() => modalChange(
@@ -325,9 +325,13 @@ export default class RequestModal extends Component {
                             <div className="col-md-12">
                                 <div className="row mt-2" style={{background:"white"}}>
                                     <div className="col-md-11">
-                                        <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx &nbsp;&nbsp;
-                                            <span _ngcontent-sok-c231="" className="badge badge-pill badge-warning shadow-warning">{values[0].state}</span>
-                                        </h5>
+                                        {
+                                            hide_btn
+                                            ?
+                                            <h5 className="text-center text-justify">Хүсэлт шийдвэрлэгдсэн </h5>
+                                            :
+                                            <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
+                                        }
                                     </div>
                                     <div className="col-md-1" onClick={() => this.handleClose()}>
                                         <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">

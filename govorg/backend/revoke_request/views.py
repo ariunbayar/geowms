@@ -150,7 +150,8 @@ def _get_display_text(field, value):
             if f.name == field:
                 for c_id, c_type in f.choices:
                     if c_id == value:
-                        return c_type
+                        if c_type == 'ТАТГАЛЗСАН':
+                            return c_type
 
 
 def _choice_state_display(state, item):
