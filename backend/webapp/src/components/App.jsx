@@ -23,6 +23,7 @@ const Error500 = React.lazy(() => import('./Error500'))
 const PasswordChange = React.lazy(() => import('./Prifile/PasswordChange'))
 const GPGeoserver = React.lazy(() => import('./GPGeoserver/index'))
 const AnotherBaseConfig = React.lazy(() => import('./AnotherBase'))
+const DBExport = React.lazy(() => import('./DBExport'))
 
 
 export default class App extends Component {
@@ -95,13 +96,18 @@ export default class App extends Component {
                   </MenuItem>
                   <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
                   <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч" count={this.state.user_count}></MenuItem>
+                  <MenuItem icon="fa fa-arrow-circle-o-down" url="/back/another-base/" text="Database IO">
+                    <ul className="sidebar-submenu">
+                        <MenuItem icon="fa fa-circle-o" url="/back/another-base/" text="Өгөгдөл оруулах"></MenuItem>
+                        <MenuItem icon="fa fa-circle-o" url="/back/db-export/" text="Өгөгдөл гаргах"></MenuItem>
+                    </ul>
+                  </MenuItem>
                   <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо">
                       <ul className="sidebar-submenu">
                           <MenuItem icon="fa fa-circle-o" url="/back/gis/" text="GIS"></MenuItem>
                           <MenuItem icon="fa fa-circle-o" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
                           <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="GeoServer"></MenuItem>
                           <MenuItem icon="fa fa-circle-o" url="/back/тохиргоо/" text="Сайт параметр"></MenuItem>
-                          <MenuItem icon="fa fa-circle-o" url="/back/another-base/" text="Өөр датабаазын тохиргоо"></MenuItem>
                           <MenuItem icon="fa fa-circle-o" url="/back/error500/" text="Error500"></MenuItem>
 
                       </ul>
@@ -135,6 +141,7 @@ export default class App extends Component {
                 <Route path={"/back/gp-geoserver/layer-groups/"} component={GPGeoserver} />
                 <Route path={"/back/gp-geoserver/style/"} component={GPGeoserver} />
                 <Route path={"/back/another-base/"} component={AnotherBaseConfig} />
+                <Route path={"/back/db-export/"} component={DBExport} />
               </Switch>
             </div>
           </BrowserRouter>

@@ -9,23 +9,17 @@ export default class List extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            жагсаалтын_холбоос: `/back/another-database/${false}/all/`,
+            жагсаалтын_холбоос: `/back/another-database/${true}/all/`,
             талбарууд: [
                 {'field': 'name', "title": 'Нэр'},
                 {'field': 'definition', "title": 'Тайлбар'},
-                {'field': 'unique_id', "title": 'Таних талбар'},
                 {'field': 'db_type', "title": 'Дата бааз төрөл'},
                 {'field': 'database_updated_at', "title": 'Сүүлд шинэчилсэн'},
                 {'field': 'created_at', "title": 'Үүссэн'},
                 {'field': 'updated_at', "title": 'Зассан'},
             ],
             нэмэлт_талбарууд: [
-                {
-                    "title": 'Засах',
-                    "text": '', "icon":
-                    'fa fa-table text-success',
-                    "action": (values) => this.tableGoLink(values),
-                },
+ 
                 {
                     "title": 'Засах',
                     "text": '', "icon":
@@ -37,6 +31,12 @@ export default class List extends Component {
                     "text": '',
                     "icon": 'fa fa-trash-o text-danger',
                     "action": (values) => this.handleRemoveAction(values),
+                },
+                {
+                    "title": 'Export',
+                    "text": '', "icon":
+                    'fa fa-table text-success',
+                    "action": (values) => this.tableGoLink(values),
                 },
                 {
                     "title": 'Бааз шинэчлэх',
@@ -63,8 +63,7 @@ export default class List extends Component {
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.handleRefreshData = this.handleRefreshData.bind(this)
         this.crontabLink = this.crontabLink.bind(this)
-        this.handleMssql = this.handleMssql.bind(this)
-        this.handleMongo = this.handleMongo.bind(this)
+        this.refreshPgData = this.refreshPgData.bind(this)
         this.modalChange = this.modalChange.bind(this)
 
     }
@@ -72,58 +71,15 @@ export default class List extends Component {
 
     crontabLink(values){
         this.props.history.push(`/back/another-base/connection/crontab/${values.id}/`)
-
-        // if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/tables/`)
-        // else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/list/`)
     }
 
     handleRefreshData(values){
-        if(values.db_type == 'MSSQL') this.handleMssql(values)
-        else if(values.db_type == "MONGODB") this.handleMongo(values)
+        if(values.db_type == 'PgDB') this.refreshPgData(values)
     }
 
-    handleMssql(values){
+    refreshPgData(values){
         this.setState({is_loading: true})
-        service
-            .mssql_config
-            .refreshData(values.id)
-            .then(({success}) => {
-                if (success) {
-                    this.setState({is_loading: false})
-                    this.modalChange(
-                        'fa fa-check-circle',
-                        null,
-                        'success',
-                        'Амжилттай боллоо',
-                        ``,
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
-                }
-                else {
-                    this.setState({is_loading: false})
-                    this.modalChange(
-                        'fa fa-time-circle',
-                        null,
-                        'danger',
-                        'Алдаа гарлаа',
-                        ``,
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
-                }
-            })
-    }
-
-    handleMongo(values){
-        this.setState({is_loading: true})
-        service.update(values.id).then(({success, all_count, success_count, prop_b_count}) => {
+        service.pg_config.refreshTableData(values.id).then(({success, info}) => {
             if (success) {
                 this.setState({is_loading: false})
                 this.modalChange(
@@ -131,7 +87,7 @@ export default class List extends Component {
                     null,
                     'success',
                     'Амжилттай',
-                    `Нийт ${all_count} мөр дата, insert хийгдэх мөр ${prop_b_count} эндээс амжилттай орсон нь ${success_count}`,
+                    ``,
                     false,
                     '',
                     '',
@@ -145,7 +101,7 @@ export default class List extends Component {
                     null,
                     'danger',
                     'Алдаа гарлаа',
-                    `Мэдээлэл дутуу байна.`,
+                    info,
                     false,
                     '',
                     '',
@@ -178,13 +134,15 @@ export default class List extends Component {
     }
 
     tableGoLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/tables/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/list/`)
+        if(values.db_type == 'MSSQL') this.props.history.push(`/back/db-export/connection/mssql/${values.id}/tables/`)
+        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/db-export/connection/mongo/${values.id}/list/`)
+        else if (values.db_type == 'PgDB') this.props.history.push(`/back/db-export/connection/pg/${values.id}/tables/`)
     }
 
     goLink(values){
-        if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/`)
-        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/`)
+        if(values.db_type == 'MSSQL') this.props.history.push(`/back/db-export/connection/mssql/${values.id}/`)
+        else if (values.db_type == 'MONGODB') this.props.history.push(`/back/db-export/connection/mongo/${values.id}/`)
+        else if (values.db_type == 'PgDB') this.props.history.push(`/back/db-export/connection/pg/${values.id}/`)
     }
 
     handleRemove() {
@@ -269,7 +227,7 @@ export default class List extends Component {
                                 уншиж_байх_үед_зурвас={"Уншиж байна"}
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
-                                нэмэх_товч={'/back/another-base/connection/'}
+                                нэмэх_товч={'/back/db-export/connection/'}
                                 refresh={refresh}
                             />
                         </div>

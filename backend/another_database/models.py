@@ -5,10 +5,12 @@ from django.conf import settings
 class AnotherDatabase(models.Model):
     MSSSQL = 1
     MONGODB = 2
+    PgDB = 3
 
     DB_CHOICES = [
         (1, 'MSSQL'),
         (2, 'MONGODB'),
+        (3, 'PgDB'),
     ]
     class Meta:
         db_table = "another_database"
@@ -22,6 +24,7 @@ class AnotherDatabase(models.Model):
     database_updated_at = models.DateTimeField(auto_now=True)
     crontab = models.TextField(null=True)
     crontab_is_active = models.BooleanField(default=False)
+    is_export = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)

@@ -15,6 +15,7 @@ import backend.gis.views
 from backend.geoserver import views as geoserver_views
 from backend.another_database import views as geoserver_another_database
 from backend.another_database import mssql_views as mssql_views
+from backend.another_database import pg_views
 
 app_name = 'backend'
 urlpatterns = [
@@ -39,7 +40,7 @@ urlpatterns = [
     ], 'wms'))),
 
     path('another-database/', include(([
-        path('all/', geoserver_another_database.pagination),
+        path('<str:out_type>/all/', geoserver_another_database.pagination),
         path('mssql/get/<int:pk>/', geoserver_another_database.mssql_get),
         path('mssql/save/', geoserver_another_database.mssql_save),
         path('mongo/get/<int:pk>/', geoserver_another_database.mongo_get),
@@ -63,6 +64,17 @@ urlpatterns = [
         path('mssql/get-all-table-names/', mssql_views.get_all_table_names),
         path('mssql/tables/<int:pk>/', geoserver_another_database.get_mssql_tables_list),
         path('mssql/refresh-mssql-datas/<int:connection_id>/', mssql_views.refresh_datas, name='refresh-datas-mssql'), # ene shuuuu
+
+        #path db-export
+        path('pg/db-config-save/', geoserver_another_database.config_save),
+        path('pg/get/<int:pk>/', pg_views.config_detail),
+        path('pg/tables/<int:pk>/all/', pg_views.get_pg_table_list),
+        path('pg/<int:conn_id>/get-all-view-names/', pg_views.get_pg_table_names),
+        path('pg/get-fields/', pg_views.getFields),
+        path('pg/save-table/', pg_views.save_table),
+        path('pg/<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
+        path('pg/<int:id>/refresh-table-data/', pg_views.refresh_datas, name='refresh-datas-pg'),
+        path('pg/<int:id>/<int:table_id>/remove-table/', pg_views.remove_pg_table),
     ], 'another-database'))),
 
 

@@ -23,33 +23,48 @@ from .mongo_utils import (
     insert_data_from_mongo,
     all_data_from_selected_table,
     delete_data_from_mongo,
-    mongo_check_connection
+    mongo_check_connection,
 )
 from backend.inspire.models import LPackages, LFeatures
 from crontab import CronTab
+from main.utils import check_pg_connection
+
+
+def _get_out_type(out_type):
+    if out_type == 'false':
+        out_type = False
+    else:
+        out_type = True
+    return out_type
+
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def pagination(request, payload):
+def pagination(request, payload, out_type):
+    items = []
+    total_page = []
+    out_type = _get_out_type(out_type)
 
     def _get_data_type_name(data_type, item):
         for id, name in AnotherDatabase.DB_CHOICES:
             if id == data_type:
                 return name
-
-
     оруулах_талбарууд = ['id', 'name', 'definition', 'unique_id', 'database_updated_at', 'created_at', 'updated_at', 'db_type']
     хувьсах_талбарууд = [{"field": "db_type", "action": _get_data_type_name, "new_field": "db_type"}]
+    qs = AnotherDatabase.objects
+    qs = qs.filter(is_export=out_type)
 
-    datatable = Datatable(
-        model=AnotherDatabase,
-        payload=payload,
-        оруулах_талбарууд=оруулах_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд
-    )
+    if qs:
+        datatable = Datatable(
+            model=AnotherDatabase,
+            payload=payload,
+            initial_qs=qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд
+        )
 
-    items, total_page = datatable.get()
+        items, total_page = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get("page"),
@@ -595,6 +610,9 @@ def crontab_save(request, payload):
     if onether_db.db_type == AnotherDatabase.MSSSQL:
         url = reverse('backend:another-database:refresh-datas-mssql', args=[payload.get('id')])
 
+    if onether_db.db_type == AnotherDatabase.PgDB:
+        url = reverse('backend:another-database:refresh-datas-pg', args=[payload.get('id')])
+
     command = 'curl ' + request.build_absolute_uri(url)
 
     if payload.get('crontab_is_active'):
@@ -655,6 +673,7 @@ def crontab_detail(request, pk):
         'month': '',
         'day_week': '',
         'crontab_is_active': onether_db.crontab_is_active,
+        'is_export': onether_db.is_export
     }
     if crontab_obj:
         crontab = {
@@ -665,10 +684,105 @@ def crontab_detail(request, pk):
             'month': crontab_obj.get('month'),
             'day_week': crontab_obj.get('day_week'),
             'crontab_is_active': onether_db.crontab_is_active,
+            'is_export': onether_db.is_export
         }
     rsp = {
         'success': True,
         'values': crontab
     }
 
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def mssql_save(request, payload):
+
+    connection = {
+        'msssql_server': payload.get('msssql_server'),
+        'msssql_port': payload.get('msssql_port'),
+        'msssql_username': payload.get('msssql_username'),
+        'msssql_password': payload.get('msssql_password'),
+        'msssql_database': payload.get('msssql_database'),
+    }
+
+    connection = utils.json_dumps(connection)
+    db_type = AnotherDatabase.MSSSQL
+    name = payload.get('name')
+    definition = payload.get('definition')
+
+    pk = payload.get('id')
+
+    unique_id = get_unique_id()
+
+    if pk:
+        AnotherDatabase.objects.filter(pk=pk).update(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+        )
+    else:
+        AnotherDatabase.objects.create(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+            unique_id=unique_id,
+        )
+
+    rsp = {
+        'success': True,
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def config_save(request, payload):
+
+    server = payload.get('pg_host')
+    port = payload.get('pg_port')
+    username = payload.get('pg_username')
+    password = payload.get('pg_password')
+    database = payload.get('pg_database')
+
+    db_type = AnotherDatabase.PgDB
+    name = payload.get('name')
+    definition = payload.get('definition')
+
+    pk = payload.get('id')
+    check = check_pg_connection(server, database, port, username, password)
+    if check:
+        connection = {
+            'server': server,
+            'port': port,
+            'username': username,
+            'password': password,
+            'database': database,
+        }
+        connection = utils.json_dumps(connection)
+    if pk:
+        AnotherDatabase.objects.filter(pk=pk).update(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+        )
+    else:
+        unique_id = get_unique_id()
+        AnotherDatabase.objects.create(
+            connection=connection,
+            db_type=db_type,
+            name=name,
+            definition=definition,
+            unique_id=unique_id,
+            is_export=True
+        )
+
+    rsp = {
+        'success': True,
+    }
     return JsonResponse(rsp)

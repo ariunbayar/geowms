@@ -1,24 +1,27 @@
 import React, { Component, Fragment } from "react"
 import { Formik, Form, Field, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
-import {service} from './service'
+
+import {service} from '../service'
 import BackButton from "@utils/Button/BackButton"
 
 
 const validationSchema = Yup.object().shape({
-    minute: Yup.string()
+    name: Yup.string()
         .required('хоосон байна!'),
-    hour: Yup.string()
+    definition: Yup.string(),
+    pg_host: Yup.string()
         .required('хоосон байна!'),
-    day: Yup.string()
+    pg_username: Yup.string(),
+    pg_password: Yup.string(),
+    pg_database: Yup.string()
         .required('хоосон байна!'),
-    month: Yup.string()
-        .required('хоосон байна!'),
-    day_week: Yup.string()
-        .required('хоосон байна!'),
+    pg_port: Yup.string()
+        .required('хоосон байна!')
 })
 
-class CronTab extends Component {
+
+class ConnectionConfig extends Component {
 
     constructor(props) {
 
@@ -27,15 +30,14 @@ class CronTab extends Component {
             is_editing: false,
             initial_values: {
                 id: props.match.params.id,
-                minute: '',
-                hour: '',
-                day: '',
-                month: '',
-                day_week: '',
-                crontab_is_active: false,
-                is_export: false
+                name: '',
+                definition: '',
+                pg_host: '',
+                pg_username: '',
+                pg_password: '',
+                pg_database: '',
+                pg_port: '',
             },
-            info: '',
             values: {},
         }
 
@@ -51,7 +53,8 @@ class CronTab extends Component {
 
     getConfigs(id) {
         service
-            .cronTabDetail(id)
+            .pg_config
+            .get(id)
             .then(({values}) => {
                 this.setState({
                     initial_values: values,
@@ -71,15 +74,14 @@ class CronTab extends Component {
     }
 
     handleSubmit(values, { setStatus, setValues, setErrors }) {
-
         setStatus('saving')
         service
-            .cronTabSave(values)
-            .then(({ success, errors, info }) => {
+            .pg_config
+            .save(values)
+            .then(({ success, errors }) => {
 
                 if (success) {
                     setStatus('save_success')
-                    this.setState({info})
                 } else {
                     setErrors(errors)
                     return Promise.reject()
@@ -100,27 +102,15 @@ class CronTab extends Component {
         const {
             is_editing,
             initial_values,
-            info
         } = this.state
-        var navlink_url = '/back/another-base/'
-        if (initial_values.is_export) { navlink_url = '/back/db-export/' }
+
         return (
             <div className="card">
 
                 <div className="card-header">
-                    CronTab Тохиргоо
+                    Postgres Connection Тохиргоо
                 </div>
-                <ul>
-                    <li><b>Минут</b>&nbsp;скриптийг гүйцэтгэх минуттай тохирч байгаа бөгөөд утга нь 0-ээс 59 хооронд хэлбэлздэг</li>
-                    <li><b>Цаг</b>&nbsp;яг цаг, 24 цагийн форматыг зохицуулдаг бөгөөд утга нь 0-ээс 23 хооронд хэлбэлздэг бөгөөд 0 нь шөнийн 12:00 байна.</li>
-                    <li><b>Өдөр</b>&nbsp;гэдэг нь тухайн сарын өдрийг хэлнэ, жишээлбэл та 15 хоног тутамд гүйхийг хүсвэл 15-ыг зааж өгч болно</li>
-                    <li><b>Сар</b>&nbsp;гэдэг нь тухайн жилийн аль сар гэдгийг өгнө</li>
-                    <li><b>Гараг</b>&nbsp;гэдэг нь долоо хоногийн өдөр гэсэн үг бөгөөд энэ нь тоон (0-ээс 7, энд 0 ба 7 нь ням гараг байдаг) эсвэл англи хэл дээрх өдрийн эхний 3 үсэг байж болно: mon, tue, wed, thu, fri, sat, sun.</li>
-                </ul>
-                <ul>
-                    <li><b>(*)</b> Тухайн нэг цаг өдрийг товлохгүй гэж үзвэл</li>
-                    <li><b>(1, 2, 3 ...)</b> Бусад үед тоо ашиглах.</li>
-                </ul>
+
                 <div className="card-body">
                     <Formik
                         initialValues={ initial_values }
@@ -145,66 +135,76 @@ class CronTab extends Component {
                             return (
                                 <Form>
                                         <div className="form-row">
-                                            <div className="form-group col-md-1 text-wrap">
-                                                <label htmlFor="id_minute">Минут</label>
+                                            <div className="form-group col-md-6 text-wrap">
+                                                <label htmlFor="id_name">Нэр</label>
                                                 <Field
-                                                    name="minute"
-                                                    id="id_minute"
+                                                    name="name"
+                                                    id="id_name"
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <p className="text-danger">{errors['minute']}</p>
+                                                <p className="text-danger">{errors['name']}</p>
                                             </div>
-                                            <div className="form-group col-md-1 text-wrap">
-                                                <label htmlFor="id_hour">Цаг</label>
+                                            <div className="form-group col-md-6 text-wrap">
+                                                <label htmlFor="id_definition">Тайлбар</label>
                                                 <Field
-                                                    name="hour"
-                                                    id="id_hour"
+                                                    name="definition"
+                                                    id="id_definition"
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <p className="text-danger">{errors['hour']}</p>
+                                                <p className="text-danger">{errors['definition']}</p>
                                             </div>
-                                            <div className="form-group col-md-1">
-                                                <label htmlFor="id_day">Өдөр</label>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_pg_host">Server HOST</label>
                                                 <Field
-                                                    name="day"
-                                                    id="id_day"
+                                                    name="pg_host"
+                                                    id="id_pg_host"
                                                     type="text"
                                                     className="form-control"
                                                 />
-                                                <p className="text-danger">{errors['day']}</p>
+                                                <p className="text-danger">{errors['pg_host']}</p>
                                             </div>
-                                            <div className="form-group col-md-1">
-                                                <label htmlFor="id_month">Сар</label>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_pg_username">Username</label>
                                                 <Field
-                                                    name="month"
+                                                    name="pg_username"
                                                     type="text"
                                                     className="form-control"
-                                                    id="id_month"
+                                                    id="id_pg_username"
                                                 />
-                                                <p className="text-danger">{errors['month']}</p>
+                                                <p className="text-danger">{errors['pg_username']}</p>
                                             </div>
-                                            <div className="form-group col-md-1">
-                                                <label htmlFor="id_day_week">Гараг</label>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_pg_password">Password</label>
                                                 <Field
-                                                    name="day_week"
+                                                    name="pg_password"
                                                     type="text"
                                                     className="form-control"
-                                                    id="id_day_week"
+                                                    id="id_pg_password"
                                                 />
-                                                <p className="text-danger">{errors['day_week']}</p>
+                                                <p className="text-danger">{errors['pg_password']}</p>
                                             </div>
-                                        </div>
-                                        <div className="form-group col-md-1">
-                                            <label htmlFor="id_crontab_is_active">Идэвхжүүлэх</label>
-                                            <Field
-                                                className="ml-2"
-                                                name='crontab_is_active'
-                                                id="id_crontab_is_active"
-                                                type="checkbox"
-                                            />
-                                            <p className="text-danger">{errors['crontab_is_active']}</p>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_pg_database">Database Name</label>
+                                                <Field
+                                                    name="pg_database"
+                                                    id="id_pg_database"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                                <p className="text-danger">{errors['pg_database']}</p>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_pg_port">Port</label>
+                                                <Field
+                                                    name="pg_port"
+                                                    id="id_pg_port"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                                <p className="text-danger">{errors['pg_port']}</p>
+                                            </div>
                                         </div>
 
                                             <button
@@ -245,26 +245,15 @@ class CronTab extends Component {
                                             </div>
                                         </div>
                                     }
-                                    { info &&
-                                        <div className="alert alert-icon-success alert-dismissible" role="alert">
-                                            <button type="button" className="close" onClick={ () => setStatus('initial') }>×</button>
-                                            <div className="alert-icon icon-part-success">
-                                                <i className="icon-check"></i>
-                                            </div>
-                                            <div className="alert-message">
-                                                <span>{info}</span>
-                                            </div>
-                                        </div>
-                                    }
                                 </Form>
                             )
                         }}
                     </Formik>
                 </div>
-                <BackButton {...this.props} name={'Буцах'} navlink_url={navlink_url}></BackButton>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/db-export/`}></BackButton>
             </div>
         )
     }
 }
 
-export default CronTab;
+export default ConnectionConfig;
