@@ -41,7 +41,7 @@ export default class RevokeRequestForm extends Component {
             is_loading: false,
             refresh: false,
             талбарууд: [
-                {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': false},
+                {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': false, 'is_sort': true },
                 {'field': 'org', "title": 'Байгууллага / мэргэжилтэн', 'has_action': true},
                 {'field': 'order_no', "title": 'Тушаалын дугаар'},
                 {'field': 'order_at', "title": 'Тушаал гарсан огноо'},

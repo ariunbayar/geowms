@@ -40,15 +40,13 @@ export default class OpenMapModal extends Component {
         } else if (button_name && !this.values) {
             this.values = [values]
         }
-        console.log(title);
         return (
             <div>
                 {
                     title == "Шийдвэрлэх"
                     ?
                         this.values.map((items, idx ) =>
-
-                            items.state != "ТАТГАЛЗСАН"
+                            items.state == "ШИНЭ"
                             ?
                                 <a
                                     className="btn btn-primary btn-sm text-white text-capitalize"
@@ -62,8 +60,7 @@ export default class OpenMapModal extends Component {
                         )
                     :
                         this.values.map((items, idx ) =>
-
-                            items.state == "ТАТГАЛЗСАН"
+                            items.state != "ШИНЭ"
                             ?
                                 <i
                                     className="fa fa-eye"
@@ -71,8 +68,7 @@ export default class OpenMapModal extends Component {
                                 >
                                 </i>
                             :
-                                null
-
+                            null
                         )
                     }
                     {is_modal_request_open &&
@@ -83,26 +79,6 @@ export default class OpenMapModal extends Component {
                             values={this.values}
                         />
                     }
-
-                                                                                                        {/* values[0].kind == 'ЦУЦЛАСАН'
-
-                                                                                                        ?
-                                                                                                        is_modal_request_open &&
-                                                                                                            <RequestModal
-                                                                                                                modalClose={this.closeModalMap}
-                                                                                                                refreshData={this.props.refreshData}
-                                                                                                                values={this.values}
-                                                                                                            />
-                                                                                                        :
-                                                                                                        is_modal_request_open &&
-                                                                                                            <RequestModal
-                                                                                                                hide_btn={this.props.hide_btn}
-                                                                                                                modalClose={this.closeModalMap}
-                                                                                                                refreshData={this.props.refreshData}
-                                                                                                                values={this.values}
-                                                                                                        />
-                                                                                                        } */}
-
             </div>
         )
     }

@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector
 from geojson import FeatureCollection
+from django.db import connections, transaction
 
 from backend.inspire.models import (
     MGeoDatas,
@@ -32,6 +33,28 @@ from main.utils import (
     get_feature_from_geojson,
 )
 from main.components import Datatable
+
+
+def _get_geom(geo_id, fid):
+    cursor = connections['default'].cursor()
+    sql = """
+        SELECT
+            ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
+        FROM
+            m_geo_datas
+        WHERE
+            feature_id = {fid} and geo_id='{geo_id}'
+        order by geo_id desc
+        limit {limit}
+    """.format(
+        fid=fid,
+        geo_id=geo_id,
+        limit=4000
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    return rows
 
 
 def _date_to_str(date):
@@ -150,8 +173,7 @@ def _get_display_text(field, value):
             if f.name == field:
                 for c_id, c_type in f.choices:
                     if c_id == value:
-                        if c_type == 'ТАТГАЛЗСАН':
-                            return c_type
+                        return c_type
 
 
 def _choice_state_display(state, item):
@@ -306,55 +328,6 @@ def get_choices(request):
         'modules': modules
     }
     return JsonResponse(rsp)
-
-
-# @require_POST
-# @ajax_required
-# @login_required(login_url='/gov/secure/login/')
-# def revoke_paginate(request, payload):
-#     employees = _get_employees(request)
-#     emp_features = _get_emp_features(employees)
-
-#     page = payload.get('page')
-#     per_page = payload.get('per_page')
-#     query = payload.get('query') or ''
-#     state = payload.get('state')
-
-#     revoke_requests = ChangeRequest.objects.annotate(
-#         search=SearchVector(
-#             'order_no',
-#             'employee__user__first_name',
-#             'employee__user__last_name'
-#         )
-#     ).filter(
-#         search__icontains=query,
-#         kind=ChangeRequest.KIND_REVOKE,
-#         feature_id__in=emp_features,
-#     ).order_by('-created_at')
-
-#     if state:
-#         revoke_requests = revoke_requests.filter(
-#             state=state
-#         )
-
-#     total_items = Paginator(revoke_requests, per_page)
-#     items_page = total_items.page(page)
-#     items = [
-#         _get_revoke_request_display(revoke_request)
-#         for revoke_request in items_page.object_list
-#     ]
-
-#     total_page = total_items.num_pages
-
-#     rsp = {
-#         'items': items,
-#         'page': page,
-#         'total_page': total_page,
-#         'success': True,
-#         'choices': _get_choices_from_model(ChangeRequest, 'state'),
-#     }
-
-#     return JsonResponse(rsp)
 
 
 def _change_revoke_request(id, state):
