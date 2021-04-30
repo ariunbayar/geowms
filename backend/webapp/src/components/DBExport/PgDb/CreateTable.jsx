@@ -177,7 +177,7 @@ export default class  PgForm extends Component {
                         />
                     </div>
                 </div>
-                <div className="form-row col-md-12 p-4 mx-1">
+                <div className="form-row col-md-9 p-4 mx-1">
                     <SelectField
                         title_name='theme'
                         data_list={themes}
@@ -198,16 +198,16 @@ export default class  PgForm extends Component {
                     />
                 </div>
                 { feature_name &&
-                    <div className="col-md-9 px-3">
+                    <div className="col-md-7 px-3">
                             <table className="table table-bordered m-1">
                                 <thead>
                                     <tr>
-                                        <th className="text-center" style={{width: "15%"}}>
+                                        <th className="text-center" style={{width: "8%"}}>
                                             Data <br/>type
                                         </th>
                                         <th className="text-center" style={{width: "5%"}}>
                                         </th>
-                                        <th className="text-center" style={{width: "30%"}}>
+                                        <th className="text-center" style={{width: "15%"}}>
                                             Property
                                         </th>
                                     </tr>
@@ -215,7 +215,7 @@ export default class  PgForm extends Component {
                                         <>
                                             <tr key={idx}>
                                                 <th rowSpan={data_type.properties.length +1}
-                                                    className="text-wrap align-middle text-justify m-2"
+                                                    className="text-wrap align-middle text-justify m-4 pl-5"
                                                 >
                                                     <span className="text-center align-middle">({data_type.data_type_name})</span><br/>
                                                     <span className="text-center align-middle">{data_type.data_type_eng}</span><br/>
@@ -240,6 +240,8 @@ export default class  PgForm extends Component {
                                                         <th>
                                                             <label
                                                                 data-toggle="tooltip" data-placement="right"
+                                                                className="text-left"
+                                                                style={{marginLeft: "4%"}}
                                                             >
                                                                 {property.property_name}
                                                             </label>
