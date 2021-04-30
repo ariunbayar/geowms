@@ -339,6 +339,8 @@ def _get_type(value_type_id):
 def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid=None):
     properties = list()
     pk = ''
+    value_text = ''
+    data_list = []
     for l_property in qs_l_properties:
         data = dict()
         value_type = _get_type(l_property.value_type_id)
@@ -349,6 +351,7 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
             m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id=feature_config_id, data_type_id=data_type_id, property_id=property_id).first()
             if m_datas:
                 pk = m_datas.id
+                value_text, data_list = _get_data_list_and_value_text(gid, m_datas.feature_config_id, data_type_id, property_id, value_type)
         data['pk'] = pk
         data['data_type_id'] = data_type_id
         data['property_id'] = property_id
@@ -357,7 +360,6 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data['property_definition'] = l_property.property_definition
         data['value_type_id'] = l_property.value_type_id
         data['value_type'] = value_type
-        value_text, data_list = _get_data_list_and_value_text(gid, fid, data_type_id, property_id, value_type)
         data['data'] =  value_text
         data['data_list'] =  data_list
         data['roles'] =  _get_roles(request, fid, property_id)
