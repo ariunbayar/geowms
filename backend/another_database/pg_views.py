@@ -180,47 +180,44 @@ def _get_pg_table_fields(schema_name, cursor):
 @user_passes_test(lambda u: u.is_superuser)
 def getFields(request, payload):
     feature_id = payload.get('feature_id')
-    data_type_list = []
-    feature_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
-    for feature_config in feature_configs:
-        data_type_configs = LDataTypeConfigs.objects.filter(
-            data_type_id=feature_config.data_type_id
-        )
 
-        for data_type_config in data_type_configs:
-            property_id = data_type_config.property_id
-            data_type_id = data_type_config.data_type_id
-            if property_id and data_type_id:
+    value_types = ['boolean', 'multi-select', 'single-select']
+    data_types_datas = []
+    data_type_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('data_type_id', flat=True))
+
+    for data_type_id in data_type_ids:
+        properties = list(LDataTypeConfigs.objects.filter(data_type_id=data_type_id).values_list('property_id', flat=True))
+        data_types = LDataTypes.objects.filter(data_type_id=data_type_id).first()
+        if data_types and properties:
+            properties_data = []
+            for property_id in properties:
+                single_property = LProperties.objects.filter(property_id=property_id).first()
                 code_data_list = []
-                data_type = LDataTypes.objects.filter(
-                    data_type_id=data_type_config.data_type_id
-                ).first()
+                if single_property:
+                    if single_property.value_type_id in value_types:
+                        code_lists = LCodeLists.objects.filter(property_id=property_id)
+                        for code_list in code_lists:
+                            code_data_list.append({
+                                'code_list_name': code_list.code_list_name,
+                                'code_list_code': code_list.code_list_code,
+                                'code_list_id': code_list.code_list_id
+                            })
 
-                property_data = LProperties.objects.filter(
-                    property_id=data_type_config.property_id
-                ).first()
+                    properties_data.append({
+                        'property_name': single_property.property_name,
+                        'property_code': single_property.property_code,
+                        'property_definition': single_property.property_definition,
+                        'code_list': code_data_list
+                    })
 
-                value_types = ['boolean', 'multi-select', 'single-select']
-                if property_data.value_type_id in value_types:
-                    code_lists = LCodeLists.objects.filter(property_id=property_id)
-                    for code_list in code_lists:
-                        code_data_list.append({
-                            'code_list_name': code_list.code_list_name,
-                            'code_list_code': code_list.code_list_code,
-                            'code_list_id': code_list.code_list_id
-                        })
-
-                data_type_list.append({
-                    'data_type_code': data_type.data_type_code,
-                    'data_type_name': data_type.data_type_name,
-                    'property_name': property_data.property_name,
-                    'property_code': property_data.property_name,
-                    'property_id': property_data.property_id,
-                    'code_list': code_data_list
-                })
+            data_types_datas.append({
+                'data_type_name': data_types.data_type_name,
+                'data_type_eng': data_types.data_type_name_eng,
+                'properties': properties_data
+            })
 
     return JsonResponse({
-        'data_type_list': data_type_list
+        'data_type_list': data_types_datas
     })
 
 

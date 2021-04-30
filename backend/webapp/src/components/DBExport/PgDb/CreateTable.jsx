@@ -20,13 +20,14 @@ export default class  PgForm extends Component {
             package_name: '',
             selected_packages: [],
             selected_features: [],
-            selected_dt_list: []
+            selected_dt_list: [],
+            data_type_list: []
         }
 
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
-        // this.handleSetField = this.handleSetField.bind(this)
+        this.handleSetField = this.handleSetField.bind(this)
         // this.handleSave = this.handleSave.bind(this)
     }
 
@@ -80,10 +81,15 @@ export default class  PgForm extends Component {
         }
 
         else if ( name == 'package' ) {
-            data_list['package_name'] = selected_value
-            array = [...features]
-            seleted_datas = array.filter((data) => data.parent == selected_value)
-            data_list['selected_features'] = seleted_datas
+            if (selected_value) {
+                data_list['package_name'] = selected_value
+                array = [...features]
+                seleted_datas = array.filter((data) => data.parent == selected_value)
+                data_list['selected_features'] = seleted_datas
+            }
+            else {
+                data_list['feature_name'] = ''
+            }
         }
         else {
             data_list['feature_name'] = selected_value
@@ -95,20 +101,19 @@ export default class  PgForm extends Component {
     componentDidUpdate(pP, pS) {
         const { theme_name, feature_name } = this.state
         if (pS.theme_name != theme_name) {
-            if (!theme_name) {
-                this.setState({selected_features: []})
-            }
+            this.setState({selected_features: [], feature_name: ''})
         }
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
+            else this.setState({feature_name})
         }
     }
 
     getFeatProperties(feature_code) {
-        service.pg_config.getProperties(feature_code).then(({state_name, table_fields}) => {
-            var fields = {}
-            fields[state_name] = table_fields
-            this.setState({ ...fields })
+        service.pg_config.getProperties(feature_code).then(({data_type_list}) => {
+            if (data_type_list && data_type_list.length > 0) {
+                this.setState({data_type_list})
+            }
         })
     }
 
@@ -124,62 +129,8 @@ export default class  PgForm extends Component {
         }
     }
 
-    handleSetField(key, e){
-        const { view_fields, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
-        var data = e.target.value
-        var values = {
-            'table_field': data,
-            'view_field': view_fields[key].column_name
-        }
-        var joined = []
-        var check = false
-        var check_error = []
-        var error_name = ''
-        if(data) {
-            if (matched_feilds.length > 0) {
-                var value = obj => obj.view_field == view_fields[key].column_name
-                var index_of = matched_feilds.findIndex(value)
-                if (index_of != -1) {
-                    matched_feilds[index_of]['table_field'] = data
-                    joined = matched_feilds
-                }
-                else {
-                    joined = matched_feilds.concat(values)
-                }
-            }
-            else joined = matched_feilds.concat(values)
-
-            var index = e.target.selectedIndex
-            var optionElement = e.target.childNodes[index]
-            var selected_data_type =  optionElement.getAttribute('name')
-            error_name = table_field_error.filter(item => {
-                return item.toLowerCase().includes(data.toLowerCase())
-            })
-
-            if ((view_fields[key].data_type.slice(0,4) != selected_data_type.slice(0,4))) {
-                if (! error_name.length >0) {
-                    check_error.push(data)
-                }
-            }
-            else {
-                check = true
-            }
-
-        }
-        else {
-            var array = [...matched_feilds]
-            for (let [i, layer] of array.entries()) {
-                if (layer.view_field == view_fields[key].column_name) {
-                    array.splice(i, 1);
-                }
-            }
-            joined = array
-        }
-
-        if (check || !data) {
-            check_error = []
-        }
-        this.setState({ matched_feilds: joined, selected_data_type, table_field_error: check_error, old_error_name })
+    handleSetField(e){
+        console.log(e)
     }
 
 
@@ -188,11 +139,11 @@ export default class  PgForm extends Component {
             table_id, id,
             themes, theme_name, package_name,
             feature_name, selected_features,
-            selected_packages
+            selected_packages, data_type_list
         } = this.state
         return (
             <div className="card">
-                <div className="form-row card-body">
+                <div className="form-row card-body p-4 mx-1">
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
@@ -200,7 +151,7 @@ export default class  PgForm extends Component {
                         />
                     </div>
                 </div>
-                <div className="form-row p-4">
+                <div className="form-row col-md-12 p-4 mx-1">
                     <SelectField
                         title_name='theme'
                         data_list={themes}
@@ -220,6 +171,63 @@ export default class  PgForm extends Component {
                         setSelect={this.handleChange}
                     />
                 </div>
+              { feature_name &&
+                <div className="col-md-9 px-3">
+                        <table className="table table-bordered m-1">
+                            <thead>
+                                <tr>
+                                    <th className="text-center" style={{width: "15%"}}>
+                                        Data <br/>type
+                                    </th>
+                                    <th className="text-center" style={{width: "5%"}}>
+                                    </th>
+                                    <th className="text-center" style={{width: "30%"}}>
+                                        Property
+                                    </th>
+                                </tr>
+                                {data_type_list.map((data_type, idx) =>
+                                    <>
+                                        <tr key={idx}>
+                                            <th rowSpan={data_type.properties.length +1}
+                                                className="text-wrap align-middle text-justify m-2"
+                                            >
+                                                <span className="text-center align-middle">({data_type.data_type_name})</span><br/>
+                                                <span className="text-center align-middle">{data_type.data_type_eng}</span><br/>
+                                                <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
+                                            </th>
+                                        </tr>
+                                        {data_type.properties.map((property, idx) =>
+                                            <>
+                                                <tr key={idx}>
+                                                    <th>
+                                                        <div className="icheck-primary justify-content-center">
+                                                            <input
+                                                                // id={data_type_config.property_name}
+                                                                type="checkbox"
+                                                                // checked={id_list.indexOf(data_type_config.property_id) > -1}
+                                                                // onChange={this.handleInput}
+                                                                value={property.property_id}
+                                                            />
+                                                            <label htmlFor={property.property_name}></label>
+                                                        </div>
+                                                    </th>
+                                                    <th>
+                                                        <label
+                                                            htmlFor={property.property_name}
+                                                            data-toggle="tooltip" data-placement="right" title={property.property_definition}
+                                                        >
+                                                            {property.property_name}
+                                                        </label>
+                                                    </th>
+                                                </tr>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </thead>
+                        </table>
+                    </div>
+                }
                 <BackButton
                     {...this.props}
                     name={'Буцах'}
