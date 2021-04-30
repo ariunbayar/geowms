@@ -63,6 +63,7 @@ export default class OpenMapModal extends Component {
                             items.state != "ШИНЭ"
                             ?
                                 <i
+                                    role="button"
                                     className="fa fa-eye"
                                     onClick={this.openModalMapMap}
                                 >

@@ -218,11 +218,10 @@ def _geojson_to_featurecollection(geo_json, item):
 def get_list(request, payload):
     employee = get_object_or_404(Employee, user=request.user)
     emp_features = _get_emp_features(employee)
-
     if emp_features:
         qs = ChangeRequest.objects
         qs = qs.filter(feature_id__in=emp_features)
-        qs = qs.exclude(kind=ChangeRequest.KIND_CREATE)
+        qs = qs.filter(kind=ChangeRequest.KIND_REVOKE)
         if qs:
             qs = qs.filter(group_id__isnull=True)
             datatable = Datatable(
