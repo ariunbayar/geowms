@@ -34,10 +34,10 @@ const pg_config = {
         return fetch(`${prefix}/pg/get-fields/`, opts).then(handleResponse)
     },
 
-    tableSave: function(id, table_id, matched_feilds, view_name, table_name) {
+    tableSave: function(id, table_id, id_list, feature_name, table_name) {
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify({ id, table_id, matched_feilds, view_name, table_name }),
+            body: JSON.stringify({ id, table_id, id_list, feature_name, table_name }),
         }
         return fetch(`${prefix}/pg/save-table/`, opts).then(handleResponse)
     },

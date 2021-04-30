@@ -161,19 +161,6 @@ def get_pg_table_names(request, conn_id):
     })
 
 
-def _get_pg_table_fields(schema_name, cursor):
-    sql = '''
-        SELECT
-        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
-        FROM
-        pg_attribute
-        WHERE
-        attrelid = 'public.{schema_name}'::regclass AND    attnum > 0
-        ORDER  BY attnum
-    '''.format(schema_name=schema_name)
-    table_fields = _get_sql_execute(sql, cursor, 'all')
-    return table_fields
-
 
 @require_POST
 @ajax_required
@@ -205,8 +192,7 @@ def getFields(request, payload):
 
                     properties_data.append({
                         'property_name': single_property.property_name,
-                        'property_code': single_property.property_code,
-                        'property_definition': single_property.property_definition,
+                        'property_id': single_property.property_id,
                         'code_list': code_data_list
                     })
 
@@ -227,23 +213,29 @@ def getFields(request, payload):
 def save_table(request, payload):
     table_id = payload.get('table_id')
     id = payload.get('id')
-    matched_feilds = payload.get('matched_feilds')
-    view_name = payload.get('view_name')
+    feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
-
+    id_list = payload.get('id_list')
+    if not table_name:
+        return JsonResponse({
+            'success': False,
+            'info': 'Table-ийн нэр хоосон байна !!!'
+        })
+    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
             'table_name': table_name,
-            'feature_code': view_name,
-            'field_config': utils.json_dumps(matched_feilds),
+            'feature_code': feature_name.feature_name,
+            'field_config': utils.json_dumps(id_list),
             'another_database': another_database,
             'created_by': request.user
         }
     )
     return JsonResponse({
         'success': True,
+        'info': 'Амжилттай хадгалагдлаа'
     })
 
 
@@ -254,19 +246,15 @@ def table__detail(request, id, table_id):
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
     field_config = another_db_tb.field_config.replace("'", '"')
     field_config = utils.json_load(field_config)
+    feature = LFeatures.objects.filter(feature_name=another_db_tb.feature_code).first()
+    package = LPackages.objects.filter(package_id=feature.package_id).first()
 
-    cursor = connections['default'].cursor()
-    view_fields = _get_pg_table_fields(another_db_tb.feature_code, cursor)
-
-    cursor_pg = _get_cursor_pg(id)
-    table_fields = _get_pg_table_fields(another_db_tb.table_name, cursor_pg)
     form_datas = {
-        'id': another_db_tb.id,
-        'field_config': field_config,
+        'id_list': field_config,
         'table_name': another_db_tb.table_name,
-        'feature_code': another_db_tb.feature_code,
-        'view_fields': view_fields,
-        'table_field_names': table_fields
+        'feature_name': feature.feature_id,
+        'theme_name': package.theme_id,
+        'package_name': package.package_id
     }
 
     return JsonResponse({

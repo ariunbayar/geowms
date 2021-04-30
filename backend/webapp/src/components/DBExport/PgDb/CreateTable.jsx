@@ -21,39 +21,39 @@ export default class  PgForm extends Component {
             selected_packages: [],
             selected_features: [],
             selected_dt_list: [],
-            data_type_list: []
+            data_type_list: [],
+            id_list: []
         }
 
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
         this.handleSetField = this.handleSetField.bind(this)
-        // this.handleSave = this.handleSave.bind(this)
+        this.handleSave = this.handleSave.bind(this)
+        this.getArray = this.getArray.bind(this)
     }
 
     componentDidMount(){
-        const {id, table_id} = this.state
-        // if(table_id) this.handleGetDetial(id, table_id)
+        const {id} = this.state
         this.getInspireTree(id)
     }
 
-    handleGetDetial(id, table_id){
+    handleGetDetial( packages, features ){
+        const {table_id, id} = this.state
         service.pg_config.tableDetail(id, table_id).then(({success, form_datas}) => {
             if(success){
-                this.setState({
-                    table_name: form_datas.table_name,
-                    view_name: form_datas.feature_code,
-                    matched_feilds: form_datas.field_config,
-                    view_fields: form_datas.view_fields,
-                    table_fields: form_datas.table_field_names
-                })
+                form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
+                form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
+                this.setState({...form_datas})
             }
         })
     }
 
     getInspireTree(id){
+        const {table_id} = this.state
         service.pg_config.getInspireTree(id).then(({themes, packages, features}) => {
             this.setState({themes, packages, features})
+            if(table_id) this.handleGetDetial(packages, features)
         })
     }
 
@@ -66,6 +66,12 @@ export default class  PgForm extends Component {
         })
     }
 
+    getArray(data, selected_value) {
+        var array = [...data]
+        var seleted_datas = array.filter((data) => data.parent == selected_value)
+        return seleted_datas
+    }
+
     handleChange(name, e) {
         const { packages, features } = this.state
         const selected_value = e.target.value
@@ -75,16 +81,14 @@ export default class  PgForm extends Component {
 
         if ( name == 'theme' ) {
             data_list['theme_name'] = selected_value
-            array = [...packages]
-            seleted_datas = array.filter((data) => data.parent == selected_value)
+            seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
         }
 
         else if ( name == 'package' ) {
             if (selected_value) {
                 data_list['package_name'] = selected_value
-                array = [...features]
-                seleted_datas = array.filter((data) => data.parent == selected_value)
+                seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
             }
             else {
@@ -95,17 +99,27 @@ export default class  PgForm extends Component {
             data_list['feature_name'] = selected_value
         }
 
+        if (! selected_value) {
+            data_list['selected_features'] = []
+            data_list['feature_name'] = ''
+        }
+
         this.setState({...data_list})
     }
 
     componentDidUpdate(pP, pS) {
-        const { theme_name, feature_name } = this.state
-        if (pS.theme_name != theme_name) {
-            this.setState({selected_features: [], feature_name: ''})
-        }
+        const { theme_name, feature_name, packages, features } = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
             else this.setState({feature_name})
+        }
+
+        if (pS.packages != packages) {
+            this.setState({packages})
+        }
+
+        if (pS.features != features) {
+            this.setState({features})
         }
     }
 
@@ -118,19 +132,27 @@ export default class  PgForm extends Component {
     }
 
     handleSave(){
-        const {id, table_id, matched_feilds, view_name, table_name, table_field_error} = this.state
-        if (! table_field_error.length >0 && ! this.over_dec.length > 0){
-            service.pg_config.tableSave(id, table_id, matched_feilds, view_name, table_name).then(({success}) => {
-                if(success){
-                    alert("Амжилттай хадгаллаа.")
-                    this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
-                }
-            })
-        }
+        const {id, table_id, table_name, id_list, feature_name} = this.state
+        service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
+            if(success){
+                alert("Амжилттай хадгаллаа.")
+                this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
+            }
+            else {
+                alert(info)
+            }
+        })
     }
 
     handleSetField(e){
-        console.log(e)
+        let id_list = this.state.id_list
+        const value = parseInt(e.target.value)
+        if (e.target.checked) {
+            id_list.push(value)
+        } else {
+            id_list = id_list.filter((oid) => oid != value)
+        }
+        this.setState({id_list})
     }
 
 
@@ -139,7 +161,8 @@ export default class  PgForm extends Component {
             table_id, id,
             themes, theme_name, package_name,
             feature_name, selected_features,
-            selected_packages, data_type_list
+            selected_packages, data_type_list,
+            id_list, table_name
         } = this.state
         return (
             <div className="card">
@@ -148,6 +171,9 @@ export default class  PgForm extends Component {
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
                             className='form-control'
+                            type='text'
+                            value={table_name}
+                            onChange={(e) => this.setState({table_name: e.target.value})}
                         />
                     </div>
                 </div>
@@ -171,63 +197,79 @@ export default class  PgForm extends Component {
                         setSelect={this.handleChange}
                     />
                 </div>
-              { feature_name &&
-                <div className="col-md-9 px-3">
-                        <table className="table table-bordered m-1">
-                            <thead>
-                                <tr>
-                                    <th className="text-center" style={{width: "15%"}}>
-                                        Data <br/>type
-                                    </th>
-                                    <th className="text-center" style={{width: "5%"}}>
-                                    </th>
-                                    <th className="text-center" style={{width: "30%"}}>
-                                        Property
-                                    </th>
-                                </tr>
-                                {data_type_list.map((data_type, idx) =>
-                                    <>
-                                        <tr key={idx}>
-                                            <th rowSpan={data_type.properties.length +1}
-                                                className="text-wrap align-middle text-justify m-2"
-                                            >
-                                                <span className="text-center align-middle">({data_type.data_type_name})</span><br/>
-                                                <span className="text-center align-middle">{data_type.data_type_eng}</span><br/>
-                                                <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
-                                            </th>
-                                        </tr>
-                                        {data_type.properties.map((property, idx) =>
-                                            <>
-                                                <tr key={idx}>
-                                                    <th>
-                                                        <div className="icheck-primary justify-content-center">
-                                                            <input
-                                                                // id={data_type_config.property_name}
-                                                                type="checkbox"
-                                                                // checked={id_list.indexOf(data_type_config.property_id) > -1}
-                                                                // onChange={this.handleInput}
-                                                                value={property.property_id}
-                                                            />
-                                                            <label htmlFor={property.property_name}></label>
-                                                        </div>
-                                                    </th>
-                                                    <th>
-                                                        <label
-                                                            htmlFor={property.property_name}
-                                                            data-toggle="tooltip" data-placement="right" title={property.property_definition}
-                                                        >
-                                                            {property.property_name}
-                                                        </label>
-                                                    </th>
-                                                </tr>
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </thead>
-                        </table>
-                    </div>
+                { feature_name &&
+                    <div className="col-md-9 px-3">
+                            <table className="table table-bordered m-1">
+                                <thead>
+                                    <tr>
+                                        <th className="text-center" style={{width: "15%"}}>
+                                            Data <br/>type
+                                        </th>
+                                        <th className="text-center" style={{width: "5%"}}>
+                                        </th>
+                                        <th className="text-center" style={{width: "30%"}}>
+                                            Property
+                                        </th>
+                                    </tr>
+                                    {data_type_list.map((data_type, idx) =>
+                                        <>
+                                            <tr key={idx}>
+                                                <th rowSpan={data_type.properties.length +1}
+                                                    className="text-wrap align-middle text-justify m-2"
+                                                >
+                                                    <span className="text-center align-middle">({data_type.data_type_name})</span><br/>
+                                                    <span className="text-center align-middle">{data_type.data_type_eng}</span><br/>
+                                                    <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
+                                                </th>
+                                            </tr>
+                                            {data_type.properties.map((property, idx) =>
+                                                <>
+                                                    <tr key={idx}>
+                                                        <th>
+                                                            <div className="p-0">
+                                                                <input
+                                                                    name={property.property_name}
+                                                                    type="checkbox"
+                                                                    className="form-control"
+                                                                    checked={id_list.indexOf(property.property_id) > -1}
+                                                                    onChange={this.handleSetField}
+                                                                    value={property.property_id}
+                                                                />
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <label
+                                                                data-toggle="tooltip" data-placement="right"
+                                                            >
+                                                                {property.property_name}
+                                                            </label>
+                                                        </th>
+                                                    </tr>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </thead>
+                            </table>
+                        </div>
                 }
+                <div className="form-row col-md-12 p-4 m-1">
+                    {
+                    <button
+                        type="button"
+                        className="btn gp-btn-primary"
+                        onClick={this.handleSave}
+                    >
+                        {
+                            table_id
+                            ?
+                                "Засах"
+                            :
+                                "Хадгалах"
+                        }
+                    </button>
+                    }
+                </div>
                 <BackButton
                     {...this.props}
                     name={'Буцах'}
