@@ -263,18 +263,6 @@ def table__detail(request, id, table_id):
     })
 
 
-def _get_count_of_someone_db_table(table_name, cursor):
-    sql = '''
-        select
-            count(*)
-        from
-            {table_name}
-    '''.format(
-        table_name=table_name
-    )
-    row_count = _get_sql_execute(sql, cursor, 'one')
-    return row_count
-
 
 def _get_row_to_list(field_name, dict_data):
     row_list = []
@@ -283,70 +271,70 @@ def _get_row_to_list(field_name, dict_data):
     return row_list
 
 
-def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
+def _insert_to_someone_db(table_name, cursor, columns, feature_id):
+    columns.sort()
+    feature_id = LFeatures.objects.filter(feature_name=feature_id).first().feature_id
+    fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
+    feature_config_id = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+
+    detete_query = '''
+        DROP TABLE IF EXISTS public.{table_name}
+    '''.format(table_name=table_name)
+    crosstab_query = '''
+        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
+    '''
+
     try:
-        number_of_row = _get_count_of_someone_db_table(table_name, cursor_pg)
-        table_fields = _get_pg_table_fields(table_name, cursor_pg)
-        if number_of_row and columns:
-            matched_view_columns = ','.join(_get_row_to_list('view_field', columns))
-            sql = '''
-                select
-                    {column}
-                from
-                    {view_name}
-                limit
-                    {row_count}
-            '''.format(
-                view_name=feature_code,
-                row_count=number_of_row[0],
-                column=matched_view_columns
-            )
+        query = '''
+            CREATE TABLE public.{table_name}
+                AS
+            SELECT
+                d.geo_id,
+                d.geo_data,
+                {columns},
+                d.feature_id
+            FROM
+                crosstab('
+                    select
+                        b.geo_id,
+                        b.property_id,
+                        COALESCE(
+                            b.code_list_id::character varying(1000),
+                            b.value_text::character varying(1000),
+                            b.value_number::character varying(1000),
+                            b.value_date::character varying(1000)
+                        ) as value_text
+                    from
+                        public.m_datas b
+                    inner join
+                        m_geo_datas mg
+                    on
+                        mg.geo_id = b.geo_id
+                    and
+                        mg.feature_id = {feature_id}
+                    where
+                        property_id in ({properties})
+                    and
+                        feature_config_id in ({feature_config_id})
+                    order by 1,2'::text
+                )
+            ct(geo_id character varying(100), {create_columns})
+            JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+        '''.format(
+                table_name = table_name,
+                columns=', '.join(['ct.{}'.format(f) for f in fields]),
+                properties=', '.join(['{}'.format(f) for f in columns]),
+                feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id]),
+                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]),
+                feature_id=feature_id,
+        )
+        query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
 
-            table_field_splits = []
-            for field in range(len(table_fields)):
-                if 'id' in table_fields[field]['column_name']:
-                    table_field_split = '''
-                        v.{table_field} = t.{table_field}
-                        '''.format(
-                            table_field=table_fields[field]['column_name'],
-                        )
-                    table_field_splits.append(table_field_split)
-
-            view_datas = _get_sql_execute(sql, cursor, 'all')
-            for i in range(number_of_row[0]):
-                update_fields = []
-                for j in range(len(columns)):
-                    view_field = columns[j]['view_field']
-                    table_data = view_datas[i][view_field]
-                    table_field = columns[j]['table_field']
-                    update_field = '''
-                        {table_field} = '{table_data}'
-                        '''.format(
-                            table_field=table_field,
-                            table_data=table_data
-                        )
-                    update_fields.insert(j, update_field)
-
-                    sql_update = '''
-                        UPDATE
-                            {table_name} AS v
-                        SET
-                            {update_fields}
-                        FROM
-                            (
-                                SELECT *, row_number() OVER(ORDER BY {any_column}) AS row
-                                FROM {table_name}
-                            ) t
-                        WHERE
-                            t.row={nd_row} and {table_field_splits}
-                    '''.format(
-                        table_name=table_name,
-                        update_fields=','.join(update_fields),
-                        nd_row=i+1,
-                        any_column=table_fields[0]['column_name'],
-                        table_field_splits=table_field_splits[0]
-                    )
-                    cursor_pg.execute(sql_update)
+        with connections['default'].cursor() as cursor:
+            cursor.execute(crosstab_query)
+            cursor.execute(detete_query)
+            cursor.execute(query)
+            cursor.execute(query_index)
         return True
     except Exception:
         return False
@@ -373,18 +361,17 @@ def refresh_datas(request, id):
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
     cursor_pg = _get_cursor_pg(id)
-    cursor = connections['default'].cursor()
     success = True
     for table in ano_db_table_pg:
         table_name = table.table_name
         field_config = table.field_config.replace("'", '"')
         columns = utils.json_load(field_config)
         feature_code = table.feature_code
-        success = _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code)
+        success = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
         if not success:
             return JsonResponse({
                 'success': success,
-                'info': table_name.upper() + '-ийг шинэчилэхэд алдаа гарлаа. Талбаруудаа шалган уу !!'
+                'info': table_name.upper() + '-ийг шинэчилэхэд алдаа гарлаа'
             })
 
     ano_db.database_updated_at = datetime.datetime.now()
