@@ -30,7 +30,7 @@
 .search-bundle .search-bundle-input {
     padding: 0 10px;
     width: 100%;
-    caret-color: #536bf6;
+    caret-color: #034ea2;
     font-size: 14px;
     color: black;
     transition: width 0.4s linear
@@ -44,7 +44,7 @@
     justify-content: center;
     align-items: center;
     color: white;
-    background-color: #536bf6;
+    background-color: #034ea2;
     font-size: 10px;
     bottom: 30px;
     position: relative;
@@ -53,4 +53,14 @@
 
 .search-bundle-icon:hover {
     color: #fff !important
+}
+
+.list-active:hover{
+    color: #fff !important;
+    background-color: #034ea2;
+}
+
+.list-active:active{
+    color: #fff !important;
+    background-color: #034ea2;
 }
