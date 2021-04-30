@@ -2,10 +2,12 @@ import json
 
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector
+from geojson import FeatureCollection
+from django.db import connections, transaction
 
 from backend.inspire.models import (
     MGeoDatas,
@@ -23,6 +25,36 @@ from main.decorators import ajax_required
 from main.utils import refreshMaterializedView
 from main.utils import has_employee_perm
 from main.utils import check_form_json
+from main.utils import (
+    dict_fetchall,
+    date_to_timezone,
+    get_display_items,
+    get_fields,
+    get_feature_from_geojson,
+)
+from main.components import Datatable
+
+
+def _get_geom(geo_id, fid):
+    cursor = connections['default'].cursor()
+    sql = """
+        SELECT
+            ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
+        FROM
+            m_geo_datas
+        WHERE
+            feature_id = {fid} and geo_id='{geo_id}'
+        order by geo_id desc
+        limit {limit}
+    """.format(
+        fid=fid,
+        geo_id=geo_id,
+        limit=4000
+    )
+    cursor.execute(sql)
+    rows = dict_fetchall(cursor)
+    rows = list(rows)
+    return rows
 
 
 def _date_to_str(date):
@@ -49,23 +81,180 @@ def _get_revoke_request_display(revoke_request):
         }
 
 
-def _get_choices_from_model(Model, field_name):
-    choices = []
-    for f in Model._meta.get_fields():
+def _хувьсах_талбарууд():
+    хувьсах_талбарууд = [
+        {'field': 'feature_id', 'action': _get_feature_name, "new_field": "feature_name"},
+        {'field': 'package_id', 'action': _get_package_name, "new_field": "package_name"},
+        {'field': 'theme_id', 'action': _get_theme_name, "new_field": "theme_name"},
+        {'field': 'theme_id', 'action': _get_theme_code, "new_field": "theme_code"},
+        {'field': 'employee_id', 'action': _get_employee_name, "new_field": "employee"},
+        {'field': 'employee_id', 'action': _get_org_name, "new_field": "org"},
+        {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
+        {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
+        {'field': 'form_json', 'action': _str_to_json, "new_field": "form_json"},
+        {'field': 'group_id', 'action': _make_group_request, "new_field": "group"},
+        {'field': 'geo_json', 'action': _geojson_to_featurecollection, "new_field": "geo_json"}
+    ]
+
+    return хувьсах_талбарууд
+
+
+def _make_group_request(group_id, item):
+    if not item['form_json'] and not item['geo_json'] and not item['old_geo_id']:
+        display_items = list()
+
+        qs = ChangeRequest.objects
+        qs = qs.filter(group_id=item['id'])
+        if qs.count() > 1:
+            fields = get_fields(ChangeRequest)
+            хувьсах_талбарууд = _хувьсах_талбарууд()
+            display_items = get_display_items(
+                qs,
+                fields,
+                хувьсах_талбарууд
+            )
+        return display_items
+
+
+def _get_feature_name(feature_id, item):
+    qs = LFeatures.objects
+    qs = qs.filter(feature_id=feature_id)
+    qs = qs.first()
+    feature_name = qs.feature_name
+    return feature_name
+
+
+def _get_package_name(package_id, item):
+    qs = LPackages.objects
+    qs = qs.filter(package_id=package_id)
+    qs = qs.first()
+    package_name = qs.package_name
+
+    return package_name
+
+
+def _get_theme_name(theme_id, item):
+    qs = LThemes.objects
+    qs = qs.filter(theme_id=theme_id)
+    qs = qs.first()
+    theme_name = qs.theme_name
+
+    return theme_name
+
+
+def _get_theme_code(theme_id, item):
+    qs = LThemes.objects
+    qs = qs.filter(theme_id=theme_id)
+    qs = qs.first()
+    theme_code = qs.theme_code
+
+    return theme_code
+
+
+def _get_employee_name(employee_id, item):
+    first_name = None
+    if employee_id:
+        employee = Employee.objects.filter(id=employee_id).first()
+        first_name = employee.user.first_name
+    return first_name
+
+
+def _get_org_name(employee_id, item):
+    org_name = None
+    if employee_id:
+        employee = Employee.objects.filter(id=employee_id).first()
+        org_name = employee.org.name
+    return org_name
+
+
+def _get_display_text(field, value):
+    for f in ChangeRequest._meta.get_fields():
         if hasattr(f, 'choices'):
-            if f.name == field_name:
-                choices.append(f.choices)
-    return choices
+            if f.name == field:
+                for c_id, c_type in f.choices:
+                    if c_id == value:
+                        return c_type
 
 
-def _get_employees(request):
-    org = get_object_or_404(Employee, user=request.user).org
-    employees = Employee.objects.filter(org=org)
-    return employees
+def _choice_state_display(state, item):
+    display_name = _get_display_text('state', state)
+    return display_name
 
 
-def _get_emp_features(employees, request):
-    employee = employees.filter(user=request.user).first()
+def _choice_kind_display(kind, item):
+    display_name = _get_display_text('kind', kind)
+    return display_name
+
+
+def _str_to_json(form_json, item):
+    return json.loads(form_json) if form_json  else ''
+
+
+def _geojson_to_featurecollection(geo_json, item):
+    geo_json_list = list()
+    if item['old_geo_id']:
+
+        if item['geo_json']:
+            current_geo_json = get_feature_from_geojson(geo_json)
+            geo_json_list.append(current_geo_json)
+
+        old_geo_data = _get_geom(item['old_geo_id'], item['feature_id'])
+        if old_geo_data:
+            old_geo_data = old_geo_data[0]['geom']
+            old_geo_data = get_feature_from_geojson(old_geo_data)
+            geo_json_list.append(old_geo_data)
+
+    elif geo_json and not item['old_geo_id']:
+        geo_json = get_feature_from_geojson(geo_json)
+        geo_json_list.append(geo_json)
+
+    geo_json = FeatureCollection(geo_json_list)
+    return geo_json
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_list(request, payload):
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_features = _get_emp_features(employee)
+    if emp_features:
+        qs = ChangeRequest.objects
+        qs = qs.filter(feature_id__in=emp_features)
+        qs = qs.filter(kind=ChangeRequest.KIND_REVOKE)
+        if qs:
+            qs = qs.filter(group_id__isnull=True)
+            datatable = Datatable(
+                model=ChangeRequest,
+                payload=payload,
+                initial_qs=qs,
+                хувьсах_талбарууд=_хувьсах_талбарууд(),
+            )
+            items, total_page = datatable.get()
+
+            rsp = {
+                'items': items,
+                'page': payload.get('page'),
+                'total_page': total_page,
+            }
+
+        else:
+            rsp = {
+                'items': [],
+                'page': 1,
+                'total_page': 1,
+            }
+
+    else:
+        rsp = {
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
+    return JsonResponse(rsp)
+
+
+def _get_emp_features(employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     emp_features = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).values_list('feature_id', flat=True)
     emp_feature = []
@@ -76,52 +265,67 @@ def _get_emp_features(employees, request):
     return emp_feature
 
 
-@require_POST
+def _get_emp_inspire_roles(user):
+    employee = Employee.objects.filter(user=user).first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm).distinct('feature_id').values_list('feature_id', flat=True)
+    package_ids = LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True)
+    theme_ids = LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True)
+    return feature_ids, package_ids, theme_ids
+
+
+def _get_features(package_id, feature_ids):
+    features = []
+    inspire_features = LFeatures.objects.filter(package_id=package_id).values('feature_id', 'feature_name')
+    for org_feature in inspire_features:
+        if org_feature['feature_id'] in feature_ids:
+            features.append({
+                'id': org_feature['feature_id'],
+                'name': org_feature['feature_name'],
+            })
+    return features
+
+
+def _get_packages(theme_id, package_ids, feature_ids):
+    packages = []
+    inspire_packages = LPackages.objects.filter(theme_id=theme_id).values('package_id', 'package_name')
+    for package in inspire_packages:
+        if package['package_id'] in package_ids:
+            packages.append({
+                'id': package['package_id'],
+                'name': package['package_name'],
+                'features': _get_features(package['package_id'], feature_ids)
+            })
+    return packages
+
+
+@require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def revoke_paginate(request, payload):
-    employees = _get_employees(request)
-    emp_features = _get_emp_features(employees, request)
+def get_choices(request):
+    choices = []
+    modules = []
+    for f in ChangeRequest._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == 'state':
+                choices.append(f.choices)
+            if f.name == 'kind':
+                choices.append(f.choices)
 
-    page = payload.get('page')
-    per_page = payload.get('per_page')
-    query = payload.get('query') or ''
-    state = payload.get('state')
-
-    revoke_requests = ChangeRequest.objects.annotate(
-        search=SearchVector(
-            'order_no',
-            'employee__user__first_name',
-            'employee__user__last_name'
-        )
-    ).filter(
-        search__icontains=query,
-        kind=ChangeRequest.KIND_REVOKE,
-        feature_id__in=emp_features,
-    ).order_by('-created_at')
-
-    if state:
-        revoke_requests = revoke_requests.filter(
-            state=state
-        )
-
-    total_items = Paginator(revoke_requests, per_page)
-    items_page = total_items.page(page)
-    items = [
-        _get_revoke_request_display(revoke_request)
-        for revoke_request in items_page.object_list
-    ]
-
-    total_page = total_items.num_pages
+    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(request.user)
+    themes = LThemes.objects.filter(theme_id__in=theme_ids)
+    for theme in themes:
+        modules.append({
+            'id': theme.theme_id,
+            'name': theme.theme_name,
+            'packages': _get_packages(theme.theme_id, package_ids, feature_ids)
+        })
 
     rsp = {
-        'items': items,
-        'page': page,
-        'total_page': total_page,
         'success': True,
-        'choices': _get_choices_from_model(ChangeRequest, 'state'),
+        'choices': choices,
+        'modules': modules
     }
-
     return JsonResponse(rsp)
 
 
