@@ -228,7 +228,10 @@ export class SearchBarComponent extends Component {
                     }
                     this.setState({ is_searching: !this.state.is_searching })
                 })
-                .catch(() => alert("Алдаа гарсан байна"))
+                .catch(() => {
+                    this.setState({ is_searching: !this.state.is_searching })
+                    alert("Алдаа гарсан байна")
+                })
         }
     }
 
@@ -281,7 +284,7 @@ export class SearchBarComponent extends Component {
                                 value={this.state.search_value}
                                 onChange={e => this.handleChange(e.target.value)}
                             />
-                            <a href="#" className="search-bundle-icon" onClick={this.handleSearch}>
+                            <a role="button" className="search-bundle-icon text-white" onClick={this.handleSearch}>
                                 {
                                     is_searching ?
                                         <i className="spinner-border text-light"></i>
@@ -293,8 +296,8 @@ export class SearchBarComponent extends Component {
                     </div>
                     {
                     search_datas.map((data, idx) =>
-                            <li className="list-group-item form-control" key={idx} id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>
-                                <i className="fa fa-history mr-3 text-secondary" id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>   {data.name}</i>
+                            <li className="list-group-item form-control list-active" key={idx} id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>
+                                <i className="fa fa-history mr-3 d-flex align-items-center" role="button" id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>   {data.name}</i>
                             </li>
                         )
                     }

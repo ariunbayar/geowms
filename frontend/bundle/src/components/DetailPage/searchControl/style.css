@@ -54,3 +54,13 @@
 .search-bundle-icon:hover {
     color: #fff !important
 }
+
+.list-active:hover{
+    color: #fff !important;
+    background-color: #034ea2;
+}
+
+.list-active:active{
+    color: #fff !important;
+    background-color: #034ea2;
+}
