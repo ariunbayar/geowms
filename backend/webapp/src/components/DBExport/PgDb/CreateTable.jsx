@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { service } from '../service';
 import BackButton from "@utils/Button/BackButton"
-import FieldForm from "./fieldForm"
+import SelectField from './selectField'
 
 export default class  PgForm extends Component {
 
@@ -11,29 +11,29 @@ export default class  PgForm extends Component {
         this.state = {
             id: props.match.params.id,
             table_id: props.match.params.table_id,
-            table_names: [],
-            view_names: [],
             table_name: '',
-            view_name: '',
-            view_fields: [],
-            table_fields: [],
-            matched_feilds: [],
-            selected_data_type: '',
-            table_field_error: [],
-            old_error_name: ''
+            themes: [],
+            packages: [],
+            features: [],
+            feature_name: '',
+            theme_name: '',
+            package_name: '',
+            selected_packages: [],
+            selected_features: [],
+            selected_dt_list: []
         }
 
         this.handleChange = this.handleChange.bind(this)
-        this.getViewNames = this.getViewNames.bind(this)
-        this.handleSetField = this.handleSetField.bind(this)
-        this.handleSave = this.handleSave.bind(this)
-        this.setSelectedField = this.setSelectedField.bind(this)
+        this.getInspireTree = this.getInspireTree.bind(this)
+        this.getFeatProperties = this.getFeatProperties.bind(this)
+        // this.handleSetField = this.handleSetField.bind(this)
+        // this.handleSave = this.handleSave.bind(this)
     }
 
     componentDidMount(){
         const {id, table_id} = this.state
-        if(table_id) this.handleGetDetial(id, table_id)
-        this.getViewNames(id)
+        // if(table_id) this.handleGetDetial(id, table_id)
+        this.getInspireTree(id)
     }
 
     handleGetDetial(id, table_id){
@@ -50,9 +50,9 @@ export default class  PgForm extends Component {
         })
     }
 
-    getViewNames(id){
-        service.pg_config.getViewNames(id).then(({view_names, table_names}) => {
-            this.setState({view_names, table_names})
+    getInspireTree(id){
+        service.pg_config.getInspireTree(id).then(({themes, packages, features}) => {
+            this.setState({themes, packages, features})
         })
     }
 
@@ -65,12 +65,51 @@ export default class  PgForm extends Component {
         })
     }
 
-    handleChange(e) {
+    handleChange(name, e) {
+        const { packages, features } = this.state
         const selected_value = e.target.value
-        var name = e.target.name
-        this.setState({ [name]: selected_value })
-        this.getTableFields(name, selected_value)
+        var data_list = {}
+        var seleted_datas = []
+        var array = []
 
+        if ( name == 'theme' ) {
+            data_list['theme_name'] = selected_value
+            array = [...packages]
+            seleted_datas = array.filter((data) => data.parent == selected_value)
+            data_list['selected_packages'] = seleted_datas
+        }
+
+        else if ( name == 'package' ) {
+            data_list['package_name'] = selected_value
+            array = [...features]
+            seleted_datas = array.filter((data) => data.parent == selected_value)
+            data_list['selected_features'] = seleted_datas
+        }
+        else {
+            data_list['feature_name'] = selected_value
+        }
+
+        this.setState({...data_list})
+    }
+
+    componentDidUpdate(pP, pS) {
+        const { theme_name, feature_name } = this.state
+        if (pS.theme_name != theme_name) {
+            if (!theme_name) {
+                this.setState({selected_features: []})
+            }
+        }
+        if (pS.feature_name != feature_name) {
+            if (feature_name) this.getFeatProperties(feature_name)
+        }
+    }
+
+    getFeatProperties(feature_code) {
+        service.pg_config.getProperties(feature_code).then(({state_name, table_fields}) => {
+            var fields = {}
+            fields[state_name] = table_fields
+            this.setState({ ...fields })
+        })
     }
 
     handleSave(){
@@ -143,117 +182,44 @@ export default class  PgForm extends Component {
         this.setState({ matched_feilds: joined, selected_data_type, table_field_error: check_error, old_error_name })
     }
 
-    setSelectedField(data) {
-        const { matched_feilds } = this.state
-        var selected_field = ''
-        if (Object.keys(matched_feilds).length > 0) {
-                var field_of_data = obj => obj.view_field == data.column_name
-                var index_of = matched_feilds.findIndex(field_of_data)
-                if (index_of != -1) {
-                    selected_field = matched_feilds[index_of].table_field
-                }
-        }
-        return selected_field
-    }
 
     render() {
         const {
-            table_names, table_id, id,
-            table_name, view_name,
-            view_names, view_fields,
-            table_fields, matched_feilds,
-            selected_data_type, table_field_error
+            table_id, id,
+            themes, theme_name, package_name,
+            feature_name, selected_features,
+            selected_packages
         } = this.state
-        var counts = {};
-        matched_feilds.forEach(function(x) {
-            counts[x.table_field] = (counts[x.table_field] || 0)+1;
-        })
-        this.over_dec = []
         return (
             <div className="card">
                 <div className="form-row card-body">
                     <div className="form-group col-md-4">
-                        <label htmlFor="id_view_name">Veiw-ийн нэр</label>
-                        <select
-                            className="form-control"
-                            name='view_name'
-                            id="id_view_name"
-                            onChange={(e) => this.handleChange(e)}
-                            value={view_name}
-                            disabled={table_id ? true : false}
-                        >
-                            <option value=""> -- View-ийн нэр сонгоно уу -- </option>
-                            {
-                                view_names.map((item, idx) =>
-                                    <option key={idx} value={item.relname}>{item.relname}</option>
-                                )
-                            }
-                        </select>
-                    </div>
-                    <div className="form-group col-md-4">
-                        <label htmlFor="id_table_name mt-1">Хүснэгтийн нэр</label>
-                        <select
-                            className="form-control"
-                            id="id_table_name"
-                            name='table_name'
-                            onChange={(e) => this.handleChange(e)}
-                            disabled={table_id ? true : false}
-                            value={table_name}
-                        >
-                            <option value=""> -- Хүснэгтийн нэр сонгоно уу -- </option>
-                            {
-                                table_names.map((item, idx) =>
-                                    <option key={idx} value={item.table_name}>{item.table_name}</option>
-                                )
-                            }
-                        </select>
-                    </div>
-                </div>
-                {
-                (view_fields && table_fields)
-                &&
-                <div className="card-body">
-                    {
-                        Object.keys(counts).length > 0
-                        &&
-                        <div className="form-group col-md-8">
-                            <label className="mt-1 text-danger text-justify">
-                                {
-                                    Object.keys(counts).map((value, idx)=> {
-                                        if ( counts[value] >1) {
-                                            this.over_dec.push(value)
-                                        }
-                                    }
-                                    )
-                                }
-                                {this.over_dec.length > 0 &&
-                                    this.over_dec.join(', ')  + ' талбар аль хэдийн сонгогдсон байна'
-                                }
-                            </label>
-                        </div>
-                    }
-                    {view_fields.map((data, idx) =>
-                        <FieldForm
-                            data_key={idx}
-                            table_fields={table_fields}
-                            data={data}
-                            matched_feilds={matched_feilds}
-                            handleSetField={this.handleSetField}
-                            setSelectedField={this.setSelectedField(data)}
-                            selected_data_type={selected_data_type}
+                        <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
+                        <input
+                            className='form-control'
                         />
-                    )}
-                    <a
-                        className="btn btn-primary text-white m-3"
-                        disabled={table_field_error.length > 0}
-                        onClick={this.handleSave}
-                    >
-                        {(table_field_error.length > 0 || this.over_dec.length > 0) && <i className="fa fa-spinner fa-spin"></i>}
-                        {(table_field_error.length > 0 || this.over_dec.length > 0) && <a className="text-light">Алдаатай байна.</a>}
-                        {!(table_field_error.length > 0 || this.over_dec.length > 0) && 'Хадгалах' }
-                    </a>
+                    </div>
                 </div>
-                }
+                <div className="form-row p-4">
+                    <SelectField
+                        title_name='theme'
+                        data_list={themes}
+                        defualt_value={theme_name}
+                        setSelect={this.handleChange}
+                    />
+                    <SelectField
+                        title_name='package'
+                        data_list={selected_packages}
+                        defualt_value={package_name}
+                        setSelect={this.handleChange}
+                    />
+                    <SelectField
+                        title_name='feature'
+                        data_list={selected_features}
+                        defualt_value={feature_name}
+                        setSelect={this.handleChange}
+                    />
+                </div>
                 <BackButton
                     {...this.props}
                     name={'Буцах'}

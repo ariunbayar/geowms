@@ -17,6 +17,20 @@ from django.views.decorators.csrf import csrf_exempt
 from main.decorators import ajax_required
 from main import utils
 
+from backend.inspire.models import (
+    LFeatures,
+    LThemes,
+    LPackages,
+    LFeatures,
+    LDataTypeConfigs,
+    LFeatureConfigs,
+    LProperties,
+    LValueTypes,
+    LCodeListConfigs,
+    LCodeLists,
+    LDataTypes
+)
+
 
 def _get_pg_conf(conn_id):
     another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
@@ -111,34 +125,39 @@ def _get_sql_execute(sql, cursor, fetch_type):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_pg_table_names(request, conn_id):
+    themes = LThemes.objects.all()
+    l_themes = []
+    l_packages = []
+    l_features = []
+    for theme in themes:
+        theme_name = theme.theme_name
+        theme_id = theme.theme_id
+        l_themes.append({
+            'name': theme_name,
+            'code': theme_id
+        })
+        packages = LPackages.objects.filter(theme_id=theme.theme_id)
+        for package in packages:
+            package_id = package.package_id
+            l_packages.append({
+                'name': package.package_name,
+                'code': package_id,
+                'parent': theme_id
+            })
 
-    cursor = connections['default'].cursor()
-    sql = '''
-        SELECT
-            relname
-        FROM
-            pg_class
-        WHERE
-            relkind = 'm'
-    '''
+            features = LFeatures.objects.filter(package_id=package_id)
+            for feat in features:
+                l_features.append({
+                    'name': feat.feature_name,
+                    'code': feat.feature_id,
+                    'parent': feat.package_id
+                })
 
-    sql_pg = '''
-        SELECT
-            table_name
-        FROM
-            information_schema.tables
-        WHERE
-            table_type='BASE TABLE'
-            and table_schema='public'
-    '''
-
-    cursor_pg = _get_cursor_pg(conn_id)
-    view_names = _get_sql_execute(sql, cursor, 'all')
-    table_names = _get_sql_execute(sql_pg, cursor_pg, 'all')
 
     return JsonResponse({
-        'view_names': view_names or [],
-        'table_names': table_names or []
+        'themes': l_themes,
+        'packages': l_packages,
+        'features': l_features
     })
 
 
@@ -160,27 +179,48 @@ def _get_pg_table_fields(schema_name, cursor):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def getFields(request, payload):
+    feature_id = payload.get('feature_id')
+    data_type_list = []
+    feature_configs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    for feature_config in feature_configs:
+        data_type_configs = LDataTypeConfigs.objects.filter(
+            data_type_id=feature_config.data_type_id
+        )
 
-    table_fields = []
-    state_name = ''
-    cursor = []
-    name = payload.get('name')
-    id = payload.get('id')
-    value = payload.get('value')
+        for data_type_config in data_type_configs:
+            property_id = data_type_config.property_id
+            data_type_id = data_type_config.data_type_id
+            if property_id and data_type_id:
+                code_data_list = []
+                data_type = LDataTypes.objects.filter(
+                    data_type_id=data_type_config.data_type_id
+                ).first()
 
-    if name == 'table_name':
-        cursor = _get_cursor_pg(id)
-        state_name = 'table_fields'
+                property_data = LProperties.objects.filter(
+                    property_id=data_type_config.property_id
+                ).first()
 
-    else:
-        cursor = connections['default'].cursor()
-        state_name = 'view_fields'
+                value_types = ['boolean', 'multi-select', 'single-select']
+                if property_data.value_type_id in value_types:
+                    code_lists = LCodeLists.objects.filter(property_id=property_id)
+                    for code_list in code_lists:
+                        code_data_list.append({
+                            'code_list_name': code_list.code_list_name,
+                            'code_list_code': code_list.code_list_code,
+                            'code_list_id': code_list.code_list_id
+                        })
 
-    table_fields = _get_pg_table_fields(value, cursor)
+                data_type_list.append({
+                    'data_type_code': data_type.data_type_code,
+                    'data_type_name': data_type.data_type_name,
+                    'property_name': property_data.property_name,
+                    'property_code': property_data.property_name,
+                    'property_id': property_data.property_id,
+                    'code_list': code_data_list
+                })
 
     return JsonResponse({
-        'state_name': state_name,
-        'table_fields': table_fields or []
+        'data_type_list': data_type_list
     })
 
 
