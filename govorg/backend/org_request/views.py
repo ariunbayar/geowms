@@ -1,4 +1,6 @@
 import json
+import pytz
+from django.utils import timezone
 from geojson import FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
@@ -550,6 +552,10 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
             MDatas.objects.create(**value)
 
         elif approve_type == 'update':
+            check_value_date = 'value_date' in value
+            if check_value_date:
+                value_dates = value['value_date'].split('-')
+                value['value_date'] = datetime.datetime(int(value_dates[0]), int(value_dates[1]), int(value_dates[2]), tzinfo=pytz.UTC)
             MDatas.objects.filter(pk=form['pk']).update(**value)
 
     return True
