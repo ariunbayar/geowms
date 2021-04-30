@@ -336,25 +336,31 @@ def _get_type(value_type_id):
     return value_type
 
 
-def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, gid=None):
+def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid=None):
     properties = list()
+    pk = ''
     for l_property in qs_l_properties:
         data = dict()
         value_type = _get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
-        if gid:
-            data['pk'] = gid
-        data['data_type_id'] = l_data_type.data_type_id if l_data_type else ''
-        data['property_id'] = l_property.property_id
+        data_type_id = l_data_type.data_type_id
+        property_id = l_property.property_id
+        for feature_config_id in feature_config_ids:
+            m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id=feature_config_id, data_type_id=data_type_id, property_id=property_id).first()
+            if m_datas:
+                pk = m_datas.id
+        data['pk'] = pk
+        data['data_type_id'] = data_type_id
+        data['property_id'] = property_id
         data['property_name'] = l_property.property_name
         data['property_code'] = l_property.property_code
         data['property_definition'] = l_property.property_definition
         data['value_type_id'] = l_property.value_type_id
         data['value_type'] = value_type
-        value_text, data_list = _get_data_list_and_value_text(gid, fid, l_data_type.data_type_id, l_property.property_id, value_type)
+        value_text, data_list = _get_data_list_and_value_text(gid, fid, data_type_id, property_id, value_type)
         data['data'] =  value_text
         data['data_list'] =  data_list
-        data['roles'] =  _get_roles(request, fid, l_property.property_id)
+        data['roles'] =  _get_roles(request, fid, property_id)
         properties.append(data)
     return properties
 
@@ -409,6 +415,7 @@ def _get_data_types(qs_property_ids_of_feature, data_type_ids):
 def detail(request, gid, fid, tid):
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
+    feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
     data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
     qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
     property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
@@ -417,7 +424,7 @@ def detail(request, gid, fid, tid):
 
     rsp = {
         'success': True,
-        'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, gid),
+        'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid),
         'data_types': _get_data_types(qs_property_ids_of_feature, data_type_ids),
     }
 
@@ -430,6 +437,7 @@ def detail(request, gid, fid, tid):
 def detailCreate(request, tid, pid, fid):
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
+    feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
     data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
     qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
     property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
@@ -438,7 +446,7 @@ def detailCreate(request, tid, pid, fid):
 
     rsp = {
         'success': True,
-        'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid),
+        'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids),
         'data_types':  _get_data_types(qs_property_ids_of_feature, data_type_ids),
     }
     return JsonResponse(rsp)
