@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import { PortalDataTable } from "@utils/DataTable/index"
+import {NavLink} from "react-router-dom"
 
 
 export class EmployeeForm extends Component {
@@ -59,6 +60,7 @@ export class EmployeeForm extends Component {
             нэмэлт_талбарууд,
             is_user,
         } = this.state
+        const { is_admin } = this.props.employee
         return (
             <div className="card">
                 <div className="card-body">
@@ -83,7 +85,7 @@ export class EmployeeForm extends Component {
                             per_page={20}
                             уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                             хувьсах_талбарууд={хувьсах_талбарууд}
-                            нэмэх_товч={нэмэх_товч}
+                            нэмэх_товч={is_admin ? нэмэх_товч : null}
                             custom_query={custom_query}
                             нэмэлт_талбарууд={нэмэлт_талбарууд}
                             is_user={is_user}

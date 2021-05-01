@@ -82,7 +82,7 @@ export class Purchase extends Component {
     }
 
     handleModalClose(){
-        this.setState({is_modal_open: false})
+        this.setState({ is_modal_open: false })
     }
 
     handleQpay(){
@@ -174,10 +174,12 @@ export class Purchase extends Component {
                         </div>
                         { is_modal_open &&
                             <Modal
+                                has_button={true}
                                 modalAction={() => this.handleQpay()}
-                                modalClose={() => this.handleQpay()}
+                                modalClose={this.handleModalClose}
                                 text='QPay-ээр төлбөр төлөхөд шимтгэл авна.'
                                 title="Анхааруулга"
+                                actionNameBack={ this.state.actionNameBack }
                                 actionNameDelete="Үргэлжлүүлэх"
                                 model_type_icon="warning"
                                 status={this.state.status}

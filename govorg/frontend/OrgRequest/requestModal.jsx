@@ -40,7 +40,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                             Татгалзах
                         </button>
                     </div>
-                    <div className="ml-auto mr-3">
+                    <div className="ml-auto kindmr-3">
                         <button
                             className="btn gp-btn-outline-primary"
                             onClick={() => modalChange(
@@ -113,7 +113,6 @@ export default class RequestModal extends Component {
 
             values: props.values,
         }
-
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
@@ -305,6 +304,7 @@ export default class RequestModal extends Component {
 
         const selected_form_json = this.state.form_json
         const { is_loading, status, selected_value, values } = this.state
+        const hide_btn = this.props.hide_btn
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -325,7 +325,13 @@ export default class RequestModal extends Component {
                             <div className="col-md-12">
                                 <div className="row mt-2" style={{background:"white"}}>
                                     <div className="col-md-11">
-                                        <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
+                                        {
+                                            hide_btn
+                                            ?
+                                            <h5 className="text-center text-justify">Хүсэлт шийдвэрлэгдсэн </h5>
+                                            :
+                                            <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
+                                        }
                                     </div>
                                     <div className="col-md-1" onClick={() => this.handleClose()}>
                                         <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">
@@ -358,62 +364,68 @@ export default class RequestModal extends Component {
                                     :
                                         null
                                 }
-                                <div className="row my-2 mr-1 float-right">
-                                    <button
-                                        type="button mr-2 ml-2"
-                                        onClick={() => this.modalChange(
-                                            'reject',
-                                            'fa fa-exclamation-circle',
-                                            'warning',
-                                            "Тохиргоог татгалзах",
-                                            `Та ${
-                                                values.length == 1
-                                                    ?
-                                                        get_modal_text(values[0].kind)
-                                                    :
-                                                values.length > 1
-                                                    ?
-                                                        `сонгосон ${values.length} геометр өгөгдлөө`
-                                                    :
+                                {
+                                    hide_btn
+                                    ?
+                                        <div className="row my-2 mr-1 float-right"></div>
+                                    :
+                                        <div className="row my-2 mr-1 float-right">
+                                            <button
+                                                type="button mr-2 ml-2"
+                                                onClick={() => this.modalChange(
+                                                    'reject',
+                                                    'fa fa-exclamation-circle',
+                                                    'warning',
+                                                    "Тохиргоог татгалзах",
+                                                    `Та ${
+                                                        values.length == 1
+                                                            ?
+                                                                get_modal_text(values[0].kind)
+                                                            :
+                                                        values.length > 1
+                                                            ?
+                                                                `сонгосон ${values.length} геометр өгөгдлөө`
+                                                            :
+                                                            null
+                                                    }
+                                                    татгалзахдаа итгэлтэй байна уу?`,
+                                                    true,
+                                                    "татгалзах",
                                                     null
-                                            }
-                                            татгалзахдаа итгэлтэй байна уу?`,
-                                            true,
-                                            "татгалзах",
-                                            null
-                                        )}
-                                        className="btn gp-btn-primary waves-effect waves-light"
-                                    >
-                                        <i className="fa fa-check-square-o">Татгалзах</i>
-                                    </button>
-                                    <button
-                                        type="button mr-2 ml-2"
-                                        onClick={() => this.modalChange(
-                                            'approve',
-                                            'fa fa-exclamation-circle',
-                                            'warning',
-                                            "Тохиргоог зөвшөөрөх",
-                                            `Та ${
-                                                values.length == 1
-                                                    ?
-                                                        get_modal_text(values[0].kind)
-                                                    :
-                                                values.length > 1
-                                                    ?
-                                                        `сонгосон ${values.length} геометр өгөгдлөө`
-                                                    :
+                                                )}
+                                                className="btn gp-btn-primary waves-effect waves-light"
+                                            >
+                                                <i className="fa fa-check-square-o">Татгалзах</i>
+                                            </button>
+                                            <button
+                                                type="button mr-2 ml-2"
+                                                onClick={() => this.modalChange(
+                                                    'approve',
+                                                    'fa fa-exclamation-circle',
+                                                    'warning',
+                                                    "Тохиргоог зөвшөөрөх",
+                                                    `Та ${
+                                                        values.length == 1
+                                                            ?
+                                                                get_modal_text(values[0].kind)
+                                                            :
+                                                        values.length > 1
+                                                            ?
+                                                                `сонгосон ${values.length} геометр өгөгдлөө`
+                                                            :
+                                                            null
+                                                    }
+                                                    зөвшөөрөхдөө итгэлтэй байна уу?`,
+                                                    true,
+                                                    "зөвшөөрөх",
                                                     null
-                                            }
-                                            зөвшөөрөхдөө итгэлтэй байна уу?`,
-                                            true,
-                                            "зөвшөөрөх",
-                                            null
-                                        )}
-                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                    >
-                                        <i className="fa fa-check">Зөвшөөрөх</i>
-                                    </button>
-                                </div>
+                                                )}
+                                                className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                                            >
+                                                <i className="fa fa-check">Зөвшөөрөх</i>
+                                            </button>
+                                        </div>
+                                }
                              <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
                             </div>
                         </div>

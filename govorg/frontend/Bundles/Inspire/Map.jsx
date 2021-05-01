@@ -269,7 +269,7 @@ export default class BarilgaSuurinGazar extends Component{
       })}
 
       this.setState({map_wms})
-      map_wms.tile.setZIndex(101)
+      map_wms.tile.setZIndex(2)
       this.map.addLayer(map_wms.tile);
 
       const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
@@ -371,7 +371,7 @@ export default class BarilgaSuurinGazar extends Component{
         })
       })
       this.setState({vector_layer})
-      vector_layer.setZIndex(101)
+      vector_layer.setZIndex(3)
 
       const vector = new VectorLayer({
         source: new VectorSource(),
