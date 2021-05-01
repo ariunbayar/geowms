@@ -341,75 +341,83 @@ def _geojson_to_geom(geo_json):
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_id):
 
-    # try:
-    columns.sort()
-    feature_id = LFeatures.objects.filter(feature_name=feature_id).first().feature_id
-    fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
-    feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+    try:
+        columns.sort()
+        feature_id = LFeatures.objects.filter(feature_name=feature_id).first().feature_id
+        fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
+        feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
 
-    detete_query = '''
-        DROP TABLE IF EXISTS public.{table_name}
-    '''.format(table_name=table_name)
+        detete_query = '''
+            DROP TABLE IF EXISTS public.{table_name}
+        '''.format(table_name=table_name)
 
-    crosstab_query = '''
-        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
-    '''
+        crosstab_query = '''
+            CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
+        '''
 
-    property_columns = []
-    for feild in range(len(fields)):
-        property_split = '''
-            {code} character varying(100)
-            '''.format(
-                code=fields[feild].lower()
+        property_columns = []
+        for feild in range(len(fields)):
+            property_split = '''
+                {code} character varying(100)
+                '''.format(
+                    code=fields[feild].lower()
+                )
+            property_columns.append(property_split)
+
+        query = '''
+            CREATE TABLE public.{table_name}
+            (
+                geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL,
+                geo_data geometry(GeometryZ,4326),
+                feature_id integer,
+                {columns}
             )
-        property_columns.append(property_split)
-
-    query = '''
-        CREATE TABLE public.{table_name}
-        (
-            geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL,
-            geo_data geometry(GeometryZ,4326),
-            feature_id integer,
-            {columns}
+        '''.format(
+            table_name=table_name,
+            columns=','.join(property_columns)
         )
-    '''.format(
-        table_name=table_name,
-        columns=','.join(property_columns)
-    )
 
-    query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id)'''.format(table_name=table_name)
-    cursor.execute(detete_query)
-    cursor.execute(crosstab_query)
-    cursor.execute(query)
-    cursor.execute(query_index)
+        query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id)'''.format(table_name=table_name)
+        cursor.execute(detete_query)
+        cursor.execute(crosstab_query)
+        cursor.execute(query)
+        cursor.execute(query_index)
 
-    data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
+        data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
 
-    for data in data_lists:
-        property_data = []
-        for field in fields:
-            field_name = field.lower()
-            field_data = data.get(field_name) or ''
-            property_data.append(field_data)
-        geo_data = data['geo_data']
-        geo_data = _geojson_to_geom(geo_data)
-        insert_query = '''
-            INSERT INTO public.{table_name}(
-                geo_id, geo_data, feature_id, {columns}
-            )
-            VALUES ({geo_id}, ST_Transform({geo_data}, 4326), {feature_id},{columns_data});
-            '''.format(
-                table_name=table_name,
-                geo_id=data['geo_id'],
-                geo_data=geo_data,
-                feature_id=feature_id,
-                columns=','.join(fields),
-                columns_data=','.join(property_data)
-            )
-        cursor.execute(insert_query)
-
-    # except Exception:
-    #     return False
+        for data in data_lists:
+            property_data = []
+            for field in fields:
+                field_name = field.lower()
+                field_data = data.get(field_name) or ''
+                property_d = '''
+                '{field_data}'
+                '''.format(field_data=field_data)
+                property_data.append(property_d)
+            geo_data = data['geo_data']
+            geo_data = _geojson_to_geom(geo_data)
+            sql_trans = '''
+                SELECT ST_SetSRID(GeomFromEWKT('{geo_data}'),4326) as wkt
+            '''.format(geo_data=geo_data)
+            geo_data =  _get_sql_execute(sql_trans, cursor, 'all')
+            geo_data = geo_data[0]['wkt']
+            insert_query = '''
+                INSERT INTO public.{table_name}(
+                    geo_id, geo_data, feature_id, {columns}
+                )
+                VALUES ({geo_id}, '{geo_data}', {feature_id},{columns_data});
+                '''.format(
+                    table_name=table_name,
+                    geo_id=data['geo_id'],
+                    geo_data=geo_data,
+                    feature_id=feature_id,
+                    columns=','.join(fields),
+                    columns_data=', '.join(property_data)
+                )
+            cursor.execute(insert_query)
+        return True
+    except Exception:
+        return False
 
 
 @require_GET
