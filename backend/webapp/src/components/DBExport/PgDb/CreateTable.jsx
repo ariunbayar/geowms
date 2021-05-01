@@ -173,6 +173,7 @@ export default class  PgForm extends Component {
                             className='form-control'
                             type='text'
                             value={table_name}
+                            disabled={table_id ? true : false}
                             onChange={(e) => this.setState({table_name: e.target.value})}
                         />
                     </div>
