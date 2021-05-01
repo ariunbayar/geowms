@@ -1,8 +1,7 @@
-import pyodbc
 import datetime
-import psycopg2
 
 from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse
@@ -16,6 +15,22 @@ from django.views.decorators.csrf import csrf_exempt
 
 from main.decorators import ajax_required
 from main import utils
+
+from backend.inspire.models import (
+    LFeatures,
+    LThemes,
+    LPackages,
+    LFeatures,
+    LDataTypeConfigs,
+    LFeatureConfigs,
+    LProperties,
+    LValueTypes,
+    LCodeListConfigs,
+    LCodeLists,
+    LDataTypes,
+    MGeoDatas,
+    MDatas
+)
 
 
 def _get_pg_conf(conn_id):
@@ -111,76 +126,84 @@ def _get_sql_execute(sql, cursor, fetch_type):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_pg_table_names(request, conn_id):
+    themes = LThemes.objects.all()
+    l_themes = []
+    l_packages = []
+    l_features = []
+    for theme in themes:
+        theme_name = theme.theme_name
+        theme_id = theme.theme_id
+        l_themes.append({
+            'name': theme_name,
+            'code': theme_id
+        })
+        packages = LPackages.objects.filter(theme_id=theme.theme_id)
+        for package in packages:
+            package_id = package.package_id
+            l_packages.append({
+                'name': package.package_name,
+                'code': package_id,
+                'parent': theme_id
+            })
 
-    cursor = connections['default'].cursor()
-    sql = '''
-        SELECT
-            relname
-        FROM
-            pg_class
-        WHERE
-            relkind = 'm'
-    '''
+            features = LFeatures.objects.filter(package_id=package_id)
+            for feat in features:
+                l_features.append({
+                    'name': feat.feature_name,
+                    'code': feat.feature_id,
+                    'parent': feat.package_id
+                })
 
-    sql_pg = '''
-        SELECT
-            table_name
-        FROM
-            information_schema.tables
-        WHERE
-            table_type='BASE TABLE'
-            and table_schema='public'
-    '''
-
-    cursor_pg = _get_cursor_pg(conn_id)
-    view_names = _get_sql_execute(sql, cursor, 'all')
-    table_names = _get_sql_execute(sql_pg, cursor_pg, 'all')
 
     return JsonResponse({
-        'view_names': view_names or [],
-        'table_names': table_names or []
+        'themes': l_themes,
+        'packages': l_packages,
+        'features': l_features
     })
-
-
-def _get_pg_table_fields(schema_name, cursor):
-    sql = '''
-        SELECT
-        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
-        FROM
-        pg_attribute
-        WHERE
-        attrelid = 'public.{schema_name}'::regclass AND    attnum > 0
-        ORDER  BY attnum
-    '''.format(schema_name=schema_name)
-    table_fields = _get_sql_execute(sql, cursor, 'all')
-    return table_fields
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def getFields(request, payload):
+    feature_id = payload.get('feature_id')
 
-    table_fields = []
-    state_name = ''
-    cursor = []
-    name = payload.get('name')
-    id = payload.get('id')
-    value = payload.get('value')
+    value_types = ['boolean', 'multi-select', 'single-select']
+    data_types_datas = []
+    data_type_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('data_type_id', flat=True))
 
-    if name == 'table_name':
-        cursor = _get_cursor_pg(id)
-        state_name = 'table_fields'
+    for data_type_id in data_type_ids:
+        properties = list(LDataTypeConfigs.objects.filter(data_type_id=data_type_id).values_list('property_id', flat=True))
+        data_types = LDataTypes.objects.filter(data_type_id=data_type_id).first()
+        if data_types and properties:
+            properties_data = []
+            for property_id in properties:
+                single_property = LProperties.objects.filter(property_id=property_id).first()
+                code_data_list = []
+                if single_property:
+                    if single_property.value_type_id in value_types:
+                        code_lists = LCodeLists.objects.filter(property_id=property_id)
+                        for code_list in code_lists:
+                            code_data_list.append({
+                                'code_list_name': code_list.code_list_name,
+                                'code_list_code': code_list.code_list_code,
+                                'code_list_id': code_list.code_list_id
+                            })
 
-    else:
-        cursor = connections['default'].cursor()
-        state_name = 'view_fields'
+                    properties_data.append({
+                        'property_name': single_property.property_name,
+                        'property_id': single_property.property_id,
+                        'code_list': code_data_list
+                    })
 
-    table_fields = _get_pg_table_fields(value, cursor)
+            data_types_datas.append({
+                'data_type_name': data_types.data_type_name,
+                'data_type_eng': data_types.data_type_name_eng,
+                'properties': properties_data
+            })
 
     return JsonResponse({
-        'state_name': state_name,
-        'table_fields': table_fields or []
+        'data_type_list': data_types_datas
     })
 
 
@@ -190,23 +213,29 @@ def getFields(request, payload):
 def save_table(request, payload):
     table_id = payload.get('table_id')
     id = payload.get('id')
-    matched_feilds = payload.get('matched_feilds')
-    view_name = payload.get('view_name')
+    feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
-
+    id_list = payload.get('id_list')
+    if not table_name:
+        return JsonResponse({
+            'success': False,
+            'info': 'Table-ийн нэр хоосон байна !!!'
+        })
+    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
             'table_name': table_name,
-            'feature_code': view_name,
-            'field_config': utils.json_dumps(matched_feilds),
+            'feature_code': feature_name.feature_code,
+            'field_config': utils.json_dumps(id_list),
             'another_database': another_database,
             'created_by': request.user
         }
     )
     return JsonResponse({
         'success': True,
+        'info': 'Амжилттай хадгалагдлаа'
     })
 
 
@@ -217,19 +246,15 @@ def table__detail(request, id, table_id):
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
     field_config = another_db_tb.field_config.replace("'", '"')
     field_config = utils.json_load(field_config)
+    feature = LFeatures.objects.filter(feature_code=another_db_tb.feature_code).first()
+    package = LPackages.objects.filter(package_id=feature.package_id).first()
 
-    cursor = connections['default'].cursor()
-    view_fields = _get_pg_table_fields(another_db_tb.feature_code, cursor)
-
-    cursor_pg = _get_cursor_pg(id)
-    table_fields = _get_pg_table_fields(another_db_tb.table_name, cursor_pg)
     form_datas = {
-        'id': another_db_tb.id,
-        'field_config': field_config,
+        'id_list': field_config,
         'table_name': another_db_tb.table_name,
-        'feature_code': another_db_tb.feature_code,
-        'view_fields': view_fields,
-        'table_field_names': table_fields
+        'feature_name': feature.feature_id,
+        'theme_name': package.theme_id,
+        'package_name': package.package_id
     }
 
     return JsonResponse({
@@ -238,90 +263,180 @@ def table__detail(request, id, table_id):
     })
 
 
-def _get_count_of_someone_db_table(table_name, cursor):
-    sql = '''
-        select
-            count(*)
-        from
-            {table_name}
+def _get_all_datas(feature_id, columns, properties, feature_config_ids):
+
+    query = '''
+            SELECT
+                d.geo_id,
+                ST_AsGeoJSON(ST_Transform(d.geo_data,4326)) as geo_data,
+                {columns},
+                d.feature_id
+            FROM
+                crosstab('
+                    select
+                        b.geo_id,
+                        b.property_id,
+                        COALESCE(
+                            b.code_list_id::character varying(1000),
+                            b.value_text::character varying(1000),
+                            b.value_number::character varying(1000),
+                            b.value_date::character varying(1000)
+                        ) as value_text
+                    from
+                        public.m_datas b
+                    inner join
+                        m_geo_datas mg
+                    on
+                        mg.geo_id = b.geo_id
+                    and
+                        mg.feature_id = {feature_id}
+                    where
+                        b.property_id in ({properties})
+                    and
+                        feature_config_id in ({feature_config_id})
+                    order by 1,2'::text
+                )
+            ct(geo_id character varying(100), {create_columns})
+            JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+        '''.format(
+                columns=', '.join(['ct.{}'.format(f) for f in properties]),
+                properties=', '.join(['{}'.format(f) for f in columns]),
+                feature_config_id=', '.join(['{}'.format(f) for f in feature_config_ids]),
+                create_columns=', '.join(['{} character varying(100)'.format(f) for f in properties]),
+                feature_id=feature_id,
+        )
+    cursor = connections['default'].cursor()
+    data_list =  _get_sql_execute(query, cursor, 'all')
+    return data_list
+
+
+def geoJsonConvertGeom(geojson):
+    with connections['default'].cursor() as cursor:
+
+        sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
+        cursor.execute(sql, [str(geojson)])
+        geom = cursor.fetchone()
+        geom =  ''.join(geom)
+        geom = GEOSGeometry(geom).hex
+        geom = geom.decode("utf-8")
+        return geom
+
+
+def _geojson_to_geom(geo_json):
+    geom = []
+    geo_json = str(geo_json).replace("\'", "\"")
+    geo_data = geoJsonConvertGeom(geo_json)
+    geom = ''.join(geo_data)
+    geom = GEOSGeometry(geom)
+
+    geom_type = GEOSGeometry(geom).geom_type
+    if geom_type == 'Point':
+        geom = MultiPoint(geom, srid=4326)
+    if geom_type == 'LineString':
+        geom = MultiLineString(geom, srid=4326)
+    if geom_type == 'Polygon':
+        geom = MultiPolygon(geom, srid=4326)
+
+    return geom
+
+
+def _drop_table(table_name, cursor):
+    detete_query = '''
+        DROP TABLE IF EXISTS public.{table_name}
+    '''.format(table_name=table_name)
+    cursor.execute(detete_query)
+
+
+def _create_extension(cursor):
+    crosstab_query = '''
+        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
+    '''
+    cursor.execute(crosstab_query)
+
+
+def _create_table(cursor, table_name, property_columns):
+
+    query = '''
+        CREATE TABLE public.{table_name}
+        (
+            geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL,
+            geo_data geometry(GeometryZ,4326),
+            feature_id integer,
+            {columns}
+        )
     '''.format(
-        table_name=table_name
+        table_name=table_name,
+        columns=','.join(property_columns)
     )
-    row_count = _get_sql_execute(sql, cursor, 'one')
-    return row_count
+
+    query_index = '''
+        CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id)
+    '''.format(table_name=table_name)
+
+    cursor.execute(query)
+    cursor.execute(query_index)
 
 
-def _get_row_to_list(field_name, dict_data):
-    row_list = []
-    for i in dict_data:
-        row_list.append(i[field_name])
-    return row_list
 
+def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
-def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
     try:
-        number_of_row = _get_count_of_someone_db_table(table_name, cursor_pg)
-        table_fields = _get_pg_table_fields(table_name, cursor_pg)
-        if number_of_row and columns:
-            matched_view_columns = ','.join(_get_row_to_list('view_field', columns))
-            sql = '''
-                select
-                    {column}
-                from
-                    {view_name}
-                limit
-                    {row_count}
-            '''.format(
-                view_name=feature_code,
-                row_count=number_of_row[0],
-                column=matched_view_columns
-            )
+        columns.sort()
+        feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
+        fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
+        feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
 
-            table_field_splits = []
-            for field in range(len(table_fields)):
-                if 'id' in table_fields[field]['column_name']:
-                    table_field_split = '''
-                        v.{table_field} = t.{table_field}
-                        '''.format(
-                            table_field=table_fields[field]['column_name'],
-                        )
-                    table_field_splits.append(table_field_split)
+        _drop_table(table_name, cursor)
+        _create_extension(cursor)
 
-            view_datas = _get_sql_execute(sql, cursor, 'all')
-            for i in range(number_of_row[0]):
-                update_fields = []
-                for j in range(len(columns)):
-                    view_field = columns[j]['view_field']
-                    table_data = view_datas[i][view_field]
-                    table_field = columns[j]['table_field']
-                    update_field = '''
-                        {table_field} = '{table_data}'
-                        '''.format(
-                            table_field=table_field,
-                            table_data=table_data
-                        )
-                    update_fields.insert(j, update_field)
+        property_columns = []
+        for feild in range(len(fields)):
+            property_split = '''
+                {code} character varying(100)
+                '''.format(
+                    code=fields[feild].lower()
+                )
+            property_columns.append(property_split)
 
-                    sql_update = '''
-                        UPDATE
-                            {table_name} AS v
-                        SET
-                            {update_fields}
-                        FROM
-                            (
-                                SELECT *, row_number() OVER(ORDER BY {any_column}) AS row
-                                FROM {table_name}
-                            ) t
-                        WHERE
-                            t.row={nd_row} and {table_field_splits}
-                    '''.format(
-                        table_name=table_name,
-                        update_fields=','.join(update_fields),
-                        nd_row=i+1,
-                        any_column=table_fields[0]['column_name'],
-                        table_field_splits=table_field_splits[0]
-                    )
-                    cursor_pg.execute(sql_update)
+        _create_table(cursor, table_name, property_columns)
+
+        data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
+
+        for data in data_lists:
+            property_data = []
+
+            for field in fields:
+                field_name = field.lower()
+                field_data = data.get(field_name) or ''
+                property_d = '''
+                '{field_data}'
+                '''.format(field_data=field_data)
+                property_data.append(property_d)
+
+            geo_data = data['geo_data']
+            geo_data = _geojson_to_geom(geo_data)
+
+            sql_set_srid = '''
+                SELECT ST_SetSRID(GeomFromEWKT('{geo_data}'),4326) as wkt
+            '''.format(geo_data=geo_data)
+
+            geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
+            geo_data = geo_data[0]['wkt']
+
+            insert_query = '''
+                INSERT INTO public.{table_name}(
+                    geo_id, geo_data, feature_id, {columns}
+                )
+                VALUES ('{geo_id}', '{geo_data}', {feature_id},{columns_data});
+                '''.format(
+                    table_name=table_name,
+                    geo_id=data['geo_id'],
+                    geo_data=geo_data,
+                    feature_id=feature_id,
+                    columns=','.join(fields),
+                    columns_data=', '.join(property_data)
+                )
+            cursor.execute(insert_query)
         return True
     except Exception:
         return False
@@ -332,8 +447,14 @@ def _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code):
 @user_passes_test(lambda u: u.is_superuser)
 def remove_pg_table(request, id, table_id):
 
-    pg_table = AnotherDatabaseTable.objects.filter(pk=table_id)
+    pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
+    try:
+        cursor_pg = _get_cursor_pg(id)
+        _drop_table(pg_table.table_name, cursor_pg)
+    except Exception:
+        return False
+
     return JsonResponse({
         'success': True,
     })
@@ -342,29 +463,31 @@ def remove_pg_table(request, id, table_id):
 @require_GET
 @csrf_exempt
 def refresh_datas(request, id):
-
     ano_db = get_object_or_404(AnotherDatabase, pk=id)
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
     cursor_pg = _get_cursor_pg(id)
-    cursor = connections['default'].cursor()
-    success = True
-    for table in ano_db_table_pg:
-        table_name = table.table_name
-        field_config = table.field_config.replace("'", '"')
-        columns = utils.json_load(field_config)
-        feature_code = table.feature_code
-        success = _insert_to_someone_db(table_name, cursor_pg, cursor, columns, feature_code)
-        if not success:
-            return JsonResponse({
-                'success': success,
-                'info': table_name.upper() + '-ийг шинэчилэхэд алдаа гарлаа. Талбаруудаа шалган уу !!'
-            })
+    if ano_db_table_pg:
+        success = True
+        for table in ano_db_table_pg:
+            table_name = table.table_name
+            field_config = table.field_config.replace("'", '"')
+            columns = utils.json_load(field_config)
+            feature_code = table.feature_code
+            success = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
+            if not success:
+                return JsonResponse({
+                    'success': success,
+                    'info': table_name.upper() + '-ийг шинэчилэхэд алдаа гарлаа'
+                })
 
-    ano_db.database_updated_at = datetime.datetime.now()
-    ano_db.save()
-
+        ano_db.database_updated_at = datetime.datetime.now()
+        ano_db.save()
+    else:
+        success = False
+        info = 'Хүснэгт үүсээгүй байна !!!'
     return JsonResponse({
         'success': success,
+        'info': info
     })
