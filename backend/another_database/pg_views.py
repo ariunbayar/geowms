@@ -468,22 +468,26 @@ def refresh_datas(request, id):
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
     cursor_pg = _get_cursor_pg(id)
-    success = True
-    for table in ano_db_table_pg:
-        table_name = table.table_name
-        field_config = table.field_config.replace("'", '"')
-        columns = utils.json_load(field_config)
-        feature_code = table.feature_code
-        success = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
-        if not success:
-            return JsonResponse({
-                'success': success,
-                'info': table_name.upper() + '-ийг шинэчилэхэд алдаа гарлаа'
-            })
+    if ano_db_table_pg:
+        success = True
+        for table in ano_db_table_pg:
+            table_name = table.table_name
+            field_config = table.field_config.replace("'", '"')
+            columns = utils.json_load(field_config)
+            feature_code = table.feature_code
+            success = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
+            if not success:
+                return JsonResponse({
+                    'success': success,
+                    'info': table_name.upper() + '-ийг шинэчилэхэд алдаа гарлаа'
+                })
 
-    ano_db.database_updated_at = datetime.datetime.now()
-    ano_db.save()
-
+        ano_db.database_updated_at = datetime.datetime.now()
+        ano_db.save()
+    else:
+        success = False
+        info = 'Хүснэгт үүсээгүй байна !!!'
     return JsonResponse({
         'success': success,
+        'info': info
     })
