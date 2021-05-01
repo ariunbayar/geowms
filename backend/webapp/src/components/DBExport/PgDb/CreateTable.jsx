@@ -225,16 +225,20 @@ export default class  PgForm extends Component {
                                             {data_type.properties.map((property, idx) =>
                                                 <>
                                                     <tr key={idx}>
-                                                        <th>
-                                                            <div className="p-0">
+                                                        <th className="d-flex justify-content-center">
+                                                            <div className="icheck-primary">
                                                                 <input
                                                                     name={property.property_name}
+                                                                    id={property.property_name}
                                                                     type="checkbox"
-                                                                    className="form-control"
                                                                     checked={id_list.indexOf(property.property_id) > -1}
                                                                     onChange={this.handleSetField}
                                                                     value={property.property_id}
                                                                 />
+                                                                <label
+                                                                    htmlFor={property.property_name}
+                                                                >
+                                                            </label>
                                                             </div>
                                                         </th>
                                                         <th>
