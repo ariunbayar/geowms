@@ -162,7 +162,6 @@ def get_pg_table_names(request, conn_id):
     })
 
 
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -228,7 +227,7 @@ def save_table(request, payload):
         pk=table_id,
         defaults={
             'table_name': table_name,
-            'feature_code': feature_name.feature_name,
+            'feature_code': feature_name.feature_code,
             'field_config': utils.json_dumps(id_list),
             'another_database': another_database,
             'created_by': request.user
@@ -247,7 +246,7 @@ def table__detail(request, id, table_id):
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
     field_config = another_db_tb.field_config.replace("'", '"')
     field_config = utils.json_load(field_config)
-    feature = LFeatures.objects.filter(feature_name=another_db_tb.feature_code).first()
+    feature = LFeatures.objects.filter(feature_code=another_db_tb.feature_code).first()
     package = LPackages.objects.filter(package_id=feature.package_id).first()
 
     form_datas = {
@@ -322,6 +321,7 @@ def geoJsonConvertGeom(geojson):
         geom = geom.decode("utf-8")
         return geom
 
+
 def _geojson_to_geom(geo_json):
     geom = []
     geo_json = str(geo_json).replace("\'", "\"")
@@ -339,21 +339,55 @@ def _geojson_to_geom(geo_json):
 
     return geom
 
-def _insert_to_someone_db(table_name, cursor, columns, feature_id):
+
+def _drop_table(table_name, cursor):
+    detete_query = '''
+        DROP TABLE IF EXISTS public.{table_name}
+    '''.format(table_name=table_name)
+    cursor.execute(detete_query)
+
+
+def _create_extension(cursor):
+    crosstab_query = '''
+        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
+    '''
+    cursor.execute(crosstab_query)
+
+
+def _create_table(cursor, table_name, property_columns):
+
+    query = '''
+        CREATE TABLE public.{table_name}
+        (
+            geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL,
+            geo_data geometry(GeometryZ,4326),
+            feature_id integer,
+            {columns}
+        )
+    '''.format(
+        table_name=table_name,
+        columns=','.join(property_columns)
+    )
+
+    query_index = '''
+        CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id)
+    '''.format(table_name=table_name)
+
+    cursor.execute(query)
+    cursor.execute(query_index)
+
+
+
+def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
     try:
         columns.sort()
-        feature_id = LFeatures.objects.filter(feature_name=feature_id).first().feature_id
+        feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
         fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
         feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
 
-        detete_query = '''
-            DROP TABLE IF EXISTS public.{table_name}
-        '''.format(table_name=table_name)
-
-        crosstab_query = '''
-            CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
-        '''
+        _drop_table(table_name, cursor)
+        _create_extension(cursor)
 
         property_columns = []
         for feild in range(len(fields)):
@@ -364,29 +398,13 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_id):
                 )
             property_columns.append(property_split)
 
-        query = '''
-            CREATE TABLE public.{table_name}
-            (
-                geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL,
-                geo_data geometry(GeometryZ,4326),
-                feature_id integer,
-                {columns}
-            )
-        '''.format(
-            table_name=table_name,
-            columns=','.join(property_columns)
-        )
-
-        query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id)'''.format(table_name=table_name)
-        cursor.execute(detete_query)
-        cursor.execute(crosstab_query)
-        cursor.execute(query)
-        cursor.execute(query_index)
+        _create_table(cursor, table_name, property_columns)
 
         data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
 
         for data in data_lists:
             property_data = []
+
             for field in fields:
                 field_name = field.lower()
                 field_data = data.get(field_name) or ''
@@ -394,18 +412,22 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_id):
                 '{field_data}'
                 '''.format(field_data=field_data)
                 property_data.append(property_d)
+
             geo_data = data['geo_data']
             geo_data = _geojson_to_geom(geo_data)
-            sql_trans = '''
+
+            sql_set_srid = '''
                 SELECT ST_SetSRID(GeomFromEWKT('{geo_data}'),4326) as wkt
             '''.format(geo_data=geo_data)
-            geo_data =  _get_sql_execute(sql_trans, cursor, 'all')
+
+            geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
             geo_data = geo_data[0]['wkt']
+
             insert_query = '''
                 INSERT INTO public.{table_name}(
                     geo_id, geo_data, feature_id, {columns}
                 )
-                VALUES ({geo_id}, '{geo_data}', {feature_id},{columns_data});
+                VALUES ('{geo_id}', '{geo_data}', {feature_id},{columns_data});
                 '''.format(
                     table_name=table_name,
                     geo_id=data['geo_id'],
@@ -425,8 +447,14 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_id):
 @user_passes_test(lambda u: u.is_superuser)
 def remove_pg_table(request, id, table_id):
 
-    pg_table = AnotherDatabaseTable.objects.filter(pk=table_id)
+    pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
+    try:
+        cursor_pg = _get_cursor_pg(id)
+        _drop_table(pg_table.table_name, cursor_pg)
+    except Exception:
+        return False
+
     return JsonResponse({
         'success': True,
     })
