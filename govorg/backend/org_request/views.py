@@ -563,7 +563,6 @@ def _request_to_m(request_datas):
             request_datas['form_json'], request_datas['feature_id'],
             request_datas['geo_id'], request_datas['approve_type']
         )
-
     if request_datas['approve_type'] == 'create':
         if geom:
             MGeoDatas.objects.create(

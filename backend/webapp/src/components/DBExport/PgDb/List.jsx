@@ -12,7 +12,7 @@ export default class List extends Component {
             id: props.match.params.id,
             жагсаалтын_холбоос: `/back/another-database/pg/tables/${props.match.params.id}/all/`,
             талбарууд: [
-                {'field': 'feature_code', "title": 'View-ийн нэр'},
+                {'field': 'feature_code', "title": 'Feature-ийн нэр'},
                 {'field': 'table_name', "title": 'Хүснэгтийн нэр'},
                 {'field': 'created_at', "title": 'Үүссэн'},
                 {'field': 'updated_at', "title": 'Зассан'},

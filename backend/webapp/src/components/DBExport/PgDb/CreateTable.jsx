@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { service } from '../service';
 import BackButton from "@utils/Button/BackButton"
-import FieldForm from "./fieldForm"
+import SelectField from './selectField'
 
 export default class  PgForm extends Component {
 
@@ -11,48 +11,49 @@ export default class  PgForm extends Component {
         this.state = {
             id: props.match.params.id,
             table_id: props.match.params.table_id,
-            table_names: [],
-            view_names: [],
             table_name: '',
-            view_name: '',
-            view_fields: [],
-            table_fields: [],
-            matched_feilds: [],
-            selected_data_type: '',
-            table_field_error: [],
-            old_error_name: ''
+            themes: [],
+            packages: [],
+            features: [],
+            feature_name: '',
+            theme_name: '',
+            package_name: '',
+            selected_packages: [],
+            selected_features: [],
+            selected_dt_list: [],
+            data_type_list: [],
+            id_list: []
         }
 
         this.handleChange = this.handleChange.bind(this)
-        this.getViewNames = this.getViewNames.bind(this)
+        this.getInspireTree = this.getInspireTree.bind(this)
+        this.getFeatProperties = this.getFeatProperties.bind(this)
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
-        this.setSelectedField = this.setSelectedField.bind(this)
+        this.getArray = this.getArray.bind(this)
     }
 
     componentDidMount(){
-        const {id, table_id} = this.state
-        if(table_id) this.handleGetDetial(id, table_id)
-        this.getViewNames(id)
+        const {id} = this.state
+        this.getInspireTree(id)
     }
 
-    handleGetDetial(id, table_id){
+    handleGetDetial( packages, features ){
+        const {table_id, id} = this.state
         service.pg_config.tableDetail(id, table_id).then(({success, form_datas}) => {
             if(success){
-                this.setState({
-                    table_name: form_datas.table_name,
-                    view_name: form_datas.feature_code,
-                    matched_feilds: form_datas.field_config,
-                    view_fields: form_datas.view_fields,
-                    table_fields: form_datas.table_field_names
-                })
+                form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
+                form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
+                this.setState({...form_datas})
             }
         })
     }
 
-    getViewNames(id){
-        service.pg_config.getViewNames(id).then(({view_names, table_names}) => {
-            this.setState({view_names, table_names})
+    getInspireTree(id){
+        const {table_id} = this.state
+        service.pg_config.getInspireTree(id).then(({themes, packages, features}) => {
+            this.setState({themes, packages, features})
+            if(table_id) this.handleGetDetial(packages, features)
         })
     }
 
@@ -65,195 +66,217 @@ export default class  PgForm extends Component {
         })
     }
 
-    handleChange(e) {
-        const selected_value = e.target.value
-        var name = e.target.name
-        this.setState({ [name]: selected_value })
-        this.getTableFields(name, selected_value)
+    getArray(data, selected_value) {
+        var array = [...data]
+        var seleted_datas = array.filter((data) => data.parent == selected_value)
+        return seleted_datas
+    }
 
+    handleChange(name, e) {
+        const { packages, features } = this.state
+        const selected_value = e.target.value
+        var data_list = {}
+        var seleted_datas = []
+        var array = []
+
+        if ( name == 'theme' ) {
+            data_list['theme_name'] = selected_value
+            seleted_datas = this.getArray(packages, selected_value)
+            data_list['selected_packages'] = seleted_datas
+        }
+
+        else if ( name == 'package' ) {
+            if (selected_value) {
+                data_list['package_name'] = selected_value
+                seleted_datas = this.getArray(features, selected_value)
+                data_list['selected_features'] = seleted_datas
+            }
+            else {
+                data_list['feature_name'] = ''
+            }
+        }
+        else {
+            data_list['feature_name'] = selected_value
+        }
+
+        if (! selected_value) {
+            data_list['selected_features'] = []
+            data_list['feature_name'] = ''
+        }
+
+        this.setState({...data_list})
+    }
+
+    componentDidUpdate(pP, pS) {
+        const { theme_name, feature_name, packages, features } = this.state
+        if (pS.feature_name != feature_name) {
+            if (feature_name) this.getFeatProperties(feature_name)
+            else this.setState({feature_name})
+        }
+
+        if (pS.packages != packages) {
+            this.setState({packages})
+        }
+
+        if (pS.features != features) {
+            this.setState({features})
+        }
+    }
+
+    getFeatProperties(feature_code) {
+        service.pg_config.getProperties(feature_code).then(({data_type_list}) => {
+            if (data_type_list && data_type_list.length > 0) {
+                this.setState({data_type_list})
+            }
+        })
     }
 
     handleSave(){
-        const {id, table_id, matched_feilds, view_name, table_name, table_field_error} = this.state
-        if (! table_field_error.length >0 && ! this.over_dec.length > 0){
-            service.pg_config.tableSave(id, table_id, matched_feilds, view_name, table_name).then(({success}) => {
-                if(success){
-                    alert("Амжилттай хадгаллаа.")
-                    this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
-                }
-            })
-        }
-    }
-
-    handleSetField(key, e){
-        const { view_fields, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
-        var data = e.target.value
-        var values = {
-            'table_field': data,
-            'view_field': view_fields[key].column_name
-        }
-        var joined = []
-        var check = false
-        var check_error = []
-        var error_name = ''
-        if(data) {
-            if (matched_feilds.length > 0) {
-                var value = obj => obj.view_field == view_fields[key].column_name
-                var index_of = matched_feilds.findIndex(value)
-                if (index_of != -1) {
-                    matched_feilds[index_of]['table_field'] = data
-                    joined = matched_feilds
-                }
-                else {
-                    joined = matched_feilds.concat(values)
-                }
-            }
-            else joined = matched_feilds.concat(values)
-
-            var index = e.target.selectedIndex
-            var optionElement = e.target.childNodes[index]
-            var selected_data_type =  optionElement.getAttribute('name')
-            error_name = table_field_error.filter(item => {
-                return item.toLowerCase().includes(data.toLowerCase())
-            })
-
-            if ((view_fields[key].data_type.slice(0,4) != selected_data_type.slice(0,4))) {
-                if (! error_name.length >0) {
-                    check_error.push(data)
-                }
+        const {id, table_id, table_name, id_list, feature_name} = this.state
+        service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
+            if(success){
+                alert("Амжилттай хадгаллаа.")
+                this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
             }
             else {
-                check = true
+                alert(info)
             }
-
-        }
-        else {
-            var array = [...matched_feilds]
-            for (let [i, layer] of array.entries()) {
-                if (layer.view_field == view_fields[key].column_name) {
-                    array.splice(i, 1);
-                }
-            }
-            joined = array
-        }
-
-        if (check || !data) {
-            check_error = []
-        }
-        this.setState({ matched_feilds: joined, selected_data_type, table_field_error: check_error, old_error_name })
+        })
     }
 
-    setSelectedField(data) {
-        const { matched_feilds } = this.state
-        var selected_field = ''
-        if (Object.keys(matched_feilds).length > 0) {
-                var field_of_data = obj => obj.view_field == data.column_name
-                var index_of = matched_feilds.findIndex(field_of_data)
-                if (index_of != -1) {
-                    selected_field = matched_feilds[index_of].table_field
-                }
+    handleSetField(e){
+        let id_list = this.state.id_list
+        const value = parseInt(e.target.value)
+        if (e.target.checked) {
+            id_list.push(value)
+        } else {
+            id_list = id_list.filter((oid) => oid != value)
         }
-        return selected_field
+        this.setState({id_list})
     }
+
 
     render() {
         const {
-            table_names, table_id, id,
-            table_name, view_name,
-            view_names, view_fields,
-            table_fields, matched_feilds,
-            selected_data_type, table_field_error
+            table_id, id,
+            themes, theme_name, package_name,
+            feature_name, selected_features,
+            selected_packages, data_type_list,
+            id_list, table_name
         } = this.state
-        var counts = {};
-        matched_feilds.forEach(function(x) {
-            counts[x.table_field] = (counts[x.table_field] || 0)+1;
-        })
-        this.over_dec = []
         return (
             <div className="card">
-                <div className="form-row card-body">
+                <div className="form-row card-body p-4 mx-1">
                     <div className="form-group col-md-4">
-                        <label htmlFor="id_view_name">Veiw-ийн нэр</label>
-                        <select
-                            className="form-control"
-                            name='view_name'
-                            id="id_view_name"
-                            onChange={(e) => this.handleChange(e)}
-                            value={view_name}
-                            disabled={table_id ? true : false}
-                        >
-                            <option value=""> -- View-ийн нэр сонгоно уу -- </option>
-                            {
-                                view_names.map((item, idx) =>
-                                    <option key={idx} value={item.relname}>{item.relname}</option>
-                                )
-                            }
-                        </select>
-                    </div>
-                    <div className="form-group col-md-4">
-                        <label htmlFor="id_table_name mt-1">Хүснэгтийн нэр</label>
-                        <select
-                            className="form-control"
-                            id="id_table_name"
-                            name='table_name'
-                            onChange={(e) => this.handleChange(e)}
-                            disabled={table_id ? true : false}
+                        <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
+                        <input
+                            className='form-control'
+                            type='text'
                             value={table_name}
-                        >
-                            <option value=""> -- Хүснэгтийн нэр сонгоно уу -- </option>
-                            {
-                                table_names.map((item, idx) =>
-                                    <option key={idx} value={item.table_name}>{item.table_name}</option>
-                                )
-                            }
-                        </select>
+                            disabled={table_id ? true : false}
+                            onChange={(e) => this.setState({table_name: e.target.value})}
+                        />
                     </div>
                 </div>
-                {
-                (view_fields && table_fields)
-                &&
-                <div className="card-body">
-                    {
-                        Object.keys(counts).length > 0
-                        &&
-                        <div className="form-group col-md-8">
-                            <label className="mt-1 text-danger text-justify">
-                                {
-                                    Object.keys(counts).map((value, idx)=> {
-                                        if ( counts[value] >1) {
-                                            this.over_dec.push(value)
-                                        }
-                                    }
-                                    )
-                                }
-                                {this.over_dec.length > 0 &&
-                                    this.over_dec.join(', ')  + ' талбар аль хэдийн сонгогдсон байна'
-                                }
-                            </label>
+                <div className="form-row col-md-9 p-4 mx-1">
+                    <SelectField
+                        title_name='theme'
+                        data_list={themes}
+                        defualt_value={theme_name}
+                        setSelect={this.handleChange}
+                    />
+                    <SelectField
+                        title_name='package'
+                        data_list={selected_packages}
+                        defualt_value={package_name}
+                        setSelect={this.handleChange}
+                    />
+                    <SelectField
+                        title_name='feature'
+                        data_list={selected_features}
+                        defualt_value={feature_name}
+                        setSelect={this.handleChange}
+                    />
+                </div>
+                { feature_name &&
+                    <div className="col-md-7 px-3">
+                            <table className="table table-bordered m-1">
+                                <thead>
+                                    <tr>
+                                        <th className="text-center" style={{width: "8%"}}>
+                                            Data <br/>type
+                                        </th>
+                                        <th className="text-center" style={{width: "5%"}}>
+                                        </th>
+                                        <th className="text-center" style={{width: "15%"}}>
+                                            Property
+                                        </th>
+                                    </tr>
+                                    {data_type_list.map((data_type, idx) =>
+                                        <>
+                                            <tr key={idx}>
+                                                <th rowSpan={data_type.properties.length +1}
+                                                    className="text-wrap align-middle text-justify m-4 pl-5"
+                                                >
+                                                    <span className="text-center align-middle">({data_type.data_type_name})</span><br/>
+                                                    <span className="text-center align-middle">{data_type.data_type_eng}</span><br/>
+                                                    <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
+                                                </th>
+                                            </tr>
+                                            {data_type.properties.map((property, idx) =>
+                                                <>
+                                                    <tr key={idx}>
+                                                        <th className="d-flex justify-content-center">
+                                                            <div className="icheck-primary">
+                                                                <input
+                                                                    name={property.property_name}
+                                                                    id={property.property_name}
+                                                                    type="checkbox"
+                                                                    checked={id_list.indexOf(property.property_id) > -1}
+                                                                    onChange={this.handleSetField}
+                                                                    value={property.property_id}
+                                                                />
+                                                                <label
+                                                                    htmlFor={property.property_name}
+                                                                >
+                                                            </label>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <label
+                                                                data-toggle="tooltip" data-placement="right"
+                                                                className="text-left"
+                                                                style={{marginLeft: "4%"}}
+                                                            >
+                                                                {property.property_name}
+                                                            </label>
+                                                        </th>
+                                                    </tr>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </thead>
+                            </table>
                         </div>
-                    }
-                    {view_fields.map((data, idx) =>
-                        <FieldForm
-                            data_key={idx}
-                            table_fields={table_fields}
-                            data={data}
-                            matched_feilds={matched_feilds}
-                            handleSetField={this.handleSetField}
-                            setSelectedField={this.setSelectedField(data)}
-                            selected_data_type={selected_data_type}
-                        />
-                    )}
-                    <a
-                        className="btn btn-primary text-white m-3"
-                        disabled={table_field_error.length > 0}
+                }
+                <div className="form-row col-md-12 p-4 m-1">
+                    {
+                    <button
+                        type="button"
+                        className="btn gp-btn-primary"
                         onClick={this.handleSave}
                     >
-                        {(table_field_error.length > 0 || this.over_dec.length > 0) && <i className="fa fa-spinner fa-spin"></i>}
-                        {(table_field_error.length > 0 || this.over_dec.length > 0) && <a className="text-light">Алдаатай байна.</a>}
-                        {!(table_field_error.length > 0 || this.over_dec.length > 0) && 'Хадгалах' }
-                    </a>
+                        {
+                            table_id
+                            ?
+                                "Засах"
+                            :
+                                "Хадгалах"
+                        }
+                    </button>
+                    }
                 </div>
-                }
                 <BackButton
                     {...this.props}
                     name={'Буцах'}
