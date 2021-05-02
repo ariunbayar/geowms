@@ -79,15 +79,16 @@ export default class List extends Component {
 
     refreshPgData(values){
         this.setState({is_loading: true})
-        service.pg_config.refreshTableData(values.id).then(({success, info}) => {
+        service.pg_config.refreshTableData(values.id).then(({success, info, table_info}) => {
             if (success) {
                 this.setState({is_loading: false})
+                var table_res = table_info.join("\n")
                 this.modalChange(
                     'fa fa-check-circle',
                     null,
                     'success',
                     'Амжилттай',
-                    ``,
+                    `${table_res}`,
                     false,
                     '',
                     '',

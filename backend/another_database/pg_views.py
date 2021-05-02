@@ -294,7 +294,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                         b.property_id in ({properties})
                     and
                         feature_config_id in ({feature_config_id})
-                    order by 1,2'::text
+                    '
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
@@ -379,42 +379,43 @@ def _create_table(cursor, table_name, property_columns):
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
-    try:
-        columns.sort()
-        feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
-        fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
-        feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+    columns.sort()
+    feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
+    fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
+    feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
 
-        _drop_table(table_name, cursor)
-        _create_extension(cursor)
+    _drop_table(table_name, cursor)
+    _create_extension(cursor)
 
-        property_columns = []
-        for feild in range(len(fields)):
-            property_split = '''
-                {code} character varying(100)
-                '''.format(
-                    code=fields[feild].lower()
-                )
-            property_columns.append(property_split)
+    property_columns = []
+    for feild in range(len(fields)):
+        property_split = '''
+            {code} character varying(100)
+            '''.format(
+                code=fields[feild].lower()
+            )
+        property_columns.append(property_split)
 
-        _create_table(cursor, table_name, property_columns)
+    _create_table(cursor, table_name, property_columns)
 
-        data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
+    data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
+    success_count = 0
+    failed_count = 0
+    total_count = len(data_lists)
+    for data in data_lists:
+        property_data = []
 
-        for data in data_lists:
-            property_data = []
+        for field in fields:
+            field_name = field.lower()
+            field_data = data.get(field_name) or ''
+            property_d = '''
+            '{field_data}'
+            '''.format(field_data=field_data)
+            property_data.append(property_d)
 
-            for field in fields:
-                field_name = field.lower()
-                field_data = data.get(field_name) or ''
-                property_d = '''
-                '{field_data}'
-                '''.format(field_data=field_data)
-                property_data.append(property_d)
-
-            geo_data = data['geo_data']
-            geo_data = _geojson_to_geom(geo_data)
-
+        geo_data = data['geo_data']
+        geo_data = _geojson_to_geom(geo_data)
+        try:
             sql_set_srid = '''
                 SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
             '''.format(geo_data=geo_data)
@@ -436,9 +437,10 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
                     columns_data=', '.join(property_data)
                 )
             cursor.execute(insert_query)
-        return True
-    except Exception:
-        return False
+            success_count = success_count + 1
+        except Exception:
+            failed_count = failed_count + 1
+    return success_count, failed_count, total_count
 
 
 @require_GET
@@ -467,6 +469,8 @@ def refresh_datas(request, id):
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
     cursor_pg = _get_cursor_pg(id)
+    table_info = []
+    info = ''
     if ano_db_table_pg:
         success = True
         for table in ano_db_table_pg:
@@ -474,13 +478,19 @@ def refresh_datas(request, id):
             field_config = table.field_config.replace("'", '"')
             columns = utils.json_load(field_config)
             feature_code = table.feature_code
-            success = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
-            if not success:
-                return JsonResponse({
-                    'success': success,
-                    'info': table_name.upper() + '-ийг шинэчилэхэд алдаа гарлаа'
-                })
-
+            success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
+            table_info_text = '''
+                {table_name} хүснэгт
+                нийт {total_count} мөр дата-наас
+                амжилттай орсон {success_count}
+                амжилтгүй {failed_count}
+                '''.format(
+                    table_name=table_name,
+                    total_count=total_count,
+                    success_count=success_count,
+                    failed_count=failed_count
+                )
+            table_info.append(table_info_text)
         ano_db.database_updated_at = datetime.datetime.now()
         ano_db.save()
     else:
@@ -488,5 +498,6 @@ def refresh_datas(request, id):
         info = 'Хүснэгт үүсээгүй байна !!!'
     return JsonResponse({
         'success': success,
-        'info': info
+        'info': info,
+        'table_info': table_info
     })
