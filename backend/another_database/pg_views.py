@@ -33,28 +33,6 @@ from backend.inspire.models import (
 )
 
 
-def _get_pg_conf(conn_id):
-    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
-    connection = utils.json_load(another_db.connection)
-    form_datas = {
-        'id': conn_id,
-        'name': another_db.name,
-        'definition': another_db.definition,
-        'pg_host': connection.get('server'),
-        'pg_port': connection.get('port'),
-        'pg_username': connection.get('username'),
-        'pg_password': connection.get('password'),
-        'pg_database': connection.get('database'),
-    }
-    return form_datas
-
-
-def _get_cursor_pg(conn_id):
-    form_datas = _get_pg_conf(conn_id)
-    cursor_pg = _get_pg_cursor(form_datas)
-    return cursor_pg
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -62,7 +40,7 @@ def config_detail(request, pk):
 
     rsp = {
         'success': True,
-        'values': _get_pg_conf(pk)
+        'values': utils.get_pg_conf(pk)
     }
     return JsonResponse(rsp)
 
@@ -99,18 +77,6 @@ def get_pg_table_list(request, payload, pk):
 
     return JsonResponse(rsp)
 
-
-def _get_pg_cursor(conn_details):
-    host = conn_details.get('pg_host')
-    port = conn_details.get('pg_port')
-    user = conn_details.get('pg_username')
-    password = conn_details.get('pg_password')
-    db = conn_details.get('pg_database')
-    try:
-        cursor = utils.check_pg_connection(host, db, port, user, password)
-    except Exception:
-        cursor = []
-    return cursor
 
 
 def _get_sql_execute(sql, cursor, fetch_type):
@@ -416,12 +382,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
         geo_data = data['geo_data']
         geo_data = _geojson_to_geom(geo_data)
         try:
-            sql_set_srid = '''
-                SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
-            '''.format(geo_data=geo_data)
-
-            geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
-            geo_data = geo_data[0]['wkt']
+            geo_data = utils.convert_3d_with_srid(geo_data)
 
             insert_query = '''
                 INSERT INTO public.{table_name}(
@@ -451,7 +412,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = _get_cursor_pg(id)
+        cursor_pg = utils.get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -468,7 +429,7 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = _get_cursor_pg(id)
+    cursor_pg = utils.get_cursor_pg(id)
     table_info = []
     info = ''
     success = True

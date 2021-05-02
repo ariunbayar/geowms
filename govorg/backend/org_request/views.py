@@ -7,7 +7,12 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
-from main.utils import get_geoJson
+from main.utils import (
+    get_geoJson,
+    get_cursor_pg,
+    convert_3d_with_srid
+)
+
 import datetime
 import random
 from backend.org.models import Org, Employee
@@ -16,6 +21,8 @@ from django.db.models import Q
 from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from backend.geoserver.models import WmtsCacheConfig
+from backend.another_database.models import AnotherDatabase
+from backend.another_database.models import AnotherDatabaseTable
 from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
     LThemes,
@@ -603,6 +610,55 @@ def _check_group_items(r_approve):
         r_approve.group_id = None
 
 
+def insert_data_another_table(feature_id, geo_data, geo_id,  change_type):
+    if geo_data:
+        geo_data = _geojson_to_geom(geo_data)
+        geo_data = convert_3d_with_srid(geo_data)
+
+    feature_code = LFeatures.objects.filter(feature_id=feature_id).first().feature_code
+
+    data_qs = AnotherDatabaseTable.objects.filter(another_database__is_export=True)
+    data_qs = data_qs.filter(feature_code=feature_code)
+    print("hoho")
+    print("hoho")
+    print("hoho")
+    print("hoho")
+    print(geo_id)
+    for data in data_qs:
+        data_table_id = data.another_database_id
+        table_name = data.table_name
+        cursor_pg = get_cursor_pg(data_table_id)
+        if change_type == 'create':
+            query = '''
+                INSERT INTO public.{table_name}(
+                    geo_id, geo_data)
+                VALUES ({geo_id}, {geo_data});
+            '''.format(
+                geo_id=geo_id,
+                geo_data=geo_data,
+            )
+
+        elif change_type == 'create':
+            query = '''
+                UPDATE public.{table_name}
+                    SET geo_data={geo_data}
+                WHERE geo_id={geo_id};
+            '''.format(
+                geo_data=geo_data,
+                geo_id=geo_id,
+                table_name=table_name
+            )
+        else:
+            query = '''
+                delete from public.{table_name}
+                WHERE geo_id={geo_id};
+            '''.format(
+                geo_id=geo_id,
+                table_name=table_name
+            )
+        cursor_pg.execute(query)
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -652,6 +708,7 @@ def request_approve(request, payload):
                     success = _request_to_m(request_datas)
                     if success and new_geo_id:
                         r_approve.new_geo_id = new_geo_id
+                        insert_data_another_table(feature_id, geo_json, new_geo_id, 'create')
 
                 if r_approve.kind == ChangeRequest.KIND_UPDATE:
                     if geo_json:
@@ -664,6 +721,7 @@ def request_approve(request, payload):
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
                         success = _request_to_m(request_datas)
+                        insert_data_another_table(feature_id,geo_json, old_geo_id, 'update')
 
                     else:
                         m_geo_datas_qs.delete()
@@ -685,6 +743,7 @@ def request_approve(request, payload):
                         mdatas_qs = MDatas.objects
                         mdatas_qs = mdatas_qs.filter(geo_id=old_geo_id)
                         mdatas_qs.delete()
+                        insert_data_another_table(feature_id, [], old_geo_id, 'delete')
                     else:
                         r_approve.state = ChangeRequest.STATE_REJECT
                         r_approve.save()
