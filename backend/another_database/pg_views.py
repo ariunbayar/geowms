@@ -416,7 +416,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
             geo_data = _geojson_to_geom(geo_data)
 
             sql_set_srid = '''
-                SELECT ST_SetSRID(GeomFromEWKT('{geo_data}'),4326) as wkt
+                SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
             '''.format(geo_data=geo_data)
 
             geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
