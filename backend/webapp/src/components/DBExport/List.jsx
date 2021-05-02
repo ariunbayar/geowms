@@ -111,20 +111,6 @@ export default class List extends Component {
                 )
             }
 
-        }).catch(() => {
-            this.setState({is_loading: false})
-            this.modalChange(
-                'fa fa-check-circle',
-                null,
-                'danger',
-                'Алдаа гарсан байна',
-                ``,
-                false,
-                '',
-                '',
-                null,
-                null
-            )
         })
     }
 
