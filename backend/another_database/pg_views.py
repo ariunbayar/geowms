@@ -370,12 +370,11 @@ def _create_table(cursor, table_name, property_columns):
     )
 
     query_index = '''
-        CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id)
+        CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {table_name}(geo_id)
     '''.format(table_name=table_name)
 
     cursor.execute(query)
     cursor.execute(query_index)
-
 
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
