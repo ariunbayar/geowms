@@ -471,8 +471,8 @@ def refresh_datas(request, id):
     cursor_pg = _get_cursor_pg(id)
     table_info = []
     info = ''
+    success = True
     if ano_db_table_pg:
-        success = True
         for table in ano_db_table_pg:
             table_name = table.table_name
             field_config = table.field_config.replace("'", '"')
