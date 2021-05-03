@@ -79,7 +79,6 @@ export default class  PgForm extends Component {
         var data_list = {}
         var seleted_datas = []
         var array = []
-        console.log(data_list);
 
         if ( name == 'theme' ) {
             data_list['theme_name'] = selected_value
