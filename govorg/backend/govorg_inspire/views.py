@@ -341,6 +341,7 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
     pk = ''
     value_text = ''
     data_list = []
+    code_list_id = ''
     for l_property in qs_l_properties:
         data = dict()
         value_type = _get_type(l_property.value_type_id)
@@ -352,6 +353,7 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
             if m_datas:
                 pk = m_datas.id
                 value_text, data_list = _get_data_list_and_value_text(gid, m_datas.feature_config_id, data_type_id, property_id, value_type)
+                code_list_id = m_datas.code_list_id
         data['pk'] = pk
         data['data_type_id'] = data_type_id
         data['property_id'] = property_id
@@ -363,7 +365,9 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data['data'] =  value_text
         data['data_list'] =  data_list
         data['roles'] =  _get_roles(request, fid, property_id)
+        data['code_list_id'] = code_list_id
         properties.append(data)
+    # print(json.dumps(properties, ensure_ascii=False))
     return properties
 
 
