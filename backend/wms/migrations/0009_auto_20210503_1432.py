@@ -14,7 +14,6 @@ def set_link(apps, schema_editor):
             if 1 < len(splited_url):
                use_url = 'https://geo.nsdi.gov.mn' + splited_url[1]
                wms.url = use_url
-               wms.save()
         if wms.cache_url:
             cache_url = wms.cache_url
             if 'http://nsdi.gov.mn:8080/geoserver/' in wms.cache_url:
@@ -22,13 +21,12 @@ def set_link(apps, schema_editor):
                 if 1 < len(splited_url):
                     use_cache_url = 'https://geo.nsdi.gov.mn' + splited_url[1]
                     wms.cache_url = use_cache_url
-                    wms.save()
             if 'http://192.168.10.15:8080/geoserver/' in wms.cache_url:
                 splited_url = cache_url.split('http://192.168.10.15:8080/geoserver')
                 if 1 < len(splited_url):
                     use_cache_url = 'http://192.168.10.15:8080' + splited_url[1]
                     wms.cache_url = use_cache_url
-                    wms.save()
+        wms.save()
 
 
 class Migration(migrations.Migration):
