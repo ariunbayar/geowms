@@ -23,7 +23,6 @@ export default class  PgForm extends Component {
             selected_dt_list: [],
             data_type_list: [],
             id_list: [],
-            hdn_table:true
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -170,7 +169,6 @@ export default class  PgForm extends Component {
             id_list, table_name,
             hdn_table
         } = this.state
-        console.log(hdn_table);
         return (
             <div className="card">
                 <div className="form-row card-body p-4 mx-1">
