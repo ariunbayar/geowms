@@ -300,11 +300,7 @@ def proxy(request, wms_id):
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     url = wms.url
-    # if 'https://geo.nsdi.gov.mn/' in url:
-    #     splited_url = url.split('https://geo.nsdi.gov.mn/')
-    #     if 1 < len(splited_url):
-    #         url = 'http://192.168.10.15:8080/' + splited_url[1]
-    rsp = requests.get(url, queryargs, headers=headers)
+    rsp = requests.get(url, queryargs, headers=headers, verify=False)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
