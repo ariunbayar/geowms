@@ -610,7 +610,7 @@ def _check_group_items(r_approve):
         r_approve.group_id = None
 
 
-def insert_data_another_table(feature_id, geo_data, geo_id,  change_type):
+def _insert_data_another_table(feature_id, geo_data, geo_id,  change_type):
     if geo_data:
         geo_data = _geojson_to_geom(geo_data)
         geo_data = convert_3d_with_srid(geo_data)
@@ -639,7 +639,7 @@ def insert_data_another_table(feature_id, geo_data, geo_id,  change_type):
                 query = '''
                     UPDATE public.{table_name}
                         SET geo_data='{geo_data}'
-                    WHERE geo_id={geo_id};
+                    WHERE geo_id='{geo_id}';
                 '''.format(
                     geo_data=geo_data,
                     geo_id=geo_id,
@@ -648,7 +648,7 @@ def insert_data_another_table(feature_id, geo_data, geo_id,  change_type):
             else:
                 query = '''
                     delete from public.{table_name}
-                    WHERE geo_id={geo_id};
+                    WHERE geo_id='{geo_id}';
                 '''.format(
                     geo_id=geo_id,
                     table_name=table_name
@@ -674,7 +674,6 @@ def request_approve(request, payload):
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
     requests_qs = ChangeRequest.objects
     requests_qs = requests_qs.filter(id__in=request_ids)
-
     with transaction.atomic():
         for r_approve in requests_qs:
             feature_id = r_approve.feature_id
@@ -691,7 +690,7 @@ def request_approve(request, payload):
                 group_id = r_approve.group_id
 
                 m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
-
+                _insert_data_another_table(feature_id, [], old_geo_id, 'delete')
                 if r_approve.kind == ChangeRequest.KIND_CREATE:
                     request_datas = dict()
                     if old_geo_id and not m_geo_datas_qs:
@@ -708,7 +707,7 @@ def request_approve(request, payload):
                     success = _request_to_m(request_datas)
                     if success and new_geo_id:
                         r_approve.new_geo_id = new_geo_id
-                        insert_data_another_table(feature_id, geo_json, new_geo_id, 'create')
+                        _insert_data_another_table(feature_id, geo_json, new_geo_id, 'create')
 
                 if r_approve.kind == ChangeRequest.KIND_UPDATE:
                     if geo_json:
@@ -721,7 +720,7 @@ def request_approve(request, payload):
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
                         success = _request_to_m(request_datas)
-                        insert_data_another_table(feature_id,geo_json, old_geo_id, 'update')
+                        _insert_data_another_table(feature_id,geo_json, old_geo_id, 'update')
 
                     else:
                         m_geo_datas_qs.delete()
@@ -743,7 +742,7 @@ def request_approve(request, payload):
                         mdatas_qs = MDatas.objects
                         mdatas_qs = mdatas_qs.filter(geo_id=old_geo_id)
                         mdatas_qs.delete()
-                        insert_data_another_table(feature_id, [], old_geo_id, 'delete')
+                        _insert_data_another_table(feature_id, [], old_geo_id, 'delete')
                     else:
                         r_approve.state = ChangeRequest.STATE_REJECT
                         r_approve.save()
