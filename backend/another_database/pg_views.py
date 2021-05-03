@@ -272,7 +272,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 feature_id=feature_id,
         )
     cursor = connections['default'].cursor()
-    data_list =  _get_sql_execute(query, cursor, 'all')
+    data_list = _get_sql_execute(query, cursor, 'all')
     return data_list
 
 
@@ -282,7 +282,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
         return geom

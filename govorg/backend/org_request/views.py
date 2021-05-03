@@ -6,22 +6,18 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from main.utils import (
     get_geoJson,
     get_cursor_pg,
     convert_3d_with_srid
 )
 
-import datetime
-import random
-from backend.org.models import Org, Employee
+from backend.org.models import Employee
 from django.db import connections, transaction
 from django.db.models import Q
-from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from backend.geoserver.models import WmtsCacheConfig
-from backend.another_database.models import AnotherDatabase
 from backend.another_database.models import AnotherDatabaseTable
 from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
@@ -132,16 +128,16 @@ def get_change_all(request):
         org_request = [_get_org_request(ob, employee) for ob in org_request_list]
         if org_request[0] != '':
             rsp = {
-                'success':True,
+                'success': True,
                 'org_request': org_request,
             }
         else:
             rsp = {
-                'success':False,
+                'success': False,
             }
     else:
         rsp = {
-                'success':False,
+                'success': False,
             }
 
     return JsonResponse(rsp)
@@ -302,41 +298,6 @@ def _str_to_json(form_json, item):
     return json.loads(form_json) if form_json else ''
 
 
-def _get_geoJson(data):
-    data = json.loads(data)
-    geom_type = data['type']
-    coordinates = data['coordinates']
-    if geom_type == 'Point':
-        from geojson import Point
-        point = Point(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'LineString':
-        from geojson import LineString
-        point = LineString(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'Polygon':
-        from geojson import Polygon
-        point = Polygon(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'MultiPoint':
-        from geojson import MultiPoint
-        point = MultiPoint(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'MultiLineString':
-        from geojson import MultiLineString
-        point = MultiLineString(coordinates)
-        return Feature(geometry=point)
-
-    else:
-        from geojson import MultiPolygon
-        point = MultiPolygon(coordinates)
-        return Feature(geometry=point)
-
-
 def _geojson_to_featurecollection(geo_json, item):
     geo_json_list = list()
     if item['old_geo_id']:
@@ -462,7 +423,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
         return geom
@@ -737,7 +698,6 @@ def request_approve(request, payload):
                 old_geo_id = r_approve.old_geo_id
                 geo_json = r_approve.geo_json
                 form_json = r_approve.form_json
-                group_id = r_approve.group_id
                 request_datas = dict()
                 m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
                 if r_approve.kind == ChangeRequest.KIND_CREATE:
