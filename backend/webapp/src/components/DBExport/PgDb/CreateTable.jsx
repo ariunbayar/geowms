@@ -84,7 +84,7 @@ export default class  PgForm extends Component {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
-            this.setState({hdn_table: true})
+            data_list['hdn_table'] = true
             data_list['feature_name'] = ''
         }
 
@@ -93,7 +93,8 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
-                this.setState({hdn_table: false})
+                data_list['hdn_table'] = false
+
             }
             else {
                 data_list['feature_name'] = ''
@@ -169,6 +170,7 @@ export default class  PgForm extends Component {
             id_list, table_name,
             hdn_table
         } = this.state
+        console.log(hdn_table);
         return (
             <div className="card">
                 <div className="form-row card-body p-4 mx-1">
