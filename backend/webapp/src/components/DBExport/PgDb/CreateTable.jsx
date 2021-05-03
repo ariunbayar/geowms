@@ -79,12 +79,14 @@ export default class  PgForm extends Component {
         var data_list = {}
         var seleted_datas = []
         var array = []
+        console.log(data_list);
 
         if ( name == 'theme' ) {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
             this.setState({hdn_table: true})
+            data_list['feature_name'] = ''
         }
 
         else if ( name == 'package' ) {
