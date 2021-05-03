@@ -527,7 +527,7 @@ def _value_types():
     ]
 
 
-def _get_data_from_form_data(form):
+def _get_data_from_data(form):
     data = form['data'] if form['data'] else None
     code_list_value_types = ['option', 'single-select', 'boolean']
     if form['value_type'] in code_list_value_types:
@@ -549,7 +549,7 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
     for form in form_json:
         value = dict()
-        data, value_type = _get_data_from_form_data(form)
+        data, value_type = _get_data_from_data(form)
         value[value_type] = data
 
         if approve_type == 'create':
@@ -623,7 +623,7 @@ def _get_property_values(properties, form_json):
     for data in form_json:
         if int(data.get('property_id')) in properties:
             property_data = ''
-            value_data, value_type = _get_data_from_form_data(data)
+            value_data, value_type = _get_data_from_data(data)
             if value_data:
                 property_data = value_data
 
