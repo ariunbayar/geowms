@@ -22,7 +22,8 @@ export default class  PgForm extends Component {
             selected_features: [],
             selected_dt_list: [],
             data_type_list: [],
-            id_list: []
+            id_list: [],
+            hdn_table:true
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -83,6 +84,7 @@ export default class  PgForm extends Component {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
+            this.setState({hdn_table: true})
         }
 
         else if ( name == 'package' ) {
@@ -90,6 +92,7 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
+                this.setState({hdn_table: false})
             }
             else {
                 data_list['feature_name'] = ''
@@ -162,7 +165,8 @@ export default class  PgForm extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name
+            id_list, table_name,
+            hdn_table
         } = this.state
         return (
             <div className="card">
@@ -198,7 +202,12 @@ export default class  PgForm extends Component {
                         setSelect={this.handleChange}
                     />
                 </div>
-                { feature_name &&
+                {
+                hdn_table
+                ?
+                    null
+                :
+                    feature_name &&
                     <div className="col-md-7 px-3">
                             <table className="table table-bordered m-1">
                                 <thead>
