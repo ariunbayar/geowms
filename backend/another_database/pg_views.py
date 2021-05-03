@@ -257,10 +257,10 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                     and
                         mg.feature_id = {feature_id}
                     where
-                        b.property_id in ({properties})
+                        property_id in ({properties})
                     and
                         feature_config_id in ({feature_config_id})
-                    '
+                    order by 1,2'::text
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
