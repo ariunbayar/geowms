@@ -297,7 +297,7 @@ export default class  PgForm extends Component {
                         modal_status={this.state.modal_status}
                         modal_icon='fa fa-check-circle'
                         icon_color='success'
-                        title='Амжилттай нэмлээ'
+                        title='Амжилттай хадгаллаа'
                         has_button={false}
                         text=''
                         modalAction={null}
