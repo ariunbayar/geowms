@@ -619,44 +619,44 @@ def insert_data_another_table(feature_id, geo_data, geo_id,  change_type):
 
     data_qs = AnotherDatabaseTable.objects.filter(another_database__is_export=True)
     data_qs = data_qs.filter(feature_code=feature_code)
-    print("hoho")
-    print("hoho")
-    print("hoho")
-    print("hoho")
-    print(geo_id)
     for data in data_qs:
         data_table_id = data.another_database_id
         table_name = data.table_name
-        cursor_pg = get_cursor_pg(data_table_id)
-        if change_type == 'create':
-            query = '''
-                INSERT INTO public.{table_name}(
-                    geo_id, geo_data)
-                VALUES ({geo_id}, {geo_data});
-            '''.format(
-                geo_id=geo_id,
-                geo_data=geo_data,
-            )
+        try:
+            cursor_pg = get_cursor_pg(data_table_id)
+            if change_type == 'create':
+                query = '''
+                    INSERT INTO public.{table_name}(
+                        geo_id, geo_data)
+                    VALUES ('{geo_id}', '{geo_data}');
+                '''.format(
+                    geo_id=geo_id,
+                    geo_data=geo_data,
+                    table_name=table_name
+                )
 
-        elif change_type == 'create':
-            query = '''
-                UPDATE public.{table_name}
-                    SET geo_data={geo_data}
-                WHERE geo_id={geo_id};
-            '''.format(
-                geo_data=geo_data,
-                geo_id=geo_id,
-                table_name=table_name
-            )
-        else:
-            query = '''
-                delete from public.{table_name}
-                WHERE geo_id={geo_id};
-            '''.format(
-                geo_id=geo_id,
-                table_name=table_name
-            )
-        cursor_pg.execute(query)
+            elif change_type == 'update':
+                query = '''
+                    UPDATE public.{table_name}
+                        SET geo_data='{geo_data}'
+                    WHERE geo_id={geo_id};
+                '''.format(
+                    geo_data=geo_data,
+                    geo_id=geo_id,
+                    table_name=table_name
+                )
+            else:
+                query = '''
+                    delete from public.{table_name}
+                    WHERE geo_id={geo_id};
+                '''.format(
+                    geo_id=geo_id,
+                    table_name=table_name
+                )
+            cursor_pg.execute(query)
+            cursor_pg.close()
+        except Exception:
+            pass
 
 
 @require_POST
