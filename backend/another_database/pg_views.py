@@ -207,6 +207,12 @@ def getFields(request, payload):
     })
 
 
+def _execute_query(cursor, sql):
+    cursor.execute(sql)
+    datas = utils.dict_fetchall(cursor)
+    return datas
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -216,27 +222,43 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
-    if not table_name:
+    cursor_pg = _get_cursor_pg(id)
+    sql = '''
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE  table_schema = 'public'
+                AND    table_name   = '{table_name}'
+            );
+    '''.format(table_name=table_name)
+    cursor_pg.execute(sql)
+    result= cursor_pg.fetchone()
+    if result[0]:
         return JsonResponse({
             'success': False,
-            'info': 'Table-ийн нэр хоосон байна !!!'
+            'info': 'Хүснэгтийн нэр давхцсан байна !!!'
         })
-    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
-    another_database = get_object_or_404(AnotherDatabase, pk=id)
-    AnotherDatabaseTable.objects.update_or_create(
-        pk=table_id,
-        defaults={
-            'table_name': table_name,
-            'feature_code': feature_name.feature_code,
-            'field_config': utils.json_dumps(id_list),
-            'another_database': another_database,
-            'created_by': request.user
-        }
-    )
-    return JsonResponse({
-        'success': True,
-        'info': 'Амжилттай хадгалагдлаа'
-    })
+    else:
+        if not table_name:
+            return JsonResponse({
+                'success': False,
+                'info': 'Table-ийн нэр хоосон байна !!!'
+            })
+        feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
+        another_database = get_object_or_404(AnotherDatabase, pk=id)
+        AnotherDatabaseTable.objects.update_or_create(
+            pk=table_id,
+            defaults={
+                'table_name': table_name,
+                'feature_code': feature_name.feature_code,
+                'field_config': utils.json_dumps(id_list),
+                'another_database': another_database,
+                'created_by': request.user
+            }
+        )
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгалагдлаа'
+        })
 
 
 @require_GET

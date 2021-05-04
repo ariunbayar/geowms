@@ -22,7 +22,8 @@ export default class  PgForm extends Component {
             selected_features: [],
             selected_dt_list: [],
             data_type_list: [],
-            id_list: []
+            id_list: [],
+            table_status:false
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -83,6 +84,8 @@ export default class  PgForm extends Component {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
+            data_list['hdn_table'] = true
+            data_list['feature_name'] = ''
         }
 
         else if ( name == 'package' ) {
@@ -90,6 +93,8 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
+                data_list['hdn_table'] = false
+
             }
             else {
                 data_list['feature_name'] = ''
@@ -108,7 +113,7 @@ export default class  PgForm extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { theme_name, feature_name, packages, features } = this.state
+        const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
             else this.setState({feature_name})
@@ -120,6 +125,10 @@ export default class  PgForm extends Component {
 
         if (pS.features != features) {
             this.setState({features})
+        }
+        if (pS.table_name != table_name)
+        {
+            this.setState({table_status:false})
         }
     }
 
@@ -139,6 +148,7 @@ export default class  PgForm extends Component {
                 this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
             }
             else {
+                this.setState({table_status:true})
                 alert(info)
             }
         })
@@ -162,7 +172,8 @@ export default class  PgForm extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name
+            id_list, table_name,table_status,
+            hdn_table
         } = this.state
         return (
             <div className="card">
@@ -170,7 +181,7 @@ export default class  PgForm extends Component {
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
-                            className='form-control'
+                            className={table_status ? 'form-control border-danger' : 'form-control'}
                             type='text'
                             value={table_name}
                             disabled={table_id ? true : false}
@@ -198,7 +209,12 @@ export default class  PgForm extends Component {
                         setSelect={this.handleChange}
                     />
                 </div>
-                { feature_name &&
+                {
+                hdn_table
+                ?
+                    null
+                :
+                    feature_name &&
                     <div className="col-md-7 px-3">
                             <table className="table table-bordered m-1">
                                 <thead>
@@ -266,6 +282,7 @@ export default class  PgForm extends Component {
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
+                        disabled={table_status ? true : false}
                     >
                         {
                             table_id
