@@ -45,11 +45,12 @@ export default class  PgForm extends Component {
 
     handleGetDetial( packages, features ){
         const {table_id, id} = this.state
+        this.setState({ is_loading: true })
         service.pg_config.tableDetail(id, table_id).then(({success, form_datas}) => {
             if(success){
                 form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
                 form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
-                this.setState({...form_datas})
+                this.setState({ ...form_datas, is_loading: false })
             }
         })
     }
@@ -102,7 +103,6 @@ export default class  PgForm extends Component {
         }
         else {
             data_list['feature_name'] = selected_value
-            this.setState({ is_loading: true })
         }
 
         if (! selected_value) {
@@ -110,7 +110,7 @@ export default class  PgForm extends Component {
             data_list['feature_name'] = ''
         }
 
-        this.setState({ ...data_list, is_loading: false })
+        this.setState({ ...data_list })
     }
 
     componentDidUpdate(pP, pS) {
@@ -130,9 +130,10 @@ export default class  PgForm extends Component {
     }
 
     getFeatProperties(feature_code) {
+        this.setState({ is_loading: true })
         service.pg_config.getProperties(feature_code).then(({data_type_list}) => {
             if (data_type_list && data_type_list.length > 0) {
-                this.setState({data_type_list})
+                this.setState({ data_type_list, is_loading: false })
             }
         })
     }
