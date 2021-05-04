@@ -33,6 +33,28 @@ from backend.inspire.models import (
 )
 
 
+def _get_pg_conf(conn_id):
+    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
+    connection = utils.json_load(another_db.connection)
+    form_datas = {
+        'id': conn_id,
+        'name': another_db.name,
+        'definition': another_db.definition,
+        'pg_host': connection.get('server'),
+        'pg_port': connection.get('port'),
+        'pg_username': connection.get('username'),
+        'pg_password': connection.get('password'),
+        'pg_database': connection.get('database'),
+    }
+    return form_datas
+
+
+def _get_cursor_pg(conn_id):
+    form_datas = _get_pg_conf(conn_id)
+    cursor_pg = _get_pg_cursor(form_datas)
+    return cursor_pg
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -40,7 +62,7 @@ def config_detail(request, pk):
 
     rsp = {
         'success': True,
-        'values': utils.get_pg_conf(pk)
+        'values': _get_pg_conf(pk)
     }
     return JsonResponse(rsp)
 
@@ -77,6 +99,18 @@ def get_pg_table_list(request, payload, pk):
 
     return JsonResponse(rsp)
 
+
+def _get_pg_cursor(conn_details):
+    host = conn_details.get('pg_host')
+    port = conn_details.get('pg_port')
+    user = conn_details.get('pg_username')
+    password = conn_details.get('pg_password')
+    db = conn_details.get('pg_database')
+    try:
+        cursor = utils.check_pg_connection(host, db, port, user, password)
+    except Exception:
+        cursor = []
+    return cursor
 
 
 def _get_sql_execute(sql, cursor, fetch_type):
@@ -171,12 +205,6 @@ def getFields(request, payload):
     return JsonResponse({
         'data_type_list': data_types_datas
     })
-
-
-def _execute_query(cursor, sql):
-    cursor.execute(sql)
-    datas = utils.dict_fetchall(cursor)
-    return datas
 
 
 @require_POST
@@ -279,10 +307,10 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                     and
                         mg.feature_id = {feature_id}
                     where
-                        property_id in ({properties})
+                        b.property_id in ({properties})
                     and
                         feature_config_id in ({feature_config_id})
-                    order by 1,2'::text
+                    '
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
@@ -294,7 +322,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 feature_id=feature_id,
         )
     cursor = connections['default'].cursor()
-    data_list = _get_sql_execute(query, cursor, 'all')
+    data_list =  _get_sql_execute(query, cursor, 'all')
     return data_list
 
 
@@ -304,7 +332,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom = ''.join(geom)
+        geom =  ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
         return geom
@@ -343,12 +371,7 @@ def _create_extension(cursor):
 
 
 def _create_table(cursor, table_name, property_columns):
-    query_extention = '''
-        CREATE EXTENSION  IF NOT EXISTS postgis;
-    '''
-    query_topolagy = '''
-        CREATE EXTENSION  IF NOT EXISTS  postgis_topology;
-    '''
+
     query = '''
         CREATE TABLE public.{table_name}
         (
@@ -361,12 +384,11 @@ def _create_table(cursor, table_name, property_columns):
         table_name=table_name,
         columns=','.join(property_columns)
     )
+
     query_index = '''
         CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {table_name}(geo_id)
     '''.format(table_name=table_name)
 
-    cursor.execute(query_extention)
-    cursor.execute(query_topolagy)
     cursor.execute(query)
     cursor.execute(query_index)
 
@@ -377,6 +399,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
     fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+
     _drop_table(table_name, cursor)
     _create_extension(cursor)
 
@@ -409,7 +432,12 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
         geo_data = data['geo_data']
         geo_data = _geojson_to_geom(geo_data)
         try:
-            geo_data = utils.convert_3d_with_srid(geo_data)
+            sql_set_srid = '''
+                SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
+            '''.format(geo_data=geo_data)
+
+            geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
+            geo_data = geo_data[0]['wkt']
 
             insert_query = '''
                 INSERT INTO public.{table_name}(
@@ -427,8 +455,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
             cursor.execute(insert_query)
             success_count = success_count + 1
         except Exception:
-            pass
-    failed_count = total_count - success_count
+            failed_count = failed_count + 1
     return success_count, failed_count, total_count
 
 
@@ -440,7 +467,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = utils.get_cursor_pg(id)
+        cursor_pg = _get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -457,7 +484,7 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = utils.get_cursor_pg(id)
+    cursor_pg = _get_cursor_pg(id)
     table_info = []
     info = ''
     success = True
