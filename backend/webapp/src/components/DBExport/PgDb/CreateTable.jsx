@@ -22,7 +22,8 @@ export default class  PgForm extends Component {
             selected_features: [],
             selected_dt_list: [],
             data_type_list: [],
-            id_list: []
+            id_list: [],
+            alert_sms: false
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -145,7 +146,7 @@ export default class  PgForm extends Component {
             })
         }
         else {
-            alert('Property сонгоогүй байна')
+            this.setState({alert_sms: true})
         }
     }
 
@@ -159,7 +160,6 @@ export default class  PgForm extends Component {
         }
         this.setState({id_list})
     }
-
 
     render() {
         const {
@@ -215,6 +215,7 @@ export default class  PgForm extends Component {
                                         </th>
                                         <th className="text-center" style={{width: "15%"}}>
                                             Property
+                                            <p className='text-danger icon-exclamation fa-lg float-right '></p>
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>
