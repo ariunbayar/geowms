@@ -2,7 +2,6 @@
 
 from django.db import migrations
 from django.db.models import Count
-import json
 
 
 def _remove(LProperties, model):
