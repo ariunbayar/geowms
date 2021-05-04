@@ -1747,6 +1747,15 @@ def get_cursor_pg(conn_id):
     return cursor_pg
 
 
+def get_sql_execute(sql, cursor, fetch_type):
+    cursor.execute(sql)
+    if fetch_type == 'one':
+        values = list(cursor.fetchone())
+    else:
+        values = list(utils.dict_fetchall(cursor))
+    return values
+
+
 def convert_3d_with_srid(geo_data):
     cursor = connections['default'].cursor()
 
@@ -1755,18 +1764,9 @@ def convert_3d_with_srid(geo_data):
     '''.format(geo_data=geo_data)
     cursor.execute(sql_set_srid)
 
-    geo_data = list(dict_fetchall(cursor))
+    geo_data = get_sql_execute(sql, cursor, 'all')
     geo_data = geo_data[0]['wkt']
     return geo_data
-
-
-def get_sql_execute(sql, cursor, fetch_type):
-    cursor.execute(sql)
-    if fetch_type == 'one':
-        values = list(cursor.fetchone())
-    else:
-        values = list(utils.dict_fetchall(cursor))
-    return values
 
 
 def check_table_name(cursor, table_name):
