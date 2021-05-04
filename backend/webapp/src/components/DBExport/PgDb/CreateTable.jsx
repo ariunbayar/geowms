@@ -37,7 +37,7 @@ export default class  PgForm extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleModalAlertOpen = this.handleModalAlertOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
     componentDidMount(){
@@ -141,18 +141,30 @@ export default class  PgForm extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, id_list, feature_name} = this.state
+        const { id, table_id, table_name, id_list, feature_name } = this.state
         this.setState({ is_loading: true })
         service
             .pg_config.tableSave(id, table_id, id_list, feature_name, table_name)
-            .then(({success, info}) => {
+            .then(({ success }) => {
                 if(success){
                     this.setState({ is_loading: false })
-                    this.handleModalOpen()
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        'success',
+                        'Амжилттай хадгаллаа',
+                        false,
+                        () => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
+                    )
                 }
                 else {
                     this.setState({ is_loading: false })
-                    this.handleModalAlertOpen()
+                    this.modalChange(
+                        'fa fa-exclamation-circle',
+                        'warning',
+                        'Хүснэгтийн нэр хоосон байна!',
+                        false,
+                        null
+                    )
                 }
             })
     }
@@ -174,10 +186,17 @@ export default class  PgForm extends Component {
         })
     }
 
-    handleModalAlertOpen() {
-        this.setState({ modalalert_status: 'open' }, () => {
-            this.setState({ modalalert_status: 'initial' })
-        })
+    modalChange(modal_icon, icon_color, title, has_button, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                icon_color,
+                title,
+                has_button,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
     }
 
     render() {
@@ -303,23 +322,12 @@ export default class  PgForm extends Component {
                         }
                     </button>
                     <Modal
-                        modal_status={this.state.modal_status}
-                        modal_icon='fa fa-check-circle'
-                        icon_color='success'
-                        title='Амжилттай хадгаллаа'
-                        has_button={false}
-                        text=''
-                        modalAction={null}
-                        modalClose={() => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)}
-                    />
-                    <Modal
-                        modal_status={this.state.modalalert_status}
-                        modal_icon='fa fa-exclamation-circle'
-                        icon_color='warning'
-                        title='Хүснэгтийн нэр хоосон байна!'
-                        has_button={false}
-                        text=''
-                        modalAction={null}
+                        modal_status={ this.state.modal_status }
+                        modal_icon={ this.state.modal_icon }
+                        icon_color={ this.state.icon_color }
+                        title={ this.state.title }
+                        has_button={ this.state.has_button }
+                        modalClose={ this.state.modalClose }
                     />
                 </div>
                 <BackButton
