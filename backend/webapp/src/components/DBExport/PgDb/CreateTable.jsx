@@ -180,7 +180,7 @@ export default class  PgForm extends Component {
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
-                            className={table_status ? 'form-control border-danger' : 'form-control'}
+                            className={`form-control ${table_status ? 'border-danger' : ''}`}
                             type='text'
                             value={table_name}
                             disabled={table_id ? true : false}

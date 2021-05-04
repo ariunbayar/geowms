@@ -194,7 +194,7 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
-    cursor_pg = _get_cursor_pg(id)
+    cursor_pg = utils.get_cursor_pg(id)
     sql = '''
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
@@ -202,8 +202,7 @@ def save_table(request, payload):
                 AND    table_name   = '{table_name}'
             );
     '''.format(table_name=table_name)
-    cursor_pg.execute(sql)
-    result= cursor_pg.fetchone()
+    result= utils.get_sql_execute(sql, cursor_pg, 'one')
     if result[0]:
         return JsonResponse({
             'success': False,
