@@ -1758,3 +1758,26 @@ def convert_3d_with_srid(geo_data):
     geo_data = list(dict_fetchall(cursor))
     geo_data = geo_data[0]['wkt']
     return geo_data
+
+
+def get_sql_execute(sql, cursor, fetch_type):
+    cursor.execute(sql)
+    if fetch_type == 'one':
+        values = list(cursor.fetchone())
+    else:
+        values = list(utils.dict_fetchall(cursor))
+    return values
+
+
+def check_table_name(cursor, table_name):
+    sql = '''
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables
+            WHERE
+                table_schema = 'public'
+                AND
+                table_name   = '{table_name}'
+        );
+    '''.format(table_name=table_name)
+    result = get_sql_execute(sql, cursor, 'one')
+    return result
