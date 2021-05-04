@@ -133,15 +133,21 @@ export default class  PgForm extends Component {
 
     handleSave(){
         const {id, table_id, table_name, id_list, feature_name} = this.state
-        service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
-            if(success){
-                alert("Амжилттай хадгаллаа.")
-                this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
-            }
-            else {
-                alert(info)
-            }
-        })
+        console.log(id_list);
+        if(id_list.length){
+            service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
+                if(success){
+                    alert("Амжилттай хадгаллаа.")
+                    this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
+                }
+                else {
+                    alert(info)
+                }
+            })
+        }
+        else {
+            alert('Property сонгоогүй байна')
+        }
     }
 
     handleSetField(e){
