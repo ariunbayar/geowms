@@ -349,6 +349,24 @@ def _create_table(cursor, table_name, property_columns):
     cursor.execute(query_index)
 
 
+def _create_code_list_table(cursor):
+    count = 0
+    sql = '''
+        CREATE TABLE public.{table_name}
+        (
+            code_list_id integer NOT NULL,
+            property_code character varying(255),
+            code_list_code character varying(255),
+            code_list_name character varying(255),
+            code_list_name_eng character varying(255),
+        )
+
+    '''
+    print("hohoh")
+    print("hohoh")
+    print("hohoh")
+
+
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
     columns.sort()
@@ -368,6 +386,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
         property_columns.append(property_split)
 
     _create_table(cursor, table_name, property_columns)
+    _create_code_list_table(cursor)
 
     data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
     success_count = 0
