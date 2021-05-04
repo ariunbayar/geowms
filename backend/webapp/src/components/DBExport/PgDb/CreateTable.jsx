@@ -27,6 +27,7 @@ export default class  PgForm extends Component {
             id_list: [],
             is_loading: false,
             modal_status: 'closed',
+            modalalert_status: 'closed'
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -36,6 +37,7 @@ export default class  PgForm extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleModalAlertOpen = this.handleModalAlertOpen.bind(this)
     }
 
     componentDidMount(){
@@ -150,7 +152,7 @@ export default class  PgForm extends Component {
                 }
                 else {
                     this.setState({ is_loading: false })
-                    alert(info)
+                    this.handleModalAlertOpen()
                 }
             })
     }
@@ -169,6 +171,12 @@ export default class  PgForm extends Component {
     handleModalOpen() {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    handleModalAlertOpen() {
+        this.setState({ modalalert_status: 'open' }, () => {
+            this.setState({ modalalert_status: 'initial' })
         })
     }
 
@@ -303,6 +311,15 @@ export default class  PgForm extends Component {
                         text=''
                         modalAction={null}
                         modalClose={() => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)}
+                    />
+                    <Modal
+                        modal_status={this.state.modalalert_status}
+                        modal_icon='fa fa-exclamation-circle'
+                        icon_color='warning'
+                        title='Хүснэгтийн нэр хоосон байна!'
+                        has_button={false}
+                        text=''
+                        modalAction={null}
                     />
                 </div>
                 <BackButton
