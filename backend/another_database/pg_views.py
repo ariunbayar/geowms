@@ -353,7 +353,41 @@ def _get_distinct_table_name(cursor):
     return table_name
 
 
-def _create_code_list_table(cursor):
+def _get_property_code_lists(property_ids):
+
+    list_of_datas = []
+    code_list_prop_ids = []
+    code_list_prop_datas = []
+    code_list_value_types = ['option', 'single-select', 'boolean']
+
+    qs_prop = LProperties.objects.filter(property_id__in=property_ids)
+    qs_prop = qs_prop.filter(value_type_id__in=code_list_value_types)
+    prop_datas = list(qs_prop.values("property_id", 'property_code'))
+    if prop_datas:
+        for prop in prop_datas:
+            code_list_prop_ids.append(prop['property_id'])
+
+        qs_code_list = LCodeLists.objects.filter(property_id__in=code_list_prop_ids)
+        qs_code_list = list(qs_code_list.values(
+            'code_list_id',
+            'property_id',
+            'code_list_code',
+            'code_list_name',
+            'code_list_name_eng'
+        ))
+        if qs_code_list:
+            for code_list in qs_code_list:
+                property_code = list(filter(lambda x: x['property_id'] == code_list['property_id'], prop_datas))[0]['property_code'] or ''
+                code_list_data = {
+                    'property_code': property_code,
+                    'code_list_id': code_list.get('code_list_id') or None,
+                    'code_list_code': code_list.get('code_list_code') or None,
+                    'code_list_name_eng': code_list.get('code_list_name_eng') or None,
+                }
+                code_list_prop_datas.append(code_list_data)
+
+
+def _create_code_list_table(cursor, property_ids):
     table_name = _get_distinct_table_name(cursor)
     _drop_table(table_name, cursor)
     sql = '''
@@ -370,6 +404,9 @@ def _create_code_list_table(cursor):
     )
     cursor.execute(sql)
 
+    _get_property_code_lists(property_ids)
+
+
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
@@ -379,6 +416,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
     _drop_table(table_name, cursor)
     _create_extension(cursor)
+    _create_code_list_table(cursor, columns)
 
     property_columns = []
     for feild in range(len(fields)):
