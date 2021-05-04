@@ -437,6 +437,7 @@ def refresh_datas(request, id):
 
     cursor_pg = utils.get_cursor_pg(id)
     table_info = []
+    table_name_info = []
     info = ''
     success = True
     if ano_db_table_pg:
@@ -447,10 +448,10 @@ def refresh_datas(request, id):
             feature_code = table.feature_code
             success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
             table_info_text = '''
-                {table_name} хүснэгт
-                нийт {total_count} мөр дата-наас
-                амжилттай орсон {success_count}
-                амжилтгүй {failed_count}
+                "{table_name}" хүснэгт
+                нийт: {total_count} мөр датанаас
+                амжилттай орсон: {success_count},
+                амжилтгүй: {failed_count}.
                 '''.format(
                     table_name=table_name,
                     total_count=total_count,
@@ -458,6 +459,14 @@ def refresh_datas(request, id):
                     failed_count=failed_count
                 )
             table_info.append(table_info_text)
+
+            table_name_info_text = '''
+                Та "{table_name}" нэртэй
+                хүснэгтийг шинэчлэхдээ итгэлтэй байна уу?
+                '''.format(
+                    table_name=table_name
+                )
+            table_name_info.append(table_name_info_text)
         ano_db.database_updated_at = datetime.datetime.now()
         ano_db.save()
     else:
@@ -466,5 +475,6 @@ def refresh_datas(request, id):
     return JsonResponse({
         'success': success,
         'info': info,
-        'table_info': table_info
+        'table_info': table_info,
+        'table_name_info': table_name_info
     })
