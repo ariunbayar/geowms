@@ -100,28 +100,6 @@ def get_pg_table_list(request, payload, pk):
     return JsonResponse(rsp)
 
 
-def _get_pg_cursor(conn_details):
-    host = conn_details.get('pg_host')
-    port = conn_details.get('pg_port')
-    user = conn_details.get('pg_username')
-    password = conn_details.get('pg_password')
-    db = conn_details.get('pg_database')
-    try:
-        cursor = utils.check_pg_connection(host, db, port, user, password)
-    except Exception:
-        cursor = []
-    return cursor
-
-
-def _get_sql_execute(sql, cursor, fetch_type):
-    cursor.execute(sql)
-    if fetch_type == 'one':
-        values = list(cursor.fetchone())
-    else:
-        values = list(utils.dict_fetchall(cursor))
-    return values
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -322,7 +300,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 feature_id=feature_id,
         )
     cursor = connections['default'].cursor()
-    data_list =  _get_sql_execute(query, cursor, 'all')
+    data_list = utils.get_sql_execute(query, cursor, 'all')
     return data_list
 
 
