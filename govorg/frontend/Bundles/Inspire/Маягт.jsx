@@ -220,11 +220,14 @@ export default class Маягт extends Component {
                                                     <Field name={`form_values.${index}.data` || ""}
                                                         as="select"
                                                         className="form-control"
+                                                        value={friend.code_list_id}
                                                         disabled={this.setDisable(friend.roles)}
                                                     >
                                                         {friend.data_list &&
                                                             friend.data_list.map((data, idy) =>
-                                                            <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
+                                                                <option key={idy} value={data.code_list_id ? data.code_list_id  : ''}>
+                                                                    {data.code_list_name ? data.code_list_name : ''}
+                                                                </option>
                                                             )
                                                         }
                                                     </Field>

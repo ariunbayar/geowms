@@ -367,7 +367,6 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data['roles'] =  _get_roles(request, fid, property_id)
         data['code_list_id'] = code_list_id
         properties.append(data)
-    # print(json.dumps(properties, ensure_ascii=False))
     return properties
 
 
