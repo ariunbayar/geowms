@@ -179,7 +179,7 @@ class ConnectionConfig extends Component {
                                                 <label htmlFor="id_pg_password">Password</label>
                                                 <Field
                                                     name="pg_password"
-                                                    type="text"
+                                                    type="password"
                                                     className="form-control"
                                                     id="id_pg_password"
                                                 />
