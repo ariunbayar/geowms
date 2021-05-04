@@ -321,7 +321,12 @@ def _create_extension(cursor):
 
 
 def _create_table(cursor, table_name, property_columns):
-
+    query_extention = '''
+        CREATE EXTENSION  IF NOT EXISTS postgis;
+    '''
+    query_topolagy = '''
+        CREATE EXTENSION  IF NOT EXISTS  postgis_topology;
+    '''
     query = '''
         CREATE TABLE public.{table_name}
         (
@@ -334,11 +339,12 @@ def _create_table(cursor, table_name, property_columns):
         table_name=table_name,
         columns=','.join(property_columns)
     )
-
     query_index = '''
         CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {table_name}(geo_id)
     '''.format(table_name=table_name)
 
+    cursor.execute(query_extention)
+    cursor.execute(query_topolagy)
     cursor.execute(query)
     cursor.execute(query_index)
 
@@ -349,7 +355,6 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
     fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
-
     _drop_table(table_name, cursor)
     _create_extension(cursor)
 
