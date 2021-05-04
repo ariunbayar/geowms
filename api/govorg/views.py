@@ -282,11 +282,11 @@ def _get_request_content(base_url, request, geo_id, headers):
             'cql_filter': cql_filter,
         }
 
-        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5)
+        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5, verify=False)
 
     else:
         queryargs = request.GET
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
 
     return rsp, queryargs
 

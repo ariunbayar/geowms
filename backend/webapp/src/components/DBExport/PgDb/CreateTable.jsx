@@ -25,7 +25,6 @@ export default class  PgForm extends Component {
             id_list: [],
             table_status:false
         }
-
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
