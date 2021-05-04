@@ -405,7 +405,8 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
             cursor.execute(insert_query)
             success_count = success_count + 1
         except Exception:
-            failed_count = failed_count + 1
+            pass
+    failed_count = total_count - success_count
     return success_count, failed_count, total_count
 
 
