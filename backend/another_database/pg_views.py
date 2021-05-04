@@ -339,10 +339,25 @@ def _create_table(cursor, table_name, property_columns):
     cursor.execute(query_index)
 
 
-def _create_code_list_table(cursor):
+def _get_distinct_table_name(cursor):
     count = 0
+    check = True
+    table_name = old_name = 'l_code_lists'
+    while check:
+        check_table_name = utils.check_table_name(cursor, table_name)
+        if check_table_name[0]:
+            count = count + 1
+            table_name = old_name + str(count)
+        check = check_table_name[0]
+
+    return table_name
+
+
+def _create_code_list_table(cursor):
+    table_name = _get_distinct_table_name(cursor)
+    _drop_table(table_name, cursor)
     sql = '''
-        CREATE TABLE public.{table_name}
+        CREATE TABLE if not expublic.{table_name}
         (
             code_list_id integer NOT NULL,
             property_code character varying(255),
@@ -350,11 +365,10 @@ def _create_code_list_table(cursor):
             code_list_name character varying(255),
             code_list_name_eng character varying(255),
         )
-
-    '''
-    print("hohoh")
-    print("hohoh")
-    print("hohoh")
+    '''.format(
+        table_name=table_name
+    )
+    cursor.execute(sql)
 
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
