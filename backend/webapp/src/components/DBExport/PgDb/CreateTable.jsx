@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { service } from '../service';
 import BackButton from "@utils/Button/BackButton"
 import SelectField from './selectField'
-
+import './style.css'
 export default class  PgForm extends Component {
 
     constructor(props) {
@@ -23,7 +23,8 @@ export default class  PgForm extends Component {
             selected_dt_list: [],
             data_type_list: [],
             id_list: [],
-            alert_sms: false
+            alert_sms: false,
+            message: ''
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -32,6 +33,9 @@ export default class  PgForm extends Component {
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
+        this.onMouseEnter = this.onMouseEnter.bind(this)
+        this.onMouseLeave = this.onMouseLeave.bind(this)
+
     }
 
     componentDidMount(){
@@ -144,6 +148,7 @@ export default class  PgForm extends Component {
                     alert(info)
                 }
             })
+            this.setState({alert_sms: false})
         }
         else {
             this.setState({alert_sms: true})
@@ -160,6 +165,14 @@ export default class  PgForm extends Component {
         }
         this.setState({id_list})
     }
+    onMouseEnter(){
+      this.setState({message:'Property сонгоогүй байна.'})
+    }
+
+    onMouseLeave(){
+      this.setState({message:''})
+    }
+
 
     render() {
         const {
@@ -167,7 +180,7 @@ export default class  PgForm extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name
+            id_list, table_name, alert_sms
         } = this.state
         return (
             <div className="card">
@@ -215,7 +228,19 @@ export default class  PgForm extends Component {
                                         </th>
                                         <th className="text-center" style={{width: "15%"}}>
                                             Property
-                                            <p className='text-danger icon-exclamation fa-lg float-right '></p>
+                                            <div
+                                                type="button"
+                                                onMouseEnter={() => this.onMouseEnter()}
+                                                onMouseLeave={() => this.onMouseLeave()}
+                                                className={`float right` + ` ${alert_sms ? "d-block" : "d-none" }`}
+                                            >
+                                                <i className="text-danger icon-exclamation  float-right blink">
+                                                    <div className={`alert rounded position-absolute`+`${this.state.message ? " d-block" : " d-none"}`} style={{zIndex:'1'}}role="alert">
+                                                        <h6 className="alert-heading"></h6>
+                                                        <p> {this.state.message}</p>
+                                                    </div>
+                                                </i>
+                                            </div>
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>
