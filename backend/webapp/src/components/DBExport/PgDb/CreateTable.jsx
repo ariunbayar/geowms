@@ -146,13 +146,13 @@ export default class  PgForm extends Component {
         this.setState({ is_loading: true })
         service
             .pg_config.tableSave(id, table_id, id_list, feature_name, table_name)
-            .then(({ success }) => {
+            .then(({ success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
                         'fa fa-check-circle',
                         'success',
-                        'Амжилттай хадгаллаа',
+                        info,
                         false,
                         () => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
                     )
@@ -161,7 +161,7 @@ export default class  PgForm extends Component {
                     this.modalChange(
                         'fa fa-exclamation-circle',
                         'warning',
-                        'Хүснэгтийн нэр хоосон байна!',
+                        info,
                         false,
                         null
                     )
