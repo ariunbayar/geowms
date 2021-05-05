@@ -237,7 +237,6 @@ def table__detail(request, id, table_id):
 
 
 def _get_all_datas(feature_id, columns, properties, feature_config_ids):
-
     query = '''
             SELECT
                 d.geo_id,
@@ -271,6 +270,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+            limit 100
         '''.format(
                 columns=', '.join(['ct.{}'.format(f) for f in properties]),
                 properties=', '.join(['{}'.format(f) for f in columns]),
@@ -331,31 +331,38 @@ def _execute_query_to_pg(cursor, sql):
 
 def _create_extention_postgis(cursor, schema):
     query_extention = '''
-        create extension postgis with schema {schema}
+        create extension  IF NOT EXISTS postgis with schema {schema}
     '''.format(schema=schema)
 
     query_topolagy = '''
-        CREATE EXTENSION postgis_topology with schema {schema}
+        CREATE EXTENSION  IF NOT EXISTS postgis_topology with schema {schema}
     '''.format(schema=schema)
 
     give_all_role_to_postgis = '''
-        GRANT ALL ON SCHEMA postgis TO {schema};
+        UPDATE
+            pg_extension
+        SET
+            extrelocatable = TRUE
+        WHERE extname = 'postgis';
+
     '''.format(schema=schema)
 
     give_all_role = '''
-        ALTER EXTENSION postgis SET SCHEMA {schema};
+        ALTER EXTENSION
+            postgis
+        SET SCHEMA {schema};
     '''.format(schema=schema)
 
     _execute_query_to_pg(cursor, query_extention)
     _execute_query_to_pg(cursor, query_topolagy)
-    _execute_query_to_pg(cursor, give_all_role_to_postgis)
-    _execute_query_to_pg(cursor, give_all_role)
+    cursor.execute(give_all_role_to_postgis)
+    cursor.execute(give_all_role)
 
 
 def _create_extension(cursor, schema):
     crosstab_query = '''
         CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA {schema}
-    '''.format( schema=schema )
+    '''.format(schema=schema)
     cursor.execute(crosstab_query)
 
 
@@ -536,7 +543,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = _get_cursor_pg(id)
+        cursor_pg = utils.get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -553,7 +560,7 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = _get_cursor_pg(id)
+    cursor_pg = utils.get_cursor_pg(id)
     table_info = []
     table_name_info = []
     info = ''

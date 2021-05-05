@@ -210,10 +210,10 @@ export default class List extends Component {
         const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, is_loading } = this.state
         return (
             <div className="row">
-                <Loader
+                {/* <Loader
                     is_loading={is_loading}
                     text={'Уншиж байна'}
-                />
+                /> */}
                 <div className="col-lg-12">
                     <div className="card">
                         <div className="card-body">
