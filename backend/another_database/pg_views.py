@@ -40,7 +40,7 @@ def config_detail(request, pk):
 
     rsp = {
         'success': True,
-        'values': _get_pg_conf(pk)
+        'values': utils.get_pg_conf(pk)
     }
     return JsonResponse(rsp)
 
