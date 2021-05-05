@@ -462,26 +462,26 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
         geo_data = data['geo_data']
         geo_data = _geojson_to_geom(geo_data)
-        try:
-            geo_data = utils.convert_3d_with_srid(geo_data)
+        # try:
+        geo_data = utils.convert_3d_with_srid(geo_data)
 
-            insert_query = '''
-                INSERT INTO public.{table_name}(
-                    geo_id, geo_data, feature_id, {columns}
-                )
-                VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
-                '''.format(
-                    table_name=table_name,
-                    geo_id=data['geo_id'],
-                    geo_data=geo_data,
-                    feature_id=feature_id,
-                    columns=','.join(fields),
-                    columns_data=', '.join(property_data)
-                )
-            cursor.execute(insert_query)
-            success_count = success_count + 1
-        except Exception:
-            pass
+        insert_query = '''
+            INSERT INTO public.{table_name}(
+                geo_id, geo_data, feature_id, {columns}
+            )
+            VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
+            '''.format(
+                table_name=table_name,
+                geo_id=data['geo_id'],
+                geo_data=geo_data,
+                feature_id=feature_id,
+                columns=','.join(fields),
+                columns_data=', '.join(property_data)
+            )
+        cursor.execute(insert_query)
+        success_count = success_count + 1
+        # except Exception:
+        #     pass
     failed_count = total_count - success_count
     return success_count, failed_count, total_count
 
