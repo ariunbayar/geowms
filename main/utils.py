@@ -10,6 +10,7 @@ import pyproj
 import math
 import json
 import psycopg2
+from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
 from datetime import timedelta, datetime
@@ -39,6 +40,7 @@ from backend.dedsanbutets.models import ViewProperties
 from backend.dedsanbutets.models import ViewNames
 from backend.inspire.models import LProperties, MGeoDatas
 
+from backend.another_database.models import AnotherDatabase
 import main.geoserver as geoserver
 
 
@@ -1708,3 +1710,88 @@ def check_pg_connection(host, db, port, user, password):
         return cursor
     except Exception as error:
         return []
+
+
+def get_pg_cursor(conn_details):
+    host = conn_details.get('pg_host')
+    port = conn_details.get('pg_port')
+    user = conn_details.get('pg_username')
+    password = conn_details.get('pg_password')
+    db = conn_details.get('pg_database')
+    try:
+        cursor = check_pg_connection(host, db, port, user, password)
+    except Exception:
+        cursor = []
+    return cursor
+
+
+def get_pg_conf(conn_id):
+    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
+    connection = json_load(another_db.connection)
+    form_datas = {
+        'id': conn_id,
+        'name': another_db.name,
+        'definition': another_db.definition,
+        'pg_host': connection.get('server'),
+        'pg_port': connection.get('port'),
+        'pg_username': connection.get('username'),
+        'pg_password': connection.get('password'),
+        'pg_database': connection.get('database'),
+    }
+    return form_datas
+
+
+def get_cursor_pg(conn_id):
+    form_datas = get_pg_conf(conn_id)
+    cursor_pg = get_pg_cursor(form_datas)
+    return cursor_pg
+
+
+def get_sql_execute(sql, cursor, fetch_type):
+    cursor.execute(sql)
+    if fetch_type == 'one':
+        values = list(cursor.fetchone())
+    else:
+        values = list(dict_fetchall(cursor))
+    return values
+
+
+def convert_3d_with_srid(geo_data):
+    cursor = connections['default'].cursor()
+
+    sql_set_srid = '''
+        SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
+    '''.format(geo_data=geo_data)
+    cursor.execute(sql_set_srid)
+
+    geo_data = get_sql_execute(sql_set_srid, cursor, 'all')
+    geo_data = geo_data[0]['wkt']
+    return geo_data
+
+
+def check_table_name(cursor, table_name):
+    sql = '''
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables
+            WHERE
+                table_schema = 'public'
+                AND
+                table_name   = '{table_name}'
+        );
+    '''.format(table_name=table_name)
+    result = get_sql_execute(sql, cursor, 'one')
+    return result
+
+
+def create_table_to_cursor(cursor, table_name, fields):
+
+    sql = '''
+        CREATE TABLE IF NOT EXISTS public.{table_name}
+        (
+            {fields}
+        )
+    '''.format(
+        table_name=table_name,
+        fields=','.join(fields)
+    )
+    cursor.execute(sql)

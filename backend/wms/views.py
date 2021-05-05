@@ -299,7 +299,8 @@ def proxy(request, wms_id):
     wms = get_object_or_404(WMS, pk=wms_id)
     queryargs = request.GET
     headers = {**BASE_HEADERS}
-    rsp = requests.get(wms.url, queryargs, headers=headers)
+    url = wms.url
+    rsp = requests.get(url, queryargs, headers=headers, verify=False)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':

@@ -65,7 +65,7 @@ export default class List extends Component {
         this.crontabLink = this.crontabLink.bind(this)
         this.refreshPgData = this.refreshPgData.bind(this)
         this.modalChange = this.modalChange.bind(this)
-
+        this.refreshPgDataAction = this.refreshPgDataAction.bind(this)
     }
 
 
@@ -77,11 +77,48 @@ export default class List extends Component {
         if(values.db_type == 'PgDB') this.refreshPgData(values)
     }
 
-    refreshPgData(values){
-        this.setState({is_loading: true})
-        service.pg_config.refreshTableData(values.id).then(({success, info, table_info}) => {
+    refreshPgData(values) {
+        this.setState({ values })
+        service.pg_config.refreshTableData(values.id).then(({ success, info, table_name_info }) => {
             if (success) {
-                this.setState({is_loading: false})
+                var table_res = table_name_info.join("\n")
+                this.modalChange(
+                    'fa fa-exclamation-circle',
+                    null,
+                    'warning',
+                    'Хүснэгт шинэчлэх',
+                    `${table_res}`,
+                    true,
+                    '',
+                    'Тийм',
+                    (values) => this.refreshPgDataAction(values),
+                    null
+                )
+            }
+            else {
+                this.setState({ is_loading: false })
+                this.modalChange(
+                    'fa fa-times-circle',
+                    null,
+                    'danger',
+                    'Алдаа гарлаа',
+                    info,
+                    false,
+                    '',
+                    '',
+                    null,
+                    null
+                )
+            }
+        })
+    }
+
+    refreshPgDataAction() {
+        this.setState({ is_loading: true })
+        const {values} = this.state
+        service.pg_config.refreshTableData(values.id).then(({ success, table_info }) => {
+            if (success) {
+                this.setState({ is_loading: false })
                 var table_res = table_info.join("\n")
                 this.modalChange(
                     'fa fa-check-circle',
@@ -89,20 +126,6 @@ export default class List extends Component {
                     'success',
                     'Амжилттай',
                     `${table_res}`,
-                    false,
-                    '',
-                    '',
-                    null,
-                    null
-                )
-            }else{
-                this.setState({is_loading: false})
-                this.modalChange(
-                    'fa fa-times-circle',
-                    null,
-                    'danger',
-                    'Алдаа гарлаа',
-                    info,
                     false,
                     '',
                     '',

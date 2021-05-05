@@ -6,16 +6,19 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from main.decorators import ajax_required
-from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
-from main.utils import get_geoJson
-import datetime
-import random
-from backend.org.models import Org, Employee
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
+from main.utils import (
+    get_geoJson,
+    get_cursor_pg,
+    convert_3d_with_srid
+)
+
+from backend.org.models import Employee
 from django.db import connections, transaction
 from django.db.models import Q
-from backend.org.models import Employee
 from govorg.backend.org_request.models import ChangeRequest
 from backend.geoserver.models import WmtsCacheConfig
+from backend.another_database.models import AnotherDatabaseTable
 from main.inspire import GEoIdGenerator
 from backend.inspire.models import (
     LThemes,
@@ -125,16 +128,16 @@ def get_change_all(request):
         org_request = [_get_org_request(ob, employee) for ob in org_request_list]
         if org_request[0] != '':
             rsp = {
-                'success':True,
+                'success': True,
                 'org_request': org_request,
             }
         else:
             rsp = {
-                'success':False,
+                'success': False,
             }
     else:
         rsp = {
-                'success':False,
+                'success': False,
             }
 
     return JsonResponse(rsp)
@@ -295,41 +298,6 @@ def _str_to_json(form_json, item):
     return json.loads(form_json) if form_json else ''
 
 
-def _get_geoJson(data):
-    data = json.loads(data)
-    geom_type = data['type']
-    coordinates = data['coordinates']
-    if geom_type == 'Point':
-        from geojson import Point
-        point = Point(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'LineString':
-        from geojson import LineString
-        point = LineString(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'Polygon':
-        from geojson import Polygon
-        point = Polygon(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'MultiPoint':
-        from geojson import MultiPoint
-        point = MultiPoint(coordinates)
-        return Feature(geometry=point)
-
-    elif geom_type == 'MultiLineString':
-        from geojson import MultiLineString
-        point = MultiLineString(coordinates)
-        return Feature(geometry=point)
-
-    else:
-        from geojson import MultiPolygon
-        point = MultiPolygon(coordinates)
-        return Feature(geometry=point)
-
-
 def _geojson_to_featurecollection(geo_json, item):
     geo_json_list = list()
     if item['old_geo_id']:
@@ -455,7 +423,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
         return geom
@@ -520,25 +488,29 @@ def _value_types():
     ]
 
 
+def _get_data_from_data(form):
+    data = form['data'] if form['data'] else None
+    code_list_value_types = ['option', 'single-select', 'boolean']
+    if form['value_type'] in code_list_value_types:
+        value_type = 'code_list_id'
+        for code in form['data_list']:
+            if data == code[value_type]:
+                data = code[value_type]
+    else:
+        for types in _value_types():
+            if form['value_type'] in types['value_names']:
+                if types['value_type'] == 'date' and data:
+                    data = date_to_timezone(data)
+
+                value_type = types['value_type']
+    return data, value_type
+
+
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
     for form in form_json:
         value = dict()
-        data = form['data'] if form['data'] else None
-        code_list_value_types = ['option', 'single-select', 'boolean']
-        if form['value_type'] in code_list_value_types:
-            value_type = 'code_list_id'
-            for code in form['data_list']:
-                if data == code[value_type]:
-                    data = code[value_type]
-        else:
-            for types in _value_types():
-                if form['value_type'] in types['value_names']:
-                    if types['value_type'] == 'date' and data:
-                        data = date_to_timezone(data)
-
-                    value_type = types['value_type']
-
+        data, value_type = _get_data_from_data(form)
         value[value_type] = data
 
         if approve_type == 'create':
@@ -603,6 +575,105 @@ def _check_group_items(r_approve):
         r_approve.group_id = None
 
 
+def _get_property_values(properties, form_json):
+    property_datas = []
+    property_names = []
+    only_property_datas = []
+    form_json = json.loads(form_json)
+    properties = json.loads(properties)
+    for data in form_json:
+        if int(data.get('property_id')) in properties:
+            property_data = ''
+            property_code = ''
+            value_data, value_type = _get_data_from_data(data)
+            if value_data:
+                property_data = value_data
+
+            property_data = '''
+                '{field_data}'
+            '''.format(field_data=property_data)
+
+            property_code = data.get('property_code')
+            if property_code == 'end':
+                property_code = 'end_'
+
+            single_data = '''{property_name}={data}'''.format(
+                property_name=property_code,
+                data=property_data
+            )
+
+            property_datas.append(single_data)
+            property_names.append(property_code)
+            only_property_datas.append(property_data)
+
+    return property_names, property_datas, only_property_datas
+
+
+def _insert_data_another_table(request_datas, geo_id, change_type):
+
+    feature_id = request_datas.get('feature_id')
+    geo_data = request_datas.get('geo_json') or ''
+    feature_id = request_datas.get('feature_id') or ''
+    form_json = request_datas.get('form_json') or []
+    property_names = []
+    property_datas = []
+    only_property_datas = []
+    if geo_data:
+        geo_data = _geojson_to_geom(geo_data)
+        geo_data = convert_3d_with_srid(geo_data)
+
+    feature_code = LFeatures.objects.filter(feature_id=feature_id).first().feature_code
+    data_qs = AnotherDatabaseTable.objects.filter(another_database__is_export=True)
+    data_qs = data_qs.filter(feature_code=feature_code)
+
+    for data in data_qs:
+        data_table_id = data.another_database_id
+        table_name = data.table_name
+        properties = data.field_config
+
+        if form_json and (change_type == 'update' or change_type == 'create'):
+            property_names, property_datas, only_property_datas = _get_property_values(properties, form_json)
+        try:
+            cursor_pg = get_cursor_pg(data_table_id)
+            if change_type == 'create':
+                query = '''
+                    INSERT INTO public.{table_name}(
+                        geo_id, geo_data, feature_id, {propery_name})
+                    VALUES ('{geo_id}', '{geo_data}', {feature_id}, {property_data});
+                '''.format(
+                    geo_id=geo_id,
+                    geo_data=geo_data,
+                    table_name=table_name,
+                    feature_id=feature_id,
+                    propery_name=','.join(property_names) if property_names else '',
+                    property_data=','.join(only_property_datas) if only_property_datas else ''
+                )
+
+            elif change_type == 'update':
+                query = '''
+                    UPDATE public.{table_name}
+                        SET geo_data='{geo_data}', {property_data}
+                    WHERE geo_id='{geo_id}';
+                '''.format(
+                    geo_data=geo_data,
+                    geo_id=geo_id,
+                    table_name=table_name,
+                    property_data=','.join(property_datas) if property_datas else ''
+                )
+            else:
+                query = '''
+                    delete from public.{table_name}
+                    WHERE geo_id='{geo_id}';
+                '''.format(
+                    geo_id=geo_id,
+                    table_name=table_name
+                )
+            cursor_pg.execute(query)
+            cursor_pg.close()
+        except Exception:
+            pass
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -618,7 +689,6 @@ def request_approve(request, payload):
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
     requests_qs = ChangeRequest.objects
     requests_qs = requests_qs.filter(id__in=request_ids)
-
     with transaction.atomic():
         for r_approve in requests_qs:
             feature_id = r_approve.feature_id
@@ -632,12 +702,9 @@ def request_approve(request, payload):
                 old_geo_id = r_approve.old_geo_id
                 geo_json = r_approve.geo_json
                 form_json = r_approve.form_json
-                group_id = r_approve.group_id
-
+                request_datas = dict()
                 m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
-
                 if r_approve.kind == ChangeRequest.KIND_CREATE:
-                    request_datas = dict()
                     if old_geo_id and not m_geo_datas_qs:
                         request_datas['geo_id'] = old_geo_id
                     else:
@@ -652,6 +719,7 @@ def request_approve(request, payload):
                     success = _request_to_m(request_datas)
                     if success and new_geo_id:
                         r_approve.new_geo_id = new_geo_id
+                        _insert_data_another_table(request_datas, new_geo_id, 'create')
 
                 if r_approve.kind == ChangeRequest.KIND_UPDATE:
                     if geo_json:
@@ -664,6 +732,7 @@ def request_approve(request, payload):
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
                         success = _request_to_m(request_datas)
+                        _insert_data_another_table(request_datas, old_geo_id, 'update')
 
                     else:
                         m_geo_datas_qs.delete()
@@ -685,6 +754,9 @@ def request_approve(request, payload):
                         mdatas_qs = MDatas.objects
                         mdatas_qs = mdatas_qs.filter(geo_id=old_geo_id)
                         mdatas_qs.delete()
+                        request_datas['feature_id'] = feature_id
+                        request_datas['form_json'] = []
+                        _insert_data_another_table(request_datas, old_geo_id, 'delete')
                     else:
                         r_approve.state = ChangeRequest.STATE_REJECT
                         r_approve.save()
