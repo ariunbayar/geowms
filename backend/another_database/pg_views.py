@@ -302,21 +302,53 @@ def _geojson_to_geom(geo_json):
     return geom
 
 
-def _drop_table(table_name, cursor):
+def _drop_table(table_name, cursor, schema):
     detete_query = '''
-        DROP TABLE IF EXISTS public.{table_name}
-    '''.format(table_name=table_name)
+        DROP TABLE IF EXISTS {schema}.{table_name}
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
     cursor.execute(detete_query)
 
+def _execute_query_to_pg(cursor, sql):
+    try:
+        cursor.execute(sql)
+    except Exception:
+        pass
 
-def _create_extension(cursor):
+
+def _create_extention_postgis(cursor, schema):
+    query_extention = '''
+        create extension postgis with schema {schema}
+    '''.format(schema=schema)
+
+    query_topolagy = '''
+        CREATE EXTENSION postgis_topology with schema {schema}
+    '''.format(schema=schema)
+
+    give_all_role_to_postgis = '''
+        GRANT ALL ON SCHEMA postgis TO {schema};
+    '''.format(schema=schema)
+
+    give_all_role = '''
+        ALTER EXTENSION postgis SET SCHEMA {schema};
+    '''.format(schema=schema)
+
+    _execute_query_to_pg(cursor, query_extention)
+    _execute_query_to_pg(cursor, query_topolagy)
+    _execute_query_to_pg(cursor, give_all_role_to_postgis)
+    _execute_query_to_pg(cursor, give_all_role)
+
+
+def _create_extension(cursor, schema):
     crosstab_query = '''
-        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
-    '''
+        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA {schema}
+    '''.format( schema=schema )
     cursor.execute(crosstab_query)
 
 
-def _create_table(cursor, table_name, property_columns):
+def _create_table(cursor, table_name, property_columns, schema):
 
     columns = [
         'geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL',
@@ -326,30 +358,23 @@ def _create_table(cursor, table_name, property_columns):
 
     property_columns = columns + property_columns
 
-    query_extention = '''
-        CREATE EXTENSION  IF NOT EXISTS postgis;
-    '''
-
-    query_topolagy = '''
-        CREATE EXTENSION  IF NOT EXISTS  postgis_topology;
-    '''
 
     query_index = '''
-        CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {table_name}(geo_id)
-    '''.format(table_name=table_name)
-
-    utils.create_table_to_cursor(cursor, table_name, property_columns)
-
-    cursor.execute(query_extention)
-    cursor.execute(query_topolagy)
+        CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {schema}.{table_name}(geo_id)
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
+    _create_extention_postgis(cursor, schema)
+    utils.create_table_to_cursor(cursor, table_name, property_columns, schema)
     cursor.execute(query_index)
 
 
-def _insert_datas_to_code_list_table(cursor, code_list_datas):
+def _insert_datas_to_code_list_table(cursor, code_list_datas, schema):
 
     try:
         insert_query = '''
-            INSERT INTO public.geoportal_l_code_lists(
+            INSERT INTO {schema}.geoportal_l_code_lists(
                 code_list_id, property_code, code_list_code, code_list_name, code_list_name_eng
             )
             VALUES (
@@ -364,7 +389,8 @@ def _insert_datas_to_code_list_table(cursor, code_list_datas):
                 property_code=code_list_datas.get('property_code'),
                 code_list_code=code_list_datas.get('code_list_code'),
                 code_list_name=code_list_datas.get('code_list_name'),
-                code_list_name_eng=code_list_datas.get('code_list_name_eng')
+                code_list_name_eng=code_list_datas.get('code_list_name_eng'),
+                schema=schema
             )
         cursor.execute(insert_query)
     except Exception:
@@ -410,7 +436,7 @@ def _get_property_code_lists(property_ids):
     return code_list_prop_datas
 
 
-def _create_code_list_table(cursor, property_ids):
+def _create_code_list_table(cursor, property_ids, schema):
 
     table_name = 'geoportal_l_code_lists'
     fields = [
@@ -422,24 +448,24 @@ def _create_code_list_table(cursor, property_ids):
         'PRIMARY KEY (code_list_id)'
     ]
 
-    utils.create_table_to_cursor(cursor, table_name, fields)
+    utils.create_table_to_cursor(cursor, table_name, fields, schema)
     code_list_datas = _get_property_code_lists(property_ids)
     if code_list_datas:
         for data in code_list_datas:
-            _insert_datas_to_code_list_table(cursor, data)
+            _insert_datas_to_code_list_table(cursor, data, schema)
 
 
 
-def _insert_to_someone_db(table_name, cursor, columns, feature_code):
+def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
 
     columns.sort()
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
     fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
 
-    _drop_table(table_name, cursor)
-    _create_extension(cursor)
-    _create_code_list_table(cursor, columns)
+    _drop_table(table_name, cursor, pg_schema)
+    _create_extension(cursor, pg_schema)
+    _create_code_list_table(cursor, columns, pg_schema)
 
     property_columns = []
     for feild in range(len(fields)):
@@ -450,7 +476,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
             )
         property_columns.append(property_split)
 
-    _create_table(cursor, table_name, property_columns)
+    _create_table(cursor, table_name, property_columns, pg_schema)
     data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
     success_count = 0
     failed_count = 0
@@ -472,7 +498,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
             geo_data = utils.convert_3d_with_srid(geo_data)
 
             insert_query = '''
-                INSERT INTO public.{table_name}(
+                INSERT INTO {schema}.{table_name}(
                     geo_id, geo_data, feature_id, {columns}
                 )
                 VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
@@ -482,7 +508,8 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
                     geo_data=geo_data,
                     feature_id=feature_id,
                     columns=','.join(fields),
-                    columns_data=', '.join(property_data)
+                    columns_data=', '.join(property_data),
+                    schema=pg_schema
                 )
             cursor.execute(insert_query)
             success_count = success_count + 1
@@ -522,13 +549,17 @@ def refresh_datas(request, id):
     table_name_info = []
     info = ''
     success = True
+
+    connection = utils.json_load(ano_db.connection)
+    pg_schema = connection.get('schema') or 'public'
+
     if ano_db_table_pg:
         for table in ano_db_table_pg:
             table_name = table.table_name
             field_config = table.field_config.replace("'", '"')
             columns = utils.json_load(field_config)
             feature_code = table.feature_code
-            success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
+            success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code, pg_schema)
             table_info_text = '''
                 "{table_name}" хүснэгт
                 нийт: {total_count} мөр датанаас
