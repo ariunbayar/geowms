@@ -460,7 +460,6 @@ def _create_code_list_table(cursor, property_ids):
             _insert_datas_to_code_list_table(cursor, data)
 
 
-
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
     columns.sort()
@@ -499,31 +498,27 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
         geo_data = data['geo_data']
         geo_data = _geojson_to_geom(geo_data)
-        try:
-            sql_set_srid = '''
-                SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
-            '''.format(geo_data=geo_data)
+        # try:
+        geo_data = utils.convert_3d_with_srid(geo_data)
 
-            geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
-            geo_data = geo_data[0]['wkt']
-
-            insert_query = '''
-                INSERT INTO public.{table_name}(
-                    geo_id, geo_data, feature_id, {columns}
-                )
-                VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
-                '''.format(
-                    table_name=table_name,
-                    geo_id=data['geo_id'],
-                    geo_data=geo_data,
-                    feature_id=feature_id,
-                    columns=','.join(fields),
-                    columns_data=', '.join(property_data)
-                )
-            cursor.execute(insert_query)
-            success_count = success_count + 1
-        except Exception:
-            failed_count = failed_count + 1
+        insert_query = '''
+            INSERT INTO public.{table_name}(
+                geo_id, geo_data, feature_id, {columns}
+            )
+            VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
+            '''.format(
+                table_name=table_name,
+                geo_id=data['geo_id'],
+                geo_data=geo_data,
+                feature_id=feature_id,
+                columns=','.join(fields),
+                columns_data=', '.join(property_data)
+            )
+        cursor.execute(insert_query)
+        success_count = success_count + 1
+        # except Exception:
+        #     pass
+    failed_count = total_count - success_count
     return success_count, failed_count, total_count
 
 
