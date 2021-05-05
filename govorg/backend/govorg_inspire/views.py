@@ -425,7 +425,7 @@ def detail(request, gid, fid, tid):
     qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
     property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
     qs_l_properties = LProperties.objects
-    qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature)
+    qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature).distinct('property_id')
 
     rsp = {
         'success': True,
