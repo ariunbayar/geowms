@@ -237,7 +237,6 @@ def table__detail(request, id, table_id):
 
 
 def _get_all_datas(feature_id, columns, properties, feature_config_ids):
-
     query = '''
             SELECT
                 d.geo_id,
@@ -271,6 +270,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+            limit 100
         '''.format(
                 columns=', '.join(['ct.{}'.format(f) for f in properties]),
                 properties=', '.join(['{}'.format(f) for f in columns]),
@@ -279,6 +279,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 feature_id=feature_id,
         )
     cursor = connections['default'].cursor()
+    print(query)
     data_list = utils.get_sql_execute(query, cursor, 'all')
     return data_list
 
@@ -339,11 +340,18 @@ def _create_extention_postgis(cursor, schema):
     '''.format(schema=schema)
 
     give_all_role_to_postgis = '''
-        GRANT ALL ON SCHEMA postgis TO {schema};
+        UPDATE
+            pg_extension
+        SET
+            extrelocatable = TRUE
+        WHERE extname = 'postgis';
+
     '''.format(schema=schema)
 
     give_all_role = '''
-        ALTER EXTENSION postgis SET SCHEMA {schema};
+        ALTER EXTENSION
+            postgis
+        SET SCHEMA {schema};
     '''.format(schema=schema)
 
     _execute_query_to_pg(cursor, query_extention)
@@ -487,6 +495,10 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
         property_columns.append(property_split)
 
     _create_table(cursor, table_name, property_columns, pg_schema)
+    print("create_table")
+    print("create_table")
+    print("create_table")
+    print("create_table")
     data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
     success_count = 0
     failed_count = 0
@@ -522,9 +534,11 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
                 )
             cursor.execute(insert_query)
             success_count = success_count + 1
+            print("hohoh", success_count)
         except Exception:
             pass
     failed_count = total_count - success_count
+    print(success_count, failed_count, total_count)
     return success_count, failed_count, total_count
 
 
@@ -536,7 +550,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = _get_cursor_pg(id)
+        cursor_pg = utils.get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -553,7 +567,7 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = _get_cursor_pg(id)
+    cursor_pg = utils.get_cursor_pg(id)
     table_info = []
     table_name_info = []
     info = ''
