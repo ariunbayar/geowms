@@ -26,7 +26,7 @@ def non_existent_property(apps, schema_editor):
 
     _remove(LProperties, GovRoleInspire)
     _remove(LProperties, GovPermInspire)
-    _remove(LProperties, EmpRoleInspire)``
+    _remove(LProperties, EmpRoleInspire)
     _remove(LProperties, EmpPermInspire)
 
 
