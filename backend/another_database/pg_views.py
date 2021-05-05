@@ -74,10 +74,9 @@ def get_pg_table_list(request, payload, pk):
     another_database = get_object_or_404(AnotherDatabase, pk=pk)
     get_base = AnotherDatabaseTable.objects.filter(another_database=another_database)
     feature_codes = get_base.values_list('feature_code', flat=True)
-
     оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id']
     initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
-   
+
     if not initial_qs:
         rsp = {
             'items': [],
@@ -95,11 +94,11 @@ def get_pg_table_list(request, payload, pk):
 
     items, total_page = datatable.get()
 
-    for code, item in zip(feature_codes, items):
-        data = LFeatures.objects.filter(feature_code=code).first()
-        feature_name = data.feature_name
-        item['feature_code']=feature_name
-    print(items)
+    for item in items:
+        for code in feature_codes:
+            data = LFeatures.objects.filter(feature_code=code).first()
+            feature_name = data.feature_name
+            item['feature_code']=feature_name
 
     rsp = {
         'items': items,
@@ -108,28 +107,6 @@ def get_pg_table_list(request, payload, pk):
     }
 
     return JsonResponse(rsp)
-
-
-def _get_pg_cursor(conn_details):
-    host = conn_details.get('pg_host')
-    port = conn_details.get('pg_port')
-    user = conn_details.get('pg_username')
-    password = conn_details.get('pg_password')
-    db = conn_details.get('pg_database')
-    try:
-        cursor = utils.check_pg_connection(host, db, port, user, password)
-    except Exception:
-        cursor = []
-    return cursor
-
-
-def _get_sql_execute(sql, cursor, fetch_type):
-    cursor.execute(sql)
-    if fetch_type == 'one':
-        values = list(cursor.fetchone())
-    else:
-        values = list(utils.dict_fetchall(cursor))
-    return values
 
 
 @require_GET
@@ -251,7 +228,7 @@ def save_table(request, payload):
     else:
         return JsonResponse({
             'success': False,
-            'info': ''
+            'info': 'Property сонгоогүй байна'
         })
 
 
@@ -322,7 +299,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 feature_id=feature_id,
         )
     cursor = connections['default'].cursor()
-    data_list =  _get_sql_execute(query, cursor, 'all')
+    data_list = utils.get_sql_execute(query, cursor, 'all')
     return data_list
 
 
@@ -372,25 +349,116 @@ def _create_extension(cursor):
 
 def _create_table(cursor, table_name, property_columns):
 
-    query = '''
-        CREATE TABLE public.{table_name}
-        (
-            geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL,
-            geo_data geometry(GeometryZ,4326),
-            feature_id integer,
-            {columns}
-        )
-    '''.format(
-        table_name=table_name,
-        columns=','.join(property_columns)
-    )
+    columns = [
+        'geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL',
+        'geo_data geometry(GeometryZ,4326)',
+        'feature_id integer'
+    ]
+
+    property_columns = columns + property_columns
+
+    query_extention = '''
+        CREATE EXTENSION  IF NOT EXISTS postgis;
+    '''
+
+    query_topolagy = '''
+        CREATE EXTENSION  IF NOT EXISTS  postgis_topology;
+    '''
 
     query_index = '''
         CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {table_name}(geo_id)
     '''.format(table_name=table_name)
 
-    cursor.execute(query)
+    utils.create_table_to_cursor(cursor, table_name, property_columns)
+
+    cursor.execute(query_extention)
+    cursor.execute(query_topolagy)
     cursor.execute(query_index)
+
+
+def _insert_datas_to_code_list_table(cursor, code_list_datas):
+
+    try:
+        insert_query = '''
+            INSERT INTO public.geoportal_l_code_lists(
+                code_list_id, property_code, code_list_code, code_list_name, code_list_name_eng
+            )
+            VALUES (
+                {code_list_id},
+                '{property_code}',
+                '{code_list_code}',
+                '{code_list_name}',
+                '{code_list_name_eng}'
+            );
+            '''.format(
+                code_list_id=code_list_datas.get('code_list_id'),
+                property_code=code_list_datas.get('property_code'),
+                code_list_code=code_list_datas.get('code_list_code'),
+                code_list_name=code_list_datas.get('code_list_name'),
+                code_list_name_eng=code_list_datas.get('code_list_name_eng')
+            )
+        cursor.execute(insert_query)
+    except Exception:
+        pass
+
+
+def _get_property_code_lists(property_ids):
+
+    code_list_prop_ids = []
+    code_list_prop_datas = []
+    code_list_value_types = ['option', 'single-select', 'boolean']
+
+    qs_prop = LProperties.objects.filter(property_id__in=property_ids)
+    qs_prop = qs_prop.filter(value_type_id__in=code_list_value_types)
+    prop_datas = list(qs_prop.values("property_id", 'property_code'))
+    if prop_datas:
+        for prop in prop_datas:
+            code_list_prop_ids.append(prop['property_id'])
+
+        qs_code_list = LCodeLists.objects.filter(property_id__in=code_list_prop_ids)
+        qs_code_list = list(qs_code_list.values(
+            'code_list_id',
+            'property_id',
+            'code_list_code',
+            'code_list_name',
+            'code_list_name_eng'
+        ))
+        if qs_code_list:
+            for code_list in qs_code_list:
+                property_code = list(
+                    filter(lambda x: x['property_id'] == code_list['property_id'], prop_datas)
+                )[0]['property_code'] or ''
+
+                code_list_data = {
+                    'property_code': property_code,
+                    'code_list_id': code_list.get('code_list_id') or None,
+                    'code_list_code': code_list.get('code_list_code') or '',
+                    'code_list_name': code_list.get('code_list_name') or '',
+                    'code_list_name_eng': code_list.get('code_list_name_eng') or '',
+                }
+                code_list_prop_datas.append(code_list_data)
+
+    return code_list_prop_datas
+
+
+def _create_code_list_table(cursor, property_ids):
+
+    table_name = 'geoportal_l_code_lists'
+    fields = [
+        'code_list_id integer NOT NULL',
+        'property_code character varying(255)',
+        'code_list_code character varying(255)',
+        'code_list_name character varying(255)',
+        'code_list_name_eng character varying(255)',
+        'PRIMARY KEY (code_list_id)'
+    ]
+
+    utils.create_table_to_cursor(cursor, table_name, fields)
+    code_list_datas = _get_property_code_lists(property_ids)
+    if code_list_datas:
+        for data in code_list_datas:
+            _insert_datas_to_code_list_table(cursor, data)
+
 
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
@@ -402,6 +470,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
     _drop_table(table_name, cursor)
     _create_extension(cursor)
+    _create_code_list_table(cursor, columns)
 
     property_columns = []
     for feild in range(len(fields)):
@@ -413,7 +482,6 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
         property_columns.append(property_split)
 
     _create_table(cursor, table_name, property_columns)
-
     data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
     success_count = 0
     failed_count = 0
@@ -443,7 +511,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
                 INSERT INTO public.{table_name}(
                     geo_id, geo_data, feature_id, {columns}
                 )
-                VALUES ('{geo_id}', '{geo_data}', {feature_id},{columns_data});
+                VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
                 '''.format(
                     table_name=table_name,
                     geo_id=data['geo_id'],
@@ -486,6 +554,7 @@ def refresh_datas(request, id):
 
     cursor_pg = _get_cursor_pg(id)
     table_info = []
+    table_name_info = []
     info = ''
     success = True
     if ano_db_table_pg:
@@ -496,10 +565,10 @@ def refresh_datas(request, id):
             feature_code = table.feature_code
             success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
             table_info_text = '''
-                {table_name} хүснэгт
-                нийт {total_count} мөр дата-наас
-                амжилттай орсон {success_count}
-                амжилтгүй {failed_count}
+                "{table_name}" хүснэгт
+                нийт: {total_count} мөр датанаас
+                амжилттай орсон: {success_count},
+                амжилтгүй: {failed_count}.
                 '''.format(
                     table_name=table_name,
                     total_count=total_count,
@@ -507,6 +576,14 @@ def refresh_datas(request, id):
                     failed_count=failed_count
                 )
             table_info.append(table_info_text)
+
+            table_name_info_text = '''
+                Та "{table_name}" нэртэй
+                хүснэгтийг шинэчлэхдээ итгэлтэй байна уу?
+                '''.format(
+                    table_name=table_name
+                )
+            table_name_info.append(table_name_info_text)
         ano_db.database_updated_at = datetime.datetime.now()
         ano_db.save()
     else:
@@ -515,5 +592,6 @@ def refresh_datas(request, id):
     return JsonResponse({
         'success': success,
         'info': info,
-        'table_info': table_info
+        'table_info': table_info,
+        'table_name_info': table_name_info
     })
