@@ -25,7 +25,6 @@ export default class  PgForm extends Component {
             selected_dt_list: [],
             data_type_list: [],
             id_list: [],
-            alert_sms: false,
             message: 'Property сонгоогүй байна.',
             is_loading: false,
             modal_status: 'closed',
@@ -146,7 +145,7 @@ export default class  PgForm extends Component {
 
     handleSave(){
         const {id, table_id, table_name, id_list, feature_name} = this.state
-        if(id_list.length){
+        if(id_list.length > 0 && table_name){
             this.setState({ is_loading: true })
             service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
                 this.setState({ is_loading: false })
@@ -158,7 +157,6 @@ export default class  PgForm extends Component {
                         false,
                         () => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
                     )
-                    this.setState({alert_sms: false})
                 }
                 else {
                     this.modalChange(
@@ -170,9 +168,6 @@ export default class  PgForm extends Component {
                     )
                 }
             })
-        }
-        else {
-            this.setState({alert_sms: true})
         }
     }
 
@@ -212,8 +207,7 @@ export default class  PgForm extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name, alert_sms,
-            is_loading
+            id_list, table_name, is_loading
         } = this.state
         return (
             <div className="card">
@@ -225,12 +219,17 @@ export default class  PgForm extends Component {
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
-                            className='form-control'
+                            className={'form-control' + ( !table_name ? ' is-invalid' : '')}
                             type='text'
                             value={table_name}
                             disabled={table_id ? true : false}
                             onChange={(e) => this.setState({table_name: e.target.value})}
                         />
+                        {
+                            !table_name
+                            &&
+                            <label className="text-danger  text-center col-md-8">Хүснэгтийн нэр оруулна уу !!!</label>
+                        }
                     </div>
                 </div>
                 <div className="form-row col-md-9 p-4 mx-1">
@@ -262,16 +261,28 @@ export default class  PgForm extends Component {
                                         <th className="text-center" style={{width: "8%"}}>
                                             Data <br/>type
                                         </th>
-                                        <th className="text-center" style={{width: "5%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "5%"}}
+                                        >
                                         </th>
-                                        <th className="text-center" style={{width: "15%"}}>
+                                        <th
+                                        //  + ( id_list && id_list.length <=0 && 'border border-danger')
+                                            className={'text-center'}
+                                            style={{width: "15%"}}
+                                        >
                                             Property
-                                            <i
-                                            data-toggle="tooltip"
-                                            data-placement="top"
-                                            title={this.state.message}
-                                            className={`${alert_sms ? "text-danger icon-exclamation  float-right blink fa-lg mb-2" : "d-none" }`}>
-                                            </i>
+                                            {
+                                                id_list.length <= 0
+                                                &&
+                                                <i
+                                                    className="text-danger icon-exclamation float-right fa-3x d-flex"
+                                                    data-toggle="tooltip"
+                                                    data-placement="left"
+                                                    title="Property сонгоогүй байна."
+                                                >
+                                                </i>
+                                            }
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>
