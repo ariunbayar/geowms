@@ -216,27 +216,33 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
-    if not table_name:
+    if(len(id_list)):
+        if not table_name:
+            return JsonResponse({
+                'success': False,
+                'info': 'Table-ийн нэр хоосон байна !!!'
+            })
+        feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
+        another_database = get_object_or_404(AnotherDatabase, pk=id)
+        AnotherDatabaseTable.objects.update_or_create(
+            pk=table_id,
+            defaults={
+                'table_name': table_name,
+                'feature_code': feature_name.feature_code,
+                'field_config': utils.json_dumps(id_list),
+                'another_database': another_database,
+                'created_by': request.user
+            }
+        )
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгалагдлаа'
+        })
+    else:
         return JsonResponse({
             'success': False,
-            'info': 'Table-ийн нэр хоосон байна !!!'
+            'info': 'Property сонгоогүй байна'
         })
-    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
-    another_database = get_object_or_404(AnotherDatabase, pk=id)
-    AnotherDatabaseTable.objects.update_or_create(
-        pk=table_id,
-        defaults={
-            'table_name': table_name,
-            'feature_code': feature_name.feature_code,
-            'field_config': utils.json_dumps(id_list),
-            'another_database': another_database,
-            'created_by': request.user
-        }
-    )
-    return JsonResponse({
-        'success': True,
-        'info': 'Амжилттай хадгалагдлаа'
-    })
 
 
 @require_GET
