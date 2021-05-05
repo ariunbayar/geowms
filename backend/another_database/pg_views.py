@@ -536,8 +536,7 @@ def refresh_datas(request, id):
             table_info.append(table_info_text)
 
             table_name_info_text = '''
-                Та "{table_name}" нэртэй
-                хүснэгтийг шинэчлэхдээ итгэлтэй байна уу?
+                "{table_name}"
                 '''.format(
                     table_name=table_name
                 )

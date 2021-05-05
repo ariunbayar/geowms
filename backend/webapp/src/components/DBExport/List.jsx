@@ -87,7 +87,7 @@ export default class List extends Component {
                     null,
                     'warning',
                     'Хүснэгт шинэчлэх',
-                    `${table_res}`,
+                    `Та ${table_res} нэртэй хүснэгтийг шинэчлэхдээ итгэлтэй байна уу?`,
                     true,
                     '',
                     'Тийм',
