@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { service } from '../service';
 import BackButton from "@utils/Button/BackButton"
 import SelectField from './selectField'
-import './style.css'
 import Loader from "@utils/Loader"
 import Modal from "@utils/Modal/Modal"
 
@@ -27,7 +26,7 @@ export default class  PgForm extends Component {
             data_type_list: [],
             id_list: [],
             alert_sms: false,
-            message: '',
+            message: 'Property сонгоогүй байна.',
             is_loading: false,
             modal_status: 'closed',
         }
@@ -38,8 +37,6 @@ export default class  PgForm extends Component {
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
-        this.onMouseEnter = this.onMouseEnter.bind(this)
-        this.onMouseLeave = this.onMouseLeave.bind(this)
 
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
@@ -161,6 +158,7 @@ export default class  PgForm extends Component {
                         false,
                         () => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
                     )
+                    this.setState({alert_sms: false})
                 }
                 else {
                     this.modalChange(
@@ -172,7 +170,6 @@ export default class  PgForm extends Component {
                     )
                 }
             })
-            this.setState({alert_sms: false})
         }
         else {
             this.setState({alert_sms: true})
@@ -188,13 +185,6 @@ export default class  PgForm extends Component {
             id_list = id_list.filter((oid) => oid != value)
         }
         this.setState({id_list})
-    }
-    onMouseEnter(){
-      this.setState({message:'Property сонгоогүй байна.'})
-    }
-
-    onMouseLeave(){
-      this.setState({message:''})
     }
 
     handleModalOpen() {
@@ -276,19 +266,12 @@ export default class  PgForm extends Component {
                                         </th>
                                         <th className="text-center" style={{width: "15%"}}>
                                             Property
-                                            <div
-                                                type="button"
-                                                onMouseEnter={() => this.onMouseEnter()}
-                                                onMouseLeave={() => this.onMouseLeave()}
-                                                className={`float right` + ` ${alert_sms ? "d-block" : "d-none" }`}
-                                            >
-                                                <i className="text-danger icon-exclamation  float-right blink">
-                                                    <div className={`alert rounded position-absolute`+`${this.state.message ? " d-block" : " d-none"}`} style={{zIndex:'1'}}role="alert">
-                                                        <h6 className="alert-heading"></h6>
-                                                        <p> {this.state.message}</p>
-                                                    </div>
-                                                </i>
-                                            </div>
+                                            <i
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title={this.state.message}
+                                            className={`${alert_sms ? "text-danger icon-exclamation  float-right blink fa-lg mb-2" : "d-none" }`}>
+                                            </i>
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>

@@ -161,14 +161,15 @@ def getFields(request, payload):
     return JsonResponse({
         'data_type_list': data_types_datas
     })
-def _rsp_validation(table_name,id_list):
+
+
+def _rsp_validation(table_name, id_list):
+    info = ''
     if not table_name:
         info = 'Table-ийн нэр хоосон байна !!!'
-    if(len(id_list)):
+    if len(id_list) == 0:
         info = 'Property сонгоогүй байна'
     return info
-
-
 
 
 @require_POST
@@ -180,7 +181,10 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
-    status =_rsp_validation(table_name, id_list)
+    info = _rsp_validation(table_name, id_list)
+    if info:
+        return JsonResponse({'success': False, 'info': info})
+
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
     AnotherDatabaseTable.objects.update_or_create(
@@ -197,7 +201,6 @@ def save_table(request, payload):
         'success': True,
         'info': 'Амжилттай хадгалагдлаа'
     })
-
 
 
 @require_GET
