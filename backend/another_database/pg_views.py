@@ -423,7 +423,6 @@ def _create_code_list_table(cursor, property_ids):
             _insert_datas_to_code_list_table(cursor, data)
 
 
-
 def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
     columns.sort()
