@@ -77,32 +77,18 @@ export default class List extends Component {
         if(values.db_type == 'PgDB') this.refreshPgData(values)
     }
 
-    refreshPgData(values) {
-        this.setState({ values })
-        service.pg_config.refreshTableData(values.id).then(({ success, info, table_name_info }) => {
+    refreshPgData(values){
+        this.setState({is_loading: true})
+        service.pg_config.refreshTableData(values.id).then(({success, info, table_info}) => {
             if (success) {
-                var table_res = table_name_info.join("\n")
+                this.setState({is_loading: false})
+                var table_res = table_info.join("\n")
                 this.modalChange(
-                    'fa fa-exclamation-circle',
+                    'fa fa-check-circle',
                     null,
-                    'warning',
-                    'Хүснэгт шинэчлэх',
+                    'success',
+                    'Амжилттай',
                     `${table_res}`,
-                    true,
-                    '',
-                    'Тийм',
-                    (values) => this.refreshPgDataAction(values),
-                    null
-                )
-            }
-            else {
-                this.setState({ is_loading: false })
-                this.modalChange(
-                    'fa fa-times-circle',
-                    null,
-                    'danger',
-                    'Алдаа гарлаа',
-                    info,
                     false,
                     '',
                     '',
