@@ -27,7 +27,6 @@ export default class  PgForm extends Component {
             id_list: [],
             is_loading: false,
             modal_status: 'closed',
-            modalalert_status: 'closed'
         }
 
         this.handleChange = this.handleChange.bind(this)
@@ -91,6 +90,7 @@ export default class  PgForm extends Component {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
+            data_list['feature_name'] = ''
         }
 
         else if ( name == 'package' ) {
@@ -98,6 +98,7 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
+
             }
             else {
                 data_list['feature_name'] = ''
@@ -146,8 +147,8 @@ export default class  PgForm extends Component {
         service
             .pg_config.tableSave(id, table_id, id_list, feature_name, table_name)
             .then(({ success }) => {
+                this.setState({ is_loading: false })
                 if(success){
-                    this.setState({ is_loading: false })
                     this.modalChange(
                         'fa fa-check-circle',
                         'success',
@@ -157,7 +158,6 @@ export default class  PgForm extends Component {
                     )
                 }
                 else {
-                    this.setState({ is_loading: false })
                     this.modalChange(
                         'fa fa-exclamation-circle',
                         'warning',
@@ -245,7 +245,8 @@ export default class  PgForm extends Component {
                         setSelect={this.handleChange}
                     />
                 </div>
-                { feature_name &&
+                {
+                    feature_name &&
                     <div className="col-md-7 px-3">
                             <table className="table table-bordered m-1">
                                 <thead>
