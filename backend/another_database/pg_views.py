@@ -33,28 +33,6 @@ from backend.inspire.models import (
 )
 
 
-def _get_pg_conf(conn_id):
-    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
-    connection = utils.json_load(another_db.connection)
-    form_datas = {
-        'id': conn_id,
-        'name': another_db.name,
-        'definition': another_db.definition,
-        'pg_host': connection.get('server'),
-        'pg_port': connection.get('port'),
-        'pg_username': connection.get('username'),
-        'pg_password': connection.get('password'),
-        'pg_database': connection.get('database'),
-    }
-    return form_datas
-
-
-def _get_cursor_pg(conn_id):
-    form_datas = _get_pg_conf(conn_id)
-    cursor_pg = _get_pg_cursor(form_datas)
-    return cursor_pg
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
