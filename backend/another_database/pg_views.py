@@ -163,6 +163,15 @@ def getFields(request, payload):
     })
 
 
+def _rsp_validation(table_name, id_list):
+    info = ''
+    if not table_name:
+        info = 'Table-ийн нэр хоосон байна !!!'
+    if len(id_list) == 0:
+        info = 'Property сонгоогүй байна'
+    return info
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -172,33 +181,26 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
-    if(len(id_list)):
-        if not table_name:
-            return JsonResponse({
-                'success': False,
-                'info': 'Table-ийн нэр хоосон байна !!!'
-            })
-        feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
-        another_database = get_object_or_404(AnotherDatabase, pk=id)
-        AnotherDatabaseTable.objects.update_or_create(
-            pk=table_id,
-            defaults={
-                'table_name': table_name,
-                'feature_code': feature_name.feature_code,
-                'field_config': utils.json_dumps(id_list),
-                'another_database': another_database,
-                'created_by': request.user
-            }
-        )
-        return JsonResponse({
-            'success': True,
-            'info': 'Амжилттай хадгалагдлаа'
-        })
-    else:
-        return JsonResponse({
-            'success': False,
-            'info': 'Property сонгоогүй байна'
-        })
+    info = _rsp_validation(table_name, id_list)
+    if info:
+        return JsonResponse({'success': False, 'info': info})
+
+    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
+    another_database = get_object_or_404(AnotherDatabase, pk=id)
+    AnotherDatabaseTable.objects.update_or_create(
+        pk=table_id,
+        defaults={
+            'table_name': table_name,
+            'feature_code': feature_name.feature_code,
+            'field_config': utils.json_dumps(id_list),
+            'another_database': another_database,
+            'created_by': request.user
+        }
+    )
+    return JsonResponse({
+        'success': True,
+        'info': 'Амжилттай хадгалагдлаа'
+    })
 
 
 @require_GET
@@ -455,7 +457,6 @@ def _create_code_list_table(cursor, property_ids, schema):
             _insert_datas_to_code_list_table(cursor, data, schema)
 
 
-
 def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
 
     columns.sort()
@@ -494,9 +495,10 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
 
         geo_data = data['geo_data']
         geo_data = _geojson_to_geom(geo_data)
-        try:
-            geo_data = utils.convert_3d_with_srid(geo_data)
+        # try:
+        geo_data = utils.convert_3d_with_srid(geo_data)
 
+<<<<<<< HEAD
             insert_query = '''
                 INSERT INTO {schema}.{table_name}(
                     geo_id, geo_data, feature_id, {columns}
@@ -515,6 +517,25 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
             success_count = success_count + 1
         except Exception:
             pass
+=======
+        insert_query = '''
+            INSERT INTO public.{table_name}(
+                geo_id, geo_data, feature_id, {columns}
+            )
+            VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
+            '''.format(
+                table_name=table_name,
+                geo_id=data['geo_id'],
+                geo_data=geo_data,
+                feature_id=feature_id,
+                columns=','.join(fields),
+                columns_data=', '.join(property_data)
+            )
+        cursor.execute(insert_query)
+        success_count = success_count + 1
+        # except Exception:
+        #     pass
+>>>>>>> 63e0ca5daab0e38a45b4436e828ec818fa5589ff
     failed_count = total_count - success_count
     return success_count, failed_count, total_count
 
