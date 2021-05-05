@@ -395,8 +395,9 @@ def _get_property_code_lists(property_ids):
                 code_list_data = {
                     'property_code': property_code,
                     'code_list_id': code_list.get('code_list_id') or None,
-                    'code_list_code': code_list.get('code_list_code') or None,
-                    'code_list_name_eng': code_list.get('code_list_name_eng') or None,
+                    'code_list_code': code_list.get('code_list_code') or '',
+                    'code_list_name': code_list.get('code_list_name') or '',
+                    'code_list_name_eng': code_list.get('code_list_name_eng') or '',
                 }
                 code_list_prop_datas.append(code_list_data)
 
