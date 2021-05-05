@@ -105,5 +105,10 @@
 
 .fixed-height{
   overflow-y: scroll;
-  height: 90vh;
+}
+
+.right-scroll-sticky{
+  position: sticky;
+  height: calc(65vh - 40px);
+  overflow-y: scroll;
 }
