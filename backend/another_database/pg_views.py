@@ -254,7 +254,6 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
-            limit 10
         '''.format(
                 columns=', '.join(['ct.{}'.format(f) for f in properties]),
                 properties=', '.join(['{}'.format(f) for f in columns]),
