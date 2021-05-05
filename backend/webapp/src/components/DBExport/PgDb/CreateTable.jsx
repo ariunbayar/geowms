@@ -25,6 +25,7 @@ export default class  PgForm extends Component {
             selected_dt_list: [],
             data_type_list: [],
             id_list: [],
+            message: 'Property сонгоогүй байна.',
             is_loading: false,
             modal_status: 'closed',
         }
@@ -35,6 +36,7 @@ export default class  PgForm extends Component {
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
+
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
     }
@@ -142,11 +144,10 @@ export default class  PgForm extends Component {
     }
 
     handleSave(){
-        const { id, table_id, table_name, id_list, feature_name } = this.state
-        this.setState({ is_loading: true })
-        service
-            .pg_config.tableSave(id, table_id, id_list, feature_name, table_name)
-            .then(({ success, info}) => {
+        const {id, table_id, table_name, id_list, feature_name} = this.state
+        if(id_list.length > 0 && table_name){
+            this.setState({ is_loading: true })
+            service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
@@ -167,6 +168,7 @@ export default class  PgForm extends Component {
                     )
                 }
             })
+        }
     }
 
     handleSetField(e){
@@ -217,12 +219,17 @@ export default class  PgForm extends Component {
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
-                            className='form-control'
+                            className={'form-control' + ( !table_name ? ' is-invalid' : '')}
                             type='text'
                             value={table_name}
                             disabled={table_id ? true : false}
                             onChange={(e) => this.setState({table_name: e.target.value})}
                         />
+                        {
+                            !table_name
+                            &&
+                            <label className="text-danger  text-center col-md-8">Хүснэгтийн нэр оруулна уу !!!</label>
+                        }
                     </div>
                 </div>
                 <div className="form-row col-md-9 p-4 mx-1">
@@ -254,10 +261,28 @@ export default class  PgForm extends Component {
                                         <th className="text-center" style={{width: "8%"}}>
                                             Data <br/>type
                                         </th>
-                                        <th className="text-center" style={{width: "5%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "5%"}}
+                                        >
                                         </th>
-                                        <th className="text-center" style={{width: "15%"}}>
+                                        <th
+                                        //  + ( id_list && id_list.length <=0 && 'border border-danger')
+                                            className={'text-center'}
+                                            style={{width: "15%"}}
+                                        >
                                             Property
+                                            {
+                                                id_list.length <= 0
+                                                &&
+                                                <i
+                                                    className="text-danger icon-exclamation float-right fa-3x d-flex"
+                                                    data-toggle="tooltip"
+                                                    data-placement="left"
+                                                    title="Property сонгоогүй байна."
+                                                >
+                                                </i>
+                                            }
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>
