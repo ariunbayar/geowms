@@ -498,33 +498,6 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
 
         geo_data = data['geo_data']
         geo_data = _geojson_to_geom(geo_data)
-<<<<<<< HEAD
-        try:
-            sql_set_srid = '''
-                SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
-            '''.format(geo_data=geo_data)
-
-            geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
-            geo_data = geo_data[0]['wkt']
-
-            insert_query = '''
-                INSERT INTO public.{table_name}(
-                    geo_id, geo_data, feature_id, {columns}
-                )
-                VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
-                '''.format(
-                    table_name=table_name,
-                    geo_id=data['geo_id'],
-                    geo_data=geo_data,
-                    feature_id=feature_id,
-                    columns=','.join(fields),
-                    columns_data=', '.join(property_data)
-                )
-            cursor.execute(insert_query)
-            success_count = success_count + 1
-        except Exception:
-            failed_count = failed_count + 1
-=======
         # try:
         geo_data = utils.convert_3d_with_srid(geo_data)
 
@@ -546,7 +519,6 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
         # except Exception:
         #     pass
     failed_count = total_count - success_count
->>>>>>> e8c81c7177fe5a2c8db6754b9ef840b57dacf687
     return success_count, failed_count, total_count
 
 
