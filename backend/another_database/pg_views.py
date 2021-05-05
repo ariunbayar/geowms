@@ -40,7 +40,7 @@ def config_detail(request, pk):
 
     rsp = {
         'success': True,
-        'values': utils.get_pg_conf(pk)
+        'values': _get_pg_conf(pk)
     }
     return JsonResponse(rsp)
 
@@ -50,9 +50,11 @@ def config_detail(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def get_pg_table_list(request, payload, pk):
     another_database = get_object_or_404(AnotherDatabase, pk=pk)
-
+    get_base = AnotherDatabaseTable.objects.filter(another_database=another_database)
+    feature_codes = get_base.values_list('feature_code', flat=True)
     оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id']
     initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
+
     if not initial_qs:
         rsp = {
             'items': [],
@@ -69,6 +71,13 @@ def get_pg_table_list(request, payload, pk):
     )
 
     items, total_page = datatable.get()
+
+    for item in items:
+        for code in feature_codes:
+            data = LFeatures.objects.filter(feature_code=code).first()
+            feature_name = data.feature_name
+            item['feature_code']=feature_name
+
     rsp = {
         'items': items,
         'page': payload.get("page"),
@@ -255,10 +264,10 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                     and
                         mg.feature_id = {feature_id}
                     where
-                        property_id in ({properties})
+                        b.property_id in ({properties})
                     and
                         feature_config_id in ({feature_config_id})
-                    order by 1,2'::text
+                    '
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
@@ -280,7 +289,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom = ''.join(geom)
+        geom =  ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
         return geom
@@ -527,7 +536,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = utils.get_cursor_pg(id)
+        cursor_pg = _get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -544,7 +553,7 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = utils.get_cursor_pg(id)
+    cursor_pg = _get_cursor_pg(id)
     table_info = []
     table_name_info = []
     info = ''
