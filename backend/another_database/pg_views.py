@@ -591,10 +591,3 @@ def refresh_datas(request, id):
         'table_info': table_info,
         'table_name_info': table_name_info
     })
-
-
-# cursor_pg = utils.get_cursor_pg(9)
-# sql = '''
-#     select count(*) from tn_soft limit 100
-# '''
-# hoho = utils.get_sql_execute(sql, cursor_pg, 'all')
