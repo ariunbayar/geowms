@@ -278,7 +278,6 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 feature_id=feature_id,
         )
     cursor = connections['default'].cursor()
-    print(query)
     data_list = utils.get_sql_execute(query, cursor, 'all')
     return data_list
 
@@ -354,7 +353,9 @@ def _create_table(cursor, table_name, property_columns, schema):
     columns = [
         'geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL',
         'geo_data geometry(GeometryZ,4326)',
-        'feature_id integer'
+        'feature_id integer',
+        'PRIMARY KEY (geo_id)'
+
     ]
 
     property_columns = columns + property_columns
@@ -515,7 +516,6 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
         except Exception:
             pass
     failed_count = total_count - success_count
-    print(total_count, success_count, failed_count)
     return success_count, failed_count, total_count
 
 
@@ -595,8 +595,6 @@ def refresh_datas(request, id):
 
 # cursor_pg = utils.get_cursor_pg(9)
 # sql = '''
-#     select count(*) from geoportal_l_code_lists
+#     select count(*) from tn_soft limit 100
 # '''
 # hoho = utils.get_sql_execute(sql, cursor_pg, 'all')
-# print("hohoh")
-# print("hohoh", hoho)
