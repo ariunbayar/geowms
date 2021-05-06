@@ -270,7 +270,6 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
-            limit 100
         '''.format(
                 columns=', '.join(['ct.{}'.format(f) for f in properties]),
                 properties=', '.join(['{}'.format(f) for f in columns]),
@@ -331,32 +330,15 @@ def _execute_query_to_pg(cursor, sql):
 
 def _create_extention_postgis(cursor, schema):
     query_extention = '''
-        create extension  IF NOT EXISTS postgis with schema {schema}
+        create extension IF NOT EXISTS  postgis SCHEMA {schema}
     '''.format(schema=schema)
 
-    query_topolagy = '''
-        CREATE EXTENSION  IF NOT EXISTS postgis_topology with schema {schema}
-    '''.format(schema=schema)
-
-    give_all_role_to_postgis = '''
-        UPDATE
-            pg_extension
-        SET
-            extrelocatable = TRUE
-        WHERE extname = 'postgis';
-
-    '''.format(schema=schema)
-
-    give_all_role = '''
-        ALTER EXTENSION
-            postgis
-        SET SCHEMA {schema};
+    query_topology = '''
+        CREATE EXTENSION   IF NOT EXISTS  postgis_topology
     '''.format(schema=schema)
 
     _execute_query_to_pg(cursor, query_extention)
-    _execute_query_to_pg(cursor, query_topolagy)
-    cursor.execute(give_all_role_to_postgis)
-    cursor.execute(give_all_role)
+    _execute_query_to_pg(cursor, query_topology)
 
 
 def _create_extension(cursor, schema):
