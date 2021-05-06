@@ -26,6 +26,7 @@ export default class  PgForm extends Component {
             data_type_list: [],
             id_list: [],
             table_status:false,
+            message: 'Property сонгоогүй байна.',
             is_loading: false,
             modal_status: 'closed',
         }
@@ -35,6 +36,7 @@ export default class  PgForm extends Component {
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
+
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
     }
@@ -148,11 +150,9 @@ export default class  PgForm extends Component {
     }
 
     handleSave(){
-        const { id, table_id, table_name, id_list, feature_name } = this.state
-        this.setState({ is_loading: true })
-        service
-            .pg_config.tableSave(id, table_id, id_list, feature_name, table_name)
-            .then(({ success, info}) => {
+        const {id, table_id, table_name, id_list, feature_name} = this.state
+            this.setState({ is_loading: true })
+            service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
@@ -224,10 +224,11 @@ export default class  PgForm extends Component {
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
-                            className={`form-control ${table_status ? 'border-danger' : ''}`}
+                            className={'form-control' + ( !table_name ? ' is-invalid' : '')}
                             type='text'
                             value={table_name}
                             disabled={table_id ? true : false}
+                            title={!table_name && 'Хүснэгтийн нэр оруулна уу !!!'}
                             onChange={(e) => this.setState({table_name: e.target.value})}
                         />
                     </div>
@@ -265,10 +266,27 @@ export default class  PgForm extends Component {
                                         <th className="text-center" style={{width: "8%"}}>
                                             Data <br/>type
                                         </th>
-                                        <th className="text-center" style={{width: "5%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "5%"}}
+                                        >
                                         </th>
-                                        <th className="text-center" style={{width: "15%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "15%"}}
+                                        >
                                             Property
+                                            {
+                                                id_list.length <= 0
+                                                &&
+                                                <i
+                                                    className="text-danger icon-exclamation float-right fa-3x"
+                                                    data-toggle="tooltip"
+                                                    data-placement="right"
+                                                    title="Property сонгоогүй байна."
+                                                >
+                                                </i>
+                                            }
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>
@@ -324,7 +342,7 @@ export default class  PgForm extends Component {
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
-                        disabled={table_status ? true : false}
+                        disabled={ (!table_name || id_list.length < 1) ? true : false}
                     >
                         {
                             table_id
