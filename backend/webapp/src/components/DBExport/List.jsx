@@ -77,13 +77,14 @@ export default class List extends Component {
         if(values.db_type == 'PgDB') this.refreshPgData(values)
     }
 
-    refreshPgData(values) {
-        this.setState({ values })
-        service.pg_config.refreshTableData(values.id).then(({ success, info, table_name_info }) => {
+    refreshPgData(values){
+        this.setState({is_loading: true})
+        service.pg_config.refreshTableData(values.id).then(({success, info, table_info}) => {
             if (success) {
-                var table_res = table_name_info.join("\n")
+                this.setState({is_loading: false})
+                var table_res = table_info.join("\n")
                 this.modalChange(
-                    'fa fa-exclamation-circle',
+                    'fa fa-check-circle',
                     null,
                     'warning',
                     'Хүснэгт шинэчлэх',
@@ -224,10 +225,10 @@ export default class List extends Component {
         const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, is_loading } = this.state
         return (
             <div className="row">
-                <Loader
+                {/* <Loader
                     is_loading={is_loading}
                     text={'Уншиж байна'}
-                />
+                /> */}
                 <div className="col-lg-12">
                     <div className="card">
                         <div className="card-body">
