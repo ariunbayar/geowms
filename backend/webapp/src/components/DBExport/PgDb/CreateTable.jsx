@@ -25,7 +25,6 @@ export default class  PgForm extends Component {
             selected_dt_list: [],
             data_type_list: [],
             id_list: [],
-            table_status:false,
             message: 'Property сонгоогүй байна.',
             is_loading: false,
             modal_status: 'closed',
@@ -92,7 +91,6 @@ export default class  PgForm extends Component {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
-            data_list['hdn_table'] = true
             data_list['feature_name'] = ''
         }
 
@@ -101,7 +99,6 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
-                data_list['hdn_table'] = false
 
             }
             else {
@@ -133,10 +130,6 @@ export default class  PgForm extends Component {
 
         if (pS.features != features) {
             this.setState({features})
-        }
-        if (pS.table_name != table_name)
-        {
-            this.setState({table_status:false})
         }
     }
 
@@ -211,8 +204,7 @@ export default class  PgForm extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name,table_status,
-            hdn_table, is_loading
+            id_list, table_name, is_loading
         } = this.state
         return (
             <div className="card">
@@ -254,10 +246,6 @@ export default class  PgForm extends Component {
                     />
                 </div>
                 {
-                hdn_table
-                ?
-                    null
-                :
                     feature_name &&
                     <div className="col-md-7 px-3">
                             <table className="table table-bordered m-1">
