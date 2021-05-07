@@ -540,7 +540,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = _get_cursor_pg(id)
+        cursor_pg = utils.get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -557,7 +557,7 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = _get_cursor_pg(id)
+    cursor_pg = utils.get_cursor_pg(id)
     table_info = []
     table_name_info = []
     info = ''
