@@ -193,6 +193,10 @@ def save_table(request, payload):
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
     cursor_pg = utils.get_cursor_pg(id)
+
+    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
+    another_database = get_object_or_404(AnotherDatabase, pk=id)
+
     sql = '''
             SELECT EXISTS (
                 SELECT FROM information_schema.tables
@@ -204,23 +208,21 @@ def save_table(request, payload):
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
-    else:
-        feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
-        another_database = get_object_or_404(AnotherDatabase, pk=id)
-        AnotherDatabaseTable.objects.update_or_create(
-            pk=table_id,
-            defaults={
-                'table_name': table_name,
-                'feature_code': feature_name.feature_code,
-                'field_config': utils.json_dumps(id_list),
-                'another_database': another_database,
-                'created_by': request.user
-            }
-        )
-        return JsonResponse({
-            'success': True,
-            'info': 'Амжилттай хадгалагдлаа'
-        })
+
+    AnotherDatabaseTable.objects.update_or_create(
+        pk=table_id,
+        defaults={
+            'table_name': table_name,
+            'feature_code': feature_name.feature_code,
+            'field_config': utils.json_dumps(id_list),
+            'another_database': another_database,
+            'created_by': request.user
+        }
+    )
+    return JsonResponse({
+        'success': True,
+        'info': 'Амжилттай хадгалагдлаа'
+    })
 
 
 @require_GET
