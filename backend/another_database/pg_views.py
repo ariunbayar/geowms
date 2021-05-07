@@ -604,3 +604,4 @@ def refresh_datas(request, id):
         'table_info': table_info,
         'table_name_info': table_name_info
     })
+
