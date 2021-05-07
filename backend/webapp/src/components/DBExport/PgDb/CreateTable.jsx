@@ -29,7 +29,6 @@ export default class  PgForm extends Component {
             is_loading: false,
             modal_status: 'closed',
         }
-
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
@@ -119,7 +118,7 @@ export default class  PgForm extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { theme_name, feature_name, packages, features } = this.state
+        const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
             else this.setState({feature_name})

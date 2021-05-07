@@ -172,12 +172,14 @@ def getFields(request, payload):
     })
 
 
-def _rsp_validation(table_name, id_list):
+def _rsp_validation(result, table_name, id_list):
     info = ''
+    if result[0]:
+        info = 'Хүснэгтийн нэр давхцсан байна !!!.'
     if not table_name:
-        info = 'Table-ийн нэр хоосон байна !!!'
+        info = 'Хүснэгтийн нэр хоосон байна !!!'
     if len(id_list) == 0:
-        info = 'Property сонгоогүй байна'
+        info = 'Property сонгоогүй байна !!!'
     return info
 
 
@@ -190,12 +192,23 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
-    info = _rsp_validation(table_name, id_list)
-    if info:
-        return JsonResponse({'success': False, 'info': info})
+    cursor_pg = utils.get_cursor_pg(id)
 
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
+
+    sql = '''
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE  table_schema = 'public'
+                AND    table_name   = '{table_name}'
+            );
+    '''.format(table_name=table_name)
+    result= utils.get_sql_execute(sql, cursor_pg, 'one')
+    info = _rsp_validation(result, table_name, id_list)
+    if info:
+        return JsonResponse({'success': False, 'info': info})
+
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
@@ -266,7 +279,7 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                         b.property_id in ({properties})
                     and
                         feature_config_id in ({feature_config_id})
-                    order by 1,2'::text
+                    '
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
@@ -527,7 +540,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = utils.get_cursor_pg(id)
+        cursor_pg = _get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -544,7 +557,7 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = utils.get_cursor_pg(id)
+    cursor_pg = _get_cursor_pg(id)
     table_info = []
     table_name_info = []
     info = ''
