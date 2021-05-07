@@ -1002,8 +1002,7 @@ export default class BarilgaSuurinGazar extends Component{
                     "warning",
                     "Үгүй"
               )
-              this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-    }
+          }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
           }
