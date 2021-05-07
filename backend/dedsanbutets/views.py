@@ -817,7 +817,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
 
 def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
     ids.sort()
-    data = LProperties.objects.filter(property_id__in=ids)
+    data = LProperties.objects.filter(property_id__in=ids).order_by('property_id')
     removeView(table_name)
     fields = list()
     for row in data:
@@ -865,6 +865,10 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
                         data_type_id in ({data_type_ids})
                     and
                         feature_config_id in ({feature_config_id})
+                    group by (
+						b.property_id, b.geo_id, b.code_list_id,
+						b.value_text, b.value_number, b.value_date
+					)
                     order by 1,2'::text
                 )
             ct(geo_id character varying(100), {create_columns})
@@ -879,7 +883,6 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
                 feature_id=feature_id,
             )
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
-
         with connections['default'].cursor() as cursor:
                 cursor.execute(query)
                 cursor.execute(query_index)

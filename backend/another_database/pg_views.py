@@ -174,7 +174,7 @@ def getFields(request, payload):
 
 def _rsp_validation(result, table_name, id_list):
     info = ''
-    if result[0]:
+    if result and result[0]:
         info = 'Хүснэгтийн нэр давхцсан байна !!!.'
     if not table_name:
         info = 'Хүснэгтийн нэр хоосон байна !!!'
@@ -192,19 +192,20 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
+    result = []
     cursor_pg = utils.get_cursor_pg(id)
 
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
-
-    sql = '''
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables
-                WHERE  table_schema = 'public'
-                AND    table_name   = '{table_name}'
-            );
-    '''.format(table_name=table_name)
-    result= utils.get_sql_execute(sql, cursor_pg, 'one')
+    if not table_id:
+        sql = '''
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE  table_schema = 'public'
+                    AND    table_name   = '{table_name}'
+                );
+        '''.format(table_name=table_name)
+        result= utils.get_sql_execute(sql, cursor_pg, 'one')
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
@@ -279,7 +280,11 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                         b.property_id in ({properties})
                     and
                         feature_config_id in ({feature_config_id})
-                    '
+                    group by (
+						b.property_id, b.geo_id, b.code_list_id,
+						b.value_text, b.value_number, b.value_date
+					)
+                    order by 1,2'::text
                 )
             ct(geo_id character varying(100), {create_columns})
             JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
@@ -474,7 +479,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
 
     columns.sort()
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
-    fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
+    fields = list(LProperties.objects.filter(property_id__in=columns).order_by('property_id').values_list('property_code', flat=True))
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
 
     _drop_table(table_name, cursor, pg_schema)
