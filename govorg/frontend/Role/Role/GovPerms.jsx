@@ -394,7 +394,7 @@ export default class InsPerms extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="col-xl-6 col-sm-12 right-scroll-sticky">
+                <div className="col-xl-6 col-sm-12" style={{position: 'sticky', height: 'calc(65vh - 40px)', overflowY: 'scroll'}}>
                     <div className="card">
                         <div className="card-body fixed-height-right">
                             <div className="table-responsive table_wrapper-100">
