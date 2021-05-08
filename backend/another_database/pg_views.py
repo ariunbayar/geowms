@@ -461,30 +461,29 @@ def _create_code_list_table(cursor, property_ids, schema):
             _insert_datas_to_code_list_table(cursor, data, schema)
 
 
-def _check(feature_code, prop, geo_id):
-    feuts = search(LFeatures, {'feature_code': feature_code})
-    for f in feuts:
-        feature_configs = search(LFeatureConfigs, {'feature_id': f.feature_id} )
-        for fc in feature_configs:
-            feature_config_id = fc.feature_config_id
-            data_type_id = fc.data_type_id
-            data_type_qs = search(LDataTypeConfigs, { 'data_type_id': data_type_id })
-            for dt in data_type_qs:
-                if dt.property_id == prop['property_id']:
-                    mdta = MDatas.objects.filter(
-                        geo_id=geo_id,
-                        feature_config_id=feature_config_id,
-                        data_type_id=data_type_id,
-                        property_id=prop['property_id'],
-                    )
-                    mdata = mdta.first()
-                    if not mdata:
-                        MDatas.objects.create(
-                            geo_id=geo_id,
-                            feature_config_id=feature_config_id,
-                            data_type_id=data_type_id,
-                            property_id=prop['property_id'],
-                        )
+def _check(feature_code, prop, geo_id, feature_config_ids):
+    # feuts = search(LFeatures, {'feature_code': feature_code})
+    # for f in feuts:
+        # feature_configs = search(LFeatureConfigs, {'feature_id': f.feature_id} )
+    for feature_config_id in feature_config_ids:
+        # feature_config_id = fc.feature_config_id
+        # data_type_id = fc.data_type_id
+        # data_type_qs = search(LDataTypeConfigs, { 'data_type_id': data_type_id })
+        # for dt in data_type_qs:
+            # if dt.property_id == prop['property_id']:
+        mdta = MDatas.objects.filter(
+            geo_id=geo_id,
+            feature_config_id=feature_config_id,
+            # data_type_id=data_type_id,
+            property_id=prop['property_id'],
+        )
+        if not mdta:
+            MDatas.objects.create(
+                geo_id=geo_id,
+                feature_config_id=feature_config_id,
+                # data_type_id=data_type_id,
+                property_id=prop['property_id'],
+                )
 
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
@@ -509,7 +508,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
         fields = []
         property_columns = []
         for prop in props.values():
-            _check(feature_code, prop, mgeo.geo_id)
+            _check(feature_code, prop, mgeo.geo_id, feature_config_ids)
             property_split = '''
                 {code} character varying(100)
                 '''.format(
