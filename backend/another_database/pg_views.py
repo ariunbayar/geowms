@@ -246,7 +246,7 @@ def table__detail(request, id, table_id):
     })
 
 
-def _get_all_datas(feature_id, columns, properties, feature_config_ids):
+def _get_all_datas(feature_id, columns, properties, feature_config_ids, geo_id, cursor='default'):
     query = '''
         SELECT
             d.geo_id,
@@ -276,6 +276,8 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                     b.property_id in ({properties})
                 and
                     feature_config_id in ({feature_config_id})
+                and
+                    b.geo_id = ''{geo_id}''
                 group by (
                     b.property_id, b.geo_id, b.code_list_id,
                     b.value_text, b.value_number, b.value_date
@@ -290,8 +292,9 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 feature_config_id=', '.join(['{}'.format(f) for f in feature_config_ids]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in properties]),
                 feature_id=feature_id,
+                geo_id=geo_id,
         )
-    cursor = connections['default'].cursor()
+    cursor = connections[cursor].cursor()
     data_list = utils.get_sql_execute(query, cursor, 'all')
     return data_list
 
@@ -369,7 +372,6 @@ def _create_table(cursor, table_name, property_columns, schema):
         'geo_data geometry(GeometryZ,4326)',
         'feature_id integer',
         'PRIMARY KEY (geo_id)'
-
     ]
 
     property_columns = columns + property_columns
@@ -471,67 +473,101 @@ def _create_code_list_table(cursor, property_ids, schema):
             _insert_datas_to_code_list_table(cursor, data, schema)
 
 
+def _check(feature_code, prop, geo_id):
+    feuts = search(LFeatures, {'feature_code': feature_code})
+    for f in feuts:
+        feature_configs = search(LFeatureConfigs, {'feature_id': f.feature_id} )
+        for fc in feature_configs:
+            feature_config_id = fc.feature_config_id
+            data_type_id = fc.data_type_id
+            data_type_qs = search(LDataTypeConfigs, { 'data_type_id': data_type_id })
+            for dt in data_type_qs:
+                if dt.property_id == prop['property_id']:
+                    mdta = MDatas.objects.filter(
+                        geo_id=geo_id,
+                        feature_config_id=feature_config_id,
+                        data_type_id=data_type_id,
+                        property_id=prop['property_id'],
+                    )
+                    mdata = mdta.first()
+                    if not mdata:
+                        MDatas.objects.create(
+                            geo_id=geo_id,
+                            feature_config_id=feature_config_id,
+                            data_type_id=data_type_id,
+                            property_id=prop['property_id'],
+                        )
+
+
 def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
 
     columns.sort()
 
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
-    columns = utils.check_property_data(columns, feature_config_ids, feature_id)
-    fields = list(LProperties.objects.filter(property_id__in=columns).order_by('property_id').values_list('property_code', flat=True))
+    props = LProperties.objects.filter(property_id__in=columns).order_by('property_id')
 
     _drop_table(table_name, cursor, pg_schema)
     _create_extension(cursor, pg_schema)
     _create_code_list_table(cursor, columns, pg_schema)
 
-    property_columns = []
-    for feild in range(len(fields)):
-        property_split = '''
-            {code} character varying(100)
-            '''.format(
-                code=fields[feild].lower()
-            )
-        property_columns.append(property_split)
-
-    _create_table(cursor, table_name, property_columns, pg_schema)
-    data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
     success_count = 0
     failed_count = 0
-    total_count = len(data_lists)
-    for data in data_lists:
-        property_data = []
+    total_count = 0
 
-        for field in fields:
-            field_name = field.lower()
-            field_data = data.get(field_name) or ''
-            property_d = '''
-            '{field_data}'
-            '''.format(field_data=field_data)
-            property_data.append(property_d)
+    mgeos_qs = MGeoDatas.objects.filter(feature_id=feature_id)
 
-        geo_data = data['geo_data']
-        geo_data = _geojson_to_geom(geo_data)
-        try:
-            geo_data = utils.convert_3d_with_srid(geo_data)
-            insert_query = '''
-                INSERT INTO {schema}.{table_name}(
-                    geo_id, geo_data, feature_id, {columns}
-                )
-                VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
+    for mgeo in mgeos_qs:
+        fields = []
+        property_columns = []
+        for prop in props.values():
+            _check(feature_code, prop, mgeo.geo_id)
+            property_split = '''
+                {code} character varying(100)
                 '''.format(
-                    table_name=table_name,
-                    geo_id=data['geo_id'],
-                    geo_data=geo_data,
-                    feature_id=feature_id,
-                    columns=','.join(fields),
-                    columns_data=', '.join(property_data),
-                    schema=pg_schema
+                    code=prop['property_code'].lower()
                 )
-            cursor.execute(insert_query)
-            success_count = success_count + 1
-        except Exception:
-            pass
-    failed_count = total_count - success_count
+            property_columns.append(property_split)
+            fields.append(prop['property_code'])
+
+        _create_table(cursor, table_name, property_columns, pg_schema)
+        data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids, mgeo.geo_id)
+
+        total_count = len(data_lists)
+        for data in data_lists:
+            property_data = []
+
+            for field in fields:
+                field_name = field.lower()
+                field_data = data.get(field_name) or ''
+                property_d = '''
+                '{field_data}'
+                '''.format(field_data=field_data)
+                property_data.append(property_d)
+
+            geo_data = data['geo_data']
+            geo_data = _geojson_to_geom(geo_data)
+            try:
+                geo_data = utils.convert_3d_with_srid(geo_data)
+                insert_query = '''
+                    INSERT INTO {schema}.{table_name}(
+                        geo_id, geo_data, feature_id, {columns}
+                    )
+                    VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
+                    '''.format(
+                        table_name=table_name,
+                        geo_id=data['geo_id'],
+                        geo_data=geo_data,
+                        feature_id=feature_id,
+                        columns=','.join(fields),
+                        columns_data=', '.join(property_data),
+                        schema=pg_schema
+                    )
+                cursor.execute(insert_query)
+                success_count = success_count + 1
+            except Exception:
+                pass
+            failed_count = total_count - success_count
     return success_count, failed_count, total_count
 
 
@@ -603,6 +639,10 @@ def _export_table(ano_db, ano_db_table_pg, cursor):
     ano_db.database_updated_at = datetime.datetime.now()
     ano_db.save()
     return table_info
+
+
+def search(Model, search):
+    return Model.objects.filter(**search)
 
 
 @require_GET

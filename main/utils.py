@@ -1788,7 +1788,6 @@ def check_table_name(cursor, table_name):
 
 
 def create_table_to_cursor(cursor, table_name, fields, schema):
-
     sql = '''
         CREATE TABLE IF NOT EXISTS {schema}.{table_name}
         (
@@ -1802,7 +1801,7 @@ def create_table_to_cursor(cursor, table_name, fields, schema):
     cursor.execute(sql)
 
 
-def check_property_data(prop_datas, feature_config_id, feature_id):
+def check_property_data(prop_datas, feature_config_id, feature_id, cursor='default'):
     property_ids = []
     cursor = connections['default'].cursor()
     for prop in prop_datas:
