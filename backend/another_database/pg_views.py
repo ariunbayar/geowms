@@ -474,10 +474,11 @@ def _create_code_list_table(cursor, property_ids, schema):
 def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
 
     columns.sort()
-    columns = check_property_data(columns, feature_config_id, feature_id)
+
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
-    fields = list(LProperties.objects.filter(property_id__in=columns).order_by('property_id').values_list('property_code', flat=True))
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+    columns = utils.check_property_data(columns, feature_config_ids, feature_id)
+    fields = list(LProperties.objects.filter(property_id__in=columns).order_by('property_id').values_list('property_code', flat=True))
 
     _drop_table(table_name, cursor, pg_schema)
     _create_extension(cursor, pg_schema)
