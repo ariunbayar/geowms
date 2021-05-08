@@ -533,7 +533,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
                 '''.format(field_data=field_data)
                 property_data.append(property_d)
 
-            geo_data = data['geo_data']
+            geo_data = mgeo.geo_data
             geo_data = _geojson_to_geom(geo_data.json)
             try:
                 geo_data = utils.convert_3d_with_srid(geo_data)
