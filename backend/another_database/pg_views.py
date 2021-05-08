@@ -539,36 +539,6 @@ def remove_pg_table(request, id, table_id):
 
 @require_GET
 @csrf_exempt
-def modal_text(request, id):
-    ano_db = get_object_or_404(AnotherDatabase, pk=id)
-    ano_db_table_pg = AnotherDatabaseTable.objects
-    ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
-
-    table_info = []
-    info = ''
-    success = True
-
-    if ano_db_table_pg:
-        for table in ano_db_table_pg:
-            table_name = table.table_name
-            table_info_text = '''
-                "{table_name}"
-                '''.format(
-                    table_name=table_name,
-                )
-            table_info.append(table_info_text)
-    else:
-        success = False
-        info = 'Хүснэгт үүсээгүй байна !!!'
-    return JsonResponse({
-        'success': success,
-        'info': info,
-        'table_info': table_info,
-    })
-
-
-@require_GET
-@csrf_exempt
 def refresh_datas(request, id):
     ano_db = get_object_or_404(AnotherDatabase, pk=id)
     ano_db_table_pg = AnotherDatabaseTable.objects

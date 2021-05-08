@@ -78,40 +78,37 @@ export default class List extends Component {
     }
 
     refreshPgDataAction(values) {
-        this.setState({ is_loading: true })
         this.setState({ values })
-        service.pg_config.modalText(values.id).then(({ success, info, table_info }) => {
-            this.setState({ is_loading: false })
-            if (success) {
-                var table_res = table_info.join("\n")
-                this.modalChange(
-                    'fa fa-check-circle',
-                    null,
-                    'warning',
-                    'Хүснэгт шинэчлэх',
-                    `Та ${table_res} хүснэгтүүдийг export хийхдээ итгэлтэй байна уу?`,
-                    true,
-                    '',
-                    'Тийм',
-                    (values) => this.refreshPgData(values),
-                    null
-                )
-            }
-            else {
-                this.modalChange(
-                    'fa fa-times-circle',
-                    null,
-                    'danger',
-                    'Алдаа гарлаа',
-                    info,
-                    false,
-                    '',
-                    '',
-                    null,
-                    null
-                )
-            }
-        })
+        var table_names = values.table_names
+        if (table_names && table_names.length >0) {
+            var table_res = table_names.join(", ")
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'warning',
+                'Хүснэгт шинэчлэх',
+                `Та ${table_res} хүснэгтүүдийг export хийхдээ итгэлтэй байна уу?`,
+                true,
+                '',
+                'Тийм',
+                (values) => this.refreshPgData(values),
+                null
+            )
+        }
+        else {
+            this.modalChange(
+                'fa fa-times-circle',
+                null,
+                'danger',
+                'Алдаа гарлаа',
+                `Хүснэгт үүсээгүй байна !!!!`,
+                false,
+                '',
+                '',
+                null,
+                null
+            )
+        }
     }
 
     refreshPgData() {
