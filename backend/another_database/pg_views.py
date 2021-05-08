@@ -461,32 +461,28 @@ def _create_code_list_table(cursor, property_ids, schema):
             _insert_datas_to_code_list_table(cursor, data, schema)
 
 
-def _check(prop, geo_id, feature_configs_qs):
-    feature_config_ids = list()
-    for fc in feature_configs_qs:
-        feature_config_id = fc.feature_config_id
-        data_type_id = fc.data_type_id
-        feature_config_ids.append(feature_config_id)
-        data_type_qs = search(LDataTypeConfigs, { 'data_type_id': data_type_id })
-        for dt in data_type_qs:
+def _check(prop, geo_id, feature_data_ids, data_type_c_qs):
+    # feuts = search(LFeatures, {'feature_code': feature_code})
+    for f_d in feature_data_ids:
+        # feature_config_id = fc.feature_config_id
+        # data_type_id = fc.data_type_id
+        for dt in data_type_c_qs:
             if dt.property_id == prop['property_id']:
-                mdta_qs = MDatas.objects
-                mdta_qs = mdta_qs.filter(
-                    geo_id=geo_id
-                )
-                mdta_qs = mdta_qs.filter(
-                    feature_config_id=feature_config_id,
-                    data_type_id=data_type_id,
+                mdta = MDatas.objects
+                mdta = mdta.filter(
+                    geo_id=geo_id)
+                mdta = mdta.filter(
+                    feature_config_id=f_d['feature_config_id'],
+                    data_type_id=f_d['data_type_id'],
                     property_id=prop['property_id'],
                 )
-                if not mdta_qs:
+                if not mdta:
                     MDatas.objects.create(
                         geo_id=geo_id,
                         feature_config_id=feature_config_id,
                         data_type_id=data_type_id,
                         property_id=prop['property_id'],
                     )
-    return feature_config_ids
 
 
 def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
@@ -494,8 +490,12 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
     columns.sort()
 
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
-    feature_configs_qs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    feature_data_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values('feature_config_id', 'data_type_id')
     props = LProperties.objects.filter(property_id__in=columns).order_by('property_id')
+
+    feature_config_ids = [item['feature_config_id'] for item in feature_data_ids]
+    data_type_ids = [item['data_type_id'] for item in feature_data_ids]
+    data_type_c_qs = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
 
     _drop_table(table_name, cursor, pg_schema)
     _create_extension(cursor, pg_schema)
@@ -511,7 +511,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
         fields = []
         property_columns = []
         for prop in props.values():
-            feature_config_ids = _check(prop, mgeo.geo_id, feature_configs_qs)
+            _check(prop, mgeo.geo_id, feature_data_ids, data_type_c_qs)
             property_split = '''
                 {code} character varying(100)
                 '''.format(
@@ -559,6 +559,10 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
                 pass
             failed_count = total_count - success_count
     return success_count, failed_count, total_count
+
+feature_id = 10101
+feature_data_ids = LFeatureConfigs.objects.filter(feature_id=feature_id).values('feature_config_id', 'data_type_id')
+print()
 
 
 @require_GET
