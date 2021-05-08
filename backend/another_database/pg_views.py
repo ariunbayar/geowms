@@ -479,8 +479,8 @@ def _check(prop, geo_id, feature_data_ids, data_type_c_qs):
                 if not mdta:
                     MDatas.objects.create(
                         geo_id=geo_id,
-                        feature_config_id=feature_config_id,
-                        data_type_id=data_type_id,
+                        feature_config_id=f_d['feature_config_id'],
+                        data_type_id=f_d['data_type_id'],
                         property_id=prop['property_id'],
                     )
 
