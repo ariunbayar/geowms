@@ -471,7 +471,7 @@ def _create_code_list_table(cursor, property_ids, schema):
             _insert_datas_to_code_list_table(cursor, data, schema)
 
 
-def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
+def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
 
     columns.sort()
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
@@ -568,24 +568,8 @@ def refresh_datas(request, id):
 
     if ano_db_table_pg:
         for table in ano_db_table_pg:
-            table_name = table.table_name
-            field_config = table.field_config.replace("'", '"')
-            columns = utils.json_load(field_config)
-            feature_code = table.feature_code
-            success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code, pg_schema)
-            table_info_text = '''
-                "{table_name}" хүснэгт
-                нийт: {total_count} мөр датанаас
-                амжилттай орсон: {success_count},
-                амжилтгүй: {failed_count}.
-                '''.format(
-                    table_name=table_name,
-                    total_count=total_count,
-                    success_count=success_count,
-                    failed_count=failed_count
-                )
-            table_info.append(table_info_text)
-
+            single_table_info = _export_table(ano_db, table, cursor_pg)
+            table_info.append(single_table_info)
         ano_db.database_updated_at = datetime.datetime.now()
         ano_db.save()
     return JsonResponse({
