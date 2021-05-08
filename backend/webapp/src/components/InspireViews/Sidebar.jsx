@@ -92,7 +92,7 @@ export default class SideBar extends Component {
     }
 
     handleAllCheck(e){
-        let id_list = this.state.id_list
+        let id_list = []
         const { fields } = this.props
         if(e.target.checked)
         {
@@ -103,9 +103,9 @@ export default class SideBar extends Component {
                     )
                 )
             )
-            this.setState({id_list})
+            this.setState({ id_list })
         }
-        else { this.setState({id_list:[]}) }
+        else { this.setState({ id_list: [] }) }
     }
 
     componentDidMount(){
