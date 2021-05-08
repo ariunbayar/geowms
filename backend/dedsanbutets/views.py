@@ -846,10 +846,15 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
                         b.geo_id,
                         b.property_id,
                         COALESCE(
-                            b.code_list_id::character varying(1000),
                             b.value_text::character varying(1000),
                             b.value_number::character varying(1000),
-                            b.value_date::character varying(1000)
+                            b.value_date::character varying(1000),
+                            case when b.code_list_id is null then null
+                            else (
+                                select code_list_name
+                                from l_code_lists
+                                where code_list_id=b.code_list_id
+                            ) end
                         ) as value_text
                     from
                         public.m_datas b
@@ -860,15 +865,18 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
                     and
                         mg.feature_id = {feature_id}
                     where
-                        property_id in ({properties})
+                        b.property_id in ({properties})
                     and
                         data_type_id in ({data_type_ids})
                     and
                         feature_config_id in ({feature_config_id})
                     group by (
-						b.property_id, b.geo_id, b.code_list_id,
-						b.value_text, b.value_number, b.value_date
-					)
+                    b.property_id, b.geo_id,
+                    b.value_date,
+                    b.code_list_id,
+                    b.value_text,
+                    b.value_number
+                    )
                     order by 1,2'::text
                 )
             ct(geo_id character varying(100), {create_columns})

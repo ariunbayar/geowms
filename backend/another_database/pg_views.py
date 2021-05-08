@@ -143,7 +143,10 @@ def getFields(request, payload):
         if data_types and properties:
             properties_data = []
             for property_id in properties:
-                single_property = LProperties.objects.filter(property_id=property_id).first()
+                single_property = LProperties.objects.filter(property_id=property_id)
+                single_property = single_property.exclude(value_type_id='data-type')
+                single_property = single_property.exclude(property_code='localId')
+                single_property = single_property.first()
                 code_data_list = []
                 if single_property:
                     if single_property.value_type_id in value_types:
