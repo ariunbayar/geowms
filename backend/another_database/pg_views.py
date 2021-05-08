@@ -540,7 +540,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
                     geo_id=data['geo_id'],
                     geo_data=geo_data,
                     feature_id=feature_id,
-                    columns=','.join(fields),
+                    columns=','.join(property_codes),
                     columns_data=', '.join(property_data),
                     schema=pg_schema
                 )
