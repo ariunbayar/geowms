@@ -613,7 +613,6 @@ def refresh_datas(request, id):
         'table_name_info': table_name_info
     })
 
-<<<<<<< HEAD
 
 def _export_table(ano_db, ano_db_table_pg, cursor):
     table_info = []
@@ -659,5 +658,3 @@ def refresh_single_table(request, id, table_id):
         'info': info,
         'table_info': table_info
     })
-=======
->>>>>>> 504113f8cb358b9c7b37f30c2d851884e9f08a33
