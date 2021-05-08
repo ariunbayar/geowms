@@ -19,6 +19,12 @@ export default class List extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
+                    "title": 'Export',
+                    "text": '',
+                    "icon": 'fa fa-car text-danger',
+                    "action": (values) => this.handleExportAction(values),
+                },
+                {
                     "title": 'Засах',
                     "text": '', "icon":
                     'fa fa-pencil-square-o text-success',
@@ -41,6 +47,7 @@ export default class List extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.modalChange = this.modalChange.bind(this)
+        this.refreshTable = this.refreshTable.bind(this)
     }
 
     goLink(values){
@@ -78,6 +85,22 @@ export default class List extends Component {
         )
     }
 
+    handleExportAction(values){
+        this.setState({values})
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'success',
+                'Export',
+                `Та "${values.table_name}" нэртэй хүснэгтийг "export" хийхдээ итгэлтэй байна уу?`,
+                true,
+                '',
+                'Тийм',
+                (values) => this.refreshTable(values),
+                null
+            )
+    }
+
     modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
         this.setState(
             {
@@ -94,6 +117,42 @@ export default class List extends Component {
             },
             () => this.handleModalOpen()
         )
+    }
+    refreshTable(){
+        const {values, id} = this.state
+        service.pg_config.refreshOneTable(id, values.id).then(({success, info, table_info}) => {
+            if (success) {
+                this.setState({is_loading: false})
+                var table_res = table_info.join("\n")
+                this.modalChange(
+                    'fa fa-check-circle',
+                    null,
+                    'success',
+                    'Амжилттай',
+                    `${table_res}`,
+                    false,
+                    '',
+                    '',
+                    null,
+                    null
+                )
+            }else{
+                this.setState({is_loading: false})
+                this.modalChange(
+                    'fa fa-times-circle',
+                    null,
+                    'danger',
+                    'Алдаа гарлаа',
+                    info,
+                    false,
+                    '',
+                    '',
+                    null,
+                    null
+                )
+            }
+
+        })
     }
 
     render() {

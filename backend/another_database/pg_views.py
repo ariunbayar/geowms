@@ -201,14 +201,7 @@ def save_table(request, payload):
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
     if not table_id:
-        sql = '''
-                SELECT EXISTS (
-                    SELECT FROM information_schema.tables
-                    WHERE  table_schema = 'public'
-                    AND    table_name   = '{table_name}'
-                );
-        '''.format(table_name=table_name)
-        result= utils.get_sql_execute(sql, cursor_pg, 'one')
+        result = utils.check_table_name(cursor_pg, table_name)
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
@@ -478,7 +471,7 @@ def _create_code_list_table(cursor, property_ids, schema):
             _insert_datas_to_code_list_table(cursor, data, schema)
 
 
-def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema):
+def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
 
     columns.sort()
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
@@ -575,24 +568,8 @@ def refresh_datas(request, id):
 
     if ano_db_table_pg:
         for table in ano_db_table_pg:
-            table_name = table.table_name
-            field_config = table.field_config.replace("'", '"')
-            columns = utils.json_load(field_config)
-            feature_code = table.feature_code
-            success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code, pg_schema)
-            table_info_text = '''
-                "{table_name}" хүснэгт
-                нийт: {total_count} мөр датанаас
-                амжилттай орсон: {success_count},
-                амжилтгүй: {failed_count}.
-                '''.format(
-                    table_name=table_name,
-                    total_count=total_count,
-                    success_count=success_count,
-                    failed_count=failed_count
-                )
-            table_info.append(table_info_text)
-
+            single_table_info = _export_table(ano_db, table, cursor_pg)
+            table_info.append(single_table_info)
         ano_db.database_updated_at = datetime.datetime.now()
         ano_db.save()
     return JsonResponse({
@@ -601,3 +578,48 @@ def refresh_datas(request, id):
         'table_info': table_info,
     })
 
+
+def _export_table(ano_db, ano_db_table_pg, cursor):
+    table_info = []
+    table_name = ano_db_table_pg.table_name
+    field_config = ano_db_table_pg.field_config.replace("'", '"')
+    columns = utils.json_load(field_config)
+    feature_code = ano_db_table_pg.feature_code
+    success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor, columns, feature_code)
+    table_info_text = '''
+        {table_name} хүснэгт
+        нийт {total_count} мөр дата-наас
+        амжилттай орсон {success_count}
+        амжилтгүй {failed_count}
+        '''.format(
+            table_name=table_name,
+            total_count=total_count,
+            success_count=success_count,
+            failed_count=failed_count
+        )
+    table_info.append(table_info_text)
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+    return table_info
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def refresh_single_table(request, id, table_id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(pk=table_id).first()
+    cursor_pg = utils.get_cursor_pg(id)
+    info = ''
+    success = True
+    if ano_db_table_pg:
+        table_info = _export_table(ano_db, ano_db_table_pg, cursor_pg)
+    else:
+        success = False
+        info = 'Хүснэгт үүсээгүй байна !!!'
+    return JsonResponse({
+        'success': success,
+        'info': info,
+        'table_info': table_info
+    })
