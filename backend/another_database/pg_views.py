@@ -249,8 +249,6 @@ def table__detail(request, id, table_id):
 def _get_all_datas(feature_id, columns, properties, feature_config_ids, geo_id, cursor='default'):
     query = '''
         SELECT
-            d.geo_id,
-            ST_AsGeoJSON(ST_Transform(d.geo_data,4326)) as geo_data,
             {columns},
             d.feature_id
         FROM
@@ -266,22 +264,12 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids, geo_id, 
                     ) as value_text
                 from
                     public.m_datas b
-                inner join
-                    m_geo_datas mg
-                on
-                    mg.geo_id = b.geo_id
-                and
-                    mg.feature_id = {feature_id}
                 where
                     b.property_id in ({properties})
                 and
                     feature_config_id in ({feature_config_id})
                 and
                     b.geo_id = ''{geo_id}''
-                group by (
-                    b.property_id, b.geo_id, b.code_list_id,
-                    b.value_text, b.value_number, b.value_date
-                )
                 order by 1,2'::text
             )
         ct(geo_id character varying(100), {create_columns})
@@ -546,7 +534,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
                 property_data.append(property_d)
 
             geo_data = data['geo_data']
-            geo_data = _geojson_to_geom(geo_data)
+            geo_data = _geojson_to_geom(geo_data.json)
             try:
                 geo_data = utils.convert_3d_with_srid(geo_data)
                 insert_query = '''
@@ -556,7 +544,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
                     VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
                     '''.format(
                         table_name=table_name,
-                        geo_id=data['geo_id'],
+                        geo_id=mgeo.geo_id,
                         geo_data=geo_data,
                         feature_id=feature_id,
                         columns=','.join(fields),
