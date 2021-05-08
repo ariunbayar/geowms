@@ -584,6 +584,7 @@ def _get_property_values(properties, form_json):
     for data in form_json:
         if int(data.get('property_id')) in properties:
             property_data = ''
+            property_code = ''
             value_data, value_type = _get_data_from_data(data)
             if value_data:
                 property_data = value_data
@@ -592,13 +593,17 @@ def _get_property_values(properties, form_json):
                 '{field_data}'
             '''.format(field_data=property_data)
 
+            property_code = data.get('property_code')
+            if property_code == 'end':
+                property_code = 'end_'
+
             single_data = '''{property_name}={data}'''.format(
-                property_name=data.get('property_code'),
+                property_name=property_code,
                 data=property_data
             )
 
             property_datas.append(single_data)
-            property_names.append(data.get('property_code'))
+            property_names.append(property_code)
             only_property_datas.append(property_data)
 
     return property_names, property_datas, only_property_datas
@@ -613,7 +618,6 @@ def _insert_data_another_table(request_datas, geo_id, change_type):
     property_names = []
     property_datas = []
     only_property_datas = []
-
     if geo_data:
         geo_data = _geojson_to_geom(geo_data)
         geo_data = convert_3d_with_srid(geo_data)

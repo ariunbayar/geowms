@@ -65,7 +65,7 @@ export default class List extends Component {
         this.crontabLink = this.crontabLink.bind(this)
         this.refreshPgData = this.refreshPgData.bind(this)
         this.modalChange = this.modalChange.bind(this)
-
+        this.refreshPgDataAction = this.refreshPgDataAction.bind(this)
     }
 
 
@@ -95,14 +95,23 @@ export default class List extends Component {
                     null,
                     null
                 )
-            }else{
-                this.setState({is_loading: false})
+            }
+        })
+    }
+
+    refreshPgDataAction() {
+        this.setState({ is_loading: true })
+        const {values} = this.state
+        service.pg_config.refreshTableData(values.id).then(({ success, table_info }) => {
+            if (success) {
+                this.setState({ is_loading: false })
+                var table_res = table_info.join("\n")
                 this.modalChange(
-                    'fa fa-times-circle',
+                    'fa fa-check-circle',
                     null,
-                    'danger',
-                    'Алдаа гарлаа',
-                    info,
+                    'success',
+                    'Амжилттай',
+                    `${table_res}`,
                     false,
                     '',
                     '',

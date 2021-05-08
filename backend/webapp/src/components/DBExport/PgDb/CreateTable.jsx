@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { service } from '../service';
 import BackButton from "@utils/Button/BackButton"
 import SelectField from './selectField'
+import Loader from "@utils/Loader"
+import Modal from "@utils/Modal/Modal"
 
 export default class  PgForm extends Component {
 
@@ -23,14 +25,19 @@ export default class  PgForm extends Component {
             selected_dt_list: [],
             data_type_list: [],
             id_list: [],
+            message: 'Property сонгоогүй байна.',
+            is_loading: false,
+            modal_status: 'closed',
         }
-
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
+
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
     componentDidMount(){
@@ -40,11 +47,12 @@ export default class  PgForm extends Component {
 
     handleGetDetial( packages, features ){
         const {table_id, id} = this.state
+        this.setState({ is_loading: true })
         service.pg_config.tableDetail(id, table_id).then(({success, form_datas}) => {
             if(success){
                 form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
                 form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
-                this.setState({...form_datas})
+                this.setState({ ...form_datas, is_loading: false })
             }
         })
     }
@@ -106,11 +114,11 @@ export default class  PgForm extends Component {
             data_list['feature_name'] = ''
         }
 
-        this.setState({...data_list})
+        this.setState({ ...data_list })
     }
 
     componentDidUpdate(pP, pS) {
-        const { theme_name, feature_name, packages, features } = this.state
+        const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
             else this.setState({feature_name})
@@ -126,24 +134,38 @@ export default class  PgForm extends Component {
     }
 
     getFeatProperties(feature_code) {
+        this.setState({ is_loading: true })
         service.pg_config.getProperties(feature_code).then(({data_type_list}) => {
             if (data_type_list && data_type_list.length > 0) {
-                this.setState({data_type_list})
+                this.setState({ data_type_list, is_loading: false })
             }
         })
     }
 
     handleSave(){
         const {id, table_id, table_name, id_list, feature_name} = this.state
-        service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
-            if(success){
-                alert("Амжилттай хадгаллаа.")
-                this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
-            }
-            else {
-                alert(info)
-            }
-        })
+            this.setState({ is_loading: true })
+            service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
+                this.setState({ is_loading: false })
+                if(success){
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        'success',
+                        info,
+                        false,
+                        () => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
+                    )
+                }
+                else {
+                    this.modalChange(
+                        'fa fa-exclamation-circle',
+                        'warning',
+                        info,
+                        false,
+                        null
+                    )
+                }
+            })
     }
 
     handleSetField(e){
@@ -157,6 +179,24 @@ export default class  PgForm extends Component {
         this.setState({id_list})
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, icon_color, title, has_button, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                icon_color,
+                title,
+                has_button,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
 
     render() {
         const {
@@ -164,18 +204,23 @@ export default class  PgForm extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name,
+            id_list, table_name, is_loading
         } = this.state
         return (
             <div className="card">
+                <Loader
+                    is_loading={is_loading}
+                    text={'Уншиж байна'}
+                />
                 <div className="form-row card-body p-4 mx-1">
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
-                            className='form-control'
+                            className={'form-control' + ( !table_name ? ' is-invalid' : '')}
                             type='text'
                             value={table_name}
                             disabled={table_id ? true : false}
+                            title={!table_name && 'Хүснэгтийн нэр оруулна уу !!!'}
                             onChange={(e) => this.setState({table_name: e.target.value})}
                         />
                     </div>
@@ -209,10 +254,27 @@ export default class  PgForm extends Component {
                                         <th className="text-center" style={{width: "8%"}}>
                                             Data <br/>type
                                         </th>
-                                        <th className="text-center" style={{width: "5%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "5%"}}
+                                        >
                                         </th>
-                                        <th className="text-center" style={{width: "15%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "15%"}}
+                                        >
                                             Property
+                                            {
+                                                id_list.length <= 0
+                                                &&
+                                                <i
+                                                    className="text-danger icon-exclamation float-right fa-3x"
+                                                    data-toggle="tooltip"
+                                                    data-placement="right"
+                                                    title="Property сонгоогүй байна."
+                                                >
+                                                </i>
+                                            }
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>
@@ -264,11 +326,11 @@ export default class  PgForm extends Component {
                         </div>
                 }
                 <div className="form-row col-md-12 p-4 m-1">
-                    {
                     <button
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
+                        disabled={ (!table_name || id_list.length < 1) ? true : false}
                     >
                         {
                             table_id
@@ -278,7 +340,14 @@ export default class  PgForm extends Component {
                                 "Хадгалах"
                         }
                     </button>
-                    }
+                    <Modal
+                        modal_status={ this.state.modal_status }
+                        modal_icon={ this.state.modal_icon }
+                        icon_color={ this.state.icon_color }
+                        title={ this.state.title }
+                        has_button={ this.state.has_button }
+                        modalClose={ this.state.modalClose }
+                    />
                 </div>
                 <BackButton
                     {...this.props}
