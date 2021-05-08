@@ -19,7 +19,7 @@ export default class List extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
-                    "title": 'Бааз шинэчлэх',
+                    "title": 'Export',
                     "text": '',
                     "icon": 'fa fa-car text-danger',
                     "action": (values) => this.handleExportAction(values),
@@ -91,8 +91,8 @@ export default class List extends Component {
                 'fa fa-check-circle',
                 null,
                 'success',
-                'Бааз шинэчлэх',
-                `Та "${values.table_name}" нэртэй хүснэгтийн ****  итгэлтэй байна уу?`,
+                'Export',
+                `Та "${values.table_name}" нэртэй хүснэгтийг "export" хийхдээ итгэлтэй байна уу?`,
                 true,
                 '',
                 'Тийм',

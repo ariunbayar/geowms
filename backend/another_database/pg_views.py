@@ -201,14 +201,7 @@ def save_table(request, payload):
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
     if not table_id:
-        sql = '''
-                SELECT EXISTS (
-                    SELECT FROM information_schema.tables
-                    WHERE  table_schema = 'public'
-                    AND    table_name   = '{table_name}'
-                );
-        '''.format(table_name=table_name)
-        result= utils.get_sql_execute(sql, cursor_pg, 'one')
+        result = utils.check_table_name(cursor_pg, table_name)
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
