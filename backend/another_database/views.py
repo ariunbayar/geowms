@@ -760,13 +760,14 @@ def config_save(request, payload):
     username = payload.get('pg_username')
     password = payload.get('pg_password')
     database = payload.get('pg_database')
+    schema = payload.get('pg_schema')
 
     db_type = AnotherDatabase.PgDB
     name = payload.get('name')
     definition = payload.get('definition')
 
     pk = payload.get('id')
-    check = check_pg_connection(server, database, port, username, password)
+    check = check_pg_connection(server, database, port, username, password, schema)
     if check:
         connection = {
             'server': server,
@@ -774,6 +775,7 @@ def config_save(request, payload):
             'username': username,
             'password': password,
             'database': database,
+            'schema': schema
         }
         connection = utils.json_dumps(connection)
     if pk:
