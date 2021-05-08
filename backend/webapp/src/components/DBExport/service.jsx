@@ -56,6 +56,13 @@ const pg_config = {
         return fetch(`${prefix}/pg/${id}/refresh-table-data/`, opts).then(handleResponse)
     },
 
+    modalText: function(id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/pg/${id}/modal-text/`, opts).then(handleResponse)
+    },
+
     removeTable: function(id, table_id) {
         const opts = {
             ...getGetOptions(),

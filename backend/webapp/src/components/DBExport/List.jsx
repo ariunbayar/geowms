@@ -74,30 +74,30 @@ export default class List extends Component {
     }
 
     handleRefreshData(values){
-        if(values.db_type == 'PgDB') this.refreshPgData(values)
+        if(values.db_type == 'PgDB') this.refreshPgDataAction(values)
     }
 
-    refreshPgData(values){
-        this.setState({is_loading: true})
-        service.pg_config.refreshTableData(values.id).then(({success, info, table_info}) => {
+    refreshPgDataAction(values) {
+        this.setState({ is_loading: true })
+        this.setState({ values })
+        service.pg_config.modalText(values.id).then(({ success, info, table_info }) => {
+            this.setState({ is_loading: false })
             if (success) {
-                this.setState({is_loading: false})
                 var table_res = table_info.join("\n")
                 this.modalChange(
                     'fa fa-check-circle',
                     null,
                     'warning',
                     'Хүснэгт шинэчлэх',
-                    `Та ${table_res} нэртэй хүснэгтийг шинэчлэхдээ итгэлтэй байна уу?`,
+                    `Та ${table_res} хүснэгтүүдийг export хийхдээ итгэлтэй байна уу?`,
                     true,
                     '',
                     'Тийм',
-                    (values) => this.refreshPgDataAction(values),
+                    (values) => this.refreshPgData(values),
                     null
                 )
             }
             else {
-                this.setState({ is_loading: false })
                 this.modalChange(
                     'fa fa-times-circle',
                     null,
@@ -114,7 +114,7 @@ export default class List extends Component {
         })
     }
 
-    refreshPgDataAction() {
+    refreshPgData() {
         this.setState({ is_loading: true })
         const {values} = this.state
         service.pg_config.refreshTableData(values.id).then(({ success, table_info }) => {
@@ -134,7 +134,6 @@ export default class List extends Component {
                     null
                 )
             }
-
         })
     }
 

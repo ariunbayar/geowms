@@ -74,6 +74,7 @@ urlpatterns = [
         path('pg/save-table/', pg_views.save_table),
         path('pg/<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
         path('pg/<int:id>/refresh-table-data/', pg_views.refresh_datas, name='refresh-datas-pg'),
+        path('pg/<int:id>/modal-text/', pg_views.modal_text),
         path('pg/<int:id>/<int:table_id>/remove-table/', pg_views.remove_pg_table),
     ], 'another-database'))),
 
