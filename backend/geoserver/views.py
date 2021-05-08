@@ -115,7 +115,7 @@ def remove_layer_group(request, payload):
 
     return JsonResponse({
         'success': True,
-        'info': 'Амжилттай утсгалаа'
+        'info': 'Амжилттай устгалаа'
     })
 
 
@@ -454,7 +454,7 @@ def _check_style_name(style_name, old_style_name):
 def create_style(request, payload):
 
     style_datas = payload.get('style_datas')
-    style_name = payload.get('style_name')
+    style_name = payload.get('style_name').replace(" ", "_")
     style_title = payload.get('style_title')
     style_abstract = payload.get('style_abstract')
     style_update = payload.get('style_update')
@@ -464,7 +464,6 @@ def create_style(request, payload):
     if info:
         return JsonResponse({'success': False, 'info': info})
 
-    
     rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
     if rsp.status_code == 201:
         return JsonResponse({
@@ -689,7 +688,7 @@ def style_remove(request, payload):
     else:
         return JsonResponse({
             'success': True,
-            'info': 'Амжилттай утсгалаа'
+            'info': 'Амжилттай устгалаа'
         })
 
 
