@@ -120,7 +120,7 @@ export default class List extends Component {
     }
     refreshTable(){
         const {values, id} = this.state
-        service.pg_config.refreshOneTable(values.id, id).then(({success, info, table_info}) => {
+        service.pg_config.refreshOneTable(id, values.id).then(({success, info, table_info}) => {
             if (success) {
                 this.setState({is_loading: false})
                 var table_res = table_info.join("\n")

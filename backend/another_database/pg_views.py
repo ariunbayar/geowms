@@ -470,12 +470,13 @@ def refresh_datas(request, id):
     })
 
 
-def _export_table(ano_db, ano_db_table_pg, cursor_pg, table_info):
+def _export_table(ano_db, ano_db_table_pg, cursor):
+    table_info = []
     table_name = ano_db_table_pg.table_name
     field_config = ano_db_table_pg.field_config.replace("'", '"')
     columns = utils.json_load(field_config)
     feature_code = ano_db_table_pg.feature_code
-    success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
+    success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor, columns, feature_code)
     table_info_text = '''
         {table_name} хүснэгт
         нийт {total_count} мөр дата-наас
@@ -501,11 +502,10 @@ def refresh_single_table(request, id, table_id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(pk=table_id).first()
     cursor_pg = utils.get_cursor_pg(id)
-    table_info = []
     info = ''
     success = True
     if ano_db_table_pg:
-        _export_table(ano_db, ano_db_table_pg, cursor_pg, table_info)
+        table_info = _export_table(ano_db, ano_db_table_pg, cursor_pg)
     else:
         success = False
         info = 'Хүснэгт үүсээгүй байна !!!'
