@@ -1828,6 +1828,5 @@ def check_property_data(prop_datas, feature_config_id, feature_id):
         cursor.execute(sql)
         datas = list(dict_fetchall(cursor))
         if len(datas) == 10:
-            if prop == 4:
-                property_ids.append(prop)
+            property_ids.append(prop)
     return property_ids
