@@ -35,6 +35,7 @@ export default class SideBar extends Component {
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
+        this.handleAllCheck = this.handleAllCheck.bind(this)
 
     }
 
@@ -88,6 +89,23 @@ export default class SideBar extends Component {
                 this.modalCloseTime()
             }
         })
+    }
+
+    handleAllCheck(e){
+        let id_list = this.state.id_list
+        const { fields } = this.props
+        if(e.target.checked)
+        {
+            fields.map((f_config, idx) =>
+                f_config.data_types.map((data_type, idx) =>
+                    data_type.data_type_configs.map((data_type_config, idx) =>
+                        id_list.push(data_type_config.property_id)
+                    )
+                )
+            )
+            this.setState({id_list})
+        }
+        else { this.setState({id_list:[]}) }
     }
 
     componentDidMount(){
@@ -365,11 +383,20 @@ export default class SideBar extends Component {
                                             Data <br/>type
                                         </th>
                                         <th className="text-center" style={{width: "15%"}}>
-                                            View
+                                             View
+                                             <div class="custom-control custom-switch ml-1">
+                                                <input
+                                                id="allcheck"
+                                                type="checkbox"
+                                                class="custom-control-input"
+                                                onChange={this.handleAllCheck}
+                                                />
+                                                    <label class="custom-control-label" for="allcheck"></label>
+                                            </div>
                                         </th>
                                         <th className="text-center" style={{width: "70%"}}>
                                             Property
-                                        </th>
+                                         </th>
                                     </tr>
                                     {fields.map((f_config, idx) =>
                                         <>
