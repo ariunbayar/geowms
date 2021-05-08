@@ -270,10 +270,16 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids, cursor='
                     m_geo_datas mg
                 on
                     mg.geo_id = b.geo_id
+                and
+                    mg.feature_id = {feature_id}
                 where
                     b.property_id in ({properties})
                 and
                     feature_config_id in ({feature_config_id})
+                group by (
+                    b.property_id, b.geo_id, b.code_list_id,
+                    b.value_text, b.value_number, b.value_date
+                )
                 order by 1,2'::text
             )
         ct(geo_id character varying(100), {create_columns})
