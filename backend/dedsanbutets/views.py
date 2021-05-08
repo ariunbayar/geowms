@@ -5,7 +5,7 @@ from django.shortcuts import render, reverse
 from django.http import JsonResponse, Http404
 
 from .models import ViewNames, ViewProperties, FeatureOverlaps
-from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas
+from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatas
 
 from django.views.decorators.http import require_GET, require_POST
 from main.decorators import ajax_required
@@ -24,7 +24,8 @@ from main.utils import (
     slugifyWord,
     get_geoJson,
     check_gp_design,
-    get_colName_type
+    get_colName_type,
+    check_property_data
 )
 import main.geoserver as geoserver
 
@@ -426,6 +427,8 @@ def propertyFieldsSave(request, payload):
     table_name = slugifyWord(feature.feature_name_eng) + '_view'
     data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
+
+    id_list = check_property_data(id_list, feature_config_id, fid)
     check = _create_view(id_list, table_name, data_type_ids, feature_config_id, fid)
     if check:
         rsp = _create_geoserver_detail(table_name, theme, user.id, feature, values)
@@ -825,6 +828,7 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
             fields.append('end_')
         else:
             fields.append(row.property_code)
+
     try:
         query = '''
             CREATE MATERIALIZED VIEW public.{table_name}

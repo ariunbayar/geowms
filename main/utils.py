@@ -1800,3 +1800,33 @@ def create_table_to_cursor(cursor, table_name, fields, schema):
         schema=schema
     )
     cursor.execute(sql)
+
+
+def check_property_data(prop_datas, feature_config_id, feature_id):
+    property_ids = []
+    cursor = connections['default'].cursor()
+    for prop in prop_datas:
+        sql = '''
+            select
+                b.property_id
+            from m_datas b
+            inner join
+                m_geo_datas mg
+            on
+                mg.geo_id=b.geo_id
+            where
+                b.property_id = {property_id}
+                and
+                mg.feature_id={feature_id}
+                and b.feature_config_id in ({feature_config_id})
+            limit 1
+        '''.format(
+            property_id=prop,
+            feature_id=feature_id,
+            feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id])
+        )
+        cursor.execute(sql)
+        datas = list(dict_fetchall(cursor))
+        if datas:
+            property_ids.append(prop)
+    return property_ids

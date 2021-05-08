@@ -248,42 +248,42 @@ def table__detail(request, id, table_id):
 
 def _get_all_datas(feature_id, columns, properties, feature_config_ids):
     query = '''
-            SELECT
-                d.geo_id,
-                ST_AsGeoJSON(ST_Transform(d.geo_data,4326)) as geo_data,
-                {columns},
-                d.feature_id
-            FROM
-                crosstab('
-                    select
-                        b.geo_id,
-                        b.property_id,
-                        COALESCE(
-                            b.code_list_id::character varying(1000),
-                            b.value_text::character varying(1000),
-                            b.value_number::character varying(1000),
-                            b.value_date::character varying(1000)
-                        ) as value_text
-                    from
-                        public.m_datas b
-                    inner join
-                        m_geo_datas mg
-                    on
-                        mg.geo_id = b.geo_id
-                    and
-                        mg.feature_id = {feature_id}
-                    where
-                        b.property_id in ({properties})
-                    and
-                        feature_config_id in ({feature_config_id})
-                    group by (
-						b.property_id, b.geo_id, b.code_list_id,
-						b.value_text, b.value_number, b.value_date
-					)
-                    order by 1,2'::text
+        SELECT
+            d.geo_id,
+            ST_AsGeoJSON(ST_Transform(d.geo_data,4326)) as geo_data,
+            {columns},
+            d.feature_id
+        FROM
+            crosstab('
+                select
+                    b.geo_id,
+                    b.property_id,
+                    COALESCE(
+                        b.code_list_id::character varying(1000),
+                        b.value_text::character varying(1000),
+                        b.value_number::character varying(1000),
+                        b.value_date::character varying(1000)
+                    ) as value_text
+                from
+                    public.m_datas b
+                inner join
+                    m_geo_datas mg
+                on
+                    mg.geo_id = b.geo_id
+                and
+                    mg.feature_id = {feature_id}
+                where
+                    b.property_id in ({properties})
+                and
+                    feature_config_id in ({feature_config_id})
+                group by (
+                    b.property_id, b.geo_id, b.code_list_id,
+                    b.value_text, b.value_number, b.value_date
                 )
-            ct(geo_id character varying(100), {create_columns})
-            JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+                order by 1,2'::text
+            )
+        ct(geo_id character varying(100), {create_columns})
+        JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
                 columns=', '.join(['ct.{}'.format(f) for f in properties]),
                 properties=', '.join(['{}'.format(f) for f in columns]),
@@ -474,6 +474,7 @@ def _create_code_list_table(cursor, property_ids, schema):
 def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
 
     columns.sort()
+    columns = check_property_data(columns, feature_config_id, feature_id)
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
     fields = list(LProperties.objects.filter(property_id__in=columns).order_by('property_id').values_list('property_code', flat=True))
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
