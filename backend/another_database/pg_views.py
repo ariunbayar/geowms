@@ -567,7 +567,6 @@ def refresh_datas(request, id):
 
     cursor_pg = utils.get_cursor_pg(id)
     table_info = []
-    table_name_info = []
     info = ''
     success = True
 
@@ -593,14 +592,6 @@ def refresh_datas(request, id):
                     failed_count=failed_count
                 )
             table_info.append(table_info_text)
-
-            table_name_info_text = '''
-                Та "{table_name}" нэртэй
-                хүснэгтийг шинэчлэхдээ итгэлтэй байна уу?
-                '''.format(
-                    table_name=table_name
-                )
-            table_name_info.append(table_name_info_text)
         ano_db.database_updated_at = datetime.datetime.now()
         ano_db.save()
     else:
@@ -610,7 +601,6 @@ def refresh_datas(request, id):
         'success': success,
         'info': info,
         'table_info': table_info,
-        'table_name_info': table_name_info
     })
 
 
