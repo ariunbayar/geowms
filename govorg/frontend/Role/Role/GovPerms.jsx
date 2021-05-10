@@ -322,8 +322,8 @@ export default class InsPerms extends Component {
         const { action_type, is_employee, addable_is_check, editable_is_check } = this.props
         return (
             <div className="row">
-                <div className="col-xl-6 col-sm-12 p-0">
-                    <div className="col fixed-height">
+                <div className="col-xl-6 col-sm-12 p-0" style={{position: 'sticky', height: 'calc(70vh - 40px)', overflowY: 'scroll'}}>
+                    <div className="col">
                         <div className="accordion my-0" id="accordion">
                                 {themes.length > 0 && themes.map((theme, t_idx) =>
                                     <div className="role-bg-white-card">
@@ -394,7 +394,7 @@ export default class InsPerms extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="col-xl-6 col-sm-12" style={{position: 'sticky', height: 'calc(65vh - 40px)', overflowY: 'scroll'}}>
+                <div className="col-xl-6 col-sm-12" style={{position: 'sticky', height: 'calc(70vh - 40px)', overflowY: 'scroll'}}>
                     <div className="card">
                         <div className="card-body fixed-height-right">
                             <div className="table-responsive table_wrapper-100">
