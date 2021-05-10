@@ -31,6 +31,7 @@ export class List extends Component {
             property_loading: false,
             cache_values: [],
             property_length:null,
+            check_list:false,
 
         }
         this.getAll = this.getAll.bind(this)
@@ -57,6 +58,7 @@ export class List extends Component {
     }
 
     getProperties(fid, tid, fname, event) {
+        var check_list = this.state.check_list
         let property_length = 0
         this.active_view(event)
         this.setState({fid, tid, fname, property_loading: true})
@@ -64,12 +66,15 @@ export class List extends Component {
             if(success){
                 fields.map((f_config, idx) =>
                     f_config.data_types.map((data_type, idx) =>
-                        property_length += data_type.data_type_configs.length,                        ))
+                        property_length += data_type.data_type_configs.length,
+                    )
+                )
+                if(property_length == id_list.length){ check_list=true }
                 this.setState({
-                        fields, id_list, view_name, url,
+                        fields, id_list, view_name, url, check_list,
                         view_style_name: style_name, geom_type,
                         property_loading:false, cache_values,
-                        property_length:property_length
+                        property_length:property_length,
                     })
             }
             else this.setState({property_loading: false})
@@ -140,7 +145,7 @@ export class List extends Component {
     }
 
     render() {
-        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading, cache_values} = this.state
+        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading, cache_values, check_list} = this.state
         return (
             <div className="row m-0">
                 <div className="col-md-6">
@@ -212,6 +217,7 @@ export class List extends Component {
                     tid={this.state.tid}
                     id_list={this.state.id_list}
                     property_length={this.state.property_length}
+                    check_list={check_list}
                     view_name={this.state.view_name}
                     style_names={style_names}
                     url={url}

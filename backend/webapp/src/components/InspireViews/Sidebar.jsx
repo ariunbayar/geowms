@@ -29,9 +29,8 @@ export default class SideBar extends Component {
             number_of_cache: 2,
             image_format: 'png',
             tile_cache_check: false,
-            check_list:false
+            check_list: props.check_list,
         }
-
         this.handleInput = this.handleInput.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
@@ -111,22 +110,25 @@ export default class SideBar extends Component {
             )
             this.setState({id_list:id_list, check_list:true })
         }
-        else { this.setState({ id_list: []}) }
+        else { this.setState({ id_list: [], check_list:false}) }
     }
 
     componentDidMount(){
-        const{ id_list, fields }= this.props
-        this.setState({id_list})
+        const{ id_list }= this.props
+        this.setState({ id_list })
     }
 
     componentDidUpdate(pP, pS){
         const {style_name, view_name, tile_cache_check} = this.state
-        const { fields } = this.props
         if(pS.style_name != style_name){
             this.setState({
                 check_style:false,
                 style_name,
             })
+        }
+
+        if(pP.check_list != this.props.check_list) {
+            this.setState({check_list: this.props.check_list})
         }
 
         if(pS.tile_cache_check != tile_cache_check) {
@@ -224,13 +226,14 @@ export default class SideBar extends Component {
     }
 
     render() {
-        const {fields, fid, fname, property_length} = this.props
+        const {fields, fid, fname } = this.props
         const {
             check_style, is_loading, cache_type,
             id_list, save_is_load, view_name, style_names,
             style_name, url, defualt_url, geom_type,
             zoom_stop, zoom_start, number_of_cache, tile_cache_check,
             image_format, check_list
+
         } = this.state
         return (
             <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>

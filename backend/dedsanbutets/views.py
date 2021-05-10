@@ -25,7 +25,6 @@ from main.utils import (
     get_geoJson,
     check_gp_design,
     get_colName_type,
-    check_property_data
 )
 import main.geoserver as geoserver
 
@@ -384,6 +383,7 @@ def propertyFieldsSave(request, payload):
     fid = payload.get('fid')
     tid = payload.get('tid')
     values = payload.get('values')
+    print(len(id_list))
     user = User.objects.filter(username=request.user).first()
     if not id_list:
         rsp = {
@@ -428,7 +428,6 @@ def propertyFieldsSave(request, payload):
     data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
 
-    id_list = check_property_data(id_list, feature_config_id, fid)
     check = _create_view(id_list, table_name, data_type_ids, feature_config_id, fid)
     if check:
         rsp = _create_geoserver_detail(table_name, theme, user.id, feature, values)
