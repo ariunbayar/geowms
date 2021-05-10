@@ -28,7 +28,8 @@ export default class SideBar extends Component {
             cache_type: 'seed',
             number_of_cache: 2,
             image_format: 'png',
-            tile_cache_check: false
+            tile_cache_check: false,
+            is_loading: false
         }
 
         this.handleInput = this.handleInput.bind(this)
@@ -75,16 +76,19 @@ export default class SideBar extends Component {
             }
         }
 
-        this.setState({save_is_load: true})
-
+        this.setState({
+            save_is_load: true,
+            is_loading:true
+        })
         service.setPropertyFields(fid, id_list, tid, values).then(({success, info}) => {
             if(success){
-                this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'success'})
+                this.setState({save_is_load: false, is_loading: false, modal_alert_check: 'open', title: info, model_type_icon: 'success'})
                 this.props.getAll()
                 this.modalCloseTime()
+
             }
             else{
-                this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'danger'})
+                this.setState({save_is_load: false, is_loading: false, modal_alert_check: 'open', title: info, model_type_icon: 'danger'})
                 this.modalCloseTime()
             }
         })
@@ -437,8 +441,8 @@ export default class SideBar extends Component {
                         status={this.state.modal_alert_check}
                         modalAction={() => this.handleModalAlert()}
                     />
-                    <Loader is_loading={is_loading}/>
                 </div>
+                <Loader is_loading={is_loading} text="Хүсэлтийг уншиж байна."/>
             </div>
         )
     }
