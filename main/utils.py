@@ -10,6 +10,7 @@ import pyproj
 import math
 import json
 import psycopg2
+import socket
 from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
@@ -1788,7 +1789,6 @@ def check_table_name(cursor, table_name):
 
 
 def create_table_to_cursor(cursor, table_name, fields, schema):
-
     sql = '''
         CREATE TABLE IF NOT EXISTS {schema}.{table_name}
         (
@@ -1800,3 +1800,49 @@ def create_table_to_cursor(cursor, table_name, fields, schema):
         schema=schema
     )
     cursor.execute(sql)
+
+
+def check_property_data(prop_datas, feature_config_id, feature_id, cursor='default'):
+    property_ids = []
+    cursor = connections['default'].cursor()
+    for prop in prop_datas:
+        sql = '''
+            select
+                *
+            from m_datas b
+            inner join
+                m_geo_datas mg
+            on
+                mg.geo_id=b.geo_id
+            where
+                b.property_id = {property_id}
+                and
+                mg.feature_id={feature_id}
+                and b.feature_config_id in ({feature_config_id})
+            limit 10
+        '''.format(
+            property_id=prop,
+            feature_id=feature_id,
+            feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id])
+        )
+        cursor.execute(sql)
+        datas = list(dict_fetchall(cursor))
+        if len(datas) == 10:
+            property_ids.append(prop)
+    return property_ids
+
+def check_nsdi_address(request):
+    nsdi_check = False
+    host_name = socket.gethostname()
+    host_addr = socket.gethostbyname(host_name + ".local")
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+
+    if host_addr == '192.168.10.15' and ip == '127.0.0.1':
+        nsdi_check = True
+
+    return nsdi_check
