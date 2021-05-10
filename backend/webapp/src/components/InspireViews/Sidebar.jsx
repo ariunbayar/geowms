@@ -28,7 +28,8 @@ export default class SideBar extends Component {
             cache_type: 'seed',
             number_of_cache: 2,
             image_format: 'png',
-            tile_cache_check: false
+            tile_cache_check: false,
+            check_list:false
         }
 
         this.handleInput = this.handleInput.bind(this)
@@ -49,13 +50,18 @@ export default class SideBar extends Component {
 
     handleInput(e){
         let id_list = this.state.id_list
+        var check_list = this.state.check_list
         const value = parseInt(e.target.value)
         if (e.target.checked) {
             id_list.push(value)
         } else {
             id_list = id_list.filter((oid) => oid != value)
         }
-        this.setState({id_list})
+
+        if(id_list.length == this.props.property_length){check_list=true }
+        else { check_list=false }
+
+        this.setState({id_list, check_list })
     }
 
     handleSave(){
@@ -100,22 +106,22 @@ export default class SideBar extends Component {
                 f_config.data_types.map((data_type, idx) =>
                     data_type.data_type_configs.map((data_type_config, idx) =>
                         id_list.push(data_type_config.property_id)
-                    )
+                        )
                 )
             )
-            this.setState({ id_list })
+            this.setState({id_list:id_list, check_list:true })
         }
-        else { this.setState({ id_list: [] }) }
+        else { this.setState({ id_list: []}) }
     }
 
     componentDidMount(){
-        const id_list = this.props.id_list
+        const{ id_list, fields }= this.props
         this.setState({id_list})
     }
 
     componentDidUpdate(pP, pS){
         const {style_name, view_name, tile_cache_check} = this.state
-
+        const { fields } = this.props
         if(pS.style_name != style_name){
             this.setState({
                 check_style:false,
@@ -218,15 +224,14 @@ export default class SideBar extends Component {
     }
 
     render() {
-        const {fields, fid, fname} = this.props
+        const {fields, fid, fname, property_length} = this.props
         const {
             check_style, is_loading, cache_type,
             id_list, save_is_load, view_name, style_names,
             style_name, url, defualt_url, geom_type,
             zoom_stop, zoom_start, number_of_cache, tile_cache_check,
-            image_format
+            image_format, check_list
         } = this.state
-
         return (
             <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
                 <div className="card-body">
@@ -389,6 +394,7 @@ export default class SideBar extends Component {
                                                 id="allcheck"
                                                 type="checkbox"
                                                 class="custom-control-input"
+                                                checked={check_list}
                                                 onChange={this.handleAllCheck}
                                                 />
                                                     <label class="custom-control-label" for="allcheck"></label>

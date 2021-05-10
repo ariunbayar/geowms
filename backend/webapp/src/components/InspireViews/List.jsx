@@ -29,7 +29,9 @@ export class List extends Component {
             geom_type: '',
             is_loading: false,
             property_loading: false,
-            cache_values: []
+            cache_values: [],
+            property_length:null,
+
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
@@ -55,14 +57,19 @@ export class List extends Component {
     }
 
     getProperties(fid, tid, fname, event) {
+        let property_length = 0
         this.active_view(event)
         this.setState({fid, tid, fname, property_loading: true})
         service.getPropertyFields(fid).then(({success ,fields, id_list, view_name, url, style_name, geom_type, cache_values}) => {
             if(success){
+                fields.map((f_config, idx) =>
+                    f_config.data_types.map((data_type, idx) =>
+                        property_length += data_type.data_type_configs.length,                        ))
                 this.setState({
                         fields, id_list, view_name, url,
                         view_style_name: style_name, geom_type,
-                        property_loading:false, cache_values
+                        property_loading:false, cache_values,
+                        property_length:property_length
                     })
             }
             else this.setState({property_loading: false})
@@ -204,6 +211,7 @@ export class List extends Component {
                     fname={this.state.fname}
                     tid={this.state.tid}
                     id_list={this.state.id_list}
+                    property_length={this.state.property_length}
                     view_name={this.state.view_name}
                     style_names={style_names}
                     url={url}
