@@ -274,19 +274,23 @@ def _get_cql_filter(geo_id):
 
 
 def _get_request_content(base_url, request, geo_id, headers):
-    if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
+    # if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
 
-        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
-        queryargs = {
-            **request.GET,
-            'cql_filter': cql_filter,
-        }
+    #     cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+    #     queryargs = {
+    #         **request.GET,
+    #         'cql_filter': cql_filter,
+    #     }
 
-        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5)
+    #     rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5, verify=False)
 
-    else:
-        queryargs = request.GET
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    # else:
+
+    conf_geoserver = geoserver.get_connection_conf()
+    queryargs = request.GET
+    if conf_geoserver['geoserver_host'] == '192.168.10.15':
+        base_url = base_url = 'http://192.168.10.15:8080/ows'
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
 
     return rsp, queryargs
 
@@ -306,7 +310,6 @@ def qgis_proxy(request, base_url, token):
         raise Http404
 
     geo_id = employee.org.geo_id
-
     rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
     content = rsp.content
 

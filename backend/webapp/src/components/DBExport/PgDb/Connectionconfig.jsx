@@ -17,6 +17,8 @@ const validationSchema = Yup.object().shape({
     pg_database: Yup.string()
         .required('хоосон байна!'),
     pg_port: Yup.string()
+        .required('хоосон байна!'),
+    pg_schema: Yup.string()
         .required('хоосон байна!')
 })
 
@@ -36,7 +38,7 @@ class ConnectionConfig extends Component {
                 pg_username: '',
                 pg_password: '',
                 pg_database: '',
-                pg_port: '',
+                pg_schema: '',
             },
             values: {},
         }
@@ -179,7 +181,7 @@ class ConnectionConfig extends Component {
                                                 <label htmlFor="id_pg_password">Password</label>
                                                 <Field
                                                     name="pg_password"
-                                                    type="text"
+                                                    type="password"
                                                     className="form-control"
                                                     id="id_pg_password"
                                                 />
@@ -204,6 +206,16 @@ class ConnectionConfig extends Component {
                                                     className="form-control"
                                                 />
                                                 <p className="text-danger">{errors['pg_port']}</p>
+                                            </div>
+                                            <div className="form-group col-md-6">
+                                                <label htmlFor="id_pg_schema">Schema</label>
+                                                <Field
+                                                    name="pg_schema"
+                                                    id="id_pg_schema"
+                                                    type="text"
+                                                    className="form-control"
+                                                />
+                                                <p className="text-danger">{errors['pg_schema']}</p>
                                             </div>
                                         </div>
 

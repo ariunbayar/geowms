@@ -33,28 +33,6 @@ from backend.inspire.models import (
 )
 
 
-def _get_pg_conf(conn_id):
-    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
-    connection = utils.json_load(another_db.connection)
-    form_datas = {
-        'id': conn_id,
-        'name': another_db.name,
-        'definition': another_db.definition,
-        'pg_host': connection.get('server'),
-        'pg_port': connection.get('port'),
-        'pg_username': connection.get('username'),
-        'pg_password': connection.get('password'),
-        'pg_database': connection.get('database'),
-    }
-    return form_datas
-
-
-def _get_cursor_pg(conn_id):
-    form_datas = _get_pg_conf(conn_id)
-    cursor_pg = _get_pg_cursor(form_datas)
-    return cursor_pg
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -62,7 +40,7 @@ def config_detail(request, pk):
 
     rsp = {
         'success': True,
-        'values': _get_pg_conf(pk)
+        'values': utils.get_pg_conf(pk)
     }
     return JsonResponse(rsp)
 
@@ -72,9 +50,11 @@ def config_detail(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def get_pg_table_list(request, payload, pk):
     another_database = get_object_or_404(AnotherDatabase, pk=pk)
-
+    get_base = AnotherDatabaseTable.objects.filter(another_database=another_database)
+    feature_codes = get_base.values_list('feature_code', flat=True)
     оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id']
     initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
+
     if not initial_qs:
         rsp = {
             'items': [],
@@ -91,6 +71,13 @@ def get_pg_table_list(request, payload, pk):
     )
 
     items, total_page = datatable.get()
+
+    for item in items:
+        for code in feature_codes:
+            data = LFeatures.objects.filter(feature_code=code).first()
+            feature_name = data.feature_name
+            item['feature_code']=feature_name
+
     rsp = {
         'items': items,
         'page': payload.get("page"),
@@ -98,28 +85,6 @@ def get_pg_table_list(request, payload, pk):
     }
 
     return JsonResponse(rsp)
-
-
-def _get_pg_cursor(conn_details):
-    host = conn_details.get('pg_host')
-    port = conn_details.get('pg_port')
-    user = conn_details.get('pg_username')
-    password = conn_details.get('pg_password')
-    db = conn_details.get('pg_database')
-    try:
-        cursor = utils.check_pg_connection(host, db, port, user, password)
-    except Exception:
-        cursor = []
-    return cursor
-
-
-def _get_sql_execute(sql, cursor, fetch_type):
-    cursor.execute(sql)
-    if fetch_type == 'one':
-        values = list(cursor.fetchone())
-    else:
-        values = list(utils.dict_fetchall(cursor))
-    return values
 
 
 @require_GET
@@ -178,7 +143,10 @@ def getFields(request, payload):
         if data_types and properties:
             properties_data = []
             for property_id in properties:
-                single_property = LProperties.objects.filter(property_id=property_id).first()
+                single_property = LProperties.objects.filter(property_id=property_id)
+                single_property = single_property.exclude(value_type_id='data-type')
+                single_property = single_property.exclude(property_code='localId')
+                single_property = single_property.first()
                 code_data_list = []
                 if single_property:
                     if single_property.value_type_id in value_types:
@@ -207,6 +175,17 @@ def getFields(request, payload):
     })
 
 
+def _rsp_validation(result, table_name, id_list):
+    info = ''
+    if result and result[0]:
+        info = 'Хүснэгтийн нэр давхцсан байна !!!.'
+    if not table_name:
+        info = 'Хүснэгтийн нэр хоосон байна !!!'
+    if len(id_list) == 0:
+        info = 'Property сонгоогүй байна !!!'
+    return info
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -216,13 +195,17 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
-    if not table_name:
-        return JsonResponse({
-            'success': False,
-            'info': 'Table-ийн нэр хоосон байна !!!'
-        })
+    result = []
+    cursor_pg = utils.get_cursor_pg(id)
+
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
+    if not table_id:
+        result = utils.check_table_name(cursor_pg, table_name)
+    info = _rsp_validation(result, table_name, id_list)
+    if info:
+        return JsonResponse({'success': False, 'info': info})
+
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
@@ -263,41 +246,44 @@ def table__detail(request, id, table_id):
     })
 
 
-def _get_all_datas(feature_id, columns, properties, feature_config_ids):
-
+def _get_all_datas(feature_id, columns, properties, feature_config_ids, cursor='default'):
     query = '''
-            SELECT
-                d.geo_id,
-                ST_AsGeoJSON(ST_Transform(d.geo_data,4326)) as geo_data,
-                {columns},
-                d.feature_id
-            FROM
-                crosstab('
-                    select
-                        b.geo_id,
-                        b.property_id,
-                        COALESCE(
-                            b.code_list_id::character varying(1000),
-                            b.value_text::character varying(1000),
-                            b.value_number::character varying(1000),
-                            b.value_date::character varying(1000)
-                        ) as value_text
-                    from
-                        public.m_datas b
-                    inner join
-                        m_geo_datas mg
-                    on
-                        mg.geo_id = b.geo_id
-                    and
-                        mg.feature_id = {feature_id}
-                    where
-                        b.property_id in ({properties})
-                    and
-                        feature_config_id in ({feature_config_id})
-                    '
+        SELECT
+            d.geo_id,
+            ST_AsGeoJSON(ST_Transform(d.geo_data, 4326)) as geo_data,
+            {columns},
+            d.feature_id
+        FROM
+            crosstab('
+                select
+                    b.geo_id,
+                    b.property_id,
+                    COALESCE(
+                        b.code_list_id::character varying(1000),
+                        b.value_text::character varying(1000),
+                        b.value_number::character varying(1000),
+                        b.value_date::character varying(1000)
+                    ) as value_text
+                from
+                    public.m_datas b
+                inner join
+                    m_geo_datas mg
+                on
+                    mg.geo_id = b.geo_id
+                and
+                    mg.feature_id = {feature_id}
+                where
+                    b.property_id in ({properties})
+                and
+                    feature_config_id in ({feature_config_id})
+                group by (
+                    b.property_id, b.geo_id, b.code_list_id,
+                    b.value_text, b.value_number, b.value_date
                 )
-            ct(geo_id character varying(100), {create_columns})
-            JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+                order by 1,2'::text
+            )
+        ct(geo_id character varying(100), {create_columns})
+        JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
         '''.format(
                 columns=', '.join(['ct.{}'.format(f) for f in properties]),
                 properties=', '.join(['{}'.format(f) for f in columns]),
@@ -305,8 +291,8 @@ def _get_all_datas(feature_id, columns, properties, feature_config_ids):
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in properties]),
                 feature_id=feature_id,
         )
-    cursor = connections['default'].cursor()
-    data_list =  _get_sql_execute(query, cursor, 'all')
+    cursor = connections[cursor].cursor()
+    data_list = utils.get_sql_execute(query, cursor, 'all')
     return data_list
 
 
@@ -340,72 +326,205 @@ def _geojson_to_geom(geo_json):
     return geom
 
 
-def _drop_table(table_name, cursor):
+def _drop_table(table_name, cursor, schema):
     detete_query = '''
-        DROP TABLE IF EXISTS public.{table_name}
-    '''.format(table_name=table_name)
+        DROP TABLE IF EXISTS {schema}.{table_name}
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
     cursor.execute(detete_query)
 
+def _execute_query_to_pg(cursor, sql):
+    try:
+        cursor.execute(sql)
+    except Exception:
+        pass
 
-def _create_extension(cursor):
+
+def _create_extention_postgis(cursor, schema):
+    query_extention = '''
+        create extension IF NOT EXISTS  postgis SCHEMA {schema}
+    '''.format(schema=schema)
+
+    query_topology = '''
+        CREATE EXTENSION   IF NOT EXISTS  postgis_topology
+    '''.format(schema=schema)
+
+    _execute_query_to_pg(cursor, query_extention)
+    _execute_query_to_pg(cursor, query_topology)
+
+
+def _create_extension(cursor, schema):
     crosstab_query = '''
-        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA public
-    '''
+        CREATE EXTENSION IF NOT EXISTS tablefunc WITH SCHEMA {schema}
+    '''.format(schema=schema)
     cursor.execute(crosstab_query)
 
 
-def _create_table(cursor, table_name, property_columns):
+def _create_table(cursor, table_name, property_columns, schema):
 
-    query = '''
-        CREATE TABLE public.{table_name}
-        (
-            geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL,
-            geo_data geometry(GeometryZ,4326),
-            feature_id integer,
-            {columns}
-        )
-    '''.format(
-        table_name=table_name,
-        columns=','.join(property_columns)
-    )
+    columns = [
+        'geo_id character varying(100) COLLATE pg_catalog."default" NOT NULL',
+        'geo_data geometry(GeometryZ,4326)',
+        'feature_id integer',
+        'PRIMARY KEY (geo_id)'
+    ]
+
+    property_columns = columns + property_columns
+
 
     query_index = '''
-        CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {table_name}(geo_id)
-    '''.format(table_name=table_name)
-
-    cursor.execute(query)
+        CREATE UNIQUE INDEX IF NOT EXISTS {table_name}_index ON {schema}.{table_name}(geo_id)
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
+    _create_extention_postgis(cursor, schema)
+    utils.create_table_to_cursor(cursor, table_name, property_columns, schema)
     cursor.execute(query_index)
 
 
-def _insert_to_someone_db(table_name, cursor, columns, feature_code):
+def _insert_datas_to_code_list_table(cursor, code_list_datas, schema):
+
+    try:
+        insert_query = '''
+            INSERT INTO {schema}.geoportal_l_code_lists(
+                code_list_id, property_code, code_list_code, code_list_name, code_list_name_eng
+            )
+            VALUES (
+                {code_list_id},
+                '{property_code}',
+                '{code_list_code}',
+                '{code_list_name}',
+                '{code_list_name_eng}'
+            );
+            '''.format(
+                code_list_id=code_list_datas.get('code_list_id'),
+                property_code=code_list_datas.get('property_code'),
+                code_list_code=code_list_datas.get('code_list_code'),
+                code_list_name=code_list_datas.get('code_list_name'),
+                code_list_name_eng=code_list_datas.get('code_list_name_eng'),
+                schema=schema
+            )
+        cursor.execute(insert_query)
+    except Exception:
+        pass
+
+
+def _get_property_code_lists(property_ids):
+
+    code_list_prop_ids = []
+    code_list_prop_datas = []
+    code_list_value_types = ['option', 'single-select', 'boolean']
+
+    qs_prop = LProperties.objects.filter(property_id__in=property_ids)
+    qs_prop = qs_prop.filter(value_type_id__in=code_list_value_types)
+    prop_datas = list(qs_prop.values("property_id", 'property_code'))
+    if prop_datas:
+        for prop in prop_datas:
+            code_list_prop_ids.append(prop['property_id'])
+
+        qs_code_list = LCodeLists.objects.filter(property_id__in=code_list_prop_ids)
+        qs_code_list = list(qs_code_list.values(
+            'code_list_id',
+            'property_id',
+            'code_list_code',
+            'code_list_name',
+            'code_list_name_eng'
+        ))
+        if qs_code_list:
+            for code_list in qs_code_list:
+                property_code = list(
+                    filter(lambda x: x['property_id'] == code_list['property_id'], prop_datas)
+                )[0]['property_code'] or ''
+
+                code_list_data = {
+                    'property_code': property_code,
+                    'code_list_id': code_list.get('code_list_id') or None,
+                    'code_list_code': code_list.get('code_list_code') or '',
+                    'code_list_name': code_list.get('code_list_name') or '',
+                    'code_list_name_eng': code_list.get('code_list_name_eng') or '',
+                }
+                code_list_prop_datas.append(code_list_data)
+
+    return code_list_prop_datas
+
+
+def _create_code_list_table(cursor, property_ids, schema):
+
+    table_name = 'geoportal_l_code_lists'
+    fields = [
+        'code_list_id integer NOT NULL',
+        'property_code character varying(255)',
+        'code_list_code character varying(255)',
+        'code_list_name character varying(255)',
+        'code_list_name_eng character varying(255)',
+        'PRIMARY KEY (code_list_id)'
+    ]
+
+    utils.create_table_to_cursor(cursor, table_name, fields, schema)
+    code_list_datas = _get_property_code_lists(property_ids)
+    if code_list_datas:
+        for data in code_list_datas:
+            _insert_datas_to_code_list_table(cursor, data, schema)
+
+
+def _check(prop, geo_id, feature_data_ids, data_type_c_qs):
+    # feuts = search(LFeatures, {'feature_code': feature_code})
+    for f_d in feature_data_ids:
+        # feature_config_id = fc.feature_config_id
+        # data_type_id = fc.data_type_id
+        for dt in data_type_c_qs:
+            if dt.property_id == prop['property_id']:
+                mdta = MDatas.objects
+                mdta = mdta.filter(
+                    geo_id=geo_id,
+                    feature_config_id=f_d['feature_config_id'],
+                    data_type_id=f_d['data_type_id'],
+                    property_id=prop['property_id'],
+                )
+                if not mdta:
+                    MDatas.objects.create(
+                        geo_id=geo_id,
+                        feature_config_id=f_d['feature_config_id'],
+                        data_type_id=f_d['data_type_id'],
+                        property_id=prop['property_id'],
+                    )
+
+
+def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='public'):
 
     columns.sort()
+
     feature_id = LFeatures.objects.filter(feature_code=feature_code).first().feature_id
-    fields = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True))
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+    property_codes = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True).order_by('property_id'))
 
-    _drop_table(table_name, cursor)
-    _create_extension(cursor)
+    _drop_table(table_name, cursor, pg_schema)
+    _create_extension(cursor, pg_schema)
+    _create_code_list_table(cursor, columns, pg_schema)
 
-    property_columns = []
-    for feild in range(len(fields)):
+    success_count = 0
+    failed_count = 0
+    total_count = 0
+
+    property_columns = list()
+    for property_code in property_codes:
         property_split = '''
             {code} character varying(100)
             '''.format(
-                code=fields[feild].lower()
+                code=property_code.lower()
             )
         property_columns.append(property_split)
 
-    _create_table(cursor, table_name, property_columns)
+    _create_table(cursor, table_name, property_columns, pg_schema)
+    data_lists = _get_all_datas(feature_id, columns, property_codes, feature_config_ids)
 
-    data_lists = _get_all_datas(feature_id, columns, fields, feature_config_ids)
-    success_count = 0
-    failed_count = 0
-    total_count = len(data_lists)
     for data in data_lists:
         property_data = []
 
-        for field in fields:
+        for field in property_codes:
             field_name = field.lower()
             field_data = data.get(field_name) or ''
             property_d = '''
@@ -416,30 +535,26 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code):
         geo_data = data['geo_data']
         geo_data = _geojson_to_geom(geo_data)
         try:
-            sql_set_srid = '''
-                SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
-            '''.format(geo_data=geo_data)
-
-            geo_data =  _get_sql_execute(sql_set_srid, cursor, 'all')
-            geo_data = geo_data[0]['wkt']
-
+            geo_data = utils.convert_3d_with_srid(geo_data)
             insert_query = '''
-                INSERT INTO public.{table_name}(
+                INSERT INTO {schema}.{table_name}(
                     geo_id, geo_data, feature_id, {columns}
                 )
-                VALUES ('{geo_id}', '{geo_data}', {feature_id},{columns_data});
+                VALUES ('{geo_id}', '{geo_data}', {feature_id}, {columns_data});
                 '''.format(
                     table_name=table_name,
                     geo_id=data['geo_id'],
                     geo_data=geo_data,
                     feature_id=feature_id,
-                    columns=','.join(fields),
-                    columns_data=', '.join(property_data)
+                    columns=','.join(property_codes),
+                    columns_data=', '.join(property_data),
+                    schema=pg_schema
                 )
             cursor.execute(insert_query)
             success_count = success_count + 1
         except Exception:
-            failed_count = failed_count + 1
+            pass
+        failed_count = total_count - success_count
     return success_count, failed_count, total_count
 
 
@@ -451,7 +566,7 @@ def remove_pg_table(request, id, table_id):
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
     try:
-        cursor_pg = _get_cursor_pg(id)
+        cursor_pg = utils.get_cursor_pg(id)
         _drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
@@ -468,31 +583,67 @@ def refresh_datas(request, id):
     ano_db_table_pg = AnotherDatabaseTable.objects
     ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
 
-    cursor_pg = _get_cursor_pg(id)
+    cursor_pg = utils.get_cursor_pg(id)
     table_info = []
     info = ''
     success = True
+
+    connection = utils.json_load(ano_db.connection)
+    pg_schema = connection.get('schema') or 'public'
+
     if ano_db_table_pg:
         for table in ano_db_table_pg:
-            table_name = table.table_name
-            field_config = table.field_config.replace("'", '"')
-            columns = utils.json_load(field_config)
-            feature_code = table.feature_code
-            success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor_pg, columns, feature_code)
-            table_info_text = '''
-                {table_name} хүснэгт
-                нийт {total_count} мөр дата-наас
-                амжилттай орсон {success_count}
-                амжилтгүй {failed_count}
-                '''.format(
-                    table_name=table_name,
-                    total_count=total_count,
-                    success_count=success_count,
-                    failed_count=failed_count
-                )
-            table_info.append(table_info_text)
+            single_table_info = _export_table(ano_db, table, cursor_pg)
+            table_info.append(single_table_info)
         ano_db.database_updated_at = datetime.datetime.now()
         ano_db.save()
+    return JsonResponse({
+        'success': success,
+        'info': info,
+        'table_info': table_info,
+    })
+
+
+def _export_table(ano_db, ano_db_table_pg, cursor):
+    table_info = []
+    table_name = ano_db_table_pg.table_name
+    field_config = ano_db_table_pg.field_config.replace("'", '"')
+    columns = utils.json_load(field_config)
+    feature_code = ano_db_table_pg.feature_code
+    success_count, failed_count, total_count = _insert_to_someone_db(table_name, cursor, columns, feature_code)
+    table_info_text = '''
+        {table_name} хүснэгт
+        нийт {total_count} мөр дата-наас
+        амжилттай орсон {success_count}
+        амжилтгүй {failed_count}
+        '''.format(
+            table_name=table_name,
+            total_count=total_count,
+            success_count=success_count,
+            failed_count=failed_count
+        )
+    table_info.append(table_info_text)
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+    return table_info
+
+
+def search(Model, search):
+    return Model.objects.filter(**search)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def refresh_single_table(request, id, table_id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(pk=table_id).first()
+    cursor_pg = utils.get_cursor_pg(id)
+    info = ''
+    success = True
+    if ano_db_table_pg:
+        table_info = _export_table(ano_db, ano_db_table_pg, cursor_pg)
     else:
         success = False
         info = 'Хүснэгт үүсээгүй байна !!!'

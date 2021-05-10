@@ -65,7 +65,7 @@ export default class List extends Component {
         this.crontabLink = this.crontabLink.bind(this)
         this.refreshPgData = this.refreshPgData.bind(this)
         this.modalChange = this.modalChange.bind(this)
-
+        this.refreshPgDataAction = this.refreshPgDataAction.bind(this)
     }
 
 
@@ -74,14 +74,49 @@ export default class List extends Component {
     }
 
     handleRefreshData(values){
-        if(values.db_type == 'PgDB') this.refreshPgData(values)
+        if(values.db_type == 'PgDB') this.refreshPgDataAction(values)
     }
 
-    refreshPgData(values){
-        this.setState({is_loading: true})
-        service.pg_config.refreshTableData(values.id).then(({success, info, table_info}) => {
+    refreshPgDataAction(values) {
+        this.setState({ values })
+        var table_names = values.table_names
+        if (table_names && table_names.length >0) {
+            var table_res = table_names.join(", ")
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'warning',
+                'Хүснэгт шинэчлэх',
+                `Та ${table_res} хүснэгтүүдийг export хийхдээ итгэлтэй байна уу?`,
+                true,
+                '',
+                'Тийм',
+                (values) => this.refreshPgData(values),
+                null
+            )
+        }
+        else {
+            this.modalChange(
+                'fa fa-times-circle',
+                null,
+                'danger',
+                'Алдаа гарлаа',
+                `Хүснэгт үүсээгүй байна !!!!`,
+                false,
+                '',
+                '',
+                null,
+                null
+            )
+        }
+    }
+
+    refreshPgData() {
+        this.setState({ is_loading: true })
+        const {values} = this.state
+        service.pg_config.refreshTableData(values.id).then(({ success, table_info }) => {
             if (success) {
-                this.setState({is_loading: false})
+                this.setState({ is_loading: false })
                 var table_res = table_info.join("\n")
                 this.modalChange(
                     'fa fa-check-circle',
@@ -95,22 +130,7 @@ export default class List extends Component {
                     null,
                     null
                 )
-            }else{
-                this.setState({is_loading: false})
-                this.modalChange(
-                    'fa fa-times-circle',
-                    null,
-                    'danger',
-                    'Алдаа гарлаа',
-                    info,
-                    false,
-                    '',
-                    '',
-                    null,
-                    null
-                )
             }
-
         })
     }
 
@@ -201,10 +221,10 @@ export default class List extends Component {
         const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, is_loading } = this.state
         return (
             <div className="row">
-                <Loader
+                {/* <Loader
                     is_loading={is_loading}
                     text={'Уншиж байна'}
-                />
+                /> */}
                 <div className="col-lg-12">
                     <div className="card">
                         <div className="card-body">

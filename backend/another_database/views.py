@@ -50,8 +50,19 @@ def pagination(request, payload, out_type):
         for id, name in AnotherDatabase.DB_CHOICES:
             if id == data_type:
                 return name
-    оруулах_талбарууд = ['id', 'name', 'definition', 'unique_id', 'database_updated_at', 'created_at', 'updated_at', 'db_type']
-    хувьсах_талбарууд = [{"field": "db_type", "action": _get_data_type_name, "new_field": "db_type"}]
+
+    def _get_table_lists(data_id, items):
+        server_detail = []
+        datas = AnotherDatabaseTable.objects.filter(another_database_id=items['id'])
+        table_names = [data.table_name for data in datas]
+        return table_names
+
+    оруулах_талбарууд = ['id', 'name', 'definition', 'unique_id', 'database_updated_at', 'created_at', 'updated_at', 'db_type', 'connection']
+    хувьсах_талбарууд = [
+        {"field": "db_type", "action": _get_data_type_name, "new_field": "db_type"},
+        {"field": "connection", "action": _get_table_lists, "new_field": "table_names"}
+    ]
+    нэмэлт_талбарууд = []
     qs = AnotherDatabase.objects
     qs = qs.filter(is_export=out_type)
 
@@ -61,7 +72,8 @@ def pagination(request, payload, out_type):
             payload=payload,
             initial_qs=qs,
             оруулах_талбарууд=оруулах_талбарууд,
-            хувьсах_талбарууд=хувьсах_талбарууд
+            хувьсах_талбарууд=хувьсах_талбарууд,
+            нэмэлт_талбарууд=нэмэлт_талбарууд
         )
 
         items, total_page = datatable.get()
@@ -748,13 +760,14 @@ def config_save(request, payload):
     username = payload.get('pg_username')
     password = payload.get('pg_password')
     database = payload.get('pg_database')
+    schema = payload.get('pg_schema')
 
     db_type = AnotherDatabase.PgDB
     name = payload.get('name')
     definition = payload.get('definition')
 
     pk = payload.get('id')
-    check = check_pg_connection(server, database, port, username, password)
+    check = check_pg_connection(server, database, port, username, password, schema)
     if check:
         connection = {
             'server': server,
@@ -762,6 +775,7 @@ def config_save(request, payload):
             'username': username,
             'password': password,
             'database': database,
+            'schema': schema
         }
         connection = utils.json_dumps(connection)
     if pk:
