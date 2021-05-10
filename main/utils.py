@@ -10,6 +10,7 @@ import pyproj
 import math
 import json
 import psycopg2
+import socket
 from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
@@ -1829,3 +1830,19 @@ def check_property_data(prop_datas, feature_config_id, feature_id, cursor='defau
         if len(datas) == 10:
             property_ids.append(prop)
     return property_ids
+
+def check_nsdi_address(request):
+    nsdi_check = False
+    host_name = socket.gethostname()
+    host_addr = socket.gethostbyname(host_name + ".local")
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+
+    if host_addr == '192.168.10.15' and ip == '127.0.0.1':
+        nsdi_check = True
+
+    return nsdi_check
