@@ -321,16 +321,20 @@ export default class SideBar extends Component {
                                                 <div className="form-group col-md-6">
                                                     <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
                                                     <select
-                                                        className="form-control form-control-sm"
+                                                        className={"form-control form-control-sm" + (!style_name ? 'is-invalid' : '')}
                                                         value={style_name ? style_name : ''}
                                                         onChange={(e) => this.setState({ style_name: e.target.value })}
                                                     >
-                                                        <option value={style_name}>{style_name ? style_name : ''}</option>
+                                                        <option value=''></option>
                                                         {
                                                             style_names.map((name, idx) =>
                                                                 <option value={name} key={idx}>{name}</option>
                                                         )}
                                                     </select>
+                                                    {
+                                                        !style_name &&
+                                                            <small className="text-danger">Style-ийн нэр хоосон байна</small>
+                                                    }
                                             </div>
                                             <div className="form-group col-md-12">
                                                 <button
@@ -445,7 +449,7 @@ export default class SideBar extends Component {
                         />
                     </div>
                 </div>
-        </Fragment>
+            </Fragment>
         )
     }
 }
