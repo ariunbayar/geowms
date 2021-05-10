@@ -1649,7 +1649,7 @@ def tseg_ustsan_success(request, payload):
 
     with transaction.atomic():
 
-        data, filter_value_type = _get_filter_dicts('Pointid')
+        data, filter_value_type = _get_filter_dicts('localId')
         search = dict()
         search[filter_value_type] = tseg_request.tseg_id
 
