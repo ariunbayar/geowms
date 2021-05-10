@@ -74,32 +74,44 @@ export default class List extends Component {
     }
 
     handleRefreshData(values){
-        if(values.db_type == 'PgDB') this.refreshPgData(values)
+        if(values.db_type == 'PgDB') this.refreshPgDataAction(values)
     }
 
-    refreshPgData(values){
-        this.setState({is_loading: true})
-        service.pg_config.refreshTableData(values.id).then(({success, info, table_info}) => {
-            if (success) {
-                this.setState({is_loading: false})
-                var table_res = table_info.join("\n")
-                this.modalChange(
-                    'fa fa-check-circle',
-                    null,
-                    'success',
-                    'Амжилттай',
-                    `${table_res}`,
-                    false,
-                    '',
-                    '',
-                    null,
-                    null
-                )
-            }
-        })
+    refreshPgDataAction(values) {
+        this.setState({ values })
+        var table_names = values.table_names
+        if (table_names && table_names.length >0) {
+            var table_res = table_names.join(", ")
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'warning',
+                'Хүснэгт шинэчлэх',
+                `Та ${table_res} хүснэгтүүдийг export хийхдээ итгэлтэй байна уу?`,
+                true,
+                '',
+                'Тийм',
+                (values) => this.refreshPgData(values),
+                null
+            )
+        }
+        else {
+            this.modalChange(
+                'fa fa-times-circle',
+                null,
+                'danger',
+                'Алдаа гарлаа',
+                `Хүснэгт үүсээгүй байна !!!!`,
+                false,
+                '',
+                '',
+                null,
+                null
+            )
+        }
     }
 
-    refreshPgDataAction() {
+    refreshPgData() {
         this.setState({ is_loading: true })
         const {values} = this.state
         service.pg_config.refreshTableData(values.id).then(({ success, table_info }) => {
@@ -119,7 +131,6 @@ export default class List extends Component {
                     null
                 )
             }
-
         })
     }
 
