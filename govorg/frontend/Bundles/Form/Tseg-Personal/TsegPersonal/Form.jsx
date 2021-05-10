@@ -690,7 +690,6 @@ export class Forms extends Component {
             back_url = `/gov/forms/tseg-info/tsegpersonal/tseg-personal/`
             button_name = 'Нэмэх'
         }
-        console.log(point_types);
 
         return (
         <Formik

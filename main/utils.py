@@ -1206,7 +1206,6 @@ def get_code_list_from_property_id(property_id):
     LCodeLists = apps.get_model('backend_inspire', 'LCodeLists')
     code_list_values = []
     code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
-    print(code_list_configs)
     for code_list_config in code_list_configs:
         property_id = code_list_config.property_id
         to_property_id = code_list_config.to_property_id
@@ -1230,7 +1229,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='Pointid'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:

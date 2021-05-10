@@ -609,7 +609,7 @@ def _table_json():
         {
             'width': 30,
             'head_name': 'Цэгийн дугаар',
-            'body_name': 'PointNumber',
+            'body_name': 'Pointid',
         },
         {
             'width': 30,
@@ -986,7 +986,7 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
         value = _check_undur(value)
 
         path = _create_folder_payment_id(folder_name, point.payment.id)
-        pdf_name = value['PointNumber'] + ".pdf"
+        pdf_name = value['Pointid'] + ".pdf"
         src_file = os.path.join(path, pdf_name)
         pdf = createPdf(value)
         pdf.output(src_file, 'F')
@@ -1152,11 +1152,11 @@ def createPdf(values):
     pdf.cell(-50)
     pdf.cell(10, 8, '1.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
-    pdf.cell(43, 8, _check_none(values, 'PointNumber'), 1, 0, 'C')
+    pdf.cell(43, 8, _check_none(values, 'Pointid'), 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
-    tseg_dugaar = values['PointNumber']
+    tseg_dugaar = values['Pointid']
     if 'localId' in values:
         tseg_dugaar = values['localId']
     pdf.cell(43, 8, tseg_dugaar, 1, 0, 'C')
@@ -1208,7 +1208,7 @@ def createPdf(values):
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
     pdf.ln(8)
-    pdf.multi_cell(188, 5, _check_none(values, 'PointLocationDescription'), 1, 0, 'C')
+    pdf.multi_cell(188, 5, _check_none(values, 'locationNote'), 1, 0, 'C')
     newH = pdf.get_y()
     # mor 6
     if 'LocationOverviewMap' in values or 'PointCenterType' in values:
