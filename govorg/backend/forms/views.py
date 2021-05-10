@@ -127,8 +127,8 @@ def createPdf(values, requests):
     pdf.cell(10, 8, '4.', 1, 0, 'C')
     pdf.cell(41, 8, 'Сүлжээний төрөл', 1, 0, 'C')
     suljee = ''
-    if 'GeodeticalNetworkPointTypeValue' in values:
-        qs = _get_model_qs(LCodeLists, {'code_list_id': values['GeodeticalNetworkPointTypeValue']})
+    if 'Geodeticаlnetworktype' in values:
+        qs = _get_model_qs(LCodeLists, {'code_list_id': values['Geodeticаlnetworktype']})
         if qs:
             suljee = qs.first().code_list_name
     pdf.cell(43, 8, suljee, 1, 0, 'C')
@@ -849,7 +849,7 @@ def tseg_inspire_list(request, payload):
         }
         return JsonResponse(rsp)
 
-    property_codes = ['GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue', 'localId', 'PointNumber']
+    property_codes = ['Geodeticnetworkorderclass', 'Geodeticаlnetworktype', 'localId', 'PointNumber']
 
     properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
     datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes)
@@ -874,8 +874,8 @@ def tseg_inspire_list(request, payload):
                     data[prop.property_code] = value[prop.property_id]
 
         display_items.append({
-            'suljeenii_torol': data['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in data else '',
-            'center_typ': data['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in data else '',
+            'suljeenii_torol': data['Geodeticаlnetworktype'] if 'Geodeticаlnetworktype' in data else '',
+            'center_typ': data['Geodeticnetworkorderclass'] if 'Geodeticnetworkorderclass' in data else '',
             'geo_id': geo_id if geo_id else '',
             'point_id': data['localId'] if 'localId' in data else '',
             'point_name': data['PointNumber'] if 'PointNumber' in data else 'Хоосон байна',
@@ -1066,7 +1066,7 @@ def tsegPersonalUpdate(request, payload):
             data['hotolson'] = values['EmployeeName'] if 'EmployeeName' in values else ''
             data['alban_tushaal'] = values['EmployeePosition'] if 'EmployeePosition' in values else ''
             data['alban_baiguullga'] = values['CompanyName'] if 'CompanyName' in values else ''
-            data['suljeenii_torol'] = values['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in values else ''
+            data['suljeenii_torol'] = values['Geodeticаlnetworktype'] if 'Geodeticаlnetworktype' in values else ''
             data['sheet1'] = sheets[0] if sheets else ''
             data['zone'] = int(sheets[1]) if sheets else ''
             data['cc'] = int(sheets[2]) if sheets else ''
@@ -1089,7 +1089,7 @@ def tsegPersonalUpdate(request, payload):
                 data['point_name'] = values['PointNumber'] if 'PointNumber' in values else ''
                 data['aimag'] = aimag
                 data['sum'] = sum
-                data['center_typ'] = values['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in values else ''
+                data['center_typ'] = values['Geodeticnetworkorderclass'] if 'Geodeticnetworkorderclass' in values else ''
                 data['hors_shinj_baidal'] = soil_type
                 # data['suljeenii_torol'] = suljeenii_torol
             tseg_display.append(data)
@@ -1313,8 +1313,8 @@ def _make_request_datas(values, request_values):
 def _get_values(request):
     value = dict()
     value['localId'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
-    value['GeodeticalNetworkPointTypeValue'] = int(request.POST.get('suljeenii_torol')) #bolson
-    value['GeodeticalNetworkPointClassValue'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
+    value['Geodeticаlnetworktype'] = int(request.POST.get('suljeenii_torol')) #bolson
+    value['Geodeticnetworkorderclass'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
     value['PointLocationDescription'] = request.POST.get('barishil_tuhai') # bolson
     value['Nomenclature'] = str(request.POST.get('trapetsiin_dugaar')) + "-" + str(request.POST.get('BA')) + "-" + str(request.POST.get('LA'))#bolson
     value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
@@ -2377,8 +2377,8 @@ def geom_points(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_field_values(request):
-    point_type = utils.InspireProperty('GeodeticalNetworkPointTypeValue')
-    point_class = utils.InspireProperty('GeodeticalNetworkPointClassValue')
+    point_type = utils.InspireProperty('Geodeticаlnetworktype')
+    point_class = utils.InspireProperty('Geodeticnetworkorderclass')
     point_types = utils.get_code_list_from_property_id(point_type.property_id)
     point_classes = utils.get_code_list_from_property_id(point_class.property_id)
     rsp = {

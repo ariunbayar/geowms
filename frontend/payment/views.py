@@ -690,7 +690,7 @@ def _create_lavlagaa_file(class_infos, path):
     pdf.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'gzbgzzg-logo.jpg'), x=25, y=8, w=37, h=40)
     org_name = _check_none(class_infos, 'CompanyName')
 
-    class_name = _check_none(class_infos, 'GeodeticalNetworkPointTypeValue')
+    class_name = _check_none(class_infos, 'Geodeticаlnetworktype')
     font_name = 'DejaVu'
 
     pdf.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
@@ -883,7 +883,7 @@ def _filter_Model(filters, Model=MDatas, initial_qs=[]):
 def _append_to_list(values, add_values):
     has_already = False
     for before_value in values:
-        if before_value['CompanyName'] == add_values['CompanyName'] and before_value['GeodeticalNetworkPointTypeValue'] == add_values['GeodeticalNetworkPointTypeValue']:
+        if before_value['CompanyName'] == add_values['CompanyName'] and before_value['Geodeticаlnetworktype'] == add_values['Geodeticаlnetworktype']:
             has_already = True
     if has_already:
         before_value['infos'].append(add_values['infos'][0])
@@ -982,7 +982,7 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
         value = _make_property_code_value(mdata)
         value['geo_id'] = geo_id
 
-        for_angilah = ['CompanyName', 'GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue']
+        for_angilah = ['CompanyName', 'Geodeticnetworkorderclass', 'Geodeticаlnetworktype']
         value = _check_undur(value)
 
         path = _create_folder_payment_id(folder_name, point.payment.id)
@@ -998,15 +998,15 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
 
         for key, val in value.items():
             if key in for_angilah:
-                if key == 'GeodeticalNetworkPointTypeValue' and 'GeodeticalNetworkPointClassValue' not in value:
-                    code_qs = _filter_Model([{'code_list_name': value['GeodeticalNetworkPointTypeValue']}], Model=LCodeLists)
+                if key == 'Geodeticаlnetworktype' and 'Geodeticnetworkorderclass' not in value:
+                    code_qs = _filter_Model([{'code_list_name': value['Geodeticаlnetworktype']}], Model=LCodeLists)
                     if code_qs:
                         code = code_qs.first()
                         top_code_qs = _filter_Model([{'top_code_list_id': code.top_code_list_id}], Model=LCodeLists)
                         if top_code_qs:
                             top_code = top_code_qs.first()
                             val = top_code.code_list_name
-                            for_pdf['GeodeticalNetworkPointClassValue'] = val
+                            for_pdf['Geodeticnetworkorderclass'] = val
                 for_pdf[key] = val
             else:
                 infos[key] = val
@@ -1173,7 +1173,7 @@ def createPdf(values):
     pdf.ln(0)
     pdf.cell(10, 8, '4.', 1, 0, 'C')
     pdf.cell(84, 8, 'Сүлжээний төрөл', 1, 0, 'C')
-    pdf.cell(94, 8, _check_none(values, 'GeodeticalNetworkPointTypeValue'), 1, 1, 'C')
+    pdf.cell(94, 8, _check_none(values, 'Geodeticаlnetworktype'), 1, 1, 'C')
     pdf.ln(0)
 
     pdf.cell(10, 8, '5.', 1, 0, 'C')
