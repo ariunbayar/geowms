@@ -10,6 +10,7 @@ import pyproj
 import math
 import json
 import psycopg2
+import socket
 from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
