@@ -717,7 +717,7 @@ def _get_qs_in_boundary(initial_qs, org):
 
     property_code = 'text'
     feature_code = 'bnd-au-au'
-
+    org_geo_id = org.geo_id
 
     feature = utils.get_feature_from_code(feature_code)
     feature_id = feature.feature_id
@@ -726,27 +726,23 @@ def _get_qs_in_boundary(initial_qs, org):
     datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
 
     mdatas_qs = MDatas.objects
+    mdatas_qs = mdatas_qs.filter(geo_id=org_geo_id)
+    mdatas_qs = mdatas_qs.filter(**datas[0])
+    if mdatas_qs:
+        mdatas_qs = mdatas_qs.values()
+        mdatas_qs = mdatas_qs.first()
+        org_boundary_name = mdatas_qs['value_text']
 
-    qs_geo_ids = initial_qs.filter(org=org).values_list('new_geo_id', flat=True)
-    org_geo_ids = list(qs_geo_ids)
-    for org_geo_id in org_geo_ids:
-        mdatas_qs = mdatas_qs.filter(geo_id=org_geo_id)
-        mdatas_qs = mdatas_qs.filter(**datas[0])
-        if mdatas_qs:
-            mdatas_qs = mdatas_qs.values()
-            mdatas_qs = mdatas_qs.first()
-            org_boundary_name = mdatas_qs['value_text']
+        len_of_geo_id = _get_len_geo_id(org_geo_id)
 
-            len_of_geo_id = _get_len_geo_id(org_geo_id)
+        filter_data = dict()
+        for level, level_name in levels:
+            if len_of_geo_id == level:
+                filter_data[level_name] = org_boundary_name
 
-            filter_data = dict()
-            for level, level_name in levels:
-                if len_of_geo_id == level:
-                    filter_data[level_name] = org_boundary_name
+        initial_qs = initial_qs.filter(**filter_data)
 
-            initial_qs = initial_qs.filter(**filter_data)
-
-        return initial_qs
+    return initial_qs
 
 
 def _get_org_from_request(request):
@@ -769,7 +765,6 @@ def tseg_personal_list(request, payload):
         org = _get_org_from_request(request)
 
         requests = TsegRequest.objects
-        # requests = requests.filter(org=org)
         requests = _get_qs_in_boundary(requests, org)
         requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
         if requests:
@@ -862,7 +857,7 @@ def tseg_inspire_list(request, payload):
         }
         return JsonResponse(rsp)
 
-    property_codes = ['Geodeticnetworkorderclass', 'Geodeticаlnetworktype', 'localId', 'Pointid']
+    property_codes = ['Geodeticnetworkorderclass', 'Geodeticаlnetworktype', 'Pointid', 'Pointname']
 
     properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
     datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes)
@@ -890,8 +885,8 @@ def tseg_inspire_list(request, payload):
             'suljeenii_torol': data['Geodeticаlnetworktype'] if 'Geodeticаlnetworktype' in data else '',
             'center_typ': data['Geodeticnetworkorderclass'] if 'Geodeticnetworkorderclass' in data else '',
             'geo_id': geo_id if geo_id else '',
-            'point_id': data['localId'] if 'localId' in data else '',
-            'point_name': data['Pointid'] if 'Pointid' in data else 'Хоосон байна',
+            'point_id': data['Pointid'] if 'Pointid' in data else '',
+            'point_name': data['Pointname'] if 'Pointname' in data else 'Хоосон байна',
         })
 
     total_page = total_items.num_pages
@@ -1098,8 +1093,8 @@ def tsegPersonalUpdate(request, payload):
                 aimag, sum = _get_aimag_sum(values, 'AdministrativeUnitSubClass')
                 soil_type = _get_hurs(geo_id)
                 data['geo_id'] = geo_id if geo_id else ''
-                data['point_id'] = values['localId'] if 'localId' in values else ''
-                data['point_name'] = values['Pointid'] if 'Pointid' in values else ''
+                data['point_id'] = values['Pointid'] if 'Pointid' in values else ''
+                data['point_name'] = values['Pointname'] if 'Pointname' in values else ''
                 data['aimag'] = aimag
                 data['sum'] = sum
                 data['center_typ'] = values['Geodeticnetworkorderclass'] if 'Geodeticnetworkorderclass' in values else ''
@@ -1325,7 +1320,7 @@ def _make_request_datas(values, request_values):
 
 def _get_values(request):
     value = dict()
-    value['localId'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
+    value['Pointid'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
     value['Geodeticаlnetworktype'] = int(request.POST.get('suljeenii_torol')) #bolson
     value['Geodeticnetworkorderclass'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
     value['locationNote'] = request.POST.get('barishil_tuhai') # bolson
@@ -1333,7 +1328,7 @@ def _get_values(request):
     value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
     value['EmployeeName'] = request.POST.get('hotolson') # bolson
     value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
-    value['Pointid'] = request.POST.get('tesgiin_ner') # bolson
+    value['Pointname'] = request.POST.get('tesgiin_ner') # bolson
     value['beginLifespanVersion'] = request.POST.get('date') #bolson
     value['AdministrativeUnitSubClass'] = utils.get_code_list_id_from_name(request.POST.get('sum_name'), 'AdministrativeUnitSubClass') if request.POST.get('sum_name') else None #bolson
     value['SoilType'] = request.POST.get('hors_shinj_baidal') #mdku
@@ -1649,7 +1644,7 @@ def tseg_ustsan_success(request, payload):
 
     with transaction.atomic():
 
-        data, filter_value_type = _get_filter_dicts('localId')
+        data, filter_value_type = _get_filter_dicts('Pointid')
         search = dict()
         search[filter_value_type] = tseg_request.tseg_id
 
