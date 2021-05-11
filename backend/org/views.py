@@ -1812,7 +1812,6 @@ def _get_choices(Model, field_name):
 
 @require_GET
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def get_select_values(request):
 
     qs = DefaultPosition.objects
