@@ -65,8 +65,8 @@ export default class SideBar extends Component {
             id_list = id_list.filter((oid) => oid != value)
         }
 
-        if(id_list.length == this.props.property_length){check_list=true }
-        else { check_list=false }
+        if(id_list.length == this.props.property_length){ check_list = true }
+        else { check_list = false }
 
         this.setState({id_list, check_list })
     }

@@ -66,14 +66,14 @@ export class List extends Component {
             if(success){
                 fields.map((f_config, idx) =>
                     f_config.data_types.map((data_type, idx) =>
-                        data_type.data_type_configs.map((data_type_config,idx) =>
+                        data_type.data_type_configs.map((data_type_config, idx) =>
                         {
-                            if (data_type_config.property_id) { property_length +=1 }
+                            if (data_type_config.property_id) { property_length += 1 }
                         })
                     )
                 )
 
-                if(property_length == id_list.length){ check_list=true }
+                if(property_length == id_list.length){ check_list = true }
                 this.setState({
                         fields, id_list, view_name, url, check_list,
                         view_style_name: style_name, geom_type,
