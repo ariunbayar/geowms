@@ -1229,7 +1229,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='Pointid'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:
