@@ -1154,8 +1154,7 @@ def make_value_dict(value, properties_qs, is_display=False):
                     data = dict()
                     if not is_display:
                         if 'date' in types['value_type']:
-                            #TODO date to timezone
-                            val = val
+                            val = date_to_timezone(val)
                         data[types['value_type']] = val
                         data['property_id'] = prop['property_id']
                     if is_display:
@@ -1801,35 +1800,6 @@ def create_table_to_cursor(cursor, table_name, fields, schema):
     )
     cursor.execute(sql)
 
-
-def check_property_data(prop_datas, feature_config_id, feature_id, cursor='default'):
-    property_ids = []
-    cursor = connections['default'].cursor()
-    for prop in prop_datas:
-        sql = '''
-            select
-                *
-            from m_datas b
-            inner join
-                m_geo_datas mg
-            on
-                mg.geo_id=b.geo_id
-            where
-                b.property_id = {property_id}
-                and
-                mg.feature_id={feature_id}
-                and b.feature_config_id in ({feature_config_id})
-            limit 10
-        '''.format(
-            property_id=prop,
-            feature_id=feature_id,
-            feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id])
-        )
-        cursor.execute(sql)
-        datas = list(dict_fetchall(cursor))
-        if len(datas) == 10:
-            property_ids.append(prop)
-    return property_ids
 
 def check_nsdi_address(request):
     nsdi_check = False
