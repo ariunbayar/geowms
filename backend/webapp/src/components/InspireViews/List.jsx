@@ -66,9 +66,13 @@ export class List extends Component {
             if(success){
                 fields.map((f_config, idx) =>
                     f_config.data_types.map((data_type, idx) =>
-                        property_length += data_type.data_type_configs.length,
+                        data_type.data_type_configs.map((data_type_config,idx) =>
+                        {
+                            if (data_type_config.property_id) { property_length +=1 }
+                        })
                     )
                 )
+
                 if(property_length == id_list.length){ check_list=true }
                 this.setState({
                         fields, id_list, view_name, url, check_list,
