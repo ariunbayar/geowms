@@ -334,7 +334,7 @@ export default class SideBar extends Component {
                                                 <div className="form-group col-md-6">
                                                     <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
                                                     <select
-                                                        className={"form-control form-control-sm" + (!style_name ? 'form-control is-invalid' : '')}
+                                                        className={"custom-select" + (!style_name ? ' is-invalid' : '')}
                                                         value={style_name ? style_name : ''}
                                                         onChange={(e) => this.setState({ style_name: e.target.value })}
                                                     >
