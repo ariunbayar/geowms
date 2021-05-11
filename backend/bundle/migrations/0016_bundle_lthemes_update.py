@@ -62,50 +62,54 @@ def update_bundles(apps, schema_editor):
     _check_column()
     _check_pk
 
-    for i in bundles.objects.all():
-        print(i.name)
-        if i.name == 'Геодезийн тулгуур сүлжээ':
-            i.name = 'Геодезийн цэг тэмдэгт'
-            i.save()
-        if i.name == 'Геологи, хөрс':
-            i.name = 'Геологи'
-            i.save()
-        if i.name == 'Ус зүй':
-            i.name = 'Ус зүйн мэдээлэл'
-            i.save()
-        if i.name == 'Нэгж талбар':
-            i.name = 'Газрын нэгж талбар'
-            i.save()
-        theme = themes.objects.filter(theme_name=i.name).first()
+    for bundle in bundles.objects.all():
+        print(bundle.name)
+        if bundle.name == 'Геодезийн тулгуур сүлжээ':
+            bundle.name = 'Геодезийн цэг тэмдэгт'
+            bundle.save()
+        if bundle.name == 'Геологи, хөрс':
+            bundle.name = 'Геологи'
+            bundle.save()
+        if bundle.name == 'Ус зүй':
+            bundle.name = 'Ус зүйн мэдээлэл'
+            bundle.save()
+        if bundle.name == 'Нэгж талбар':
+            bundle.name = 'Газрын нэгж талбар'
+            bundle.save()
+        theme = themes.objects.filter(theme_name=bundle.name).first()
         if theme:
-            bundles.objects.filter(id=i.id).update(ltheme=theme)
+            bundles.objects.filter(id=bundle.id).update(ltheme=theme)
         else:
-            theme = themes.objects.filter(theme_name__istartswith=i.name[:3], theme_name__endswith= i.name[-4:]).first()
+            theme = themes.objects.filter(theme_name__istartswith=bundle.name[:3], theme_name__endswith= bundle.name[-4:]).first()
             if theme:
-                bundles.objects.filter(id=i.id).update(ltheme=theme)
+                bundles.objects.filter(id=bundle.id).update(ltheme=theme)
             else:
+                theme_id = themes.objects.all().order_by('-theme_id').first().theme_id + 1
                 cursor = connections['default'].cursor()
                 sql = """
                 INSERT INTO
                     public.l_themes(
+                        theme_id,
                         theme_name,
                         order_no,
                         is_active
                         )
                 VALUES (
+                    '{theme_id}',
                     '{theme_name}',
                     {order_no},
                     {is_active}
                     )
 
                 """.format(
-                    theme_name=i.name,
-                    order_no=i.sort_order,
+                    theme_id=theme_id,
+                    theme_name=bundle.name,
+                    order_no=bundles.objects.all().count() + 1,
                     is_active=True
                 )
                 cursor.execute(sql)
-                theme = themes.objects.filter(theme_name=i.name).first()
-                bundles.objects.filter(id=i.id).update(ltheme=theme)
+                theme = themes.objects.filter(theme_name=bundle.name).first()
+                bundles.objects.filter(id=bundle.id).update(ltheme=theme)
 
 
 
