@@ -25,7 +25,6 @@ from main.utils import (
     get_geoJson,
     check_gp_design,
     get_colName_type,
-    check_property_data
 )
 import main.geoserver as geoserver
 
