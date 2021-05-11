@@ -383,7 +383,6 @@ def propertyFieldsSave(request, payload):
     fid = payload.get('fid')
     tid = payload.get('tid')
     values = payload.get('values')
-    print(len(id_list))
     user = User.objects.filter(username=request.user).first()
     if not id_list:
         rsp = {
