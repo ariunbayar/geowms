@@ -609,7 +609,7 @@ def _table_json():
         {
             'width': 30,
             'head_name': 'Цэгийн дугаар',
-            'body_name': 'PointNumber',
+            'body_name': 'Pointid',
         },
         {
             'width': 30,
@@ -634,7 +634,7 @@ def _table_json():
         {
             'width': 20,
             'head_name': 'Өндөр',
-            'body_name': 'elevationValue',
+            'body_name': 'ellipsoidheight',
         },
     ]
     return table_col
@@ -690,7 +690,7 @@ def _create_lavlagaa_file(class_infos, path):
     pdf.image(os.path.join(settings.STATIC_ROOT, 'assets', 'image', 'logo', 'gzbgzzg-logo.jpg'), x=25, y=8, w=37, h=40)
     org_name = _check_none(class_infos, 'CompanyName')
 
-    class_name = _check_none(class_infos, 'GeodeticalNetworkPointTypeValue')
+    class_name = _check_none(class_infos, 'Geodeticаlnetworktype')
     font_name = 'DejaVu'
 
     pdf.add_font(font_name, '', settings.MEDIA_ROOT + '/' + 'DejaVuSansCondensed.ttf', uni=True)
@@ -883,7 +883,7 @@ def _filter_Model(filters, Model=MDatas, initial_qs=[]):
 def _append_to_list(values, add_values):
     has_already = False
     for before_value in values:
-        if before_value['CompanyName'] == add_values['CompanyName'] and before_value['GeodeticalNetworkPointTypeValue'] == add_values['GeodeticalNetworkPointTypeValue']:
+        if before_value['CompanyName'] == add_values['CompanyName'] and before_value['Geodeticаlnetworktype'] == add_values['Geodeticаlnetworktype']:
             has_already = True
     if has_already:
         before_value['infos'].append(add_values['infos'][0])
@@ -917,7 +917,7 @@ def _get_geom_info(mdata, value):
 
 
 def _check_undur(value):
-    undur = 'elevationValue'
+    undur = 'ellipsoidheight'
     if undur not in value.keys():
         value[undur] = 'Хоосон'
     return value
@@ -982,11 +982,11 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
         value = _make_property_code_value(mdata)
         value['geo_id'] = geo_id
 
-        for_angilah = ['CompanyName', 'GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue']
+        for_angilah = ['CompanyName', 'Geodeticnetworkorderclass', 'Geodeticаlnetworktype']
         value = _check_undur(value)
 
         path = _create_folder_payment_id(folder_name, point.payment.id)
-        pdf_name = value['PointNumber'] + ".pdf"
+        pdf_name = value['Pointid'] + ".pdf"
         src_file = os.path.join(path, pdf_name)
         pdf = createPdf(value)
         pdf.output(src_file, 'F')
@@ -998,15 +998,15 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
 
         for key, val in value.items():
             if key in for_angilah:
-                if key == 'GeodeticalNetworkPointTypeValue' and 'GeodeticalNetworkPointClassValue' not in value:
-                    code_qs = _filter_Model([{'code_list_name': value['GeodeticalNetworkPointTypeValue']}], Model=LCodeLists)
+                if key == 'Geodeticаlnetworktype' and 'Geodeticnetworkorderclass' not in value:
+                    code_qs = _filter_Model([{'code_list_name': value['Geodeticаlnetworktype']}], Model=LCodeLists)
                     if code_qs:
                         code = code_qs.first()
                         top_code_qs = _filter_Model([{'top_code_list_id': code.top_code_list_id}], Model=LCodeLists)
                         if top_code_qs:
                             top_code = top_code_qs.first()
                             val = top_code.code_list_name
-                            for_pdf['GeodeticalNetworkPointClassValue'] = val
+                            for_pdf['Geodeticnetworkorderclass'] = val
                 for_pdf[key] = val
             else:
                 infos[key] = val
@@ -1152,11 +1152,11 @@ def createPdf(values):
     pdf.cell(-50)
     pdf.cell(10, 8, '1.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
-    pdf.cell(43, 8, _check_none(values, 'PointNumber'), 1, 0, 'C')
+    pdf.cell(43, 8, _check_none(values, 'Pointid'), 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
-    tseg_dugaar = values['PointNumber']
+    tseg_dugaar = values['Pointid']
     if 'localId' in values:
         tseg_dugaar = values['localId']
     pdf.cell(43, 8, tseg_dugaar, 1, 0, 'C')
@@ -1173,7 +1173,7 @@ def createPdf(values):
     pdf.ln(0)
     pdf.cell(10, 8, '4.', 1, 0, 'C')
     pdf.cell(84, 8, 'Сүлжээний төрөл', 1, 0, 'C')
-    pdf.cell(94, 8, _check_none(values, 'GeodeticalNetworkPointTypeValue'), 1, 1, 'C')
+    pdf.cell(94, 8, _check_none(values, 'Geodeticаlnetworktype'), 1, 1, 'C')
     pdf.ln(0)
 
     pdf.cell(10, 8, '5.', 1, 0, 'C')
@@ -1198,32 +1198,32 @@ def createPdf(values):
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.ln(70)
-    if 'PointNearPhoto' in values:
-        if values['PointNearPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 91, w = 92, h = 60, type = '', link = '')
-    if 'PointFarPhoto' in values:
-        if values['PointFarPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 91, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPointToNear' in values:
+        if values['photoOfControlPointToNear']:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear']), x = 11, y = 91, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPoinFromFar' in values:
+        if values['photoOfControlPoinFromFar']:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar']), x = 105, y = 91, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
     pdf.ln(8)
-    pdf.multi_cell(188, 5, _check_none(values, 'PointLocationDescription'), 1, 0, 'C')
+    pdf.multi_cell(188, 5, _check_none(values, 'locationNote'), 1, 0, 'C')
     newH = pdf.get_y()
     # mor 6
-    if 'LocationOverviewMap' in values or 'PointCenterType' in values:
+    if 'overviewPhotoOfControlPointLocation' in values or 'pointCentreType' in values:
         pdf.cell(94, 8, '9. Байршлын тойм зураг.', 1, 0, 'C')
         pdf.cell(94, 8, '10. Төв цэгийн хэлбэр', 1, 0, 'C')
         pdf.ln(8)
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
-        if 'PointCenterType' in values:
-            if values['PointCenterType']:
-                pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointCenterType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
-        if 'LocationOverviewMap' in values:
-            if values['LocationOverviewMap']:
-                pdf.image(os.path.join(settings.MEDIA_ROOT, values['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'pointCentreType' in values:
+            if values['pointCentreType']:
+                pdf.image(os.path.join(settings.MEDIA_ROOT, values['pointCentreType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'overviewPhotoOfControlPointLocation' in values:
+            if values['overviewPhotoOfControlPointLocation']:
+                pdf.image(os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6
@@ -1627,7 +1627,7 @@ def get_popup_info(request, payload):
                         if prop['property_code'].lower() == key and value:
                             if prop['value_type_id'] in value_will_change_types:
                                 code_list_qs = LCodeLists.objects
-                                code_list_qs = code_list_qs.filter(code_list_id=value)
+                                code_list_qs = code_list_qs.filter(code_list_name=value)
                                 if code_list_qs:
                                     code_list = code_list_qs.first()
                                     value = code_list.code_list_name

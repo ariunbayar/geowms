@@ -1229,7 +1229,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='Pointid'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:
@@ -1800,3 +1800,20 @@ def create_table_to_cursor(cursor, table_name, fields, schema):
         schema=schema
     )
     cursor.execute(sql)
+
+
+def check_nsdi_address(request):
+    nsdi_check = False
+    host_name = socket.gethostname()
+    host_addr = socket.gethostbyname(host_name + ".local")
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+
+    if host_addr == '192.168.10.15' and ip == '127.0.0.1':
+        nsdi_check = True
+
+    return nsdi_check

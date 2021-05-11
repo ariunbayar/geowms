@@ -127,8 +127,8 @@ def createPdf(values, requests):
     pdf.cell(10, 8, '4.', 1, 0, 'C')
     pdf.cell(41, 8, 'Сүлжээний төрөл', 1, 0, 'C')
     suljee = ''
-    if 'GeodeticalNetworkPointTypeValue' in values:
-        qs = _get_model_qs(LCodeLists, {'code_list_id': values['GeodeticalNetworkPointTypeValue']})
+    if 'Geodeticаlnetworktype' in values:
+        qs = _get_model_qs(LCodeLists, {'code_list_id': values['Geodeticаlnetworktype']})
         if qs:
             suljee = qs.first().code_list_name
     pdf.cell(43, 8, suljee, 1, 0, 'C')
@@ -156,28 +156,28 @@ def createPdf(values, requests):
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.ln(70)
-    if 'PointNearPhoto' in values:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
-    if 'PointFarPhoto' in values:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPointToNear' in values:
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPoinFromFar' in values:
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
     pdf.ln(8)
-    pdf.multi_cell(188, 5, values['PointLocationDescription'], 1, 0, 'C')
+    pdf.multi_cell(188, 5, values['locationNote'], 1, 0, 'C')
     newH = pdf.get_y()
     # mor 6
-    if 'LocationOverviewMap' in values or 'PointCenterType' in values:
+    if 'overviewPhotoOfControlPointLocation' in values or 'pointCentreType' in values:
         pdf.cell(94, 8, '9. Байршлын тойм зураг.', 1, 0, 'C')
         pdf.cell(94, 8, '10. Төв цэгийн хэлбэр', 1, 0, 'C')
         pdf.ln(8)
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
-        if 'PointCenterType' in values:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointCenterType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
-        if 'LocationOverviewMap' in values:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'pointCentreType' in values:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['pointCentreType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'overviewPhotoOfControlPointLocation' in values:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6
@@ -676,14 +676,22 @@ def _get_kind_color(kind, item):
 
 def _getname(point_class, item=None):
     point_class = _get_model_qs(LCodeLists, {'code_list_id': int(point_class)})
-    point_class = point_class.first().code_list_name
+    point_class = point_class.first()
+    if point_class:
+        point_class = point_class.code_list_name
+    else:
+        point_class = ''
     return point_class
 
 
 def _get_point_type_name(point_type, item):
     if point_type:
         point_type = _get_model_qs(LCodeLists, {'code_list_id': int(point_type)})
-        point_type = point_type.first().code_list_name
+        point_type = point_type.first()
+        if point_type:
+            point_type = point_type.code_list_name
+        else:
+            point_type = ''
     return point_type
 
 
@@ -709,7 +717,7 @@ def _get_qs_in_boundary(initial_qs, org):
 
     property_code = 'text'
     feature_code = 'bnd-au-au'
-    org_geo_id = org.geo_id
+
 
     feature = utils.get_feature_from_code(feature_code)
     feature_id = feature.feature_id
@@ -718,23 +726,27 @@ def _get_qs_in_boundary(initial_qs, org):
     datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[property_code])
 
     mdatas_qs = MDatas.objects
-    mdatas_qs = mdatas_qs.filter(geo_id=org_geo_id)
-    mdatas_qs = mdatas_qs.filter(**datas[0])
-    if mdatas_qs:
-        mdatas_qs = mdatas_qs.values()
-        mdatas_qs = mdatas_qs.first()
-        org_boundary_name = mdatas_qs['value_text']
 
-        len_of_geo_id = _get_len_geo_id(org_geo_id)
+    qs_geo_ids = initial_qs.filter(org=org).values_list('new_geo_id', flat=True)
+    org_geo_ids = list(qs_geo_ids)
+    for org_geo_id in org_geo_ids:
+        mdatas_qs = mdatas_qs.filter(geo_id=org_geo_id)
+        mdatas_qs = mdatas_qs.filter(**datas[0])
+        if mdatas_qs:
+            mdatas_qs = mdatas_qs.values()
+            mdatas_qs = mdatas_qs.first()
+            org_boundary_name = mdatas_qs['value_text']
 
-        filter_data = dict()
-        for level, level_name in levels:
-            if len_of_geo_id == level:
-                filter_data[level_name] = org_boundary_name
+            len_of_geo_id = _get_len_geo_id(org_geo_id)
 
-        initial_qs = initial_qs.filter(**filter_data)
+            filter_data = dict()
+            for level, level_name in levels:
+                if len_of_geo_id == level:
+                    filter_data[level_name] = org_boundary_name
 
-    return initial_qs
+            initial_qs = initial_qs.filter(**filter_data)
+
+        return initial_qs
 
 
 def _get_org_from_request(request):
@@ -757,6 +769,7 @@ def tseg_personal_list(request, payload):
         org = _get_org_from_request(request)
 
         requests = TsegRequest.objects
+        # requests = requests.filter(org=org)
         requests = _get_qs_in_boundary(requests, org)
         requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
         if requests:
@@ -849,7 +862,7 @@ def tseg_inspire_list(request, payload):
         }
         return JsonResponse(rsp)
 
-    property_codes = ['GeodeticalNetworkPointClassValue', 'GeodeticalNetworkPointTypeValue', 'localId', 'PointNumber']
+    property_codes = ['Geodeticnetworkorderclass', 'Geodeticаlnetworktype', 'localId', 'Pointid']
 
     properties_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id)
     datas = utils._get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes)
@@ -874,11 +887,11 @@ def tseg_inspire_list(request, payload):
                     data[prop.property_code] = value[prop.property_id]
 
         display_items.append({
-            'suljeenii_torol': data['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in data else '',
-            'center_typ': data['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in data else '',
+            'suljeenii_torol': data['Geodeticаlnetworktype'] if 'Geodeticаlnetworktype' in data else '',
+            'center_typ': data['Geodeticnetworkorderclass'] if 'Geodeticnetworkorderclass' in data else '',
             'geo_id': geo_id if geo_id else '',
             'point_id': data['localId'] if 'localId' in data else '',
-            'point_name': data['PointNumber'] if 'PointNumber' in data else 'Хоосон байна',
+            'point_name': data['Pointid'] if 'Pointid' in data else 'Хоосон байна',
         })
 
     total_page = total_items.num_pages
@@ -1056,21 +1069,21 @@ def tsegPersonalUpdate(request, payload):
             data['BA'] = BA
             data['BB'] = BB
             data['BC'] = BC
-            data['tseg_oiroos_img_url'] = '/media/' + values['PointNearPhoto'] if values and 'PointNearPhoto' in values else ''
-            data['tseg_holoos_img_url'] = '/media/' + values['PointFarPhoto'] if values and 'PointFarPhoto' in values else ''
-            data['barishil_tuhai'] = values['PointLocationDescription'] if 'PointLocationDescription' in values else ''
-            data['bairshil_tseg_oiroos_img_url'] = '/media/' + values['PointCenterType'] if values and 'PointCenterType' in values else ''
-            data['bairshil_tseg_holoos_img_url'] = '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else ''
-            data['sudalga_or_shine'] =  values['PointShape'] if 'PointShape' in values else ''
+            data['tseg_oiroos_img_url'] = '/media/' + values['photoOfControlPointToNear'] if values and 'photoOfControlPointToNear' in values else ''
+            data['tseg_holoos_img_url'] = '/media/' + values['photoOfControlPoinFromFar'] if values and 'photoOfControlPoinFromFar' in values else ''
+            data['barishil_tuhai'] = values['locationNote'] if 'locationNote' in values else ''
+            data['bairshil_tseg_oiroos_img_url'] = '/media/' + values['pointCentreType'] if values and 'pointCentreType' in values else ''
+            data['bairshil_tseg_holoos_img_url'] = '/media/' + values['overviewPhotoOfControlPointLocation'] if values and 'overviewPhotoOfControlPointLocation' in values else ''
+            data['sudalga_or_shine'] =  values['pointCentreType'] if 'pointCentreType' in values else ''
             data['date'] = utils.datetime_to_string(values['beginLifespanVersion']) if values and 'beginLifespanVersion' in values else ''
             data['hotolson'] = values['EmployeeName'] if 'EmployeeName' in values else ''
             data['alban_tushaal'] = values['EmployeePosition'] if 'EmployeePosition' in values else ''
             data['alban_baiguullga'] = values['CompanyName'] if 'CompanyName' in values else ''
-            data['suljeenii_torol'] = values['GeodeticalNetworkPointTypeValue'] if 'GeodeticalNetworkPointTypeValue' in values else ''
+            data['suljeenii_torol'] = values['Geodeticаlnetworktype'] if 'Geodeticаlnetworktype' in values else ''
             data['sheet1'] = sheets[0] if sheets else ''
             data['zone'] = int(sheets[1]) if sheets else ''
             data['cc'] = int(sheets[2]) if sheets else ''
-            data['ondor'] = values['elevationValue'] if 'elevationValue' in values else ''
+            data['ondor'] = values['ellipsoidheight'] if 'ellipsoidheight' in values else ''
 
             if pk:
                 data['id'] = requests.id if requests.id else ''
@@ -1086,10 +1099,10 @@ def tsegPersonalUpdate(request, payload):
                 soil_type = _get_hurs(geo_id)
                 data['geo_id'] = geo_id if geo_id else ''
                 data['point_id'] = values['localId'] if 'localId' in values else ''
-                data['point_name'] = values['PointNumber'] if 'PointNumber' in values else ''
+                data['point_name'] = values['Pointid'] if 'Pointid' in values else ''
                 data['aimag'] = aimag
                 data['sum'] = sum
-                data['center_typ'] = values['GeodeticalNetworkPointClassValue'] if 'GeodeticalNetworkPointClassValue' in values else ''
+                data['center_typ'] = values['Geodeticnetworkorderclass'] if 'Geodeticnetworkorderclass' in values else ''
                 data['hors_shinj_baidal'] = soil_type
                 # data['suljeenii_torol'] = suljeenii_torol
             tseg_display.append(data)
@@ -1313,19 +1326,19 @@ def _make_request_datas(values, request_values):
 def _get_values(request):
     value = dict()
     value['localId'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
-    value['GeodeticalNetworkPointTypeValue'] = int(request.POST.get('suljeenii_torol')) #bolson
-    value['GeodeticalNetworkPointClassValue'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
-    value['PointLocationDescription'] = request.POST.get('barishil_tuhai') # bolson
+    value['Geodeticаlnetworktype'] = int(request.POST.get('suljeenii_torol')) #bolson
+    value['Geodeticnetworkorderclass'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
+    value['locationNote'] = request.POST.get('barishil_tuhai') # bolson
     value['Nomenclature'] = str(request.POST.get('trapetsiin_dugaar')) + "-" + str(request.POST.get('BA')) + "-" + str(request.POST.get('LA'))#bolson
     value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
     value['EmployeeName'] = request.POST.get('hotolson') # bolson
     value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
-    value['PointNumber'] = request.POST.get('tesgiin_ner') # bolson
+    value['Pointid'] = request.POST.get('tesgiin_ner') # bolson
     value['beginLifespanVersion'] = request.POST.get('date') #bolson
     value['AdministrativeUnitSubClass'] = utils.get_code_list_id_from_name(request.POST.get('sum_name'), 'AdministrativeUnitSubClass') if request.POST.get('sum_name') else None #bolson
     value['SoilType'] = request.POST.get('hors_shinj_baidal') #mdku
     # value['endLifespanVersion'] = date # ustsanii daraah hadagalah # TODO
-    value['elevationValue'] = request.POST.get('ondor')#bolson
+    value['ellipsoidheight'] = request.POST.get('ondor')#bolson
     return value
 
 
@@ -1390,10 +1403,10 @@ def tsegPersonal(request):
 
                 return value
 
-            value = _remove_and_save('tseg_oiroos_img_url', 'PointNearPhoto', tseg, value, tseg_image_url, request)
-            value = _remove_and_save('tseg_holoos_img_url', 'PointFarPhoto', tseg, value, tseg_image_url, request)
-            value = _remove_and_save('bairshil_tseg_oiroos_img_url', 'PointCenterType', tseg, value, tseg_bairshil_img_url, request)
-            value = _remove_and_save('bairshil_tseg_holoos_img_url', 'LocationOverviewMap', tseg, value, tseg_bairshil_img_url, request)
+            value = _remove_and_save('tseg_oiroos_img_url', 'photoOfControlPointToNear', tseg, value, tseg_image_url, request)
+            value = _remove_and_save('tseg_holoos_img_url', 'photoOfControlPoinFromFar', tseg, value, tseg_image_url, request)
+            value = _remove_and_save('bairshil_tseg_oiroos_img_url', 'pointCentreType', tseg, value, tseg_bairshil_img_url, request)
+            value = _remove_and_save('bairshil_tseg_holoos_img_url', 'overviewPhotoOfControlPointLocation', tseg, value, tseg_bairshil_img_url, request)
 
             # TODO
             # if not request.POST.get('file1'):
@@ -1450,10 +1463,10 @@ def tsegPersonal(request):
 
                 return value
 
-            value = _make_value('tseg_oiroos_img_url', 'PointNearPhoto', tseg_image_url, request, value)
-            value = _make_value('tseg_holoos_img_url', 'PointFarPhoto', tseg_image_url, request, value)
-            value = _make_value('bairshil_tseg_oiroos_img_url', 'PointCenterType', tseg_bairshil_img_url, request, value)
-            value = _make_value('bairshil_tseg_holoos_img_url', 'LocationOverviewMap', tseg_bairshil_img_url, request, value)
+            value = _make_value('tseg_oiroos_img_url', 'photoOfControlPointToNear', tseg_image_url, request, value)
+            value = _make_value('tseg_holoos_img_url', 'photoOfControlPoinFromFar', tseg_image_url, request, value)
+            value = _make_value('bairshil_tseg_oiroos_img_url', 'pointCentreType', tseg_bairshil_img_url, request, value)
+            value = _make_value('bairshil_tseg_holoos_img_url', 'overviewPhotoOfControlPointLocation', tseg_bairshil_img_url, request, value)
 
             request_values['kind'] = TsegRequest.KIND_CREATE
             request_values['geo_json'] = geom.json
@@ -1636,7 +1649,7 @@ def tseg_ustsan_success(request, payload):
 
     with transaction.atomic():
 
-        data, filter_value_type = _get_filter_dicts('PointNumber')
+        data, filter_value_type = _get_filter_dicts('localId')
         search = dict()
         search[filter_value_type] = tseg_request.tseg_id
 
@@ -2183,7 +2196,7 @@ def _check_tseg_role(perm_name, user):
     return check_point, info
 
 
-def _check_tseg(values, property_code='PointNumber'):
+def _check_tseg(values, property_code='Pointid'):
     msg = ''
     has_tseg = False
     values = utils.json_load(values)
@@ -2377,8 +2390,8 @@ def geom_points(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_field_values(request):
-    point_type = utils.InspireProperty('GeodeticalNetworkPointTypeValue')
-    point_class = utils.InspireProperty('GeodeticalNetworkPointClassValue')
+    point_type = utils.InspireProperty('Geodeticаlnetworktype')
+    point_class = utils.InspireProperty('Geodeticnetworkorderclass')
     point_types = utils.get_code_list_from_property_id(point_type.property_id)
     point_classes = utils.get_code_list_from_property_id(point_class.property_id)
     rsp = {

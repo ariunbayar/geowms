@@ -127,7 +127,7 @@ export class Details extends Component {
                                                                 {key + 1}
                                                             </th>
                                                             <td>
-                                                                {value['PointNumber']}
+                                                                {value['Pointid']}
                                                             </td>
                                                             <td scope="">
                                                                 {value['aimag']}
@@ -136,7 +136,7 @@ export class Details extends Component {
                                                                 {value['sum']}
                                                             </td>
                                                             <td scope="">
-                                                                {value['elevationValue'] || "Хоосон"}
+                                                                {value['ellipsoidheight'] || "Хоосон"}
                                                             </td>
                                                             <td>
                                                                 {value.amount}₮
@@ -145,8 +145,8 @@ export class Details extends Component {
                                                                 items.is_success
                                                                 ?
                                                                     <td scope="">
-                                                                        {value['PointNumber'] && items.export_file &&
-                                                                            <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value['PointNumber']}/`}>
+                                                                        {value['Pointid'] && items.export_file &&
+                                                                            <a className="text-info" href={`/payment/download-pdf/${payment_id}/${value['Pointid']}/`}>
                                                                                 файл
                                                                             </a>
                                                                         }
