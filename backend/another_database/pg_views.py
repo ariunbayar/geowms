@@ -247,49 +247,54 @@ def table__detail(request, id, table_id):
 
 
 def _get_all_datas(feature_id, columns, properties, feature_config_ids, cursor='default'):
+    data = LProperties.objects.filter(property_id__in=columns).order_by('property_id')
+    cols = []
+    for item in data:
+        col = 'Max(Case When a.property_id = {property_id} Then value_text End) As {property_code}'.format(property_id=item.property_id, property_code=item.property_code)
+        cols.append(col)
+
     query = '''
-        SELECT
-            d.geo_id,
-            ST_AsGeoJSON(ST_Transform(d.geo_data, 4326)) as geo_data,
-            {columns},
-            d.feature_id
-        FROM
-            crosstab('
-                select
-                    b.geo_id,
-                    b.property_id,
-                    COALESCE(
-                        b.code_list_id::character varying(1000),
-                        b.value_text::character varying(1000),
-                        b.value_number::character varying(1000),
-                        b.value_date::character varying(1000)
-                    ) as value_text
-                from
-                    public.m_datas b
-                inner join
-                    m_geo_datas mg
-                on
-                    mg.geo_id = b.geo_id
-                and
-                    mg.feature_id = {feature_id}
-                where
-                    b.property_id in ({properties})
-                and
-                    feature_config_id in ({feature_config_id})
-                group by (
-                    b.property_id, b.geo_id, b.code_list_id,
-                    b.value_text, b.value_number, b.value_date
-                )
-                order by 1,2'::text
-            )
-        ct(geo_id character varying(100), {create_columns})
-        JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+        select
+            a.geo_id,
+            ST_AsGeoJSON(ST_Transform(a.geo_data, 4326)) as geo_data,
+            a.feature_id,
+            {cols}
+        from
+        (
+            select
+                a.geo_id,
+                a.property_id,
+                mg.geo_data,
+                mg.feature_id,
+                COALESCE(
+                    a.value_text::character varying(1000),
+                    a.value_number::character varying(1000),
+                    a.value_date::character varying(1000),
+                    case when a.code_list_id is null then null
+                    else (
+                        select code_list_name
+                        from l_code_lists
+                        where code_list_id=a.code_list_id
+                    ) end
+                ) as value_text
+            from
+                public.m_datas a
+            inner join
+                m_geo_datas mg
+            on
+                mg.geo_id = a.geo_id
+            where
+                a.property_id in ({properties}) and
+                a.feature_config_id in ({feature_config_ids})
+        ) a
+        group by
+        a.geo_id,
+        a.geo_data,
+        a.feature_id
         '''.format(
-                columns=', '.join(['ct.{}'.format(f) for f in properties]),
-                properties=', '.join(['{}'.format(f) for f in columns]),
-                feature_config_id=', '.join(['{}'.format(f) for f in feature_config_ids]),
-                create_columns=', '.join(['{} character varying(100)'.format(f) for f in properties]),
-                feature_id=feature_id,
+            properties=', '.join(['{}'.format(f) for f in columns]),
+            cols=', '.join(['{}'.format(f) for f in cols]),
+            feature_config_ids=', '.join(['{}'.format(f) for f in feature_config_ids]),
         )
     cursor = connections[cursor].cursor()
     data_list = utils.get_sql_execute(query, cursor, 'all')

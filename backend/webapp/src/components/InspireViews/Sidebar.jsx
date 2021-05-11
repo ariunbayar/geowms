@@ -29,18 +29,26 @@ export default class SideBar extends Component {
             number_of_cache: 2,
             image_format: 'png',
             tile_cache_check: false,
-            is_loading: false
+            check_list: props.check_list,
+            is_loading: false,
+            invalid_feedback: false,
         }
-
         this.handleInput = this.handleInput.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
+        this.handleAllCheck = this.handleAllCheck.bind(this)
 
     }
 
     handleOnClick(){
-        this.setState({check_style:true})
+        this.setState({ check_style: true })
+        const { style_name } = this.state
+        if(style_name) {
+            this.setState({ invalid_feedback: false })
+        } else {
+            this.setState({ invalid_feedback: true })
+        }
     }
 
     handleOnChange(e){
@@ -49,13 +57,18 @@ export default class SideBar extends Component {
 
     handleInput(e){
         let id_list = this.state.id_list
+        var check_list = this.state.check_list
         const value = parseInt(e.target.value)
         if (e.target.checked) {
             id_list.push(value)
         } else {
             id_list = id_list.filter((oid) => oid != value)
         }
-        this.setState({id_list})
+
+        if(id_list.length == this.props.property_length){ check_list = true }
+        else { check_list = false }
+
+        this.setState({id_list, check_list })
     }
 
     handleSave(){
@@ -76,6 +89,12 @@ export default class SideBar extends Component {
             }
         }
 
+        if(style_name) {
+            this.setState({ invalid_feedback: false })
+        } else {
+            this.setState({ invalid_feedback: true })
+        }
+
         this.setState({
             save_is_load: true,
             is_loading:true
@@ -94,19 +113,39 @@ export default class SideBar extends Component {
         })
     }
 
+    handleAllCheck(e){
+        let id_list = []
+        const { fields } = this.props
+        if(e.target.checked)
+        {
+            fields.map((f_config, idx) =>
+                f_config.data_types.map((data_type, idx) =>
+                    data_type.data_type_configs.map((data_type_config, idx) =>
+                        id_list.push(data_type_config.property_id)
+                        )
+                )
+            )
+            this.setState({id_list:id_list, check_list:true })
+        }
+        else { this.setState({ id_list: [], check_list:false}) }
+    }
+
     componentDidMount(){
-        const id_list = this.props.id_list
-        this.setState({id_list})
+        const{ id_list }= this.props
+        this.setState({ id_list })
     }
 
     componentDidUpdate(pP, pS){
         const {style_name, view_name, tile_cache_check} = this.state
-
         if(pS.style_name != style_name){
             this.setState({
                 check_style:false,
                 style_name,
             })
+        }
+
+        if(pP.check_list != this.props.check_list) {
+            this.setState({check_list: this.props.check_list})
         }
 
         if(pS.tile_cache_check != tile_cache_check) {
@@ -204,15 +243,14 @@ export default class SideBar extends Component {
     }
 
     render() {
-        const {fields, fid, fname} = this.props
+        const {fields, fid, fname } = this.props
         const {
             check_style, is_loading, cache_type,
             id_list, save_is_load, view_name, style_names,
             style_name, url, defualt_url, geom_type,
             zoom_stop, zoom_start, number_of_cache, tile_cache_check,
-            image_format
+            image_format, check_list, invalid_feedback,
         } = this.state
-
         return (
             <Fragment>
                 <Loader is_loading={is_loading} text="Хүсэлтийг уншиж байна."/>
@@ -321,16 +359,20 @@ export default class SideBar extends Component {
                                                 <div className="form-group col-md-6">
                                                     <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
                                                     <select
-                                                        className="form-control form-control-sm"
+                                                        className={"custom-select" + (!style_name ? ' is-invalid' : '')}
                                                         value={style_name ? style_name : ''}
                                                         onChange={(e) => this.setState({ style_name: e.target.value })}
                                                     >
-                                                        <option value={style_name}>{style_name ? style_name : ''}</option>
+                                                        <option value=''></option>
                                                         {
                                                             style_names.map((name, idx) =>
                                                                 <option value={name} key={idx}>{name}</option>
                                                         )}
                                                     </select>
+                                                    {
+                                                        !style_name && invalid_feedback &&
+                                                            <small className="text-danger">Style-ийн нэр хоосон байна</small>
+                                                    }
                                             </div>
                                             <div className="form-group col-md-12">
                                                 <button
@@ -355,97 +397,107 @@ export default class SideBar extends Component {
                                                     </div>
                                                 </div>
                                             }
-                                        </div>
-                                    </fieldset>
-                                }
-                                <table className="table table-bordered m-1">
-                                    <thead>
-                                        <tr>
-                                            <th colSpan={4} className="text-center">
-                                                <h4 className="text-center">{fname}</h4>
-                                                {view_name && <h4 className="text-center"><small>View name: {view_name}</small></h4>}
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <th className="text-center" style={{width: "15%"}}>
-                                                Data <br/>type
-                                            </th>
-                                            <th className="text-center" style={{width: "15%"}}>
-                                                View
-                                            </th>
-                                            <th className="text-center" style={{width: "70%"}}>
-                                                Property
-                                            </th>
-                                        </tr>
-                                        {fields.map((f_config, idx) =>
-                                            <>
-                                                {f_config.data_types.map((data_type, idx) =>
-                                                    <>
-                                                        <tr key={idx}>
-                                                            <th rowSpan={data_type.data_type_configs.length +1}
-                                                                className="text-wrap align-middle text-justify m-2"
-                                                            >
-                                                                <span className="text-center align-middle">({data_type.data_type_name_eng})</span><br/>
-                                                                <span className="text-center align-middle">{data_type.data_type_name}</span><br/>
-                                                                <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
-                                                            </th>
-                                                        </tr>
-                                                        {data_type.data_type_configs.map((data_type_config, idx) =>
-                                                            <>
-                                                                <tr key={idx}>
-                                                                    <th>
-                                                                        <div className="icheck-primary">
-                                                                            <input
-                                                                                id={data_type_config.property_name}
-                                                                                type="checkbox"
-                                                                                checked={id_list.indexOf(data_type_config.property_id) > -1}
-                                                                                onChange={this.handleInput}
-                                                                                value={data_type_config.property_id}
-                                                                            />
-                                                                            <label htmlFor={data_type_config.property_name}></label>
-                                                                        </div>
-                                                                    </th>
-                                                                    <th>
-                                                                        <label
-                                                                            htmlFor={data_type_config.property_name}
-                                                                            data-toggle="tooltip" data-placement="right" title={data_type_config.property_definition}
-                                                                        >
-                                                                        {data_type_config.property_name}<br/>
-                                                                        (
-                                                                        {data_type_config.value_types.map((value_type, idx) =>
-                                                                            <span key={idx}>{value_type.value_type_name}</span>
-                                                                        )}
-                                                                        )
-                                                                        </label>
-                                                                    </th>
-                                                                </tr>
-                                                            </>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </>
-                                        )}
-                                    </thead>
-                                </table>
-                                {save_is_load ?
-                                    <a className="btn btn-block gp-btn-primary text-white">Уншиж байна</a>:
-                                    <a onClick={this.handleSave} className="btn btn-block gp-btn-primary text-white">View үүсгэх</a>
-                                }
-                            </div>
-                            :
-                            <div>
-                                <h4 className="text-center">Property Хоосон байна</h4>
-                            </div>
-                        }
-                        <ModalAlert
-                            title={this.state.title}
-                            model_type_icon ={this.state.model_type_icon}
-                            status={this.state.modal_alert_check}
-                            modalAction={() => this.handleModalAlert()}
-                        />
+                                    </div>
+                                </fieldset>
+                            }
+                            <table className="table table-bordered m-1">
+                                <thead>
+                                    <tr>
+                                        <th colSpan={4} className="text-center">
+                                            <h4 className="text-center">{fname}</h4>
+                                            {view_name && <h4 className="text-center"><small>View name: {view_name}</small></h4>}
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th className="text-center" style={{width: "15%"}}>
+                                            Data <br/>type
+                                        </th>
+                                        <th className="text-center" style={{width: "15%"}}>
+                                             View
+                                             <div class="custom-control custom-switch ml-1">
+                                                <input
+                                                id="allcheck"
+                                                type="checkbox"
+                                                class="custom-control-input"
+                                                checked={check_list}
+                                                onChange={this.handleAllCheck}
+                                                />
+                                                    <label class="custom-control-label" for="allcheck"></label>
+                                            </div>
+                                        </th>
+                                        <th className="text-center" style={{width: "70%"}}>
+                                            Property
+                                         </th>
+                                    </tr>
+                                    {fields.map((f_config, idx) =>
+                                        <>
+                                            {f_config.data_types.map((data_type, idx) =>
+                                                <>
+                                                    <tr key={idx}>
+                                                        <th rowSpan={data_type.data_type_configs.length +1}
+                                                            className="text-wrap align-middle text-justify m-2"
+                                                        >
+                                                            <span className="text-center align-middle">({data_type.data_type_name_eng})</span><br/>
+                                                            <span className="text-center align-middle">{data_type.data_type_name}</span><br/>
+                                                            <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
+                                                        </th>
+                                                    </tr>
+                                                    {data_type.data_type_configs.map((data_type_config, idx) =>
+                                                        <>
+                                                            <tr key={idx}>
+                                                                <th>
+                                                                    <div className="icheck-primary">
+                                                                        <input
+                                                                            id={data_type_config.property_name}
+                                                                            type="checkbox"
+                                                                            checked={id_list.indexOf(data_type_config.property_id) > -1}
+                                                                            onChange={this.handleInput}
+                                                                            value={data_type_config.property_id}
+                                                                        />
+                                                                        <label htmlFor={data_type_config.property_name}></label>
+                                                                    </div>
+                                                                </th>
+                                                                <th>
+                                                                    <label
+                                                                        htmlFor={data_type_config.property_name}
+                                                                        data-toggle="tooltip" data-placement="right" title={data_type_config.property_definition}
+                                                                    >
+                                                                    {data_type_config.property_name}<br/>
+                                                                    (
+                                                                    {data_type_config.value_types.map((value_type, idx) =>
+                                                                        <span key={idx}>{value_type.value_type_name}</span>
+                                                                    )}
+                                                                    )
+                                                                    </label>
+                                                                </th>
+                                                            </tr>
+                                                        </>
+                                                    )}
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                </thead>
+                            </table>
+                            {save_is_load ?
+                                <a className="btn btn-block gp-btn-primary text-white">Уншиж байна</a>:
+                                <a onClick={this.handleSave} className="btn btn-block gp-btn-primary text-white">View үүсгэх</a>
+                            }
+                        </div>
+                        :
+                        <div>
+                            <h4 className="text-center">Property Хоосон байна</h4>
+                        </div>
+                    }
+                    <ModalAlert
+                        title={this.state.title}
+                        model_type_icon ={this.state.model_type_icon}
+                        status={this.state.modal_alert_check}
+                        modalAction={() => this.handleModalAlert()}
+                    />
                     </div>
                 </div>
-        </Fragment>
+            </Fragment>
         )
     }
 }
