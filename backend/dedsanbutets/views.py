@@ -439,7 +439,7 @@ def propertyFieldsSave(request, payload):
     else:
         rsp = {
             'success': False,
-            'info': 'Амжилтгүй хадгаллаа view үүсхэд алдаа гарлаа.'
+            'info': 'Амжилтгүй хадгаллаа !!!.'
         }
     return JsonResponse(rsp)
 
@@ -712,6 +712,8 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
         if geom_type:
             cache_values = values.get('cache_values')
             geoserver.update_layer_style(layer_name, style_name)
+            if not style_name:
+                return {"success": False, "info": 'Style-ийн нэр хоосон байна.'}
             if tile_cache_check:
                 cache_type = cache_details.get('cache_type')
                 zoom_stop = cache_details.get('zoom_stop')
