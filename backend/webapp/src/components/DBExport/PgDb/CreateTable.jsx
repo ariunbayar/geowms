@@ -25,16 +25,17 @@ export default class  PgForm extends Component {
             selected_dt_list: [],
             data_type_list: [],
             id_list: [],
+            message: 'Property сонгоогүй байна.',
             is_loading: false,
             modal_status: 'closed',
         }
-
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
+
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
     }
@@ -91,6 +92,7 @@ export default class  PgForm extends Component {
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
             data_list['feature_name'] = ''
+            data_list['id_list'] = []
         }
 
         else if ( name == 'package' ) {
@@ -98,6 +100,7 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
+                data_list['id_list'] = []
 
             }
             else {
@@ -117,7 +120,7 @@ export default class  PgForm extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { theme_name, feature_name, packages, features } = this.state
+        const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
             else this.setState({feature_name})
@@ -142,17 +145,15 @@ export default class  PgForm extends Component {
     }
 
     handleSave(){
-        const { id, table_id, table_name, id_list, feature_name } = this.state
-        this.setState({ is_loading: true })
-        service
-            .pg_config.tableSave(id, table_id, id_list, feature_name, table_name)
-            .then(({ success }) => {
+        const {id, table_id, table_name, id_list, feature_name} = this.state
+            this.setState({ is_loading: true })
+            service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
                         'fa fa-check-circle',
                         'success',
-                        'Амжилттай хадгаллаа',
+                        info,
                         false,
                         () => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
                     )
@@ -161,7 +162,7 @@ export default class  PgForm extends Component {
                     this.modalChange(
                         'fa fa-exclamation-circle',
                         'warning',
-                        'Хүснэгтийн нэр хоосон байна!',
+                        info,
                         false,
                         null
                     )
@@ -217,10 +218,11 @@ export default class  PgForm extends Component {
                     <div className="form-group col-md-4">
                         <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
                         <input
-                            className='form-control'
+                            className={'form-control' + ( !table_name ? ' is-invalid' : '')}
                             type='text'
                             value={table_name}
                             disabled={table_id ? true : false}
+                            title={!table_name && 'Хүснэгтийн нэр оруулна уу !!!'}
                             onChange={(e) => this.setState({table_name: e.target.value})}
                         />
                     </div>
@@ -254,10 +256,27 @@ export default class  PgForm extends Component {
                                         <th className="text-center" style={{width: "8%"}}>
                                             Data <br/>type
                                         </th>
-                                        <th className="text-center" style={{width: "5%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "5%"}}
+                                        >
                                         </th>
-                                        <th className="text-center" style={{width: "15%"}}>
+                                        <th
+                                            className={'text-center'}
+                                            style={{width: "15%"}}
+                                        >
                                             Property
+                                            {
+                                                id_list.length <= 0
+                                                &&
+                                                <i
+                                                    className="text-danger icon-exclamation float-right fa-3x"
+                                                    data-toggle="tooltip"
+                                                    data-placement="right"
+                                                    title="Property сонгоогүй байна."
+                                                >
+                                                </i>
+                                            }
                                         </th>
                                     </tr>
                                     {data_type_list.map((data_type, idx) =>
@@ -313,6 +332,7 @@ export default class  PgForm extends Component {
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
+                        disabled={ (!table_name || id_list.length < 1) ? true : false}
                     >
                         {
                             table_id

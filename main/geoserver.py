@@ -361,25 +361,37 @@ def get_version():
 def get_wms_url(wms_name):
 
     conf_geoserver = get_connection_conf()
-
-    wms_url = 'http://{host}:{port}/geoserver/{wms_name}/ows'.format(
-        wms_name=wms_name,
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port']
-    )
-
+    if conf_geoserver['geoserver_host'] == '192.168.10.15':
+        wms_url = 'http://{host}:{port}/{wms_name}/ows'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
+    else:
+        wms_url = 'http://{host}:{port}/geoserver/{wms_name}/ows'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
     return wms_url
 
 
 def get_wmts_url(wms_name):
 
     conf_geoserver = get_connection_conf()
+    if conf_geoserver['geoserver_host'] == '192.168.10.15':
+        wmts_url = 'http://{host}:{port}/{wms_name}/gwc/service/wmts'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
 
-    wmts_url = 'http://{host}:{port}/geoserver/{wms_name}/gwc/service/wmts'.format(
-        wms_name=wms_name,
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port']
-    )
+    else:
+        wmts_url = 'http://{host}:{port}/geoserver/{wms_name}/gwc/service/wmts'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
 
     return wmts_url
 

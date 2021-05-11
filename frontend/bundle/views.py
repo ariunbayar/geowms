@@ -111,14 +111,19 @@ def wms_layers(request, pk):
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         if wms.is_active:
-            url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
-            chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+            if utils.check_nsdi_address(request):
+                url = wms.url
+                chache_url = wms.chache_url
+            else:
+                url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
+                chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+
             wms_data = {
                 'name': wms.name,
                 'url': request.build_absolute_uri(url),
                 'chache_url': chache_url,
                 'layers': [_layer_to_display(layer) for layer in layers],
-                'wms_or_cache_ur': True if wms.cache_url else False
+                'wms_or_cache_ur': True if wms.cache_url else False,
             }
             wms_list.append(wms_data)
 

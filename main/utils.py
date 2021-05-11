@@ -10,6 +10,7 @@ import pyproj
 import math
 import json
 import psycopg2
+import socket
 from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
@@ -1228,7 +1229,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='Pointid'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:
@@ -1695,14 +1696,16 @@ def get_all_file_paths(directory):
     return file_paths
 
 
-def check_pg_connection(host, db, port, user, password):
+def check_pg_connection(host, db, port, user, password, schema):
     try:
+        schema =schema or 'public'
         connection = psycopg2.connect(
             user=user,
             password=password,
             host=host,
             port=port,
-            database=db
+            database=db,
+            options="-c search_path=dbo,{schema}".format(schema=schema)
         )
 
         cursor = connection.cursor()
@@ -1718,8 +1721,9 @@ def get_pg_cursor(conn_details):
     user = conn_details.get('pg_username')
     password = conn_details.get('pg_password')
     db = conn_details.get('pg_database')
+    schema = conn_details.get('pg_schema')
     try:
-        cursor = check_pg_connection(host, db, port, user, password)
+        cursor = check_pg_connection(host, db, port, user, password, schema)
     except Exception:
         cursor = []
     return cursor
@@ -1737,6 +1741,7 @@ def get_pg_conf(conn_id):
         'pg_username': connection.get('username'),
         'pg_password': connection.get('password'),
         'pg_database': connection.get('database'),
+        'pg_schema': connection.get('schema')
     }
     return form_datas
 
@@ -1783,15 +1788,61 @@ def check_table_name(cursor, table_name):
     return result
 
 
-def create_table_to_cursor(cursor, table_name, fields):
-
+def create_table_to_cursor(cursor, table_name, fields, schema):
     sql = '''
-        CREATE TABLE IF NOT EXISTS public.{table_name}
+        CREATE TABLE IF NOT EXISTS {schema}.{table_name}
         (
             {fields}
         )
     '''.format(
         table_name=table_name,
-        fields=','.join(fields)
+        fields=','.join(fields),
+        schema=schema
     )
     cursor.execute(sql)
+
+
+def check_property_data(prop_datas, feature_config_id, feature_id, cursor='default'):
+    property_ids = []
+    cursor = connections['default'].cursor()
+    for prop in prop_datas:
+        sql = '''
+            select
+                *
+            from m_datas b
+            inner join
+                m_geo_datas mg
+            on
+                mg.geo_id=b.geo_id
+            where
+                b.property_id = {property_id}
+                and
+                mg.feature_id={feature_id}
+                and b.feature_config_id in ({feature_config_id})
+            limit 10
+        '''.format(
+            property_id=prop,
+            feature_id=feature_id,
+            feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id])
+        )
+        cursor.execute(sql)
+        datas = list(dict_fetchall(cursor))
+        if len(datas) == 10:
+            property_ids.append(prop)
+    return property_ids
+
+def check_nsdi_address(request):
+    nsdi_check = False
+    host_name = socket.gethostname()
+    host_addr = socket.gethostbyname(host_name + ".local")
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+
+    if host_addr == '192.168.10.15' and ip == '127.0.0.1':
+        nsdi_check = True
+
+    return nsdi_check

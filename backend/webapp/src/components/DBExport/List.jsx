@@ -74,46 +74,44 @@ export default class List extends Component {
     }
 
     handleRefreshData(values){
-        if(values.db_type == 'PgDB') this.refreshPgData(values)
+        if(values.db_type == 'PgDB') this.refreshPgDataAction(values)
     }
 
-    refreshPgData(values) {
+    refreshPgDataAction(values) {
         this.setState({ values })
-        service.pg_config.refreshTableData(values.id).then(({ success, info, table_name_info }) => {
-            if (success) {
-                var table_res = table_name_info.join("\n")
-                this.modalChange(
-                    'fa fa-exclamation-circle',
-                    null,
-                    'warning',
-                    'Хүснэгт шинэчлэх',
-                    `${table_res}`,
-                    true,
-                    '',
-                    'Тийм',
-                    (values) => this.refreshPgDataAction(values),
-                    null
-                )
-            }
-            else {
-                this.setState({ is_loading: false })
-                this.modalChange(
-                    'fa fa-times-circle',
-                    null,
-                    'danger',
-                    'Алдаа гарлаа',
-                    info,
-                    false,
-                    '',
-                    '',
-                    null,
-                    null
-                )
-            }
-        })
+        var table_names = values.table_names
+        if (table_names && table_names.length >0) {
+            var table_res = table_names.join(", ")
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'warning',
+                'Хүснэгт шинэчлэх',
+                `Та ${table_res} хүснэгтүүдийг export хийхдээ итгэлтэй байна уу?`,
+                true,
+                '',
+                'Тийм',
+                (values) => this.refreshPgData(values),
+                null
+            )
+        }
+        else {
+            this.modalChange(
+                'fa fa-times-circle',
+                null,
+                'danger',
+                'Алдаа гарлаа',
+                `Хүснэгт үүсээгүй байна !!!!`,
+                false,
+                '',
+                '',
+                null,
+                null
+            )
+        }
     }
 
-    refreshPgDataAction() {
+    refreshPgData() {
         this.setState({ is_loading: true })
         const {values} = this.state
         service.pg_config.refreshTableData(values.id).then(({ success, table_info }) => {
@@ -133,7 +131,6 @@ export default class List extends Component {
                     null
                 )
             }
-
         })
     }
 
@@ -224,10 +221,10 @@ export default class List extends Component {
         const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, values, modal_status, is_loading } = this.state
         return (
             <div className="row">
-                <Loader
+                {/* <Loader
                     is_loading={is_loading}
                     text={'Уншиж байна'}
-                />
+                /> */}
                 <div className="col-lg-12">
                     <div className="card">
                         <div className="card-body">

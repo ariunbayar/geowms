@@ -63,6 +63,12 @@ const pg_config = {
         return fetch(`${prefix}/pg/${id}/${table_id}/remove-table/`, opts).then(handleResponse)
     },
 
+    refreshOneTable: function(id, table_id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/pg/${id}/${table_id}/refresh-one-table/`, opts).then(handleResponse)
+    },
 }
 
 function remove(pk) {
