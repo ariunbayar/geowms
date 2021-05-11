@@ -110,12 +110,11 @@
 }
 
 .fixed-height::-webkit-scrollbar-thumb {
-  background: #f8f9fa;
-  border-radius: 10px;
+  background: #eaeef3;
 }
 
 .fixed-height:hover::-webkit-scrollbar-thumb {
-  background: #A9A9A9;
+  background: #9e9e9e;
   border-radius: 10px;
   transition: 0.4s;
 }
