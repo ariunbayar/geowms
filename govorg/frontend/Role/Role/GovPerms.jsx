@@ -322,8 +322,8 @@ export default class InsPerms extends Component {
         const { action_type, is_employee, addable_is_check, editable_is_check } = this.props
         return (
             <div className="row">
-                <div className="col-md-6 p-0">
-                    <div className="col fixed-height">
+                <div className="col-xl-6 col-sm-12 p-0 fixed-height">
+                    <div className="col ">
                         <div className="accordion my-0" id="accordion">
                                 {themes.length > 0 && themes.map((theme, t_idx) =>
                                     <div className="role-bg-white-card">
@@ -394,82 +394,80 @@ export default class InsPerms extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-6">
-                    <div className="card">
-                        <div className="card-body fixed-height-right">
-                            <div className="table-responsive table_wrapper-100">
-                                <table className="table table_wrapper_table_saaral table-bordered">
-                                    <thead className="thead-light">
-                                        <tr>
-                                            <th className="col"></th>
-                                            {perms.map((perm, perm_idx) =>
-                                                <th className="col" className="p-2 text-center" key={perm_idx}>
-                                                    <span>{perm.name}</span>
-                                                    {
-                                                        !is_employee ?
-                                                        action_type && fid > 0 ?
-                                                        <div className="custom-control custom-switch col-lg-12 ml-2">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="custom-control-input"
-                                                                id={perm.name}
-                                                                checked={perm.all_check_value}
-                                                                onChange={(e) => this.PermsOnChange(e.target, perm.eng_name, perm_idx, perm.insp_id, perm.is_role_emp_id)}
-                                                            />
-                                                            <label className="custom-control-label " htmlFor={perm.name}></label>
-                                                        </div>
-                                                        : null : null
-                                                    }
-                                                </th>
-                                            )}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {properties.length > 0 && properties.map((property, pro_idx) =>
-                                            property.parent_id == fid &&
-                                            <tr key={pro_idx}>
-                                                <th>
-                                                   {property.name}
-                                                </th>
-                                                {perms.map((perm, perm_idx) =>
-                                                Object.keys(property.roles).map((key, k_idx) =>
-                                                    key == perm.eng_name &&
-                                                    <PermChecks key={perm_idx}
-                                                        fid={fid}
-                                                        all_check_value={perm.all_check_value}
-                                                        id={property.id}
-                                                        index={pro_idx}
-                                                        idx={perm_idx}
-                                                        value={property.roles[key]}
-                                                        insp_id={property.roles[perm.insp_id]}
-                                                        name={property.name}
-                                                        perm_name={perm.eng_name}
-                                                        action_type={action_type}
-                                                        sendValue={this.props.getValue}
-                                                        is_role_check={property.roles[perm.is_role_check]}
-                                                        is_role_emp_id={property.roles[perm.is_role_emp_id]}
-                                                        is_emp_perm={property.roles[perm.is_employee_perm]}
-                                                        is_employee={is_employee}
-                                                        addable_is_check={
-                                                            addable_is_check ?
-                                                            addable_is_check.filter((item) => item.gov_perm_inspire_id == property.roles[perm.insp_id]).length > 0
-                                                            :
-                                                            false
-                                                        }
-                                                        editable_is_check={
-                                                            editable_is_check
-                                                            ?
-                                                            editable_is_check.filter((item) => item.gov_perm_ins_id == property.roles[perm.insp_id]).length > 0
-                                                            :
-                                                            false
-                                                        }
-                                                    />
-                                                ))}
-                                            </tr>
+                <div className="col-xl-6 col-sm-12 fixed-height">
+                    <div className="card-body">
+                        <div className="fixed-height-right">
+                            <table className="table table_wrapper_table_saaral table-bordered">
+                                <thead className="thead-light">
+                                    <tr>
+                                        <th className="col"></th>
+                                        {perms.map((perm, perm_idx) =>
+                                            <th className="col" className="p-2 text-center" key={perm_idx}>
+                                                <span>{perm.name}</span>
+                                                {
+                                                    !is_employee ?
+                                                    action_type && fid > 0 ?
+                                                    <div className="custom-control custom-switch col-lg-12 ml-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="custom-control-input"
+                                                            id={perm.name}
+                                                            checked={perm.all_check_value}
+                                                            onChange={(e) => this.PermsOnChange(e.target, perm.eng_name, perm_idx, perm.insp_id, perm.is_role_emp_id)}
+                                                        />
+                                                        <label className="custom-control-label " htmlFor={perm.name}></label>
+                                                    </div>
+                                                    : null : null
+                                                }
+                                            </th>
                                         )}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {properties.length > 0 && properties.map((property, pro_idx) =>
+                                        property.parent_id == fid &&
+                                        <tr key={pro_idx}>
+                                            <th>
+                                                {property.name}
+                                            </th>
+                                            {perms.map((perm, perm_idx) =>
+                                            Object.keys(property.roles).map((key, k_idx) =>
+                                                key == perm.eng_name &&
+                                                <PermChecks key={perm_idx}
+                                                    fid={fid}
+                                                    all_check_value={perm.all_check_value}
+                                                    id={property.id}
+                                                    index={pro_idx}
+                                                    idx={perm_idx}
+                                                    value={property.roles[key]}
+                                                    insp_id={property.roles[perm.insp_id]}
+                                                    name={property.name}
+                                                    perm_name={perm.eng_name}
+                                                    action_type={action_type}
+                                                    sendValue={this.props.getValue}
+                                                    is_role_check={property.roles[perm.is_role_check]}
+                                                    is_role_emp_id={property.roles[perm.is_role_emp_id]}
+                                                    is_emp_perm={property.roles[perm.is_employee_perm]}
+                                                    is_employee={is_employee}
+                                                    addable_is_check={
+                                                        addable_is_check ?
+                                                        addable_is_check.filter((item) => item.gov_perm_inspire_id == property.roles[perm.insp_id]).length > 0
+                                                        :
+                                                        false
+                                                    }
+                                                    editable_is_check={
+                                                        editable_is_check
+                                                        ?
+                                                        editable_is_check.filter((item) => item.gov_perm_ins_id == property.roles[perm.insp_id]).length > 0
+                                                        :
+                                                        false
+                                                    }
+                                                />
+                                            ))}
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

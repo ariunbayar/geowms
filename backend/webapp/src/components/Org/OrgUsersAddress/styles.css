@@ -3,10 +3,10 @@
 }
 
 .🌍 > #map{
-    width: 16%;
+    width: 100%;
     height: 600px;
     right: 5px;
-    position: fixed;
+    position: relative;
 }
 
 .суурь-давхаргууд{

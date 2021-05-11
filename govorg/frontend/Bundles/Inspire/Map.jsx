@@ -1000,10 +1000,9 @@ export default class BarilgaSuurinGazar extends Component{
                     `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хянуулах уу`,
                     null,
                     "warning",
-                    "Үгүй"
+                    "Үгүй", () => this.setState({ togle_islaod: true })
               )
-              this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-    }
+          }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
           }
