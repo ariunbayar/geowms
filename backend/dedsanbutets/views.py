@@ -428,7 +428,6 @@ def propertyFieldsSave(request, payload):
     data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
 
-    id_list = check_property_data(id_list, feature_config_id, fid)
     check = _create_view(id_list, table_name, data_type_ids, feature_config_id, fid)
     if check:
         rsp = _create_geoserver_detail(table_name, theme, user.id, feature, values)
@@ -832,71 +831,68 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
             fields.append('end_')
         else:
             fields.append(row.property_code)
+    cols = list()
+    for item in data:
+        col = 'Max(Case When a.property_id = {property_id} Then value_text End) As {property_code}'.format(property_id=item.property_id, property_code=item.property_code)
+        cols.append(col)
 
     try:
         query = '''
-            CREATE MATERIALIZED VIEW public.{table_name}
-                AS
-            SELECT
-                d.geo_id,
-                d.geo_data,
-                d.geo_id as inspire_id,
-                d.geo_id as localid,
-                {columns},
-                d.feature_id,
-                d.created_on,
-                d.created_by,
-                d.modified_on,
-                d.modified_by
-            FROM
-                crosstab('
+            create MATERIALIZED VIEW public.{table_name} as
+                select
+                    a.geo_id,
+                    a.geo_data,
+                    a.geo_id as inspire_id,
+                    a.geo_id as localid,
+                    {cols},
+                    a.feature_id,
+                    a.created_on,
+                    a.modified_on
+                from
+                (
                     select
-                        b.geo_id,
-                        b.property_id,
+                        a.geo_id,
+                        a.property_id,
+                        mg.geo_data,
+                        mg.feature_id,
+                        mg.created_on,
+                        mg.modified_on,
                         COALESCE(
-                            b.value_text::character varying(1000),
-                            b.value_number::character varying(1000),
-                            b.value_date::character varying(1000),
-                            case when b.code_list_id is null then null
-                            else (
-                                select code_list_name
-                                from l_code_lists
-                                where code_list_id=b.code_list_id
-                            ) end
-                        ) as value_text
+                                a.value_text::character varying(1000),
+                                a.value_number::character varying(1000),
+                                a.value_date::character varying(1000),
+                                case when a.code_list_id is null then null
+                                else (
+                                    select code_list_name
+                                    from l_code_lists
+                                    where code_list_id=a.code_list_id
+                                ) end
+                            ) as value_text
                     from
-                        public.m_datas b
+                        public.m_datas a
                     inner join
                         m_geo_datas mg
                     on
-                        mg.geo_id = b.geo_id
-                    and
-                        mg.feature_id = {feature_id}
+                        mg.geo_id = a.geo_id
                     where
-                        b.property_id in ({properties})
-                    and
-                        data_type_id in ({data_type_ids})
-                    and
-                        feature_config_id in ({feature_config_id})
-                    group by (
-                    b.property_id, b.geo_id,
-                    b.value_date,
-                    b.code_list_id,
-                    b.value_text,
-                    b.value_number
-                    )
-                    order by 1,2'::text
-                )
-            ct(geo_id character varying(100), {create_columns})
-            JOIN m_geo_datas d ON ct.geo_id::text = d.geo_id::text
+                        a.property_id in ({properties}) and a.feature_config_id in ({feature_config_ids})
+                ) a
+                group by
+                    a.geo_id,
+                    a.geo_data,
+                    a.feature_id,
+                    a.created_on,
+                    a.modified_on
+
         '''.format(
                 table_name = table_name,
                 columns=', '.join(['ct.{}'.format(f) for f in fields]),
                 properties=', '.join(['{}'.format(f) for f in ids]),
                 data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
-                feature_config_id=', '.join(['{}'.format(f) for f in feature_config_id]),
+                feature_config_ids=', '.join(['{}'.format(f) for f in feature_config_id]),
                 create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]),
                 feature_id=feature_id,
+                cols=',\n'.join(cols)
             )
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
         with connections['default'].cursor() as cursor:
