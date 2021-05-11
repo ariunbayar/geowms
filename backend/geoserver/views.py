@@ -454,7 +454,7 @@ def _check_style_name(style_name, old_style_name):
 def create_style(request, payload):
 
     style_datas = payload.get('style_datas')
-    style_name = payload.get('style_name').replace(" ", "_")
+    style_name = payload.get('style_name')
     style_title = payload.get('style_title')
     style_abstract = payload.get('style_abstract')
     style_update = payload.get('style_update')
