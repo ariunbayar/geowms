@@ -1154,8 +1154,7 @@ def make_value_dict(value, properties_qs, is_display=False):
                     data = dict()
                     if not is_display:
                         if 'date' in types['value_type']:
-                            #TODO date to timezone
-                            val = val
+                            val = date_to_timezone(val)
                         data[types['value_type']] = val
                         data['property_id'] = prop['property_id']
                     if is_display:
