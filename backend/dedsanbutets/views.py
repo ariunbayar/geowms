@@ -439,7 +439,7 @@ def propertyFieldsSave(request, payload):
     else:
         rsp = {
             'success': False,
-            'info': 'Амжилтгүй хадгаллаа view үүсхэд алдаа гарлаа.'
+            'info': 'Амжилтгүй хадгаллаа. Style-ийн нэр хоосон байна.'
         }
     return JsonResponse(rsp)
 

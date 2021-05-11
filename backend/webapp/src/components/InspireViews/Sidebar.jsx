@@ -29,7 +29,8 @@ export default class SideBar extends Component {
             number_of_cache: 2,
             image_format: 'png',
             tile_cache_check: false,
-            is_loading: false
+            is_loading: false,
+            invalid_feedback: false
         }
 
         this.handleInput = this.handleInput.bind(this)
@@ -40,7 +41,13 @@ export default class SideBar extends Component {
     }
 
     handleOnClick(){
-        this.setState({check_style:true})
+        this.setState({ check_style: true })
+        const { style_name } = this.state
+        if(style_name) {
+            this.setState({ invalid_feedback: false })
+        } else {
+            this.setState({ invalid_feedback: true })
+        }
     }
 
     handleOnChange(e){
@@ -74,6 +81,12 @@ export default class SideBar extends Component {
                 'zoom_stop': zoom_stop, 'zoom_start':zoom_start, 'number_of_cache': number_of_cache, 'cache_type': cache_type,
                 'image_format': image_format
             }
+        }
+
+        if(style_name) {
+            this.setState({ invalid_feedback: false })
+        } else {
+            this.setState({ invalid_feedback: true })
         }
 
         this.setState({
@@ -210,7 +223,7 @@ export default class SideBar extends Component {
             id_list, save_is_load, view_name, style_names,
             style_name, url, defualt_url, geom_type,
             zoom_stop, zoom_start, number_of_cache, tile_cache_check,
-            image_format
+            image_format, invalid_feedback
         } = this.state
 
         return (
@@ -321,7 +334,7 @@ export default class SideBar extends Component {
                                                 <div className="form-group col-md-6">
                                                     <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
                                                     <select
-                                                        className={"form-control form-control-sm" + (!style_name ? 'is-invalid' : '')}
+                                                        className={"form-control form-control-sm" + (!style_name ? 'form-control is-invalid' : '')}
                                                         value={style_name ? style_name : ''}
                                                         onChange={(e) => this.setState({ style_name: e.target.value })}
                                                     >
@@ -332,7 +345,8 @@ export default class SideBar extends Component {
                                                         )}
                                                     </select>
                                                     {
-                                                        !style_name &&
+                                                        !style_name && invalid_feedback &&
+                                                            // <a onClick={() => this.handleSave} className="text-danger">Style-ийн нэр хоосон байна</a>
                                                             <small className="text-danger">Style-ийн нэр хоосон байна</small>
                                                     }
                                             </div>
