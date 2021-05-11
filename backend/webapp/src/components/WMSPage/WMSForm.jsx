@@ -39,19 +39,16 @@ export class WMSForm extends Component {
         this.ActiveChange=this.ActiveChange.bind(this)
         this.modalCloseTime=this.modalCloseTime.bind(this)
         this.addNotif = this.addNotif.bind(this)
+        this.RemoveInvalidWmsLayer = this.RemoveInvalidWmsLayer.bind(this)
 
     }
-
-    componentDidMount() {
+    componentWillMount(){
         const id = this.props.match.params.id
         if (id) {
             this.loadData()
         }
     }
 
-    componentDidUpdate(prevState) {
-
-    }
 
     handleSave() {
         const id = this.props.match.params.id
@@ -121,13 +118,12 @@ export class WMSForm extends Component {
         service.detail(id).then(({ wms_list }) => {
             if (wms_list) {
                 {
-                    wms_list.map((wms, idx) =>
-                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [],is_active:wms.is_active, wmts_url: wms.wmts_url})
+                    wms_list.map((wms, idx) =>{
+                        this.setState({ name: wms.name, url: wms.url, public_url: wms.public_url, layers: wms.layers, layers_all: [],is_active:wms.is_active, wmts_url: wms.wmts_url})}
                     )
 
                 }
-                this.loadLayers(this.state.public_url)
-                this.handleWmsLayerRefresh()
+                this.loadLayers(this.state.public_url, wms_list[0].layers)
 
             }
         })
@@ -142,9 +138,30 @@ export class WMSForm extends Component {
         })
     }
 
-    loadLayers(public_url) {
+    loadLayers(public_url, layers) {
+        var invalid_layers = []
         service.getLayers(public_url).then((layer_choices) => {
-            this.setState({ layer_choices })
+            if (layer_choices && layer_choices.length >0) {
+                layers.map((single_layer) => {
+                    var value = obj => obj.code == single_layer
+                    var index_of = layer_choices.findIndex(value)
+                    if (index_of < 0) {
+                        invalid_layers.push(single_layer)
+                    }
+                })
+                if (invalid_layers.length > 0) {
+                    this.RemoveInvalidWmsLayer(invalid_layers)
+                }
+                this.setState({ layer_choices })
+                this.handleWmsLayerRefresh()
+            }
+        })
+    }
+
+    RemoveInvalidWmsLayer(invalid_layers) {
+        const id = this.props.match.params.id
+        service.removeInvalidLayers(id, invalid_layers).then(({success}) =>{
+            if(success) {this.setState({layer_choices})}
         })
     }
 

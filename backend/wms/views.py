@@ -23,17 +23,6 @@ import main.geoserver as geoserver
 
 
 def _get_wms_display(request, wms):
-   
-    ws_url ='workspaces'
-    code = WMSLayer.objects.filter(wms_id=wms.id).first()
-    layer_detail = geoserver.get_layer_group_detail(code.code)
-    ws_detail = geoserver._get_ws_layers_in_wms('gp_bnd', ws_url)
-    print(ws_detail)
-    if layer_detail :
-        print('Layer Group shuu ', layer_detail)
-    if ws_detail:
-        print('Ws shuu ',ws_detail)
-
     return {
         'id': wms.id,
         'name': wms.name,
@@ -101,7 +90,7 @@ def wms_layer_all(request, payload):
     ]
     return JsonResponse({
         'layers_all': layers_all,
-    })
+        })
 
 
 @require_POST
@@ -374,6 +363,20 @@ def save_geo(request, payload):
         geodb_export_field = export_field,
         feature_price = price,
     )
+    rsp = {
+        'success': True
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def remove_invalid_layers(request, payload, id):
+    layers = payload.get('invalid_layers')
+    wmslayer = WMSLayer.objects.filter(wms_id=id, code__in=layers)
+    wmslayer.delete()
+
     rsp = {
         'success': True
     }
