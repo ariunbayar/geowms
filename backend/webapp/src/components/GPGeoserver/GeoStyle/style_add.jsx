@@ -211,7 +211,6 @@ export class CreateStyle extends Component {
                 }
             }
             this.setState({single_select_datas: this.style_datas[0], data_state: false})
-            console.log(this.style_datas);
         }
 
         if (input_name != 'range_number' && input_name != 'had_chosen') {
@@ -394,7 +393,6 @@ export class CreateStyle extends Component {
                 modal_text, sld_file, check_style_content, desing_file_content
 
             } = this.state
-            console.log(this.state.style_name);
             var style_update = this.props.match.params.style_name
             return (
                 <div className="row p-2">
