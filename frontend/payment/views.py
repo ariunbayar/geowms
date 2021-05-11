@@ -634,7 +634,7 @@ def _table_json():
         {
             'width': 20,
             'head_name': 'Өндөр',
-            'body_name': 'elevationValue',
+            'body_name': 'ellipsoidheight',
         },
     ]
     return table_col
@@ -917,7 +917,7 @@ def _get_geom_info(mdata, value):
 
 
 def _check_undur(value):
-    undur = 'elevationValue'
+    undur = 'ellipsoidheight'
     if undur not in value.keys():
         value[undur] = 'Хоосон'
     return value
@@ -1198,12 +1198,12 @@ def createPdf(values):
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.ln(70)
-    if 'PointNearPhoto' in values:
-        if values['PointNearPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 91, w = 92, h = 60, type = '', link = '')
-    if 'PointFarPhoto' in values:
-        if values['PointFarPhoto']:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 91, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPointToNear' in values:
+        if values['photoOfControlPointToNear']:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear']), x = 11, y = 91, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPoinFromFar' in values:
+        if values['photoOfControlPoinFromFar']:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar']), x = 105, y = 91, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
@@ -1211,19 +1211,19 @@ def createPdf(values):
     pdf.multi_cell(188, 5, _check_none(values, 'locationNote'), 1, 0, 'C')
     newH = pdf.get_y()
     # mor 6
-    if 'LocationOverviewMap' in values or 'PointCenterType' in values:
+    if 'overviewPhotoOfControlPointLocation' in values or 'pointCentreType' in values:
         pdf.cell(94, 8, '9. Байршлын тойм зураг.', 1, 0, 'C')
         pdf.cell(94, 8, '10. Төв цэгийн хэлбэр', 1, 0, 'C')
         pdf.ln(8)
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
-        if 'PointCenterType' in values:
-            if values['PointCenterType']:
-                pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointCenterType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
-        if 'LocationOverviewMap' in values:
-            if values['LocationOverviewMap']:
-                pdf.image(os.path.join(settings.MEDIA_ROOT, values['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'pointCentreType' in values:
+            if values['pointCentreType']:
+                pdf.image(os.path.join(settings.MEDIA_ROOT, values['pointCentreType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'overviewPhotoOfControlPointLocation' in values:
+            if values['overviewPhotoOfControlPointLocation']:
+                pdf.image(os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6

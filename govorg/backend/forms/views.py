@@ -156,10 +156,10 @@ def createPdf(values, requests):
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.ln(70)
-    if 'PointNearPhoto' in values:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointNearPhoto']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
-    if 'PointFarPhoto' in values:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointFarPhoto']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPointToNear' in values:
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+    if 'photoOfControlPoinFromFar' in values:
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
@@ -167,17 +167,17 @@ def createPdf(values, requests):
     pdf.multi_cell(188, 5, values['locationNote'], 1, 0, 'C')
     newH = pdf.get_y()
     # mor 6
-    if 'LocationOverviewMap' in values or 'PointCenterType' in values:
+    if 'overviewPhotoOfControlPointLocation' in values or 'pointCentreType' in values:
         pdf.cell(94, 8, '9. Байршлын тойм зураг.', 1, 0, 'C')
         pdf.cell(94, 8, '10. Төв цэгийн хэлбэр', 1, 0, 'C')
         pdf.ln(8)
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
-        if 'PointCenterType' in values:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['PointCenterType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
-        if 'LocationOverviewMap' in values:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['LocationOverviewMap']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'pointCentreType' in values:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['pointCentreType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+        if 'overviewPhotoOfControlPointLocation' in values:
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
     else:
         pdf.ln(0)
     # mor 6
@@ -769,7 +769,7 @@ def tseg_personal_list(request, payload):
         org = _get_org_from_request(request)
 
         requests = TsegRequest.objects
-        requests = requests.filter(org=org)
+        # requests = requests.filter(org=org)
         requests = _get_qs_in_boundary(requests, org)
         requests = requests.exclude(kind=TsegRequest.KIND_DELETE)
         if requests:
@@ -1069,12 +1069,12 @@ def tsegPersonalUpdate(request, payload):
             data['BA'] = BA
             data['BB'] = BB
             data['BC'] = BC
-            data['tseg_oiroos_img_url'] = '/media/' + values['PointNearPhoto'] if values and 'PointNearPhoto' in values else ''
-            data['tseg_holoos_img_url'] = '/media/' + values['PointFarPhoto'] if values and 'PointFarPhoto' in values else ''
+            data['tseg_oiroos_img_url'] = '/media/' + values['photoOfControlPointToNear'] if values and 'photoOfControlPointToNear' in values else ''
+            data['tseg_holoos_img_url'] = '/media/' + values['photoOfControlPoinFromFar'] if values and 'photoOfControlPoinFromFar' in values else ''
             data['barishil_tuhai'] = values['locationNote'] if 'locationNote' in values else ''
-            data['bairshil_tseg_oiroos_img_url'] = '/media/' + values['PointCenterType'] if values and 'PointCenterType' in values else ''
-            data['bairshil_tseg_holoos_img_url'] = '/media/' + values['LocationOverviewMap'] if values and 'LocationOverviewMap' in values else ''
-            data['sudalga_or_shine'] =  values['PointShape'] if 'PointShape' in values else ''
+            data['bairshil_tseg_oiroos_img_url'] = '/media/' + values['pointCentreType'] if values and 'pointCentreType' in values else ''
+            data['bairshil_tseg_holoos_img_url'] = '/media/' + values['overviewPhotoOfControlPointLocation'] if values and 'overviewPhotoOfControlPointLocation' in values else ''
+            data['sudalga_or_shine'] =  values['pointCentreType'] if 'pointCentreType' in values else ''
             data['date'] = utils.datetime_to_string(values['beginLifespanVersion']) if values and 'beginLifespanVersion' in values else ''
             data['hotolson'] = values['EmployeeName'] if 'EmployeeName' in values else ''
             data['alban_tushaal'] = values['EmployeePosition'] if 'EmployeePosition' in values else ''
@@ -1403,10 +1403,10 @@ def tsegPersonal(request):
 
                 return value
 
-            value = _remove_and_save('tseg_oiroos_img_url', 'PointNearPhoto', tseg, value, tseg_image_url, request)
-            value = _remove_and_save('tseg_holoos_img_url', 'PointFarPhoto', tseg, value, tseg_image_url, request)
-            value = _remove_and_save('bairshil_tseg_oiroos_img_url', 'PointCenterType', tseg, value, tseg_bairshil_img_url, request)
-            value = _remove_and_save('bairshil_tseg_holoos_img_url', 'LocationOverviewMap', tseg, value, tseg_bairshil_img_url, request)
+            value = _remove_and_save('tseg_oiroos_img_url', 'photoOfControlPointToNear', tseg, value, tseg_image_url, request)
+            value = _remove_and_save('tseg_holoos_img_url', 'photoOfControlPoinFromFar', tseg, value, tseg_image_url, request)
+            value = _remove_and_save('bairshil_tseg_oiroos_img_url', 'pointCentreType', tseg, value, tseg_bairshil_img_url, request)
+            value = _remove_and_save('bairshil_tseg_holoos_img_url', 'overviewPhotoOfControlPointLocation', tseg, value, tseg_bairshil_img_url, request)
 
             # TODO
             # if not request.POST.get('file1'):
@@ -1463,10 +1463,10 @@ def tsegPersonal(request):
 
                 return value
 
-            value = _make_value('tseg_oiroos_img_url', 'PointNearPhoto', tseg_image_url, request, value)
-            value = _make_value('tseg_holoos_img_url', 'PointFarPhoto', tseg_image_url, request, value)
-            value = _make_value('bairshil_tseg_oiroos_img_url', 'PointCenterType', tseg_bairshil_img_url, request, value)
-            value = _make_value('bairshil_tseg_holoos_img_url', 'LocationOverviewMap', tseg_bairshil_img_url, request, value)
+            value = _make_value('tseg_oiroos_img_url', 'photoOfControlPointToNear', tseg_image_url, request, value)
+            value = _make_value('tseg_holoos_img_url', 'photoOfControlPoinFromFar', tseg_image_url, request, value)
+            value = _make_value('bairshil_tseg_oiroos_img_url', 'pointCentreType', tseg_bairshil_img_url, request, value)
+            value = _make_value('bairshil_tseg_holoos_img_url', 'overviewPhotoOfControlPointLocation', tseg_bairshil_img_url, request, value)
 
             request_values['kind'] = TsegRequest.KIND_CREATE
             request_values['geo_json'] = geom.json

@@ -136,7 +136,7 @@ export class Details extends Component {
                                                                 {value['sum']}
                                                             </td>
                                                             <td scope="">
-                                                                {value['elevationValue'] || "Хоосон"}
+                                                                {value['ellipsoidheight'] || "Хоосон"}
                                                             </td>
                                                             <td>
                                                                 {value.amount}₮
