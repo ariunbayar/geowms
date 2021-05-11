@@ -346,7 +346,6 @@ export default class SideBar extends Component {
                                                     </select>
                                                     {
                                                         !style_name && invalid_feedback &&
-                                                            // <a onClick={() => this.handleSave} className="text-danger">Style-ийн нэр хоосон байна</a>
                                                             <small className="text-danger">Style-ийн нэр хоосон байна</small>
                                                     }
                                             </div>
