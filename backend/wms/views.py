@@ -18,9 +18,22 @@ from main.components import Datatable
 from .models import WMS
 from .forms import WMSForm
 
+import main.geoserver as geoserver
+
 
 
 def _get_wms_display(request, wms):
+   
+    ws_url ='workspaces'
+    code = WMSLayer.objects.filter(wms_id=wms.id).first()
+    layer_detail = geoserver.get_layer_group_detail(code.code)
+    ws_detail = geoserver._get_ws_layers_in_wms('gp_bnd', ws_url)
+    print(ws_detail)
+    if layer_detail :
+        print('Layer Group shuu ', layer_detail)
+    if ws_detail:
+        print('Ws shuu ',ws_detail)
+
     return {
         'id': wms.id,
         'name': wms.name,
@@ -86,7 +99,6 @@ def wms_layer_all(request, payload):
         _wms_layer_display(wms_layer)
         for wms_layer in wms_layers
     ]
-
     return JsonResponse({
         'layers_all': layers_all,
     })
@@ -212,7 +224,6 @@ def update(request, payload):
     is_active = payload.get('is_active')
     url_service = payload.get('url')
     wmts_url = payload.get('wmts_url')
-
     if wms:
         wms.cache_url = wmts_url or None
         wms.save()
