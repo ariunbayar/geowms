@@ -1627,7 +1627,7 @@ def get_popup_info(request, payload):
                         if prop['property_code'].lower() == key and value:
                             if prop['value_type_id'] in value_will_change_types:
                                 code_list_qs = LCodeLists.objects
-                                code_list_qs = code_list_qs.filter(code_list_id=value)
+                                code_list_qs = code_list_qs.filter(code_list_name=value)
                                 if code_list_qs:
                                     code_list = code_list_qs.first()
                                     value = code_list.code_list_name
