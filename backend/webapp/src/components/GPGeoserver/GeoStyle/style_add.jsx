@@ -240,7 +240,7 @@ export class CreateStyle extends Component {
                 this.setState({geom_type})
             }
         }
-        this.setState({[e.target.name]: input_value})
+        this.setState({[input_name]: input_value})
     }
 
     componentDidUpdate(pP, pS) {

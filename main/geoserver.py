@@ -640,7 +640,7 @@ def delete_layer_group(group_name):
     return rsp
 
 
-def create_layer_group(group_values, group_layers):
+def create_layer_group(group_values, group_name, group_layers):
     BASE_URL, AUTH = getHeader()
     HEADERS = {
         'Content-type': 'text/xml'
@@ -674,9 +674,9 @@ def create_layer_group(group_values, group_layers):
             </styles>
         </layerGroup>
     '''.format(
-        name=group_values.get('name'),
+        name=group_name,
         title=group_values.get('title'),
-        abstract=group_values.get('abstract'),
+        abstract=group_values.get('abstract') or '',
         layers=''.join(g_layers),
         styles=''.join(g_styles)
     )
