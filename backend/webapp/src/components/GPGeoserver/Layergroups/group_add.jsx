@@ -5,13 +5,7 @@ import { service } from './service'
 import ModelSelectLayer from "./ModelSelect"
 import ModalAlert from "../../ModalAlert"
 import {GPIcon} from "@utils/Tools"
-
-const validationSchema = Yup.object().shape({
-    name: Yup.string()
-    .required('Нэр оруулна уу !'),
-    title: Yup.string(),
-    abstract: Yup.string(),
-})
+import Loader from "@utils/Loader"
 
 export class GroupAdd extends Component {
 
@@ -19,7 +13,6 @@ export class GroupAdd extends Component {
         super(props)
         this.state = {
             form_values: {
-                name: '',
                 title: '',
                 abstract: '',
                 layers: '',
@@ -43,7 +36,10 @@ export class GroupAdd extends Component {
             style_list: [],
             more_detail: '',
             work_space_list: [],
-            work_space_name: ''
+            work_space_name: '',
+            group_layer_name: '',
+            name_invalid: false,
+            is_loading: false
         }
         this.getDetialAll = this.getDetialAll.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -57,7 +53,7 @@ export class GroupAdd extends Component {
         this.handleSelectModel = this.handleSelectModel.bind(this)
         this.setStyleName = this.setStyleName.bind(this)
         this.getWsDetail = this.getWsDetail.bind(this)
-
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
 
     componentDidMount() {
@@ -112,7 +108,6 @@ export class GroupAdd extends Component {
             if( detial_list ) {
                 this.setState({
                     form_values: {
-                        name: detial_list.name,
                         title: detial_list.title,
                         abstract: detial_list.abstractTxt,
                         minx: bound.minx,
@@ -121,7 +116,8 @@ export class GroupAdd extends Component {
                         maxy: bound.maxy,
                         projection: bound.crs
                     },
-                    layer_list
+                    layer_list,
+                    group_layer_name: detial_list.name,
                 })
             }
         })
@@ -167,13 +163,20 @@ export class GroupAdd extends Component {
         this.setState({layer_list: obj})
     }
 
-    handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
-        const { layer_list, old_name} = this.state
+    handleSubmit( values, { setStatus, setSubmitting, setErrors }) {
+        const { layer_list, old_name, group_layer_name} = this.state
         var group_state = false
         const group_name = this.props.match.params.group_name
+
+        if (!group_layer_name) {
+            this.setState({ name_invalid: true})
+        }
         if (group_name) group_state = true
-        service
-            .createLayerGroup(values, layer_list, group_state, old_name)
+
+        if (group_layer_name) {
+            this.setState({is_loading: true})
+            service
+            .createLayerGroup(values, group_layer_name,  layer_list, group_state, old_name)
             .then(({ success, info, errors }) => {
                 if (success) {
                     this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'success'})
@@ -184,17 +187,26 @@ export class GroupAdd extends Component {
                         setErrors(errors)
                     }
                     else {
-                        this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'danger'})
+                        this.setState({modal_alert_status: "open", model_alert_text: info, model_alert_icon: 'danger', is_loading: false})
                     }
                     setSubmitting(false)
                 }
             })
+        }
+        else {
+            setSubmitting(false)
+        }
+    }
 
+    handleOnChange(e) {
+        var input_value = e.target.value
+        var group_layer_name = input_value.replace(' ', '_')
+        this.setState({group_layer_name})
     }
 
     modalCloseTime(){
         this.state.timer = setTimeout(() => {
-            this.setState({modal_alert_status: "closed"})
+            this.setState({modal_alert_status: "closed", is_loading: false})
         }, 2000)
         this.props.history.push("/back/gp-geoserver/layer-groups/")
     }
@@ -206,15 +218,16 @@ export class GroupAdd extends Component {
             model_alert_text, model_alert_icon,
             modalAction, modal_title, values,
             style_list, more_detail, work_space_list,
-            work_space_name
+            work_space_name, name_invalid, group_layer_name,
+            is_loading
         } = this.state
-
         const group_name = this.props.match.params.group_name
         return (
             <div className="col-md-8"  style={{ minHeight: '72vh'}}>
                 <div className="row">
                     <div className="col-4 col-md-4 col-xl-4">
                         <div className="row">
+                        <Loader is_loading={is_loading} text={'Уншиж байна'}/>
                             <div className="col-12 mt-3 col-md-12 col-xl-12">
                                 <div className="h-100">
                                     <Formik
@@ -222,7 +235,6 @@ export class GroupAdd extends Component {
                                         initialValues={
                                             form_values
                                         }
-                                        validationSchema={validationSchema}
                                         onSubmit={this.handleSubmit}
                                     >
                                     {({
@@ -235,14 +247,18 @@ export class GroupAdd extends Component {
                                                 <div className="form-row">
                                                     <div className="form-group col-md-12">
                                                         <label htmlFor="" >Нэр</label>
-                                                        <Field
-                                                            className={'form-control ' + (errors.name ? 'is-invalid' : '')}
-                                                            name='name'
-                                                            id="name"
+                                                        <input
+                                                            className={'form-control ' + ((name_invalid) ? 'is-invalid' : '')}
+                                                            name='group_layer_name'
+                                                            id="group_layer_name_id"
                                                             type="text"
+                                                            value={group_layer_name}
+                                                            onChange={(e) => this.handleOnChange(e)}
                                                         />
-                                                        <ErrorMessage name="name" component="div" className="text-danger"/>
-
+                                                        {
+                                                            !group_layer_name && name_invalid &&
+                                                                <small className="text-danger">Style-ийн нэр хоосон байна</small>
+                                                        }
                                                     </div>
                                                     <div className="form-group col-md-12">
                                                         <label htmlFor="title">Гарчиг</label>
@@ -259,7 +275,7 @@ export class GroupAdd extends Component {
                                                         <Field
                                                             className={'form-control'}
                                                             name='abstract'
-                                                            id="abstract"
+                                                            id="abstract_id"
                                                             as='textarea'
                                                             placeholder="Товч тайлбар"
                                                         />
