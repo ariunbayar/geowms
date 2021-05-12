@@ -1,3 +1,5 @@
+from pymongo import cursor
+from backend import another_database
 from backend.inspire.models import LFeatures, LPackages, LThemes
 import requests
 from django.http import HttpResponse
@@ -243,12 +245,29 @@ def mssql_save(request, payload):
     return JsonResponse(rsp)
 
 
+def _drop_table(table_name, cursor, schema='public'):
+    detete_query = '''
+        DROP TABLE IF EXISTS {schema}.{table_name}
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
+    cursor.execute(detete_query)
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def remove(request, pk):
-
     another_db = get_object_or_404(AnotherDatabase, pk=pk)
+    another_db_tables_all = AnotherDatabaseTable.objects.all()
+    cursor_pg = utils.get_cursor_pg(pk)
+    for item in another_db_tables_all:
+        if(item.another_database_id == pk):
+            _drop_table(item.table_name, cursor_pg)
+            delete_table = AnotherDatabaseTable.objects.filter(table_name=item.table_name)
+            delete_table.delete()
+
     another_db.delete()
     connection = utils.json_load(another_db.connection)
     rsp = {
