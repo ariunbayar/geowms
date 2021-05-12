@@ -17,6 +17,7 @@ export const service = {
     pagination,
     getData,
     saveData,
+    removeInvalidLayers
 }
 
 const prefix = '/back'
@@ -70,6 +71,14 @@ function _getGetOptions() {
             'X-Requested-With': 'XMLHttpRequest',
         },
     }
+}
+
+function removeInvalidLayers(id, invalid_layers) {
+    const requestOptions = {
+        ..._getPostOptions(),
+        body: JSON.stringify({invalid_layers}),
+    }
+    return fetch(`${prefix}/wms/${id}/remove/invalid-layer/`, requestOptions).then(handleResponse)
 }
 
 function pagination(last,first) {
