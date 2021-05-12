@@ -357,12 +357,13 @@ def get_list(request, payload):
                 initial_qs=qs,
                 хувьсах_талбарууд=_хувьсах_талбарууд(),
             )
-            items, total_page = datatable.get()
+            items, total_page, start_index = datatable.get()
 
             rsp = {
                 'items': items,
                 'page': payload.get('page'),
                 'total_page': total_page,
+                'start_index': start_index
             }
 
         else:

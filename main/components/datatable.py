@@ -1,5 +1,5 @@
 from django.contrib.postgres.search import SearchVector
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, Page
 from main.utils import get_display_items, get_fields
 
 
@@ -20,6 +20,7 @@ class Datatable():
         self.items_page = None
         self.total_page = None
         self.нэмэлт_талбарууд = нэмэлт_талбарууд
+        self.start_index = 1
 
     @property
     def хасах_талбарууд(self):
@@ -50,6 +51,8 @@ class Datatable():
     def paginator(self):
         total_items = Paginator(self.search_qs, self.perpage)
         items_page = total_items.page(self.page)
+        page = Page(self.search_qs, self.page, total_items)
+        self.start_index = page.start_index()
         self.items_page = items_page.object_list
         self.total_page = total_items.num_pages
 
@@ -58,4 +61,4 @@ class Datatable():
         self.sort()
         self.paginator()
         items = get_display_items(self.items_page, self.оруулах_талбарууд, self.хувьсах_талбарууд, self.нэмэлт_талбарууд)
-        return items, self.total_page
+        return items, self.total_page, self.start_index
