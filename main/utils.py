@@ -1822,3 +1822,13 @@ def check_nsdi_address(request):
         nsdi_check = True
 
     return nsdi_check
+
+
+def drop_table(table_name, cursor, schema='public'):
+    detete_query = '''
+        DROP TABLE IF EXISTS {schema}.{table_name}
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
+    cursor.execute(detete_query)

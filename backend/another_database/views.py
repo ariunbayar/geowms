@@ -245,16 +245,6 @@ def mssql_save(request, payload):
     return JsonResponse(rsp)
 
 
-def _drop_table(table_name, cursor, schema='public'):
-    detete_query = '''
-        DROP TABLE IF EXISTS {schema}.{table_name}
-    '''.format(
-        table_name=table_name,
-        schema=schema
-    )
-    cursor.execute(detete_query)
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -264,7 +254,7 @@ def remove(request, pk):
     cursor_pg = utils.get_cursor_pg(pk)
     for item in another_db_tables_all:
         if(item.another_database_id == pk):
-            _drop_table(item.table_name, cursor_pg)
+            utils.drop_table(item.table_name, cursor_pg)
             delete_table = AnotherDatabaseTable.objects.filter(table_name=item.table_name)
             delete_table.delete()
 

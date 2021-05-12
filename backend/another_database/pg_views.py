@@ -331,15 +331,6 @@ def _geojson_to_geom(geo_json):
     return geom
 
 
-def _drop_table(table_name, cursor, schema):
-    detete_query = '''
-        DROP TABLE IF EXISTS {schema}.{table_name}
-    '''.format(
-        table_name=table_name,
-        schema=schema
-    )
-    cursor.execute(detete_query)
-
 def _execute_query_to_pg(cursor, sql):
     try:
         cursor.execute(sql)
@@ -506,7 +497,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
     property_codes = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True).order_by('property_id'))
 
-    _drop_table(table_name, cursor, pg_schema)
+    utils.drop_table(table_name, cursor, pg_schema)
     _create_extension(cursor, pg_schema)
     _create_code_list_table(cursor, columns, pg_schema)
 
@@ -572,7 +563,7 @@ def remove_pg_table(request, id, table_id):
     pg_table.delete()
     try:
         cursor_pg = utils.get_cursor_pg(id)
-        _drop_table(pg_table.table_name, cursor_pg)
+        utils.drop_table(pg_table.table_name, cursor_pg)
     except Exception:
         return False
 
