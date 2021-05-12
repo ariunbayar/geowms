@@ -1806,13 +1806,19 @@ def check_nsdi_address(request):
     host_name = socket.gethostname()
     host_addr = socket.gethostbyname(host_name + ".local")
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-
+    host = request.META.get('HTTP_HOST')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
     else:
         ip = request.META.get('REMOTE_ADDR')
-
-    if host_addr == '192.168.10.15' and ip == '127.0.0.1':
+    host_name = socket.gethostname()
+    host_addr = socket.gethostbyname(host_name + ".local")
+    if not settings.DEBUG:
+        f = open("check_15_ip.txt", "w")
+        text = 'host_ip=' + host_addr + "\n"+ 'request_ip='+ip + 'host=' + host
+        f.write(text)
+        f.close()
+    if host_addr == '192.168.1.15' and ip == '127.0.0.1':
         nsdi_check = True
 
     return nsdi_check

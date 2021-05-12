@@ -113,7 +113,8 @@ def wms_layers(request, pk):
         if wms.is_active:
             if utils.check_nsdi_address(request):
                 url = wms.url
-                chache_url = wms.chache_url
+                ws_name = url.split('/')[3]
+                chache_url = 'http://127.0.0.1:8080/{ws_name}/gwc/service/wmts'.format(ws_name=ws_name)
             else:
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
                 chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
