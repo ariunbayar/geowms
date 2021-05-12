@@ -5,8 +5,6 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
-from django.core.paginator import Paginator
-from django.contrib.postgres.search import SearchVector
 
 from api.utils import replace_src_url
 from backend.bundle.models import BundleLayer
@@ -17,9 +15,6 @@ from main.components import Datatable
 
 from .models import WMS
 from .forms import WMSForm
-
-import main.geoserver as geoserver
-
 
 
 def _get_wms_display(request, wms):
@@ -164,7 +159,7 @@ def layerAdd(request, payload):
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
+        WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
         return JsonResponse({'success': True})
 
 
@@ -208,7 +203,6 @@ def create(request, payload):
 def update(request, payload):
     pk = payload.get('id')
     wms = get_object_or_404(WMS, pk=pk)
-    layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
     is_active = payload.get('is_active')
     url_service = payload.get('url')
@@ -218,17 +212,17 @@ def update(request, payload):
         wms.save()
 
     if is_active:
-        wms.is_active=True
+        wms.is_active = True
     else:
-        wms.is_active=False
+        wms.is_active = False
     if url_service == wms.url:
         if form.is_valid():
             with transaction.atomic():
                 form.save()
                 wms = form.instance
-            rsp = { 'success': True }
+            rsp = {'success': True}
         else:
-            rsp = { 'success': False }
+            rsp = {'success': False}
     else:
         if form.is_valid():
             layers = WMSLayer.objects.filter(wms=wms)
@@ -237,9 +231,9 @@ def update(request, payload):
                 BundleLayer.objects.filter(layer=layer).delete()
             layers.delete()
             form.save()
-            rsp = { 'success': True }
+            rsp = {'success': True}
         else:
-            rsp = { 'success': False }
+            rsp = {'success': False}
 
     return JsonResponse(rsp)
 
@@ -357,11 +351,11 @@ def save_geo(request, payload):
     table = datas[0]['table']
 
     WMSLayer.objects.filter(wms_id=wms_id, code=code).update(
-        geodb_schema = schema,
-        geodb_table = table,
-        geodb_pk_field = pk_field,
-        geodb_export_field = export_field,
-        feature_price = price,
+        geodb_schema=schema,
+        geodb_table=table,
+        geodb_pk_field=pk_field,
+        geodb_export_field=export_field,
+        feature_price=price,
     )
     rsp = {
         'success': True
