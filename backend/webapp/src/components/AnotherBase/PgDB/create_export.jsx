@@ -14,7 +14,7 @@ export default class  ExportCreate extends Component {
         this.over_dec = []
         this.state = {
             id: props.match.params.id,
-            table_id: props.match.params.tsable_id,
+            table_id: props.match.params.table_id,
             table_name: '',
             themes: [],
             packages: [],
@@ -46,6 +46,7 @@ export default class  ExportCreate extends Component {
 
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
+        this.setSelectedField = this.setSelectedField.bind(this)
     }
 
     componentDidMount(){
@@ -56,10 +57,11 @@ export default class  ExportCreate extends Component {
     handleGetDetial( packages, features ){
         const {table_id, id} = this.state
         this.setState({ is_loading: true })
-        service.pg_config.tableDetail(id, table_id).then(({success, form_datas}) => {
+        service.pg_config.tableDetail(id, table_id, true).then(({success, form_datas}) => {
             if(success){
                 form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
                 form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
+                form_datas['matched_feilds'] = form_datas.id_list
                 this.setState({ ...form_datas, is_loading: false })
             }
         })
@@ -74,6 +76,7 @@ export default class  ExportCreate extends Component {
             this.setState({themes, packages, features, ano_table_names: table_names})
             if(table_id) this.handleGetDetial(packages, features)
         })
+
     }
 
     getTableFields(table_name){
@@ -158,9 +161,9 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, id_list, feature_name} = this.state
+        const {id, table_id, table_name, matched_feilds, feature_name} = this.state
             this.setState({ is_loading: true })
-            service.pg_config.tableSave(id, table_id, id_list, feature_name, table_name).then(({success, info}) => {
+            service.pg_config.tableSave(id, table_id, matched_feilds, feature_name, table_name, true).then(({success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
@@ -168,7 +171,7 @@ export default class  ExportCreate extends Component {
                         'success',
                         info,
                         false,
-                        () => this.props.history.push(`/back/db-export/connection/pg/${id}/tables/`)
+                        () => this.props.history.push(`/back/another-base/connection/pg/${id}/list/`)
                     )
                 }
                 else {
@@ -241,7 +244,7 @@ export default class  ExportCreate extends Component {
         const { matched_feilds } = this.state
         var selected_field = ''
         if (Object.keys(matched_feilds).length > 0) {
-                var field_of_data = obj => obj.table_field == data.column_name
+                var field_of_data = obj => obj.property_id == data.property_id
                 var index_of = matched_feilds.findIndex(field_of_data)
                 if (index_of != -1) {
                     selected_field = matched_feilds[index_of].table_field
@@ -274,6 +277,7 @@ export default class  ExportCreate extends Component {
                                 id='ano_table_name_id'
                                 className="form-control col-md-6"
                                 value={table_name}
+                                disabled={table_id ? true : false}
                                 onChange={(e) => {this.setState({table_name: e.target.value})}}
                             >
                                 <option value=''></option>
@@ -350,7 +354,7 @@ export default class  ExportCreate extends Component {
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
-                        disabled={ (!table_name || id_list.length < 1) ? true : false}
+                        disabled={ (!table_name || matched_feilds.length < 1) ? true : false}
                     >
                         {
                             table_id

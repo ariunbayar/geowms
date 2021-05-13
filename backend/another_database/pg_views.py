@@ -196,12 +196,13 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
+    is_insert = payload.get('is_insert')
     result = []
     cursor_pg = utils.get_cursor_pg(id)
 
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
-    if not table_id:
+    if not table_id and not is_insert:
         result = utils.check_table_name(cursor_pg, table_name)
     info = _rsp_validation(result, table_name, id_list)
     if info:

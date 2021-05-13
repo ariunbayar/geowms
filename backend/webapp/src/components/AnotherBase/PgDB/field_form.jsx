@@ -26,7 +26,7 @@ export default class FieldForm extends Component {
 
     render() {
         const {
-            property_data, selected_table_name, ano_table_fields,
+            property_data, setSelectedField, ano_table_fields,
             data_key, prop_key
         } = this.props
         const { field_class_name } = this.state
@@ -44,7 +44,7 @@ export default class FieldForm extends Component {
                         name='table_field_name'
                         id='table_field_id'
                         className="form-control col-md-5 m-1"
-                        value={selected_table_name}
+                        value={setSelectedField}
                         onChange={(e) => this.props.handleSetField(data_key, prop_key, e)}
                     >
                         <option value=''></option>
