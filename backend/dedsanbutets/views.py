@@ -54,7 +54,6 @@ def _get_package(theme_id):
     return package_data
 
 
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
