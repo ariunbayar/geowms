@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { service } from '../service';
 import BackButton from "@utils/Button/BackButton"
 import SelectField from '@utils/Tools/Form/select_field'
 import Loader from "@utils/Loader"
 import Modal from "@utils/Modal/Modal"
 import { checkedFonts } from 'ol/render/canvas';
+import FieldForm from './field_form'
 
 export default class  ExportCreate extends Component {
 
@@ -30,7 +31,9 @@ export default class  ExportCreate extends Component {
             is_loading: false,
             modal_status: 'closed',
             ano_table_names: [],
-            ano_table_fields: []
+            ano_table_fields: [],
+            table_field_name: '',
+            matched_feilds: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -179,17 +182,6 @@ export default class  ExportCreate extends Component {
             })
     }
 
-    handleSetField(e){
-        let id_list = this.state.id_list
-        const value = parseInt(e.target.value)
-        if (e.target.checked) {
-            id_list.push(value)
-        } else {
-            id_list = id_list.filter((oid) => oid != value)
-        }
-        this.setState({id_list})
-    }
-
     handleModalOpen() {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
@@ -209,6 +201,44 @@ export default class  ExportCreate extends Component {
         )
     }
 
+    handleSetField(data_key, prop_key, e){
+        const { data_type_list, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
+        var data = e.target.value
+        var values = {
+            'table_field': data,
+            'property_id': data_type_list[data_key].properties[prop_key].property_id
+        }
+        var joined = []
+        if(data) {
+            if (matched_feilds.length > 0) {
+                var value = obj => obj.property_id == data_type_list[data_key].properties[prop_key].property_id
+                var index_of = matched_feilds.findIndex(value)
+                if (index_of != -1) {
+                    matched_feilds[index_of]['table_field'] = data
+                    joined = matched_feilds
+                }
+                else {
+                    joined = matched_feilds.concat(values)
+                }
+            }
+            else joined = matched_feilds.concat(values)
+        }
+        this.setState({matched_feilds: joined})
+    }
+
+    setSelectedField(data) {
+        const { matched_feilds } = this.state
+        var selected_field = ''
+        if (Object.keys(matched_feilds).length > 0) {
+                var field_of_data = obj => obj.table_field == data.column_name
+                var index_of = matched_feilds.findIndex(field_of_data)
+                if (index_of != -1) {
+                    selected_field = matched_feilds[index_of].table_field
+                }
+        }
+        return selected_field
+    }
+
     render() {
         const {
             table_id, id,
@@ -216,16 +246,18 @@ export default class  ExportCreate extends Component {
             feature_name, selected_features,
             selected_packages, data_type_list,
             id_list, table_name, is_loading,
-            ano_table_names
+            ano_table_names, ano_table_fields,
+            table_field_name
         } = this.state
+        console.log(ano_table_fields)
         return (
-            <div className="card">
+            <div className="card p-2">
                 <Loader
                     is_loading={is_loading}
                     text={'Уншиж байна'}
                 />
-                <div className="form-row card-body p-4 mx-1">
-                    <div className="form-group col-md-4">
+                <div className="form-row p-4 mx-1">
+                    <div className="form-group col-md-6">
                         <label htmlFor='ano_table_name'>Хүснэгтүүд</label>
                             <select
                                 name='table_name'
@@ -243,7 +275,7 @@ export default class  ExportCreate extends Component {
                             </select>
                     </div>
                 </div>
-                <div className="form-row col-md-9 p-4 mx-1">
+                <div className="form-row col-md-12 p-4 mx-1">
                     <SelectField
                         title_name='theme'
                         data_list={themes}
@@ -267,16 +299,41 @@ export default class  ExportCreate extends Component {
                     />
                 </div>
                 {
-                    // feature_name &&
-                    // <div className="col-md-7 px-3">
-                    //     <SelectField
-                    //         title_name={data_type.data_type_definition}
-                    //         data_list={data_type.properties}
-                    //         defualt_value={''}
-                    //         defualt_text={'feature-ийн нэр сонгоно уу'}
-                    //         handleSelectField={this.handleChange}
-                    //     />
-                    // </div>
+                    feature_name &&
+                    <div className="col-md-12 px-3 mt-5">
+                    {
+                        (data_type_list && data_type_list.length >0)
+                        ?
+                            data_type_list.map((data_type_data, idx) =>
+                                <>
+                                    <div key={idx} className="form-row mr-3">
+                                        <div className='form-group col-md-3 align-self-center text-center'>
+                                            <b>{data_type_data.data_type_name}</b>
+                                        </div>
+                                        <div className='form-group col-md-9'>
+                                            {
+                                                (data_type_data.properties && data_type_data.properties.length > 0)
+                                                ?
+                                                data_type_data.properties.map((property_data, idy) =>
+                                                    <FieldForm
+                                                        data_key={idx}
+                                                        prop_key={idy}
+                                                        property_data={property_data}
+                                                        ano_table_fields={ano_table_fields}
+                                                        handleSetField={this.handleSetField}
+                                                        setSelectedField={this.setSelectedField(property_data)}
+                                                    />
+                                                )
+                                                : null
+                                            }
+                                        </div>
+                                    </div>
+                                    <hr />
+                                </>
+                            )
+                        : null
+                    }
+                    </div>
                 }
                 <div className="form-row col-md-12 p-4 m-1">
                     <button

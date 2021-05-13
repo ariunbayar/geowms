@@ -11,7 +11,7 @@ export default class SelectField extends Component {
     render() {
         const {title_name, data_list, defualt_value, defualt_text} = this.props
         return (
-            <div className="form-group col-md-3">
+            <div className="form-group col-md-4">
                 <label className=''>
                     {title_name ? title_name : ''}
                 </label>

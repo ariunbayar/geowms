@@ -161,7 +161,8 @@ def getFields(request, payload):
                     properties_data.append({
                         'property_name': single_property.property_name,
                         'property_id': single_property.property_id,
-                        'code_list': code_data_list
+                        'code_list': code_data_list,
+                        'value_type_id': single_property.value_type_id
                     })
 
             data_types_datas.append({
