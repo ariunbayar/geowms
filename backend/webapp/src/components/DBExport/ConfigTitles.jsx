@@ -35,7 +35,7 @@ class ConfigTitles extends Component {
                         <div className="col-md-12">
                             <div className="card-body">
                                 <NavLink
-                                    to={`/back/db-export/connection/pg/`}
+                                    to={`/back/db-export/connection/${true}/pg/`}
                                     className="col-md-3 ml-2 text-center"
                                     activeClassName="text-white gp-bg-primary"
                                 >

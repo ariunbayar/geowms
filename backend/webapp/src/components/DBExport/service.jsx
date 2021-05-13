@@ -11,10 +11,11 @@ const pg_config = {
         return fetch(`${prefix}/pg/get/${pk}/`, requestOptions).then(handleResponse)
     },
 
-    save: function(values) {
+    save: function(values, out_type) {
+        console.log(values, out_type)
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify(values),
+            body: JSON.stringify({values, out_type}),
         }
         return fetch(`${prefix}/pg/db-config-save/`, opts).then(handleResponse)
     },

@@ -76,10 +76,11 @@ class ConnectionConfig extends Component {
     }
 
     handleSubmit(values, { setStatus, setValues, setErrors }) {
+        const out_type = this.props.match.params.out_type
         setStatus('saving')
         service
             .pg_config
-            .save(values)
+            .save(values, out_type)
             .then(({ success, errors }) => {
 
                 if (success) {
