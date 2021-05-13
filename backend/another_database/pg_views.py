@@ -657,3 +657,47 @@ def refresh_single_table(request, id, table_id):
         'info': info,
         'table_info': table_info
     })
+
+
+# Өөр баазаас дата авах
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_ano_tables(request, pk):
+    pk = 9
+    table_fields = list()
+    field = list()
+    single_field = dict()
+    cursor_pg = utils.get_cursor_pg(pk)
+    sql = '''
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name;
+    '''.format(table_name='table_name')
+    table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
+
+    for table in table_names:
+        table_name = table['table_name']
+        sql = '''
+            SELECT column_name
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = '{table_name}'
+        '''.format(
+                table_name = table_name,
+                column_name = 'column_name' )
+
+        single_field['table_name'] = table_name
+        columns = utils.get_sql_execute(sql, cursor_pg, 'all')
+
+        for column_names in columns:
+            field.append(column_names['column_name'])
+
+        single_field['column_name'] = field
+    table_fields.append(single_field)
+
+    return JsonResponse({
+        'success': True,
+        'fields': table_fields
+    })
+
