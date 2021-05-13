@@ -76,7 +76,7 @@ urlpatterns = [
         path('pg/<int:id>/refresh-table-data/', pg_views.refresh_datas, name='refresh-datas-pg'),
         path('pg/<int:id>/<int:table_id>/refresh-one-table/', pg_views.refresh_single_table, name='refresh_single_table'),
         path('pg/<int:id>/<int:table_id>/remove-table/', pg_views.remove_pg_table),
-        # path('pg/<int:pk>/get-another-tables/', pg_views.get_ano_tables),
+        path('pg/<int:pk>/get-another-tables/', pg_views.get_ano_tables),
     ], 'another-database'))),
 
 
