@@ -207,7 +207,6 @@ def save_table(request, payload):
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
-
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
@@ -565,18 +564,19 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
     return success_count, failed_count, total_count
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def remove_pg_table(request, id, table_id):
-
+def remove_pg_table(request, payload, id, table_id):
+    is_insert = payload.get('is_insert')
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
-    try:
-        cursor_pg = utils.get_cursor_pg(id)
-        _drop_table(pg_table.table_name, cursor_pg)
-    except Exception:
-        return False
+    if not is_insert:
+        try:
+            cursor_pg = utils.get_cursor_pg(id)
+            _drop_table(pg_table.table_name, cursor_pg)
+        except Exception:
+            pass
 
     return JsonResponse({
         'success': True,

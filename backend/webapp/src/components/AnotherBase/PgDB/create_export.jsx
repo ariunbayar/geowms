@@ -104,7 +104,7 @@ export default class  ExportCreate extends Component {
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
             data_list['feature_name'] = ''
-            data_list['id_list'] = []
+            data_list['matched_feilds'] = []
         }
 
         else if ( name == 'package' ) {
@@ -112,7 +112,7 @@ export default class  ExportCreate extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
-                data_list['id_list'] = []
+                data_list['matched_feilds'] = []
 
             }
             else {
@@ -376,7 +376,7 @@ export default class  ExportCreate extends Component {
                 <BackButton
                     {...this.props}
                     name={'Буцах'}
-                    navlink_url={`/back/db-export/connection/pg/${id}/tables/`}
+                    navlink_url={`/back/another-base/connection/pg/${id}/list/`}
                 />
             </div>
         );
