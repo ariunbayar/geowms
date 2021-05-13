@@ -219,6 +219,14 @@ const pg_config = {
         }
         return fetch(`${prefix}/pg/${id}/${table_id}/refresh-one-table/`, opts).then(handleResponse)
     },
+
+    refreshData: function(id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/pg/${id}/refresh-all-connection/`, opts).then(handleResponse)
+    },
+
 }
 
 

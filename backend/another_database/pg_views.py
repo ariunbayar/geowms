@@ -707,3 +707,55 @@ def get_table_fields(request, payload, pk):
     return JsonResponse({
         'fields': columns
     })
+
+
+def _insert_to_geo_db(table_name, cursor, columns, feature_code):
+    print("hoho")
+
+def _insert_sngle_table(ano_db, ano_db_table_pg, cursor):
+    table_info = []
+    table_name = ano_db_table_pg.table_name
+    field_config = ano_db_table_pg.field_config.replace("'", '"')
+    columns = utils.json_load(field_config)
+    feature_code = ano_db_table_pg.feature_code
+    success_count, failed_count, total_count = _insert_to_geo_db(table_name, cursor, columns, feature_code)
+    table_info_text = '''
+        {table_name} хүснэгт
+        нийт {total_count} мөр дата-наас
+        амжилттай орсон {success_count}
+        амжилтгүй {failed_count}
+        '''.format(
+            table_name=table_name,
+            total_count=total_count,
+            success_count=success_count,
+            failed_count=failed_count
+        )
+    table_info.append(table_info_text)
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+    return table_info
+
+
+@require_GET
+@csrf_exempt
+def refresh_all_conn(request, id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
+
+    cursor_pg = utils.get_cursor_pg(id)
+    table_info = []
+    info = ''
+    success = True
+
+    if ano_db_table_pg:
+        for table in ano_db_table_pg:
+            single_table_info = _insert_sngle_table(ano_db, table, cursor_pg)
+            table_info.append(single_table_info)
+        # ano_db.database_updated_at = datetime.datetime.now()
+        # ano_db.save()
+    return JsonResponse({
+        'success': success,
+        'info': info,
+        'table_info': table_info,
+    })

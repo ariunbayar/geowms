@@ -66,6 +66,7 @@ export default class List extends Component {
         this.handleMssql = this.handleMssql.bind(this)
         this.handleMongo = this.handleMongo.bind(this)
         this.modalChange = this.modalChange.bind(this)
+        this.handlePGRefreshData = this.handlePGRefreshData.bind(this)
 
     }
 
@@ -80,6 +81,46 @@ export default class List extends Component {
     handleRefreshData(values){
         if(values.db_type == 'MSSQL') this.handleMssql(values)
         else if(values.db_type == "MONGODB") this.handleMongo(values)
+        else if(values.db_type == "PgDb") this.handlePGRefreshData(values)
+    }
+    handlePGRefreshData(values) {
+
+        this.setState({is_loading: true})
+        service
+            .pg_config
+            .refreshData(values.id)
+            .then(({success}) => {
+                if (success) {
+                    this.setState({is_loading: false})
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        'success',
+                        'Амжилттай боллоо',
+                        ``,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
+                }
+                else {
+                    this.setState({is_loading: false})
+                    this.modalChange(
+                        'fa fa-time-circle',
+                        null,
+                        'danger',
+                        'Алдаа гарлаа',
+                        ``,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
+                }
+            })
     }
 
     handleMssql(values){
