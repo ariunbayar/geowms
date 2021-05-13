@@ -53,14 +53,14 @@ def _check_pk():
     cursor.execute(sql)
     value = cursor.fetchone()
     if not value:
-        _create_pk
+        _create_pk()
 
 
 def update_bundles(apps, schema_editor):
     bundles = apps.get_model('backend_bundle', 'Bundle')
     themes = apps.get_model('backend_inspire', 'LThemes')
     _check_column()
-    _check_pk
+    _check_pk()
 
     for bundle in bundles.objects.all():
         print(bundle.name)
@@ -84,25 +84,21 @@ def update_bundles(apps, schema_editor):
             if theme:
                 bundles.objects.filter(id=bundle.id).update(ltheme=theme)
             else:
-                theme_id = themes.objects.all().order_by('-theme_id').first().theme_id + 1
                 cursor = connections['default'].cursor()
                 sql = """
                 INSERT INTO
                     public.l_themes(
-                        theme_id,
                         theme_name,
                         order_no,
                         is_active
                         )
                 VALUES (
-                    '{theme_id}',
                     '{theme_name}',
                     {order_no},
                     {is_active}
                     )
 
                 """.format(
-                    theme_id=theme_id,
                     theme_name=bundle.name,
                     order_no=bundles.objects.all().count() + 1,
                     is_active=True
