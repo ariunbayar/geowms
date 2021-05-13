@@ -4,6 +4,7 @@ import BackButton from "@utils/Button/BackButton"
 import SelectField from '@utils/Tools/Form/select_field'
 import Loader from "@utils/Loader"
 import Modal from "@utils/Modal/Modal"
+import { checkedFonts } from 'ol/render/canvas';
 
 export default class  ExportCreate extends Component {
 
@@ -28,6 +29,8 @@ export default class  ExportCreate extends Component {
             message: 'Property сонгоогүй байна.',
             is_loading: false,
             modal_status: 'closed',
+            ano_table_names: [],
+            ano_table_fields: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -35,6 +38,7 @@ export default class  ExportCreate extends Component {
         this.handleSetField = this.handleSetField.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.getArray = this.getArray.bind(this)
+        this.getTableFields = this.getTableFields.bind(this)
 
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
@@ -59,18 +63,19 @@ export default class  ExportCreate extends Component {
 
     getInspireTree(id){
         const {table_id} = this.state
-        service.pg_config.getInspireTree(id).then(({themes, packages, features}) => {
-            this.setState({themes, packages, features})
+        Promise.all([
+            service.pg_config.getAnotherPgDetail(id),
+            service.pg_config.getInspireTree(id),
+        ]).then(([{table_names}, {themes, packages, features}]) => {
+            this.setState({themes, packages, features, ano_table_names: table_names})
             if(table_id) this.handleGetDetial(packages, features)
         })
     }
 
-    getTableFields(name, value){
+    getTableFields(table_name){
         const {id} = this.state
-        service.pg_config.fieldNames(id, name, value).then(({state_name, table_fields}) => {
-            var fields = {}
-            fields[state_name] = table_fields
-            this.setState({ ...fields })
+        service.pg_config.fieldNames(id, table_name).then(({fields}) => {
+            if (fields) this.setState({ano_table_fields: fields})
         })
     }
 
@@ -132,6 +137,10 @@ export default class  ExportCreate extends Component {
 
         if (pS.features != features) {
             this.setState({features})
+        }
+
+        if (pS.table_name != table_name) {
+            this.getTableFields(table_name)
         }
     }
 
@@ -206,7 +215,8 @@ export default class  ExportCreate extends Component {
             themes, theme_name, package_name,
             feature_name, selected_features,
             selected_packages, data_type_list,
-            id_list, table_name, is_loading
+            id_list, table_name, is_loading,
+            ano_table_names
         } = this.state
         return (
             <div className="card">
@@ -216,15 +226,21 @@ export default class  ExportCreate extends Component {
                 />
                 <div className="form-row card-body p-4 mx-1">
                     <div className="form-group col-md-4">
-                        <label htmlFor="id_view_name">Хүснэгтийн нэр</label>
-                        <input
-                            className={'form-control' + ( !table_name ? ' is-invalid' : '')}
-                            type='text'
-                            value={table_name}
-                            disabled={table_id ? true : false}
-                            title={!table_name && 'Хүснэгтийн нэр оруулна уу !!!'}
-                            onChange={(e) => this.setState({table_name: e.target.value})}
-                        />
+                        <label htmlFor='ano_table_name'>Хүснэгтүүд</label>
+                            <select
+                                name='table_name'
+                                id='ano_table_name_id'
+                                className="form-control col-md-6"
+                                value={table_name}
+                                onChange={(e) => {this.setState({table_name: e.target.value})}}
+                            >
+                                <option value=''></option>
+                                {
+                                    ano_table_names.map((value, idy) =>
+                                        <option key = {idy} value={value.table_name}>{value.table_name}</option>
+                                    )
+                                }
+                            </select>
                     </div>
                 </div>
                 <div className="form-row col-md-9 p-4 mx-1">
@@ -251,84 +267,16 @@ export default class  ExportCreate extends Component {
                     />
                 </div>
                 {
-                    feature_name &&
-                    <div className="col-md-7 px-3">
-                            <table className="table table-bordered m-1">
-                                <thead>
-                                    <tr>
-                                        <th className="text-center" style={{width: "8%"}}>
-                                            Data <br/>type
-                                        </th>
-                                        <th
-                                            className={'text-center'}
-                                            style={{width: "5%"}}
-                                        >
-                                        </th>
-                                        <th
-                                            className={'text-center'}
-                                            style={{width: "15%"}}
-                                        >
-                                            Property
-                                            {
-                                                id_list.length <= 0
-                                                &&
-                                                <i
-                                                    className="text-danger icon-exclamation float-right fa-3x"
-                                                    data-toggle="tooltip"
-                                                    data-placement="right"
-                                                    title="Property сонгоогүй байна."
-                                                >
-                                                </i>
-                                            }
-                                        </th>
-                                    </tr>
-                                    {data_type_list.map((data_type, idx) =>
-                                        <>
-                                            <tr key={idx}>
-                                                <th rowSpan={data_type.properties.length +1}
-                                                    className="text-wrap align-middle text-justify m-4 pl-5"
-                                                >
-                                                    <span className="text-center align-middle">({data_type.data_type_name})</span><br/>
-                                                    <span className="text-center align-middle">{data_type.data_type_eng}</span><br/>
-                                                    <span className="text-justify text-muted align-middle"><small>{data_type.data_type_definition}</small></span>
-                                                </th>
-                                            </tr>
-                                            {data_type.properties.map((property, idx) =>
-                                                <>
-                                                    <tr key={idx}>
-                                                        <th className="d-flex justify-content-center">
-                                                            <div className="icheck-primary">
-                                                                <input
-                                                                    name={property.property_name}
-                                                                    id={property.property_name}
-                                                                    type="checkbox"
-                                                                    checked={id_list.indexOf(property.property_id) > -1}
-                                                                    onChange={this.handleSetField}
-                                                                    value={property.property_id}
-                                                                />
-                                                                <label
-                                                                    htmlFor={property.property_name}
-                                                                >
-                                                            </label>
-                                                            </div>
-                                                        </th>
-                                                        <th>
-                                                            <label
-                                                                data-toggle="tooltip" data-placement="right"
-                                                                className="text-left"
-                                                                style={{marginLeft: "4%"}}
-                                                            >
-                                                                {property.property_name}
-                                                            </label>
-                                                        </th>
-                                                    </tr>
-                                                </>
-                                            )}
-                                        </>
-                                    )}
-                                </thead>
-                            </table>
-                        </div>
+                    // feature_name &&
+                    // <div className="col-md-7 px-3">
+                    //     <SelectField
+                    //         title_name={data_type.data_type_definition}
+                    //         data_list={data_type.properties}
+                    //         defualt_value={''}
+                    //         defualt_text={'feature-ийн нэр сонгоно уу'}
+                    //         handleSelectField={this.handleChange}
+                    //     />
+                    // </div>
                 }
                 <div className="form-row col-md-12 p-4 m-1">
                     <button

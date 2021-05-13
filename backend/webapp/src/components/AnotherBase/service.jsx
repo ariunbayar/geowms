@@ -142,13 +142,25 @@ function remove(pk) {
 
 const pg_config = {
 
+    fieldNames: function(id, table_name) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({table_name}),
+        }
+        return fetch(`${prefix}/pg/${id}/get_table_fields/`, opts).then(handleResponse)
+    },
+
+    getAnotherPgDetail: function(pk) {
+        const requestOptions = getGetOptions()
+        return fetch(`${prefix}/pg/${pk}/get-another-tables/`, requestOptions).then(handleResponse)
+    },
+
     get: function(pk) {
         const requestOptions = getGetOptions()
         return fetch(`${prefix}/pg/get/${pk}/`, requestOptions).then(handleResponse)
     },
 
     save: function(values, out_type) {
-        console.log(values, out_type)
         const opts = {
             ...getPostOptions(),
             body: JSON.stringify({values, out_type}),

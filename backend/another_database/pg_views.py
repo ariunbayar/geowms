@@ -660,44 +660,48 @@ def refresh_single_table(request, id, table_id):
 
 
 # Өөр баазаас дата авах
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_ano_tables(request, pk):
-    pk = 9
-    table_fields = list()
-    field = list()
-    single_field = dict()
+
     cursor_pg = utils.get_cursor_pg(pk)
     sql = '''
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public'
             ORDER BY table_name;
-    '''.format(table_name='table_name')
+    '''
+
     table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
 
-    for table in table_names:
-        table_name = table['table_name']
-        sql = '''
-            SELECT column_name
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = '{table_name}'
-        '''.format(
-                table_name = table_name,
-                column_name = 'column_name' )
-
-        single_field['table_name'] = table_name
-        columns = utils.get_sql_execute(sql, cursor_pg, 'all')
-
-        for column_names in columns:
-            field.append(column_names['column_name'])
-
-        single_field['column_name'] = field
-    table_fields.append(single_field)
-
     return JsonResponse({
-        'success': True,
-        'fields': table_fields
+        'table_names': table_names
     })
 
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_table_fields(request, payload, pk):
+    table_name = payload.get('table_name')
+    cursor_pg = utils.get_cursor_pg(pk)
+
+    sql = '''
+        SELECT
+        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
+        FROM
+        pg_attribute
+        WHERE
+        attrelid = '{table_name}'::regclass AND    attnum > 0
+        ORDER  BY attnum
+    '''.format(
+        table_name = table_name,
+    )
+
+    columns = utils.get_sql_execute(sql, cursor_pg, 'all')
+
+    return JsonResponse({
+        'fields': columns
+    })
