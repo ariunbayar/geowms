@@ -1,5 +1,3 @@
-from backend.bundle.models import Bundle
-from backend.inspire.models import LThemes
 from django.db import migrations, models
 from django.core import serializers
 from django.db import connections
@@ -106,16 +104,16 @@ def update_bundles(apps, schema_editor):
         theme = themes.objects.filter(theme_name=bundle.name).first()
         if theme:
             bundles.objects.filter(id=bundle.id).update(ltheme=theme)
-    for item in LThemes.objects.all():
-        qs = Bundle.objects
-        qs = qs.filter(name=item.theme_name)
+    for item in themes.objects.all().values():
+        qs = bundles.objects
+        qs = qs.filter(name=item['theme_name'])
         if not qs:
-            Bundle.objects.create(
-                name=item.theme_name,
+            bundles.objects.create(
+                name=item['theme_name'],
                 is_removeable=True,
                 created_by_id=1,
-                sort_order=Bundle.objects.all().count() + 1,
-                ltheme=item,
+                sort_order=bundles.objects.all().count() + 1,
+                ltheme_id=item['theme_id'],
             )
 
 
