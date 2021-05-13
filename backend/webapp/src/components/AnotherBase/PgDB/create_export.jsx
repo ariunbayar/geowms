@@ -33,7 +33,8 @@ export default class  ExportCreate extends Component {
             ano_table_names: [],
             ano_table_fields: [],
             table_field_name: '',
-            matched_feilds: []
+            matched_feilds: [],
+            table_field_error: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -223,6 +224,16 @@ export default class  ExportCreate extends Component {
             }
             else joined = matched_feilds.concat(values)
         }
+        else {
+            var array = [...matched_feilds]
+            for (let [i, layer] of array.entries()) {
+                if (layer.property_id == data_type_list[data_key].properties[prop_key].property_id) {
+                    array.splice(i, 1);
+                }
+            }
+            joined = array
+        }
+
         this.setState({matched_feilds: joined})
     }
 
@@ -247,9 +258,8 @@ export default class  ExportCreate extends Component {
             selected_packages, data_type_list,
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
-            table_field_name
+            matched_feilds
         } = this.state
-        console.log(ano_table_fields)
         return (
             <div className="card p-2">
                 <Loader
