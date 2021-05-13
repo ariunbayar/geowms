@@ -12,7 +12,6 @@ const pg_config = {
     },
 
     save: function(values, out_type) {
-        console.log(values, out_type)
         const opts = {
             ...getPostOptions(),
             body: JSON.stringify({values, out_type}),
