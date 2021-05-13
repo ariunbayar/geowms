@@ -37,6 +37,7 @@ urlpatterns = [
         path('paginatedList/', wms_views.paginated_list, name='paginatedList'),
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
+        path('<int:id>/remove/invalid-layer/', wms_views.remove_invalid_layers, name='remove_invalid_layers'),
     ], 'wms'))),
 
     path('another-database/', include(([
