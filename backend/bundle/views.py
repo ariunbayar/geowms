@@ -206,4 +206,3 @@ def swap(request, payload):
     }
 
     return JsonResponse(rsp)
-

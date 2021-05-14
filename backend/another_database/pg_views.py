@@ -168,6 +168,7 @@ def getFields(request, payload):
             data_types_datas.append({
                 'data_type_name': data_types.data_type_name,
                 'data_type_eng': data_types.data_type_name_eng,
+                'data_type_definition': data_types.data_type_definition,
                 'properties': properties_data
             })
 
