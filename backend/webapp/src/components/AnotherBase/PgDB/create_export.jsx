@@ -80,9 +80,15 @@ export default class  ExportCreate extends Component {
     }
 
     getTableFields(table_name){
-        const {id} = this.state
+        const {id, matched_feilds} = this.state
         service.pg_config.fieldNames(id, table_name).then(({fields}) => {
-            if (fields) this.setState({ano_table_fields: fields})
+
+            var value = obj => obj.data_type.slice(0,4) == 'geom'
+            var index_of = fields.findIndex(value)
+            var geom_field_name = fields[index_of].column_name
+            if (fields) this.setState({
+                ano_table_fields: fields, geo_data_field: geom_field_name,
+            })
         })
     }
 
@@ -97,7 +103,6 @@ export default class  ExportCreate extends Component {
         const selected_value = e.target.value
         var data_list = {}
         var seleted_datas = []
-        var array = []
 
         if ( name == 'theme' ) {
             data_list['theme_name'] = selected_value
@@ -161,9 +166,16 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, matched_feilds, feature_name} = this.state
+        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field} = this.state
             this.setState({ is_loading: true })
-            service.pg_config.tableSave(id, table_id, matched_feilds, feature_name, table_name, true).then(({success, info}) => {
+            var values = {
+                    'table_field': geo_data_field,
+                    'properti_id': 'geo_datas',
+                    'data_type': 'geom'
+            }
+
+            var all_fields = matched_feilds.concat(values)
+            service.pg_config.tableSave(id, table_id, all_fields, feature_name, table_name, true).then(({success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
@@ -208,8 +220,13 @@ export default class  ExportCreate extends Component {
     handleSetField(data_key, prop_key, e){
         const { data_type_list, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
         var data = e.target.value
+        var table_data = e.target.selectedIndex
+        var optionElement = e.target.childNodes[table_data]
+        var selected_data_type =  optionElement.getAttribute('name')
+
         var values = {
             'table_field': data,
+            'table_data_type': selected_data_type,
             'property_id': data_type_list[data_key].properties[prop_key].property_id
         }
         var joined = []
@@ -261,7 +278,7 @@ export default class  ExportCreate extends Component {
             selected_packages, data_type_list,
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
-            matched_feilds
+            matched_feilds, geo_data_field
         } = this.state
         return (
             <div className="card p-2">
@@ -315,6 +332,18 @@ export default class  ExportCreate extends Component {
                 {
                     feature_name &&
                     <div className="col-md-12 px-3 mt-5">
+                    <span
+                        className="col-md-6 m-1 border rounded"
+                        name='inspire_property'
+                    >
+                        Геометр талбар
+                    </span>
+                    <span
+                        className="col-md-6 m-1 border rounded"
+                        name='inspire_property'
+                    >
+                        {geo_data_field}
+                    </span>
                     {
                         (data_type_list && data_type_list.length >0)
                         ?
