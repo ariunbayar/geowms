@@ -1,6 +1,4 @@
 import json
-import pytz
-from django.utils import timezone
 from geojson import FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
@@ -514,6 +512,9 @@ def _create_mdatas(geo_id, feature_id, form, value):
     value['feature_config_id'] = ids[0]['feature_config_id']
     value['data_type_id'] = ids[0]['data_type_id']
     value['property_id'] = form['property_id']
+    check_value_date = 'value_date' in value
+    if check_value_date:
+        value['value_date'] = date_to_timezone(value['value_date'])
     MDatas.objects.create(**value)
 
 

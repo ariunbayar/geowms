@@ -338,14 +338,15 @@ def _get_type(value_type_id):
 
 def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid=None):
     properties = list()
-    value_text = ''
-    data_list = []
-    code_list_id = ''
     for l_property in qs_l_properties:
         pk = ''
+        value_text = ''
+        code_list_id = ''
+        data_list = []
         data = dict()
         value_type = _get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
+        value_text, data_list = _get_data_list_and_value_text(gid, fid, l_data_type.data_type_id, l_property.property_id, value_type)
         data_type_id = l_data_type.data_type_id
         property_id = l_property.property_id
         for feature_config_id in feature_config_ids:
@@ -354,6 +355,14 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
                 pk = m_datas.id
                 value_text, data_list = _get_data_list_and_value_text(gid, m_datas.feature_config_id, data_type_id, property_id, value_type)
                 code_list_id = m_datas.code_list_id
+        if data_list:
+            if code_list_id:
+                value_text = code_list_id
+            else:
+                value_text = data_list[0]['code_list_id']
+        else:
+            value_text = value_text
+
         data['pk'] = pk
         data['data_type_id'] = data_type_id
         data['property_id'] = property_id
@@ -362,7 +371,7 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data['property_definition'] = l_property.property_definition
         data['value_type_id'] = l_property.value_type_id
         data['value_type'] = value_type
-        data['data'] =  value_text
+        data['data'] = value_text
         data['data_list'] =  data_list
         data['roles'] =  _get_roles(request, fid, property_id)
         data['code_list_id'] = code_list_id

@@ -252,7 +252,7 @@ export default class Маягт extends Component {
                                                                                 as="select"
                                                                                 className="form-control"
                                                                                 disabled={this.setDisable(friend.roles)}
-                                                                                value={friend.code_list_id ? code_list_ids[friend.property_code] : ''}
+                                                                                value={code_list_ids[friend.property_code] ? code_list_ids[friend.property_code] : ''}
                                                                                 onChange={(e) =>
                                                                                     this.setInitial(e.target.name, e.target.value)
                                                                                 }
