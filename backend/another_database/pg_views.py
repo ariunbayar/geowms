@@ -161,7 +161,8 @@ def getFields(request, payload):
                     properties_data.append({
                         'property_name': single_property.property_name,
                         'property_id': single_property.property_id,
-                        'code_list': code_data_list
+                        'code_list': code_data_list,
+                        'value_type_id': single_property.value_type_id
                     })
 
             data_types_datas.append({
@@ -195,17 +196,17 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
+    is_insert = payload.get('is_insert')
     result = []
     cursor_pg = utils.get_cursor_pg(id)
 
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
-    if not table_id:
+    if not table_id and not is_insert:
         result = utils.check_table_name(cursor_pg, table_name)
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
-
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
@@ -563,18 +564,19 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
     return success_count, failed_count, total_count
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def remove_pg_table(request, id, table_id):
-
+def remove_pg_table(request, payload, id, table_id):
+    is_insert = payload.get('is_insert')
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
-    try:
-        cursor_pg = utils.get_cursor_pg(id)
-        _drop_table(pg_table.table_name, cursor_pg)
-    except Exception:
-        return False
+    if not is_insert:
+        try:
+            cursor_pg = utils.get_cursor_pg(id)
+            _drop_table(pg_table.table_name, cursor_pg)
+        except Exception:
+            pass
 
     return JsonResponse({
         'success': True,
@@ -660,44 +662,100 @@ def refresh_single_table(request, id, table_id):
 
 
 # Өөр баазаас дата авах
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_ano_tables(request, pk):
-    pk = 9
-    table_fields = list()
-    field = list()
-    single_field = dict()
+
     cursor_pg = utils.get_cursor_pg(pk)
     sql = '''
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public'
             ORDER BY table_name;
-    '''.format(table_name='table_name')
+    '''
+
     table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
 
-    for table in table_names:
-        table_name = table['table_name']
-        sql = '''
-            SELECT column_name
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_NAME = '{table_name}'
-        '''.format(
-                table_name = table_name,
-                column_name = 'column_name' )
-
-        single_field['table_name'] = table_name
-        columns = utils.get_sql_execute(sql, cursor_pg, 'all')
-
-        for column_names in columns:
-            field.append(column_names['column_name'])
-
-        single_field['column_name'] = field
-    table_fields.append(single_field)
-
     return JsonResponse({
-        'success': True,
-        'fields': table_fields
+        'table_names': table_names
     })
 
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_table_fields(request, payload, pk):
+    table_name = payload.get('table_name')
+    cursor_pg = utils.get_cursor_pg(pk)
+
+    sql = '''
+        SELECT
+        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
+        FROM
+        pg_attribute
+        WHERE
+        attrelid = '{table_name}'::regclass AND    attnum > 0
+        ORDER  BY attnum
+    '''.format(
+        table_name = table_name,
+    )
+
+    columns = utils.get_sql_execute(sql, cursor_pg, 'all')
+
+    return JsonResponse({
+        'fields': columns
+    })
+
+
+def _insert_to_geo_db(table_name, cursor, columns, feature_code):
+    print("hoho")
+
+def _insert_sngle_table(ano_db, ano_db_table_pg, cursor):
+    table_info = []
+    table_name = ano_db_table_pg.table_name
+    field_config = ano_db_table_pg.field_config.replace("'", '"')
+    columns = utils.json_load(field_config)
+    feature_code = ano_db_table_pg.feature_code
+    success_count, failed_count, total_count = _insert_to_geo_db(table_name, cursor, columns, feature_code)
+    table_info_text = '''
+        {table_name} хүснэгт
+        нийт {total_count} мөр дата-наас
+        амжилттай орсон {success_count}
+        амжилтгүй {failed_count}
+        '''.format(
+            table_name=table_name,
+            total_count=total_count,
+            success_count=success_count,
+            failed_count=failed_count
+        )
+    table_info.append(table_info_text)
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+    return table_info
+
+
+@require_GET
+@csrf_exempt
+def refresh_all_conn(request, id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
+
+    cursor_pg = utils.get_cursor_pg(id)
+    table_info = []
+    info = ''
+    success = True
+
+    if ano_db_table_pg:
+        for table in ano_db_table_pg:
+            single_table_info = _insert_sngle_table(ano_db, table, cursor_pg)
+            table_info.append(single_table_info)
+        # ano_db.database_updated_at = datetime.datetime.now()
+        # ano_db.save()
+    return JsonResponse({
+        'success': success,
+        'info': info,
+        'table_info': table_info,
+    })
