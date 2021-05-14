@@ -1,3 +1,5 @@
+from geojson import feature
+from backend import another_database
 import datetime
 
 from django.contrib.gis.geos import GEOSGeometry
@@ -10,6 +12,8 @@ from django.shortcuts import get_object_or_404
 
 from backend.another_database.models import AnotherDatabase
 from backend.another_database.models import AnotherDatabaseTable
+from backend.dedsanbutets.models import ViewNames
+
 from main.components import Datatable
 from django.views.decorators.csrf import csrf_exempt
 
@@ -127,6 +131,26 @@ def get_pg_table_names(request, conn_id):
     })
 
 
+def _get_valid_data_type(value_type_id):
+    if value_type_id == 'number':
+        value_type = 'inte'
+    elif value_type_id == 'double':
+        value_type = 'inte'
+    elif value_type_id == 'multi-text':
+        value_type = 'char'
+    elif value_type_id == 'text':
+        value_type = 'char'
+    elif value_type_id == 'date':
+        value_type = 'time'
+    elif value_type_id == 'link':
+        value_type = 'char'
+    elif value_type_id == 'boolean':
+        value_type = 'bool'
+    else:
+        value_type = 'inte'
+    return value_type
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -149,6 +173,14 @@ def getFields(request, payload):
                 single_property = single_property.first()
                 code_data_list = []
                 if single_property:
+                    value_type_id = single_property.value_type_id
+                    value_type_name = ''
+                    value_type_qs = LValueTypes.objects.filter(value_type_id=value_type_id)
+                    value_type_qs = value_type_qs.exclude(value_type_id='data_type')
+                    value_type_qs = value_type_qs.first()
+                    if value_type_qs:
+                        value_type_name = value_type_qs.value_type_name
+
                     if single_property.value_type_id in value_types:
                         code_lists = LCodeLists.objects.filter(property_id=property_id)
                         for code_list in code_lists:
@@ -161,12 +193,15 @@ def getFields(request, payload):
                     properties_data.append({
                         'property_name': single_property.property_name,
                         'property_id': single_property.property_id,
-                        'code_list': code_data_list
+                        'code_list': code_data_list,
+                        'value_type_name': value_type_name,
+                        'value_type_id': _get_valid_data_type(value_type_id)
                     })
 
             data_types_datas.append({
                 'data_type_name': data_types.data_type_name,
                 'data_type_eng': data_types.data_type_name_eng,
+                'data_type_definition': data_types.data_type_definition,
                 'properties': properties_data
             })
 
@@ -195,17 +230,17 @@ def save_table(request, payload):
     feature_name = payload.get('feature_name')
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
+    is_insert = payload.get('is_insert')
     result = []
     cursor_pg = utils.get_cursor_pg(id)
 
     feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
     another_database = get_object_or_404(AnotherDatabase, pk=id)
-    if not table_id:
+    if not table_id and not is_insert:
         result = utils.check_table_name(cursor_pg, table_name)
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
-
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
@@ -563,18 +598,19 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
     return success_count, failed_count, total_count
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def remove_pg_table(request, id, table_id):
-
+def remove_pg_table(request, payload, id, table_id):
+    is_insert = payload.get('is_insert')
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
-    try:
-        cursor_pg = utils.get_cursor_pg(id)
-        _drop_table(pg_table.table_name, cursor_pg)
-    except Exception:
-        return False
+    if not is_insert:
+        try:
+            cursor_pg = utils.get_cursor_pg(id)
+            _drop_table(pg_table.table_name, cursor_pg)
+        except Exception:
+            pass
 
     return JsonResponse({
         'success': True,
@@ -656,4 +692,268 @@ def refresh_single_table(request, id, table_id):
         'success': success,
         'info': info,
         'table_info': table_info
+    })
+
+
+# Өөр баазаас дата авах
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_ano_tables(request, pk):
+
+    cursor_pg = utils.get_cursor_pg(pk)
+    sql = '''
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY table_name;
+    '''
+
+    table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
+
+    return JsonResponse({
+        'table_names': table_names
+    })
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_table_fields(request, payload, pk):
+    table_name = payload.get('table_name')
+    cursor_pg = utils.get_cursor_pg(pk)
+
+    sql = '''
+        SELECT
+        attname AS column_name, format_type(atttypid, atttypmod) AS data_type
+        FROM
+        pg_attribute
+        WHERE
+        attrelid = '{table_name}'::regclass AND    attnum > 0
+        ORDER  BY attnum
+    '''.format(
+        table_name = table_name,
+    )
+
+    columns = utils.get_sql_execute(sql, cursor_pg, 'all')
+
+    return JsonResponse({
+        'fields': columns
+    })
+
+
+def _delete_datas_of_pg(unique_id, feature_id):
+    m_geo_datas = MGeoDatas.objects.filter(
+        feature_id=feature_id, created_by=unique_id
+    )
+    if m_geo_datas:
+        for geo_data in m_geo_datas:
+            m_datas = MDatas.objects.filter(
+                geo_id=geo_data.geo_id,
+                created_by=unique_id
+            )
+            m_datas.delete()
+
+        m_geo_datas.delete()
+
+
+def _get_ona_datas(cursor, table_name, columns, table_geo_data):
+    sql = '''
+        select
+            {columns}
+        from
+            public.{table_name}
+    '''.format(
+        table_name=table_name,
+        columns=','.join(columns),
+        table_geo_data=table_geo_data
+    )
+    cursor.execute(sql)
+    datas = list(utils.dict_fetchall(cursor))
+    return datas
+
+
+def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
+
+    geo_data = _geojson_to_geom(ona_data[table_geo_data])
+    geom =utils.convert_3d_with_srid(geo_data)
+    new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+
+    new_geo = MGeoDatas.objects.create(
+        geo_id=new_geo_id,
+        geo_data=geom,
+        feature_id=feature.feature_id,
+        created_by=unique_id
+    )
+    return new_geo.geo_id
+
+
+def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
+
+    property_ids = _get_row_to_list('property_id', columns, True)
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_id__in=property_ids)
+    prop_codes = list(prop_qs.values_list('property_code', flat=True))
+
+    for prop_code in prop_codes:
+        data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature.feature_code)
+        for prop_data in columns:
+            if data['property_id'] == prop_data['property_id']:
+                mdata_value = dict()
+                mdata_value[value_type] = ona_data[prop_data['table_field']]
+                MDatas.objects.create(
+                    geo_id=geo_id,
+                    **data,
+                    **mdata_value,
+                    created_by=unique_id
+                )
+
+
+def _get_row_to_list(field_name, dict_data, table_field):
+    row_list = []
+    for i in dict_data:
+        if table_field:
+            if isinstance(i[field_name], int):
+                row_list.append(i[field_name])
+        else:
+            if i['property_id'] == 'geo_datas':
+                geo_data_field = '''
+                    ST_AsGeoJSON(ST_Transform({geo_data}, 4326)) as {geo_data}
+                '''.format(geo_data=i[field_name])
+                row_list.append(geo_data_field)
+            else:
+                row_list.append(i[field_name])
+
+    return row_list
+
+
+def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
+    success_count = 0
+    total_count = 0
+    failed_count = 0
+    unique_id = ano_db.unique_id
+    feature_id = feature.feature_id
+    _delete_datas_of_pg(unique_id, feature_id)
+
+    table_geo_data = list(
+        filter(lambda x: x['property_id'] == 'geo_datas', columns)
+    )[0]['table_field']
+
+    table_fields = _get_row_to_list('table_field', columns, False)
+    ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
+    total_count = len(ona_table_datas)
+    for ona_data in ona_table_datas:
+        try:
+            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
+            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+            success_count = success_count + 1
+        except Exception:
+            pass
+
+    return success_count, failed_count, total_count
+
+
+def _insert_single_table(ano_db, ano_db_table_pg, cursor):
+    table_info = []
+    table_name = ano_db_table_pg.table_name
+    field_config = ano_db_table_pg.field_config.replace("'", '"')
+    columns = utils.json_load(field_config)
+    feature_code = ano_db_table_pg.feature_code
+    feature = LFeatures.objects.filter(feature_code=feature_code).first()
+    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, table_name, cursor, columns, feature)
+    table_info_text = '''
+        {table_name} хүснэгт
+        нийт {total_count} мөр дата-наас
+        "{feature_name}" feature-д
+        амжилттай орсон {success_count}
+        амжилтгүй {failed_count}
+        '''.format(
+            table_name=table_name,
+            total_count=total_count,
+            success_count=success_count,
+            failed_count=failed_count,
+            feature_name=feature.feature_name
+        )
+
+    table_info.append(table_info_text)
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+    return table_info
+
+
+@require_GET
+@csrf_exempt
+@user_passes_test(lambda u: u.is_superuser)
+def refresh_all_conn(request, id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(another_database=ano_db)
+
+    cursor_pg = utils.get_cursor_pg(id)
+    table_info = []
+    info = ''
+    success = True
+
+    if ano_db_table_pg:
+        for table in ano_db_table_pg:
+            single_table_info = _insert_single_table(ano_db, table, cursor_pg)
+            table_info.append(single_table_info)
+        ano_db.database_updated_at = datetime.datetime.now()
+        ano_db.save()
+    return JsonResponse({
+        'success': success,
+        'table_info': table_info,
+    })
+
+
+@require_GET
+@csrf_exempt
+@user_passes_test(lambda u: u.is_superuser)
+def insert_single_table(request, id, table_id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(id=table_id).first()
+
+    cursor_pg = utils.get_cursor_pg(id)
+    success = True
+    single_table_info = _insert_single_table(ano_db, ano_db_table_pg, cursor_pg)
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+    return JsonResponse({
+        'success': success,
+        'table_info': single_table_info,
+    })
+
+
+def _refresh_feature(items):
+    feature_code = items.feature_code
+    feature_qs = LFeatures.objects
+    feature_qs = feature_qs.filter(feature_code=feature_code).first()
+    feature_id = feature_qs.feature_id
+    view_qs = ViewNames.objects
+    view_qs = view_qs.filter(feature_id=feature_id)
+    if view_qs:
+        utils.refreshMaterializedView(feature_id)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def refresh_view(request, payload):
+    id = payload.get('id')
+    table_id = payload.get('table_id')
+    initial_qs = AnotherDatabaseTable.objects
+
+    if table_id :
+        ano_db_table_pg = initial_qs.filter(id=table_id).first()
+        _refresh_feature(ano_db_table_pg)
+    else :
+        ano_db_table_pg = initial_qs.filter(another_database_id=id)
+
+        for item in ano_db_table_pg:
+            _refresh_feature(item)
+
+    return JsonResponse({
+        'success': True
     })
