@@ -34,7 +34,9 @@ export default class  ExportCreate extends Component {
             ano_table_fields: [],
             table_field_name: '',
             matched_feilds: [],
-            table_field_error: []
+            table_field_error: [],
+            check_data_type:false,
+            check_error: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -47,6 +49,7 @@ export default class  ExportCreate extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.setSelectedField = this.setSelectedField.bind(this)
+        this.dataTypeValidation = this.dataTypeValidation.bind(this)
     }
 
     componentDidMount(){
@@ -82,13 +85,15 @@ export default class  ExportCreate extends Component {
     getTableFields(table_name){
         const {id, matched_feilds} = this.state
         service.pg_config.fieldNames(id, table_name).then(({fields}) => {
-
             var value = obj => obj.data_type.slice(0,4) == 'geom'
             var index_of = fields.findIndex(value)
-            var geom_field_name = fields[index_of].column_name
-            if (fields) this.setState({
-                ano_table_fields: fields, geo_data_field: geom_field_name,
+            if(index_of != -1)
+                var geom_field_name = fields[index_of].column_name
+            if (fields)
+            {
+                this.setState({ano_table_fields: fields, geo_data_field: geom_field_name,
             })
+        }
         })
     }
 
@@ -223,6 +228,8 @@ export default class  ExportCreate extends Component {
         var table_data = e.target.selectedIndex
         var optionElement = e.target.childNodes[table_data]
         var selected_data_type =  optionElement.getAttribute('name')
+        var selected_id =  optionElement.getAttribute('id')
+        this.dataTypeValidation(prop_key, data_key, selected_id)
 
         var values = {
             'table_field': data,
@@ -270,6 +277,44 @@ export default class  ExportCreate extends Component {
         return selected_field
     }
 
+    dataTypeValidation(prop_key, data_key, index){
+        const {data_type_list, ano_table_fields, check_error} = this.state
+        var type=false
+        var prop_id = data_type_list[data_key].properties[prop_key].property_id
+        var list_check_error = [...check_error]
+        var check_data_type = list_check_error.indexOf(prop_id)
+        if (index) {
+            var prop_data_type = data_type_list[data_key].properties[prop_key].value_type_id
+            var table_data_type = ano_table_fields[parseInt(index)].data_type.slice(0,4)
+
+            if (prop_data_type != table_data_type) {
+                type = true
+                if (check_data_type && check_data_type == -1) {
+                    list_check_error.push(prop_id)
+                }
+            }
+            else {
+                type = false
+            }
+        }
+        else
+            type=false
+
+
+        data_type_list[data_key].properties[prop_key]['form_state'] = type
+
+        if (!type){
+            if (check_data_type >-1) {
+                list_check_error = list_check_error.filter((val) => val != prop_id)
+            }
+        }
+
+        this.setState({
+            ...data_type_list,
+            check_error: list_check_error
+        })
+    }
+
     render() {
         const {
             table_id, id,
@@ -278,7 +323,8 @@ export default class  ExportCreate extends Component {
             selected_packages, data_type_list,
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
-            matched_feilds, geo_data_field
+            matched_feilds, geo_data_field, check_data_type,
+            check_error
         } = this.state
         return (
             <div className="card p-2">
@@ -374,6 +420,7 @@ export default class  ExportCreate extends Component {
                                                         property_data={property_data}
                                                         ano_table_fields={ano_table_fields}
                                                         handleSetField={this.handleSetField}
+                                                        dataTypeValidation={this.dataTypeValidation}
                                                         setSelectedField={this.setSelectedField(property_data)}
                                                     />
                                                 )
@@ -393,7 +440,9 @@ export default class  ExportCreate extends Component {
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
-                        disabled={ (!table_name || matched_feilds.length < 1) ? true : false}
+                        disabled={
+                            (!table_name || matched_feilds.length < 0 || check_error.length >0 || ! geo_data_field ) ? true : false
+                        }
                     >
                         {
                             table_id
