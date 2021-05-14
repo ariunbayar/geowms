@@ -170,7 +170,7 @@ export default class  ExportCreate extends Component {
             this.setState({ is_loading: true })
             var values = {
                     'table_field': geo_data_field,
-                    'properti_id': 'geo_datas',
+                    'property_id': 'geo_datas',
                     'data_type': 'geom'
             }
 

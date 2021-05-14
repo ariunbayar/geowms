@@ -81,38 +81,23 @@ export default class List extends Component {
     handleRefreshData(values){
         if(values.db_type == 'MSSQL') this.handleMssql(values)
         else if(values.db_type == "MONGODB") this.handleMongo(values)
-        else if(values.db_type == "PgDb") this.handlePGRefreshData(values)
+        else if(values.db_type == "PgDB") this.handlePGRefreshData(values)
     }
     handlePGRefreshData(values) {
-
         this.setState({is_loading: true})
         service
             .pg_config
             .refreshData(values.id)
-            .then(({success}) => {
+            .then(({success, table_info}) => {
                 if (success) {
-                    this.setState({is_loading: false})
+                    this.setState({ is_loading: false })
+                    var table_res = table_info.join("\n")
                     this.modalChange(
                         'fa fa-check-circle',
                         null,
                         'success',
-                        'Амжилттай боллоо',
-                        ``,
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
-                }
-                else {
-                    this.setState({is_loading: false})
-                    this.modalChange(
-                        'fa fa-time-circle',
-                        null,
-                        'danger',
-                        'Алдаа гарлаа',
-                        ``,
+                        'Амжилттай',
+                        `${table_res}`,
                         false,
                         '',
                         '',

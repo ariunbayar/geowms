@@ -709,10 +709,9 @@ def get_table_fields(request, payload, pk):
     })
 
 
-def _delete_datas_of_pg(ano_db, feature_id):
-    unique_id = ano_db.unique_id
+def _delete_datas_of_pg(unique_id, feature_id):
     m_geo_datas = MGeoDatas.objects.filter(
-        feature_id=feature_id, create_by=unique_id
+        feature_id=feature_id, created_by=unique_id
     )
     if m_geo_datas:
         for geo_data in m_geo_datas:
@@ -725,69 +724,115 @@ def _delete_datas_of_pg(ano_db, feature_id):
         m_geo_datas.delete()
 
 
-def _get_ona_datas(cursor, table_name, columns):
+def _get_ona_datas(cursor, table_name, columns, table_geo_data):
     sql = '''
         select
             {columns},
-            Find_SRID('public', '{table_name}', '{data}') as srid,
+            public.Find_SRID('public', '{table_name}', '{table_geo_data}') as srid
         from
-            {table_name}
+            public.{table_name}
     '''.format(
         table_name=table_name,
-        columns=','.join(columns)
+        columns=','.join(columns),
+        table_geo_data=table_geo_data
     )
-
-    datas = utils.get_sql_execute(sql, cursor, 'all')
+    cursor.execute(sql)
+    datas = list(utils.dict_fetchall(cursor))
     return datas
 
 
-def _insert_geo_data(ona_data, feature_id):
-    print("hohoh")
-    print("hohoh")
-    print("hohoh")
+def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
+    geom =utils.convert_3d_with_srid(ona_data[table_geo_data])
+    new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+    new_geo = MGeoDatas.objects.create(
+        geo_id=new_geo_id,
+        geo_data=geom,
+        feature_id=feature.feature_id,
+        created_by=unique_id
+    )
+    return new_geo.geo_id
 
 
-def _get_row_to_list(field_name, dict_data):
+def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
+
+    property_ids = _get_row_to_list('property_id', columns, True)
+    prop_qs = LProperties.objects
+    prop_qs = prop_qs.filter(property_id__in=property_ids)
+    prop_codes = list(prop_qs.values_list('property_code', flat=True))
+
+    for prop_code in prop_codes:
+        data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature.feature_code)
+        for prop_data in columns:
+            if data['property_id'] == prop_data['property_id']:
+                mdata_value = dict()
+                mdata_value[value_type] = ona_data[prop_data['table_field']]
+                MDatas.objects.create(
+                    geo_id=geo_id,
+                    **data,
+                    **mdata_value,
+                    created_by=unique_id
+                )
+
+
+def _get_row_to_list(field_name, dict_data, table_field):
     row_list = []
     for i in dict_data:
-        row_list.append(i[field_name])
+        if table_field:
+            if isinstance(i[field_name], int):
+                row_list.append(i[field_name])
+        else:
+            row_list.append(i[field_name])
     return row_list
 
 
-def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature_code):
-    feature = LFeatures.objects.filter(feature_code=feature_code).first()
+def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
+    success_count = 0
+    total_count = 0
+    failed_count = 0
+    unique_id = ano_db.unique_id
     feature_id = feature.feature_id
-    # property_code = list(
-    #     filter(lambda x: x['property_id'] == code_list['property_id'], prop_datas)
-    # )[0]['property_code']
-    _delete_datas_of_pg(ano_db, feature_id)
+    _delete_datas_of_pg(unique_id, feature_id)
 
+    table_geo_data = list(
+        filter(lambda x: x['property_id'] == 'geo_datas', columns)
+    )[0]['table_field']
 
-    table_fields = _get_row_to_list('table_field', columns)
-    ona_table_datas = _get_ona_datas(cursor, table_name, table_fields)
-
+    table_fields = _get_row_to_list('table_field', columns, False)
+    ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
+    total_count = len(ona_table_datas)
     for ona_data in ona_table_datas:
-        geo_id = _insert_geo_data(ona_data, feature_id)
+        try:
+            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
+            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+            success_count = success_count + 1
+        except Exception:
+            pass
+
+    return success_count, failed_count, total_count
 
 
-def _insert_sngle_table(ano_db, ano_db_table_pg, cursor):
+def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     table_info = []
     table_name = ano_db_table_pg.table_name
     field_config = ano_db_table_pg.field_config.replace("'", '"')
     columns = utils.json_load(field_config)
     feature_code = ano_db_table_pg.feature_code
-    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, table_name, cursor, columns, feature_code)
+    feature = LFeatures.objects.filter(feature_code=feature_code).first()
+    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, table_name, cursor, columns, feature)
     table_info_text = '''
         {table_name} хүснэгт
         нийт {total_count} мөр дата-наас
+        "{feature_name}" feature-д
         амжилттай орсон {success_count}
         амжилтгүй {failed_count}
         '''.format(
             table_name=table_name,
             total_count=total_count,
             success_count=success_count,
-            failed_count=failed_count
+            failed_count=failed_count,
+            feature_name=feature.feature_name
         )
+
     table_info.append(table_info_text)
     ano_db.database_updated_at = datetime.datetime.now()
     ano_db.save()
@@ -808,12 +853,11 @@ def refresh_all_conn(request, id):
 
     if ano_db_table_pg:
         for table in ano_db_table_pg:
-            single_table_info = _insert_sngle_table(ano_db, table, cursor_pg)
+            single_table_info = _insert_single_table(ano_db, table, cursor_pg)
             table_info.append(single_table_info)
-        # ano_db.database_updated_at = datetime.datetime.now()
-        # ano_db.save()
+        ano_db.database_updated_at = datetime.datetime.now()
+        ano_db.save()
     return JsonResponse({
         'success': success,
-        'info': info,
         'table_info': table_info,
     })
