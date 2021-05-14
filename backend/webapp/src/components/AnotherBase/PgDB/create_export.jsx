@@ -34,7 +34,6 @@ export default class  ExportCreate extends Component {
             ano_table_fields: [],
             table_field_name: '',
             matched_feilds: [],
-            table_field_error: [],
             check_data_type:false,
             check_error: []
         }
@@ -223,7 +222,7 @@ export default class  ExportCreate extends Component {
     }
 
     handleSetField(data_key, prop_key, e){
-        const { data_type_list, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
+        const { data_type_list, table_fields, matched_feilds } = this.state
         var data = e.target.value
         var table_data = e.target.selectedIndex
         var optionElement = e.target.childNodes[table_data]
