@@ -155,9 +155,11 @@ urlpatterns = [
         ], 'meta-data'))),
 
         path('revoke_request/', include(([
+            path('', revoke_request_views.get_list),
             path('revoke-new/', revoke_request_views.revoke_new),
             path('revoke-change-state/', revoke_request_views.revoke_state),
-            path('revoke-search/', revoke_request_views.revoke_paginate),
+            # path('revoke-search/', revoke_request_views.revoke_paginate),
+            path('get_choices/', revoke_request_views.get_choices),
         ], 'revoke_request'))),
 
     ], 'back_org'))),

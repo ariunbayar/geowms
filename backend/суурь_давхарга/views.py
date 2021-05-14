@@ -74,9 +74,9 @@ def wms_preview(request, pk, url_type):
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     if url_type == "wmts":
-        rsp = requests.get(wms.cache_url, queryargs, headers=headers)
+        rsp = requests.get(wms.cache_url, queryargs, headers=headers, verify=False)
     else:
-        rsp = requests.get(wms.url, queryargs, headers=headers)
+        rsp = requests.get(wms.url, queryargs, headers=headers, verify=False)
 
     content_type = rsp.headers.get('content-type')
 

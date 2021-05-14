@@ -28,18 +28,27 @@ export default class SideBar extends Component {
             cache_type: 'seed',
             number_of_cache: 2,
             image_format: 'png',
-            tile_cache_check: false
+            tile_cache_check: false,
+            check_list: props.check_list,
+            is_loading: false,
+            invalid_feedback: false,
         }
-
         this.handleInput = this.handleInput.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.handleOnClick = this.handleOnClick.bind(this)
+        this.handleAllCheck = this.handleAllCheck.bind(this)
 
     }
 
     handleOnClick(){
-        this.setState({check_style:true})
+        this.setState({ check_style: true })
+        const { style_name } = this.state
+        if(style_name) {
+            this.setState({ invalid_feedback: false })
+        } else {
+            this.setState({ invalid_feedback: true })
+        }
     }
 
     handleOnChange(e){
@@ -48,13 +57,18 @@ export default class SideBar extends Component {
 
     handleInput(e){
         let id_list = this.state.id_list
+        var check_list = this.state.check_list
         const value = parseInt(e.target.value)
         if (e.target.checked) {
             id_list.push(value)
         } else {
             id_list = id_list.filter((oid) => oid != value)
         }
-        this.setState({id_list})
+
+        if(id_list.length == this.props.property_length){ check_list = true }
+        else { check_list = false }
+
+        this.setState({id_list, check_list })
     }
 
     handleSave(){
@@ -75,34 +89,63 @@ export default class SideBar extends Component {
             }
         }
 
-        this.setState({save_is_load: true})
+        if(style_name) {
+            this.setState({ invalid_feedback: false })
+        } else {
+            this.setState({ invalid_feedback: true })
+        }
 
+        this.setState({
+            save_is_load: true,
+            is_loading:true
+        })
         service.setPropertyFields(fid, id_list, tid, values).then(({success, info}) => {
             if(success){
-                this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'success'})
+                this.setState({save_is_load: false, is_loading: false, modal_alert_check: 'open', title: info, model_type_icon: 'success'})
                 this.props.getAll()
                 this.modalCloseTime()
+
             }
             else{
-                this.setState({save_is_load: false, modal_alert_check: 'open', title: info, model_type_icon: 'danger'})
+                this.setState({save_is_load: false, is_loading: false, modal_alert_check: 'open', title: info, model_type_icon: 'danger'})
                 this.modalCloseTime()
             }
         })
     }
 
+    handleAllCheck(e){
+        let id_list = []
+        const { fields } = this.props
+        if(e.target.checked)
+        {
+            fields.map((f_config, idx) =>
+                f_config.data_types.map((data_type, idx) =>
+                    data_type.data_type_configs.map((data_type_config, idx) =>
+                        id_list.push(data_type_config.property_id)
+                        )
+                )
+            )
+            this.setState({id_list:id_list, check_list:true })
+        }
+        else { this.setState({ id_list: [], check_list:false}) }
+    }
+
     componentDidMount(){
-        const id_list = this.props.id_list
-        this.setState({id_list})
+        const{ id_list }= this.props
+        this.setState({ id_list })
     }
 
     componentDidUpdate(pP, pS){
         const {style_name, view_name, tile_cache_check} = this.state
-
         if(pS.style_name != style_name){
             this.setState({
                 check_style:false,
                 style_name,
             })
+        }
+
+        if(pP.check_list != this.props.check_list) {
+            this.setState({check_list: this.props.check_list})
         }
 
         if(pS.tile_cache_check != tile_cache_check) {
@@ -200,155 +243,160 @@ export default class SideBar extends Component {
     }
 
     render() {
-        const {fields, fid, fname} = this.props
+        const {fields, fid, fname } = this.props
         const {
             check_style, is_loading, cache_type,
             id_list, save_is_load, view_name, style_names,
             style_name, url, defualt_url, geom_type,
             zoom_stop, zoom_start, number_of_cache, tile_cache_check,
-            image_format
+            image_format, check_list, invalid_feedback,
         } = this.state
-
         return (
-            <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
-                <div className="card-body">
-                    {fid ?
-                        <div>
-                            {
-                                geom_type
-                                &&
-                                <fieldset>
-                                    <div className="form-row border m-1 p-1">
-                                        <div className="form-row col-md-12  text-center">
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor="" className="m-2"><h5>tilecache тохируулах</h5></label>
-                                                <input type="checkbox" checked={tile_cache_check} onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
-                                            </div>
-                                        </div>
-                                        {
-                                            tile_cache_check
-                                            &&
-                                            <div className="form-row col-md-12">
-                                                <div className="form-group col-md-4">
-                                                    <label htmlFor="" className="m-2">Зургийн формат</label>
-                                                    <select
-                                                        className="form-control form-control-sm"
-                                                        value={image_format}
-                                                        onChange={(e) => this.setState({ image_format: e.target.value })}
-                                                    >
-                                                        <option value="jpeg">jpeg</option>
-                                                        <option value="png">png</option>
-                                                    </select>
+            <Fragment>
+                <Loader is_loading={is_loading} text="Хүсэлтийг уншиж байна."/>
+                <div className={`card col-md-6 mb-1 bundle-view-right-scroll`} style={{left:"10px"}}>
+                    <div className="card-body">
+                        {fid ?
+                            <div>
+                                {
+                                    geom_type
+                                    &&
+                                    <fieldset>
+                                        <div className="form-row border m-1 p-1">
+                                            <div className="form-row col-md-12  text-center">
+                                                <div className="form-group col-md-12">
+                                                    <label htmlFor="" className="m-2"><h5>tilecache тохируулах</h5></label>
+                                                    <input type="checkbox" checked={tile_cache_check} onChange={(e) => this.setState({ tile_cache_check: !tile_cache_check})}/>
                                                 </div>
-                                                <div className="form-group col-md-4">
-                                                        <label htmlFor="" className="m-2">Томруулах эхний утга</label>
+                                            </div>
+                                            {
+                                                tile_cache_check
+                                                &&
+                                                <div className="form-row col-md-12">
+                                                    <div className="form-group col-md-4">
+                                                        <label htmlFor="" className="m-2">Зургийн формат</label>
+                                                        <select
+                                                            className="form-control form-control-sm"
+                                                            value={image_format}
+                                                            onChange={(e) => this.setState({ image_format: e.target.value })}
+                                                        >
+                                                            <option value="jpeg">jpeg</option>
+                                                            <option value="png">png</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="form-group col-md-4">
+                                                            <label htmlFor="" className="m-2">Томруулах эхний утга</label>
+                                                            <input
+                                                                type="number"
+                                                                name='zoom_start'
+                                                                className={'form-control col-4' + (zoom_start > 21 ? ' is-invalid' : '')}
+                                                                value= {zoom_start}
+                                                                onChange={(e) => this.handleOnChange(e)}
+                                                            />
+                                                            {
+                                                                zoom_start > 21
+                                                                &&
+                                                                <label className="text-danger">
+                                                                    Томруулах эхний утга нь хамгийн ихдээ 21 байна
+                                                                </label>
+                                                            }
+                                                    </div>
+                                                    <div className="form-group col-md-4">
+                                                        <label htmlFor="" className="m-2">Томруулах сүүлчийн утга</label>
                                                         <input
                                                             type="number"
-                                                            name='zoom_start'
-                                                            className={'form-control col-4' + (zoom_start > 21 ? ' is-invalid' : '')}
-                                                            value= {zoom_start}
+                                                            name='zoom_stop'
+                                                            className={'form-control col-4' + (zoom_stop > 21 ? ' is-invalid' : '')}
+                                                            value= {zoom_stop}
                                                             onChange={(e) => this.handleOnChange(e)}
                                                         />
                                                         {
-                                                            zoom_start > 21
+                                                            zoom_stop > 21
                                                             &&
                                                             <label className="text-danger">
-                                                                Томруулах эхний утга нь хамгийн ихдээ 21 байна
+                                                                Томруулах сүүлчийн утга нь хамгийн ихдээ 21 байна
                                                             </label>
                                                         }
+                                                    </div>
+                                                    <div className="form-group col-md-4">
+                                                        <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
+                                                        <select
+                                                            className="form-control form-control-sm"
+                                                            value={cache_type}
+                                                            onChange={(e) => this.setState({ cache_type: e.target.value })}
+                                                        >
+                                                            <option value="seed">seed</option>
+                                                            <option value="reseed">reseed</option>
+                                                            <option value="truncate">Truncate</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="form-group col-md-4 mr-2">
+                                                        <label htmlFor="number_of_cache" className="m-2">Хэрэглэх таскуудын тоо</label>
+                                                        <input
+                                                            type="number"
+                                                            name='number_of_cache'
+                                                            className={'form-control col-4' + (zoom_stop > 100 ? ' is-invalid' : '')}
+                                                            value= {number_of_cache}
+                                                            onChange={(e) => this.handleOnChange(e)}
+                                                        />
+                                                        {
+                                                            number_of_cache > 100
+                                                            &&
+                                                            <label className="text-danger">
+                                                            Хэрэглэх таскын тоо хамгийн ихдээ 100 байна
+                                                            </label>
+                                                        }
+                                                    </div>
                                                 </div>
-                                                <div className="form-group col-md-4">
-                                                    <label htmlFor="" className="m-2">Томруулах сүүлчийн утга</label>
-                                                    <input
-                                                        type="number"
-                                                        name='zoom_stop'
-                                                        className={'form-control col-4' + (zoom_stop > 21 ? ' is-invalid' : '')}
-                                                        value= {zoom_stop}
-                                                        onChange={(e) => this.handleOnChange(e)}
-                                                    />
-                                                    {
-                                                        zoom_stop > 21
-                                                        &&
-                                                        <label className="text-danger">
-                                                            Томруулах сүүлчийн утга нь хамгийн ихдээ 21 байна
-                                                        </label>
-                                                    }
+                                            }
+                                            </div>
+                                            <div className="form-row border m-1 p-2 pl-2">
+                                                <div className="form-row col-md-12 text-center">
+                                                    <div className="form-group col-md-12">
+                                                        <label htmlFor="color" className="m-2"><h5>давхаргын style тохируулах</h5></label>
+                                                    </div>
                                                 </div>
-                                                <div className="form-group col-md-4">
-                                                    <label htmlFor="color" className="m-2">Үйлдлийн төрөл</label>
+                                                <div className="form-group col-md-6">
+                                                    <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
                                                     <select
-                                                        className="form-control form-control-sm"
-                                                        value={cache_type}
-                                                        onChange={(e) => this.setState({ cache_type: e.target.value })}
+                                                        className={"custom-select" + (!style_name ? ' is-invalid' : '')}
+                                                        value={style_name ? style_name : ''}
+                                                        onChange={(e) => this.setState({ style_name: e.target.value })}
                                                     >
-                                                        <option value="seed">seed</option>
-                                                        <option value="reseed">reseed</option>
-                                                        <option value="truncate">Truncate</option>
+                                                        <option value=''></option>
+                                                        {
+                                                            style_names.map((name, idx) =>
+                                                                <option value={name} key={idx}>{name}</option>
+                                                        )}
                                                     </select>
-                                                </div>
-                                                <div className="form-group col-md-4 mr-2">
-                                                    <label htmlFor="number_of_cache" className="m-2">Хэрэглэх таскуудын тоо</label>
-                                                    <input
-                                                        type="number"
-                                                        name='number_of_cache'
-                                                        className={'form-control col-4' + (zoom_stop > 100 ? ' is-invalid' : '')}
-                                                        value= {number_of_cache}
-                                                        onChange={(e) => this.handleOnChange(e)}
-                                                    />
                                                     {
-                                                        number_of_cache > 100
-                                                        &&
-                                                        <label className="text-danger">
-                                                        Хэрэглэх таскын тоо хамгийн ихдээ 100 байна
-                                                        </label>
+                                                        !style_name && invalid_feedback &&
+                                                            <small className="text-danger">Style-ийн нэр хоосон байна</small>
                                                     }
-                                                </div>
                                             </div>
-                                        }
-                                        </div>
-                                        <div className="form-row border m-1 p-2 pl-2">
-                                            <div className="form-row col-md-12 text-center">
-                                                <div className="form-group col-md-12">
-                                                    <label htmlFor="color" className="m-2"><h5>давхаргын style тохируулах</h5></label>
-                                                </div>
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="id_geoserver_user">Style-ийн нэр</label>
-                                                <select
-                                                    className="form-control form-control-sm"
-                                                    value={style_name ? style_name : ''}
-                                                    onChange={(e) => this.setState({ style_name: e.target.value })}
+                                            <div className="form-group col-md-12">
+                                                <button
+                                                    type="button"
+                                                    className='btn btn-primary'
+                                                    onClick={this.handleOnClick}
                                                 >
-                                                    <option value={style_name}>{style_name ? style_name : ''}</option>
-                                                    {
-                                                        style_names.map((name, idx) =>
-                                                            <option value={name} key={idx}>{name}</option>
-                                                    )}
-                                                </select>
-                                        </div>
-                                        <div className="form-group col-md-12">
-                                            <button
-                                                type="button"
-                                                className='btn btn-primary'
-                                                onClick={this.handleOnClick}
-                                            >
-                                                Style-ийг шалгах
-                                            </button>
-                                        </div>
-                                        {
-                                            check_style &&
-                                            <div className="form-row col-md-12">
-                                                <div className="form-group col-md-12">
-                                                    <StyleMap
-                                                        style_name={style_name}
-                                                        view_name={view_name}
-                                                        url={url}
-                                                        defualt_url={defualt_url}
-                                                        geom_type={geom_type}
-                                                    />
-                                                </div>
+                                                    Style-ийг шалгах
+                                                </button>
                                             </div>
-                                        }
+                                            {
+                                                check_style &&
+                                                <div className="form-row col-md-12">
+                                                    <div className="form-group col-md-12">
+                                                        <StyleMap
+                                                            style_name={style_name}
+                                                            view_name={view_name}
+                                                            url={url}
+                                                            defualt_url={defualt_url}
+                                                            geom_type={geom_type}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            }
                                     </div>
                                 </fieldset>
                             }
@@ -365,11 +413,21 @@ export default class SideBar extends Component {
                                             Data <br/>type
                                         </th>
                                         <th className="text-center" style={{width: "15%"}}>
-                                            View
+                                             View
+                                             <div class="custom-control custom-switch ml-1">
+                                                <input
+                                                id="allcheck"
+                                                type="checkbox"
+                                                class="custom-control-input"
+                                                checked={check_list}
+                                                onChange={this.handleAllCheck}
+                                                />
+                                                    <label class="custom-control-label" for="allcheck"></label>
+                                            </div>
                                         </th>
                                         <th className="text-center" style={{width: "70%"}}>
                                             Property
-                                        </th>
+                                         </th>
                                     </tr>
                                     {fields.map((f_config, idx) =>
                                         <>
@@ -437,9 +495,9 @@ export default class SideBar extends Component {
                         status={this.state.modal_alert_check}
                         modalAction={() => this.handleModalAlert()}
                     />
-                    <Loader is_loading={is_loading}/>
+                    </div>
                 </div>
-            </div>
+            </Fragment>
         )
     }
 }

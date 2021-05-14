@@ -29,7 +29,10 @@ export class List extends Component {
             geom_type: '',
             is_loading: false,
             property_loading: false,
-            cache_values: []
+            cache_values: [],
+            property_length:null,
+            check_list:false,
+
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
@@ -55,14 +58,27 @@ export class List extends Component {
     }
 
     getProperties(fid, tid, fname, event) {
+        var check_list = this.state.check_list
+        let property_length = 0
         this.active_view(event)
         this.setState({fid, tid, fname, property_loading: true})
         service.getPropertyFields(fid).then(({success ,fields, id_list, view_name, url, style_name, geom_type, cache_values}) => {
             if(success){
+                fields.map((f_config, idx) =>
+                    f_config.data_types.map((data_type, idx) =>
+                        data_type.data_type_configs.map((data_type_config, idx) =>
+                        {
+                            if (data_type_config.property_id) { property_length += 1 }
+                        })
+                    )
+                )
+
+                if(property_length == id_list.length){ check_list = true }
                 this.setState({
-                        fields, id_list, view_name, url,
+                        fields, id_list, view_name, url, check_list,
                         view_style_name: style_name, geom_type,
-                        property_loading:false, cache_values
+                        property_loading:false, cache_values,
+                        property_length:property_length,
                     })
             }
             else this.setState({property_loading: false})
@@ -133,7 +149,7 @@ export class List extends Component {
     }
 
     render() {
-        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading, cache_values} = this.state
+        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading, cache_values, check_list} = this.state
         return (
             <div className="row m-0">
                 <div className="col-md-6">
@@ -204,6 +220,8 @@ export class List extends Component {
                     fname={this.state.fname}
                     tid={this.state.tid}
                     id_list={this.state.id_list}
+                    property_length={this.state.property_length}
+                    check_list={check_list}
                     view_name={this.state.view_name}
                     style_names={style_names}
                     url={url}

@@ -10,6 +10,8 @@ import pyproj
 import math
 import json
 import psycopg2
+import socket
+from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
 from datetime import timedelta, datetime
@@ -39,6 +41,7 @@ from backend.dedsanbutets.models import ViewProperties
 from backend.dedsanbutets.models import ViewNames
 from backend.inspire.models import LProperties, MGeoDatas
 
+from backend.another_database.models import AnotherDatabase
 import main.geoserver as geoserver
 
 
@@ -1151,8 +1154,7 @@ def make_value_dict(value, properties_qs, is_display=False):
                     data = dict()
                     if not is_display:
                         if 'date' in types['value_type']:
-                            #TODO date to timezone
-                            val = val
+                            val = date_to_timezone(val)
                         data[types['value_type']] = val
                         data['property_id'] = prop['property_id']
                     if is_display:
@@ -1226,7 +1228,7 @@ def get_code_list_from_property_id(property_id):
     return code_list_values
 
 
-def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='PointNumber'):
+def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, property_code='Pointid'):
     data = dict()
     for prop in properties_qs:
         if prop.property_code == property_code:
@@ -1693,14 +1695,16 @@ def get_all_file_paths(directory):
     return file_paths
 
 
-def check_pg_connection(host, db, port, user, password):
+def check_pg_connection(host, db, port, user, password, schema):
     try:
+        schema =schema or 'public'
         connection = psycopg2.connect(
             user=user,
             password=password,
             host=host,
             port=port,
-            database=db
+            database=db,
+            options="-c search_path=dbo,{schema}".format(schema=schema)
         )
 
         cursor = connection.cursor()
@@ -1708,3 +1712,100 @@ def check_pg_connection(host, db, port, user, password):
         return cursor
     except Exception as error:
         return []
+
+
+def get_pg_cursor(conn_details):
+    host = conn_details.get('pg_host')
+    port = conn_details.get('pg_port')
+    user = conn_details.get('pg_username')
+    password = conn_details.get('pg_password')
+    db = conn_details.get('pg_database')
+    schema = conn_details.get('pg_schema')
+    try:
+        cursor = check_pg_connection(host, db, port, user, password, schema)
+    except Exception:
+        cursor = []
+    return cursor
+
+
+def get_pg_conf(conn_id):
+    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
+    connection = json_load(another_db.connection)
+    form_datas = {
+        'id': conn_id,
+        'name': another_db.name,
+        'definition': another_db.definition,
+        'pg_host': connection.get('server'),
+        'pg_port': connection.get('port'),
+        'pg_username': connection.get('username'),
+        'pg_password': connection.get('password'),
+        'pg_database': connection.get('database'),
+        'pg_schema': connection.get('schema')
+    }
+    return form_datas
+
+
+def get_cursor_pg(conn_id):
+    form_datas = get_pg_conf(conn_id)
+    cursor_pg = get_pg_cursor(form_datas)
+    return cursor_pg
+
+
+def get_sql_execute(sql, cursor, fetch_type):
+    cursor.execute(sql)
+    if fetch_type == 'one':
+        values = list(cursor.fetchone())
+    else:
+        values = list(dict_fetchall(cursor))
+    return values
+
+
+def convert_3d_with_srid(geo_data):
+    cursor = connections['default'].cursor()
+
+    sql_set_srid = '''
+        SELECT st_force3d(ST_SetSRID(GeomFromEWKT('{geo_data}'),4326)) as wkt
+    '''.format(geo_data=geo_data)
+    cursor.execute(sql_set_srid)
+
+    geo_data = get_sql_execute(sql_set_srid, cursor, 'all')
+    geo_data = geo_data[0]['wkt']
+    return geo_data
+
+
+def check_table_name(cursor, table_name):
+    sql = '''
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables
+            WHERE
+                table_schema = 'public'
+                AND
+                table_name   = '{table_name}'
+        );
+    '''.format(table_name=table_name)
+    result = get_sql_execute(sql, cursor, 'one')
+    return result
+
+
+def create_table_to_cursor(cursor, table_name, fields, schema):
+    sql = '''
+        CREATE TABLE IF NOT EXISTS {schema}.{table_name}
+        (
+            {fields}
+        )
+    '''.format(
+        table_name=table_name,
+        fields=','.join(fields),
+        schema=schema
+    )
+    cursor.execute(sql)
+
+
+def check_nsdi_address(request):
+    nsdi_check = False
+    host_name = socket.gethostname()
+    host_addr = socket.gethostbyname(host_name + ".local")
+    host = request.META.get('HTTP_HOST')
+    if host_addr == '192.168.10.15' and host == 'nsdi.gov.mn':
+        nsdi_check = True
+    return nsdi_check

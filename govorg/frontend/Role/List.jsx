@@ -2,6 +2,7 @@ import React, { Component } from "react"
 import {service} from './Role/service'
 import { PortalDataTable } from "@utils/DataTable/index"
 import Modal from "@utils/Modal/Modal"
+import {NavLink} from "react-router-dom"
 
 
 export class List extends Component {
@@ -121,6 +122,7 @@ export class List extends Component {
             нэмэлт_талбарууд,
             values,
         } = this.state
+        const { is_admin } = this.props.employee
         return (
             <div className="card">
                 <div className="card-body">
@@ -130,8 +132,8 @@ export class List extends Component {
                         per_page={20}
                         уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                         хувьсах_талбарууд={хувьсах_талбарууд}
-                        нэмэх_товч={нэмэх_товч}
-                        нэмэлт_талбарууд={нэмэлт_талбарууд}
+                        нэмэх_товч={is_admin ? нэмэх_товч : null}
+                        нэмэлт_талбарууд={is_admin ? нэмэлт_талбарууд : null}
                         color={'primary'}
                         refresh={refresh}
                     />

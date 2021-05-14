@@ -37,6 +37,7 @@ urlpatterns = [
         path('paginatedList/', wms_views.paginated_list, name='paginatedList'),
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
+        path('<int:id>/remove/invalid-layer/', wms_views.remove_invalid_layers, name='remove_invalid_layers'),
     ], 'wms'))),
 
     path('another-database/', include(([
@@ -74,6 +75,7 @@ urlpatterns = [
         path('pg/save-table/', pg_views.save_table),
         path('pg/<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
         path('pg/<int:id>/refresh-table-data/', pg_views.refresh_datas, name='refresh-datas-pg'),
+        path('pg/<int:id>/<int:table_id>/refresh-one-table/', pg_views.refresh_single_table, name='refresh_single_table'),
         path('pg/<int:id>/<int:table_id>/remove-table/', pg_views.remove_pg_table),
     ], 'another-database'))),
 

@@ -361,25 +361,37 @@ def get_version():
 def get_wms_url(wms_name):
 
     conf_geoserver = get_connection_conf()
-
-    wms_url = 'http://{host}:{port}/geoserver/{wms_name}/ows'.format(
-        wms_name=wms_name,
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port']
-    )
-
+    if conf_geoserver['geoserver_host'] == '192.168.10.15':
+        wms_url = 'http://{host}:{port}/{wms_name}/ows'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
+    else:
+        wms_url = 'http://{host}:{port}/geoserver/{wms_name}/ows'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
     return wms_url
 
 
 def get_wmts_url(wms_name):
 
     conf_geoserver = get_connection_conf()
+    if conf_geoserver['geoserver_host'] == '192.168.10.15':
+        wmts_url = 'http://{host}:{port}/{wms_name}/gwc/service/wmts'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
 
-    wmts_url = 'http://{host}:{port}/geoserver/{wms_name}/gwc/service/wmts'.format(
-        wms_name=wms_name,
-        host=conf_geoserver['geoserver_host'],
-        port=conf_geoserver['geoserver_port']
-    )
+    else:
+        wmts_url = 'http://{host}:{port}/geoserver/{wms_name}/gwc/service/wmts'.format(
+            wms_name=wms_name,
+            host=conf_geoserver['geoserver_host'],
+            port=conf_geoserver['geoserver_port']
+        )
 
     return wmts_url
 
@@ -628,7 +640,7 @@ def delete_layer_group(group_name):
     return rsp
 
 
-def create_layer_group(group_values, group_layers):
+def create_layer_group(group_values, group_name, group_layers):
     BASE_URL, AUTH = getHeader()
     HEADERS = {
         'Content-type': 'text/xml'
@@ -662,9 +674,9 @@ def create_layer_group(group_values, group_layers):
             </styles>
         </layerGroup>
     '''.format(
-        name=group_values.get('name'),
+        name=group_name,
         title=group_values.get('title'),
-        abstract=group_values.get('abstract'),
+        abstract=group_values.get('abstract') or '',
         layers=''.join(g_layers),
         styles=''.join(g_styles)
     )
@@ -747,3 +759,16 @@ def get_ws_list():
         return features.get('workspaces').get('workspace')
     return rsp
 
+
+def _get_detail_geoserver(url):
+
+    BASE_URL, AUTH = getHeader()
+    if BASE_URL and AUTH:
+        HEADERS = {
+            'accept': 'application/json',
+            'Content-type': 'application/json',
+        }
+        url = BASE_URL + url
+        rsp = requests.get(url, headers=HEADERS, auth=AUTH)
+        if rsp.status_code ==200:
+            return rsp.json()

@@ -366,7 +366,8 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data['data_list'] =  data_list
         data['roles'] =  _get_roles(request, fid, property_id)
         data['code_list_id'] = code_list_id
-        properties.append(data)
+        if data['property_code'] != 'localId' and data['value_type_id'] != 'data-type':
+            properties.append(data)
     return properties
 
 

@@ -1319,7 +1319,12 @@ def _get_feature_property(feature_id, gov_perm):
                 'properties': [],
             }
             property_ids = LDataTypeConfigs.objects.filter(data_type_id=data_type.data_type_id).values_list('property_id', flat=True)
-            properties = LProperties.objects.filter(property_id__in=property_ids).values('property_id', "property_code", "property_name")
+            qs_properties = LProperties.objects
+            qs_properties = qs_properties.filter(property_id__in=property_ids)
+            qs_properties = qs_properties.exclude(property_code='localId')
+            qs_properties = qs_properties.exclude(value_type_id='data-type')
+            properties = qs_properties.values('property_id', 'property_code', 'property_name')
+
             for prop in properties:
                 perm_all = perm_all + 1
                 property_obj = {
@@ -1812,7 +1817,6 @@ def _get_choices(Model, field_name):
 
 @require_GET
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
 def get_select_values(request):
 
     qs = DefaultPosition.objects

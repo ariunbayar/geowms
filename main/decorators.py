@@ -123,12 +123,20 @@ def get_conf_geoserver_base_url(url_nemelt):
                 if not conf_geoserver['geoserver_host'] and not conf_geoserver['geoserver_port']:
                     raise Http404
 
-                base_url = '{protocol}://{host}:{port}/geoserver/{url_nemelt}'.format(
-                    host=conf_geoserver['geoserver_host'],
-                    port=conf_geoserver['geoserver_port'],
-                    protocol=conf_geoserver['geoserver_protocol'],
-                    url_nemelt=url_nemelt
-                )
+                if not conf_geoserver['geoserver_host'] == '192.168.10.15':
+                    base_url = '{protocol}://{host}:{port}/geoserver/{url_nemelt}'.format(
+                        host=conf_geoserver['geoserver_host'],
+                        port=conf_geoserver['geoserver_port'],
+                        protocol=conf_geoserver['geoserver_protocol'],
+                        url_nemelt=url_nemelt
+                    )
+                else:
+                    base_url = '{protocol}://{host}:{port}/{url_nemelt}'.format(
+                        host=conf_geoserver['geoserver_host'],
+                        port=conf_geoserver['geoserver_port'],
+                        protocol=conf_geoserver['geoserver_protocol'],
+                        url_nemelt=url_nemelt
+                    )
                 cache.set('{}'.format(url_nemelt), base_url, 86400)
             args = [base_url, *args]
 

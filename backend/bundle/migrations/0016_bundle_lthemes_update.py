@@ -34,7 +34,7 @@ def _create_pk():
     sql = """
         ALTER TABLE l_themes
         ADD CONSTRAINT l_themes_pkey
-        PRIMARY KEY (theme_id);
+        SERIAL PRIMARY KEY (theme_id);
     """
     cursor.execute(sql)
 
@@ -53,60 +53,68 @@ def _check_pk():
     cursor.execute(sql)
     value = cursor.fetchone()
     if not value:
-        _create_pk
+        _create_pk()
+
+
+def _change_name(qs, from_name, to_name):
+    print(qs.name)
+    if qs.name == from_name:
+        qs.name = to_name
+        qs.save()
+    return
 
 
 def update_bundles(apps, schema_editor):
     bundles = apps.get_model('backend_bundle', 'Bundle')
     themes = apps.get_model('backend_inspire', 'LThemes')
     _check_column()
-    _check_pk
+    _check_pk()
 
-    for i in bundles.objects.all():
-        print(i.name)
-        if i.name == 'Геодезийн тулгуур сүлжээ':
-            i.name = 'Геодезийн цэг тэмдэгт'
-            i.save()
-        if i.name == 'Геологи, хөрс':
-            i.name = 'Геологи'
-            i.save()
-        if i.name == 'Ус зүй':
-            i.name = 'Ус зүйн мэдээлэл'
-            i.save()
-        if i.name == 'Нэгж талбар':
-            i.name = 'Газрын нэгж талбар'
-            i.save()
-        theme = themes.objects.filter(theme_name=i.name).first()
+    for bundle in bundles.objects.all():
+        names = [
+            [
+                'Геодезийн тулгуур сүлжээ', 'Геодезийн цэг тэмдэгт'
+            ],
+            [
+                'Ус зүй', 'Ус зүйн мэдээлэл'
+            ],
+            [
+                'Нэгж талбар', 'Газрын нэгж талбар'
+            ],
+            [
+                'Түүх, соёлын өв', 'Түүх соёл, археологийн өв'
+            ],
+            [
+                'Хил, зааг', 'Хил зааг'
+            ],
+            [
+                'Газрын бүрхэвч, газар ашиглалт', 'Газрын бүрхэвч'
+            ],
+            [
+                'Орто зураг', 'Ортозураг'
+            ],
+            [
+                'Геологи, хөрс', 'Геологи'
+            ],
+        ]
+
+        for from_name, to_name in names:
+            _change_name(bundle, from_name, to_name)
+
+        theme = themes.objects.filter(theme_name=bundle.name).first()
         if theme:
-            bundles.objects.filter(id=i.id).update(ltheme=theme)
-        else:
-            theme = themes.objects.filter(theme_name__istartswith=i.name[:3], theme_name__endswith= i.name[-4:]).first()
-            if theme:
-                bundles.objects.filter(id=i.id).update(ltheme=theme)
-            else:
-                cursor = connections['default'].cursor()
-                sql = """
-                INSERT INTO
-                    public.l_themes(
-                        theme_name,
-                        order_no,
-                        is_active
-                        )
-                VALUES (
-                    '{theme_name}',
-                    {order_no},
-                    {is_active}
-                    )
-
-                """.format(
-                    theme_name=i.name,
-                    order_no=i.sort_order,
-                    is_active=True
-                )
-                cursor.execute(sql)
-                theme = themes.objects.filter(theme_name=i.name).first()
-                bundles.objects.filter(id=i.id).update(ltheme=theme)
-
+            bundles.objects.filter(id=bundle.id).update(ltheme=theme)
+    for item in themes.objects.all().values():
+        qs = bundles.objects
+        qs = qs.filter(name=item['theme_name'])
+        if not qs:
+            bundles.objects.create(
+                name=item['theme_name'],
+                is_removeable=True,
+                created_by_id=1,
+                sort_order=bundles.objects.all().count() + 1,
+                ltheme_id=item['theme_id'],
+            )
 
 
 class Migration(migrations.Migration):

@@ -269,7 +269,7 @@ export default class BarilgaSuurinGazar extends Component{
       })}
 
       this.setState({map_wms})
-      map_wms.tile.setZIndex(101)
+      map_wms.tile.setZIndex(2)
       this.map.addLayer(map_wms.tile);
 
       const Mongolia_feaure = (new GeoJSON().readFeatures(Mongolia_boundary, {
@@ -371,7 +371,7 @@ export default class BarilgaSuurinGazar extends Component{
         })
       })
       this.setState({vector_layer})
-      vector_layer.setZIndex(101)
+      vector_layer.setZIndex(3)
 
       const vector = new VectorLayer({
         source: new VectorSource(),
@@ -1000,10 +1000,9 @@ export default class BarilgaSuurinGazar extends Component{
                     `${modifyend_selected_feature_ID || build_name} дугаартай мэдээллийг хянуулах уу`,
                     null,
                     "warning",
-                    "Үгүй"
+                    "Үгүй", () => this.setState({ togle_islaod: true })
               )
-              this.setState({ modifyend_selected_feature_check: false, update_geom_from_list: false })
-    }
+          }
           else{
             this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
           }
