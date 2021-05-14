@@ -332,18 +332,27 @@ export default class  ExportCreate extends Component {
                 {
                     feature_name &&
                     <div className="col-md-12 px-3 mt-5">
-                    <span
-                        className="col-md-6 m-1 border rounded"
-                        name='inspire_property'
-                    >
-                        Геометр талбар
-                    </span>
-                    <span
-                        className="col-md-6 m-1 border rounded"
-                        name='inspire_property'
-                    >
-                        {geo_data_field}
-                    </span>
+                        <div className='row'>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                        <span
+                                            className="col-md-6 m-1 border rounded mr-auto"
+                                            name='inspire_property'
+                                        >
+                                            Геометр талбар
+                                        </span>&nbsp;
+                                        <span
+                                            className="col-md-5 m-1 border rounded"
+                                            name='inspire_property'
+                                        >
+                                            {geo_data_field}
+                                        </span>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
                     {
                         (data_type_list && data_type_list.length >0)
                         ?
