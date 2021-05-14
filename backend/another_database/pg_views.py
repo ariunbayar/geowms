@@ -127,6 +127,26 @@ def get_pg_table_names(request, conn_id):
     })
 
 
+def _get_valid_data_type(value_type_id):
+    if value_type_id == 'number':
+        value_type = 'inte'
+    elif value_type_id == 'double':
+        value_type = 'inte'
+    elif value_type_id == 'multi-text':
+        value_type = 'char'
+    elif value_type_id == 'text':
+        value_type = 'char'
+    elif value_type_id == 'date':
+        value_type = 'time'
+    elif value_type_id == 'link':
+        value_type = 'char'
+    elif value_type_id == 'boolean':
+        value_type = 'bool'
+    else:
+        value_type = 'inte'
+    return value_type
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -162,7 +182,7 @@ def getFields(request, payload):
                         'property_name': single_property.property_name,
                         'property_id': single_property.property_id,
                         'code_list': code_data_list,
-                        'value_type_id': single_property.value_type_id
+                        'value_type_id': _get_valid_data_type(single_property.value_type_id)
                     })
 
             data_types_datas.append({

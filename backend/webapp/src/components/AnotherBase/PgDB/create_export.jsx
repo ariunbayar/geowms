@@ -36,6 +36,7 @@ export default class  ExportCreate extends Component {
             matched_feilds: [],
             table_field_error: [],
             check_data_type:false,
+            check_error: []
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -221,13 +222,15 @@ export default class  ExportCreate extends Component {
         )
     }
 
-    handleSetField(data_key, prop_key, select_id, e){
+    handleSetField(data_key, prop_key, e){
         const { data_type_list, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
         var data = e.target.value
         var table_data = e.target.selectedIndex
         var optionElement = e.target.childNodes[table_data]
         var selected_data_type =  optionElement.getAttribute('name')
-        this.dataTypeValidation(select_id, data)
+        var selected_id =  optionElement.getAttribute('id')
+        this.dataTypeValidation(prop_key, data_key, selected_id)
+
         var values = {
             'table_field': data,
             'table_data_type': selected_data_type,
@@ -274,35 +277,42 @@ export default class  ExportCreate extends Component {
         return selected_field
     }
 
-    dataTypeValidation(property_id, data_type){
-        const data_type_list = this.state.data_type_list
-        const ano_table_fields = this.state.ano_table_fields
-        var check_data_type = this.state.check_data_type
-        var type=''
-        ano_table_fields.map((field, idx ) =>
-            {
-                if(field.column_name == data_type)
-                    type=field.data_type
+    dataTypeValidation(prop_key, data_key, index){
+        const {data_type_list, ano_table_fields, check_error} = this.state
+        var type=false
+        var prop_id = data_type_list[data_key].properties[prop_key].property_id
+        var list_check_error = [...check_error]
+        var check_data_type = list_check_error.indexOf(prop_id)
+        if (index) {
+            var prop_data_type = data_type_list[data_key].properties[prop_key].value_type_id
+            var table_data_type = ano_table_fields[parseInt(index)].data_type.slice(0,4)
+
+            if (prop_data_type != table_data_type) {
+                type = true
+                if (check_data_type && check_data_type == -1) {
+                    list_check_error.push(prop_id)
+                }
             }
-        )
-        data_type_list.map((data_type_data, idx) =>
-            data_type_data.properties.map((property_data, idy) =>
-                {
-                    if(property_data.property_id == property_id)
-                    {
-                        if (property_data.value_type_id != type){
-                            check_data_type = true
-                            property_data['form_state'] = check_data_type
-                            this.setState({check_data_type: true})
-                        }
-                        else {
-                            check_data_type = false
-                            property_data['form_state'] = check_data_type
-                            this.setState({check_data_type:false})
-                        }
-                    }
-                })
-        )
+            else {
+                type = false
+            }
+        }
+        else
+            type=false
+
+
+        data_type_list[data_key].properties[prop_key]['form_state'] = type
+
+        if (!type){
+            if (check_data_type >-1) {
+                list_check_error = list_check_error.filter((val) => val != prop_id)
+            }
+        }
+
+        this.setState({
+            ...data_type_list,
+            check_error: list_check_error
+        })
     }
 
     render() {
@@ -313,9 +323,9 @@ export default class  ExportCreate extends Component {
             selected_packages, data_type_list,
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
-            matched_feilds, geo_data_field, check_data_type
+            matched_feilds, geo_data_field, check_data_type,
+            check_error
         } = this.state
-        console.log(data_type_list);
         return (
             <div className="card p-2">
                 <Loader
@@ -430,7 +440,9 @@ export default class  ExportCreate extends Component {
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
-                        disabled={ (!table_name || matched_feilds.length < 1 || check_data_type == true ) ? true : false}
+                        disabled={
+                            (!table_name || matched_feilds.length < 0 || check_error.length >0 || ! geo_data_field ) ? true : false
+                        }
                     >
                         {
                             table_id
