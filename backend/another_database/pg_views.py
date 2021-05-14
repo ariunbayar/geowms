@@ -728,10 +728,10 @@ def _delete_datas_of_pg(unique_id, feature_id):
 def _get_ona_datas(cursor, table_name, columns, table_geo_data):
     sql = '''
         select
-            {columns},
-            public.Find_SRID('public', '{table_name}', '{table_geo_data}') as srid
+            {columns}
         from
             public.{table_name}
+            limit 10
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
@@ -743,8 +743,11 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
 
 
 def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
-    geom =utils.convert_3d_with_srid(ona_data[table_geo_data])
+
+    geo_data = _geojson_to_geom(ona_data[table_geo_data])
+    geom =utils.convert_3d_with_srid(geo_data)
     new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+
     new_geo = MGeoDatas.objects.create(
         geo_id=new_geo_id,
         geo_data=geom,
@@ -782,7 +785,14 @@ def _get_row_to_list(field_name, dict_data, table_field):
             if isinstance(i[field_name], int):
                 row_list.append(i[field_name])
         else:
-            row_list.append(i[field_name])
+            if i['property_id'] == 'geo_datas':
+                geo_data_field = '''
+                    ST_AsGeoJSON(ST_Transform({geo_data}, 4326)) as {geo_data}
+                '''.format(geo_data=i[field_name])
+                row_list.append(geo_data_field)
+            else:
+                row_list.append(i[field_name])
+
     return row_list
 
 
@@ -802,12 +812,12 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
     total_count = len(ona_table_datas)
     for ona_data in ona_table_datas:
-        try:
-            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
-            success_count = success_count + 1
-        except Exception:
-            pass
+        # try:
+        geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
+        _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+        success_count = success_count + 1
+        # except Exception:
+        #     pass
 
     return success_count, failed_count, total_count
 
