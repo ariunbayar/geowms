@@ -227,6 +227,12 @@ const pg_config = {
         return fetch(`${prefix}/pg/${id}/refresh-all-connection/`, opts).then(handleResponse)
     },
 
+    insertSingleData: function(id, table_id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/pg/${id}/${table_id}/insert-single-table/`, opts).then(handleResponse)
+    },
 }
 
 

@@ -92,7 +92,7 @@ export default class List extends Component {
                 null,
                 'success',
                 'Export',
-                `Та "${values.table_name}" нэртэй хүснэгтийг "export" хийхдээ итгэлтэй байна уу?`,
+                `Та "${values.table_name}" нэртэй хүснэгтийг "insert" хийхдээ итгэлтэй байна уу?`,
                 true,
                 '',
                 'Тийм',
@@ -118,32 +118,18 @@ export default class List extends Component {
             () => this.handleModalOpen()
         )
     }
+
     refreshTable(){
         const {values, id} = this.state
-        service.pg_config.refreshOneTable(id, values.id).then(({success, info, table_info}) => {
+        service.pg_config.insertSingleData(id, values.id).then(({success, table_info}) => {
             if (success) {
                 this.setState({is_loading: false})
-                var table_res = table_info.join("\n")
                 this.modalChange(
                     'fa fa-check-circle',
                     null,
                     'success',
                     'Амжилттай',
-                    `${table_res}`,
-                    false,
-                    '',
-                    '',
-                    null,
-                    null
-                )
-            }else{
-                this.setState({is_loading: false})
-                this.modalChange(
-                    'fa fa-times-circle',
-                    null,
-                    'danger',
-                    'Алдаа гарлаа',
-                    info,
+                    `${table_info}`,
                     false,
                     '',
                     '',
@@ -151,7 +137,6 @@ export default class List extends Component {
                     null
                 )
             }
-
         })
     }
 

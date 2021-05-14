@@ -852,6 +852,7 @@ def _insert_single_table(ano_db, ano_db_table_pg, cursor):
 
 @require_GET
 @csrf_exempt
+@user_passes_test(lambda u: u.is_superuser)
 def refresh_all_conn(request, id):
     ano_db = get_object_or_404(AnotherDatabase, pk=id)
     ano_db_table_pg = AnotherDatabaseTable.objects
@@ -871,4 +872,23 @@ def refresh_all_conn(request, id):
     return JsonResponse({
         'success': success,
         'table_info': table_info,
+    })
+
+
+@require_GET
+@csrf_exempt
+@user_passes_test(lambda u: u.is_superuser)
+def insert_single_table(request, id, table_id):
+    ano_db = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table_pg = AnotherDatabaseTable.objects
+    ano_db_table_pg = ano_db_table_pg.filter(id=table_id).first()
+
+    cursor_pg = utils.get_cursor_pg(id)
+    success = True
+    single_table_info = _insert_single_table(ano_db, ano_db_table_pg, cursor_pg)
+    ano_db.database_updated_at = datetime.datetime.now()
+    ano_db.save()
+    return JsonResponse({
+        'success': success,
+        'table_info': single_table_info,
     })
