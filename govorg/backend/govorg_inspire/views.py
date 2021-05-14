@@ -338,11 +338,11 @@ def _get_type(value_type_id):
 
 def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid=None):
     properties = list()
-    pk = ''
     value_text = ''
     data_list = []
     code_list_id = ''
     for l_property in qs_l_properties:
+        pk = ''
         data = dict()
         value_type = _get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
