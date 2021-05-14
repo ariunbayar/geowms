@@ -709,8 +709,66 @@ def get_table_fields(request, payload, pk):
     })
 
 
-def _insert_to_geo_db(table_name, cursor, columns, feature_code):
-    print("hoho")
+def _delete_datas_of_pg(ano_db, feature_id):
+    unique_id = ano_db.unique_id
+    m_geo_datas = MGeoDatas.objects.filter(
+        feature_id=feature_id, create_by=unique_id
+    )
+    if m_geo_datas:
+        for geo_data in m_geo_datas:
+            m_datas = MDatas.objects.filter(
+                geo_id=geo_data.geo_id,
+                created_by=unique_id
+            )
+            m_datas.delete()
+
+        m_geo_datas.delete()
+
+
+def _get_ona_datas(cursor, table_name, columns):
+    sql = '''
+        select
+            {columns},
+            Find_SRID('public', '{table_name}', '{data}') as srid,
+        from
+            {table_name}
+    '''.format(
+        table_name=table_name,
+        columns=','.join(columns)
+    )
+
+    datas = utils.get_sql_execute(sql, cursor, 'all')
+    return datas
+
+
+def _insert_geo_data(ona_data, feature_id):
+    print("hohoh")
+    print("hohoh")
+    print("hohoh")
+
+
+def _get_row_to_list(field_name, dict_data):
+    row_list = []
+    for i in dict_data:
+        row_list.append(i[field_name])
+    return row_list
+
+
+def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature_code):
+    feature = LFeatures.objects.filter(feature_code=feature_code).first()
+    feature_id = feature.feature_id
+    # property_code = list(
+    #     filter(lambda x: x['property_id'] == code_list['property_id'], prop_datas)
+    # )[0]['property_code']
+    _delete_datas_of_pg(ano_db, feature_id)
+
+
+    table_fields = _get_row_to_list('table_field', columns)
+    ona_table_datas = _get_ona_datas(cursor, table_name, table_fields)
+
+    for ona_data in ona_table_datas:
+        geo_id = _insert_geo_data(ona_data, feature_id)
+
 
 def _insert_sngle_table(ano_db, ano_db_table_pg, cursor):
     table_info = []
@@ -718,7 +776,7 @@ def _insert_sngle_table(ano_db, ano_db_table_pg, cursor):
     field_config = ano_db_table_pg.field_config.replace("'", '"')
     columns = utils.json_load(field_config)
     feature_code = ano_db_table_pg.feature_code
-    success_count, failed_count, total_count = _insert_to_geo_db(table_name, cursor, columns, feature_code)
+    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, table_name, cursor, columns, feature_code)
     table_info_text = '''
         {table_name} хүснэгт
         нийт {total_count} мөр дата-наас

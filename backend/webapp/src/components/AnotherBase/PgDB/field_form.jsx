@@ -50,7 +50,7 @@ export default class FieldForm extends Component {
                         <option value=''></option>
                         {
                             ano_table_fields.map((value, idy) =>
-                                <option key = {idy} value={value.column_name}>{value.column_name}</option>
+                                <option key = {idy} value={value.column_name} name = {value.data_type}>{value.column_name}</option>
                             )
                         }
                     </select>
