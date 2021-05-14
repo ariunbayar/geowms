@@ -1,3 +1,5 @@
+from geojson import feature
+from backend import another_database
 import datetime
 
 from django.contrib.gis.geos import GEOSGeometry
@@ -10,6 +12,8 @@ from django.shortcuts import get_object_or_404
 
 from backend.another_database.models import AnotherDatabase
 from backend.another_database.models import AnotherDatabaseTable
+from backend.dedsanbutets.models import ViewNames
+
 from main.components import Datatable
 from django.views.decorators.csrf import csrf_exempt
 
@@ -169,6 +173,14 @@ def getFields(request, payload):
                 single_property = single_property.first()
                 code_data_list = []
                 if single_property:
+                    value_type_id = single_property.value_type_id
+                    value_type_name = ''
+                    value_type_qs = LValueTypes.objects.filter(value_type_id=value_type_id)
+                    value_type_qs = value_type_qs.exclude(value_type_id='data_type')
+                    value_type_qs = value_type_qs.first()
+                    if value_type_qs:
+                        value_type_name = value_type_qs.value_type_name
+
                     if single_property.value_type_id in value_types:
                         code_lists = LCodeLists.objects.filter(property_id=property_id)
                         for code_list in code_lists:
@@ -182,7 +194,8 @@ def getFields(request, payload):
                         'property_name': single_property.property_name,
                         'property_id': single_property.property_id,
                         'code_list': code_data_list,
-                        'value_type_id': _get_valid_data_type(single_property.value_type_id)
+                        'value_type_name': value_type_name,
+                        'value_type_id': _get_valid_data_type(value_type_id)
                     })
 
             data_types_datas.append({
@@ -751,7 +764,6 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
             {columns}
         from
             public.{table_name}
-        limit 10
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
@@ -911,4 +923,37 @@ def insert_single_table(request, id, table_id):
     return JsonResponse({
         'success': success,
         'table_info': single_table_info,
+    })
+
+
+def _refresh_feature(items):
+    feature_code = items.feature_code
+    feature_qs = LFeatures.objects
+    feature_qs = feature_qs.filter(feature_code=feature_code).first()
+    feature_id = feature_qs.feature_id
+    view_qs = ViewNames.objects
+    view_qs = view_qs.filter(feature_id=feature_id)
+    if view_qs:
+        utils.refreshMaterializedView(feature_id)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def refresh_view(request, payload):
+    id = payload.get('id')
+    table_id = payload.get('table_id')
+    initial_qs = AnotherDatabaseTable.objects
+
+    if table_id :
+        ano_db_table_pg = initial_qs.filter(id=table_id).first()
+        _refresh_feature(ano_db_table_pg)
+    else :
+        ano_db_table_pg = initial_qs.filter(another_database_id=id)
+
+        for item in ano_db_table_pg:
+            _refresh_feature(item)
+
+    return JsonResponse({
+        'success': True
     })

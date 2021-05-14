@@ -400,31 +400,32 @@ export default class  ExportCreate extends Component {
                         </div>
                         <hr />
                     {
-                        (data_type_list && data_type_list.length >0)
+                        data_type_list && data_type_list.length > 0
                         ?
                             data_type_list.map((data_type_data, idx) =>
                                 <>
                                     <div key={idx} className="form-row mr-3">
-                                        <div className='form-group col-md-3 align-self-center text-center'>
-                                            <b>{data_type_data.data_type_name}</b><br/>
-                                            <small>{data_type_data.data_type_definition}</small>
+                                        <div className='form-group col-md-3 align-self-center text-center px-2 '>
+                                            <b className="text-wrap">{data_type_data.data_type_name}</b><br/>
+                                            <small className="text-center">({data_type_data.data_type_definition})</small>
                                         </div>
                                         <div className='form-group col-md-9'>
                                             {
-                                                (data_type_data.properties && data_type_data.properties.length > 0)
+                                                data_type_data.properties && data_type_data.properties.length > 0
                                                 ?
-                                                data_type_data.properties.map((property_data, idy) =>
-                                                    <FieldForm
-                                                        data_key={idx}
-                                                        prop_key={idy}
-                                                        property_data={property_data}
-                                                        ano_table_fields={ano_table_fields}
-                                                        handleSetField={this.handleSetField}
-                                                        dataTypeValidation={this.dataTypeValidation}
-                                                        setSelectedField={this.setSelectedField(property_data)}
-                                                    />
-                                                )
-                                                : null
+                                                    data_type_data.properties.map((property_data, idy) =>
+                                                        <FieldForm
+                                                            data_key={idx}
+                                                            prop_key={idy}
+                                                            property_data={property_data}
+                                                            ano_table_fields={ano_table_fields}
+                                                            handleSetField={this.handleSetField}
+                                                            dataTypeValidation={this.dataTypeValidation}
+                                                            setSelectedField={this.setSelectedField(property_data)}
+                                                        />
+                                                    )
+                                                :
+                                                    null
                                             }
                                         </div>
                                     </div>

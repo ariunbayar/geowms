@@ -48,6 +48,7 @@ export default class List extends Component {
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.refreshTable = this.refreshTable.bind(this)
+        this.refreshView = this.refreshView.bind(this)
     }
 
     goLink(values){
@@ -119,6 +120,14 @@ export default class List extends Component {
         )
     }
 
+    refreshView(values){
+        const {id} = this.state
+        service.pg_config.refreshView(id, values.id).then(({ success }) => {
+            if (success) {
+            }
+        })
+    }
+
     refreshTable(){
         const {values, id} = this.state
         service.pg_config.insertSingleData(id, values.id).then(({success, table_info}) => {
@@ -134,7 +143,7 @@ export default class List extends Component {
                     '',
                     '',
                     null,
-                    null
+                    () => this.refreshView(values)
                 )
             }
         })

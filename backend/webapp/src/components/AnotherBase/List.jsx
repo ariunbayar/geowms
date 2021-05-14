@@ -67,6 +67,7 @@ export default class List extends Component {
         this.handleMongo = this.handleMongo.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handlePGRefreshData = this.handlePGRefreshData.bind(this)
+        this.refreshView = this.refreshView.bind(this)
 
     }
 
@@ -83,6 +84,7 @@ export default class List extends Component {
         else if(values.db_type == "MONGODB") this.handleMongo(values)
         else if(values.db_type == "PgDB") this.handlePGRefreshData(values)
     }
+
     handlePGRefreshData(values) {
         this.setState({is_loading: true})
         service
@@ -102,10 +104,17 @@ export default class List extends Component {
                         '',
                         '',
                         null,
-                        null
+                        () => this.refreshView(values)
                     )
                 }
             })
+    }
+
+    refreshView(values){
+        service.pg_config.refreshView(values.id).then(({ success }) => {
+            if (success) {
+            }
+        })
     }
 
     handleMssql(values){

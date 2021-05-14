@@ -80,7 +80,8 @@ urlpatterns = [
         path('pg/<int:pk>/get-another-tables/', pg_views.get_ano_tables),
         path('pg/<int:pk>/get_table_fields/', pg_views.get_table_fields),
         path('pg/<int:id>/refresh-all-connection/', pg_views.refresh_all_conn),
-        path('pg/<int:id>/<int:table_id>/insert-single-table/', pg_views.insert_single_table, name='insert_single_table')
+        path('pg/<int:id>/<int:table_id>/insert-single-table/', pg_views.insert_single_table, name='insert_single_table'),
+        path('pg/refresh-view/', pg_views.refresh_view),
     ], 'another-database'))),
 
 

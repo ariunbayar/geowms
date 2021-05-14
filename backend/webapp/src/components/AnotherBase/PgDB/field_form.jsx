@@ -22,6 +22,8 @@ export default class FieldForm extends Component {
                         name='inspire_property'
                     >
                         {property_data.property_name}
+                        <br/>
+                        <small>{property_data.value_type_name ? `(${property_data.value_type_name})` : '' }</small>
                     </span>
                     <select
                         name='table_field_name'

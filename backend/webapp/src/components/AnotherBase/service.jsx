@@ -233,6 +233,14 @@ const pg_config = {
         }
         return fetch(`${prefix}/pg/${id}/${table_id}/insert-single-table/`, opts).then(handleResponse)
     },
+
+    refreshView: function(id, table_id) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({ id, table_id }),
+        }
+        return fetch(`${prefix}/pg/refresh-view/`, opts).then(handleResponse)
+    }
 }
 
 
