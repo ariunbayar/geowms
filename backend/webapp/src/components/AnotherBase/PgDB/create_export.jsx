@@ -351,7 +351,8 @@ export default class  ExportCreate extends Component {
                                 <>
                                     <div key={idx} className="form-row mr-3">
                                         <div className='form-group col-md-3 align-self-center text-center'>
-                                            <b>{data_type_data.data_type_name}</b>
+                                            <b>{data_type_data.data_type_name}</b><br/>
+                                            <small>{data_type_data.data_type_definition}</small>
                                         </div>
                                         <div className='form-group col-md-9'>
                                             {
