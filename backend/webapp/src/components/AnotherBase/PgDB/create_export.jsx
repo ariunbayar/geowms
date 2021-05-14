@@ -34,7 +34,8 @@ export default class  ExportCreate extends Component {
             ano_table_fields: [],
             table_field_name: '',
             matched_feilds: [],
-            table_field_error: []
+            table_field_error: [],
+            check_data_type:false,
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -47,6 +48,7 @@ export default class  ExportCreate extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.setSelectedField = this.setSelectedField.bind(this)
+        this.dataTypeValidation = this.dataTypeValidation.bind(this)
     }
 
     componentDidMount(){
@@ -82,13 +84,15 @@ export default class  ExportCreate extends Component {
     getTableFields(table_name){
         const {id, matched_feilds} = this.state
         service.pg_config.fieldNames(id, table_name).then(({fields}) => {
-
             var value = obj => obj.data_type.slice(0,4) == 'geom'
             var index_of = fields.findIndex(value)
-            var geom_field_name = fields[index_of].column_name
-            if (fields) this.setState({
-                ano_table_fields: fields, geo_data_field: geom_field_name,
+            if(index_of != -1)
+                var geom_field_name = fields[index_of].column_name
+            if (fields)
+            {
+                this.setState({ano_table_fields: fields, geo_data_field: geom_field_name,
             })
+        }
         })
     }
 
@@ -217,13 +221,13 @@ export default class  ExportCreate extends Component {
         )
     }
 
-    handleSetField(data_key, prop_key, e){
+    handleSetField(data_key, prop_key, select_id, e){
         const { data_type_list, table_fields, matched_feilds, table_field_error, old_error_name } = this.state
         var data = e.target.value
         var table_data = e.target.selectedIndex
         var optionElement = e.target.childNodes[table_data]
         var selected_data_type =  optionElement.getAttribute('name')
-
+        this.dataTypeValidation(select_id, data)
         var values = {
             'table_field': data,
             'table_data_type': selected_data_type,
@@ -270,6 +274,37 @@ export default class  ExportCreate extends Component {
         return selected_field
     }
 
+    dataTypeValidation(property_id, data_type){
+        const data_type_list = this.state.data_type_list
+        const ano_table_fields = this.state.ano_table_fields
+        var check_data_type = this.state.check_data_type
+        var type=''
+        ano_table_fields.map((field, idx ) =>
+            {
+                if(field.column_name == data_type)
+                    type=field.data_type
+            }
+        )
+        data_type_list.map((data_type_data, idx) =>
+            data_type_data.properties.map((property_data, idy) =>
+                {
+                    if(property_data.property_id == property_id)
+                    {
+                        if (property_data.value_type_id != type){
+                            check_data_type = true
+                            property_data['form_state'] = check_data_type
+                            this.setState({check_data_type: true})
+                        }
+                        else {
+                            check_data_type = false
+                            property_data['form_state'] = check_data_type
+                            this.setState({check_data_type:false})
+                        }
+                    }
+                })
+        )
+    }
+
     render() {
         const {
             table_id, id,
@@ -278,8 +313,9 @@ export default class  ExportCreate extends Component {
             selected_packages, data_type_list,
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
-            matched_feilds, geo_data_field
+            matched_feilds, geo_data_field, check_data_type
         } = this.state
+        console.log(data_type_list);
         return (
             <div className="card p-2">
                 <Loader
@@ -374,6 +410,7 @@ export default class  ExportCreate extends Component {
                                                         property_data={property_data}
                                                         ano_table_fields={ano_table_fields}
                                                         handleSetField={this.handleSetField}
+                                                        dataTypeValidation={this.dataTypeValidation}
                                                         setSelectedField={this.setSelectedField(property_data)}
                                                     />
                                                 )
@@ -393,7 +430,7 @@ export default class  ExportCreate extends Component {
                         type="button"
                         className="btn gp-btn-primary"
                         onClick={this.handleSave}
-                        disabled={ (!table_name || matched_feilds.length < 1) ? true : false}
+                        disabled={ (!table_name || matched_feilds.length < 1 || check_data_type == true ) ? true : false}
                     >
                         {
                             table_id

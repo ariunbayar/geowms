@@ -43,9 +43,9 @@ export default class FieldForm extends Component {
                     <select
                         name='table_field_name'
                         id='table_field_id'
-                        className="form-control col-md-5 m-1"
+                        className={`form-control col-md-5 m-1 ${property_data.form_state ? "border-danger" : ''}`}
                         value={setSelectedField}
-                        onChange={(e) => this.props.handleSetField(data_key, prop_key, e)}
+                        onChange={(e) => this.props.handleSetField( data_key, prop_key, property_data.property_id, e)}
                     >
                         <option value=''></option>
                         {
