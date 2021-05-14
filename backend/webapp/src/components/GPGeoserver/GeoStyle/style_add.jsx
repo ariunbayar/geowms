@@ -180,13 +180,19 @@ export class CreateStyle extends Component {
             wellknowshape, div_angle, color_opacity, dashed_line_length, dashed_line_gap,
             min_range, max_range, had_chosen, shape_types, shape_type, rule_name
         } = this.state
-        var input_name = e.target.name
+        var input_name = e.target.name;
+        var input_value = e.target.value;
+
+        if (input_name == 'style_name') {
+            input_value = input_value.replace(/ /g,"_");
+        }
+
         if(input_name == 'range_number') {
-            if (e.target.value > 0) {
-                for(var i=1; i <= e.target.value; i++) {
+            if (input_value > 0) {
+                for(var i=1; i <= input_value; i++) {
                     this.style_datas.push({
                         'index_of_range': i,
-                        'range_number': e.target.value,
+                        'range_number': input_value,
                         'min_range': min_range,
                         'max_range': max_range,
                         'style_color': style_color,
@@ -213,28 +219,28 @@ export class CreateStyle extends Component {
                 if (had_chosen > 0) {
                     var value = obj => obj.index_of_range == had_chosen
                     var index_of = this.style_datas.findIndex(value)
-                    this.style_datas[index_of][input_name] = e.target.value
+                    this.style_datas[index_of][input_name] = input_value
 
                     if (input_name == 'shape_type') {
                         this.style_datas.map((data,idx) => {
-                            data.shape_type = e.target.value
+                            data.shape_type = input_value
                         })
                     }
                     if (input_name == 'wellknownname') {
                         this.style_datas.map((data,idx) => {
-                            data.wellknownname = e.target.value
+                            data.wellknownname = input_value
                         })
                     }
                 }
             }
             if (input_name == 'shape_type') {
-                var field_of_data = obj => obj.geo_name == e.target.value
+                var field_of_data = obj => obj.geo_name == input_value
                 var index_of = shape_types.findIndex(field_of_data)
                 var geom_type = shape_types[index_of].name
                 this.setState({geom_type})
             }
         }
-        this.setState({[e.target.name]:e.target.value})
+        this.setState({[input_name]: input_value})
     }
 
     componentDidUpdate(pP, pS) {

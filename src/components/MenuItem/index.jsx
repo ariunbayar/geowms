@@ -11,7 +11,7 @@ class MenuItem extends Component {
         if ('exact' in this.props) {
             is_match = this.props.location.pathname === path
         } else {
-            is_match = this.props.location.pathname.substr(0, path.length) === path
+            is_match = this.props.location.pathname === path
         }
 
         return is_match ? 'active' : '';

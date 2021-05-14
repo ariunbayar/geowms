@@ -294,9 +294,11 @@ class PopUpCmp extends Component {
                                         <button
                                             className="btn btn-xs btn-primary mx-3"
                                             onClick={() => this.checkDataForPurchase()}
-                                            disabled={is_enable ? "" : "disabled"}
+                                            // disabled={is_enable ? "" : "disabled"}
+                                            disabled={true}
                                         >
-                                            Худалдаж авах
+                                            {/* Худалдаж авах */}
+                                            Засвартай байгаа
                                         </button>
                                         <button
                                             className="btn btn-xs btn-primary my-2 mx-3"
