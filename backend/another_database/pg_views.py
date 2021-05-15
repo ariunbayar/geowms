@@ -54,8 +54,6 @@ def config_detail(request, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def get_pg_table_list(request, payload, pk):
     another_database = get_object_or_404(AnotherDatabase, pk=pk)
-    get_base = AnotherDatabaseTable.objects.filter(another_database=another_database)
-    feature_codes = get_base.values_list('feature_code', flat=True)
     оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id']
     initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
 
@@ -75,12 +73,11 @@ def get_pg_table_list(request, payload, pk):
     )
 
     items, total_page = datatable.get()
-
     for item in items:
-        for code in feature_codes:
-            data = LFeatures.objects.filter(feature_code=code).first()
-            feature_name = data.feature_name
-            item['feature_code']=feature_name
+            feature_code = item['feature_code']
+            feature_qs = LFeatures.objects.filter(feature_code=feature_code).first()
+            feature_name = feature_qs.feature_name
+            item['feature_code'] = feature_name
 
     rsp = {
         'items': items,
