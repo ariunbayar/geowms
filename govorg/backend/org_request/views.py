@@ -1,4 +1,5 @@
 import json
+import datetime
 from geojson import FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
@@ -512,9 +513,9 @@ def _create_mdatas(geo_id, feature_id, form, value):
     value['feature_config_id'] = ids[0]['feature_config_id']
     value['data_type_id'] = ids[0]['data_type_id']
     value['property_id'] = form['property_id']
-    check_value_date = 'value_date' in value
-    if check_value_date:
-        value['value_date'] = date_to_timezone(value['value_date'])
+    if 'value_date' in value:
+        if not isinstance(value['value_date'], datetime.datetime):
+            value['value_date'] = date_to_timezone(value['value_date'])
     MDatas.objects.create(**value)
 
 
@@ -528,9 +529,9 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
         if approve_type == 'create':
             _create_mdatas(geo_id, feature_id, form, value)
         elif approve_type == 'update':
-            check_value_date = 'value_date' in value
-            if check_value_date:
-                value['value_date'] = date_to_timezone(value['value_date'])
+            if 'value_date' in value:
+                if not isinstance(value['value_date'], datetime.datetime):
+                    value['value_date'] = date_to_timezone(value['value_date'])
             if form['pk']:
                 MDatas.objects.filter(pk=form['pk']).update(**value)
             else:
