@@ -53,8 +53,19 @@ def config_detail(request, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_pg_table_list(request, payload, pk):
+
+    items = []
     another_database = get_object_or_404(AnotherDatabase, pk=pk)
+
+    def _change_detail(data_id, items):
+        feature_code = items['feature_code']
+        feature_qs = LFeatures.objects.filter(feature_code=feature_code).first()
+        feature_name = feature_qs.feature_name
+        return feature_name
+
     оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id']
+    хувьсах_талбарууд = [{"field": "feature_code", "action": _change_detail, "new_field": "feature_code"}]
+
     initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
 
     if not initial_qs:
@@ -65,19 +76,16 @@ def get_pg_table_list(request, payload, pk):
         }
 
         return JsonResponse(rsp)
+
     datatable = Datatable(
         model=AnotherDatabaseTable,
         payload=payload,
         оруулах_талбарууд=оруулах_талбарууд,
+        хувьсах_талбарууд=хувьсах_талбарууд,
         initial_qs=initial_qs
     )
 
     items, total_page = datatable.get()
-    for item in items:
-            feature_code = item['feature_code']
-            feature_qs = LFeatures.objects.filter(feature_code=feature_code).first()
-            feature_name = feature_qs.feature_name
-            item['feature_code'] = feature_name
 
     rsp = {
         'items': items,
