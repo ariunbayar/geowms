@@ -21,7 +21,6 @@ import json
 def _get_govorg_display(govorg):
 
     layers = list(govorg.wms_layers.all().values_list('pk', flat=True))
-    print(layers)
     return {
         'id': govorg.pk,
         'name': govorg.name,
@@ -112,14 +111,24 @@ def _get_attribute(request, wms):
         'User-Agent': 'geo 1.0',
     }
     queryargs = request.GET
-    headers = {**BASE_HEADERS}
+    # headers = {**BASE_HEADERS}
+    headers = {
+        **BASE_HEADERS,
+        'accept': 'application/json',
+        'Content-type': 'application/json'
+    }
+    content = []
     base_url = wms.url + '?service=wfs&version=2.0.0&request=DescribeFeatureType&outputFormat=application/json'
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=20)
+    requests.packages.urllib3.disable_warnings()
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=20, verify=False)
     if rsp.status_code == 200:
-        content = rsp.content.decode("utf-8")
-        content = json.loads(content)
-        return content
-    return []
+        try:
+            content = rsp.text
+        except Exception:
+            pass
+        # content = rsp.content.decode("utf-8")
+        # content = json.loads(content)
+    return content
 
 
 def _get_wmslayers(request, govorg, wms):

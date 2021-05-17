@@ -53,7 +53,6 @@ def allowed_attbs(request, token, system, code):
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def proxy(request, base_url, token, pk=None):
-
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -71,7 +70,7 @@ def proxy(request, base_url, token, pk=None):
             "propertyName": [allowed_att],
         }
 
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
@@ -127,13 +126,13 @@ def json_proxy(request, base_url, token, code):
                 **request.GET,
                 "propertyName": [allowed_att],
             }
-            rsp = requests.get(base_url, queryargs, headers=headers, timeout=50)
+            rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
             content = rsp.content
             content = filter_layers_wfs(content, allowed_layers)
 
         elif request.GET.get('SERVICE') == 'WMS':
             queryargs = request.GET
-            rsp = requests.get(base_url, queryargs, headers=headers, timeout=50)
+            rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
             content = rsp.content
             content = filter_layers(content, allowed_layers)
 
@@ -149,7 +148,7 @@ def json_proxy(request, base_url, token, code):
             "propertyName": [allowed_att],
         }
 
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
         content = rsp.content
         content = filter_layers_wfs(content, allowed_layers)
 
@@ -341,7 +340,7 @@ def geo_design_proxy(request, base_url, veiw_name):
         **request.GET,
         'layers': layer_code,
     }
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5)
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
     content = rsp.content
 
     qs_request = queryargs.get('REQUEST', 'no request')
