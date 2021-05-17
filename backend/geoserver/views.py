@@ -380,6 +380,7 @@ def create_group_cache(request, payload, group_name):
     })
 
 
+
 @require_GET
 @csrf_exempt
 def check_geoserver_wms(request):
@@ -399,14 +400,19 @@ def check_geoserver_wms(request):
         base_url = qs.url
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=50)
         if rsp.status_code == 404:
-            wms_layer = WMSLayer.objects.filter(wms_id=qs.id).first()
+            wms_layer = WMSLayer.objects.filter(wms_id=qs.id)
             if wms_layer:
-                bundle_layer = BundleLayer.objects.filter(layer_id=wms_layer.id)
-                if bundle_layer:
-                    bundle_layer.delete()
-                system_layer = GovOrgWMSLayer.objects.filter(wms_layer_id=wms_layer.id).first()
-                if system_layer:
-                    system_layer.delete()
+                for layer in wms_layer:
+                    bundle_layers = BundleLayer.objects.filter(layer_id=layer.id)
+
+                    if bundle_layers:
+                        bundle_layers.delete()
+
+                    system_layers = GovOrgWMSLayer.objects.filter(wms_layer_id=layer.id)
+
+                    if system_layers:
+                        system_layers.delete()
+
                 wms_layer.delete()
             qs.delete()
 
@@ -780,3 +786,4 @@ def get_ws_list(request):
     return JsonResponse({
         'work_space_list': work_space_list,
     })
+
