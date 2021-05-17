@@ -515,7 +515,8 @@ def _create_mdatas(geo_id, feature_id, form, value):
     value['property_id'] = form['property_id']
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
-            value['value_date'] = date_to_timezone(value['value_date'])
+            if value['value_date']:
+                value['value_date'] = date_to_timezone(value['value_date'])
     MDatas.objects.create(**value)
 
 
@@ -531,7 +532,8 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
         elif approve_type == 'update':
             if 'value_date' in value:
                 if not isinstance(value['value_date'], datetime.datetime):
-                    value['value_date'] = date_to_timezone(value['value_date'])
+                    if value['value_date']:
+                        value['value_date'] = date_to_timezone(value['value_date'])
             if form['pk']:
                 MDatas.objects.filter(pk=form['pk']).update(**value)
             else:
