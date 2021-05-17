@@ -410,7 +410,7 @@ def check_geoserver_wms(request):
                 wms_layer.delete()
             qs.delete()
 
-    return JsonResponse({'success': 'Hello'})
+    return JsonResponse({'success': True})
 
 
 @require_GET
