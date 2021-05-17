@@ -19,7 +19,7 @@ export default class List extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
-                    "title": 'Export',
+                    "title": 'Import',
                     "text": '',
                     "icon": 'fa fa-car text-danger',
                     "action": (values) => this.handleExportAction(values),
