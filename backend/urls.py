@@ -238,6 +238,7 @@ urlpatterns = [
         path('get_group_cache_list/', geoserver_views.get_group_cache),
         path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
         path('update_geo_web_cache/', geoserver_views.update_geo_cache),
+        path('check_geoserver_wms/', geoserver_views.check_geoserver_wms),
         path('check-style-name/', geoserver_views.check_styles_name),
         path('style-data/', geoserver_views.get_style_data),
         path('create-style/', geoserver_views.create_style),
