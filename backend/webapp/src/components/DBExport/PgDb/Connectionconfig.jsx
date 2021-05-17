@@ -263,7 +263,7 @@ class ConnectionConfig extends Component {
                         }}
                     </Formik>
                 </div>
-                <BackButton {...this.props} name={'Буцах'} navlink_url={this.props.history.goBack}></BackButton>
+                <BackButton {...this.props} name={'Буцах'} onClick={this.props.history.goBack}></BackButton>
             </div>
         )
     }
