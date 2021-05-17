@@ -115,7 +115,7 @@ def remove_layer_group(request, payload):
 
     return JsonResponse({
         'success': True,
-        'info': 'Амжилттай утсгалаа'
+        'info': 'Амжилттай устгалаа'
     })
 
 
@@ -212,7 +212,7 @@ def create_layer_group(request, payload):
 
     group_values = payload.get('values')
     group_layers = payload.get('layer_list')
-    group_name = group_values.get('name')
+    group_name = payload.get('group_layer_name')
     group_title = group_values.get('title')
     group_state = payload.get('group_state')
     group_old_name = payload.get('old_name') or group_name
@@ -237,7 +237,7 @@ def create_layer_group(request, payload):
 
     geoserver.delete_layer_group(group_old_name)
 
-    rsp = geoserver.create_layer_group(group_values, group_layers)
+    rsp = geoserver.create_layer_group(group_values, group_name, group_layers)
     if rsp.status_code != 201:
         return JsonResponse({
             'success': False,
@@ -464,7 +464,6 @@ def create_style(request, payload):
     if info:
         return JsonResponse({'success': False, 'info': info})
 
-    
     rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
     if rsp.status_code == 201:
         return JsonResponse({
@@ -689,7 +688,7 @@ def style_remove(request, payload):
     else:
         return JsonResponse({
             'success': True,
-            'info': 'Амжилттай утсгалаа'
+            'info': 'Амжилттай устгалаа'
         })
 
 

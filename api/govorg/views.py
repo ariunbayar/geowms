@@ -16,9 +16,8 @@ from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
-import main.geoserver as geoserver
 from django.core.cache import cache
-from main.decorators import get_conf_geoserver, get_conf_geoserver_base_url
+from main.decorators import get_conf_geoserver_base_url
 
 
 def _get_service_url(request, token):
@@ -121,9 +120,8 @@ def json_proxy(request, base_url, token, code):
 
     if not allowed_att or not system:
         raise Http404
-
+    allowed_layers = [code]
     if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
-        allowed_layers = [code]
         if request.GET.get('SERVICE') == 'WFS':
             queryargs = {
                 **request.GET,
@@ -269,28 +267,22 @@ def _get_layer_name(employee):
 
 def _get_cql_filter(geo_id):
     cql_data = utils.get_2d_data(geo_id)
-    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data = cql_data)
+    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data=cql_data)
     return cql_filter if cql_data else ''
 
 
 def _get_request_content(base_url, request, geo_id, headers):
-    # if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
+    if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
 
-    #     cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
-    #     queryargs = {
-    #         **request.GET,
-    #         'cql_filter': cql_filter,
-    #     }
-
-    #     rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5, verify=False)
-
-    # else:
-
-    conf_geoserver = geoserver.get_connection_conf()
-    queryargs = request.GET
-    if conf_geoserver['geoserver_host'] == '192.168.10.15':
-        base_url = base_url = 'http://192.168.10.15:8080/ows'
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
+        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        queryargs = {
+            **request.GET,
+            'cql_filter': cql_filter,
+        }
+        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5, verify=False)
+    else:
+        queryargs = request.GET
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
 
     return rsp, queryargs
 
@@ -298,7 +290,6 @@ def _get_request_content(base_url, request, geo_id, headers):
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def qgis_proxy(request, base_url, token):
-
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }

@@ -640,7 +640,7 @@ def delete_layer_group(group_name):
     return rsp
 
 
-def create_layer_group(group_values, group_layers):
+def create_layer_group(group_values, group_name, group_layers):
     BASE_URL, AUTH = getHeader()
     HEADERS = {
         'Content-type': 'text/xml'
@@ -674,9 +674,9 @@ def create_layer_group(group_values, group_layers):
             </styles>
         </layerGroup>
     '''.format(
-        name=group_values.get('name'),
+        name=group_name,
         title=group_values.get('title'),
-        abstract=group_values.get('abstract'),
+        abstract=group_values.get('abstract') or '',
         layers=''.join(g_layers),
         styles=''.join(g_styles)
     )
@@ -759,3 +759,16 @@ def get_ws_list():
         return features.get('workspaces').get('workspace')
     return rsp
 
+
+def _get_detail_geoserver(url):
+
+    BASE_URL, AUTH = getHeader()
+    if BASE_URL and AUTH:
+        HEADERS = {
+            'accept': 'application/json',
+            'Content-type': 'application/json',
+        }
+        url = BASE_URL + url
+        rsp = requests.get(url, headers=HEADERS, auth=AUTH)
+        if rsp.status_code ==200:
+            return rsp.json()

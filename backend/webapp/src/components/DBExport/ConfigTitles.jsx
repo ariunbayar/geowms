@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { NavLink } from "react-router-dom"
+import BackButton from "@utils/Button/BackButton"
 
 class ConfigTitles extends Component {
     render() {
@@ -35,7 +36,7 @@ class ConfigTitles extends Component {
                         <div className="col-md-12">
                             <div className="card-body">
                                 <NavLink
-                                    to={`/back/db-export/connection/pg/`}
+                                    to={`/back/db-export/connection/${true}/pg/`}
                                     className="col-md-3 ml-2 text-center"
                                     activeClassName="text-white gp-bg-primary"
                                 >
@@ -45,6 +46,7 @@ class ConfigTitles extends Component {
                         </div>
                     </div>
                 </div>
+                <BackButton {...this.props} name={'Буцах'} onClick={this.props.history.goBack}></BackButton>
             </div>
         );
     }
