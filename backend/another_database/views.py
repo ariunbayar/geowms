@@ -250,15 +250,16 @@ def mssql_save(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def remove(request, pk):
     another_db = get_object_or_404(AnotherDatabase, pk=pk)
-    another_db_tables_all = AnotherDatabaseTable.objects.all()
+    another_db_table = AnotherDatabaseTable.objects
+    another_db_table = another_db_table.filter(another_database=another_db)
     cursor_pg = utils.get_cursor_pg(pk)
-    for item in another_db_tables_all:
-        if(item.another_database_id == pk):
-            utils.drop_table(item.table_name, cursor_pg)
-            delete_table = AnotherDatabaseTable.objects.filter(table_name=item.table_name)
-            delete_table.delete()
+
+    for item in another_db_table:
+        utils.drop_table(item.table_name, cursor_pg)
+        item.delete()
 
     another_db.delete()
+
     connection = utils.json_load(another_db.connection)
     rsp = {
         'success': True,
