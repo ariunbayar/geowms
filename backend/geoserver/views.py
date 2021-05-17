@@ -385,7 +385,6 @@ def create_group_cache(request, payload, group_name):
 @csrf_exempt
 def check_geoserver_wms(request):
 
-    initial_qs = WMS.objects.all()
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -396,10 +395,12 @@ def check_geoserver_wms(request):
         'request': 'GetCapabilities',
     }
 
+    initial_qs = WMS.objects.all()
+
     for qs in initial_qs:
         base_url = qs.url
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=50)
-        if rsp.status_code == 404:
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
+        if rsp.status_code != 200:
             wms_layer = WMSLayer.objects.filter(wms_id=qs.id)
             if wms_layer:
                 for layer in wms_layer:
