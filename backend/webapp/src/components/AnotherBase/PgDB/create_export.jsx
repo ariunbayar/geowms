@@ -389,8 +389,9 @@ export default class  ExportCreate extends Component {
                                             Геометр талбар
                                         </span>&nbsp;
                                         <span
-                                            className="col-md-5 m-1 border rounded"
+                                            className={"col-md-5 m-1 border rounded form-control" + ( !geo_data_field ? ' is-invalid border-danger' : '')}
                                             name='inspire_property'
+                                            title={!geo_data_field && 'Geo data байхгүй байна !!!'}
                                         >
                                             {geo_data_field}
                                         </span>
