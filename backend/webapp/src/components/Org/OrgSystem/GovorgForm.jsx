@@ -193,7 +193,7 @@ export class GovorgForm extends Component {
                         </Formik>
                     </div>
                     <div className="col-md-8">
-                     {this.state.wms_list.map((wms, wms_index) =>
+                    {this.state.wms_list.map((wms, wms_index) =>
                         <div className="col-md-12" id="accordion1" key={wms_index}>
                             <div className="row">
                                 <div className="col-md-8 arrow-tree">

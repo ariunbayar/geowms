@@ -6,6 +6,7 @@ import {service} from './service'
 import Modal from "../../Modal"
 import BackButton from "@utils/Button/BackButton"
 import Attributes from './Attributes'
+import { containsCoordinate } from 'ol/extent'
 
 export class Дэлгэрэнгүй extends Component {
 
@@ -54,20 +55,8 @@ export class Дэлгэрэнгүй extends Component {
         service
             .detail(this.props.match.params.system_id)
             .then(({govorg, public_url, private_url}) => {
-                const govorg_wms_list =
-                    govorg.wms_list
-                        .map((wms) => {
-                            return {
-                                ...wms,
-                                layer_list: wms.layer_list.filter((layer) => {
-                                    return govorg.layers.indexOf(layer.id) > -1
-                                })
-                            }
-                        })
-                        .filter((wms) => wms.layer_list.length)
                 this.setState({
-                    govorg,
-                    govorg_wms_list,
+                    govorg_wms_list: govorg.wms_list,
                     public_url,
                     private_url,
                     is_loading: false,
@@ -114,7 +103,6 @@ export class Дэлгэрэнгүй extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const {is_state} = this.state
-
         return (
             <div className="my-4">
                 <div className="row">
@@ -174,7 +162,7 @@ export class Дэлгэрэнгүй extends Component {
                             <div className="col-md-12 mt-3 mb-3 ml-3" key={wms.id}>
                                 <h5> {wms.name} </h5>
                                 <ul>
-                                    {wms.layer_list.map((layer, idx) =>
+                                    {wms.layers.map((layer, idx) =>
                                         <li key={idx} id="accordion1">
                                             GeoJSON: {layer.title} ({layer.code})
                                             <div className="input-group mt-2">
@@ -185,16 +173,16 @@ export class Дэлгэрэнгүй extends Component {
                                                     </button>
                                                 </span>
                                             </div>
-                                            <div>
+                                            {/* <div>
                                                 <button data-toggle="collapse" data-target={`#collapse-${wms.id + layer.id}`} aria-expanded="false" aria-controls={`#collapse-${wms.id + layer.id}`}>Багана эрх</button>
-                                            </div>
-                                            {layer &&
+                                            </div> */}
+                                            {/* {layer &&
                                             <Attributes
                                                 wms={wms}
                                                 layer={layer}
                                                 addNotif={this.addNotif}
                                             ></Attributes>
-                                            }
+                                            } */}
                                         </li>
                                     )}
                                 </ul>

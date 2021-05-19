@@ -115,16 +115,16 @@ def json_proxy(request, base_url, token, code):
 
     system = utils.geo_cache("system_json", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
 
-    allowed_att = allowed_attbs(request, token, system, code)
+    # allowed_att = allowed_attbs(request, token, system, code)
 
-    if not allowed_att or not system:
-        raise Http404
+    # if not allowed_att or not system:
+    #     raise Http404
     allowed_layers = [code]
     if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
         if request.GET.get('SERVICE') == 'WFS':
             queryargs = {
                 **request.GET,
-                "propertyName": [allowed_att],
+                # "propertyName": [allowed_att],
             }
             rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
             content = rsp.content
@@ -145,7 +145,7 @@ def json_proxy(request, base_url, token, code):
             'request': 'GetFeature',
             'typeName': code,
             'outputFormat': 'application/json',
-            "propertyName": [allowed_att],
+            # "propertyName": [allowed_att],
         }
 
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)

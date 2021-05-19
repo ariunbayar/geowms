@@ -105,69 +105,91 @@ def set_attributes(request, payload, pk):
     })
 
 
-def _get_attribute(request, wms):
+# def _get_attribute(request, wms):
 
-    BASE_HEADERS = {
-        'User-Agent': 'geo 1.0',
-    }
-    queryargs = request.GET
-    # headers = {**BASE_HEADERS}
-    headers = {
-        **BASE_HEADERS,
-        'accept': 'application/json',
-        'Content-type': 'application/json'
-    }
-    content = []
-    base_url = wms.url + '?service=wfs&version=2.0.0&request=DescribeFeatureType&outputFormat=application/json'
-    requests.packages.urllib3.disable_warnings()
-    rsp = requests.get(base_url, queryargs, headers=headers, timeout=20, verify=False)
-    if rsp.status_code == 200:
-        try:
-            content = rsp.text
-        except Exception:
-            pass
-        # content = rsp.content.decode("utf-8")
-        # content = json.loads(content)
-    return content
+#     BASE_HEADERS = {
+#         'User-Agent': 'geo 1.0',
+#     }
+#     queryargs = request.GET
+#     # headers = {**BASE_HEADERS}
+#     headers = {
+#         **BASE_HEADERS,
+#         'accept': 'application/json',
+#         'Content-type': 'application/json'
+#     }
+#     content = []
+#     base_url = wms.url + '?service=wfs&version=2.0.0&request=DescribeFeatureType&outputFormat=application/json'
+#     requests.packages.urllib3.disable_warnings()
+#     rsp = requests.get(base_url, queryargs, headers=headers, timeout=20, verify=False)
+#     if rsp.status_code == 200:
+#         try:
+#             content = rsp.text
+#         except Exception:
+#             pass
+#         # content = rsp.content.decode("utf-8")
+#         # content = json.loads(content)
+#     return content
 
 
-def _get_wmslayers(request, govorg, wms):
-    layer_list = []
-    system_local_base_url = utils.get_config('system_local_base_url')
-    for wmslayer in wms.wmslayer_set.all():
-        govorg_layers = GovOrgWMSLayer.objects.filter(govorg=govorg, wms_layer=wmslayer).first()
-        attributes = []
-        if govorg_layers:
-            if govorg_layers.attributes:
-                attributes = json.loads(govorg_layers.attributes)
-            layer_list.append({
-                'id': govorg_layers.id,
-                'attributes': attributes,
-                'code': wmslayer.code,
-                'name': wmslayer.name,
-                'title': wmslayer.title,
-                'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wmslayer.code])),
-                'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wmslayer.code]),
-            })
-    return layer_list
+# def _get_wmslayers(request, govorg, wms):
+#     layer_list = []
+#     system_local_base_url = utils.get_config('system_local_base_url')
+#     for wmslayer in wms.wmslayer_set.all():
+#         govorg_layers = GovOrgWMSLayer.objects.filter(govorg=govorg, wms_layer=wmslayer).first()
+#         attributes = []
+#         if govorg_layers:
+#             if govorg_layers.attributes:
+#                 attributes = json.loads(govorg_layers.attributes)
+#             layer_list.append({
+#                 'id': govorg_layers.id,
+#                 'attributes': attributes,
+#                 'code': wmslayer.code,
+#                 'name': wmslayer.name,
+#                 'title': wmslayer.title,
+#                 'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wmslayer.code])),
+#                 'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wmslayer.code]),
+#             })
+#     return layer_list
 
 
 def _get_govorg_detail_display(request, govorg):
-    wms_list = [
-        {
-            'id': wms.id,
-            'name': wms.name,
-            'is_active': wms.is_active,
-            'url': wms.url,
-            'layer_list': _get_wmslayers(request, govorg, wms),
-            'attributes': _get_attribute(request, wms),
+    wms_ids = []
+    wms_detail_list = []
+    wms_layer_ids = list(GovOrgWMSLayer.objects.filter(govorg_id=6).values_list('wms_layer_id', flat=True))
+    wms_layer_detail = WMSLayer.objects.filter(id__in=wms_layer_ids)
+    wms_layer_detail = list(wms_layer_detail.values('id', 'code', 'wms_id', 'title', 'name'))
+
+    for wms_layer in wms_layer_detail:
+        if wms_layer['wms_id'] not in wms_ids:
+            wms_ids.append(wms_layer['wms_id'])
+
+    wms_qs = list(WMS.objects.filter(id__in=wms_ids).values('id', 'name', 'url'))
+    system_local_base_url = utils.get_config('system_local_base_url')
+
+    for wms in wms_qs:
+        wms_layers = []
+        for wms_layer in wms_layer_detail:
+            if wms['id'] == wms_layer['wms_id']:
+                layer_detail = {
+                    'id': wms_layer['id'],
+                    'code': wms_layer['code'],
+                    'name': wms_layer['name'],
+                    'title': wms_layer['title'],
+                    'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wms_layer['code']])),
+                    'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wms_layer['code']]),
+                }
+                wms_layers.append(layer_detail)
+
+        wms_detail = {
+            'id': wms['id'],
+            'name': wms['name'],
+            'layers': wms_layers
         }
-        for wms in WMS.objects.all()
-    ]
+        wms_detail_list.append(wms_detail)
 
     return {
         **_get_govorg_display(govorg),
-        'wms_list': wms_list,
+        'wms_list': wms_detail_list,
     }
 
 
