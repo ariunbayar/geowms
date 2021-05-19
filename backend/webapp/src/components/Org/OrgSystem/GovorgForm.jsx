@@ -27,6 +27,7 @@ export class GovorgForm extends Component {
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handlePropCheck = this.handlePropCheck.bind(this)
+        this.handleCheck = this.handleCheck.bind(this)
     }
 
     componentDidMount() {
@@ -43,16 +44,45 @@ export class GovorgForm extends Component {
         }
 
     }
+
     handlePropCheck(e) {
         let accepted_props = this.state.accepted_props
         const value = e.target.value
+        const layer_id = e.target.name
+        var attributes = []
+        var find_index = obj => obj.layer_id == layer_id
+        var index_of = accepted_props.findIndex(find_index)
 
         if (e.target.checked) {
-            accepted_props.push(value)
+            if (index_of > -1) {
+                accepted_props[index_of].attributes.push(value)
+            }
+            else {
+                attributes.push(value)
+                accepted_props.push({
+                    'layer_id': layer_id,
+                    'attributes': attributes
+                })
+            }
         } else {
-            accepted_props = accepted_props.filter((code) => code != value)
+            var lists = accepted_props[index_of].attributes.filter((val) => val != value)
+            accepted_props[index_of].attributes = lists
         }
         this.setState({accepted_props})
+    }
+
+    handleCheck(layer_id, value) {
+        var accepted_props = this.state.accepted_props
+        var find_index = obj => obj.layer_id == layer_id
+        var index_of = accepted_props.findIndex(find_index)
+        var check_prop = false
+        if (index_of > -1) {
+            var index_of_prop = accepted_props[index_of].attributes.indexOf(value)
+            if (index_of_prop > -1) {
+                check_prop = true
+            }
+        }
+        return check_prop
     }
 
     handleLayerToggle(e) {
@@ -240,7 +270,7 @@ export class GovorgForm extends Component {
                                         &&
                                         this.state.layers.indexOf(layer.id) > -1
                                         &&
-                                        <div className="d-block col-md-8 text-primary">
+                                        <div className="d-block col-md-12 text-primary">
                                             <label
                                                 className="col-md-8 text-primary"
                                             >
@@ -262,8 +292,9 @@ export class GovorgForm extends Component {
                                                         <label>
                                                             <input type="checkbox"
                                                                 value={prop.prop_eng}
+                                                                name={layer.id}
                                                                 onChange={this.handlePropCheck}
-                                                                checked={this.state.accepted_props.indexOf(prop.prop_eng) > -1}
+                                                                checked={this.handleCheck(layer.id, prop.prop_eng)}
                                                             />
                                                             {} {prop.prop_name} ({prop.prop_eng})
                                                         </label>
