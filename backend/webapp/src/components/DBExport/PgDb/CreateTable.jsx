@@ -124,6 +124,7 @@ export default class  PgForm extends Component {
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
             else this.setState({feature_name})
+            this.setState({ id_list: [] })
         }
 
         if (pS.packages != packages) {
@@ -306,7 +307,7 @@ export default class  PgForm extends Component {
                                                                 <label
                                                                     htmlFor={property.property_name}
                                                                 >
-                                                            </label>
+                                                                </label>
                                                             </div>
                                                         </th>
                                                         <th>
