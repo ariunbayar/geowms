@@ -1,3 +1,4 @@
+from backend.inspire.models import LFeatures, LPackages, LProperties
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -10,6 +11,7 @@ from api.utils import replace_src_url
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
 from backend.payment.models import PaymentLayer
+from backend.dedsanbutets.models import ViewNames, ViewProperties
 from main.decorators import ajax_required
 from main.components import Datatable
 
@@ -18,6 +20,33 @@ from .forms import WMSForm
 
 
 def _get_wms_display(request, wms):
+    layer_list = []
+    wms_layers = list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title'))
+    for wms_layer in wms_layers:
+        properties = []
+        if 'gp_layer' in wms_layer['code']:
+            layer_code = wms_layer['code'].split('gp_layer_')[1]
+            layer_code = layer_code.split('_view')[0]
+            feature = LFeatures.objects.filter(feature_name_eng__iexact=layer_code).first()
+            if feature:
+                prop_qs = ViewProperties.objects
+                prop_qs = prop_qs.filter(view__feature_id=feature.feature_id)
+                prop_qs = list(prop_qs.values_list('property_id', flat=True))
+                if prop_qs:
+                    prop_all = LProperties.objects.filter(property_id__in=prop_qs)
+                    for prop in prop_all:
+                        property_detail = {
+                            'prop_id': prop.property_id,
+                            'prop_name': prop.property_name,
+                            'prop_eng': prop.property_name_eng
+                        }
+                        properties.append(property_detail)
+
+        wms_layer_detail = {
+            **wms_layer,
+            'properties': properties
+        }
+        layer_list.append(wms_layer_detail)
     return {
         'id': wms.id,
         'name': wms.name,
@@ -25,7 +54,7 @@ def _get_wms_display(request, wms):
         'wmts_url': wms.cache_url if wms.cache_url else '',
         'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
-        'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+        'layer_list': layer_list,
         'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
         'created_at': wms.created_at.strftime('%Y-%m-%d'),
     }

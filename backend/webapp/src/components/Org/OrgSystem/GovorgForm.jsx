@@ -20,6 +20,7 @@ export class GovorgForm extends Component {
             title: '',
             model_type_icon: '',
             timer: null,
+            prop_arrow: false
         }
 
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
@@ -212,7 +213,7 @@ export class GovorgForm extends Component {
                                 </div>
                             </div>
                             {wms.is_active && wms.layer_list.map((layer, idx) =>
-                                <div key={idx}  id={`collapse-${wms_index}`} className="ml-5 collapse" data-parent="#accordion1">
+                                <div key={idx}  id={`collapse-${wms_index}`} className="ml-5 collapse col-md-8" data-parent="#accordion1">
                                     <label>
                                         <input type="checkbox"
                                             value={layer.id}
@@ -221,6 +222,43 @@ export class GovorgForm extends Component {
                                         />
                                         {} {layer.title} ({layer.code})
                                     </label>
+                                    {
+                                        layer.properties.length > 0
+                                        &&
+                                        this.state.layers.indexOf(layer.id) > -1
+                                        &&
+                                        <div className="d-block col-md-8 text-primary">
+                                            <label
+                                                className="col-md-8 text-primary"
+                                            >
+                                                    Талбарууд
+                                            </label>
+                                            <i
+                                                className={'col-md-4 fa-lg fa fa-angle-double-' + (this.state.prop_arrow ? 'down': 'left')}
+                                                onClick={() => this.setState({prop_arrow: !this.state.prop_arrow})}
+                                                >
+                                            </i>
+                                            {
+                                                this.state.prop_arrow
+                                                &&
+                                                layer.properties.map((prop, idy) =>
+                                                    <div
+                                                        key={idy}
+                                                        className="ml-4 pl-2"
+                                                    >
+                                                        <label>
+                                                            <input type="checkbox"
+                                                                // value={layer.id}
+                                                                // onChange={this.handleLayerToggle}
+                                                                // checked={this.state.layers.indexOf(layer.id) > -1}
+                                                            />
+                                                            {} {prop.prop_name} ({prop.prop_eng})
+                                                        </label>
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+                                    }
                                 </div>
                             )}
                         </div>
