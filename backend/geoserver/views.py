@@ -1,4 +1,6 @@
+from django.db.models import base
 import requests
+from requests.api import request
 from requests.auth import HTTPBasicAuth
 
 from xml.etree import ElementTree as etree
@@ -16,6 +18,7 @@ from geoportal_app.models import User
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
+from backend.govorg.models import GovOrgWMSLayer
 from django.views.decorators.csrf import csrf_exempt
 from main.utils import (
     dict_fetchall,
@@ -375,6 +378,46 @@ def create_group_cache(request, payload, group_name):
         'success': True,
         'info': 'Амжилттай хадгалагдлаа'
     })
+
+
+
+@require_GET
+@csrf_exempt
+def check_geoserver_wms(request):
+
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    headers = {**BASE_HEADERS}
+    queryargs = {
+        'service': 'WMS',
+        'version': '1.0.0',
+        'request': 'GetCapabilities',
+    }
+
+    initial_qs = WMS.objects.all()
+
+    for qs in initial_qs:
+        base_url = qs.url
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
+        if rsp.status_code != 200:
+            wms_layer = WMSLayer.objects.filter(wms_id=qs.id)
+            if wms_layer:
+                for layer in wms_layer:
+                    bundle_layers = BundleLayer.objects.filter(layer_id=layer.id)
+
+                    if bundle_layers:
+                        bundle_layers.delete()
+
+                    system_layers = GovOrgWMSLayer.objects.filter(wms_layer_id=layer.id)
+
+                    if system_layers:
+                        system_layers.delete()
+
+                wms_layer.delete()
+            qs.delete()
+
+    return JsonResponse({'success': True})
 
 
 @require_GET
@@ -744,3 +787,4 @@ def get_ws_list(request):
     return JsonResponse({
         'work_space_list': work_space_list,
     })
+
