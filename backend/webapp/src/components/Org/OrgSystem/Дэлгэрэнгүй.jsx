@@ -55,6 +55,7 @@ export class Дэлгэрэнгүй extends Component {
         service
             .detail(this.props.match.params.system_id)
             .then(({govorg, public_url, private_url}) => {
+                console.log("hohoh", govorg)
                 this.setState({
                     govorg_wms_list: govorg.wms_list,
                     public_url,
@@ -173,16 +174,6 @@ export class Дэлгэрэнгүй extends Component {
                                                     </button>
                                                 </span>
                                             </div>
-                                            {/* <div>
-                                                <button data-toggle="collapse" data-target={`#collapse-${wms.id + layer.id}`} aria-expanded="false" aria-controls={`#collapse-${wms.id + layer.id}`}>Багана эрх</button>
-                                            </div> */}
-                                            {/* {layer &&
-                                            <Attributes
-                                                wms={wms}
-                                                layer={layer}
-                                                addNotif={this.addNotif}
-                                            ></Attributes>
-                                            } */}
                                         </li>
                                     )}
                                 </ul>

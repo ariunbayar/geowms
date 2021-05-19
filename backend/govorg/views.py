@@ -155,7 +155,8 @@ def set_attributes(request, payload, pk):
 def _get_govorg_detail_display(request, govorg):
     wms_ids = []
     wms_detail_list = []
-    wms_layer_ids = list(GovOrgWMSLayer.objects.filter(govorg_id=6).values_list('wms_layer_id', flat=True))
+
+    wms_layer_ids = list(GovOrgWMSLayer.objects.filter(govorg_id=govorg.id).values_list('wms_layer_id', flat=True))
     wms_layer_detail = WMSLayer.objects.filter(id__in=wms_layer_ids)
     wms_layer_detail = list(wms_layer_detail.values('id', 'code', 'wms_id', 'title', 'name'))
 
@@ -186,7 +187,6 @@ def _get_govorg_detail_display(request, govorg):
             'layers': wms_layers
         }
         wms_detail_list.append(wms_detail)
-
     return {
         **_get_govorg_display(govorg),
         'wms_list': wms_detail_list,
