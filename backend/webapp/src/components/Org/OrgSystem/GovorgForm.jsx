@@ -20,12 +20,13 @@ export class GovorgForm extends Component {
             title: '',
             model_type_icon: '',
             timer: null,
-            prop_arrow: false
+            prop_arrow: false,
+            accepted_props: []
         }
 
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-
+        this.handlePropCheck = this.handlePropCheck.bind(this)
     }
 
     componentDidMount() {
@@ -41,6 +42,17 @@ export class GovorgForm extends Component {
             })
         }
 
+    }
+    handlePropCheck(e) {
+        let accepted_props = this.state.accepted_props
+        const value = e.target.value
+
+        if (e.target.checked) {
+            accepted_props.push(value)
+        } else {
+            accepted_props = accepted_props.filter((code) => code != value)
+        }
+        this.setState({accepted_props})
     }
 
     handleLayerToggle(e) {
@@ -61,7 +73,8 @@ export class GovorgForm extends Component {
         const data = {
             ...values,
             layers: this.state.layers,
-            'org': org_id
+            'org': org_id,
+            'accepted_props': accepted_props
         }
 
         setStatus('checking')
@@ -248,9 +261,9 @@ export class GovorgForm extends Component {
                                                     >
                                                         <label>
                                                             <input type="checkbox"
-                                                                // value={layer.id}
-                                                                // onChange={this.handleLayerToggle}
-                                                                // checked={this.state.layers.indexOf(layer.id) > -1}
+                                                                value={prop.prop_eng}
+                                                                onChange={this.handlePropCheck}
+                                                                checked={this.state.accepted_props.indexOf(prop.prop_eng) > -1}
                                                             />
                                                             {} {prop.prop_name} ({prop.prop_eng})
                                                         </label>
