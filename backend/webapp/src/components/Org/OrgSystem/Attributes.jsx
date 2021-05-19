@@ -49,7 +49,7 @@ export default class Attributes extends Component {
         const {checked_array} = this.state
         return (
             <ul key={wms.id + layer.id} id={`collapse-${wms.id + layer.id}`} className="collapse" data-parent="#accordion1">
-            {wms.attributes.featureTypes.map((attribute, idx) => 
+            {wms.attributes.featureTypes.map((attribute, idx) =>
                 attribute.typeName == layer.code &&
                 attribute.properties.map((property, index) =>
                     <li>
