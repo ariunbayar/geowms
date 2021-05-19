@@ -423,17 +423,36 @@ def _get_data_types(qs_property_ids_of_feature, data_type_ids):
         data_types.append(data)
     return data_types
 
+def _get_user_perm(request, fid):
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_perm = get_object_or_404(EmpPerm, employee=employee)
+    emp_perm = EmpPermInspire.objects.filter(
+        emp_perm=emp_perm,
+        feature_id=fid,
+        perm_kind=EmpPermInspire.PERM_VIEW
+    )
+    emp_perm = emp_perm.exclude(property_id__isnull=True)
+    property_list = list(emp_perm.values_list('property_id', flat=True))
+
+    return property_list
 
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detail(request, gid, fid, tid):
+
+    user_perm_property = _get_user_perm(request, fid)
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
     feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
     data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
-    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
+
+    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(
+        data_type_id__in=data_type_ids,
+        property_id__in=user_perm_property)
+
     property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
+    data_type_ids = list(qs_property_ids_of_feature.values_list('data_type_id', flat=True))
     qs_l_properties = LProperties.objects
     qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature).distinct('property_id')
 
@@ -450,12 +469,20 @@ def detail(request, gid, fid, tid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detailCreate(request, tid, pid, fid):
+
+    user_perm_property = _get_user_perm(request, fid)
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
     feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
     data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
-    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
+    qs_property_ids_of_feature = LDataTypeConfigs.objects
+
+    qs_property_ids_of_feature = qs_property_ids_of_feature.filter(
+        data_type_id__in=data_type_ids,
+        property_id__in=user_perm_property)
+
     property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
+    data_type_ids = list(qs_property_ids_of_feature.values_list('data_type_id', flat=True))
     qs_l_properties = LProperties.objects
     qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature)
 
