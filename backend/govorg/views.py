@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
-from django.core.paginator import Paginator
-from django.db import connections, transaction
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.utils.timezone import localtime, now
@@ -14,7 +13,6 @@ from main import utils
 from .models import GovOrg, GovOrgWMSLayer
 from .forms import SystemForm
 from main.components import Datatable
-import requests
 import json
 
 
@@ -119,7 +117,7 @@ def _get_govorg_detail_display(request, govorg):
     wms_ids = []
     wms_detail_list = []
     govorg_layer_detail = []
-    govorg_id = govorg_id=govorg.id
+    govorg_id = govorg.id
     system_local_base_url = utils.get_config('system_local_base_url')
 
     govorg_layers = list(GovOrgWMSLayer.objects.filter(govorg_id=govorg_id).values('wms_layer_id', 'attributes'))
@@ -135,7 +133,6 @@ def _get_govorg_detail_display(request, govorg):
             'layer_id': govorg_layer['wms_layer_id'],
             'attributes': utils.json_load(govorg_layer_attr)
         })
-
 
     wms_layer_detail = WMSLayer.objects.filter(id__in=wms_layer_ids)
     wms_layer_detail = list(wms_layer_detail.values('id', 'code', 'wms_id', 'title', 'name'))
