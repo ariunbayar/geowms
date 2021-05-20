@@ -226,7 +226,7 @@ export default class List extends Component {
 
     handleRemove() {
         const {values} = this.state
-        service.remove(values.id).then(({success}) => {
+        service.remove(values.id, values.unique_id).then(({success}) => {
             if (success) {
                 this.setState(
                     {refresh: !this.state.refresh},

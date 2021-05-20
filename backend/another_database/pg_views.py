@@ -601,11 +601,12 @@ def remove_pg_table(request, payload, id, table_id):
     is_insert = payload.get('is_insert')
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
     pg_table.delete()
-    try:
-        cursor_pg = utils.get_cursor_pg(id)
-        utils.drop_table(pg_table.table_name, cursor_pg)
-    except Exception:
-        return False
+    if is_insert:
+        try:
+            cursor_pg = utils.get_cursor_pg(id)
+            utils.drop_table(pg_table.table_name, cursor_pg)
+        except Exception:
+            pass
 
     return JsonResponse({
         'success': True,

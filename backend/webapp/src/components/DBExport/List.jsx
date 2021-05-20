@@ -154,7 +154,8 @@ export default class List extends Component {
 
     handleRemove() {
         const {values} = this.state
-        service.remove(values.id).then(({success}) => {
+        const state =  'Export'
+        service.remove(values.id, state).then(({success}) => {
             if (success) {
                 this.setState(
                     {refresh: !this.state.refresh},

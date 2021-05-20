@@ -1,6 +1,6 @@
 from pymongo import cursor
 from backend import another_database
-from backend.inspire.models import LFeatures, LPackages, LThemes
+from backend.inspire.models import LFeatures, LPackages, LThemes, MDatas, MGeoDatas
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -245,20 +245,31 @@ def mssql_save(request, payload):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def remove(request, pk):
+def remove(request, payload, pk):
+    state = payload.get('state')
     another_db = get_object_or_404(AnotherDatabase, pk=pk)
     another_db_table = AnotherDatabaseTable.objects
     another_db_table = another_db_table.filter(another_database=another_db)
-    cursor_pg = utils.get_cursor_pg(pk)
 
-    for item in another_db_table:
-        utils.drop_table(item.table_name, cursor_pg)
-        item.delete()
+    if state == 'Export':
+        cursor_pg = utils.get_cursor_pg(pk)
 
-    another_db.delete()
+        for item in another_db_table:
+            utils.drop_table(item.table_name, cursor_pg)
+            item.delete()
+
+        another_db.delete()
+    else:
+        another_db_table.delete()
+        another_db.delete()
+        mdatas = MDatas.objects.filter(created_by=state)
+        mdatas.delete()
+        m_geo_datas = MGeoDatas.objects.filter(created_by=state)
+        m_geo_datas.delete()
+
     rsp = {
         'success': True,
     }

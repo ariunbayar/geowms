@@ -71,9 +71,10 @@ const pg_config = {
     },
 }
 
-function remove(pk) {
+function remove(pk, state) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({state}),
     }
     return fetch(`${prefix}/remove/${pk}/`, requestOptions).then(handleResponse)
 }
