@@ -875,7 +875,7 @@ def _delete_file(for_delete_items, Sid=None):
             'geoportal_app',
             'datas',
             for_delete_items.get('file_type_name'),
-            for_delete_items.get('file_name')+'.*'
+            for_delete_items.get('uniq_name')+'.*'
         )
     )
     for filePath in fileList:
@@ -960,6 +960,9 @@ def _check_perm(employee, feature_id, geo_json):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def file_upload_save_data(request, tid, pid, fid, ext):
+    geo_json_list = list()
+    data = MGeoDatas.objects.filter(feature_id=fid).first()
+    geom_type = GEOSGeometry(data.geo_data).geom_type
     employee = get_object_or_404(Employee, user=request.user)
     files = request.FILES.getlist('data')
     order_at = request.POST.get('order_at')
@@ -1017,55 +1020,68 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     for val in layer:
                         values = dict()
                         for name in range(0, len(layer.fields)):
-                            field_name = val[name].name  # field name
-                            value = val.get(name)  # value ni
+                            geo_json = val.geom.json
+                            geo_type = utils.json_dumps(geo_json)
+                            geo_json_load = utils.json_load(geo_type)
+                            geo_type = geo_json_load['type']
+                            geo_json_list.append(geo_type)
+                        if all(geom_type == item for item in geo_json_list):
+                            for name in range(0, len(layer.fields)):
+                                field_name = val[name].name  # field name
+                                value = val.get(name)  # value ni
 
-                            if name == 0:
+                                if name == 0:
 
-                                # geo_id = _make_geo_id(feature_id)
-                                geo_json = val.geom.json  # goemetry json
+                                    # geo_id = _make_geo_id(feature_id)
+                                    geo_json = val.geom.json  # goemetry json
 
-                                if geo_json:
-                                    success, info, request_kind = _check_perm(
-                                        employee,
-                                        feature_id,
-                                        geo_json
-                                    )
+                                    if geo_json:
+                                        success, info, request_kind = _check_perm(
+                                            employee,
+                                            feature_id,
+                                            geo_json
+                                        )
 
-                                    if not success:
+                                        if not success:
+                                            _delete_file(for_delete_items, Sid)
+                                            rsp = {
+                                                'success': success,
+                                                'info': info,
+                                            }
+                                            return JsonResponse(rsp)
+
+                                    else:
                                         _delete_file(for_delete_items, Sid)
                                         rsp = {
-                                            'success': success,
-                                            'info': info,
+                                            'success': False,
+                                            'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
                                         }
                                         return JsonResponse(rsp)
 
-                                else:
-                                    _delete_file(for_delete_items, Sid)
-                                    rsp = {
-                                        'success': False,
-                                        'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
-                                    }
-                                    return JsonResponse(rsp)
+                                values[field_name] = value
 
-                            values[field_name] = value
-
-                        request_values = {
-                            'theme_id': tid,
-                            'package_id': pid,
-                            'feature_id': fid,
-                            'employee': employee,
-                            'geo_json': geo_json,
-                            'kind': request_kind,
-                            'order_at': order_at,
-                            'order_no': order_no,
-                            'group_id': main_request_id,
-                        }
-                        success, info = _make_request(values, request_values)
-                        if not success:
+                            request_values = {
+                                'theme_id': tid,
+                                'package_id': pid,
+                                'feature_id': fid,
+                                'employee': employee,
+                                'geo_json': geo_json,
+                                'kind': request_kind,
+                                'order_at': order_at,
+                                'order_no': order_no,
+                                'group_id': main_request_id,
+                            }
+                            success, info = _make_request(values, request_values)
+                            if not success:
+                                _delete_file(for_delete_items, Sid)
+                                break
+                        else:
                             _delete_file(for_delete_items, Sid)
-                            break
-
+                            rsp = {
+                                'success': False,
+                                'info': "Type зөрсөн байна"
+                            }
+                            return JsonResponse(rsp)
                     rsp = {
                         'success': success,
                         'info': info
