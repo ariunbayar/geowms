@@ -39,7 +39,7 @@ export class GovorgForm extends Component {
 
         if (system_id) {
             service.detail(system_id).then(({govorg}) => {
-                this.setState(({govorg, layers: govorg.layers,}))
+                this.setState(({govorg, layers: govorg.layers, accepted_props: govorg.govorg_attributes}))
             })
         }
 
@@ -167,7 +167,6 @@ export class GovorgForm extends Component {
     }
 
     render() {
-        console.log(this.state.accepted_props)
         return (
 
             <div className="my-4">

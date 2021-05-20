@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.postgres.search import SearchVector
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import connections, transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.utils.timezone import localtime, now
@@ -165,8 +165,25 @@ def set_attributes(request, payload, pk):
 def _get_govorg_detail_display(request, govorg):
     wms_ids = []
     wms_detail_list = []
+    govorg_layer_detail = []
+    govorg_id = govorg_id=govorg.id
+    system_local_base_url = utils.get_config('system_local_base_url')
 
-    wms_layer_ids = list(GovOrgWMSLayer.objects.filter(govorg_id=govorg.id).values_list('wms_layer_id', flat=True))
+    govorg_layers = list(GovOrgWMSLayer.objects.filter(govorg_id=govorg_id).values('wms_layer_id', 'attributes'))
+
+    wms_layer_ids = []
+    for govorg_layer in govorg_layers:
+
+        if govorg_layer['wms_layer_id'] not in wms_layer_ids:
+            wms_layer_ids.append(govorg_layer['wms_layer_id'])
+
+        govorg_layer_attr = govorg_layer['attributes'].replace("\'", "\"")
+        govorg_layer_detail.append({
+            'layer_id': govorg_layer['wms_layer_id'],
+            'attributes': utils.json_load(govorg_layer_attr)
+        })
+
+
     wms_layer_detail = WMSLayer.objects.filter(id__in=wms_layer_ids)
     wms_layer_detail = list(wms_layer_detail.values('id', 'code', 'wms_id', 'title', 'name'))
 
@@ -175,7 +192,6 @@ def _get_govorg_detail_display(request, govorg):
             wms_ids.append(wms_layer['wms_id'])
 
     wms_qs = list(WMS.objects.filter(id__in=wms_ids).values('id', 'name', 'url'))
-    system_local_base_url = utils.get_config('system_local_base_url')
 
     for wms in wms_qs:
         wms_layers = []
@@ -200,6 +216,7 @@ def _get_govorg_detail_display(request, govorg):
     return {
         **_get_govorg_display(govorg),
         'wms_list': wms_detail_list,
+        'govorg_attributes': govorg_layer_detail
     }
 
 
