@@ -764,19 +764,22 @@ def mssql_save(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def config_save(request, payload):
-
-    server = payload.get('pg_host')
-    port = payload.get('pg_port')
-    username = payload.get('pg_username')
-    password = payload.get('pg_password')
-    database = payload.get('pg_database')
-    schema = payload.get('pg_schema')
+    values = payload.get('values')
+    out_type = payload.get('out_type')
+    server = values.get('pg_host')
+    port = values.get('pg_port')
+    username = values.get('pg_username')
+    password = values.get('pg_password')
+    database = values.get('pg_database')
+    schema = values.get('pg_schema')
+    is_export = False
+    if out_type == 'true':
+        is_export = True
 
     db_type = AnotherDatabase.PgDB
-    name = payload.get('name')
-    definition = payload.get('definition')
-
-    pk = payload.get('id')
+    name = values.get('name')
+    definition = values.get('definition')
+    pk = values.get('id')
     check = check_pg_connection(server, database, port, username, password, schema)
     if check:
         connection = {
@@ -803,7 +806,7 @@ def config_save(request, payload):
             name=name,
             definition=definition,
             unique_id=unique_id,
-            is_export=True
+            is_export=is_export
         )
 
     rsp = {

@@ -37,6 +37,7 @@ urlpatterns = [
         path('paginatedList/', wms_views.paginated_list, name='paginatedList'),
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
+        path('<int:id>/remove/invalid-layer/', wms_views.remove_invalid_layers, name='remove_invalid_layers'),
     ], 'wms'))),
 
     path('another-database/', include(([
@@ -76,6 +77,11 @@ urlpatterns = [
         path('pg/<int:id>/refresh-table-data/', pg_views.refresh_datas, name='refresh-datas-pg'),
         path('pg/<int:id>/<int:table_id>/refresh-one-table/', pg_views.refresh_single_table, name='refresh_single_table'),
         path('pg/<int:id>/<int:table_id>/remove-table/', pg_views.remove_pg_table),
+        path('pg/<int:pk>/get-another-tables/', pg_views.get_ano_tables),
+        path('pg/<int:pk>/get_table_fields/', pg_views.get_table_fields),
+        path('pg/<int:id>/refresh-all-connection/', pg_views.refresh_all_conn),
+        path('pg/<int:id>/<int:table_id>/insert-single-table/', pg_views.insert_single_table, name='insert_single_table'),
+        path('pg/refresh-view/', pg_views.refresh_view),
     ], 'another-database'))),
 
 
@@ -232,6 +238,7 @@ urlpatterns = [
         path('get_group_cache_list/', geoserver_views.get_group_cache),
         path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
         path('update_geo_web_cache/', geoserver_views.update_geo_cache),
+        path('check_geoserver_wms/', geoserver_views.check_geoserver_wms),
         path('check-style-name/', geoserver_views.check_styles_name),
         path('style-data/', geoserver_views.get_style_data),
         path('create-style/', geoserver_views.create_style),

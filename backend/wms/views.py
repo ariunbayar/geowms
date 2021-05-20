@@ -1,3 +1,4 @@
+from backend.inspire.models import LFeatures, LPackages, LProperties
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -5,13 +6,12 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
-from django.core.paginator import Paginator
-from django.contrib.postgres.search import SearchVector
 
 from api.utils import replace_src_url
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
 from backend.payment.models import PaymentLayer
+from backend.dedsanbutets.models import ViewNames, ViewProperties
 from main.decorators import ajax_required
 from main.components import Datatable
 
@@ -19,8 +19,34 @@ from .models import WMS
 from .forms import WMSForm
 
 
-
 def _get_wms_display(request, wms):
+    layer_list = []
+    wms_layers = list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title'))
+    for wms_layer in wms_layers:
+        properties = []
+        if 'gp_layer' in wms_layer['code']:
+            layer_code = wms_layer['code'].split('gp_layer_')[1]
+            layer_code = layer_code.split('_view')[0]
+            feature = LFeatures.objects.filter(feature_name_eng__iexact=layer_code).first()
+            if feature:
+                prop_qs = ViewProperties.objects
+                prop_qs = prop_qs.filter(view__feature_id=feature.feature_id)
+                prop_qs = list(prop_qs.values_list('property_id', flat=True))
+                if prop_qs:
+                    prop_all = LProperties.objects.filter(property_id__in=prop_qs)
+                    for prop in prop_all:
+                        property_detail = {
+                            'prop_id': prop.property_id,
+                            'prop_name': prop.property_name,
+                            'prop_eng': prop.property_name_eng
+                        }
+                        properties.append(property_detail)
+
+        wms_layer_detail = {
+            **wms_layer,
+            'properties': properties
+        }
+        layer_list.append(wms_layer_detail)
     return {
         'id': wms.id,
         'name': wms.name,
@@ -28,7 +54,7 @@ def _get_wms_display(request, wms):
         'wmts_url': wms.cache_url if wms.cache_url else '',
         'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
-        'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+        'layer_list': layer_list,
         'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
         'created_at': wms.created_at.strftime('%Y-%m-%d'),
     }
@@ -86,10 +112,9 @@ def wms_layer_all(request, payload):
         _wms_layer_display(wms_layer)
         for wms_layer in wms_layers
     ]
-
     return JsonResponse({
         'layers_all': layers_all,
-    })
+        })
 
 
 @require_POST
@@ -163,7 +188,7 @@ def layerAdd(request, payload):
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
+        WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
         return JsonResponse({'success': True})
 
 
@@ -207,28 +232,26 @@ def create(request, payload):
 def update(request, payload):
     pk = payload.get('id')
     wms = get_object_or_404(WMS, pk=pk)
-    layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
     is_active = payload.get('is_active')
     url_service = payload.get('url')
     wmts_url = payload.get('wmts_url')
-
     if wms:
         wms.cache_url = wmts_url or None
         wms.save()
 
     if is_active:
-        wms.is_active=True
+        wms.is_active = True
     else:
-        wms.is_active=False
+        wms.is_active = False
     if url_service == wms.url:
         if form.is_valid():
             with transaction.atomic():
                 form.save()
                 wms = form.instance
-            rsp = { 'success': True }
+            rsp = {'success': True}
         else:
-            rsp = { 'success': False }
+            rsp = {'success': False}
     else:
         if form.is_valid():
             layers = WMSLayer.objects.filter(wms=wms)
@@ -237,9 +260,9 @@ def update(request, payload):
                 BundleLayer.objects.filter(layer=layer).delete()
             layers.delete()
             form.save()
-            rsp = { 'success': True }
+            rsp = {'success': True}
         else:
-            rsp = { 'success': False }
+            rsp = {'success': False}
 
     return JsonResponse(rsp)
 
@@ -357,12 +380,26 @@ def save_geo(request, payload):
     table = datas[0]['table']
 
     WMSLayer.objects.filter(wms_id=wms_id, code=code).update(
-        geodb_schema = schema,
-        geodb_table = table,
-        geodb_pk_field = pk_field,
-        geodb_export_field = export_field,
-        feature_price = price,
+        geodb_schema=schema,
+        geodb_table=table,
+        geodb_pk_field=pk_field,
+        geodb_export_field=export_field,
+        feature_price=price,
     )
+    rsp = {
+        'success': True
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def remove_invalid_layers(request, payload, id):
+    layers = payload.get('invalid_layers')
+    wmslayer = WMSLayer.objects.filter(wms_id=id, code__in=layers)
+    wmslayer.delete()
+
     rsp = {
         'success': True
     }

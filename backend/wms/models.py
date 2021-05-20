@@ -40,8 +40,6 @@ class WMSLog(models.Model):
 
     system = models.ForeignKey('backend_govorg.GovOrg', on_delete=models.PROTECT, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True)
-    wms = models.ForeignKey('backend_wms.WMS', on_delete=models.PROTECT, null=True)
-
     qs_all = models.TextField(null=True)
     qs_request = models.CharField(max_length=50, db_index=True)
 

@@ -6,6 +6,7 @@ import re
 import unicodedata
 import importlib
 import zipfile
+from django import utils
 import pyproj
 import math
 import json
@@ -1140,10 +1141,9 @@ def json_load(data):
 
 
 def json_dumps(data):
-    if isinstance(data, dict):
+    if isinstance(data, dict) or isinstance(data, list):
         data = json.dumps(data, ensure_ascii=False)
     return data
-
 
 def make_value_dict(value, properties_qs, is_display=False):
     value = json_load(value)
@@ -1805,22 +1805,9 @@ def check_nsdi_address(request):
     nsdi_check = False
     host_name = socket.gethostname()
     host_addr = socket.gethostbyname(host_name + ".local")
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     host = request.META.get('HTTP_HOST')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    host_name = socket.gethostname()
-    host_addr = socket.gethostbyname(host_name + ".local")
-    if not settings.DEBUG:
-        f = open("check_15_ip.txt", "w")
-        text = 'host_ip=' + host_addr + "\n"+ 'request_ip='+ip + 'host=' + host
-        f.write(text)
-        f.close()
-    if host_addr == '192.168.1.15' and ip == '127.0.0.1':
+    if host_addr == '192.168.10.15' and host == 'nsdi.gov.mn':
         nsdi_check = True
-
     return nsdi_check
 
 
