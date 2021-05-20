@@ -121,6 +121,7 @@ export default class  ExportCreate extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
+                data_list['feature_name'] = ''
                 data_list['matched_feilds'] = []
 
             }
@@ -145,6 +146,7 @@ export default class  ExportCreate extends Component {
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
             else this.setState({feature_name})
+            this.setState({ matched_feilds: [] })
         }
 
         if (pS.packages != packages) {
