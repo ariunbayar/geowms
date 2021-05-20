@@ -31,6 +31,7 @@ export default class FieldForm extends Component {
                         className={`form-control col-md-5 m-1 ${property_data.form_state ? "border-danger" : ''}`}
                         value={setSelectedField}
                         onChange={(e) => this.props.handleSetField( data_key, prop_key, e)}
+                        title={property_data.form_state && 'Өгөгдлийн төрөл таарахгүй байна !!!'}
                     >
                         <option value=''></option>
                         {
