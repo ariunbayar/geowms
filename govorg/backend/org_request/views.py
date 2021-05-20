@@ -586,8 +586,6 @@ def _check_group_items(r_approve):
                 other_item.group_id = None
                 other_item.save()
 
-        r_approve.group_id = None
-
 
 def _get_property_values(properties, form_json):
     property_datas = []
@@ -782,6 +780,7 @@ def request_approve(request, payload):
 
                 r_approve.state = ChangeRequest.STATE_APPROVE
                 _check_group_items(r_approve)
+                r_approve.group_id = None
                 r_approve.save()
 
             else:
