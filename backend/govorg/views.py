@@ -127,12 +127,12 @@ def _get_govorg_detail_display(request, govorg):
 
         if govorg_layer['wms_layer_id'] not in wms_layer_ids:
             wms_layer_ids.append(govorg_layer['wms_layer_id'])
-
-        govorg_layer_attr = govorg_layer['attributes'].replace("\'", "\"")
-        govorg_layer_detail.append({
-            'layer_id': govorg_layer['wms_layer_id'],
-            'attributes': utils.json_load(govorg_layer_attr)
-        })
+        if govorg_layer['attributes']:
+            govorg_layer_attr = govorg_layer['attributes'].replace("\'", "\"")
+            govorg_layer_detail.append({
+                'layer_id': govorg_layer['wms_layer_id'],
+                'attributes': utils.json_load(govorg_layer_attr)
+            })
 
     wms_layer_detail = WMSLayer.objects.filter(id__in=wms_layer_ids)
     wms_layer_detail = list(wms_layer_detail.values('id', 'code', 'wms_id', 'title', 'name'))
