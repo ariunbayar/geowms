@@ -1,4 +1,5 @@
 import json
+import datetime
 from geojson import FeatureCollection
 from django.contrib.gis.geos import GEOSGeometry
 
@@ -502,8 +503,21 @@ def _get_data_from_data(form):
                 if types['value_type'] == 'date' and data:
                     data = date_to_timezone(data)
 
-                value_type = types['value_type']
+            value_type = types['value_type']
     return data, value_type
+
+
+def _create_mdatas(geo_id, feature_id, form, value):
+    ids = _get_ids(feature_id, form['property_id'])
+    value['geo_id'] = geo_id
+    value['feature_config_id'] = ids[0]['feature_config_id']
+    value['data_type_id'] = ids[0]['data_type_id']
+    value['property_id'] = form['property_id']
+    if 'value_date' in value:
+        if not isinstance(value['value_date'], datetime.datetime):
+            if value['value_date']:
+                value['value_date'] = date_to_timezone(value['value_date'])
+    MDatas.objects.create(**value)
 
 
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
@@ -514,16 +528,16 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
         value[value_type] = data
 
         if approve_type == 'create':
-            ids = _get_ids(feature_id, form['property_id'])
-            value['geo_id'] = geo_id
-            value['feature_config_id'] = ids[0]['feature_config_id']
-            value['data_type_id'] = ids[0]['data_type_id']
-            value['property_id'] = form['property_id']
-            MDatas.objects.create(**value)
-
+            _create_mdatas(geo_id, feature_id, form, value)
         elif approve_type == 'update':
-            MDatas.objects.filter(pk=form['pk']).update(**value)
-
+            if 'value_date' in value:
+                if not isinstance(value['value_date'], datetime.datetime):
+                    if value['value_date']:
+                        value['value_date'] = date_to_timezone(value['value_date'])
+            if form['pk']:
+                MDatas.objects.filter(pk=form['pk']).update(**value)
+            else:
+                _create_mdatas(geo_id, feature_id, form, value)
     return True
 
 

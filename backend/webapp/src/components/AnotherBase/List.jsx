@@ -21,7 +21,7 @@ export default class List extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
-                    "title": 'export',
+                    "title": 'import',
                     "text": '', "icon":
                     'fa fa-table text-success',
                     "action": (values) => this.tableGoLink(values),
