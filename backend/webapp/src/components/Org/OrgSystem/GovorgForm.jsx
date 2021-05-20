@@ -4,6 +4,7 @@ import {service} from "./service"
 import {validationSchema} from './validationSchema'
 import ModalAlert from "../../ModalAlert"
 import BackButton from "@utils/Button/BackButton"
+import Attributes from  './Attributes'
 
 
 export class GovorgForm extends Component {
@@ -20,11 +21,14 @@ export class GovorgForm extends Component {
             title: '',
             model_type_icon: '',
             timer: null,
+            prop_arrow: false,
+            accepted_props: []
         }
 
         this.handleLayerToggle = this.handleLayerToggle.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-
+        this.handlePropCheck = this.handlePropCheck.bind(this)
+        this.handleCheck = this.handleCheck.bind(this)
     }
 
     componentDidMount() {
@@ -36,23 +40,67 @@ export class GovorgForm extends Component {
 
         if (system_id) {
             service.detail(system_id).then(({govorg}) => {
-                this.setState(({govorg, layers: govorg.layers,}))
+                this.setState(({govorg, layers: govorg.layers, accepted_props: govorg.govorg_attributes}))
             })
         }
 
     }
 
-    handleLayerToggle(e) {
-        let layers = this.state.layers
+    getIndexOfLayer(layer_id, val_dict) {
+        var find_index = obj => obj.layer_id == layer_id
+        var index_of = val_dict.findIndex(find_index)
+        return index_of
+    }
 
+    handlePropCheck(e) {
+        let accepted_props = this.state.accepted_props
+        const value = e.target.value
+        const layer_id = e.target.name
+        var attributes = []
+        var index_of = this.getIndexOfLayer(layer_id, accepted_props)
+
+        if (e.target.checked) {
+            if (index_of > -1) {
+                accepted_props[index_of].attributes.push(value)
+            }
+            else {
+                attributes.push(value)
+                accepted_props.push({
+                    'layer_id': layer_id,
+                    'attributes': attributes
+                })
+            }
+        } else {
+            var lists = accepted_props[index_of].attributes.filter((val) => val != value)
+            accepted_props[index_of].attributes = lists
+        }
+        this.setState({accepted_props})
+    }
+
+    handleCheck(layer_id, value) {
+        var accepted_props = this.state.accepted_props
+        var index_of = this.getIndexOfLayer(layer_id, accepted_props)
+        var check_prop = false
+        if (index_of > -1) {
+            var index_of_prop = accepted_props[index_of].attributes.indexOf(value)
+            if (index_of_prop > -1) {
+                check_prop = true
+            }
+        }
+        return check_prop
+    }
+
+    handleLayerToggle(e) {
+        var { layers, accepted_props } = this.state
         const value = parseInt(e.target.value)
 
         if (e.target.checked) {
             layers.push(value)
         } else {
             layers = layers.filter((id) => id != value)
+            accepted_props = accepted_props.filter((val) => val.layer_id != value)
         }
-        this.setState({layers})
+        this.setState({layers, accepted_props})
     }
 
     handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
@@ -60,7 +108,8 @@ export class GovorgForm extends Component {
         const data = {
             ...values,
             layers: this.state.layers,
-            'org': org_id
+            'org': org_id,
+            'accepted_props': this.state.accepted_props
         }
 
         setStatus('checking')
@@ -193,7 +242,7 @@ export class GovorgForm extends Component {
                         </Formik>
                     </div>
                     <div className="col-md-8">
-                     {this.state.wms_list.map((wms, wms_index) =>
+                    {this.state.wms_list.map((wms, wms_index) =>
                         <div className="col-md-12" id="accordion1" key={wms_index}>
                             <div className="row">
                                 <div className="col-md-8 arrow-tree">
@@ -212,16 +261,15 @@ export class GovorgForm extends Component {
                                 </div>
                             </div>
                             {wms.is_active && wms.layer_list.map((layer, idx) =>
-                                <div key={idx}  id={`collapse-${wms_index}`} className="ml-5 collapse" data-parent="#accordion1">
-                                    <label>
-                                        <input type="checkbox"
-                                            value={layer.id}
-                                            onChange={this.handleLayerToggle}
-                                            checked={this.state.layers.indexOf(layer.id) > -1}
-                                        />
-                                        {} {layer.title} ({layer.code})
-                                    </label>
-                                </div>
+                                <Attributes
+                                    idx={idx}
+                                    layer={layer}
+                                    wms_index={wms_index}
+                                    layers={this.state.layers}
+                                    handlePropCheck={this.handlePropCheck}
+                                    handleCheck={this.handleCheck}
+                                    handleLayerToggle={this.handleLayerToggle}
+                                />
                             )}
                         </div>
                     )}
