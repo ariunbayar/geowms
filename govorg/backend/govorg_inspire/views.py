@@ -1025,7 +1025,8 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                             geo_json_load = utils.json_load(geo_type)
                             geo_type = geo_json_load['type']
                             geo_json_list.append(geo_type)
-                        if all(geom_type == item for item in geo_json_list):
+
+                        if all(geom_type in item for item in geo_json_list):
                             for name in range(0, len(layer.fields)):
                                 field_name = val[name].name  # field name
                                 value = val.get(name)  # value ni
@@ -1079,7 +1080,7 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                             _delete_file(for_delete_items, Sid)
                             rsp = {
                                 'success': False,
-                                'info': "Type зөрсөн байна"
+                                'info': "Геометр өгөгдлийн төрөл нь тухайн feature-ийн төрөлтэй таарахгүй байна!!!."
                             }
                             return JsonResponse(rsp)
                     rsp = {
