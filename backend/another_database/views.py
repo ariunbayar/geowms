@@ -259,8 +259,6 @@ def remove(request, pk):
         item.delete()
 
     another_db.delete()
-
-    connection = utils.json_load(another_db.connection)
     rsp = {
         'success': True,
     }
