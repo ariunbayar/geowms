@@ -55,7 +55,6 @@ export class Дэлгэрэнгүй extends Component {
         service
             .detail(this.props.match.params.system_id)
             .then(({govorg, public_url, private_url}) => {
-                console.log("hohoh", govorg)
                 this.setState({
                     govorg_wms_list: govorg.wms_list,
                     public_url,

@@ -4,6 +4,7 @@ import {service} from "./service"
 import {validationSchema} from './validationSchema'
 import ModalAlert from "../../ModalAlert"
 import BackButton from "@utils/Button/BackButton"
+import Attributes from  './Attributes'
 
 
 export class GovorgForm extends Component {
@@ -260,54 +261,15 @@ export class GovorgForm extends Component {
                                 </div>
                             </div>
                             {wms.is_active && wms.layer_list.map((layer, idx) =>
-                                <div key={idx}  id={`collapse-${wms_index}`} className="ml-5 collapse col-md-8" data-parent="#accordion1">
-                                    <label>
-                                        <input type="checkbox"
-                                            value={layer.id}
-                                            onChange={this.handleLayerToggle}
-                                            checked={this.state.layers.indexOf(layer.id) > -1}
-                                        />
-                                        {} {layer.title} ({layer.code})
-                                    </label>
-                                    {
-                                        layer.properties.length > 0
-                                        &&
-                                        this.state.layers.indexOf(layer.id) > -1
-                                        &&
-                                        <div className="d-block col-md-12 text-primary">
-                                            <label
-                                                className="col-md-8 text-primary"
-                                            >
-                                                    Талбарууд
-                                            </label>
-                                            <i
-                                                className={'col-md-4 fa-lg fa fa-angle-double-' + (this.state.prop_arrow ? 'down': 'left')}
-                                                onClick={() => this.setState({prop_arrow: !this.state.prop_arrow})}
-                                                >
-                                            </i>
-                                            {
-                                                this.state.prop_arrow
-                                                &&
-                                                layer.properties.map((prop, idy) =>
-                                                    <div
-                                                        key={idy}
-                                                        className="ml-4 pl-2"
-                                                    >
-                                                        <label>
-                                                            <input type="checkbox"
-                                                                value={prop.prop_eng}
-                                                                name={layer.id}
-                                                                onChange={this.handlePropCheck}
-                                                                checked={this.handleCheck(layer.id, prop.prop_eng)}
-                                                            />
-                                                            {} {prop.prop_name} ({prop.prop_eng})
-                                                        </label>
-                                                    </div>
-                                                )
-                                            }
-                                        </div>
-                                    }
-                                </div>
+                                <Attributes
+                                    idx={idx}
+                                    layer={layer}
+                                    wms_index={wms_index}
+                                    layers={this.state.layers}
+                                    handlePropCheck={this.handlePropCheck}
+                                    handleCheck={this.handleCheck}
+                                    handleLayerToggle={this.handleLayerToggle}
+                                />
                             )}
                         </div>
                     )}

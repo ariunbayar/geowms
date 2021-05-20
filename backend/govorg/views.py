@@ -115,53 +115,6 @@ def set_attributes(request, payload, pk):
     })
 
 
-# def _get_attribute(request, wms):
-
-#     BASE_HEADERS = {
-#         'User-Agent': 'geo 1.0',
-#     }
-#     queryargs = request.GET
-#     # headers = {**BASE_HEADERS}
-#     headers = {
-#         **BASE_HEADERS,
-#         'accept': 'application/json',
-#         'Content-type': 'application/json'
-#     }
-#     content = []
-#     base_url = wms.url + '?service=wfs&version=2.0.0&request=DescribeFeatureType&outputFormat=application/json'
-#     requests.packages.urllib3.disable_warnings()
-#     rsp = requests.get(base_url, queryargs, headers=headers, timeout=20, verify=False)
-#     if rsp.status_code == 200:
-#         try:
-#             content = rsp.text
-#         except Exception:
-#             pass
-#         # content = rsp.content.decode("utf-8")
-#         # content = json.loads(content)
-#     return content
-
-
-# def _get_wmslayers(request, govorg, wms):
-#     layer_list = []
-#     system_local_base_url = utils.get_config('system_local_base_url')
-#     for wmslayer in wms.wmslayer_set.all():
-#         govorg_layers = GovOrgWMSLayer.objects.filter(govorg=govorg, wms_layer=wmslayer).first()
-#         attributes = []
-#         if govorg_layers:
-#             if govorg_layers.attributes:
-#                 attributes = json.loads(govorg_layers.attributes)
-#             layer_list.append({
-#                 'id': govorg_layers.id,
-#                 'attributes': attributes,
-#                 'code': wmslayer.code,
-#                 'name': wmslayer.name,
-#                 'title': wmslayer.title,
-#                 'json_public_url': request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[govorg.token, wmslayer.code])),
-#                 'json_private_url': system_local_base_url + reverse('api:service:local_system_json_proxy', args=[govorg.token, wmslayer.code]),
-#             })
-#     return layer_list
-
-
 def _get_govorg_detail_display(request, govorg):
     wms_ids = []
     wms_detail_list = []
