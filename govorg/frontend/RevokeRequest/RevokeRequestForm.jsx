@@ -65,7 +65,6 @@ export default class RevokeRequestForm extends Component {
                     "title": 'Шийдвэрлэх',
                     'component': OpenMapModal,
                     'props': {
-                        'button_name' : 'Шийдвэрлэх',
                         'hide_btn' : false,
                         'refreshData': () => this.refreshData(),
                     }
@@ -74,6 +73,7 @@ export default class RevokeRequestForm extends Component {
                     "title": 'Харах',
                     'component': OpenMapModal,
                     'props': {
+                        'is_not_array': true,
                         'button_name' : 'Үзэх',
                         'hide_btn' : true,
                         'refreshData': () => this.refreshData(),
@@ -184,14 +184,15 @@ export default class RevokeRequestForm extends Component {
                                 <div className="col-md-6">
                                     <label htmlFor="">Төлөв</label>
                                     <select className="form-control form-control-xs"
-                                        onChange={(e) => this.setState({ state: e.target.value })}>
+                                        onChange={(e) => this.setState({ state: e.target.value })}
+                                    >
                                         <option value="">--- Төлөвөөр хайх ---</option>
                                         {
                                             choices && choices.length > 0
                                             ?
-                                            choices[0].map((choice, idx) =>
-                                                <option key={idx} value={choice[0]}>{choice[1]}</option>
-                                            )
+                                                choices[0].map((choice, idx) =>
+                                                    <option key={idx} value={choice[0]}>{choice[1]}</option>
+                                                )
                                             :
                                             null
                                         }

@@ -503,7 +503,7 @@ def _get_data_from_data(form):
                 if types['value_type'] == 'date' and data:
                     data = date_to_timezone(data)
 
-            value_type = types['value_type']
+                value_type = types['value_type']
     return data, value_type
 
 

@@ -34,34 +34,43 @@ export default class OpenMapModal extends Component {
 
     render() {
         const { is_modal_request_open, title, values, state } = this.state
-        const { button_name } = this.props
-        if (!button_name && !this.values) {
+        const { button_name, is_not_array } = this.props
+        if (button_name && !this.values && !is_not_array) {
             this.values = [values]
-        } else if (button_name && !this.values) {
+        }
+        else if (!button_name && !this.values && !is_not_array) {
+            this.values = [values]
+        }
+        else if (button_name && this.values && values && !is_not_array) {
             this.values = values
+        }
+        else if (is_not_array) {
+            this.values = [values]
         }
         return (
             <div>
                 {
                     state == "ШИНЭ" || button_name
-            ?
-                        <a
-                            className="btn btn-primary btn-sm text-white text-capitalize"
-                            onClick={this.openModalMapMap}
-                        >
-                            {title}
-                        </a>
-            :
-                null
-            }
-            {is_modal_request_open &&
-                <RequestModal
-                    hide_btn={this.props.hide_btn}
-                    modalClose={this.closeModalMap}
-                    refreshData={this.props.refreshData}
-                    values={this.values}
-                />
-            }
+                    ?
+                            <a
+                                className="btn btn-primary btn-sm text-white text-capitalize"
+                                onClick={this.openModalMapMap}
+                            >
+                                {title}
+                            </a>
+                    :
+                        null
+                }
+                {
+                    is_modal_request_open
+                    &&
+                        <RequestModal
+                            hide_btn={this.props.hide_btn}
+                            modalClose={this.closeModalMap}
+                            refreshData={this.props.refreshData}
+                            values={this.values}
+                        />
+                }
             </div>
         )
     }
