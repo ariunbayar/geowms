@@ -46,7 +46,7 @@ class ConfigTitles extends Component {
                         </div>
                     </div>
                 </div>
-                <BackButton {...this.props} name={'Буцах'} onClick={this.props.history.goBack}></BackButton>
+                <BackButton {...this.props} name={'Буцах'} navlink_url={`/back/another-base/`}></BackButton>
             </div>
         );
     }

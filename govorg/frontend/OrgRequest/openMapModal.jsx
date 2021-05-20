@@ -38,48 +38,30 @@ export default class OpenMapModal extends Component {
         if (!button_name && !this.values) {
             this.values = [values]
         } else if (button_name && !this.values) {
-            this.values = [values]
+            this.values = values
         }
         return (
             <div>
                 {
-                    title == "Шийдвэрлэх"
-                    ?
-                        this.values.map((items, idx ) =>
-                            items.state == "ШИНЭ"
-                            ?
-                                <a
-                                    className="btn btn-primary btn-sm text-white text-capitalize"
-                                    onClick={this.openModalMapMap}
-                                >
-                                    {title}
-                                </a>
-                            :
-                                null
-
-                        )
-                    :
-                        this.values.map((items, idx ) =>
-                            items.state != "ШИНЭ"
-                            ?
-                                <i
-                                    role="button"
-                                    className="fa fa-eye"
-                                    onClick={this.openModalMapMap}
-                                >
-                                </i>
-                            :
-                            null
-                        )
-                    }
-                    {is_modal_request_open &&
-                        <RequestModal
-                            hide_btn={this.props.hide_btn}
-                            modalClose={this.closeModalMap}
-                            refreshData={this.props.refreshData}
-                            values={this.values}
-                        />
-                    }
+                    state == "ШИНЭ" || button_name
+            ?
+                        <a
+                            className="btn btn-primary btn-sm text-white text-capitalize"
+                            onClick={this.openModalMapMap}
+                        >
+                            {title}
+                        </a>
+            :
+                null
+            }
+            {is_modal_request_open &&
+                <RequestModal
+                    hide_btn={this.props.hide_btn}
+                    modalClose={this.closeModalMap}
+                    refreshData={this.props.refreshData}
+                    values={this.values}
+                />
+            }
             </div>
         )
     }

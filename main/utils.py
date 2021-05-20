@@ -6,6 +6,7 @@ import re
 import unicodedata
 import importlib
 import zipfile
+from django import utils
 import pyproj
 import math
 import json
@@ -1140,10 +1141,9 @@ def json_load(data):
 
 
 def json_dumps(data):
-    if isinstance(data, dict):
+    if isinstance(data, dict) or isinstance(data, list):
         data = json.dumps(data, ensure_ascii=False)
     return data
-
 
 def make_value_dict(value, properties_qs, is_display=False):
     value = json_load(value)

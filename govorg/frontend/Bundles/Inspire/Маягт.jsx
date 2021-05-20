@@ -14,14 +14,17 @@ export default class Маягт extends Component {
             tid: props.tid,
             pid: props.pid,
             fid: props.fid,
-            values: {},
+            form_values: {},
             order_at: '',
             order_no: '',
-            data_types: []
+            data_types: [],
+            code_list_ids: {},
         }
 
         this.onSubmit = this.onSubmit.bind(this)
         this.handleUpdate = this.handleUpdate.bind(this)
+        this.setInitialValue = this.setInitial.bind(this)
+        this.makeInitial = this.makeInitial.bind(this)
         this.validationSchema = validationSchema.bind(this)
         this.addNotif = this.props.addNotif
     }
@@ -71,10 +74,11 @@ export default class Маягт extends Component {
         service.detail(gid, tid, fid).then(({success, datas, data_types}) => {
             if(success){
                 this.setState({
-                    values:datas,
+                    form_values:datas,
                     data_types,
                     is_loading: false
                 })
+                this.makeInitial(datas)
             }
         })
     }
@@ -83,7 +87,7 @@ export default class Маягт extends Component {
         service.detailCreate(this.state.tid, this.state.pid, this.state.fid).then(({success, datas, data_types}) => {
             if(success){
                 this.setState({
-                    values:datas,
+                    form_values:datas,
                     is_loading: false,
                     data_types
                 })
@@ -161,8 +165,32 @@ export default class Маягт extends Component {
         return return_data
     }
 
+    makeInitial(datas) {
+        var initial_code_list_ids = {}
+        datas.map((row, idx) => {
+            initial_code_list_ids[row.property_code] = row.code_list_id
+
+        })
+        this.setState({code_list_ids: initial_code_list_ids})
+    }
+
+    setInitial(name, value) {
+        var changed_code_list_ids = this.state.code_list_ids
+        var form_values = this.state.form_values
+        changed_code_list_ids[name] = value
+        form_values.map((row, idx) => {
+            if (row.property_code == name) {
+                row.data = value
+            }
+        })
+        this.setState({
+            code_list_ids: changed_code_list_ids,
+            form_values
+        })
+    }
+
     render() {
-        const { values, id, data_types } = this.state
+        const { form_values, id, data_types, code_list_ids } = this.state
         const { modifyend_selected_feature_check, update_geom_from_list, null_form_isload, cancel_button_active, remove_button_active } = this.props
         if (this.state.is_loading) {
             return (
@@ -177,7 +205,7 @@ export default class Маягт extends Component {
                 <Formik
                     enableReinitialize
                     initialValues={{
-                        form_values: values,
+                        form_values: form_values,
                         order_at: this.state.order_at,
                         order_no: this.state.order_no,
                     }}
@@ -203,64 +231,74 @@ export default class Маягт extends Component {
                             name="form_values"
                             render={arrayHelpers => (
                             <div>
-                                {data_types.map((data_type, idx) =>
-                                <>
-                                <h5 className="text-center border-bottom">{data_type['data_type_name']}</h5>
-                                {values.form_values && values.form_values.length > 0 ? (
-                                values.form_values.map((friend, index) => (
-                                    data_type['property_ids'].includes(friend.property_id) &&
-                                    data_type['data_type_id'] == friend.data_type_id &&
-                                    <div key={index} className="row my-3 ">
-                                        <div className="col-md-3">
-                                            <label className="col-form-label">{friend.property_name ? friend.property_name : ''}</label>
-                                        </div>
-                                        {friend.value_type == 'option' ?
-                                            <div className="col-md-9">
-                                                <Fragment>
-                                                    <Field name={`form_values.${index}.data` || ""}
-                                                        as="select"
-                                                        className="form-control"
-                                                        disabled={this.setDisable(friend.roles)}
-                                                    >
-                                                        {friend.data_list &&
-                                                            friend.data_list.map((data, idy) =>
-                                                            <option key = {idy} value={data.code_list_id ? data.code_list_id  :''}>{data.code_list_name ? data.code_list_name : ''}</option>
-                                                            )
-                                                        }
-                                                    </Field>
-                                                </Fragment>
-                                                <small>{friend.property_definition ? friend.property_definition : ''}</small>
-                                            </div>
-                                            :
-                                            <div className="col-md-9">
-                                                {friend.value_type_id == 'boolean' ?
-                                                <Field
-                                                    name={`form_values.${index}.data` || ""}
-                                                    as="select"
-                                                    className='form-control'
-                                                    disabled={this.setDisable(friend.roles)}
-                                                >
-                                                    <option value="true">True</option>
-                                                    <option value="false">False</option>
-                                                </Field>
-                                                :
-                                                <Field
-                                                    name={`form_values.${index}.data` || ""}
-                                                    className='form-control'
-                                                    disabled={this.setDisable(friend.roles)}
-                                                    placeholder={friend.property_name}
-                                                    type={friend.value_type}
-                                                />
-                                                }
-                                                <small>{friend.property_definition ? friend.property_definition : ''}</small>
-                                            </div>
-                                        }
-                                    </div>
-                                ))
-                                ) : ( null
-                                )}
-                                </>
-                                )}
+                                {
+                                    data_types.map((data_type, idx) =>
+                                        <>
+                                        <h5 key={idx} className="text-center border-bottom">{data_type['data_type_name']}</h5>
+                                            {
+                                                form_values.map((friend, index) => (
+                                                    data_type['property_ids'].includes(friend.property_id) &&
+                                                        data_type['data_type_id'] == friend.data_type_id &&
+                                                        <div key={index} className="row my-3 ">
+                                                            <div className="col-md-3">
+                                                                <label className="col-form-label">{friend.property_name ? friend.property_name : ''}</label>
+                                                            </div>
+                                                            {
+                                                                friend.value_type == 'option'
+                                                                ?
+                                                                    <div className="col-md-9">
+                                                                        <Fragment>
+                                                                            <Field name={`${friend.property_code}` || ""}
+                                                                                as="select"
+                                                                                className="form-control"
+                                                                                disabled={this.setDisable(friend.roles)}
+                                                                                value={code_list_ids[friend.property_code] ? code_list_ids[friend.property_code] : ''}
+                                                                                onChange={(e) =>
+                                                                                    this.setInitial(e.target.name, e.target.value)
+                                                                                }
+                                                                            >
+                                                                                {friend.data_list &&
+                                                                                    friend.data_list.map((data, idy) =>
+                                                                                        <option key={idy} value={data.code_list_id ? data.code_list_id  : ''}>
+                                                                                            {data.code_list_name ? data.code_list_name : ''}
+                                                                                        </option>
+                                                                                    )
+                                                                                }
+                                                                            </Field>
+                                                                        </Fragment>
+                                                                        <small>{friend.property_definition ? friend.property_definition : ''}</small>
+                                                                    </div>
+                                                                :
+                                                                    <div className="col-md-9">
+                                                                        {friend.value_type_id == 'boolean'
+                                                                        ?
+                                                                            <Field
+                                                                                name={`form_values.${index}.data` || ""}
+                                                                                as="select"
+                                                                                className='form-control'
+                                                                                disabled={this.setDisable(friend.roles)}
+                                                                            >
+                                                                                <option value="true">True</option>
+                                                                                <option value="false">False</option>
+                                                                            </Field>
+                                                                        :
+                                                                            <Field
+                                                                                name={`form_values.${index}.data` || ""}
+                                                                                className='form-control'
+                                                                                disabled={this.setDisable(friend.roles)}
+                                                                                placeholder={friend.property_name}
+                                                                                type={friend.value_type}
+                                                                            />
+                                                                            }
+                                                                            <small>{friend.property_definition ? friend.property_definition : ''}</small>
+                                                                        </div>
+                                                            }
+                                                        </div>
+                                                    ))
+                                            }
+                                        </>
+                                    )
+                                }
                                 <div className="row my-3 ">
                                     <div className="col-md-3">
                                         <label className="col-form-label">Тушаалын дугаар</label>

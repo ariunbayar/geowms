@@ -41,9 +41,10 @@ def allowed_attbs(request, token, system, code):
         govorg_layer = GovOrgWMSLayer.objects.filter(wms_layer=wms_layer, govorg=system).first()
         allowed_att = ''
         if govorg_layer and govorg_layer.attributes:
-            attributes = json.loads(govorg_layer.attributes)
+            govort_attributes = govorg_layer.attributes.replace("\'", "\"")
+            attributes = json.loads(govort_attributes)
             for attribute in attributes:
-                allowed_att = allowed_att + attribute + ','
+                allowed_att = allowed_att + attribute.lower() + ','
             allowed_att = allowed_att[:-1]
         cache.set('allowed_att_{}_{}'.format(token, code), allowed_att, 600)
 
@@ -63,8 +64,6 @@ def proxy(request, base_url, token, pk=None):
     if request.GET.get('TYPENAMES'):
         code = char_in_split(request.GET.get('TYPENAMES'))
         allowed_att = allowed_attbs(request, token, system, code)
-        if not allowed_att:
-            raise Http404
         queryargs = {
             **request.GET,
             "propertyName": [allowed_att],
@@ -115,45 +114,23 @@ def json_proxy(request, base_url, token, code):
 
     system = utils.geo_cache("system_json", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
 
-    # allowed_att = allowed_attbs(request, token, system, code)
-
-    # if not allowed_att or not system:
-    #     raise Http404
+    allowed_att = allowed_attbs(request, token, system, code)
 
     if not system:
         raise Http404
     allowed_layers = [code]
-    if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
-        if request.GET.get('SERVICE') == 'WFS':
-            queryargs = {
-                **request.GET,
-                # "propertyName": [allowed_att],
-            }
-            rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
-            content = rsp.content
-            content = filter_layers_wfs(content, allowed_layers)
+    queryargs = {
+        'service': 'WFS',
+        'version': '1.0.0',
+        'request': 'GetFeature',
+        'typeName': code,
+        'outputFormat': 'application/json',
+        "propertyName": [allowed_att]
+    }
 
-        elif request.GET.get('SERVICE') == 'WMS':
-            queryargs = request.GET
-            rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
-            content = rsp.content
-            content = filter_layers(content, allowed_layers)
-
-        else:
-            raise Http404
-    else:
-        queryargs = {
-            'service': 'WFS',
-            'version': '1.0.0',
-            'request': 'GetFeature',
-            'typeName': code,
-            'outputFormat': 'application/json',
-            # "propertyName": [allowed_att],
-        }
-
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
-        content = rsp.content
-        content = filter_layers_wfs(content, allowed_layers)
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
+    content = rsp.content
+    content = filter_layers_wfs(content, allowed_layers)
 
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
@@ -321,7 +298,7 @@ def qgis_proxy(request, base_url, token):
         qs_request=qs_request,
         rsp_status=rsp.status_code,
         rsp_size=len(rsp.content),
-        user=employee.user,
+        user=employee.user
     )
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
