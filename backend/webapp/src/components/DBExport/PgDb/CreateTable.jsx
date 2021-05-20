@@ -100,11 +100,13 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
+                data_list['feature_name'] = ''
                 data_list['id_list'] = []
 
             }
             else {
                 data_list['feature_name'] = ''
+                data_list['id_list'] = []
             }
         }
         else {
