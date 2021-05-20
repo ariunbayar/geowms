@@ -132,11 +132,12 @@ const mongo_config = {
     },
 }
 
-function remove(pk) {
-    const requestOptions = {
-        ...getGetOptions(),
+function remove(pk, state) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({state}),
     }
-    return fetch(`${prefix}/remove/${pk}/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/remove/${pk}/`, opts).then(handleResponse)
 }
 
 

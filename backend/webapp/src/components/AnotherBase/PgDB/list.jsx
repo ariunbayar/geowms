@@ -57,7 +57,7 @@ export default class List extends Component {
 
     handleRemove() {
         const {values, id} = this.state
-        service.pg_config.removeTable(id, values.id, true).then(({success}) => {
+        service.pg_config.removeTable(id, values.id, false).then(({success}) => {
             if (success) {
                 this.setState({refresh: !this.state.refresh})
             }

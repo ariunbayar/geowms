@@ -1809,3 +1809,13 @@ def check_nsdi_address(request):
     if host_addr == '192.168.10.15' and host == 'nsdi.gov.mn':
         nsdi_check = True
     return nsdi_check
+
+
+def drop_table(table_name, cursor, schema='public'):
+    detete_query = '''
+        DROP TABLE IF EXISTS {schema}.{table_name}
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
+    cursor.execute(detete_query)

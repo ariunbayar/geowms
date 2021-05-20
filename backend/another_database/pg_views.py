@@ -371,15 +371,6 @@ def _geojson_to_geom(geo_json):
     return geom
 
 
-def _drop_table(table_name, cursor, schema):
-    detete_query = '''
-        DROP TABLE IF EXISTS {schema}.{table_name}
-    '''.format(
-        table_name=table_name,
-        schema=schema
-    )
-    cursor.execute(detete_query)
-
 def _execute_query_to_pg(cursor, sql):
     try:
         cursor.execute(sql)
@@ -546,13 +537,12 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
     feature_config_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
     property_codes = list(LProperties.objects.filter(property_id__in=columns).values_list('property_code', flat=True).order_by('property_id'))
 
-    _drop_table(table_name, cursor, pg_schema)
+    utils.drop_table(table_name, cursor, pg_schema)
     _create_extension(cursor, pg_schema)
     _create_code_list_table(cursor, columns, pg_schema)
 
     success_count = 0
     failed_count = 0
-    total_count = 0
 
     property_columns = list()
     for property_code in property_codes:
@@ -565,7 +555,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
 
     _create_table(cursor, table_name, property_columns, pg_schema)
     data_lists = _get_all_datas(feature_id, columns, property_codes, feature_config_ids)
-
+    total_count = len(data_lists)
     for data in data_lists:
         property_data = []
 
@@ -609,14 +599,21 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
 def remove_pg_table(request, payload, id, table_id):
     is_insert = payload.get('is_insert')
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
-    pg_table.delete()
-    if not is_insert:
+    created_by = pg_table.another_database.unique_id
+    if is_insert:
         try:
             cursor_pg = utils.get_cursor_pg(id)
-            _drop_table(pg_table.table_name, cursor_pg)
+            utils.drop_table(pg_table.table_name, cursor_pg)
         except Exception:
             pass
+    else:
+        mdatas = MDatas.objects.filter(created_by=created_by)
+        mdatas.delete()
 
+        m_geo_datas = MGeoDatas.objects.filter(created_by=created_by)
+        m_geo_datas.delete()
+
+    pg_table.delete()
     return JsonResponse({
         'success': True,
     })
