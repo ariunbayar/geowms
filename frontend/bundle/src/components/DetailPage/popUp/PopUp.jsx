@@ -114,7 +114,7 @@ class PopUpCmp extends Component {
                 if (value[0] == 'pid' && mode == 'mpoint_view') {
                     // this.checkButtonEnableWithPdf(value[1])
                 }
-                if (value[2] && value[2].toLowerCase() == 'pointnumber') {
+                if (value[2] && value[2].toLowerCase() == 'pointname') {
                     this.checkButtonEnableWithId(localid, value[1])
                     this.setState({ name: value[1] })
                     geom_name = value[1]
@@ -132,7 +132,7 @@ class PopUpCmp extends Component {
         if (this.props.is_from_inspire) data = [datas[number - 1]]
         else data = datas[number - 1]
 
-        if (code != "gp_layer_geodetical_point_view") {
+        if (code != "gp_layer_geodeticalpoint_view") {
             this.is_from_inspire = false
         }
         this.setState({ data, mode, datas, code, geom_name })
