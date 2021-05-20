@@ -62,6 +62,8 @@ def _system_validation(payload, system=None):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def хадгалах(request, payload, pk=None):
+    accepted_props = payload.get('accepted_props')
+
     if pk:
         system = get_object_or_404(GovOrg, pk=pk, deleted_by__isnull=True)
         form = SystemForm(payload, instance=system)
@@ -78,6 +80,14 @@ def хадгалах(request, payload, pk=None):
 
             layers = WMSLayer.objects.filter(pk__in=payload.get('layers'))
             system.wms_layers.set(layers)
+            for accepted_prop in accepted_props:
+                GovOrgWMSLayer.objects.update_or_create(
+                    govorg_id=system.id,
+                    wms_layer_id=accepted_prop.get('layer_id'),
+                    defaults={
+                        'attributes': utils.json_dumps(accepted_prop.get('attributes'))
+                    }
+                )
 
         return JsonResponse({
             'success': True,

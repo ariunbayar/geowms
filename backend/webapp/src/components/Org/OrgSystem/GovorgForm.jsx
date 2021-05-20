@@ -45,13 +45,18 @@ export class GovorgForm extends Component {
 
     }
 
+    getIndexOfLayer(layer_id, val_dict) {
+        var find_index = obj => obj.layer_id == layer_id
+        var index_of = val_dict.findIndex(find_index)
+        return index_of
+    }
+
     handlePropCheck(e) {
         let accepted_props = this.state.accepted_props
         const value = e.target.value
         const layer_id = e.target.name
         var attributes = []
-        var find_index = obj => obj.layer_id == layer_id
-        var index_of = accepted_props.findIndex(find_index)
+        var index_of = this.getIndexOfLayer(layer_id, accepted_props)
 
         if (e.target.checked) {
             if (index_of > -1) {
@@ -73,8 +78,7 @@ export class GovorgForm extends Component {
 
     handleCheck(layer_id, value) {
         var accepted_props = this.state.accepted_props
-        var find_index = obj => obj.layer_id == layer_id
-        var index_of = accepted_props.findIndex(find_index)
+        var index_of = this.getIndexOfLayer(layer_id, accepted_props)
         var check_prop = false
         if (index_of > -1) {
             var index_of_prop = accepted_props[index_of].attributes.indexOf(value)
@@ -86,16 +90,16 @@ export class GovorgForm extends Component {
     }
 
     handleLayerToggle(e) {
-        let layers = this.state.layers
-
+        var { layers, accepted_props } = this.state
         const value = parseInt(e.target.value)
 
         if (e.target.checked) {
             layers.push(value)
         } else {
             layers = layers.filter((id) => id != value)
+            accepted_props = accepted_props.filter((val) => val.layer_id != value)
         }
-        this.setState({layers})
+        this.setState({layers, accepted_props})
     }
 
     handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
@@ -104,7 +108,7 @@ export class GovorgForm extends Component {
             ...values,
             layers: this.state.layers,
             'org': org_id,
-            'accepted_props': accepted_props
+            'accepted_props': this.state.accepted_props
         }
 
         setStatus('checking')
@@ -163,6 +167,7 @@ export class GovorgForm extends Component {
     }
 
     render() {
+        console.log(this.state.accepted_props)
         return (
 
             <div className="my-4">
