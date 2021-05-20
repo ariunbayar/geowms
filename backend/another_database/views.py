@@ -260,16 +260,16 @@ def remove(request, payload, pk):
         for item in another_db_table:
             utils.drop_table(item.table_name, cursor_pg)
             item.delete()
-
-        another_db.delete()
     else:
-        another_db_table.delete()
-        another_db.delete()
+
         mdatas = MDatas.objects.filter(created_by=state)
         mdatas.delete()
+
         m_geo_datas = MGeoDatas.objects.filter(created_by=state)
         m_geo_datas.delete()
 
+    another_db_table.delete()
+    another_db.delete()
     rsp = {
         'success': True,
     }

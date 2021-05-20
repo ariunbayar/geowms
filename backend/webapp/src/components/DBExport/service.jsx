@@ -56,9 +56,10 @@ const pg_config = {
         return fetch(`${prefix}/pg/${id}/refresh-table-data/`, opts).then(handleResponse)
     },
 
-    removeTable: function(id, table_id) {
+    removeTable: function(id, table_id, is_insert) {
         const opts = {
-            ...getGetOptions(),
+            ...getPostOptions(),
+            body: JSON.stringify({ is_insert }),
         }
         return fetch(`${prefix}/pg/${id}/${table_id}/remove-table/`, opts).then(handleResponse)
     },

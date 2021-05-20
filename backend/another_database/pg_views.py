@@ -543,7 +543,6 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
 
     success_count = 0
     failed_count = 0
-    total_count = 0
 
     property_columns = list()
     for property_code in property_codes:
@@ -556,7 +555,7 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
 
     _create_table(cursor, table_name, property_columns, pg_schema)
     data_lists = _get_all_datas(feature_id, columns, property_codes, feature_config_ids)
-
+    total_count = len(data_lists)
     for data in data_lists:
         property_data = []
 
@@ -600,14 +599,21 @@ def _insert_to_someone_db(table_name, cursor, columns, feature_code, pg_schema='
 def remove_pg_table(request, payload, id, table_id):
     is_insert = payload.get('is_insert')
     pg_table = AnotherDatabaseTable.objects.filter(pk=table_id).first()
-    pg_table.delete()
+    created_by = pg_table.another_database.unique_id
     if is_insert:
         try:
             cursor_pg = utils.get_cursor_pg(id)
             utils.drop_table(pg_table.table_name, cursor_pg)
         except Exception:
             pass
+    else:
+        mdatas = MDatas.objects.filter(created_by=created_by)
+        mdatas.delete()
 
+        m_geo_datas = MGeoDatas.objects.filter(created_by=created_by)
+        m_geo_datas.delete()
+
+    pg_table.delete()
     return JsonResponse({
         'success': True,
     })
