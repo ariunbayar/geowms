@@ -29,6 +29,7 @@ export class Upload extends Component {
         this.setType = this.setType.bind(this)
         this.cancel = this.cancel.bind(this)
         this.removeFromList = this.removeFromList.bind(this)
+        this.checkExt = this.checkExt.bind(this)
     }
 
     getFile(event) {
@@ -37,9 +38,9 @@ export class Upload extends Component {
         var file_value = document.getElementById('Upload')
         const state_files = this.state.files
         if (files.length == 1){
-            const check = this.checkName(files)
+            const check = this.checkExt(files)
             for (var i=0; i < files.length; i ++){
-                if (check){
+                if (check == true){
                     if (files.length == 0){
                         this.setState({ files: files[i] })
                     }
@@ -52,15 +53,18 @@ export class Upload extends Component {
                         this.props.notif('warning', `.shx төрлийн файл хамт байх ёстойг анхаарна уу`, 'info')
                     }
                 }
-                else
+                else if(check == false)
                 {
                     file_value.value = ''
                     this.setState({ files: [] })
                 }
+                else if (check == 'not') {
+                    alert('Төрөл давхцаж байна!')
+                }
             }
         }
         if (files.length > 1){
-            const check = this.checkName(files)
+            const check = this.checkExt(files)
             if (check) {
                 this.setState({ files: files })
             }
@@ -72,12 +76,17 @@ export class Upload extends Component {
         }
     }
 
-    checkName(files){
+    checkExt(files){
         const { name } = this.state
         var check = false
         for (var i=0; i < files.length; i ++){
             const type = files[i].name.split('.')
             const urt = type.length - 1
+            for (const index in this.state.files) {
+                const file_ext = this.state.files[index].name.split('.')
+                const idx = file_ext.length - 1
+                if (file_ext[idx] == type[urt]) return 'not'
+            }
             if (name == 'shp'){
                 if (type[urt] == 'shp' || type[urt] == 'shx' || type[urt] == 'prj' || type[urt] == 'dbf' || type[urt] == 'cpg'){
                     check = true
@@ -143,12 +152,6 @@ export class Upload extends Component {
                     this.props.setLoading(false)
                     setSubmitting(false)
                 })
-                .catch((error) => {
-                    alert('Алдаа гарлаа, Файлаа шалгана уу!')
-                    this.props.setLoading(false)
-                    setSubmitting(false)
-                    this.setState({ is_upload_button: false, not_cancel: false, btn_upload_is_laod: false })
-                })
         }
     }
 
@@ -175,15 +178,20 @@ export class Upload extends Component {
 
     setType(name){
         this.setState({ name, files: [], is_upload_button: true, btn_upload_is_laod: false })
+        this.removeInput()
+    }
+
+    removeInput() {
+        var file_value = document.getElementById('Upload')
+        file_value.value = ''
     }
 
     removeFromList(file_name) {
         const { files } = this.state
         const isBelowThreshold = (names) => names = file_name;
-        var file_value = document.getElementById('Upload')
         if (files.length == 1) {
+            this.removeInput()
             this.setState({ files: [] })
-            file_value.value = ''
         }
         else {
             if(files.every(isBelowThreshold)){
