@@ -92,6 +92,7 @@ INSTALLED_APPS = [
 
     # LLC apps
     'llc.backend.llc_conf.apps.LlcConfConfig',
+    'llc.backend.llc_request.apps.LlcRequestConfig',
 
 ]
 
