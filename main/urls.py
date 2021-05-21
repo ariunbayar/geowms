@@ -7,6 +7,7 @@ import backend.urls
 import frontend.urls
 import api.urls
 import govorg.urls
+import llc.urls
 
 
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
     path('back/', include(backend.urls)),
     path('api/', include(api.urls)),
     path('gov/', include(govorg.urls)),
+    path('llc/', include(llc.urls)),
     path('', include(frontend.urls)),
     path('', include('pwa.urls')),
 ]

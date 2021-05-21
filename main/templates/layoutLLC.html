@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>{{ CONFIGS.site_title }}</title>
+    <link rel="icon" href="{% static "assets/favicon.ico" %}">
+    <link rel="stylesheet" href="{% static "assets/bootstrap/css/bootstrap.min.css" %}"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static "assets/css/style.css" %}?v={{ STATIC_VERSION }}">
+    <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.carousel.min.css" %}">
+    <link rel="stylesheet" href="{% static "assets/bootstrap/css/owl.theme.default.min.css" %}">
+    <link rel="stylesheet" href="{% static "assets/bootstrap/css/animate.min.css" %}">
+    <link href="{% static "assets/bootstrap/css/font-awesome.min.css" %}" rel="stylesheet">
+    <!--Full Calendar Css-->
+    <link rel="stylesheet" href="{% static "assets/admin/plugins/fullcalendar/css/fullcalendar.min.css" %}">
+    <!-- simplebar CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/plugins/simplebar/css/simplebar.css" %}">
+    <!-- Bootstrap core CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/animate.css" %}">
+    <!-- Icons CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/icons.css" %}">
+    <!-- Sidebar CSS-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/sidebar-menu.css" %}">
+    <!-- Custom Style-->
+    <link rel="stylesheet" href="{% static "assets/admin/css/app-style.css" %}">
+</head>
+<style>
+</style>
+
+<body>
+    <div id="wrapper">
+        <header class="topbar-nav">
+            <nav class="navbar navbar-expand fixed-top bg-white">
+                <ul class="navbar-nav mr-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link toggle-menu" href="javascript:void();">
+                            <i class="icon-menu menu-icon"></i>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav mr-auto align-items-center">
+                    <li class="nav-item">
+                        <span class="pl-3 text-dark">{{ ann_name }}</span>
+                    </li>
+                </ul>
+                <ul class="navbar-nav align-items-center right-nav-link">
+                    <li class="nav-item">
+                        <form class="search-bar">
+                            <input type="text" class="form-control" placeholder="Хайх"></input>
+                            <a href="javascript:void();"><i class="icon-magnifier"></i></a>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+
+    <div>
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+
+</div>
+    {% block script %}
+    {% endblock %}
+    <script src="{% static "assets/admin/js/jquery.min.js" %}"></script>
+    <script src="{% static "assets/admin/js/popper.min.js" %}"></script>
+    <script src="{% static "assets/admin/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "assets/admin/plugins/simplebar/js/simplebar.js" %}"></script>
+    <script src="{% static "assets/admin/js/waves.js" %}"></script>
+    <script src="{% static "assets/admin/js/sidebar-menu.js" %}"></script>
+    <script src="{% static "assets/admin/js/app-script.js" %}"></script>
+    <script src="{% static "assets/admin/plugins/vectormap/jquery-jvectormap-2.0.2.min.js" %}"></script>
+    <script src="{% static "assets/admin/plugins/vectormap/jquery-jvectormap-world-mill-en.js" %}"></script>
+    <script src="{% static "assets/admin/js/index.js" %}?v={{ STATIC_VERSION }}"></script>
+</body>
+
+</html>
