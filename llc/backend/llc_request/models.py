@@ -30,29 +30,28 @@ class RequestFiles(models.Model):
         (KIND_DISMISS, 'БУЦААГДСАН'),
         (KIND_REVOKE, 'ЦУЦЛАСАН')
     )
-    aan = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
+    # aan = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
     name = models.CharField(max_length=250, verbose_name='Нэр')
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     geo_id = models.CharField(max_length=100)
-    file_path = models.FileField(upload_to='llc-request_file/')
+    file_path = models.FileField(upload_to='llc-request-files/')
 
 
 class RequestFilesShape(models.Model):
 
     class Meta:
-        db_table = "llc_files_shape"
+        db_table = "llc_file_shapes"
 
 
-    file_id = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
-    name = models.CharField(max_length=250, verbose_name='Нэр')
-    created_at = models.DateTimeField(auto_now_add=True)
+    files = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
+    org = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
     theme_id = models.IntegerField()
+    package_id = models.IntegerField()
     feature_id = models.IntegerField()
-    property_id = models.IntegerField()
-    org_id = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
 
@@ -62,14 +61,8 @@ class ShapeGeom(models.Model):
         db_table = "llc_shapes_geom"
 
     shape_id = models.ForeignKey(RequestFilesShape, on_delete=models.PROTECT, db_index=True)
-    geom_json = models.TextField(null=True)
-    geo_json = models.TextField(null=True)
+    geom_json = models.TextField()
+    form_json = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
-
-class FileForm(models.Model):
-
-
-    file_id = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
-    # Attribute Байна.
