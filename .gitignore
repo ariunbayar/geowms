@@ -6,8 +6,8 @@ __pycache__
 backend/**/*.dev.html
 frontend/**/*.dev.html
 govorg/**/*.dev.html
-# llc/**/**/*.dev.html
-llc/backend/llc_conf/templates/llc/index.html
+llc/**/**/*.dev.html
+# llc/backend/llc_conf/templates/llc/index.html
 
 main/settings/dev.py
 main/settings/prod.py
