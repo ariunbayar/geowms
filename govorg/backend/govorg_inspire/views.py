@@ -291,7 +291,7 @@ def delete(request, payload, pid, fid):
 
 
 def _code_list_display(property_id):
-    code_list_values = []
+    code_list_values = list()
     code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
     if code_list_configs:
         for code_list_config in code_list_configs:
@@ -340,60 +340,63 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
     properties = list()
     for l_property in qs_l_properties:
         pk = ''
-        value_text = ''
-        code_list_id = ''
-        data_list = []
-        data = dict()
+        data = ''
+        code_lists = []
+        form = dict()
         value_type = _get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
-        value_text, data_list = _get_data_list_and_value_text(gid, fid, l_data_type.data_type_id, l_property.property_id, value_type)
         data_type_id = l_data_type.data_type_id
         property_id = l_property.property_id
-        for feature_config_id in feature_config_ids:
-            m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id=feature_config_id, data_type_id=data_type_id, property_id=property_id).first()
-            if m_datas:
-                pk = m_datas.id
-                value_text, data_list = _get_data_list_and_value_text(gid, m_datas.feature_config_id, data_type_id, property_id, value_type)
-                code_list_id = m_datas.code_list_id
-        if data_list:
-            if code_list_id:
-                value_text = code_list_id
-            else:
-                value_text = data_list[0]['code_list_id']
-        else:
-            value_text = value_text
+        value, data_list, has_value = _get_data_list_and_value(gid, feature_config_ids, data_type_id, property_id, value_type)
+        if has_value:
+            data = value
+            if data_list and not gid:
+                data = data_list[0]['code_list_id']
+            code_lists = data_list
 
-        data['pk'] = pk
-        data['data_type_id'] = data_type_id
-        data['property_id'] = property_id
-        data['property_name'] = l_property.property_name
-        data['property_code'] = l_property.property_code
-        data['property_definition'] = l_property.property_definition
-        data['value_type_id'] = l_property.value_type_id
-        data['value_type'] = value_type
-        data['data'] = value_text
-        data['data_list'] =  data_list
-        data['roles'] =  _get_roles(request, fid, property_id)
-        data['code_list_id'] = code_list_id
-        if data['property_code'] != 'localId' and data['value_type_id'] != 'data-type':
-            properties.append(data)
+        print(value, value_type)
+
+        form['pk'] = pk
+        form['data_type_id'] = data_type_id
+        form['property_id'] = property_id
+        form['property_name'] = l_property.property_name
+        form['property_code'] = l_property.property_code
+        form['property_definition'] = l_property.property_definition
+        form['value_type_id'] = l_property.value_type_id
+        form['value_type'] = value_type
+        form['data'] = data
+        form['data_list'] = code_lists
+        form['roles'] = _get_roles(request, fid, property_id)
+        if form['property_code'] != 'localId' or form['value_type_id'] != 'data-type':
+            properties.append(form)
     return properties
 
 
-def _get_data_list_and_value_text(gid, fid, data_type_id, property_id, value_type):
+def _get_data_list_and_value(gid, fcids, data_type_id, property_id, value_type):
     data_list = []
-    value_text = ''
-    m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id=fid, data_type_id=data_type_id, property_id=property_id).first()
-    if value_type == 'option':
-        data_list = _code_list_display(property_id)
-    elif value_type == 'text':
-        value_text = m_datas.value_text if m_datas else ''
-    elif value_type == 'number':
-        value_text = m_datas.value_number if m_datas else ''
+    value = ''
+    m_datas = ''
+    has_value = False
+    if gid:
+        m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id__in=fcids, data_type_id=data_type_id, property_id=property_id).first()
+        if m_datas:
+            has_value = True
     else:
-        value_text = _datetime_display(m_datas.value_date if m_datas else '')
+        has_value = True
 
-    return value_text, data_list
+    if has_value:
+        if value_type == 'option':
+            data_list = _code_list_display(property_id)
+            if m_datas:
+                value = m_datas.code_list_id
+        elif value_type == 'text':
+            value = m_datas.value_text if m_datas else ''
+        elif value_type == 'number':
+            value = m_datas.value_number if m_datas else ''
+        else:
+            value = _datetime_display(m_datas.value_date if m_datas else '')
+
+    return value, data_list, has_value
 
 
 def _get_roles(request, fid, property_id):
@@ -435,6 +438,7 @@ def _get_user_perm(request, fid):
     property_list = list(emp_perm.values_list('property_id', flat=True))
 
     return property_list
+
 
 @require_GET
 @ajax_required
@@ -489,7 +493,7 @@ def detailCreate(request, tid, pid, fid):
     rsp = {
         'success': True,
         'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids),
-        'data_types':  _get_data_types(qs_property_ids_of_feature, data_type_ids),
+        'data_types': _get_data_types(qs_property_ids_of_feature, data_type_ids),
     }
     return JsonResponse(rsp)
 

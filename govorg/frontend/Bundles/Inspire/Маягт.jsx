@@ -168,7 +168,7 @@ export default class Маягт extends Component {
     makeInitial(datas) {
         var initial_code_list_ids = {}
         datas.map((row, idx) => {
-            initial_code_list_ids[row.property_code] = row.code_list_id
+            initial_code_list_ids[row.property_code] = row.data
 
         })
         this.setState({code_list_ids: initial_code_list_ids})
