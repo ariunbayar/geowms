@@ -1,6 +1,8 @@
 from django.urls import re_path, path, include
+from llc.backend import llc_request
 
 from llc.backend.llc_conf import views as llc_views
+from llc.backend.llc_request import views as llc_request_views
 
 urlpatterns = [
     path('', include(([
