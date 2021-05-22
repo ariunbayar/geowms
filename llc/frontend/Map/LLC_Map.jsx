@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 
-export class Detail extends Component {
+export class LLCMap extends Component {
 
     constructor(props) {
         super(props)
