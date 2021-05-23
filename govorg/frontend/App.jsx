@@ -23,6 +23,7 @@ const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
+const LLCRequest = React.lazy(() => import("./LLCRequest"));
 
 const Tseg = React.lazy(() => import('./Bundles/TsegPersonal'));
 
@@ -134,6 +135,7 @@ export class App extends Component {
                             >
                             </MenuItem>
                         }
+                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
@@ -213,6 +215,7 @@ export class App extends Component {
 
                                 <Route path="/gov/system/" component={System} />
                                 <Route path="/gov/revoke-request/" component={RevokeRequest} />
+                                <Route path="/gov/llc-request/" component={LLCRequest} />
                                 <Route path="/gov/meta/" component={Meta} />
 
                                 <Route path="/gov/perm/region/" component={MapRegion} />

@@ -23,6 +23,7 @@ class ChangeRequest(models.Model):
     KIND_DELETE = 3
     KIND_DIRECT = 4
     KIND_REVOKE = 5
+    KIND_DISMISS = 6
 
     KIND_CHOICES = (
         (KIND_CREATE, 'ҮҮССЭН'),
@@ -30,6 +31,7 @@ class ChangeRequest(models.Model):
         (KIND_DELETE, 'УСТГАСАН'),
         (KIND_DIRECT, 'ШУУД'),
         (KIND_REVOKE, 'ЦУЦЛАСАН'),
+        (KIND_DISMISS, 'Буцаагдсан'),
     )
 
     old_geo_id = models.CharField(max_length=100, null=True)

@@ -38,6 +38,8 @@ geoportal_app/media/tseg-personal-img/*
 !geoportal_app/media/tseg-personal-img/.keep
 geoportal_app/media/tseg-personal/*
 !geoportal_app/media/tseg-personal/.keep
+geoportal_app/media/llc-request-files/*
+!geoportal_app/media/llc-request-files/.keep
 geoportal_app/media/covid_map/*
 !geoportal_app/media/covid_map/.keep
 geoportal_app/files/payment/*

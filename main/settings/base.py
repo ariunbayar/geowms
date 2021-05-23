@@ -89,6 +89,11 @@ INSTALLED_APPS = [
     'govorg.backend.revoke_request.apps.RevokeRequestConfig',
     'govorg.backend.secure.apps.SecureConfig',
     'govorg.backend.tseg.apps.TsegConfig',
+
+    # LLC apps
+    'llc.backend.llc_conf.apps.LlcConfConfig',
+    'llc.backend.llc_request.apps.LlcRequestConfig',
+
 ]
 
 REST_FRAMEWORK = {

@@ -1,0 +1,20 @@
+{% extends "layoutLLC.html" %}
+{% load static %}
+{% block content %}
+
+<div id="llc-app" class="content" data-id="">
+</div>
+{{ llc | json_script:"llc-app-data" }}
+
+{% endblock %}
+
+
+{% block script %}
+
+    {% if DEBUG %}
+        {% include "llc/index.dev.html" %}
+    {% else %}
+        {% include "llc/index.prod.html" %}
+    {% endif %}
+
+{% endblock %}
