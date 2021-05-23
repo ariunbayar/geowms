@@ -644,7 +644,6 @@ export default class InspireMap extends Component {
         const {form_datas} = this.state
         const projection = this.map.getView().getProjection()
         const map_coord = transformCoordinate(center, this.state.projection_display, projection)
-        var is_not_inspire = false
         const overlay = this.overlay
         overlay.setPosition(map_coord)
         this.controls.popup.getData(true, form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
@@ -1222,7 +1221,6 @@ export default class InspireMap extends Component {
     render() {
         const {is_loading, is_search_bar, is_menu_bar, is_menu_bar_all} = this.state
         const height = this.props.height ? this.props.height : '80vh'
-
         const Menu_comp = () => {
             return (
                 <div>
