@@ -164,7 +164,7 @@ urlpatterns = [
 
         path('llc-request/', include(([
             path('', org_request_views.get_llc_list),
-        ], 'org-request'))),
+        ], 'llc-request'))),
 
     ], 'back_org'))),
 

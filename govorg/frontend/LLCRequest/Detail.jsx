@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import OpenMapModal from './openMapModal'
-import { service } from "./service"
 
 
 export const make_state_color = (state) => {
@@ -14,7 +13,7 @@ export const make_state_color = (state) => {
 export const make_kind_color = (kind) => {
     let color
     if (kind == "ШИЙДВЭРЛЭГДСЭН") color = 'text-success'
-    else if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-primary'
+    else if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
     else if (kind == "БУЦААГДСАН") color = 'text-danger'
     return color
@@ -36,8 +35,8 @@ export class Detail extends Component {
             талбарууд: [
                 // {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': true},
                 {'field': 'org', "title": 'Байгууллага'},
-                {'field': 'project', "title": 'Төсөл'},
-                {'field': 'file', "title": 'File'},
+                {'field': 'name', "title": 'Төсөл'},
+                {'field': 'file_path', "title": 'File Path'},
                 {'field': 'created_at', "title": 'Огноо'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
@@ -58,16 +57,6 @@ export class Detail extends Component {
             custom_query: {}
         }
 
-    }
-
-    componentDidMount() {
-        service
-            .getChoices()
-            .then(({success, modules, choices}) => {
-                if (success) {
-                    this.setState({ modules, choices })
-                }
-            })
     }
 
     render() {

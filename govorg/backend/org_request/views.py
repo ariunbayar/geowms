@@ -14,7 +14,7 @@ from main.utils import (
     convert_3d_with_srid
 )
 
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 from django.db import connections, transaction
 from django.db.models import Q
 from govorg.backend.org_request.models import ChangeRequest
@@ -40,6 +40,8 @@ from main.utils import (
     get_feature_from_geojson,
 )
 from main.components import Datatable
+
+from llc.backend.llc_request.models import RequestFiles, RequestFilesShape, ShapeGeom
 
 
 def _get_geom(geo_id, fid):
@@ -821,50 +823,58 @@ def get_count(request):
     return JsonResponse(rsp)
 
 
+def _get_state(state, item):
+    return "Шинэ" if state == 1 else "Илгээсэн"
+
+
+def _get_kind(kind, item):
+    if kind == 1:
+        kind = "Хүлээгдэж буй"
+    elif kind == 2:
+        kind = "Шийдвэрлэгдсэн"
+    elif kind == 3:
+        kind = "Буцаагдсан"
+    elif kind == 2:
+        kind = "Цуцласан"
+    return kind
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-
     employee = get_object_or_404(Employee, user=request.user)
-    emp_features = _get_emp_features(employee)
-    if emp_features:
-        qs = ChangeRequest.objects
-        qs = qs.filter(feature_id__in=emp_features)
-        qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
-        print('aaaaaa')
-        print('aaaaaa')
-        print('aaaaaa')
-        print('aaaaaa')
-        print(qs)
+    org = Org.objects.filter(employee__user=request.user).first()
+
+    if employee:
+        qs = RequestFilesShape.objects
+        qs = qs.filter(org_id=org.id)
         if qs:
-            qs = qs.filter(group_id__isnull=True)
+            оруулах_талбарууд = ['org', 'name', 'file_path', 'created_at', 'kind', 'state']
+            хувьсах_талбарууд = [
+                {"field": "state", "action": _get_state, "new_field": "state"},
+                {"field": "kind", "action": _get_kind, "new_field": "kind"},
+            ]
+
             datatable = Datatable(
-                model=ChangeRequest,
+                model=RequestFiles,
                 payload=payload,
                 initial_qs=qs,
-                хувьсах_талбарууд=_хувьсах_талбарууд(),
+                оруулах_талбарууд=оруулах_талбарууд,
+                хувьсах_талбарууд=хувьсах_талбарууд,
             )
             items, total_page = datatable.get()
 
             rsp = {
                 'items': items,
-                'page': payload.get('page'),
                 'total_page': total_page,
             }
-
         else:
             rsp = {
                 'items': [],
-                'page': 1,
+                'page': payload.get("page"),
                 'total_page': 1,
+
             }
 
-    else:
-        rsp = {
-            'items': [],
-            'page': 1,
-            'total_page': 1,
-        }
-
-    return JsonResponse(rsp)
+        return JsonResponse(rsp)
