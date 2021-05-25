@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
-import {Detail} from './Detail'
+import {LLCMap} from './LLC_Map'
 
 
 export default class Map extends Component {
@@ -12,7 +12,7 @@ export default class Map extends Component {
     render() {
         return (
             <Switch>
-                <Route exact path="/llc/map/" component={Detail} />
+                <Route exact path="/llc/map/" component={LLCMap} />
             </Switch>
         )
     }

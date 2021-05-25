@@ -11,5 +11,9 @@ urlpatterns = [
         path('save_requests/', llc_request_views. save_requests, name=' save_requests'),
     ], 'llc'))),
 
+    path('backend/', include(([
+        path('get-all-geo_json/', llc_request_views.get_all_geo_json, name='get_all_geo_json'),
+    ], 'llc_requests'))),
+
     re_path('^.*', llc_views.llc_frontend, name='llc'),
 ]
