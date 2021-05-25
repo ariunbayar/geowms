@@ -68,19 +68,20 @@ def llc_request_list(request, payload):
 
 @require_POST
 @ajax_required
-def save_requests(request, payload):
-    descripion = payload.get('request_text')
+def save_request(request):
+    uploaded_file = request.FILES['files']
+    description = request.POST.get
     user = request.user
-    RequestFiles.objects.create(
-        name=user,
-        kind=2,
-        state=1,
-        geo_id=496,
-        file_path='.',
-        )
+    # RequestFiles.objects.create(
+    #     name=user,
+    #     kind=2,
+    #     state=1,
+    #     geo_id=496,
+    #     file_path='.',
+    #     )
     rsp = {
         'success': True,
-        'info': descripion
+        # 'info': descripion
     }
     return JsonResponse(rsp)
 

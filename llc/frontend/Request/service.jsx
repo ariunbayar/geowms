@@ -3,13 +3,13 @@ export const service = {
     SaveRequest
 }
 
-const prefix = '/llc'
+const prefix = '/llc/backend'
 
-function SaveRequest(request_text) {
-    const requestOptions = {
+function SaveRequest(form_datas) {
+    const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ request_text})
+        body: form_datas
     }
 
-    return fetch(`${prefix}/save_requests/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/save-request/`, opts).then(handleResponse)
 }

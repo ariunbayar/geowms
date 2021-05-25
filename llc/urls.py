@@ -7,12 +7,12 @@ from llc.backend.llc_request import views as llc_request_views
 urlpatterns = [
     path('', include(([
         path('', llc_views.llc_frontend, name='frontend'),
-        path('llc-request-list/', llc_request_views.llc_request_list, name='llc_request_list'),
-        path('save_requests/', llc_request_views. save_requests, name=' save_requests'),
     ], 'llc'))),
 
     path('backend/', include(([
         path('get-all-geo_json/', llc_request_views.get_all_geo_json, name='get_all_geo_json'),
+        path('llc-request-list/', llc_request_views.llc_request_list, name='llc_request_list'),
+        path('save-request/', llc_request_views. save_request, name=' save_request'),
     ], 'llc_requests'))),
 
     re_path('^.*', llc_views.llc_frontend, name='llc'),
