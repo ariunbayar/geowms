@@ -83,7 +83,54 @@ export default class InspireMap extends Component {
             alertBox: new AlertRoot(), // this.controls.alertBox.showAlert(true, "....")
             popup: new PopUp(),
         }
-
+        this.layer_styles = {
+            'MultiPolygon': new Style({
+                stroke: new Stroke({
+                color: 'green',
+                width: 2,
+                }),
+                fill: new Fill({
+                color: 'rgba(0,255,0,0.3)',
+                }),
+            }),
+            'Polygon': new Style({
+                stroke: new Stroke({
+                color: 'black',
+                width: 2,
+                }),
+                fill: new Fill({
+                color: 'red',
+                }),
+            }),
+            'Point': new Style({
+                image: new CircleStyle({
+                radius: 5,
+                fill: new Fill({
+                    color: 'green',
+                }),
+                }),
+            }),
+            'LineString': new Style({
+                stroke: new Stroke({
+                color: 'green',
+                width: 2,
+                }),
+            }),
+            'MultiLineString': new Style({
+                stroke: new Stroke({
+                color: 'green',
+                width: 2,
+                }),
+            }),
+            'MultiPoint': new Style({
+                image: new CircleStyle({
+                radius: 5,
+                fill: new Fill({
+                    color: 'green',
+                }),
+                }),
+            }),
+            };
         this.marker = this.initMarker()
 
         this.handleToggle = this.handleToggle.bind(this)
@@ -168,7 +215,7 @@ export default class InspireMap extends Component {
     }
 
     componentDidMount() {
-      service.getUser().then(({is_authenticated}) =>
+    service.getUser().then(({is_authenticated}) =>
         {
             this.setState({is_authenticated})
         })
@@ -300,7 +347,9 @@ export default class InspireMap extends Component {
         }
 
         if (vector_source !== prevState.vector_source) {
-            this.addVectorSource(vector_source)
+            if (vector_source && Object.keys(vector_source).length > 0) {
+                this.addVectorSource(vector_source)
+            }
         }
 
         if (form_datas !== prevState.form_datas) {
@@ -322,30 +371,27 @@ export default class InspireMap extends Component {
     }
 
     addVectorSource(vector_source) {
-
         const { projection, projection_display, form_datas} = this.state
+        var styles = this.layer_styles
         if (Object.keys(vector_source).length > 0) {
-            this.map.getLayers().forEach(layer => {
-                if (layer && layer.get('id') === 'aimag') {
-                  layer.getSource().clear();
-                }
-            });
-
+            // this.map.getLayers().forEach(layer => {
+            //     if (layer && layer.get('id') === 'aimag') {
+            //       layer.getSource().clear();
+            //     }
+            // });
             const features = new GeoJSON({
                 dataProjection: projection_display,
                 featureProjection: projection,
-            }).readFeatures(vector_source['features'])
+            }).readFeatures(vector_source)
+
             const vectorSource = new VectorSource({
                 features: features
             });
             const vector_layer = new VectorLayer({
                 source: vectorSource,
-                style: new Style({
-                    stroke: new Stroke({
-                        color: 'rgba(100, 255, 0, 1)',
-                        width: 2
-                    }),
-                }),
+                style: function (feature) {
+                    return styles[feature.getGeometry().getType()];
+                },
                 id: 'aimag'
             })
             this.map.addLayer(vector_layer)
@@ -598,7 +644,7 @@ export default class InspireMap extends Component {
                 this.controls.sidebar,
                 this.controls.cart,
                 this.controls.alertBox,
-                this.controls.popup,
+                // this.controls.popup,
 
             ]),
             layers: [
@@ -618,7 +664,7 @@ export default class InspireMap extends Component {
         this.map = map
 
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
-        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
+        // this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
         this.getErguulLayer()
         this.setState({is_loading: false})
 
@@ -644,10 +690,9 @@ export default class InspireMap extends Component {
         const {form_datas} = this.state
         const projection = this.map.getView().getProjection()
         const map_coord = transformCoordinate(center, this.state.projection_display, projection)
-        var is_not_inspire = false
         const overlay = this.overlay
         overlay.setPosition(map_coord)
-        this.controls.popup.getData(true, form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+        // this.controls.popup.getData(true, form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
     }
 
     getElement(element) {
@@ -985,9 +1030,9 @@ export default class InspireMap extends Component {
                             if (not_visible_layers.length > 0) {
                                 this.getPopUpInfo(coordinate, not_visible_layers)
                             }
-                            else {
-                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
-                            }
+                            // else {
+                            //     this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+                            // }
                         }
                     })
                 }
@@ -1222,7 +1267,6 @@ export default class InspireMap extends Component {
     render() {
         const {is_loading, is_search_bar, is_menu_bar, is_menu_bar_all} = this.state
         const height = this.props.height ? this.props.height : '80vh'
-
         const Menu_comp = () => {
             return (
                 <div>
