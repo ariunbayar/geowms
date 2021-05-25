@@ -26,7 +26,7 @@ class RequestFiles(models.Model):
 
     KIND_CHOICES = (
         (KIND_PENDING, 'ХҮЛЭЭГДЭЖ БУЙ'),
-        (KIND_SOLVED, 'ШИИДВЭРЛЭГДСЭН'),
+        (KIND_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
         (KIND_DISMISS, 'БУЦААГДСАН'),
         (KIND_REVOKE, 'ЦУЦЛАСАН')
     )

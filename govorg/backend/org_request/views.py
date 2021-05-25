@@ -819,3 +819,52 @@ def get_count(request):
     }
 
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_llc_list(request, payload):
+
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_features = _get_emp_features(employee)
+    if emp_features:
+        qs = ChangeRequest.objects
+        qs = qs.filter(feature_id__in=emp_features)
+        qs = qs.exclude(kind=ChangeRequest.KIND_REVOKE)
+        print('aaaaaa')
+        print('aaaaaa')
+        print('aaaaaa')
+        print('aaaaaa')
+        print(qs)
+        if qs:
+            qs = qs.filter(group_id__isnull=True)
+            datatable = Datatable(
+                model=ChangeRequest,
+                payload=payload,
+                initial_qs=qs,
+                хувьсах_талбарууд=_хувьсах_талбарууд(),
+            )
+            items, total_page = datatable.get()
+
+            rsp = {
+                'items': items,
+                'page': payload.get('page'),
+                'total_page': total_page,
+            }
+
+        else:
+            rsp = {
+                'items': [],
+                'page': 1,
+                'total_page': 1,
+            }
+
+    else:
+        rsp = {
+            'items': [],
+            'page': 1,
+            'total_page': 1,
+        }
+
+    return JsonResponse(rsp)

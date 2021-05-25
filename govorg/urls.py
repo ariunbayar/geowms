@@ -162,6 +162,10 @@ urlpatterns = [
             path('get_choices/', revoke_request_views.get_choices),
         ], 'revoke_request'))),
 
+        path('llc-request/', include(([
+            path('', org_request_views.get_llc_list),
+        ], 'org-request'))),
+
     ], 'back_org'))),
 
     path('secure/', include(([
