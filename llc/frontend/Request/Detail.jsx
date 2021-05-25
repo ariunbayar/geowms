@@ -119,7 +119,6 @@ export class Detail extends Component {
     }
 
     handleRemove(){
-        alert("amjilttai ustlaa")
         this.modalChange(
             'fa fa-check-circle',
             "success",

@@ -136,6 +136,25 @@ modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNam
                                     disabled='disabled'
                                     value="ОРГИЛБОЛД ХХК"/>
                             </div>
+                            <div>
+                                <label htmlFor="tools">Ашигласан багажны мэдээлэл</label>
+                                <div>
+                                    <input
+                                        id='QGIS'
+                                        type='checkbox'
+                                        name='QGIS'
+                                        value='QGIS'>
+                                    </input>
+                                </div>
+                                <div>
+                                    <input
+                                        id='Geoserver'
+                                        type='checkbox'
+                                        name='Geoserver'
+                                        value='Geoserver'>
+                                    </input>
+                                </div>
+                            </div>
                             <div className="form-group">
                                 <label for="input-5"> Хүсэлтийн тайлбар </label>
                                 <span className='col-md-12'>

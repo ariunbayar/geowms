@@ -79,6 +79,7 @@ def save_requests(request, payload):
         state=1,
         geo_id=496,
         file_path='.',
+        descripion=descripion,
         )
     rsp = {
         'success': True,
