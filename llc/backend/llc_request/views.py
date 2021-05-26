@@ -1,15 +1,26 @@
 
+import rarfile
+from django.db import connections
 from geojson import FeatureCollection
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
-from main.components import Datatable
-from main.utils import (
-    json_load
+from llc.backend.llc_request.models import (
+    RequestFiles,
+    ShapeGeom,
+    RequestFilesShape
 )
 
-from llc.backend.llc_request.models import RequestFiles, ShapeGeom
+from backend.org.models import Org
+
+from main.components import Datatable
+from main.utils import (
+    json_dumps,
+    json_load,
+    get_sql_execute
+)
+
 
 # Create your views here.
 
@@ -37,7 +48,7 @@ def _choice_kind_display(kind, item):
 def llc_request_list(request, payload):
     qs = RequestFiles.objects.all()
     if qs:
-        оруулах_талбарууд = ['name', 'kind', 'state',  'created_at', 'updated_at']
+        оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path']
         хувьсах_талбарууд = [
             {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
             {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"}
@@ -66,22 +77,117 @@ def llc_request_list(request, payload):
     return JsonResponse(rsp)
 
 
+def _get_leve_2_geo_id(file_data, zip_ref):
+    org_datas = Org.objects.filter(level=2)
+    cursor = connections['default'].cursor()
+    data_of_range = []
+
+    with zip_ref.open(file_data, "r") as fo:
+        json_content = json_load(fo)
+        for i in json_content:
+            if isinstance(i, bytes):
+                contents = i.decode()
+            else:
+                contents = i
+
+            contents = contents.replace("\'", "\"")
+            contents = json_load(contents)
+            features = contents.get('features')
+
+            for org_data in org_datas:
+                for feature in features:
+                    geometry = feature.get('geometry')
+                    geometry = str(geometry).replace("\'", "\"")
+                    sql = '''
+                        SELECT ST_AsText(st_force2d(ST_GeomFromGeoJSON('{geo_json}'))) As wkt
+                    '''.format(geo_json=geometry)
+                    valid_geodata = get_sql_execute(sql, cursor, 'all')[0].get('wkt')
+
+                    sql_2 = '''
+                    select
+                        ST_Contains(
+                            ST_Transform(geo_data, 4326),
+                            ST_GeomFromText('{geom}', 4326)
+                        )
+                    As check_geom
+                    from
+                        m_geo_datas
+                    where geo_id='{geo_id}'
+                    '''.format(
+                        geom=valid_geodata,
+                        geo_id=org_data.geo_id
+                    )
+                    check_geom = get_sql_execute(sql_2, cursor, 'all')[0].get('check_geom')
+                    if check_geom:
+                        data_of_range = org_data
+                        break
+    return data_of_range
+
+
+def _create_shape_files(org_data, request_file, zip_ref):
+    file_datas = zip_ref.infolist()
+    for file_data in file_datas:
+        with zip_ref.open(file_data, "r") as fo:
+            json_content = json_load(fo)
+            for i in json_content:
+                if isinstance(i, bytes):
+                    contents = i.decode()
+                else:
+                    contents = i
+
+                contents = contents.replace("\'", "\"")
+                contents = json_load(contents)
+                features = contents.get('features')
+
+                requets_shape = RequestFilesShape.objects.create(
+                    files=request_file,
+                    org=org_data
+                )
+
+                for feature in features:
+                    geometry = feature.get('geometry')
+                    properties = feature.get('properties')
+                    ShapeGeom.objects.create(
+                        shape_id=requets_shape,
+                        geom_json=json_dumps(geometry),
+                        form_json=json_dumps(properties)
+                    )
+
+
 @require_POST
 @ajax_required
 def save_request(request):
     uploaded_file = request.FILES['files']
-    description = request.POST.get
-    user = request.user
-    # RequestFiles.objects.create(
-    #     name=user,
-    #     kind=2,
-    #     state=1,
-    #     geo_id=496,
-    #     file_path='.',
-    #     )
+    project_name = request.POST.get('project_name')
+    object_type = request.POST.get('object_type')
+    object_count = request.POST.get('object_count')
+    hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
+    zahialagch = request.POST.get('zahialagch')
+
+    with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
+        file_datas = zip_ref.infolist()[0]
+        org_data = _get_leve_2_geo_id(file_datas, zip_ref)
+        if not org_data:
+
+            return JsonResponse({
+                    'success': False,
+                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+            })
+
+        request_file = RequestFiles.objects.create(
+            name='Төслийн нэр байна',
+            kind=2,
+            state=1,
+            geo_id=org_data.geo_id if org_data else '',
+            file_path=uploaded_file
+
+        )
+
+        _create_shape_files(org_data, request_file, zip_ref)
+
     rsp = {
         'success': True,
-        # 'info': descripion
+        'info': 'Амжилттай хадгаллаа'
     }
     return JsonResponse(rsp)
 
@@ -101,3 +207,20 @@ def get_all_geo_json(request):
     return JsonResponse({
         'geo_json_datas': FeatureCollection(features)
     })
+
+
+@require_GET
+@ajax_required
+def get_request_data(request, id):
+    features = []
+    shape_geometries = ShapeGeom.objects.filter(shape_id__files_id=id)
+
+    for shape_geometry in shape_geometries:
+
+        single_geom = json_load(shape_geometry.geom_json)
+        features.append(single_geom)
+
+    return JsonResponse({
+        'vector_datas': FeatureCollection(features)
+    })
+
