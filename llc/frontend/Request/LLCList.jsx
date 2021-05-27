@@ -91,6 +91,7 @@ export class Detail extends Component {
         this.handeUpdateAction = this.handeUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.sendData = this.sendData.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
@@ -98,6 +99,10 @@ export class Detail extends Component {
 
     handeUpdateAction(values) {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
+    }
+
+    sendData(values) {
+        this.props.history.push(`/llc/llc-request/${values.id}/Хүсэлт-илгээх/`)
     }
 
     handleRemoveAction(values){

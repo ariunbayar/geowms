@@ -9,6 +9,7 @@ class SubmitClass extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            current_path:''
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
@@ -17,7 +18,7 @@ class SubmitClass extends Component {
         const {
             files, project_name,
             object_type, object_count,
-            hurungu_oruulalt, zahialagch
+            hurungu_oruulalt, zahialagch,
         } = this.props.values
         const form_datas = new FormData()
         form_datas.append('files', files, files.name)
@@ -33,16 +34,34 @@ class SubmitClass extends Component {
     }
 
     render (){
+        const {values} = this.props
         return (
-            <div className="col-md-12 mt-2">
-                <button
-                    type="button"
-                    className="btn btn-primary col-12"
-                    onClick ={()=> this.handleSubmit()}
-                >
-                    <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
-                </button>
-            </div>
+                <div>
+                    { values.current_path == 'Хүсэлт-илгээх'
+                        ?
+                            <div className="col-md-8 mt-2 ">
+                                        <p className="btn btn-secondary">
+                                            <i
+                                                className="fa fa-angle-double-left"
+                                                onClick ={()=>this.props.values.BackToList()}
+
+                                            >
+                                                     Буцах
+                                            </i>
+                                        </p>
+                                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                        <p className="btn btn-primary"><i className="fa"> Хүсэлт илгээх</i></p>
+                            </div>
+                        :
+                            <button
+                                type="button"
+                                className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
+                                onClick ={()=> this.handleSubmit()}
+                            >
+                                <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
+                            </button>
+                    }
+                </div>
         )
     }
 }
@@ -68,13 +87,34 @@ export class RequestAdd extends Component {
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+        this.BackToList = this.BackToList.bind(this)
     }
 
     componentDidMount() {
         const {id} = this.props.match.params
+        var pathname = this.props.location.pathname
+        pathname = pathname.split('/')
+
+        if ( id > 0 ) {
+            this.setState({current_path: pathname[4]})
+        }
+        else { this.setState({current_path: pathname[3]})}
+
         service.handleRequestData(id).then(({ vector_datas }) =>{
             this.setState({vector_datas})
         })
+        service.handleRequestForm(id).then(({ form_field }) =>{
+            if (form_field){
+                this.setState({
+                    zahialagch :form_field['client_org'],
+                    project_name : form_field['project_name'],
+                    object_type : form_field['object_type'],
+                    object_count : form_field['object_quantum'],
+                    hurungu_oruulalt : form_field['investment_status'],
+                })
+            }
+        })
+
     }
 
     handleOnChange(e) {
@@ -90,7 +130,7 @@ export class RequestAdd extends Component {
     }
 
     modalClose() {
-        this.props.history.push('/llc/llc-request/')
+        this.props.history.push(`/llc/llc-request/`)
     }
 
     modalOpen(){
@@ -147,12 +187,16 @@ export class RequestAdd extends Component {
         })
     }
 
+    BackToList(){
+        this.props.history.push("/llc/llc-request/")
+    }
+
         render (){
             const {
                 files, project_name,
                 object_type, object_count,
                 hurungu_oruulalt, zahialagch,
-                vector_datas
+                vector_datas, current_path
             } = this.state
             const {id} = this.props.match.params
             return (
@@ -170,6 +214,8 @@ export class RequestAdd extends Component {
                             handleOnChange={this.handleOnChange}
                             submitClass={SubmitClass}
                             handlePassValues={this.handlePassValues}
+                            current_path={current_path}
+                            BackToList={this.BackToList}
                         />
                     </div>
                     <Modal

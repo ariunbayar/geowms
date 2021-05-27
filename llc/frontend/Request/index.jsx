@@ -22,6 +22,10 @@ export default class Request extends Component {
                     path="/llc/llc-request/:id/дэлгэрэнгүй/"
                     component={RequestAdd}
                 />
+                <Route
+                    path="/llc/llc-request/:id/Хүсэлт-илгээх/"
+                    component={RequestAdd}
+                />
             </Switch>
         )
     }

@@ -9,7 +9,8 @@ from django.views.decorators.http import require_GET, require_POST
 from llc.backend.llc_request.models import (
     RequestFiles,
     ShapeGeom,
-    RequestFilesShape
+    RequestFilesShape,
+    RequestForm,
 )
 
 from backend.org.models import Org
@@ -182,6 +183,15 @@ def save_request(request):
             file_path=uploaded_file
 
         )
+        
+        RequestForm.objects.create(
+            client_org=zahialagch,
+            project_name=project_name,
+            object_type=object_type,
+            object_quantum=object_count,
+            investment_status=hurungu_oruulalt,
+            forms_id=request_file.id
+        )
 
         _create_shape_files(org_data, request_file, zip_ref)
 
@@ -222,5 +232,17 @@ def get_request_data(request, id):
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features)
+    })
+
+
+@require_GET
+@ajax_required
+def get_request_form(request, id):
+    field = dict()
+    qs = RequestForm.objects.filter(forms_id=id)
+    field = [item for item in qs.values()]
+
+    return JsonResponse({
+        'form_field': field[0]
     })
 
