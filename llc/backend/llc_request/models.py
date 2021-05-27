@@ -34,11 +34,12 @@ class RequestFiles(models.Model):
     name = models.CharField(max_length=250, verbose_name='Нэр')
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
+    description = models.TextField(default='')
+    tools = models.TextField(default='')
     geo_id = models.CharField(max_length=100)
     file_path = models.FileField(upload_to='llc-request-files/')
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
 class RequestFilesShape(models.Model):
 
@@ -48,9 +49,9 @@ class RequestFilesShape(models.Model):
 
     files = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
     org = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
-    theme_id = models.IntegerField()
-    package_id = models.IntegerField()
-    feature_id = models.IntegerField()
+    theme_id = models.IntegerField(null=True)
+    package_id = models.IntegerField(null=True)
+    feature_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -60,7 +61,7 @@ class ShapeGeom(models.Model):
     class Meta:
         db_table = "llc_shapes_geom"
 
-    shape_id = models.ForeignKey(RequestFilesShape, on_delete=models.PROTECT, db_index=True)
+    shape = models.ForeignKey(RequestFilesShape, on_delete=models.PROTECT, db_index=True)
     geom_json = models.TextField()
     form_json = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
