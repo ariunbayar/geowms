@@ -1,7 +1,7 @@
 
 import rarfile
 from django.db import connections
-from geojson import FeatureCollection
+from geojson import FeatureCollection, Feature
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -192,18 +192,30 @@ def save_request(request):
     return JsonResponse(rsp)
 
 
+def _get_feature(shape_geometries):
+    features = []
+    for shape_geometry in shape_geometries:
+
+        single_geom = json_load(shape_geometry.geom_json)
+        feature = {
+            "type":"Feature",
+            'geometry': single_geom,
+            'id': shape_geometry.id,
+            'properties': json_load(shape_geometry.form_json)
+            
+        }
+        features.append(feature)
+    
+    return features
+
+
 @require_GET
 @ajax_required
 def get_all_geo_json(request):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
-
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        features.append(single_geom)
-
+    features = _get_feature(shape_geometries)
     return JsonResponse({
         'geo_json_datas': FeatureCollection(features)
     })
@@ -214,12 +226,7 @@ def get_all_geo_json(request):
 def get_request_data(request, id):
     features = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
-
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        features.append(single_geom)
-
+    features = _get_feature(shape_geometries)
     return JsonResponse({
         'vector_datas': FeatureCollection(features)
     })

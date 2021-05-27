@@ -14,6 +14,7 @@ import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
 import {Select} from 'ol/interaction'
+import {click} from 'ol/events/condition';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import ImageWMS from 'ol/source/ImageWMS';
@@ -377,6 +378,7 @@ export default class InspireMap extends Component {
     addVectorSource(vector_source) {
         const { projection, projection_display, form_datas} = this.state
         var styles = this.layer_styles
+
         if (Object.keys(vector_source.features).length > 0) {
             if (this.map) {
                 this.map.getLayers().forEach(layer => {
@@ -385,6 +387,7 @@ export default class InspireMap extends Component {
                     }
                 });
             }
+
             const features = new GeoJSON({
                 dataProjection: projection_display,
                 featureProjection: projection,
@@ -403,9 +406,6 @@ export default class InspireMap extends Component {
             if (this.map) {
                 this.map.addLayer(vector_layer)
                 this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
-
-                const select = new Select()
-                select.on("select", event => this.featureSelected(event, coordinate))
             }
         }
 
@@ -670,7 +670,7 @@ export default class InspireMap extends Component {
             })
         })
 
-        // map.on('click', this.handleMapClick)
+        map.on('click', this.handleMapClick)
         this.map = map
 
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
@@ -974,12 +974,18 @@ export default class InspireMap extends Component {
     }
 
     featureFromVectorData(coordinate) {
-        
+        var selectClick = new Select({
+            condition: click,
+        });
+        this.map.addInteraction(selectClick)
+        selectClick.on("select", event => this.featureSelected(event, coordinate));
     }
 
+
     featureSelected(event, coordinate){
-        console.log(coordinate)
-        console.log(event.selected[0])
+        const features = event.selected
+        var prop = features[0].getProperties();
+        this.controls.popup.getData(true, prop, this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
     }
 
     setSourceInPopUp(mode) {
@@ -1053,9 +1059,9 @@ export default class InspireMap extends Component {
                             if (not_visible_layers.length > 0) {
                                 this.getPopUpInfo(coordinate, not_visible_layers)
                             }
-                            // else {
-                            //     this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
-                            // }
+                            else {
+                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+                            }
                         }
                     })
                 }
