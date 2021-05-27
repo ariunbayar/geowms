@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import {Switch, Route} from "react-router-dom"
 import {LLCMap} from '../LLCMap'
+import {LLCPP} from './llc_popup'
 import {service} from './service'
 
 
@@ -28,7 +29,14 @@ export default class Map extends Component {
             <Switch>
                 <Route
                     exact path="/llc/map/"
-                    component={(props) => <LLCMap {...props} vector_datas={this.state.vector_datas} height={'100vh'}/>}
+                    component={
+                        (props) =>
+                            <LLCMap
+                                {...props}
+                                vector_datas={this.state.vector_datas}
+                                height={'100vh'}
+                                PPContent={LLCPP}
+                        />}
                 />
             </Switch>
         )

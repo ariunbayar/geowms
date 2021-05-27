@@ -1,9 +1,8 @@
 import React, { Component, Fragment } from "react"
-import ReactDOM from 'react-dom'
 import Loader from "@utils/Loader"
-import {Control} from 'ol/control'
 
-class PopUpCmp extends Component {
+
+export class LLCPP extends Component {
 
     constructor(props) {
 
@@ -18,7 +17,7 @@ class PopUpCmp extends Component {
             is_prev: false,
             is_plus: true,
             data: [],
-            datas: '',
+            datas: props.datas,
             mode: '',
             name: '',
             id: '',
@@ -27,26 +26,36 @@ class PopUpCmp extends Component {
             pdf_id:'',
             is_purchase: false,
             is_enable: false,
-            is_authenticated: props.is_authenticated,
+            is_authenticated: false,
+            layer_name: '',
+            attr10: '',
+            attr10_status: false,
+            choices_list: [],
+            attributes: [],
         }
         this.plusTab = this.plusTab.bind(this)
         this.prevTab = this.prevTab.bind(this)
         this.checkModeAndCode = this.checkModeAndCode.bind(this)
-    }
-
-    componentDidMount() {
-        this.element = document.getElementById("popup")
-        if (this.props.sendElem) this.props.sendElem(this.element)
+        this.getNemaAttributeDetail = this.getNemaAttributeDetail.bind(this)
     }
 
     componentDidUpdate(pP, pS) {
         const { datas } = this.props
         if(pP.datas !== datas && !this.props.is_loading) {
+            this.getNemaAttributeDetail(datas)
+        }
+
+        if (pP.datas !== datas) {
+            if (datas && datas[0][0][1]) this.setState({datas})
+        }
+    }
+
+    getNemaAttributeDetail(datas) {
             this.properties = []
             const startNumber = 1
-            this.setState({ startNumber, is_plus: true, is_prev: false, is_enable: false })
+            this.setState({ startNumber, is_plus: true, is_prev: false})
+
             this.checkModeAndCode(startNumber, datas)
-        }
     }
 
     plusTab() {
@@ -56,9 +65,9 @@ class PopUpCmp extends Component {
         var plus = startNumber + 1
         plus = Math.min(datas.length, plus)
         if (plus == datas.length) {
-            this.setState({ is_plus: false, is_prev: true, is_enable: false })
+            this.setState({ is_plus: false, is_prev: true })
         } else {
-            this.setState({ is_plus: true, is_prev: true, is_enable: false })
+            this.setState({ is_plus: true, is_prev: true })
         }
         this.checkModeAndCode(plus, datas)
         this.setState({ startNumber: plus })
@@ -71,9 +80,9 @@ class PopUpCmp extends Component {
         var minus = startNumber - 1
         minus = Math.max(minus, 1)
         if (minus == 1) {
-            this.setState({ is_prev: false, is_plus: true, is_enable: false })
+            this.setState({ is_prev: false, is_plus: true })
         }else {
-            this.setState({ is_plus: true, is_prev: true, is_enable: false })
+            this.setState({ is_plus: true, is_prev: true })
         }
         this.checkModeAndCode(minus, datas)
         this.setState({ startNumber: minus })
@@ -83,7 +92,6 @@ class PopUpCmp extends Component {
         let mode
         let code
         let values
-        let localid
         let geom_name
         this.click_count = 0
         if (datas.length > 0) {
@@ -108,12 +116,15 @@ class PopUpCmp extends Component {
         if (this.props.is_from_inspire) data = [datas[number - 1]]
         else data = datas[number - 1]
 
+        if (code != "gp_layer_geodetical_point_view") {
+            this.is_from_inspire = false
+        }
         this.setState({ data, mode, datas, code, geom_name })
     }
 
     render() {
-        const { datas, data, startNumber, is_prev, is_plus, is_authenticated } = this.state
-        const { is_empty, is_loading } = this.props
+        const { datas, data, startNumber, is_prev, is_plus} = this.state
+        const { is_empty, is_from_inspire, is_loading, datas_hoho} = this.props
         return (
                 <div>
                     <div className="ol-popup-header">
@@ -148,36 +159,29 @@ class PopUpCmp extends Component {
                     </div>
                     <Loader is_loading={is_loading} />
                     {
-                        is_empty && is_authenticated
+                        is_empty
                         ?
                             <div className="ol-popup-contet text-center">
                                 <b>Хоосон газар сонгосон байна.</b>
                             </div>
                         :
-                            is_authenticated
-                            &&
-                                <div className="ol-popup-contet">
-                                    {
-                                        data.length >= 1
+                            <div className="ol-popup-contet  overflow-auto" style={{height: '30vh'}}>
+                                {
+                                    data.length>= 1 && data[2]
                                         &&
-                                            data[0].map((layer, idx) =>
-                                                idx == 1 &&
-                                                layer.map((value, v_idx) =>
-                                                    value[0].toLowerCase().startsWith('name')
-                                                    && <b key={v_idx}>{value[1]}</b>
-                                                )
-                                            )
-                                    }
-                                    <hr className="m-1 border border-secondary rounded"/>
-                                    <table className="table borderless no-padding">
-                                        <tbody>
-                                            {
-                                                data.length >= 1
-                                                ?
-                                                    data[0].map((layer, idx) =>
-                                                        idx == 1 &&
-                                                        layer.map((value, v_idx) =>
-                                                            value[0] != 'geo_id' && !value[0].toLowerCase().startsWith('name')
+                                        <div className="text-info text-center col-md-12">{data[2]}</div>
+                                }
+                                <hr className="m-1 border border-secondary rounded"/>
+                                <table className="table borderless no-padding">
+                                    <tbody>
+                                        {
+                                            data.length >= 1
+                                            ?
+                                                data[0].map((layer, idx) =>
+                                                    idx == 1 &&
+                                                    <Fragment key={idx}>
+                                                        {   layer.map((value, v_idx) =>
+                                                            !value[0].toLowerCase().startsWith('name')
                                                             &&
                                                                 <tr className="p-0" style={{fontSize: '12px'}} key={v_idx}>
                                                                     <th className="font-weight-normal">
@@ -185,68 +189,17 @@ class PopUpCmp extends Component {
                                                                         <p className="m-0">&nbsp;&nbsp;&nbsp;{value[1].charAt(0).toUpperCase() + value[1].substring(1)}</p>
                                                                     </th>
                                                                 </tr>
-                                                        )
-                                                    )
-                                                :
-                                                <tr><th>Хоосон байна</th></tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                            )}
+                                                        </Fragment>
+                                                )
+                                            :
+                                            <tr><th>Хоосон байна.</th></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                     }
                 </div>
             )
-    }
-}
-
-export class PopUp extends Control {
-
-    constructor(opt_options) {
-
-        const options = opt_options || {}
-
-        super({
-            element: document.createElement('div'),
-            target: options.target,
-        })
-
-        this.is_component_initialized = false
-
-        this.element.className = 'ol-popup'
-        this.element.setAttribute("id", "popup")
-
-        this.renderComponent = this.renderComponent.bind(this)
-        this.toggleControl = this.toggleControl.bind(this)
-        this.getData = this.getData.bind(this)
-    }
-
-    toggleControl(is_visible) {
-        if (is_visible) {
-            this.element.style.display = 'block'
-            this.element.style.zIndex = '1050'
-        }
-        else {
-            this.element.style.display = 'none'
-        }
-
-    }
-
-    renderComponent(props) {
-        if (!this.is_component_initialized) {
-            ReactDOM.render(<PopUpCmp {...props}/>, this.element)
-            this.is_component_initialized = true
-        }
-
-        ReactDOM.hydrate(<PopUpCmp {...props}/>, this.element)
-    }
-
-    blockPopUp(islaod, sendElem, close) {
-        this.toggleControl(islaod)
-        this.renderComponent({sendElem, close})
-    }
-
-    getData(isload, datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading=true, is_authenticated=false) {
-        this.toggleControl(isload)
-        this.renderComponent({datas, close, setSource, cartButton, is_empty, is_from_inspire, is_loading, is_authenticated})
     }
 }

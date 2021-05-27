@@ -28,6 +28,7 @@ export class LLCMap extends Component {
                             height={height}
                             is_menu_bar_all='close'
                             vector_source={vector_datas}
+                            PPContent={this.props.PPContent}
                         />
                     </div>
                 </div>
