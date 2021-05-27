@@ -22,6 +22,22 @@ export const make_kind_color = (kind) => {
     return color
 }
 
+export const make_send_data = (values) => {
+    return (
+        <a
+            type="button"
+            href={'/media/' + values.values.file_path}
+            target="_blank"
+            className="
+                btn text-light animated bounceIn bg-danger
+            "
+        >
+        <i className="fa fa-download"> &nbsp; Татах</i>
+        </a>
+    )
+
+}
+
 
 export class Detail extends Component {
 
@@ -30,60 +46,58 @@ export class Detail extends Component {
         this.state = {
             refresh:false,
             талбарууд: [
-                {'field': 'name', "title": 'Аж ахуйн нэр'},
+                {'field': 'name', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
 
             ],
-            жагсаалтын_холбоос: '/llc/llc-request-list/',
+            жагсаалтын_холбоос: '/llc/backend/llc-request-list/',
             хувьсах_талбарууд: [
                 {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
                 {"field": "kind", "action": (values) => make_kind_color(values), "action_type": true},
             ],
             нэмэлт_талбарууд: [
                     {
+                        "title": 'дэлгэрэнгүй',
+                        "text": '',
+                        "icon": 'fa fa-eye text-primary',
+                        "action": (values) => this.handeUpdateAction(values),
+                    },
+                    {
                         "title": 'Илгээх',
-                        'component': DirectModal,
-                        'props': {
-                            'button_name': 'Илгээх',
-                            'refreshData': () => this.refreshData(),
-                        },
+                        "text": '',
+                        "icon": 'fa fa-paper-plane-o text-primary',
+                        "action": (values) => this.sendData(values),
                     },
                     {
                         "title": 'Устгах',
                         "text": '',
                         "icon": 'fa fa-trash-o text-danger',
                         "action": (values) => this.handleRemoveAction(values),
-                        "width": "100px"
                     },
                     {
-                        "title": 'Дэлгэрэнгүй',
-                        'component': DirectModal,
-                        'props': {
-                            'button_name' : 'Дэлгэрэнгүй',
-                            'refreshData': () => this.refreshData(),
-                        },
-                    },
-                    {
-                        "title": 'Файл',
-                        'component': DirectModal,
-                        'props': {
-                            'button_name' : 'Файл',
-                            'refreshData': () => this.refreshData(),
-                        },
-                    },
+                        "title": '',
+                        "text": 'татах',
+                        "icon": 'text-primary',
+                        'component': (values) => make_send_data(values)
+                    }
             ],
             modal_status:'closed',
             request_form:false
         }
         this.refreshData = this.refreshData.bind(this)
+        this.handeUpdateAction = this.handeUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+    }
+
+    handeUpdateAction(values) {
+        this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
     }
 
     handleRemoveAction(values){
@@ -136,7 +150,7 @@ export class Detail extends Component {
         return (
             <Fragment>
                 <div className="card">
-                     <div className="card-body">
+                    <div className="card-body">
                         <div className="col-md-12 row">
                                 <div className="col-md-6">
                                     <label htmlFor="">Төлөв</label>
@@ -184,11 +198,11 @@ export class Detail extends Component {
                                 уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
-                                нэмэх_товч={'Хүсэлт-нэмэх'}
+                                нэмэх_товч={'/llc/llc-request/хүсэлт-нэмэх/'}
                             />
                         </div>
-                     </div>
-                     <Modal
+                    </div>
+                    <Modal
                         modal_status={this.state.modal_status}
                         modal_icon={this.state.modal_icon}
                         icon_color={this.state.icon_color}
@@ -198,7 +212,7 @@ export class Detail extends Component {
                         modalAction={this.handleRemove}
                         actionNameDelete="Устгах"
                     />
-                 </div>
+                </div>
             </Fragment>
         )
     }

@@ -1,15 +1,23 @@
-import {handleResponse, getGetOptions, getPostOptions} from '../components/helpers/service'
+import {handleResponse, getGetOptions, getPostOptions} from '../helpers/service'
 export const service = {
-    SaveRequest
+    SaveRequest,
+    handleRequestData
 }
 
-const prefix = '/llc'
+const prefix = '/llc/backend'
 
-function SaveRequest(request_text) {
-    const requestOptions = {
+function SaveRequest(form_datas) {
+    const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ request_text})
+        body: form_datas
     }
 
-    return fetch(`${prefix}/save_requests/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/save-request/`, opts).then(handleResponse)
+}
+
+function handleRequestData(id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${id}/get-request-data/`, opts).then(handleResponse)
 }

@@ -373,7 +373,7 @@ export default class InspireMap extends Component {
     addVectorSource(vector_source) {
         const { projection, projection_display, form_datas} = this.state
         var styles = this.layer_styles
-        if (Object.keys(vector_source).length > 0) {
+        if (Object.keys(vector_source.features).length > 0) {
             // this.map.getLayers().forEach(layer => {
             //     if (layer && layer.get('id') === 'aimag') {
             //       layer.getSource().clear();
@@ -394,8 +394,10 @@ export default class InspireMap extends Component {
                 },
                 id: 'aimag'
             })
-            this.map.addLayer(vector_layer)
-            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+            if (this.map) {
+                this.map.addLayer(vector_layer)
+                this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+            }
         }
 
     }

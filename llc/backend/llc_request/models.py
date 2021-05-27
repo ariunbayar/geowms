@@ -49,9 +49,9 @@ class RequestFilesShape(models.Model):
 
     files = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
     org = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
-    theme_id = models.IntegerField()
-    package_id = models.IntegerField()
-    feature_id = models.IntegerField()
+    theme_id = models.IntegerField(null=True)
+    package_id = models.IntegerField(null=True)
+    feature_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
