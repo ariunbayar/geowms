@@ -13,7 +13,7 @@ export default class RequestDetail extends Component {
         const {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            project_name, vector_datas
+            project_name, vector_datas, id
         } = this.props
         return (
             <div className="row p-3">
@@ -86,13 +86,17 @@ export default class RequestDetail extends Component {
                         values={this.props}
                     />
                 </div>
-                <div className="col-md-7">
+                {
+                    id
+                    &&
+                    <div className="col-md-7">
                     <LLCMap
                         vector_datas={vector_datas}
                         height="80vh"
                     />
                 </div>
 
+                }
             </div>
         )
     }
