@@ -148,7 +148,7 @@ def _create_shape_files(org_data, request_file, zip_ref):
                     geometry = feature.get('geometry')
                     properties = feature.get('properties')
                     ShapeGeom.objects.create(
-                        shape_id=requets_shape,
+                        shape=requets_shape,
                         geom_json=json_dumps(geometry),
                         form_json=json_dumps(properties)
                     )
@@ -213,7 +213,7 @@ def get_all_geo_json(request):
 @ajax_required
 def get_request_data(request, id):
     features = []
-    shape_geometries = ShapeGeom.objects.filter(shape_id__files_id=id)
+    shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
 
     for shape_geometry in shape_geometries:
 
