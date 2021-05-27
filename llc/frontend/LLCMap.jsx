@@ -29,6 +29,8 @@ export class LLCMap extends Component {
                             is_menu_bar_all='close'
                             vector_source={vector_datas}
                             PPContent={this.props.PPContent}
+                            featurefromUrl={true}
+                            property_pp={true}
                         />
                     </div>
                 </div>
