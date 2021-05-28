@@ -183,7 +183,6 @@ def save_request(request):
             file_path=uploaded_file
 
         )
-        
         RequestForm.objects.create(
             client_org=zahialagch,
             project_name=project_name,
@@ -240,11 +239,6 @@ def get_request_data(request, id):
 
     qs = RequestForm.objects.filter(forms_id=id)
     field = [item for item in qs.values()]
-
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        features.append(single_geom)
 
     if qs:
         field = [item for item in qs.values()]
