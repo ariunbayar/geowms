@@ -1,6 +1,4 @@
 import React, { Component, Fragment } from "react"
-import Loader from "@utils/Loader"
-
 
 export class LLCPP extends Component {
 
@@ -23,7 +21,6 @@ export class LLCPP extends Component {
         const { datas } = this.state
         return (
                 <div>
-                    <Loader is_loading={is_loading} />
                     {
                         <div className="ol-popup-contet  overflow-auto" style={{height: '30vh'}}>
                             <hr className="m-1 border border-secondary rounded"/>
