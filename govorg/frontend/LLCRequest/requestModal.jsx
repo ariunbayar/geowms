@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from "react"
-import {service} from '../OrgRequest/service'
+import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
 
