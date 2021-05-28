@@ -33,10 +33,9 @@ export class Detail extends Component {
             is_loading: false,
             refresh: false,
             талбарууд: [
-                // {'field': 'theme_name', "title": 'Орон зайн өгөгдөл', 'has_action': true},
                 {'field': 'org', "title": 'Байгууллага'},
                 {'field': 'name', "title": 'Төсөл'},
-                {'field': 'file_path', "title": 'File Path'},
+                {'field': 'file', "title": 'File'},
                 {'field': 'created_at', "title": 'Огноо'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
@@ -48,6 +47,11 @@ export class Detail extends Component {
             ],
             нэмэлт_талбарууд: [{
                 "title": 'Шийдвэрлэх',
+                'component': OpenMapModal,
+                'props': {
+                    'refreshData': () => this.refreshData(),
+                },
+                "title": 'Дэлгэрэнгүй',
                 'component': OpenMapModal,
                 'props': {
                     'refreshData': () => this.refreshData(),

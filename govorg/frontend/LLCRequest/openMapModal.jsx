@@ -7,6 +7,8 @@ export default class OpenMapModal extends Component {
         super(props)
         this.state = {
             is_modal_request_open: false,
+            values: props.values,
+            state: props.values.state,
         }
         this.openModalMapMap = this.openModalMapMap.bind(this)
         this.closeModalMap = this.closeModalMap.bind(this)
@@ -22,15 +24,19 @@ export default class OpenMapModal extends Component {
 
 
     render() {
-        const { is_modal_request_open } = this.state
+        const { is_modal_request_open, state } = this.state
         return (
             <div>
-                <a
-                    className="btn btn-primary btn-sm text-white text-capitalize"
-                    onClick={this.openModalMapMap}
-                >
-                    Шийдвэрлэх
-                </a>
+                {
+                    state == "ШИНЭ"
+                    &&
+                        <a
+                            className="btn btn-primary btn-sm text-white text-capitalize"
+                            onClick={this.openModalMapMap}
+                        >
+                            Шийдвэрлэх
+                        </a>
+                }
                 {
                     is_modal_request_open
                     &&

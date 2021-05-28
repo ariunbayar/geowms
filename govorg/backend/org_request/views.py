@@ -878,3 +878,63 @@ def get_llc_list(request, payload):
             }
 
         return JsonResponse(rsp)
+
+
+# def _check_group_item(r_approve):
+#     qs = RequestFiles.objects
+#     group_qs = qs.filter(group_id=r_approve.group_id)
+#     if group_qs:
+#         group_count = group_qs.count()
+
+#         if group_count <= 2:
+#             group_main = qs.filter(id=r_approve.group_id)
+#             group_main.delete()
+#             for other_item in group_qs:
+#                 other_item.group_id = None
+#                 other_item.save()
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def llc_request_reject(request, payload):
+    ids = payload.get('ids')
+    feature_id = payload.get('feature_id')
+    employee = get_object_or_404(Employee, user__username=request.user)
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm=emp_perm)
+    qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
+    perm_reject = qs.filter(feature_id=feature_id)
+
+    if perm_reject:
+        for r_id in ids:
+            llc_req_obj = get_object_or_404(RequestFiles, pk=r_id)
+            # _check_group_item(llc_req_obj)
+            llc_req_obj.state = RequestFiles.STATE_REJECT
+            llc_req_obj.save()
+
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай татгалзлаа'
+        }
+
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Татгалзах эрхгүй байна'
+        }
+
+    return JsonResponse(rsp)
+
+
+# @require_POST
+# @ajax_required
+# @login_required(login_url='/gov/secure/login/')
+# def llc_request_approve(request, payload):
+
+#     request_ids = payload.get("ids")
+#     feature_id = payload.get("feature_id")
+#     success = False
+#     new_geo_id = None
