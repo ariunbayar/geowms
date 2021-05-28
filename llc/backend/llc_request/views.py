@@ -223,6 +223,9 @@ def get_all_geo_json(request):
 @ajax_required
 def get_request_data(request, id):
     features = []
+    field = dict()
+    qs = RequestForm.objects.filter(forms_id=id)
+
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
 
     for shape_geometry in shape_geometries:
@@ -230,19 +233,10 @@ def get_request_data(request, id):
         single_geom = json_load(shape_geometry.geom_json)
         features.append(single_geom)
 
-    return JsonResponse({
-        'vector_datas': FeatureCollection(features)
-    })
-
-
-@require_GET
-@ajax_required
-def get_request_form(request, id):
-    field = dict()
-    qs = RequestForm.objects.filter(forms_id=id)
-    field = [item for item in qs.values()]
+    if qs:
+        field = [item for item in qs.values()]
 
     return JsonResponse({
+        'vector_datas': FeatureCollection(features),
         'form_field': field[0]
     })
-

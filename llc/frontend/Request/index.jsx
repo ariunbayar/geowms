@@ -23,7 +23,7 @@ export default class Request extends Component {
                     component={RequestAdd}
                 />
                 <Route
-                    path="/llc/llc-request/:id/Хүсэлт-илгээх/"
+                    path="/llc/llc-request/:id/:info/Хүсэлт-илгээх/"
                     component={RequestAdd}
                 />
             </Switch>

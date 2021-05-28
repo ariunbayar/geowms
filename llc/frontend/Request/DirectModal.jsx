@@ -39,7 +39,7 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
-                        <div className="form-group col-md-6 my-4">
+                        <div className="form-group col-md-6 my-4 col-sm-6">
                             <label htmlFor=''>Обьектийн төрөл</label>
                             <textarea
                                 type="text"
@@ -49,7 +49,7 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
-                        <div className="form-group col-md-6 my-4">
+                        <div className="form-group col-md-6 col-sm-6 my-4">
                             <label htmlFor=''>Обьектийн тоо хэмжээ</label>
                             <textarea
                                 type="text"

@@ -9,7 +9,6 @@ class SubmitClass extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            current_path:''
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
@@ -37,9 +36,9 @@ class SubmitClass extends Component {
         const {values} = this.props
         return (
                 <div>
-                    { values.current_path == 'Хүсэлт-илгээх'
+                    { values.info
                         ?
-                            <div className="col-md-8 mt-2 ">
+                            <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
                                         <p className="btn btn-secondary">
                                             <i
                                                 className="fa fa-angle-double-left"
@@ -92,20 +91,11 @@ export class RequestAdd extends Component {
 
     componentDidMount() {
         const {id} = this.props.match.params
-        var pathname = this.props.location.pathname
-        pathname = pathname.split('/')
 
-        if ( id > 0 ) {
-            this.setState({current_path: pathname[4]})
-        }
-        else { this.setState({current_path: pathname[3]})}
-
-        service.handleRequestData(id).then(({ vector_datas }) =>{
-            this.setState({vector_datas})
-        })
-        service.handleRequestForm(id).then(({ form_field }) =>{
+        service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
             if (form_field){
                 this.setState({
+                    vector_datas,
                     zahialagch :form_field['client_org'],
                     project_name : form_field['project_name'],
                     object_type : form_field['object_type'],
@@ -196,9 +186,9 @@ export class RequestAdd extends Component {
                 files, project_name,
                 object_type, object_count,
                 hurungu_oruulalt, zahialagch,
-                vector_datas, current_path
+                vector_datas,
             } = this.state
-            const {id} = this.props.match.params
+            const {id, info} = this.props.match.params
             return (
                 <div className="card">
                     <div className="card-body">
@@ -214,8 +204,8 @@ export class RequestAdd extends Component {
                             handleOnChange={this.handleOnChange}
                             submitClass={SubmitClass}
                             handlePassValues={this.handlePassValues}
-                            current_path={current_path}
                             BackToList={this.BackToList}
+                            info={info}
                         />
                     </div>
                     <Modal

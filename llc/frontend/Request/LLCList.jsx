@@ -102,7 +102,7 @@ export class Detail extends Component {
     }
 
     sendData(values) {
-        this.props.history.push(`/llc/llc-request/${values.id}/Хүсэлт-илгээх/`)
+        this.props.history.push(`/llc/llc-request/${values.id}/${true}/Хүсэлт-илгээх/`)
     }
 
     handleRemoveAction(values){

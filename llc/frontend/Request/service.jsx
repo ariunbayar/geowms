@@ -2,7 +2,6 @@ import {handleResponse, getGetOptions, getPostOptions} from '../helpers/service'
 export const service = {
     SaveRequest,
     handleRequestData,
-    handleRequestForm
 }
 
 const prefix = '/llc/backend'
@@ -21,11 +20,4 @@ function handleRequestData(id) {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/${id}/get-request-data/`, opts).then(handleResponse)
-}
-
-function handleRequestForm(id) {
-    const opts = {
-        ...getGetOptions(),
-    }
-    return fetch(`${prefix}/${id}/get-request-form/`, opts).then(handleResponse)
 }
