@@ -1,5 +1,7 @@
 import React, { Component, Fragment } from "react"
+import {GPIcon} from "@utils/Tools"
 import {LLCMap} from '../LLCMap'
+import UsedTools from './select_tools'
 
 export default class RequestDetail extends Component {
 
@@ -13,7 +15,7 @@ export default class RequestDetail extends Component {
         const {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            project_name, vector_datas, id
+            project_name, vector_datas, id,
         } = this.props
         return (
             <div className="row p-3">
@@ -69,6 +71,9 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
+                        <UsedTools
+                            values={this.props}
+                        />
                         <div className="form-group">
                             <label htmlFor=''>Байр зүйн мэдээлэл</label>
                             <input

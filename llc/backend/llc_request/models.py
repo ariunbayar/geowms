@@ -74,7 +74,7 @@ class RequestForm(models.Model):
     class Meta:
         db_table = 'llc_request_form'
 
-    forms = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
+    file = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
     client_org = models.CharField(max_length=100, verbose_name='Нэр')
     project_name = models.CharField(max_length=100, verbose_name='Нэр')
     object_type = models.TextField()

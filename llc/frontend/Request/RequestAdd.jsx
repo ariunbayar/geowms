@@ -79,18 +79,29 @@ export class RequestAdd extends Component {
             hurungu_oruulalt: '',
             zahialagch: '',
             modal_status:'closed',
-            vector_datas: []
+            vector_datas: [],
+            tool_datas: [],
+            selected_tools: [],
+            regis_number: props.regis_number,
 
         }
+
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
         this.BackToList = this.BackToList.bind(this)
+        this.getTools = this.getTools.bind(this)
+        this.handleSelectModel = this.handleSelectModel.bind(this)
+    }
+
+    handleSelectModel(selected_tools) {
+        this.setState({selected_tools})
     }
 
     componentDidMount() {
         const {id} = this.props.match.params
+        this.getTools()
 
         service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
             if (form_field){
@@ -105,6 +116,13 @@ export class RequestAdd extends Component {
             }
         })
 
+    }
+
+    getTools() {
+        const {regis_number} = this.state
+        service.getToolDatas(regis_number).then(({tool_datas})=>{
+            this.setState({tool_datas})
+        })
     }
 
     handleOnChange(e) {
@@ -186,7 +204,7 @@ export class RequestAdd extends Component {
                 files, project_name,
                 object_type, object_count,
                 hurungu_oruulalt, zahialagch,
-                vector_datas,
+                vector_datas, tool_datas, selected_tools
             } = this.state
             const {id, info} = this.props.match.params
             return (
@@ -206,6 +224,9 @@ export class RequestAdd extends Component {
                             handlePassValues={this.handlePassValues}
                             BackToList={this.BackToList}
                             info={info}
+                            tool_datas={tool_datas}
+                            selected_tools={selected_tools}
+                            handleSelectModel={this.handleSelectModel}
                         />
                     </div>
                     <Modal

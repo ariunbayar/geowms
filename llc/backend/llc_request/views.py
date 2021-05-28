@@ -189,7 +189,7 @@ def save_request(request):
             object_type=object_type,
             object_quantum=object_count,
             investment_status=hurungu_oruulalt,
-            forms_id=request_file.id
+            file=request_file
         )
 
         _create_shape_files(org_data, request_file, zip_ref)
