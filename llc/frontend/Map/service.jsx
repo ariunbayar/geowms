@@ -1,4 +1,4 @@
-import {getGetOptions, getPostOptions, handleResponse} from '../frontend/helpers/service'
+import {getGetOptions, getPostOptions, handleResponse} from '../helpers/service'
 
 const prefix = '/llc/backend'
 
