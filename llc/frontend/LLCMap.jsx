@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import InspireMap from "@utils/BundleMap"
+import {LLCPP} from './llc_popup'
 
 export class LLCMap extends Component {
 
@@ -31,6 +32,7 @@ export class LLCMap extends Component {
                             PPContent={this.props.PPContent}
                             featurefromUrl={true}
                             property_pp={true}
+                            PPContent={LLCPP}
                         />
                     </div>
                 </div>

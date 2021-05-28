@@ -45,7 +45,7 @@ class SubmitClass extends Component {
                                                 onClick ={()=>this.props.values.BackToList()}
 
                                             >
-                                                     Буцах
+                                                Буцах
                                             </i>
                                         </p>
                                         &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
