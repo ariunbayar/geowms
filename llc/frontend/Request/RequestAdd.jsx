@@ -29,7 +29,6 @@ export class RequestAdd extends Component {
     componentDidMount() {
         const {id} = this.props.match.params
         service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
-            form_field=form_field[0]
             if (form_field){
                 this.setState({
                     vector_datas,

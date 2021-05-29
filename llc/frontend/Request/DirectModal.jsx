@@ -18,7 +18,6 @@ class SubmitClass extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
         } = this.props.values
-        console.log(this.props);
         const form_datas = new FormData()
         form_datas.append('files', files, files.name)
         form_datas.append('project_name', project_name)
@@ -26,7 +25,6 @@ class SubmitClass extends Component {
         form_datas.append('object_count', object_count)
         form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
         form_datas.append('zahialagch', zahialagch)
-        console.log(form_datas);
         service.SaveRequest(form_datas).then(({success, info}) => {
             this.props.values.handlePassValues(success, info)
         })
@@ -67,6 +65,13 @@ class SubmitClass extends Component {
                                             Буцах
                                     </i>
                                 </p>
+                                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                    <p
+                                        className="btn btn-primary"
+                                        onClick ={()=> this.handleSubmit()}
+                                    >
+                                        <i className="fa"> Хүсэлт илгээх</i>
+                                    </p>
                             </div>
                     }
                 </div>

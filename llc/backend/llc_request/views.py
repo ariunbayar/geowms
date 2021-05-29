@@ -223,24 +223,25 @@ def get_all_geo_json(request):
 @ajax_required
 def get_request_data(request, id):
     features = []
-    field = {}
+    field = dict()
     qs = RequestForm.objects.filter(forms_id=id).first()
-
-    qs = RequestForm.objects.filter(forms_id=6).first()
-    file_path = qs.forms.file_path
-
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
 
     for shape_geometry in shape_geometries:
 
         single_geom = json_load(shape_geometry.geom_json)
         features.append(single_geom)
-    if qs:
-        field = [item for item in qs.values()]
 
-    field['file_path'] = file_path
-    print("dsfjsldkf")
+    if qs:
+        field['client_org'] = qs.client_org
+        field['project_name'] = qs.project_name
+        field['object_type'] = qs.object_type
+        field['object_quantum'] = qs.object_quantum
+        field['investment_status'] = qs.investment_status
+        field['file_path'] = str(qs.forms.file_path)
+
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
         'form_field': field
     })
+
