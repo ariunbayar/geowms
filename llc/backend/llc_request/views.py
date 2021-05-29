@@ -183,7 +183,7 @@ def save_request(request):
             file_path=uploaded_file
 
         )
-        
+
         RequestForm.objects.create(
             client_org=zahialagch,
             project_name=project_name,
@@ -223,8 +223,11 @@ def get_all_geo_json(request):
 @ajax_required
 def get_request_data(request, id):
     features = []
-    field = dict()
-    qs = RequestForm.objects.filter(forms_id=id)
+    field = {}
+    qs = RequestForm.objects.filter(forms_id=id).first()
+
+    qs = RequestForm.objects.filter(forms_id=6).first()
+    file_path = qs.forms.file_path
 
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
 
@@ -232,11 +235,12 @@ def get_request_data(request, id):
 
         single_geom = json_load(shape_geometry.geom_json)
         features.append(single_geom)
-
     if qs:
         field = [item for item in qs.values()]
 
+    field['file_path'] = file_path
+
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
-        'form_field': field[0]
+        'form_field': field
     })

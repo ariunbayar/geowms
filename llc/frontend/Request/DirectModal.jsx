@@ -1,5 +1,78 @@
 import React, { Component, Fragment } from "react"
+import { service } from "./service"
 import {LLCMap} from '../LLCMap'
+
+class SubmitClass extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            url:"/llc/llc-request/"
+        }
+        this.handleSubmit = this.handleSubmit.bind(this)
+    }
+
+    handleSubmit(){
+        const {
+            files, project_name,
+            object_type, object_count,
+            hurungu_oruulalt, zahialagch,
+        } = this.props.values
+        console.log(this.props);
+        const form_datas = new FormData()
+        form_datas.append('files', files, files.name)
+        form_datas.append('project_name', project_name)
+        form_datas.append('object_type', object_type)
+        form_datas.append('object_count', object_count)
+        form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
+        form_datas.append('zahialagch', zahialagch)
+        console.log(form_datas);
+        service.SaveRequest(form_datas).then(({success, info}) => {
+            this.props.values.handlePassValues(success, info)
+        })
+    }
+    render (){
+        const {values} = this.props
+        const {url} = this.state
+        return (
+                <div>
+                    { values.info == 'Хүсэлт илгээх'
+                        ?
+                            <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
+                                        <p className="btn btn-secondary">
+                                            <i
+                                                className="fa fa-angle-double-left"
+                                                onClick ={()=> values.closeRequestMap()}
+
+                                            >
+                                                     Буцах
+                                            </i>
+                                        </p>
+                                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                        <p
+                                            className="btn btn-primary"
+                                            onClick ={()=> this.handleSubmit()}
+                                        >
+                                            <i className="fa"> Хүсэлт илгээх</i>
+                                        </p>
+                            </div>
+                        :
+                            <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
+                                <p className="btn btn-secondary">
+                                    <i
+                                        className="fa fa-angle-double-left"
+                                        onClick ={()=> values.history.push(url)}
+
+                                    >
+                                            Буцах
+                                    </i>
+                                </p>
+                            </div>
+                    }
+                </div>
+        )
+    }
+}
 
 export default class RequestDetail extends Component {
 
@@ -82,7 +155,7 @@ export default class RequestDetail extends Component {
                             </small>
                         </div>
                     </form>
-                    <this.props.submitClass
+                    <SubmitClass
                         values={this.props}
                     />
                 </div>

@@ -20,6 +20,7 @@ export class LLCMap extends Component {
     render() {
         const { vector_datas } = this.state
         const {height} = this.props
+        console.log("vector_Datas", vector_datas)
         return (
             <div className="col-12 col-md-12 col-xl-12">
                 <div className="card">

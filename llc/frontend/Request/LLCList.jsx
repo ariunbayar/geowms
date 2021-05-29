@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import DirectModal from  './DirectModal'
+import RequestModal from  './RequestModal'
 import Modal from '@utils/Modal/Modal'
 
 
@@ -63,13 +64,14 @@ export class Detail extends Component {
                         "title": 'дэлгэрэнгүй',
                         "text": '',
                         "icon": 'fa fa-eye text-primary',
-                        "action": (values) => this.handeUpdateAction(values),
+                        "action": (values) => this.handleUpdateAction(values),
                     },
                     {
                         "title": 'Илгээх',
-                        "text": '',
-                        "icon": 'fa fa-paper-plane-o text-primary',
-                        "action": (values) => this.sendData(values),
+                        'component': RequestModal,
+                        'props' :{
+                            'refreshData': () => this.refreshData(),
+                        }
                     },
                     {
                         "title": 'Устгах',
@@ -88,21 +90,16 @@ export class Detail extends Component {
             request_form:false
         }
         this.refreshData = this.refreshData.bind(this)
-        this.handeUpdateAction = this.handeUpdateAction.bind(this)
+        this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
-        this.sendData = this.sendData.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
     }
 
-    handeUpdateAction(values) {
+    handleUpdateAction(values) {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
-    }
-
-    sendData(values) {
-        this.props.history.push(`/llc/llc-request/${values.id}/${true}/Хүсэлт-илгээх/`)
     }
 
     handleRemoveAction(values){
@@ -116,8 +113,8 @@ export class Detail extends Component {
             "warning",
             'Тохиргоог устгах',
             `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
-            true
-        )
+                true
+            )
     }
 
     modalChange(modal_icon, icon_color, title, text, has_button) {
