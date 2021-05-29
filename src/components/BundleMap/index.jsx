@@ -424,63 +424,6 @@ export default class InspireMap extends Component {
                     this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
                 }
         }
-
-        // if (Object.keys(vector_source.features).length > 0) {
-        //     if (this.map) {
-        //         this.map.getLayers().forEach(layer => {
-        //             if (layer && layer.get('id') === 'aimag') {
-        //                 layer.getSource().clear();
-        //             }
-        //         });
-        //     }
-
-        //     const features = new GeoJSON({
-        //         dataProjection: projection_display,
-        //         featureProjection: projection,
-        //     }).readFeatures(vector_source)
-
-        //     const aimag_features = new GeoJSON({
-        //         dataProjection: projection_display,
-        //         featureProjection: projection,
-        //     }).readFeatures(aimag_geom)
-
-
-        //     const vectorSource = new VectorSource({
-        //         features: features
-        //     });
-
-        //     const vectorSource_aimag = new VectorSource({
-        //         features: aimag_features
-        //     });
-
-        //     const vector_layer = new VectorLayer({
-        //         source: vectorSource,
-        //         style: function (feature) {
-        //             return styles[feature.getGeometry().getType()];
-        //         },
-        //         id: 'aimag'
-        //     })
-
-        //     const vector_aimag = new VectorLayer({
-        //         source: vector_layer,
-        //         style:  new Style({
-        //             stroke: new Stroke({
-        //             color: 'green',
-        //             width: 2,
-        //             })
-        //         })
-        //     })
-
-        //     if (this.map) {
-        //         if (this.props.aimag_geom) {
-        //             this.map.addLayer(vectorSource_aimag)
-        //         }
-
-        //         this.map.addLayer(vector_layer)
-        //         this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
-        //     }
-        // }
-
     }
 
     loadWmsLayers(wms_list) {
