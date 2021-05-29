@@ -217,7 +217,7 @@ export default class InspireMap extends Component {
         }
     }
 
-    componentWillMount() {
+    componentDidMount() {
     service.getUser().then(({is_authenticated}) =>
         {
             this.setState({is_authenticated})
