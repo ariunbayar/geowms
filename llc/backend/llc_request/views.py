@@ -186,7 +186,7 @@ def save_request(request):
             })
 
         request_file = RequestFiles.objects.create(
-            name='Төслийн нэр байна',
+            name=project_name,
             kind=2,
             state=1,
             geo_id=org_data.geo_id if org_data else '',
@@ -268,3 +268,36 @@ def get_request_data(request, id):
         'form_field': field
     })
 
+
+@require_GET
+@ajax_required
+def send_request(request, id):
+
+    initial_qry = RequestFiles.objects.filter(pk=id)
+    initial_qry.update(state=2)
+
+    return JsonResponse({
+        'success': True,
+        'info': 'Амжилттай хадгаллаа'
+    })
+
+
+@require_GET
+@ajax_required
+def remove_request(request, id):
+
+    initial_query = RequestFiles.objects.filter(pk=id).first()
+    shapes = RequestFilesShape.objects.filter(files=initial_query.id)
+    form = RequestForm.objects.filter(file=initial_query.id)
+    for shape in shapes:
+        geom = ShapeGeom.objects.filter(shape=shape.id)
+        if geom:
+            geom.delete()
+            shapes.delete()
+    if form:
+        form.delete()
+        initial_query.delete()
+
+    return JsonResponse({
+        'success': True
+    })

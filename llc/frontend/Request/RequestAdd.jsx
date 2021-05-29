@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { Component, Fragment } from "react"
 import RequestDetail from './DirectModal'
 import { service } from "./service"
 import Modal from '@utils/Modal/Modal'
@@ -37,6 +37,7 @@ class SubmitClass extends Component {
     render (){
         const {values} = this.props
         return (
+            <Fragment>
                 <div>
                     {
                         <button
@@ -48,6 +49,21 @@ class SubmitClass extends Component {
                         </button>
                     }
                 </div>
+                <div>
+                    {
+                        
+                    }
+                    <p className="btn btn-secondary">
+                        <i
+                            className="fa fa-angle-double-left"
+                            onClick ={()=> values.closeRequestMap()}
+
+                        >
+                            Буцах
+                        </i>
+                    </p>
+                </div>
+                </Fragment>
         )
     }
 }
@@ -107,6 +123,7 @@ export class RequestAdd extends Component {
 
     getTools() {
         const {regis_number} = this.state
+        console.log(this.props);
         service.getToolDatas(regis_number).then(({tool_datas})=>{
             this.setState({tool_datas})
         })

@@ -3,42 +3,47 @@ import { PortalDataTable } from '@utils/DataTable/index'
 import DirectModal from  './DirectModal'
 import RequestModal from  './RequestModal'
 import Modal from '@utils/Modal/Modal'
+import { render } from "react-dom";
+import { service } from "./service";
 
 
 export const make_state_color = (state) => {
     let color
     if (state == "ШИНЭ") color = 'text-primary'
-    else if (state == "ТАТГАЛЗСАН") color = 'text-danger'
-    else if (state == "ЗӨВШӨӨРСӨН") color = 'text-success'
+    else  color = 'text-warning'
     return color
 }
 
 export const make_kind_color = (kind) => {
     let color
     if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-success'
-    else if (kind == "ЗАССАН") color = 'text-primary'
+    else if (kind == "ШИЙДВЭРЛЭГДСЭН") color = 'text-success'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
-    else if (kind == "УСТГАСАН") color = 'text-danger'
-    else if (kind == "ШУУД") color = 'text-danger'
+    else if (kind == "БУЦААГДСАН") color = 'text-danger'
+    else if (kind == "ШИНЭ") color = 'text-primary'
     return color
 }
 
 export const make_send_data = (values) => {
+    let kind = values.values.kind
     return (
-        <a
-            type="button"
-            href={'/media/' + values.values.file_path}
-            target="_blank"
-            className="
-                btn text-light animated bounceIn bg-danger
-            "
-        >
-        <i className="fa fa-download"> &nbsp; Татах</i>
-        </a>
+        <div>
+            {
+                kind == "БУЦААГДСАН"
+                &&
+                <a
+                    type="button"
+                    href={'/media/' + values.values.file_path}
+                    target="_blank"
+                    className= "btn text-light animated bounceIn bg-danger"
+                >
+                <i className="fa fa-download"> &nbsp; Татах</i>
+                </a>
+        }
+        </div>
+
     )
-
 }
-
 
 export class Detail extends Component {
 
@@ -135,14 +140,21 @@ export class Detail extends Component {
     }
 
     handleRemove(){
-        this.modalChange(
-            'fa fa-check-circle',
-            "success",
-            'Амжилттай устгалаа',
-            '',
-            false
-        )
+        const {id} = this.state.values
+        service.RemoveRequest(id).then(({ success }) =>{
+            if(success){
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "success",
+                    'Амжилттай устгалаа',
+                    '',
+                    false
+                )
+                this.refreshData()
+            }
+        })
     }
+
     refreshData(){
         this.setState({ refresh: !this.state.refresh })
     }

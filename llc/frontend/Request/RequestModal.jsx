@@ -4,6 +4,119 @@ import RequestDetail from './DirectModal'
 import Modal from '@utils/Modal/Modal'
 
 
+
+class ActionClass extends Component {
+    constructor(props) {
+            super(props)
+            this.state = {
+                url: "/llc/llc-request/",
+                modal_status: 'closed'
+            }
+            this.handleSubmit = this.handleSubmit.bind(this)
+            this.modalClose = this.modalClose.bind(this)
+            this.modalOpen = this.modalOpen.bind(this)
+        }
+
+        handleSubmit(){
+            const {id} =this.props.values
+            service.SendRequest(id).then(({ success, info}) =>{
+                if(success){
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        'success',
+                        info,
+                        '',
+                        false,
+                        '',
+                        '',
+                        null,
+                        this.modalClose()
+                    )
+                }
+                else {
+                    this.modalChange(
+                        'fa fa-times-circle',
+                        null,
+                        'danger',
+                        info,
+                        '',
+                        false,
+                        '',
+                        '',
+                        null,
+                        this.modalClose()
+                    )
+                }
+
+            })
+        }
+        modalClose() {
+            this.setState({ modal_status: 'closed' })
+        }
+
+        modalOpen(){
+            this.setState({ modal_status: 'open' }, () => {
+                this.setState({ modal_status: 'initial' })
+            })
+        }
+
+        modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+            this.setState({
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose
+            }, () => {
+                this.modalOpen()
+            })
+        }
+        render (){
+            const {values} = this.props
+            const {url} = this.state
+            return (
+                    <div>
+                        <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
+                            <p className="btn btn-secondary">
+                                <i
+                                    className="fa fa-angle-double-left"
+                                    onClick ={()=> values.closeRequestMap()}
+
+                                >
+                                    Буцах
+                                </i>
+                            </p>
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            <p
+                                className="btn btn-primary"
+                                onClick ={()=> this.handleSubmit()}
+                            >
+                                <i className="fa"> Хүсэлт илгээх</i>
+                            </p>
+                        </div>
+                        <Modal
+                            modal_status={ this.state.modal_status }
+                            modal_icon={ this.state.modal_icon }
+                            modal_bg={ this.state.modal_bg }
+                            icon_color={ this.state.icon_color }
+                            title={ this.state.title }
+                            text={ this.state.text }
+                            has_button={ this.state.has_button }
+                            actionNameBack={ this.state.actionNameBack }
+                            actionNameDelete={ this.state.actionNameDelete }
+                            modalAction={ this.state.modalAction }
+                            modalClose={ this.state.modalClose }
+                        />
+                    </div>
+            )
+        }
+    }
 class SendModal extends Component{
     constructor(props) {
         super(props)
@@ -55,6 +168,7 @@ class SendModal extends Component{
                         zahialagch={zahialagch}
                         files={files}
                         vector_datas={vector_datas}
+                        submitClass={ActionClass}
                         closeRequestMap={this.props.closeRequestMap}
                         info='Хүсэлт илгээх'
                     />
@@ -71,7 +185,8 @@ export default class RequestModal extends Component {
         this.state = {
             values: props.values,
             icon : this.props.icon,
-            modal_status:'closed'
+            modal_status:'closed',
+            state: props.values.state
         }
         this.openRequestModal = this.openRequestModal.bind(this)
         this.closeRequestMap = this.closeRequestMap.bind(this)
@@ -86,22 +201,23 @@ export default class RequestModal extends Component {
     }
 
     render() {
-       const {values, modal_status} = this.state
+       const {values, modal_status, state} = this.state
         return (
             <div className="col-md-12">
-                <a
-                    className="fa fa-paper-plane-o text-primary mt-2 ml-2"
-                    onClick={this.openRequestModal}
-                >
-                </a>
+                {
+                    state == 'ШИНЭ'
+                        ?
+                            <a className="fa fa-paper-plane-o text-primary mt-2 ml-2" onClick={this.openRequestModal}></a>
+                        :
+                             <a className="fa fa-check text-success mt-2 ml-2" ></a>
+                        }
                 <Modal
                     body={SendModal}
-                    field ={values}
+                    body_props={{ values: { field: values }, closeRequestMap: this.closeRequestMap }}
                     modal_status={modal_status}
                     modal_dialog={true}
                     modal_bg= 'white'
                     title='Хүсэлт Илгээх'
-                    closeRequestMap={this.closeRequestMap}
                 ></Modal>
              </div>
         )

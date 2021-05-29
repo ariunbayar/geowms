@@ -28,17 +28,14 @@ export default class Modal extends Component {
                 actionNameDelete ---> Тийм гэдэг утгыг солих
                 modalClose ---> x товч дарж modal хаахад хийж болох үйлдлүүд
                 modalAction ---> Тийм товч дарж хийж болох үйлдлүүд
-
         // import:
             import Modal from "@utils/Modal/Modal"
-
         // Modal open function:
             handleModalOpen() {
                 this.setState({ modal_status: 'open' }, () => {
                     this.setState({ modal_status: 'initial' })
                 })
             }
-
         // Modal default value function(Хэрэв has_button==false байвал ModalAlert горимоор ажиллана):
             modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
                 this.setState(
@@ -133,60 +130,50 @@ export default class Modal extends Component {
         return (
             <Fragment>
                 <div className={className}>
-                    <div className="col-md-8 d-flex justify-content-center container align-center align-self-center">
-                        <div className={!this.props.modal_dialog && 'modal-dialog modal-dialog-centered'} >
-                            <div className={`modal-content border-0 rounded-lg ${this.props.modal_bg ? this.props.modal_bg : 'bg-light'}`} >
-                                <div className="col-md-12 offset-md-12 float-right my-1">
-                                    <button type="button" className="close mt-2 mr-2" aria-label="Close">
-                                        <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
-                                    </button>
-                                </div>
-                                <div className="d-flex justify-content-center">
-                                    {
-                                        this.props.modal_icon &&
-                                            <i className={`${this.props.modal_icon} fa-3x my-3 animated bounceIn text-${this.props.icon_color}`}
-                                                aria-hidden="true">
-                                            </i>
-                                    }
-                                </div>
-                                <div className="d-flex justify-content-center">
-                                    <h5 >{ this.props.title && this.props.title }</h5>
-                                </div>
-                                <div className="modal-body text-center text-wrap ml-2 mr-2 text-justify " >
-                                    {
-                                        this.props.body
-                                        &&
-                                            <this.props.body
-                                                values={this.props}
-                                                closeRequestMap={this.props.closeRequestMap}
-                                            />
-                                    }
-                                    {
-                                        this.props.text &&
-                                            this.props.text
-                                    }
-                                </div>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className={`modal-content border-0 rounded-lg ${this.props.modal_bg ? this.props.modal_bg : 'bg-light'}`} >
+                            <div className="col-md-12 offset-md-12 float-right my-1">
+                                <button type="button" className="close mt-2 mr-2" aria-label="Close">
+                                    <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
+                                </button>
+                            </div>
+                            <div className="d-flex justify-content-center">
                                 {
-                                    this.props.has_button ?
-                                        <div className="modal-footer border-0">
-                                            <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
-                                                <i className="fa fa-times pr-1"></i>
-                                                {this.props.actionNameBack ? this.props.actionNameBack : "БУЦАХ"}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={this.handleProceed}
-                                                className="btn btn-outline-primary waves-effect waves-light">
-                                                <i className="fa fa-check-square-o pr-1"></i>
-                                                {this.props.actionNameDelete ? this.props.actionNameDelete : "УСТГАХ"}
-                                            </button>
-                                        </div>
-                                    :
-                                    <div className="modal-body mt-3"></div>
+                                    this.props.modal_icon &&
+                                        <i className={`${this.props.modal_icon} fa-3x my-3 animated bounceIn text-${this.props.icon_color}`}
+                                            aria-hidden="true">
+                                        </i>
                                 }
                             </div>
+                            <div className="d-flex justify-content-center">
+                                <h5 >{ this.props.title && this.props.title }</h5>
+                            </div>
+                            <div className="modal-body text-center text-wrap ml-2 mr-2 text-justify">
+                                {
+                                    this.props.text &&
+                                        this.props.text
+                                }
+                            </div>
+                            {
+                                this.props.has_button ?
+                                    <div className="modal-footer border-0">
+                                        <button type="button" onClick={() => this.handleClose()} className="btn btn-primary waves-effect waves-light">
+                                            <i className="fa fa-times pr-1"></i>
+                                            {this.props.actionNameBack ? this.props.actionNameBack : "БУЦАХ"}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={this.handleProceed}
+                                            className="btn btn-outline-primary waves-effect waves-light">
+                                            <i className="fa fa-check-square-o pr-1"></i>
+                                            {this.props.actionNameDelete ? this.props.actionNameDelete : "УСТГАХ"}
+                                        </button>
+                                    </div>
+                                :
+                                <div className="modal-body mt-3"></div>
+                            }
                         </div>
-                        </div>
+                    </div>
                 </div>
                 <div className={classNameBackdrop}></div>
             </Fragment>
