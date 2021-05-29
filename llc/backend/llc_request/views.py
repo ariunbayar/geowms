@@ -19,7 +19,8 @@ from main.components import Datatable
 from main.utils import (
     json_dumps,
     json_load,
-    get_sql_execute
+    get_sql_execute,
+    slugifyWord
 )
 
 
@@ -164,6 +165,15 @@ def save_request(request):
     object_count = request.POST.get('object_count')
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
+    selected_tools = request.POST.get('selected_tools') or []
+    if selected_tools:
+        rsp = {
+            'success': False,
+            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        }
+
+        selected_tools = json_load(selected_tools)
+        selected_tools = selected_tools['selected_tools']
 
     with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
         file_datas = zip_ref.infolist()[0]
@@ -180,9 +190,10 @@ def save_request(request):
             kind=2,
             state=1,
             geo_id=org_data.geo_id if org_data else '',
-            file_path=uploaded_file
-
+            file_path=uploaded_file,
+            tools=json_dumps(selected_tools)
         )
+
         RequestForm.objects.create(
             client_org=zahialagch,
             project_name=project_name,
@@ -237,13 +248,15 @@ def get_request_data(request, id):
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features = _get_feature(shape_geometries)
 
-    qs = RequestForm.objects.filter(forms_id=id)
+    qs = RequestForm.objects.filter(file_id=id)
     field = [item for item in qs.values()]
+    selected_tools = qs.first().file.tools
 
     if qs:
         field = [item for item in qs.values()]
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
-        'form_field': field[0]
+        'form_field': field[0],
+        'selected_tools': json_load(selected_tools)
     })

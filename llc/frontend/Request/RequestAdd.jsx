@@ -18,6 +18,7 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
+            selected_tools
         } = this.props.values
         const form_datas = new FormData()
         form_datas.append('files', files, files.name)
@@ -26,6 +27,7 @@ class SubmitClass extends Component {
         form_datas.append('object_count', object_count)
         form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
         form_datas.append('zahialagch', zahialagch)
+        form_datas.append('selected_tools', JSON.stringify({selected_tools}))
 
         service.SaveRequest(form_datas).then(({success, info}) => {
             this.props.values.handlePassValues(success, info)
@@ -103,7 +105,7 @@ export class RequestAdd extends Component {
         const {id} = this.props.match.params
         this.getTools()
 
-        service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
+        service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools}) =>{
             if (form_field){
                 this.setState({
                     vector_datas,
@@ -112,6 +114,7 @@ export class RequestAdd extends Component {
                     object_type : form_field['object_type'],
                     object_count : form_field['object_quantum'],
                     hurungu_oruulalt : form_field['investment_status'],
+                    selected_tools
                 })
             }
         })
