@@ -87,11 +87,9 @@ export class RequestAdd extends Component {
 
     componentDidMount() {
         const {id} = this.props.match.params
-        this.getTools()
         if (id) {
             service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
                 if (form_field){
-                    console.log("hoho", form_field)
                     this.setState({
                         vector_datas,
                         zahialagch: form_field['client_org'],
@@ -104,6 +102,7 @@ export class RequestAdd extends Component {
                 }
             })
         }
+        this.getTools()
     }
 
     getTools() {

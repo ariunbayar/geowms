@@ -21,8 +21,6 @@ class SendModal extends Component{
         const values = this.props.values
         const {id} = values.field
         service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
-            form_field=form_field[0]
-            console.log(form_field);
             if (form_field){
                 this.setState({
                     vector_datas,
