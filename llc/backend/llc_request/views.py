@@ -239,7 +239,7 @@ def get_request_data(request, id):
         field = [item for item in qs.values()]
 
     field['file_path'] = file_path
-
+    print("dsfjsldkf")
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
         'form_field': field
