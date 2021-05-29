@@ -28,7 +28,13 @@ export default class Map extends Component {
             <Switch>
                 <Route
                     exact path="/llc/map/"
-                    component={(props) => <LLCMap {...props} vector_datas={this.state.vector_datas} height={'100vh'}/>}
+                    component={
+                        (props) =>
+                            <LLCMap
+                                {...props}
+                                vector_datas={this.state.vector_datas}
+                                height={'100vh'}
+                        />}
                 />
             </Switch>
         )

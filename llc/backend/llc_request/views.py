@@ -1,7 +1,7 @@
 
 import rarfile
 from django.db import connections
-from geojson import FeatureCollection
+from geojson import FeatureCollection, Feature
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -19,7 +19,8 @@ from main.components import Datatable
 from main.utils import (
     json_dumps,
     json_load,
-    get_sql_execute
+    get_sql_execute,
+    slugifyWord
 )
 
 
@@ -164,6 +165,15 @@ def save_request(request):
     object_count = request.POST.get('object_count')
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
+    selected_tools = request.POST.get('selected_tools') or []
+    if selected_tools:
+        rsp = {
+            'success': False,
+            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        }
+
+        selected_tools = json_load(selected_tools)
+        selected_tools = selected_tools['selected_tools']
 
     with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
         file_datas = zip_ref.infolist()[0]
@@ -180,8 +190,8 @@ def save_request(request):
             kind=2,
             state=1,
             geo_id=org_data.geo_id if org_data else '',
-            file_path=uploaded_file
-
+            file_path=uploaded_file,
+            tools=json_dumps(selected_tools)
         )
 
         RequestForm.objects.create(
@@ -190,7 +200,7 @@ def save_request(request):
             object_type=object_type,
             object_quantum=object_count,
             investment_status=hurungu_oruulalt,
-            forms_id=request_file.id
+            file=request_file
         )
 
         _create_shape_files(org_data, request_file, zip_ref)
@@ -202,18 +212,28 @@ def save_request(request):
     return JsonResponse(rsp)
 
 
+def _get_feature(shape_geometries):
+    features = []
+    for shape_geometry in shape_geometries:
+
+        single_geom = json_load(shape_geometry.geom_json)
+        feature = {
+            "type":"Feature",
+            'geometry': single_geom,
+            'id': shape_geometry.id,
+            'properties': json_load(shape_geometry.form_json)
+        }
+        features.append(feature)
+    return features
+
+
 @require_GET
 @ajax_required
 def get_all_geo_json(request):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
-
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        features.append(single_geom)
-
+    features = _get_feature(shape_geometries)
     return JsonResponse({
         'geo_json_datas': FeatureCollection(features)
     })
@@ -223,23 +243,25 @@ def get_all_geo_json(request):
 @ajax_required
 def get_request_data(request, id):
     features = []
-    field = {}
-    qs = RequestForm.objects.filter(forms_id=id).first()
-
-    qs = RequestForm.objects.filter(forms_id=6).first()
-    file_path = qs.forms.file_path
+    field = []
+    qs = RequestForm.objects.filter(file_id=id).first()
 
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
+    features = _get_feature(shape_geometries)
 
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        features.append(single_geom)
     if qs:
-        field = [item for item in qs.values()]
+        file_path = qs.file.file_path
+        selected_tools = qs.file.tools
+        field.append({
+            'client_org': qs.client_org,
+            'project_name': qs.project_name,
+            'object_type': qs.object_type,
+            'object_quantum': qs.object_quantum,
+            'investment_stat': qs.investment_status,
+            'file_path': file_path,
+            'selected_tools': selected_tools
+        }) 
 
-    field['file_path'] = file_path
-    print("dsfjsldkf")
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
         'form_field': field

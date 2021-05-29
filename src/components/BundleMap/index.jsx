@@ -13,6 +13,8 @@ import { Point } from 'ol/geom'
 import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
+import {Select} from 'ol/interaction'
+import {click} from 'ol/events/condition';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import ImageWMS from 'ol/source/ImageWMS';
@@ -172,6 +174,7 @@ export default class InspireMap extends Component {
         this.getDetailOfPoint = this.getDetailOfPoint.bind(this)
         this.ChoosePopUp = this.ChoosePopUp.bind(this)
         this.updateParams = this.updateParams.bind(this)
+        this.featureFromVectorData = this.featureFromVectorData.bind(this)
     }
 
     initMarker() {
@@ -214,16 +217,18 @@ export default class InspireMap extends Component {
         }
     }
 
-    componentDidMount() {
+    componentWillMount() {
     service.getUser().then(({is_authenticated}) =>
         {
             this.setState({is_authenticated})
         })
 
         this.loadMapData()
+
         if (this.clicked_coordinate.length > 0) {
             this.controls.coordinateCopy.setCoordinate(this.clicked_coordinate)
         }
+
     }
 
     getFullName(feature) {
@@ -373,12 +378,16 @@ export default class InspireMap extends Component {
     addVectorSource(vector_source) {
         const { projection, projection_display, form_datas} = this.state
         var styles = this.layer_styles
+
         if (Object.keys(vector_source.features).length > 0) {
-            // this.map.getLayers().forEach(layer => {
-            //     if (layer && layer.get('id') === 'aimag') {
-            //       layer.getSource().clear();
-            //     }
-            // });
+            if (this.map) {
+                this.map.getLayers().forEach(layer => {
+                    if (layer && layer.get('id') === 'aimag') {
+                        layer.getSource().clear();
+                    }
+                });
+            }
+
             const features = new GeoJSON({
                 dataProjection: projection_display,
                 featureProjection: projection,
@@ -646,7 +655,7 @@ export default class InspireMap extends Component {
                 this.controls.sidebar,
                 this.controls.cart,
                 this.controls.alertBox,
-                // this.controls.popup,
+                this.controls.popup,
 
             ]),
             layers: [
@@ -662,11 +671,10 @@ export default class InspireMap extends Component {
         })
 
         map.on('click', this.handleMapClick)
-
         this.map = map
 
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
-        // this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
+        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
         this.getErguulLayer()
         this.setState({is_loading: false})
 
@@ -953,12 +961,31 @@ export default class InspireMap extends Component {
             this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
         }
 
+        if (this.props.property_pp) {
+            this.featureFromVectorData(coordinate)
+        }
+
         if (!this.props.featurefromUrl) {
             this.featureFromUrl(coordinate)
         }
 
         this.sendFeatureInfo = []
         this.is_empty = true
+    }
+
+    featureFromVectorData(coordinate) {
+        var selectClick = new Select({
+            condition: click,
+        });
+        this.map.addInteraction(selectClick)
+        selectClick.on("select", event => this.featureSelected(event, coordinate));
+    }
+
+
+    featureSelected(event, coordinate){
+        const features = event.selected
+        var prop = features[0].getProperties();
+        this.controls.popup.getData(true, prop, this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
     }
 
     setSourceInPopUp(mode) {
@@ -1032,9 +1059,9 @@ export default class InspireMap extends Component {
                             if (not_visible_layers.length > 0) {
                                 this.getPopUpInfo(coordinate, not_visible_layers)
                             }
-                            // else {
-                            //     this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
-                            // }
+                            else {
+                                this.controls.popup.getData(true, this.sendFeatureInfo, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+                            }
                         }
                     })
                 }

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import InspireMap from "@utils/BundleMap"
+import {LLCPP} from './llc_popup'
 
 export class LLCMap extends Component {
 
@@ -20,7 +21,6 @@ export class LLCMap extends Component {
     render() {
         const { vector_datas } = this.state
         const {height} = this.props
-        console.log("vector_Datas", vector_datas)
         return (
             <div className="col-12 col-md-12 col-xl-12">
                 <div className="card">
@@ -29,6 +29,10 @@ export class LLCMap extends Component {
                             height={height}
                             is_menu_bar_all='close'
                             vector_source={vector_datas}
+                            PPContent={this.props.PPContent}
+                            featurefromUrl={true}
+                            property_pp={true}
+                            PPContent={LLCPP}
                         />
                     </div>
                 </div>

@@ -1,8 +1,57 @@
 import React, { Component } from "react"
-import filesize from 'filesize'
 import RequestDetail from './DirectModal'
 import { service } from "./service"
 import Modal from '@utils/Modal/Modal'
+import { cmpPos } from "codemirror"
+
+class SubmitClass extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+        }
+        this.handleSubmit = this.handleSubmit.bind(this)
+    }
+
+    handleSubmit(){
+        const {
+            files, project_name,
+            object_type, object_count,
+            hurungu_oruulalt, zahialagch,
+            selected_tools
+        } = this.props.values
+        const form_datas = new FormData()
+        form_datas.append('files', files, files.name)
+        form_datas.append('project_name', project_name)
+        form_datas.append('object_type', object_type)
+        form_datas.append('object_count', object_count)
+        form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
+        form_datas.append('zahialagch', zahialagch)
+        form_datas.append('selected_tools', JSON.stringify({selected_tools}))
+
+        service.SaveRequest(form_datas).then(({success, info}) => {
+            this.props.values.handlePassValues(success, info)
+        })
+    }
+
+    render (){
+        const {values} = this.props
+        return (
+                <div>
+                    {
+                        <button
+                            type="button"
+                            className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
+                            onClick ={()=> this.handleSubmit()}
+                        >
+                            <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
+                        </button>
+                    }
+                </div>
+        )
+    }
+}
+
 
 export class RequestAdd extends Component {
 
@@ -17,31 +66,51 @@ export class RequestAdd extends Component {
             hurungu_oruulalt: '',
             zahialagch: '',
             modal_status:'closed',
-            vector_datas: []
+            vector_datas: [],
+            tool_datas: [],
+            selected_tools: [],
+            regis_number: props.regis_number,
 
         }
+
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+        this.getTools = this.getTools.bind(this)
+        this.handleSelectModel = this.handleSelectModel.bind(this)
+    }
+
+    handleSelectModel(selected_tools) {
+        this.setState({selected_tools})
     }
 
     componentDidMount() {
         const {id} = this.props.match.params
-        service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
-            form_field=form_field[0]
-            if (form_field){
-                this.setState({
-                    vector_datas,
-                    zahialagch :form_field['client_org'],
-                    project_name : form_field['project_name'],
-                    object_type : form_field['object_type'],
-                    object_count : form_field['object_quantum'],
-                    hurungu_oruulalt : form_field['investment_status'],
-                })
-            }
-        })
+        this.getTools()
+        if (id) {
+            service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
+                if (form_field){
+                    console.log("hoho", form_field)
+                    this.setState({
+                        vector_datas,
+                        zahialagch: form_field['client_org'],
+                        project_name: form_field['project_name'],
+                        object_type: form_field['object_type'],
+                        object_count: form_field['object_quantum'],
+                        hurungu_oruulalt: form_field['investment_status'],
+                        selected_tools: form_field['selected_tools'],
+                    })
+                }
+            })
+        }
+    }
 
+    getTools() {
+        const {regis_number} = this.state
+        service.getToolDatas(regis_number).then(({tool_datas})=>{
+            this.setState({tool_datas})
+        })
     }
 
     handleOnChange(e) {
@@ -119,7 +188,7 @@ export class RequestAdd extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            vector_datas,
+            vector_datas, tool_datas, selected_tools
         } = this.state
         const {id, info} = this.props.match.params
         return (
@@ -135,9 +204,13 @@ export class RequestAdd extends Component {
                         files={files}
                         vector_datas={vector_datas}
                         handleOnChange={this.handleOnChange}
+                        submitClass={SubmitClass}
                         handlePassValues={this.handlePassValues}
-                        history={this.props.history}
+                        BackToList={this.BackToList}
                         info={info}
+                        tool_datas={tool_datas}
+                        selected_tools={selected_tools}
+                        handleSelectModel={this.handleSelectModel}
                     />
                 </div>
                 <Modal
@@ -154,7 +227,5 @@ export class RequestAdd extends Component {
                     modalClose={ this.state.modalClose }
                 />
             </div>
-        )
+        )}
     }
-}
-

@@ -7,6 +7,7 @@ from llc.backend.llc_request import views as llc_request_views
 urlpatterns = [
     path('', include(([
         path('', llc_views.llc_frontend, name='frontend'),
+        path('get_tool_datas/', llc_views.get_tool_datas, name='get_tool_datas')
     ], 'llc'))),
 
     path('backend/', include(([
