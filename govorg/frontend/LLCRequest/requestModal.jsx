@@ -2,6 +2,8 @@ import React, {Component, Fragment} from "react"
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
+import SelectField from '@utils/Tools/Form/select_field'
+import {LLCMap} from '../../../llc/frontend/LLCMap'
 
 
 export default class RequestModal extends Component {
@@ -24,17 +26,25 @@ export default class RequestModal extends Component {
             modalClose: null,
 
             values: props.values,
+
+            files:[],
+            project_name: '',
+            object_type: '',
+            object_count: '',
+            hurungu_oruulalt: '',
+            zahialagch: '',
+            modal_status:'closed',
+            vector_datas: [],
+            disabled: true
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalAction = this.handleModalAction.bind(this)
-        this.selectedFeature = this.selectedFeature.bind(this)
         this.handleRequestApprove = this.handleRequestApprove.bind(this)
         this.handleRequestReturn = this.handleRequestReturn.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
-
     }
 
     handleModalOpen(){
@@ -63,7 +73,6 @@ export default class RequestModal extends Component {
 
     handleModalAction(){
         const { selected_value, values } = this.state
-
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
         this.setState({ is_loading: true })
 
@@ -219,6 +228,20 @@ export default class RequestModal extends Component {
 
     componentDidMount() {
         if (this.state.status == "initial") this.handleOpen()
+
+        const {id} = this.state.values
+        service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
+            if (form_field){
+                this.setState({
+                    vector_datas,
+                    zahialagch :form_field['client_org'],
+                    project_name : form_field['project_name'],
+                    object_type : form_field['object_type'],
+                    object_count : form_field['object_quantum'],
+                    hurungu_oruulalt : form_field['investment_status'],
+                })
+            }
+        })
     }
 
     handleOpen() {
@@ -228,19 +251,6 @@ export default class RequestModal extends Component {
     handleClose() {
         this.setState({status: "closed"})
         this.props.modalClose()
-    }
-
-    selectedFeature(e) {
-        const feature = e.selected[0]
-        if (feature) {
-            const { values } = this.props
-            const id = feature.getProperties()['id']
-            values.map((value, idx) => {
-                if (value.id == id) {
-                    this.setState({ form_json: value.form_json, selected_value: value })
-                }
-            })
-        }
     }
 
     modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
@@ -265,7 +275,10 @@ export default class RequestModal extends Component {
     render () {
 
         const selected_form_json = this.state.form_json
-        const { is_loading, status, selected_value, values } = this.state
+        const { is_loading, status, values,
+            disabled, object_type, object_count,
+            hurungu_oruulalt, zahialagch,
+            project_name, vector_datas } = this.state
         const hide_btn = this.props.hide_btn
         const className =
             "modal fade" +
@@ -295,120 +308,168 @@ export default class RequestModal extends Component {
                                         </button>
                                     </div>
                                 </div>
-                                {/* {
-                                    values && values.length > 0
-                                    ?
-                                        values.map((value, idx) => {
-                                            const { form_json } = value
-                                            if (idx == values.length - 1) {
-                                                return (
-                                                    <div key={idx} className="row">
-                                                        {
-                                                            values.length == 1
-                                                            ?
-                                                                form_json && <FormJson form_json={form_json} />
-                                                            :
-                                                                selected_form_json && <FormJson form_json={selected_form_json} handleModalOpen={this.modalChange} values={selected_value}/>
-                                                        }
-                                                        <div className={selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
-                                                            <RequestMap values={values} selectedFeature={this.selectedFeature}/>
-                                                        </div>
-                                                    </div>
-                                                )
+
+                                <div className="row p-3">
+                                    <div className="col-md-5">
+                                        <form  class="form-row">
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor=''>Захиалагч байгууллага</label>
+                                                <input
+                                                    type="text"
+                                                    name='zahialagch'
+                                                    className="form-control"
+                                                    value={zahialagch}
+                                                    onChange={(e) => {this.props.handleOnChange(e)}}
+                                                    disabled={disabled}
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-12 m-0">
+                                                <label htmlFor=''>төслийн нэр</label>
+                                                <input
+                                                    type="text"
+                                                    name='project_name'
+                                                    className="form-control"
+                                                    value={project_name}
+                                                    onChange={(e) => {this.props.handleOnChange(e)}}
+                                                    disabled={disabled}
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-6 my-4 col-sm-6">
+                                                <label htmlFor=''>Обьектийн төрөл</label>
+                                                <textarea
+                                                    type="text"
+                                                    name="object_type"
+                                                    className="form-control"
+                                                    value={object_type}
+                                                    onChange={(e) => {this.props.handleOnChange(e)}}
+                                                    disabled={disabled}
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-6 col-sm-6 my-4">
+                                                <label htmlFor=''>Обьектийн тоо хэмжээ</label>
+                                                <textarea
+                                                    type="text"
+                                                    name="object_count"
+                                                    className="form-control"
+                                                    value={object_count}
+                                                    onChange={(e) => {this.props.handleOnChange(e)}}
+                                                    disabled={disabled}
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor=''> Хөрөнгө оруулалтын байдал </label>
+                                                <textarea
+                                                    name='hurungu_oruulalt'
+                                                    rows="3"
+                                                    className="form-control"
+                                                    value={hurungu_oruulalt}
+                                                    onChange={(e) => {this.props.handleOnChange(e)}}
+                                                    disabled={disabled}
+                                                />
+                                            </div>
+                                            <div className="form-group col-md-12">
+                                                <label htmlFor=''>Байр зүйн мэдээлэл</label>
+                                                <input
+                                                    type="text"
+                                                    name='file'
+                                                    className="form-control"
+                                                    value={values.file_path}
+                                                    onChange={(e) => {this.props.handleOnChange(e)}}
+                                                    disabled={disabled}
+                                                />
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div className="col-md-7">
+                                        <LLCMap
+                                            vector_datas={vector_datas}
+                                            height="50vh"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="row my-2 mr-1 float-right">
+                                    <button
+                                        type="button mr-2 ml-2"
+                                        onClick={() => this.modalChange(
+                                            'reject',
+                                            'fa fa-exclamation-circle',
+                                            'warning',
+                                            "Тохиргоог татгалзах",
+                                            `Та ${
+                                                values.length == 1
+                                                    ?
+                                                        get_modal_text(values[0].kind)
+                                                    :
+                                                values.length > 1
+                                                    ?
+                                                        `${values.length} өгөгдлөө`
+                                                    :
+                                                    null
                                             }
-                                        })
-                                    :
-                                        null
-                                } */}
-                                {
-                                    hide_btn
-                                    ?
-                                        <div className="row my-2 mr-1 float-right"></div>
-                                    :
-                                        <div className="row my-2 mr-1 float-right">
-                                            <button
-                                                type="button mr-2 ml-2"
-                                                onClick={() => this.modalChange(
-                                                    'reject',
-                                                    'fa fa-exclamation-circle',
-                                                    'warning',
-                                                    "Тохиргоог татгалзах",
-                                                    `Та ${
-                                                        values.length == 1
-                                                            ?
-                                                                get_modal_text(values[0].kind)
-                                                            :
-                                                        values.length > 1
-                                                            ?
-                                                                `${values.length} өгөгдлөө`
-                                                            :
-                                                            null
-                                                    }
-                                                    татгалзахдаа итгэлтэй байна уу?`,
-                                                    true,
-                                                    "татгалзах",
+                                            татгалзахдаа итгэлтэй байна уу?`,
+                                            true,
+                                            "татгалзах",
+                                            null
+                                        )}
+                                        className="btn gp-btn-primary waves-effect waves-light"
+                                    >
+                                        <i className="fa fa-check-square-o">Татгалзах</i>
+                                    </button>
+                                    <button
+                                        type="button mr-2 ml-2"
+                                        onClick={() => this.modalChange(
+                                            'reject',
+                                            'fa fa-exclamation-circle',
+                                            'warning',
+                                            "Тохиргоог буцаах",
+                                            `Та ${
+                                                values.length == 1
+                                                    ?
+                                                        get_modal_text(values[0].kind)
+                                                    :
+                                                values.length > 1
+                                                    ?
+                                                        `${values.length} өгөгдлөө`
+                                                    :
                                                     null
-                                                )}
-                                                className="btn gp-btn-primary waves-effect waves-light"
-                                            >
-                                                <i className="fa fa-check-square-o">Татгалзах</i>
-                                            </button>
-                                            <button
-                                                type="button mr-2 ml-2"
-                                                onClick={() => this.modalChange(
-                                                    'reject',
-                                                    'fa fa-exclamation-circle',
-                                                    'warning',
-                                                    "Тохиргоог буцаах",
-                                                    `Та ${
-                                                        values.length == 1
-                                                            ?
-                                                                get_modal_text(values[0].kind)
-                                                            :
-                                                        values.length > 1
-                                                            ?
-                                                                `${values.length} өгөгдлөө`
-                                                            :
-                                                            null
-                                                    }
-                                                    буцаахдаа итгэлтэй байна уу?`,
-                                                    true,
-                                                    "буцаах",
+                                            }
+                                            буцаахдаа итгэлтэй байна уу?`,
+                                            true,
+                                            "буцаах",
+                                            null
+                                        )}
+                                        className="btn gp-btn-primary waves-effect waves-light ml-2"
+                                    >
+                                        <i className="fa fa-check-square-o">Буцаах</i>
+                                    </button>
+                                    <button
+                                        type="button mr-2 ml-2"
+                                        onClick={() => this.modalChange(
+                                            'approve',
+                                            'fa fa-exclamation-circle',
+                                            'warning',
+                                            "Хүсэлт үүсгэх",
+                                            `Та ${
+                                                values.length == 1
+                                                    ?
+                                                        get_modal_text(values[0].kind)
+                                                    :
+                                                values.length > 1
+                                                    ?
+                                                        `${values.length} өгөгдөлд`
+                                                    :
                                                     null
-                                                )}
-                                                className="btn gp-btn-primary waves-effect waves-light ml-2"
-                                            >
-                                                <i className="fa fa-check-square-o">Буцаах</i>
-                                            </button>
-                                            <button
-                                                type="button mr-2 ml-2"
-                                                onClick={() => this.modalChange(
-                                                    'approve',
-                                                    'fa fa-exclamation-circle',
-                                                    'warning',
-                                                    "Хүсэлт үүсгэх",
-                                                    `Та ${
-                                                        values.length == 1
-                                                            ?
-                                                                get_modal_text(values[0].kind)
-                                                            :
-                                                        values.length > 1
-                                                            ?
-                                                                `${values.length} өгөгдөлд`
-                                                            :
-                                                            null
-                                                    }
-                                                    хүсэлт үүсгэх итгэлтэй байна уу?`,
-                                                    true,
-                                                    "Хүсэлт үүсгэх",
-                                                    null
-                                                )}
-                                                className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                            >
-                                                <i className="fa fa-check">Хүсэлт үүсгэх</i>
-                                            </button>
-                                        </div>
-                                }
+                                            }
+                                            хүсэлт үүсгэх итгэлтэй байна уу?`,
+                                            true,
+                                            "Хүсэлт үүсгэх",
+                                            null
+                                        )}
+                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                                    >
+                                        <i className="fa fa-check">Хүсэлт үүсгэх</i>
+                                    </button>
+                                </div>
                              <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
                             </div>
                         </div>

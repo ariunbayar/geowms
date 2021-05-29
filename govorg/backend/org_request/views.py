@@ -38,10 +38,11 @@ from main.utils import (
     get_display_items,
     get_fields,
     get_feature_from_geojson,
+    json_load
 )
 from main.components import Datatable
 
-from llc.backend.llc_request.models import RequestFiles, RequestFilesShape, ShapeGeom
+from llc.backend.llc_request.models import RequestFiles, RequestFilesShape, ShapeGeom, RequestForm
 
 
 def _get_geom(geo_id, fid):
@@ -824,18 +825,18 @@ def get_count(request):
 
 
 def _get_state(state, item):
-    return "Шинэ" if state == 1 else "Илгээсэн"
+    return "ШИНЭ" if state == 1 else "ИЛГЭЭСЭН"
 
 
 def _get_kind(kind, item):
     if kind == 1:
-        kind = "Хүлээгдэж буй"
+        kind = "ХҮЛЭЭГДЭЖ БУЙ"
     elif kind == 2:
-        kind = "Шийдвэрлэгдсэн"
+        kind = "ШИЙДВЭРЛЭГДСЭН"
     elif kind == 3:
-        kind = "Буцаагдсан"
+        kind = "БУЦААГДСАН"
     elif kind == 2:
-        kind = "Цуцласан"
+        kind = "ЦУЦЛАСАН"
     return kind
 
 
@@ -847,10 +848,10 @@ def get_llc_list(request, payload):
     org = Org.objects.filter(employee__user=request.user).first()
 
     if employee:
-        qs = RequestFilesShape.objects
-        qs = qs.filter(org_id=org.id)
+        qs = RequestFiles.objects
+        qs = qs.filter(geo_id=org.geo_id)
         if qs:
-            оруулах_талбарууд = ['org', 'name', 'file_path', 'created_at', 'kind', 'state']
+            оруулах_талбарууд = ['id', 'name', 'file_path', 'created_at', 'updated_at', 'kind', 'state']
             хувьсах_талбарууд = [
                 {"field": "state", "action": _get_state, "new_field": "state"},
                 {"field": "kind", "action": _get_kind, "new_field": "kind"},
@@ -880,18 +881,41 @@ def get_llc_list(request, payload):
         return JsonResponse(rsp)
 
 
-# def _check_group_item(r_approve):
-#     qs = RequestFiles.objects
-#     group_qs = qs.filter(group_id=r_approve.group_id)
-#     if group_qs:
-#         group_count = group_qs.count()
+def _get_feature(shape_geometries):
+    features = []
+    for shape_geometry in shape_geometries:
 
-#         if group_count <= 2:
-#             group_main = qs.filter(id=r_approve.group_id)
-#             group_main.delete()
-#             for other_item in group_qs:
-#                 other_item.group_id = None
-#                 other_item.save()
+        single_geom = json_load(shape_geometry.geom_json)
+        feature = {
+            "type": "Feature",
+            'geometry': single_geom,
+            'id': shape_geometry.id,
+            'properties': json_load(shape_geometry.form_json)
+        }
+        features.append(feature)
+    return features
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_request_data(request, id):
+    features = []
+    field = dict()
+
+    shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
+    features = _get_feature(shape_geometries)
+
+    qs = RequestForm.objects.filter(forms_id=id)
+    field = [item for item in qs.values()]
+
+    if qs:
+        field = [item for item in qs.values()]
+
+    return JsonResponse({
+        'vector_datas': FeatureCollection(features),
+        'form_field': field[0]
+    })
 
 
 @require_POST
@@ -911,7 +935,6 @@ def llc_request_reject(request, payload):
     if perm_reject:
         for r_id in ids:
             llc_req_obj = get_object_or_404(RequestFiles, pk=r_id)
-            # _check_group_item(llc_req_obj)
             llc_req_obj.state = RequestFiles.STATE_REJECT
             llc_req_obj.save()
 
@@ -934,7 +957,108 @@ def llc_request_reject(request, payload):
 # @login_required(login_url='/gov/secure/login/')
 # def llc_request_approve(request, payload):
 
+#     employee = get_object_or_404(Employee, user=request.user)
+#     emp_perm = get_object_or_404(EmpPerm, employee=employee)
 #     request_ids = payload.get("ids")
 #     feature_id = payload.get("feature_id")
 #     success = False
 #     new_geo_id = None
+
+#     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
+#     requests_qs = RequestFiles.objects
+#     requests_qs = requests_qs.filter(id__in=request_ids)
+#     with transaction.atomic():
+#         for r_approve in requests_qs:
+#             feature_id = r_approve.feature_id
+#             perm_approve = EmpPermInspire.objects.filter(
+#                 emp_perm=emp_perm,
+#                 feature_id=feature_id,
+#                 perm_kind=EmpPermInspire.PERM_APPROVE
+#             )
+
+#             if perm_approve:
+#                 old_geo_id = r_approve.old_geo_id
+#                 geo_json = r_approve.geo_json
+#                 form_json = r_approve.form_json
+#                 request_datas = dict()
+#                 m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
+#                 if r_approve.kind == ChangeRequest.KIND_CREATE:
+#                     if old_geo_id and not m_geo_datas_qs:
+#                         request_datas['geo_id'] = old_geo_id
+#                     else:
+#                         new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
+#                         request_datas['geo_id'] = new_geo_id
+
+#                     request_datas['geo_json'] = geo_json
+#                     request_datas['approve_type'] = 'create'
+#                     request_datas['feature_id'] = feature_id
+#                     request_datas['form_json'] = form_json
+#                     request_datas['m_geo_datas_qs'] = m_geo_datas_qs
+#                     success = _request_to_m(request_datas)
+#                     if success and new_geo_id:
+#                         r_approve.new_geo_id = new_geo_id
+#                         _insert_data_another_table(request_datas, new_geo_id, 'create')
+
+#                 if r_approve.kind == ChangeRequest.KIND_UPDATE:
+#                     if geo_json:
+#                         request_datas = {
+#                             'geo_json': geo_json,
+#                             'geo_id': old_geo_id,
+#                             'approve_type': 'update',
+#                             'feature_id': feature_id,
+#                             'form_json': form_json,
+#                             'm_geo_datas_qs': m_geo_datas_qs
+#                         }
+#                         success = _request_to_m(request_datas)
+#                         _insert_data_another_table(request_datas, old_geo_id, 'update')
+
+#                     else:
+#                         m_geo_datas_qs.delete()
+#                         qs = MDatas.objects.filter(geo_id=old_geo_id)
+#                         qs.delete()
+#                         r_approve.state = ChangeRequest.STATE_REJECT
+#                         r_approve.save()
+#                         rsp = {
+#                             'success': False,
+#                             'info': 'Геом өгөгдөл нь олдоогүй учраас татгалзлаа.'
+#                         }
+#                         return JsonResponse(rsp)
+
+#                 if r_approve.kind == ChangeRequest.KIND_DELETE:
+#                     if old_geo_id:
+#                         mgeo_qs = MGeoDatas.objects
+#                         mgeo_qs = mgeo_qs.filter(geo_id=old_geo_id)
+#                         mgeo_qs.delete()
+#                         mdatas_qs = MDatas.objects
+#                         mdatas_qs = mdatas_qs.filter(geo_id=old_geo_id)
+#                         mdatas_qs.delete()
+#                         request_datas['feature_id'] = feature_id
+#                         request_datas['form_json'] = []
+#                         _insert_data_another_table(request_datas, old_geo_id, 'delete')
+#                     else:
+#                         r_approve.state = ChangeRequest.STATE_REJECT
+#                         r_approve.save()
+#                         rsp = {
+#                             'success': False,
+#                             'info': 'Геом өгөгдөл нь олдоогүй учраас татгалзлаа.'
+#                         }
+#                         return JsonResponse(rsp)
+
+#                 r_approve.state = ChangeRequest.STATE_APPROVE
+#                 _check_group_items(r_approve)
+#                 r_approve.group_id = None
+#                 r_approve.save()
+
+#             else:
+#                 rsp = {
+#                     'success': False,
+#                     'info': 'Танд баталгаажуулах эрх алга байна.'
+#                 }
+
+#         refreshMaterializedView(feature_id)
+#         rsp = {
+#             'success': True,
+#             'info': 'Амжилттай баталгаажуулж дууслаа'
+#         }
+
+#     return JsonResponse(rsp)

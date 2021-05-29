@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import RequestModal from './requestModal'
 
-export default class OpenMapModal extends Component {
+export default class SolveModal extends Component {
 
     constructor(props) {
         super(props)
@@ -44,7 +44,7 @@ export default class OpenMapModal extends Component {
                             hide_btn={this.props.hide_btn}
                             modalClose={this.closeModalMap}
                             refreshData={this.props.refreshData}
-                            values={this.values}
+                            values={this.state.values}
                         />
                 }
             </div>

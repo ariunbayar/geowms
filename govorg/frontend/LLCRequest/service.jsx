@@ -3,6 +3,9 @@ export const service = {
     requestReject,
     requestApprove,
     requestReturn,
+    llcList,
+    handleRequestData,
+    pg_config
 }
 
 const prefix = '/gov/api/llc-request'
@@ -29,4 +32,43 @@ function requestReturn(ids, feature_id) {
         body: JSON.stringify({ids, feature_id}),
     }
     return fetch(`${prefix}/return/`, requestOptions).then(handleResponse)
+}
+
+function llcList(id) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify({ id }),
+    }
+    return fetch(`${prefix}`, requestOptions).then(handleResponse)
+}
+
+function handleRequestData(id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${id}/get-request-data/`, opts).then(handleResponse)
+}
+
+const pg_config = {
+    getInspireTree: function(connection_id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/${connection_id}/get-all-view-names/`, opts).then(handleResponse)
+    },
+
+    tableDetail: function(id, table_id) {
+        const opts = {
+            ...getGetOptions(),
+        }
+        return fetch(`${prefix}/${id}/${table_id}/table-detail/`, opts).then(handleResponse)
+    },
+
+    getProperties: function(feature_id) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({feature_id}),
+        }
+        return fetch(`${prefix}/get-fields/`, opts).then(handleResponse)
+    },
 }
