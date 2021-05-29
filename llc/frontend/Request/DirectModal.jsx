@@ -16,11 +16,26 @@ export default class RequestDetail extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
+            aimag_name, aimag_geom
         } = this.props
         return (
             <div className="row p-3">
                 <div className="col-md-5">
                     <form  class="form-row">
+                        {
+                            aimag_name
+                            &&
+                            <div className="form-group col-md-12">
+                                <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
+                                <input
+                                    type="text"
+                                    name='aimag_name'
+                                    className="form-control"
+                                    disabled={true}
+                                    value={aimag_name}
+                                />
+                            </div>
+                        }
                         <div className="form-group col-md-12">
                             <label htmlFor=''>Захиалагч байгууллага</label>
                             <input
@@ -98,6 +113,7 @@ export default class RequestDetail extends Component {
                     <LLCMap
                         vector_datas={vector_datas}
                         height="80vh"
+                        aimag_geom={aimag_geom}
                     />
                 </div>
 

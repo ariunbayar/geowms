@@ -85,7 +85,8 @@ export class RequestAdd extends Component {
             tool_datas: [],
             selected_tools: [],
             regis_number: props.regis_number,
-
+            aimag_name: '',
+            aimag_geom: []
         }
 
         this.handleOnChange = this.handleOnChange.bind(this)
@@ -105,7 +106,7 @@ export class RequestAdd extends Component {
         const {id} = this.props.match.params
         this.getTools()
 
-        service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools}) =>{
+        service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
                     vector_datas,
@@ -114,7 +115,9 @@ export class RequestAdd extends Component {
                     object_type : form_field['object_type'],
                     object_count : form_field['object_quantum'],
                     hurungu_oruulalt : form_field['investment_status'],
-                    selected_tools
+                    selected_tools,
+                    aimag_name,
+                    aimag_geom
                 })
             }
         })
@@ -207,7 +210,8 @@ export class RequestAdd extends Component {
                 files, project_name,
                 object_type, object_count,
                 hurungu_oruulalt, zahialagch,
-                vector_datas, tool_datas, selected_tools
+                vector_datas, tool_datas, selected_tools,
+                aimag_geom, aimag_name
             } = this.state
             const {id, info} = this.props.match.params
             return (
@@ -229,6 +233,8 @@ export class RequestAdd extends Component {
                             info={info}
                             tool_datas={tool_datas}
                             selected_tools={selected_tools}
+                            aimag_name={aimag_name}
+                            aimag_geom={aimag_geom}
                             handleSelectModel={this.handleSelectModel}
                         />
                     </div>
