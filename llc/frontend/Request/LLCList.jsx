@@ -168,7 +168,7 @@ export class Detail extends Component {
                         <div className="col-md-12 row">
                                 <div className="col-md-6">
                                     <label htmlFor="">Төлөв</label>
-                                    <select className="form-control form-control-xs"
+                                    <select className="form-control form-control-xs disabled"
                                         onChange={(e) => this.setState({ state: e.target.value })}
                                     >
                                         {/* <option value="">--- Төлөвөөр хайх ---</option>
@@ -185,7 +185,7 @@ export class Detail extends Component {
                                 </div>
                                 <div className="col-md-6">
                                     <label htmlFor="">Өөрчлөлт</label>
-                                    <select className="form-control form-control-sm"
+                                    <select className="form-control form-control-sm disabled"
                                         onChange={(e) => this.setState({ kind: e.target.value })}
                                     >
                                         {/* <option value="">--- Өөрчлөлтөөр хайх ---</option>
@@ -200,7 +200,7 @@ export class Detail extends Component {
                                         } */}
                                     </select>
                                 </div>
-                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right" /*onClick={() => this.handleSearch()}*/>Хайх</button>
+                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right disabled" /*onClick={() => this.handleSearch()}*/>Хайх</button>
                         </div>
                         <div className="col-md-12">
                             <PortalDataTable

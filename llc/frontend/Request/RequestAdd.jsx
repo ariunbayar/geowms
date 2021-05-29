@@ -39,29 +39,26 @@ class SubmitClass extends Component {
         return (
             <Fragment>
                 <div>
-                    {
-                        <button
-                            type="button"
-                            className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
-                            onClick ={()=> this.handleSubmit()}
-                        >
-                            <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
-                        </button>
-                    }
-                </div>
-                <div>
-                    {
-                        
-                    }
-                    <p className="btn btn-secondary">
-                        <i
-                            className="fa fa-angle-double-left"
-                            onClick ={()=> values.closeRequestMap()}
+                    {   !values.id 
+                        ?
+                            <button
+                                type="button"
+                                className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
+                                onClick ={()=> this.handleSubmit()}
+                            >
+                                <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
+                            </button>
+                        : 
+                            <p className="btn btn-secondary">
+                              <i
+                                className="fa fa-angle-double-left"
+                                onClick ={()=> values.closeRequestMap()}
 
-                        >
-                            Буцах
-                        </i>
-                    </p>
+                                >
+                                Буцах
+                                </i>
+                            </p>
+                }
                 </div>
                 </Fragment>
         )

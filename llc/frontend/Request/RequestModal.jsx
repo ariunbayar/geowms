@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react"
 import { service } from "./service"
 import RequestDetail from './DirectModal'
 import Modal from '@utils/Modal/Modal'
+import ModelSendData from './send_request'
 
 
 
@@ -201,28 +202,32 @@ export default class RequestModal extends Component {
     }
 
     render() {
-       const {values, modal_status, state} = this.state
+        const {values, modal_status, state} = this.state
         return (
             <div className="col-md-12">
                 {
-                    state == 'ШИНЭ'
+                state == 'ШИНЭ'
                         ?
                             <a className="fa fa-paper-plane-o text-primary mt-2 ml-2" onClick={this.openRequestModal}></a>
                         :
                              <a className="fa fa-check text-success mt-2 ml-2" ></a>
-                        }
-                <Modal
-                    body={SendModal}
-                    body_props={{ values: { field: values }, closeRequestMap: this.closeRequestMap }}
-                    modal_status={modal_status}
-                    modal_dialog={true}
-                    modal_bg= 'white'
-                    title='Хүсэлт Илгээх'
-                ></Modal>
-             </div>
+                }
+                {
+                    modal_status == 'open'
+                    &&
+                    <ModelSendData
+                        body={SendModal}
+                        field ={values}
+                        modal_status={modal_status}
+                        modal_dialog={true}
+                        modal_bg= 'white'
+                        title='Хүсэлт Илгээх'
+                        closeRequestMap={this.closeRequestMap}
+                    />
+                }
+                </div>
         )
     }
 }
-
 
 
