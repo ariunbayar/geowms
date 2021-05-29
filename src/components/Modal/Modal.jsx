@@ -134,7 +134,7 @@ export default class Modal extends Component {
             <Fragment>
                 <div className={className}>
                     <div className="col-md-8 d-flex justify-content-center container align-center align-self-center">
-                        <div className={!this.props.modal_dialog && 'modal-dialog modal-dialog-centered'} >
+                        <div className={!this.props.modal_dialog ? 'modal-dialog modal-dialog-centered': ''} >
                             <div className={`modal-content border-0 rounded-lg ${this.props.modal_bg ? this.props.modal_bg : 'bg-light'}`} >
                                 <div className="col-md-12 offset-md-12 float-right my-1">
                                     <button type="button" className="close mt-2 mr-2" aria-label="Close">
