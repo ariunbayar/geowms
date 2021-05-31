@@ -216,9 +216,11 @@ def save_request(request):
 
 def _get_feature(shape_geometries):
     features = []
+    geom_type = ''
     for shape_geometry in shape_geometries:
 
         single_geom = json_load(shape_geometry.geom_json)
+        geom_type = single_geom.get('type')
         feature = {
             "type":"Feature",
             'geometry': single_geom,
@@ -226,7 +228,7 @@ def _get_feature(shape_geometries):
             'properties': json_load(shape_geometry.form_json)
         }
         features.append(feature)
-    return features
+    return features, geom_type
 
 
 @require_GET
@@ -281,7 +283,8 @@ def _get_shapes_geoms(shape_geometry):
     geo_datas = []
     geom_type = ''
     shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
-    geo_datas = _get_feature(shape_geoms)
+    geo_datas, geom_type = _get_feature(shape_geoms)
+
     return geo_datas, geom_type
 
 
@@ -291,14 +294,13 @@ def get_file_shapes(request, id):
     list_of_datas = []
     shape_geometries = RequestFilesShape.objects.filter(files_id=id)
     for shape_geometry in shape_geometries:
-        feature = []
         geoms, geom_type = _get_shapes_geoms(shape_geometry)
         list_of_datas.append({
             'geom_type': geom_type,
-            'theme': shape_geometry.theme,
-            'feature': shape_geometry.feature,
-            'package': shape_geometry.package,
-            'features': feature
+            'theme': shape_geometry.theme_id,
+            'feature': shape_geometry.feature_id,
+            'package': shape_geometry.package_id,
+            'features': geoms
         })
 
     return JsonResponse({

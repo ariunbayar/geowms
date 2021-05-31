@@ -1,5 +1,7 @@
 import React, {Component, Fragment} from "react"
 import {service} from './service'
+import RequestModal from './requestModal'
+import {ConfigureBundle} from './configure_bundle'
 
 export class LLCSettings extends Component {
 
@@ -7,9 +9,21 @@ export class LLCSettings extends Component {
         super(props)
         this.state = {
             values: props.values,
-            list_of_datas: []
+            list_of_datas: [],
+            model_status: false,
+            selected_values: []
         }
+        this.handleProceed = this.handleProceed.bind(this)
+        this.closeModel = this.closeModel.bind(this)
 
+    }
+
+    handleProceed(values) {
+        this.setState({model_status: true, selected_values: values})
+    }
+
+    closeModel() {
+        this.setState({ is_modal_request_open: false })
     }
 
     componentDidMount() {
@@ -20,7 +34,7 @@ export class LLCSettings extends Component {
     }
 
     render () {
-        const { list_of_datas } = this.state
+        const { list_of_datas, model_status, selected_values} = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -57,8 +71,8 @@ export class LLCSettings extends Component {
                                             <td>
                                                 {value.feature}
                                             </td>
-                                            <td>
-                                                <a href="#" onClick={(e) => this.handleProceed(true, value)}></a>
+                                            <td scope='row'>
+                                                <a className="btn btn-primary" href="#" onClick={(e) => this.handleProceed(value)}>inspire тохиргоо</a>
                                             </td>
                                         </tr>
                                         ): <tr><td>дата бүртгэлгүй байна</td></tr>
@@ -66,6 +80,16 @@ export class LLCSettings extends Component {
                                 </tbody>
                             </table>
                         </div>
+                        {
+                            model_status
+                            &&
+                            <RequestModal
+                                modalClose={this.closeModel}
+                                model_body={ConfigureBundle}
+                                {...this.state}
+                                title={'Хүсэлт шийдвэрлэх'}
+                            />
+                        }
                     </div>
                 </div>
             </div>

@@ -5,8 +5,8 @@ export const service = {
     requestDismiss,
     llcList,
     handleRequestData,
-    pg_config,
-    getFilesDetal
+    getFilesDetal,
+    getInspireTree
 }
 
 const prefix = '/gov/api/llc-request'
@@ -57,26 +57,10 @@ function handleRequestData(id) {
     return fetch(`${prefix}/${id}/get-request-data/`, opts).then(handleResponse)
 }
 
-const pg_config = {
-    getInspireTree: function(connection_id) {
-        const opts = {
-            ...getGetOptions(),
-        }
-        return fetch(`${prefix}/${connection_id}/get-all-view-names/`, opts).then(handleResponse)
-    },
-
-    tableDetail: function(id, table_id) {
-        const opts = {
-            ...getGetOptions(),
-        }
-        return fetch(`${prefix}/${id}/${table_id}/table-detail/`, opts).then(handleResponse)
-    },
-
-    getProperties: function(feature_id) {
-        const opts = {
-            ...getPostOptions(),
-            body: JSON.stringify({feature_id}),
-        }
-        return fetch(`${prefix}/get-fields/`, opts).then(handleResponse)
-    },
+function getInspireTree() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`/back/another-database/pg/get-all-view-names/`, opts).then(handleResponse)
 }
+

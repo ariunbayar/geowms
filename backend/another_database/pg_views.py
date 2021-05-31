@@ -98,8 +98,7 @@ def get_pg_table_list(request, payload, pk):
 
 @require_GET
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def get_pg_table_names(request, conn_id):
+def get_pg_table_names(request):
     themes = LThemes.objects.all()
     l_themes = []
     l_packages = []

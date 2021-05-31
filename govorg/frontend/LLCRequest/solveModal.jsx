@@ -11,7 +11,6 @@ class DetailModalBody extends Component {
         }
     }
     render() {
-        console.log("values", this.props)
         const {
             aimag_name, zahialagch,
             project_name, object_type,
