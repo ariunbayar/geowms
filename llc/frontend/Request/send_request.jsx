@@ -71,13 +71,13 @@ export default class ModelSendData extends Component {
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap position-fixed"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                    <div className="col-md-8 d-flex justify-content-center container align-center align-self-center"> 
+                    <div className="col-md-8 d-flex justify-content-center container align-center align-self-center">
                         <div className="col-md-12">
                             <div className="modal-content animated row" >
                                 <div className="col-md-12">
                                     <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
                                         <div className="col-md-11">
-                                            <h5 className="text-center text-justify">Эрх бүхий багажны жагсаалт</h5>
+                                            <h5 className="text-center text-justify">Хүсэлт илгээх</h5>
                                         </div>
                                         <div className="col-md-1">
                                             <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">

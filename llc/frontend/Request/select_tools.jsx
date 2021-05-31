@@ -60,9 +60,8 @@ export default class UsedTools extends Component {
 
     render (){
         const {
-            selected_tools, tool_datas,
+            selected_tools, tool_datas, id
         } = this.props.values
-
         const {
             modalAction, values,
             modal_title,
@@ -104,7 +103,7 @@ export default class UsedTools extends Component {
                         </tbody>
                     </table>
                 </div>
-                <div className="form-group col-md-12">
+                <div className={`form-group col-md-12 ${id ? 'invisible' : ''}`}>
                     <div className="form-group col-md-12">
                         <a
                             id='tool_id'

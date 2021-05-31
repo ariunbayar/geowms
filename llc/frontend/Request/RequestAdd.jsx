@@ -9,6 +9,7 @@ class SubmitClass extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            url: "/llc/llc-request/",
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
@@ -18,16 +19,20 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools, id
+            selected_tools,id, file_state
         } = this.props.values
         var blob = []
         if (id) {
-            const obj = files
-            blob = new Blob([JSON.stringify(obj, null, 2)], {type : 'application/vnd.rar'})
+            if (!file_state) {
+                const obj = files
+                blob = new Blob([JSON.stringify(obj, null, 2)], {type : 'application/vnd.rar'})
+            }
+            else blob = files
         }
         else blob = files
         const form_datas = new FormData()
         form_datas.append('files', blob, files.name)
+        form_datas.append('id', JSON.stringify({id}))
         form_datas.append('project_name', project_name)
         form_datas.append('object_type', object_type)
         form_datas.append('object_count', object_count)
@@ -45,7 +50,7 @@ class SubmitClass extends Component {
         return (
             <Fragment>
                 <div>
-                {   !values.id 
+                    {   !values.id
                         ?
                             <button
                                 type="button"
@@ -54,16 +59,32 @@ class SubmitClass extends Component {
                             >
                                 <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
                             </button>
-                        : 
-                            <p className="btn btn-secondary">
-                                <i
+                        :
+                        <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
+                        <p className="btn btn-secondary">
+                            <i
                                 className="fa fa-angle-double-left"
-                                onClick ={()=> values.closeRequestMap()}
+                                onClick ={()=> values.history.push(this.state.url)}
 
-                                >
+                            >
                                 Буцах
-                                </i>
-                            </p>
+                            </i>
+                        </p>
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            {
+                                values.state != 2
+
+                                ?
+                                    <p
+                                    className="btn btn-primary"
+                                    onClick ={()=> this.handleSubmit()}
+                                    >
+                                        <i className="fa"> Хадгалах</i>
+                                    </p>
+                                    :
+                                        null
+                            }
+                    </div>
                 }
                 </div>
                 </Fragment>
@@ -89,7 +110,9 @@ export class RequestAdd extends Component {
             tool_datas: [],
             selected_tools: [],
             file_name:'',
+            state: '',
             regis_number: props.regis_number,
+            file_state: false
 
         }
 
@@ -119,7 +142,8 @@ export class RequestAdd extends Component {
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
                         files: form_field['file_path'],
-                        file_name: form_field['file_name']
+                        file_name: form_field['file_name'],
+                        state: form_field['state'],
                     })
                 }
             })
@@ -136,16 +160,21 @@ export class RequestAdd extends Component {
 
     handleOnChange(e) {
         var name = e.target.name
-        var {file_name} = this.state
+        var {file_name, file_state} = this.state
+        const {id} = this.props.match.params
         var value = ''
         if (name == 'files') {
+            if (id) {
+                file_state = true
+            }
+
             value = e.target.files[0]
             file_name = value.name
         }
         else {
             value = e.target.value
         }
-        this.setState({[name]: value, file_name})
+        this.setState({[name]: value, file_name, file_state})
     }
 
     modalClose() {
@@ -212,9 +241,9 @@ export class RequestAdd extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             vector_datas, tool_datas, selected_tools,
-            file_name
+            file_name, state, file_state
         } = this.state
-        const {id, info} = this.props.match.params
+        const {id} = this.props.match.params
         return (
             <div className="card">
                 <div className="card-body">
@@ -228,13 +257,15 @@ export class RequestAdd extends Component {
                         files={files}
                         file_name={file_name}
                         vector_datas={vector_datas}
-                        handleOnChange={this.handleOnChange}
-                        submitClass={SubmitClass}
-                        handlePassValues={this.handlePassValues}
-                        BackToList={this.BackToList}
-                        info={info}
                         tool_datas={tool_datas}
                         selected_tools={selected_tools}
+                        state={state}
+                        file_state={file_state}
+                        history={this.props.history}
+                        info={this.props.info}
+                        submitClass={SubmitClass}
+                        handleOnChange={this.handleOnChange}
+                        handlePassValues={this.handlePassValues}
                         handleSelectModel={this.handleSelectModel}
                     />
                 </div>

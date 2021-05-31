@@ -112,7 +112,7 @@ class ActionClass extends Component {
                             actionNameBack={ this.state.actionNameBack }
                             actionNameDelete={ this.state.actionNameDelete }
                             modalAction={ this.state.modalAction }
-                            modalClose={ this.state.modalClose }
+                            modalClose={ this.state.modalClose, values.closeRequestMap }
                         />
                     </div>
             )
@@ -144,6 +144,7 @@ class SendModal extends Component{
                     object_type : form_field['object_type'],
                     object_count : form_field['object_quantum'],
                     hurungu_oruulalt : form_field['investment_status'],
+                    selected_tools: form_field['selected_tools'],
                 })
             }
         })
@@ -155,7 +156,7 @@ class SendModal extends Component{
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            vector_datas,
+            vector_datas, selected_tools
         } = this.state
         return (
             <div className="col-md-12">
@@ -170,8 +171,9 @@ class SendModal extends Component{
                         files={files}
                         vector_datas={vector_datas}
                         submitClass={ActionClass}
+                        selected_tools={selected_tools}
                         closeRequestMap={this.props.closeRequestMap}
-                        info='Хүсэлт илгээх'
+                        info={this.props.values.info}
                     />
                     </div>
                 </div>
@@ -218,9 +220,10 @@ export default class RequestModal extends Component {
                     <ModelSendData
                         body={SendModal}
                         field ={values}
-                        modal_status={modal_status}
+                        status={modal_status}
                         modal_dialog={true}
                         modal_bg= 'white'
+                        info={true}
                         title='Хүсэлт Илгээх'
                         closeRequestMap={this.closeRequestMap}
                     />

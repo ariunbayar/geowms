@@ -161,6 +161,7 @@ def _create_shape_files(org_data, request_file, zip_ref):
 @require_POST
 @ajax_required
 def save_request(request):
+    id = request.POST.get('id') or None
     uploaded_file = request.FILES['files']
     project_name = request.POST.get('project_name')
     object_type = request.POST.get('object_type')
@@ -168,44 +169,77 @@ def save_request(request):
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
     selected_tools = request.POST.get('selected_tools') or []
-    if selected_tools:
-        rsp = {
-            'success': False,
-            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
-        }
 
+    if id:
+        id = json_load(id)
+        id = id.get('id')
+
+    if not selected_tools:
         selected_tools = json_load(selected_tools)
         selected_tools = selected_tools['selected_tools']
+        return JsonResponse({
+            'success': False,
+            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        })
 
-    with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
-        file_datas = zip_ref.infolist()[0]
+    check_file_name = 'llc-request-files/' + str(uploaded_file)
+    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
+    if check_data_of_file and not id:
+        return JsonResponse({
+            'success': False,
+            'info': 'Файл-ын нэр давхцаж байна !!!.'
+        })
+
+    if not check_data_of_file or not id:
+        with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
+            file_datas = zip_ref.infolist()[0]
+
         org_data = _get_leve_2_geo_id(file_datas, zip_ref)
         if not org_data:
-
             return JsonResponse({
                     'success': False,
                     'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
             })
 
-        request_file = RequestFiles.objects.create(
-            name=project_name,
-            kind=2,
-            state=1,
-            geo_id=org_data.geo_id if org_data else '',
-            file_path=uploaded_file,
-            tools=json_dumps(selected_tools)
-        )
+        if id:
+            request_file = RequestFiles.objects.filter(pk=id).first()
+            if not check_data_of_file:
+                request_file.geo_id=org_data.geo_id if org_data else ''
+                request_file.file_path=uploaded_file
 
+            request_file.tools=json_dumps(selected_tools)
+            request_file.save()
+
+        else:
+            request_file = RequestFiles.objects.create(
+                name=project_name,
+                kind=2,
+                state=1,
+                geo_id=org_data.geo_id if org_data else '',
+                file_path=uploaded_file,
+                tools=json_dumps(selected_tools)
+            )
+            request_file = request_file.id
+        _create_shape_files(org_data, request_file, zip_ref)
+
+    form_data = RequestForm.objects.filter(file_id=id).first()
+    if form_data:
+        form_data.client_org = zahialagch
+        form_data.project_name = project_name
+        form_data.object_type = object_type
+        form_data.object_quantum = object_count
+        form_data.investment_status = hurungu_oruulalt
+        form_data.save()
+
+    else:
         RequestForm.objects.create(
             client_org=zahialagch,
             project_name=project_name,
             object_type=object_type,
             object_quantum=object_count,
             investment_status=hurungu_oruulalt,
-            file=request_file
+            file_id=id
         )
-
-        _create_shape_files(org_data, request_file, zip_ref)
 
     rsp = {
         'success': True,
@@ -276,6 +310,7 @@ def get_request_data(request, id):
         field['file_path'] = file_data
         field['selected_tools'] = json_load(qs.file.tools)
         field['file_name'] = file_name
+        field['state'] = qs.file.state
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -292,7 +327,7 @@ def send_request(request, id):
 
     return JsonResponse({
         'success': True,
-        'info': 'Амжилттай хадгаллаа'
+        'info': 'Амжилттай илгээгдлээ.'
     })
 
 

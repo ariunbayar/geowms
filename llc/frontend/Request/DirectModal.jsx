@@ -80,6 +80,25 @@ export default class RequestDetail extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            info: false,
+            state : props.state,
+            disabled: false
+        }
+    }
+
+    componentDidMount() {
+        const {info} = this.props
+        if(info) {
+            this.setState({disabled: true})
+        }
+    }
+
+    componentDidUpdate(pP, pS) {
+        const {info, state} = this.props
+        if (pP.state != state) {
+            if(state == 2) {
+                this.setState({disabled: true})
+            }
         }
     }
 
@@ -88,7 +107,7 @@ export default class RequestDetail extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
-            files, file_name
+            files, file_name, info
         } = this.props
         return (
             <div className="row p-3">
@@ -100,6 +119,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name='zahialagch'
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={zahialagch}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -110,6 +130,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name='project_name'
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={project_name}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -120,6 +141,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name="object_type"
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={object_type}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -130,6 +152,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name="object_count"
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={object_count}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -140,6 +163,7 @@ export default class RequestDetail extends Component {
                                 name='hurungu_oruulalt'
                                 rows="3"
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={hurungu_oruulalt}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
