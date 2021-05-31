@@ -1,9 +1,6 @@
 
-<<<<<<< HEAD
 from geoportal_app.models import User
-=======
 import os
->>>>>>> 33fc1c66d5e8a9ee1e36228e21749b7f5207616d
 import rarfile
 from django.conf import settings
 from django.db import connections
@@ -214,6 +211,13 @@ def save_request(request):
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
+            get_shapes = RequestFilesShape.objects.filter(files=request_file)
+            if get_shapes:
+                for shape in get_shapes:
+                    geoms = ShapeGeom.objects.filter(shape=shape)
+                    geoms.delete()
+                get_shapes.delete()
+
             if not check_data_of_file:
                 request_file.geo_id=org_data.geo_id if org_data else ''
                 request_file.file_path=uploaded_file
@@ -243,9 +247,6 @@ def save_request(request):
         form_data.save()
 
     else:
-        print("hoh")
-        print("hoh")
-        print("hoh", id)
         RequestForm.objects.create(
             client_org=zahialagch,
             project_name=project_name,
@@ -386,7 +387,7 @@ def send_request(request, id):
     qs = RequestFiles.objects.filter(pk=id)
     query = qs.first()
     org_obj = RequestFilesShape.objects.filter(files=query).first()
-    employee = Employee.objects.filter(org=org_obj.id).first()
+    employee = Employee.objects.filter(org_id=org_obj.org_id).first()
     success_mail =_send_to_information_email(employee.user_id)
 
     if success_mail:
