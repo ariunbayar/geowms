@@ -18,6 +18,7 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
+            selected_tools
         } = this.props.values
         const form_datas = new FormData()
         form_datas.append('files', files, files.name)
@@ -26,6 +27,7 @@ class SubmitClass extends Component {
         form_datas.append('object_count', object_count)
         form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
         form_datas.append('zahialagch', zahialagch)
+        form_datas.append('selected_tools', JSON.stringify({selected_tools}))
 
         service.SaveRequest(form_datas).then(({success, info}) => {
             this.props.values.handlePassValues(success, info)
@@ -79,20 +81,32 @@ export class RequestAdd extends Component {
             hurungu_oruulalt: '',
             zahialagch: '',
             modal_status:'closed',
-            vector_datas: []
-
+            vector_datas: [],
+            tool_datas: [],
+            selected_tools: [],
+            regis_number: props.regis_number,
+            aimag_name: '',
+            aimag_geom: []
         }
+
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
         this.BackToList = this.BackToList.bind(this)
+        this.getTools = this.getTools.bind(this)
+        this.handleSelectModel = this.handleSelectModel.bind(this)
+    }
+
+    handleSelectModel(selected_tools) {
+        this.setState({selected_tools})
     }
 
     componentDidMount() {
         const {id} = this.props.match.params
+        this.getTools()
 
-        service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
+        service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
                     vector_datas,
@@ -101,10 +115,20 @@ export class RequestAdd extends Component {
                     object_type : form_field['object_type'],
                     object_count : form_field['object_quantum'],
                     hurungu_oruulalt : form_field['investment_status'],
+                    selected_tools,
+                    aimag_name,
+                    aimag_geom
                 })
             }
         })
 
+    }
+
+    getTools() {
+        const {regis_number} = this.state
+        service.getToolDatas(regis_number).then(({tool_datas})=>{
+            this.setState({tool_datas})
+        })
     }
 
     handleOnChange(e) {
@@ -186,7 +210,8 @@ export class RequestAdd extends Component {
                 files, project_name,
                 object_type, object_count,
                 hurungu_oruulalt, zahialagch,
-                vector_datas,
+                vector_datas, tool_datas, selected_tools,
+                aimag_geom, aimag_name
             } = this.state
             const {id, info} = this.props.match.params
             return (
@@ -206,6 +231,11 @@ export class RequestAdd extends Component {
                             handlePassValues={this.handlePassValues}
                             BackToList={this.BackToList}
                             info={info}
+                            tool_datas={tool_datas}
+                            selected_tools={selected_tools}
+                            aimag_name={aimag_name}
+                            aimag_geom={aimag_geom}
+                            handleSelectModel={this.handleSelectModel}
                         />
                     </div>
                     <Modal

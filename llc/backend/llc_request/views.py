@@ -14,12 +14,15 @@ from llc.backend.llc_request.models import (
 )
 
 from backend.org.models import Org
+from backend.inspire.models import MGeoDatas, MDatas, LCodeLists
 
 from main.components import Datatable
 from main.utils import (
     json_dumps,
     json_load,
-    get_sql_execute
+    get_sql_execute,
+    slugifyWord,
+    get_geom
 )
 
 
@@ -164,6 +167,15 @@ def save_request(request):
     object_count = request.POST.get('object_count')
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
+    selected_tools = request.POST.get('selected_tools') or []
+    if selected_tools:
+        rsp = {
+            'success': False,
+            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        }
+
+        selected_tools = json_load(selected_tools)
+        selected_tools = selected_tools['selected_tools']
 
     with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
         file_datas = zip_ref.infolist()[0]
@@ -180,16 +192,17 @@ def save_request(request):
             kind=2,
             state=1,
             geo_id=org_data.geo_id if org_data else '',
-            file_path=uploaded_file
-
+            file_path=uploaded_file,
+            tools=json_dumps(selected_tools)
         )
+
         RequestForm.objects.create(
             client_org=zahialagch,
             project_name=project_name,
             object_type=object_type,
             object_quantum=object_count,
             investment_status=hurungu_oruulalt,
-            forms_id=request_file.id
+            file=request_file
         )
 
         _create_shape_files(org_data, request_file, zip_ref)
@@ -233,17 +246,33 @@ def get_all_geo_json(request):
 def get_request_data(request, id):
     features = []
     field = dict()
-
+    aimag_name = ''
+    aimag_geom = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features = _get_feature(shape_geometries)
 
-    qs = RequestForm.objects.filter(forms_id=id)
+    qs = RequestForm.objects.filter(file_id=id)
     field = [item for item in qs.values()]
+    selected_tools = qs.first().file.tools
+    geo_id = qs.first().file.geo_id
+
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+    if mdata_qs:
+        code_list_id = mdata_qs.code_list_id
+        code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
+        aimag_name = code_list_data.code_list_name
+
+        aimag_geom = get_geom(geo_id, 'MultiPolygon')
+        if aimag_geom:
+            aimag_geom = aimag_geom.json
 
     if qs:
         field = [item for item in qs.values()]
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
-        'form_field': field[0]
+        'form_field': field[0],
+        'selected_tools': json_load(selected_tools),
+        'aimag_name': aimag_name,
+        'aimag_geom': aimag_geom
     })

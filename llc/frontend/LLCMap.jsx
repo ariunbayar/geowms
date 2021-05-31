@@ -20,7 +20,7 @@ export class LLCMap extends Component {
 
     render() {
         const { vector_datas } = this.state
-        const {height} = this.props
+        const {height, aimag_geom} = this.props
         return (
             <div className="col-12 col-md-12 col-xl-12">
                 <div className="card">
@@ -33,6 +33,7 @@ export class LLCMap extends Component {
                             featurefromUrl={true}
                             property_pp={true}
                             PPContent={LLCPP}
+                            aimag_geom={aimag_geom}
                         />
                     </div>
                 </div>

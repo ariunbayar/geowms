@@ -1,5 +1,7 @@
 import React, { Component, Fragment } from "react"
+import {GPIcon} from "@utils/Tools"
 import {LLCMap} from '../LLCMap'
+import UsedTools from './select_tools'
 
 export default class RequestDetail extends Component {
 
@@ -13,12 +15,27 @@ export default class RequestDetail extends Component {
         const {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            project_name, vector_datas, id
+            project_name, vector_datas, id,
+            aimag_name, aimag_geom
         } = this.props
         return (
             <div className="row p-3">
                 <div className="col-md-5">
                     <form  class="form-row">
+                        {
+                            aimag_name
+                            &&
+                            <div className="form-group col-md-12">
+                                <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
+                                <input
+                                    type="text"
+                                    name='aimag_name'
+                                    className="form-control"
+                                    disabled={true}
+                                    value={aimag_name}
+                                />
+                            </div>
+                        }
                         <div className="form-group col-md-12">
                             <label htmlFor=''>Захиалагч байгууллага</label>
                             <input
@@ -69,6 +86,9 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
+                        <UsedTools
+                            values={this.props}
+                        />
                         <div className="form-group">
                             <label htmlFor=''>Байр зүйн мэдээлэл</label>
                             <input
@@ -93,6 +113,7 @@ export default class RequestDetail extends Component {
                     <LLCMap
                         vector_datas={vector_datas}
                         height="80vh"
+                        aimag_geom={aimag_geom}
                     />
                 </div>
 
