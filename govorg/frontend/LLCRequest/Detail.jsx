@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import SolveModal from './solveModal'
+import LLCSettings from './sett_comp'
 
 export const make_state_color = (state) => {
     let color
@@ -56,22 +57,22 @@ export class Detail extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
-                    "title": 'File',
-                    "text": 'Татах',
-                    "icon": 'text-primary',
-                    'component': (values) => download_data(values)
-                },
-                {
-                    "title": 'Дэлгэрэнгүй1',
+                    "title": 'Дэлгэрэнгүй',
                     "text": '',
                     "icon": 'fa fa-eye text-primary',
                     "action": (values) => this.handeDetail(values)
                 },
                 {
-                    "title": 'Дэлгэрэнгүй2',
+                    "title": 'Тохиргоо',
                     "text": '',
-                    "icon": 'fa fa-eye text-primary',
+                    "icon": 'fa fa-cog text-primary',
                     "action": (values) => this.handeUpdateAction(values)
+                },
+                {
+                    "title": 'Хавсаргасан файл',
+                    "text": 'Татах',
+                    "icon": 'text-primary',
+                    'component': (values) => download_data(values)
                 },
                 {
                     "title": 'Шийдвэрлэх',
@@ -92,7 +93,7 @@ export class Detail extends Component {
     }
 
     handeUpdateAction(values) {
-        this.props.history.push(`/gov/llc-request/${values.id}/дэлгэрэнгүй2/`)
+        this.props.history.push(`/gov/llc-request/${values.id}/configure-bundle/`)
     }
 
     render() {
