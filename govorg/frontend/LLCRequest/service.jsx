@@ -5,10 +5,18 @@ export const service = {
     requestReturn,
     llcList,
     handleRequestData,
-    pg_config
+    pg_config,
+    getFilesDetal
 }
 
 const prefix = '/gov/api/llc-request'
+
+function getFilesDetal(id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`/llc/backend/${id}/get-file-shapes/`, opts).then(handleResponse)
+}
 
 function requestReject(ids, feature_id) {
     const requestOptions = {

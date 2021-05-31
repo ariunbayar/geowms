@@ -4,7 +4,7 @@ import Loader from "@utils/Loader/index"
 import SelectField from '@utils/Tools/Form/select_field'
 
 
-export class delgerengui extends Component {
+export class ConfigureBundle extends Component {
 
     constructor(props) {
         super(props)
@@ -19,12 +19,9 @@ export class delgerengui extends Component {
             title: '',
             text: '',
             model_type_icon: '',
-            has_button: false,
             action_name: '',
             modalClose: null,
-
             values: props.values,
-
             table_name: '',
             themes: [],
             packages: [],
@@ -36,8 +33,6 @@ export class delgerengui extends Component {
             selected_features: [],
             selected_dt_list: [],
             data_type_list: [],
-            id_list: [],
-            message: 'Property сонгоогүй байна.',
             is_loading: false,
         }
         this.selectedFeature = this.selectedFeature.bind(this)
@@ -47,30 +42,8 @@ export class delgerengui extends Component {
         this.getArray = this.getArray.bind(this)
         this.getFeatProperties = this.getFeatProperties.bind(this)
     }
-
-
-    getRequestIds(selected_value, values) {
-        let request_values
-        let ids = []
-        let feature_id
-
-        if (selected_value){
-            request_values = [selected_value]
-        }
-        else {
-            request_values = values
-        }
-        request_values.map((value, idx) => {
-            if (idx == 0) feature_id = value.feature_id
-            ids.push(value.id);
-        })
-        return {ids, feature_id}
-    }
-
-
     componentDidMount() {
         const {id} = this.state
-        // this.getInspireTree(id)
     }
 
     componentDidUpdate(pP, pS) {

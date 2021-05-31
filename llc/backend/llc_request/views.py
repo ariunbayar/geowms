@@ -276,3 +276,31 @@ def get_request_data(request, id):
         'aimag_name': aimag_name,
         'aimag_geom': aimag_geom
     })
+
+def _get_shapes_geoms(shape_geometry):
+    geo_datas = []
+    geom_type = ''
+    shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
+    geo_datas = _get_feature(shape_geoms)
+    return geo_datas, geom_type
+
+
+@require_GET
+@ajax_required
+def get_file_shapes(request, id):
+    list_of_datas = []
+    shape_geometries = RequestFilesShape.objects.filter(files_id=id)
+    for shape_geometry in shape_geometries:
+        feature = []
+        geoms, geom_type = _get_shapes_geoms(shape_geometry)
+        list_of_datas.append({
+            'geom_type': geom_type,
+            'theme': shape_geometry.theme,
+            'feature': shape_geometry.feature,
+            'package': shape_geometry.package,
+            'features': feature
+        })
+
+    return JsonResponse({
+        'list_of_datas': list_of_datas,
+    })

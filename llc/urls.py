@@ -15,6 +15,7 @@ urlpatterns = [
         path('llc-request-list/', llc_request_views.llc_request_list, name='llc_request_list'),
         path('save-request/', llc_request_views.save_request, name=' save_request'),
         path('<int:id>/get-request-data/', llc_request_views.get_request_data, name=' save_request'),
+        path('<int:id>/get-file-shapes/', llc_request_views.get_file_shapes, name=' save_request'),
     ], 'llc_requests'))),
 
     re_path('^.*', llc_views.llc_frontend, name='llc'),
