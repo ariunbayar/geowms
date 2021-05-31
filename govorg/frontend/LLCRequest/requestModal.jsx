@@ -74,8 +74,7 @@ export default class RequestModal extends Component {
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
         this.setState({ is_loading: true })
 
-        if(this.state.action_type == 'reject')
-        {
+        if(this.state.action_type == 'reject') {
            this.handleRequestReject(ids, feature_id)
         }
         if(this.state.action_type == 'approve') {

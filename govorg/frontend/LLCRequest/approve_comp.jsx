@@ -1,7 +1,9 @@
-import React, {Component, Fragment} from "react"
+import React, {Component} from "react"
 import {service} from './service'
 import {LLCMap} from '../../../llc/frontend/LLCMap'
 
+import Modal from "@utils/Modal/Modal"
+import Loader from "@utils/Loader/index"
 
 export default class RequestApprove extends Component {
 
@@ -17,20 +19,16 @@ export default class RequestApprove extends Component {
             icon_color: 'success',
             title: '',
             text: '',
-            model_type_icon: '',
             has_button: false,
             action_name: '',
             modalClose: null,
 
             values: props.values,
-
-            files:[],
             project_name: '',
             object_type: '',
             object_count: '',
             hurungu_oruulalt: '',
             zahialagch: '',
-            modal_status:'closed',
             vector_datas: [],
             disabled: true
         }
@@ -41,33 +39,34 @@ export default class RequestApprove extends Component {
         this.handleRequestReturn = this.handleRequestReturn.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        // this.getRequestIds = this.getRequestIds.bind(this)
     }
 
-    getRequestIds(selected_value, values) {
-        let request_values
-        let ids = []
-        let feature_id
+    // getRequestIds(selected_value, values) {
+    //     let request_values
+    //     let ids = []
+    //     let feature_id
 
-        if (selected_value){
-            request_values = [selected_value]
-        }
-        else {
-            request_values = values
-        }
-        request_values.map((value, idx) => {
-            if (idx == 0) feature_id = value.feature_id
-            ids.push(value.id);
-        })
-        return {ids, feature_id}
-    }
+    //     if (selected_value){
+    //         request_values = [selected_value]
+    //     }
+    //     else {
+    //         request_values = values
+    //     }
+    //     request_values.map((value, idx) => {
+    //         if (idx == 0) feature_id = value.feature_id
+    //         ids.push(value.id);
+    //     })
+    //     return {ids, feature_id}
+    // }
 
     handleModalAction(){
-        const { selected_value, values } = this.state
-        const {ids, feature_id} = this.getRequestIds(selected_value, values)
+        // const { selected_value, values } = this.state
+        const {ids, feature_id} = this.state
         this.setState({ is_loading: true })
 
-        if(this.state.action_type == 'reject')
-        {
+        if(this.state.action_type == 'reject') {
             this.handleRequestReject(ids, feature_id)
         }
         if(this.state.action_type == 'approve') {
@@ -259,14 +258,20 @@ export default class RequestApprove extends Component {
 
     handleModalClose() {
         this.setState({ is_loading: false })
-        this.props.refreshData()
+    }
+
+    handleModalOpen(){
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     render () {
-        const { zahialagch, project_name, object_type, object_count, hurungu_oruulalt, vector_datas } = this.props
+        const { zahialagch, project_name, object_type, object_count, hurungu_oruulalt, vector_datas, is_loading } = this.props
         return (
             <div>
                 <div className="row p-3">
+                <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
                     <div className="col-md-5">
                         <form  class="form-row">
                             <div className="form-group col-md-12">
@@ -341,18 +346,7 @@ export default class RequestApprove extends Component {
                             'fa fa-exclamation-circle',
                             'warning',
                             "Тохиргоог татгалзах",
-                            `Та ${
-                                values.length == 1
-                                    ?
-                                        get_modal_text(values[0].kind)
-                                    :
-                                values.length > 1
-                                    ?
-                                        `${values.length} өгөгдлөө`
-                                    :
-                                    null
-                            }
-                            татгалзахдаа итгэлтэй байна уу?`,
+                            `Та татгалзахдаа итгэлтэй байна уу?`,
                             true,
                             "татгалзах",
                             null
@@ -368,18 +362,7 @@ export default class RequestApprove extends Component {
                             'fa fa-exclamation-circle',
                             'warning',
                             "Тохиргоог буцаах",
-                            `Та ${
-                                values.length == 1
-                                    ?
-                                        get_modal_text(values[0].kind)
-                                    :
-                                values.length > 1
-                                    ?
-                                        `${values.length} өгөгдлөө`
-                                    :
-                                    null
-                            }
-                            буцаахдаа итгэлтэй байна уу?`,
+                            `Та буцаахдаа итгэлтэй байна уу?`,
                             true,
                             "буцаах",
                             null
@@ -395,18 +378,7 @@ export default class RequestApprove extends Component {
                             'fa fa-exclamation-circle',
                             'warning',
                             "Хүсэлт үүсгэх",
-                            `Та ${
-                                values.length == 1
-                                    ?
-                                        get_modal_text(values[0].kind)
-                                    :
-                                values.length > 1
-                                    ?
-                                        `${values.length} өгөгдөлд`
-                                    :
-                                    null
-                            }
-                            хүсэлт үүсгэх итгэлтэй байна уу?`,
+                            `Та хүсэлт үүсгэх итгэлтэй байна уу?`,
                             true,
                             "Хүсэлт үүсгэх",
                             null
@@ -416,6 +388,17 @@ export default class RequestApprove extends Component {
                         <i className="fa fa-check">Хүсэлт үүсгэх</i>
                     </button>
                 </div>
+                <Modal
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    has_button={this.state.has_button}
+                    text={this.state.text}
+                    modalAction={this.handleModalAction}
+                    actionNameDelete={this.state.action_name}
+                    modalClose={this.state.modalClose}
+                />
             </div>
         )
     }
