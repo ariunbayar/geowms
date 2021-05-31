@@ -25,6 +25,7 @@ from backend.inspire.models import (
     LThemes,
     LPackages,
     LFeatures,
+    LCodeLists,
     MGeoDatas,
     MDatas,
     EmpPermInspire,
@@ -38,7 +39,8 @@ from main.utils import (
     get_display_items,
     get_fields,
     get_feature_from_geojson,
-    json_load
+    json_load,
+    get_geom
 )
 from main.components import Datatable
 
@@ -896,19 +898,35 @@ def _get_feature(shape_geometries):
 def get_request_data(request, id):
     features = []
     field = dict()
-
+    aimag_name = ''
+    aimag_geom = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features = _get_feature(shape_geometries)
 
     qs = RequestForm.objects.filter(file_id=id)
     field = [item for item in qs.values()]
+    selected_tools = qs.first().file.tools
+    geo_id = qs.first().file.geo_id
+
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+    if mdata_qs:
+        code_list_id = mdata_qs.code_list_id
+        code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
+        aimag_name = code_list_data.code_list_name
+
+        aimag_geom = get_geom(geo_id, 'MultiPolygon')
+        if aimag_geom:
+            aimag_geom = aimag_geom.json
 
     if qs:
         field = [item for item in qs.values()]
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
-        'form_field': field[0]
+        'form_field': field[0],
+        'selected_tools': json_load(selected_tools),
+        'aimag_name': aimag_name,
+        'aimag_geom': aimag_geom
     })
 
 

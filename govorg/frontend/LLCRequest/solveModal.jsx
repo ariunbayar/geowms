@@ -1,6 +1,5 @@
 import React, { Component } from "react"
 import RequestModal from './requestModal'
-// import RequestApprove from './approve_comp'
 
 export default class SolveModal extends Component {
 
@@ -11,11 +10,11 @@ export default class SolveModal extends Component {
             values: props.values,
             state: props.values.state,
         }
-        this.openModalMapMap = this.openModalMapMap.bind(this)
+        this.openModalMap = this.openModalMap.bind(this)
         this.closeModalMap = this.closeModalMap.bind(this)
     }
 
-    openModalMapMap() {
+    openModalMap() {
         this.setState({ is_modal_request_open: true })
     }
 
@@ -33,7 +32,7 @@ export default class SolveModal extends Component {
                     &&
                         <a
                             className="btn btn-primary btn-sm text-white text-capitalize"
-                            onClick={this.openModalMapMap}
+                            onClick={this.openModalMap}
                         >
                             Шийдвэрлэх
                         </a>
@@ -42,12 +41,9 @@ export default class SolveModal extends Component {
                     is_modal_request_open
                     &&
                         <RequestModal
-                            hide_btn={this.props.hide_btn}
                             modalClose={this.closeModalMap}
-                            refreshData={this.props.refreshData}
                             values={this.state.values}
                             title={'Хүсэлт шийдвэрлэх'}
-                            // requestContent={RequestApprove}
                         />
                 }
             </div>

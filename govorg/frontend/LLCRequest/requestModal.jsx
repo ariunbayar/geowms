@@ -26,7 +26,8 @@ export default class RequestModal extends Component {
             hurungu_oruulalt: '',
             zahialagch: '',
             vector_datas: [],
-            disabled: true
+            disabled: true,
+            aimag_name: ''
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -34,7 +35,6 @@ export default class RequestModal extends Component {
         this.handleRequestApprove = this.handleRequestApprove.bind(this)
         this.handleRequestDismiss = this.handleRequestDismiss.bind(this)
         this.modalChange = this.modalChange.bind(this)
-        this.handleModalClose = this.handleModalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         // this.getRequestIds = this.getRequestIds.bind(this)
     }
@@ -86,7 +86,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                     this.setState({ is_loading: false })
                 }
@@ -99,7 +99,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                 }
             })
@@ -113,7 +113,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                 }
             })
@@ -132,7 +132,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                     this.setState({ is_loading: false })
                 }
@@ -145,7 +145,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                 }
             })
@@ -159,7 +159,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                 }
             })
@@ -178,7 +178,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                     this.setState({ is_loading: false })
                 }
@@ -191,7 +191,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                     )
                 }
             })
@@ -205,7 +205,7 @@ export default class RequestModal extends Component {
                         '',
                         false,
                         "",
-                        this.handleModalClose
+                        this.handleClose
                         )
                     }
                 })
@@ -215,7 +215,7 @@ export default class RequestModal extends Component {
         if (this.state.status == "initial") this.handleOpen()
 
         const {id} = this.state.values
-        service.handleRequestData(id).then(({ vector_datas, form_field }) => {
+        service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom }) => {
             if (form_field) {
                 this.setState({
                     vector_datas,
@@ -224,6 +224,9 @@ export default class RequestModal extends Component {
                     object_type : form_field['object_type'],
                     object_count : form_field['object_quantum'],
                     hurungu_oruulalt : form_field['investment_status'],
+                    selected_tools,
+                    aimag_name,
+                    aimag_geom
                 })
             }
         })
@@ -252,18 +255,16 @@ export default class RequestModal extends Component {
         this.handleModalOpen()
     }
 
-    handleModalClose() {
-        this.setState({ is_loading: false })
-    }
-
     handleModalOpen(){
-        this.setState({ modal_status: 'open' }, () => {
+        this.setState({ is_loading: false, modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
         })
     }
 
     render () {
-        const { zahialagch, project_name, object_type, object_count, hurungu_oruulalt, vector_datas, is_loading, status } = this.state
+        const { zahialagch, project_name, object_type,
+            object_count, hurungu_oruulalt, vector_datas,
+            is_loading, aimag_geom, aimag_name, status } = this.state
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -292,18 +293,24 @@ export default class RequestModal extends Component {
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* {
-                                    this.props.requestContent
-                                    &&
-                                    <this.props.requestContent
-                                        values={ this.props }
-                                    />
-                                } */}
                                 <div className="row p-3">
                                     <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
                                         <div className="col-md-5">
                                             <form  class="form-row">
+                                                {
+                                                    aimag_name
+                                                    &&
+                                                        <div className="form-group col-md-12">
+                                                            <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
+                                                            <input
+                                                                type="text"
+                                                                name='aimag_name'
+                                                                className="form-control"
+                                                                disabled={true}
+                                                                value={aimag_name}
+                                                            />
+                                                        </div>
+                                                }
                                                 <div className="form-group col-md-12">
                                                     <label htmlFor=''>Захиалагч байгууллага</label>
                                                     <input
@@ -360,6 +367,7 @@ export default class RequestModal extends Component {
                                             <LLCMap
                                                 vector_datas={vector_datas}
                                                 height="50vh"
+                                                aimag_geom={aimag_geom}
                                             />
                                         </div>
                                     </div>
@@ -427,11 +435,6 @@ export default class RequestModal extends Component {
                                 </div>
                             </div>
                         </div>
-                        {/* <Modal
-                            modal_status={this.state.modal_status}
-                            title={this.state.title}
-                            modalClose={this.state.modalClose}
-                        /> */}
                     </div>
                 <div className={classNameBackdrop}></div>
             </Fragment>
