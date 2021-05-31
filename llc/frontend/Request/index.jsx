@@ -21,7 +21,8 @@ export default class Request extends Component {
                 />
                 <Route
                     path="/llc/llc-request/:id/дэлгэрэнгүй/"
-                    component={RequestAdd}
+                    component={(props) =>
+                        <RequestAdd {...props} values={this.props} info={false}/>}
                 />
             </Switch>
         )

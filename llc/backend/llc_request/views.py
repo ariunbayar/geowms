@@ -159,6 +159,7 @@ def _create_shape_files(org_data, request_file, zip_ref):
 @require_POST
 @ajax_required
 def save_request(request):
+    id = request.POST.get('id')
     uploaded_file = request.FILES['files']
     project_name = request.POST.get('project_name')
     object_type = request.POST.get('object_type')
@@ -185,24 +186,48 @@ def save_request(request):
                     'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
             })
 
-        request_file = RequestFiles.objects.create(
-            name=project_name,
-            kind=2,
-            state=1,
-            geo_id=org_data.geo_id if org_data else '',
-            file_path=uploaded_file,
-            tools=json_dumps(selected_tools)
-        )
+        if id:
+            request_file = RequestFiles.objects.filter(pk=id)
+            request_file.update(
+                name=project_name,
+                kind=2,
+                state=1,
+                geo_id=org_data.geo_id if org_data else '',
+                file_path=uploaded_file,
+                tools=json_dumps(selected_tools)
+            )
+            request_file = request_file.first()
+        else:
 
-        RequestForm.objects.create(
-            client_org=zahialagch,
-            project_name=project_name,
-            object_type=object_type,
-            object_quantum=object_count,
-            investment_status=hurungu_oruulalt,
-            file=request_file
-        )
+            request_file = RequestFiles.objects.create(
+                name=project_name,
+                kind=2,
+                state=1,
+                geo_id=org_data.geo_id if org_data else '',
+                file_path=uploaded_file,
+                tools=json_dumps(selected_tools)
+            )
+            request_file = request_file.id
 
+        form_data = RequestForm.objects.filter(file_id=id).first()
+
+        if form_data:
+
+            form_data.client_org = zahialagch
+            form_data.project_name = project_name
+            form_data.object_type = object_type
+            form_data.object_quantum = object_count
+            form_data.investment_status = hurungu_oruulalt
+            form_data.save()
+
+        else:
+            RequestForm.objects.create(
+                client_org=zahialagch,
+                project_name=project_name,
+                object_type=object_type,
+                object_quantum=object_count,
+                investment_status=hurungu_oruulalt,
+            )
         _create_shape_files(org_data, request_file, zip_ref)
 
     rsp = {
@@ -262,6 +287,7 @@ def get_request_data(request, id):
         field['investment_status'] = qs.investment_status
         field['file_path'] = str(qs.file.file_path)
         field['selected_tools'] = json_load(qs.file.tools)
+        field['state'] = qs.file.state
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -278,7 +304,7 @@ def send_request(request, id):
 
     return JsonResponse({
         'success': True,
-        'info': 'Амжилттай хадгаллаа'
+        'info': 'Амжилттай илгээгдлээ.'
     })
 
 

@@ -9,6 +9,7 @@ class SubmitClass extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            url: "/llc/llc-request/",
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
@@ -18,10 +19,11 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools
+            selected_tools,id
         } = this.props.values
         const form_datas = new FormData()
         form_datas.append('files', files, files.name)
+        form_datas.append('id', id)
         form_datas.append('project_name', project_name)
         form_datas.append('object_type', object_type)
         form_datas.append('object_count', object_count)
@@ -39,7 +41,7 @@ class SubmitClass extends Component {
         return (
             <Fragment>
                 <div>
-                    {   !values.id 
+                    {   !values.id
                         ?
                             <button
                                 type="button"
@@ -48,16 +50,32 @@ class SubmitClass extends Component {
                             >
                                 <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
                             </button>
-                        : 
-                            <p className="btn btn-secondary">
-                              <i
+                        :
+                        <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
+                        <p className="btn btn-secondary">
+                            <i
                                 className="fa fa-angle-double-left"
-                                onClick ={()=> values.closeRequestMap()}
+                                onClick ={()=> values.history.push(this.state.url)}
 
-                                >
+                            >
                                 Буцах
-                                </i>
-                            </p>
+                            </i>
+                        </p>
+                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            {
+                                values.state != 2
+
+                                ?
+                                    <p
+                                    className="btn btn-primary"
+                                    onClick ={()=> this.handleSubmit()}
+                                    >
+                                        <i className="fa"> Хадгалах</i>
+                                    </p>
+                                    :
+                                        null
+                            }
+                    </div>
                 }
                 </div>
                 </Fragment>
@@ -82,6 +100,7 @@ export class RequestAdd extends Component {
             vector_datas: [],
             tool_datas: [],
             selected_tools: [],
+            state: '',
             regis_number: props.regis_number,
 
         }
@@ -111,6 +130,7 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
+                        state: form_field['state'],
                     })
                 }
             })
@@ -120,7 +140,6 @@ export class RequestAdd extends Component {
 
     getTools() {
         const {regis_number} = this.state
-        console.log(this.props);
         service.getToolDatas(regis_number).then(({tool_datas})=>{
             this.setState({tool_datas})
         })
@@ -201,9 +220,10 @@ export class RequestAdd extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            vector_datas, tool_datas, selected_tools
+            vector_datas, tool_datas, selected_tools,
+            state
         } = this.state
-        const {id, info} = this.props.match.params
+        const {id} = this.props.match.params
         return (
             <div className="card">
                 <div className="card-body">
@@ -216,13 +236,14 @@ export class RequestAdd extends Component {
                         zahialagch={zahialagch}
                         files={files}
                         vector_datas={vector_datas}
-                        handleOnChange={this.handleOnChange}
-                        submitClass={SubmitClass}
-                        handlePassValues={this.handlePassValues}
-                        BackToList={this.BackToList}
-                        info={info}
                         tool_datas={tool_datas}
                         selected_tools={selected_tools}
+                        state={this.state.state}
+                        history={this.props.history}
+                        info={this.props.info}
+                        submitClass={SubmitClass}
+                        handleOnChange={this.handleOnChange}
+                        handlePassValues={this.handlePassValues}
                         handleSelectModel={this.handleSelectModel}
                     />
                 </div>
