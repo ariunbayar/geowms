@@ -826,13 +826,22 @@ def get_count(request):
     return JsonResponse(rsp)
 
 
+def _get_display(field, value):
+    for f in RequestFiles._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == field:
+                for c_id, c_type in f.choices:
+                    if c_id == value:
+                        return c_type
+
+
 def _get_state(state, item):
-    display_name = _get_display_text('state', state)
+    display_name = _get_display('state', state)
     return display_name
 
 
 def _get_kind(kind, item):
-    display_name = _get_display_text('kind', kind)
+    display_name = _get_display('kind', kind)
     return display_name
 
 
@@ -840,10 +849,11 @@ def _get_kind(kind, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+    # employee = get_object_or_404(Employee, user=request.user)
     org = Org.objects.filter(employee__user=request.user).first()
+    state = RequestFiles.STATE_SENT
 
-    if employee:
+    if state:
         qs = RequestFiles.objects
         qs = qs.filter(geo_id=org.geo_id)
         if qs:
@@ -871,10 +881,15 @@ def get_llc_list(request, payload):
                 'items': [],
                 'page': payload.get("page"),
                 'total_page': 1,
-
             }
+    else:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1,
+        }
 
-        return JsonResponse(rsp)
+    return JsonResponse(rsp)
 
 
 def _get_feature(shape_geometries):
@@ -934,35 +949,54 @@ def get_request_data(request, id):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def llc_request_reject(request, payload):
-    ids = payload.get('ids')
-    feature_id = payload.get('feature_id')
-    employee = get_object_or_404(Employee, user__username=request.user)
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    # ids = payload.get('ids')
+    # feature_id = payload.get('feature_id')
+    # employee = get_object_or_404(Employee, user__username=request.user)
+    # emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
-    qs = EmpPermInspire.objects
-    qs = qs.filter(emp_perm=emp_perm)
-    qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
-    perm_reject = qs.filter(feature_id=feature_id)
+    # emp = employee.position.id
 
-    if perm_reject:
-        for r_id in ids:
-            llc_req_obj = get_object_or_404(RequestFiles, pk=r_id)
-            llc_req_obj.state = RequestFiles.STATE_REJECT
-            llc_req_obj.save()
+    # qs = EmpPermInspire.objects
+    # qs = qs.filter(emp_perm=emp_perm)
+    # qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
+    # perm_reject = qs.filter(feature_id=feature_id)
 
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай татгалзлаа'
-        }
+    # if employee:
+    #     for r_id in ids:
+    #         llc_req_obj = get_object_or_404(RequestFiles, pk=r_id)
+    #         llc_req_obj.state = RequestFiles.STATE_REJECT
+    #         llc_req_obj.save()
+    #         print('aaaaaaaaa')
+    #         print('aaaaaaaaa')
+    #         print('aaaaaaaaa')
+    #         print('aaaaaaaaa')
+    #         print('aaaaaaaaa')
 
-    else:
-        rsp = {
-            'success': False,
-            'info': 'Татгалзах эрхгүй байна'
-        }
+    #     rsp = {
+    #         'success': True,
+    #         'info': 'Амжилттай татгалзлаа'
+    #     }
 
-    return JsonResponse(rsp)
+    # else:
+    #     rsp = {
+    #         'success': False,
+    #         'info': 'Татгалзах эрхгүй байна'
+    #     }
 
+    # return JsonResponse(rsp)
+
+
+    # state = payload.get('state')
+    # pk = payload.get('id')
+
+    # if state == 'reject':
+    #     _change_revoke_request(pk, ChangeRequest.STATE_REJECT)
+
+    if state == 'approve':
+        change_request = _change_revoke_request(pk, ChangeRequest.STATE_APPROVE)
+        _delete_geom_data(change_request)
+
+    return JsonResponse({'success': True})
 
 @require_POST
 @ajax_required

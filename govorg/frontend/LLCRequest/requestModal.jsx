@@ -36,30 +36,13 @@ export default class RequestModal extends Component {
         this.handleRequestDismiss = this.handleRequestDismiss.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
-        // this.getRequestIds = this.getRequestIds.bind(this)
+        this.selectedFeature = this.selectedFeature.bind(this)
     }
 
-    // getRequestIds(selected_value, values) {
-    //     let request_values
-    //     let ids = []
-    //     let feature_id
-
-    //     if (selected_value){
-    //         request_values = [selected_value]
-    //     }
-    //     else {
-    //         request_values = values
-    //     }
-    //     request_values.map((value, idx) => {
-    //         if (idx == 0) feature_id = value.feature_id
-    //         ids.push(value.id);
-    //     })
-    //     return {ids, feature_id}
-    // }
-
     handleModalAction(){
-        // const { selected_value, values } = this.state
-        const {ids, feature_id} = this.state
+        const { selected_value, values } = this.state
+        let ids = []
+        let feature_id
         this.setState({ is_loading: true })
 
         if(this.state.action_type == 'reject') {
@@ -119,9 +102,9 @@ export default class RequestModal extends Component {
             })
     }
 
-    handleRequestReject(ids, feature_id,) {
+    handleRequestReject(id, state) {
         service
-            .requestReject(ids, feature_id)
+            .requestReject(id, state)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -213,8 +196,8 @@ export default class RequestModal extends Component {
 
     componentDidMount() {
         if (this.state.status == "initial") this.handleOpen()
-
-        const {id} = this.state.values
+        // const {id} = .id
+        var id = this.props.id
         service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom }) => {
             if (form_field) {
                 this.setState({
@@ -261,10 +244,23 @@ export default class RequestModal extends Component {
         })
     }
 
+    selectedFeature(e) {
+        const feature = e.selected[0]
+        if (feature) {
+            const { values } = this.props
+            const id = feature.getProperties()['id']
+            values.map((value, idx) => {
+                if (value.id == id) {
+                    this.setState({ form_json: value.form_json, selected_value: value })
+                }
+            })
+        }
+    }
+
     render () {
         const { zahialagch, project_name, object_type,
             object_count, hurungu_oruulalt, vector_datas,
-            is_loading, aimag_geom, aimag_name, status } = this.state
+            is_loading, aimag_geom, aimag_name, status, selected_value } = this.state
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -276,7 +272,6 @@ export default class RequestModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
@@ -293,134 +288,14 @@ export default class RequestModal extends Component {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="row p-3">
-                                    <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
-                                        <div className="col-md-5">
-                                            <form  class="form-row">
-                                                {
-                                                    aimag_name
-                                                    &&
-                                                        <div className="form-group col-md-12">
-                                                            <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
-                                                            <input
-                                                                type="text"
-                                                                name='aimag_name'
-                                                                className="form-control"
-                                                                disabled={true}
-                                                                value={aimag_name}
-                                                            />
-                                                        </div>
-                                                }
-                                                <div className="form-group col-md-12">
-                                                    <label htmlFor=''>Захиалагч байгууллага</label>
-                                                    <input
-                                                        type="text"
-                                                        name='zahialagch'
-                                                        className="form-control"
-                                                        value={zahialagch}
-                                                        disabled={true}
-                                                    />
-                                                </div>
-                                                <div className="form-group col-md-12 m-0">
-                                                    <label htmlFor=''>Төслийн нэр</label>
-                                                    <input
-                                                        type="text"
-                                                        name='project_name'
-                                                        className="form-control"
-                                                        value={project_name}
-                                                        disabled={true}
-                                                    />
-                                                </div>
-                                                <div className="form-group col-md-6 my-4 col-sm-6">
-                                                    <label htmlFor=''>Объектийн төрөл</label>
-                                                    <textarea
-                                                        type="text"
-                                                        name="object_type"
-                                                        className="form-control"
-                                                        value={object_type}
-                                                        disabled={true}
-                                                    />
-                                                </div>
-                                                <div className="form-group col-md-6 col-sm-6 my-4">
-                                                    <label htmlFor=''>Объектийн тоо хэмжээ</label>
-                                                    <textarea
-                                                        type="text"
-                                                        name="object_count"
-                                                        className="form-control"
-                                                        value={object_count}
-                                                        disabled={true}
-                                                    />
-                                                </div>
-                                                <div className="form-group col-md-12">
-                                                    <label htmlFor=''> Хөрөнгө оруулалтын байдал </label>
-                                                    <textarea
-                                                        name='hurungu_oruulalt'
-                                                        rows="3"
-                                                        className="form-control"
-                                                        value={hurungu_oruulalt}
-                                                        disabled={true}
-                                                    />
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div className="col-md-7">
-                                            <LLCMap
-                                                vector_datas={vector_datas}
-                                                height="50vh"
-                                                aimag_geom={aimag_geom}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="row my-2 mr-1 float-right">
-                                        <button
-                                            type="button mr-2 ml-2"
-                                            onClick={() => this.modalChange(
-                                                'reject',
-                                                'fa fa-exclamation-circle',
-                                                'warning',
-                                                "Тохиргоог татгалзах",
-                                                `Та татгалзахдаа итгэлтэй байна уу?`,
-                                                true,
-                                                "татгалзах",
-                                                null
-                                            )}
-                                            className="btn gp-btn-primary waves-effect waves-light"
-                                        >
-                                            <i className="fa fa-check-square-o">Татгалзах</i>
-                                        </button>
-                                        <button
-                                            type="button mr-2 ml-2"
-                                            onClick={() => this.modalChange(
-                                                'reject',
-                                                'fa fa-exclamation-circle',
-                                                'warning',
-                                                "Тохиргоог буцаах",
-                                                `Та буцаахдаа итгэлтэй байна уу?`,
-                                                true,
-                                                "буцаах",
-                                                null
-                                            )}
-                                            className="btn gp-btn-primary waves-effect waves-light ml-2"
-                                        >
-                                            <i className="fa fa-check-square-o">Буцаах</i>
-                                        </button>
-                                        <button
-                                            type="button mr-2 ml-2"
-                                            onClick={() => this.modalChange(
-                                                'approve',
-                                                'fa fa-exclamation-circle',
-                                                'warning',
-                                                "Хүсэлт үүсгэх",
-                                                `Та хүсэлт үүсгэх итгэлтэй байна уу?`,
-                                                true,
-                                                "Хүсэлт үүсгэх",
-                                                null
-                                            )}
-                                            className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                        >
-                                            <i className="fa fa-check">Хүсэлт үүсгэх</i>
-                                        </button>
-                                    </div>
+                                    {
+                                        this.props.model_body
+                                        &&
+                                        <this.props.model_body
+                                            {...this.state}
+                                        />
+                                    }
+
                                     <Modal
                                         modal_status={this.state.modal_status}
                                         modal_icon={this.state.modal_icon}
