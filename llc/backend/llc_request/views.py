@@ -1,7 +1,9 @@
 
+import os
 import rarfile
+from django.conf import settings
 from django.db import connections
-from geojson import FeatureCollection, Feature
+from geojson import FeatureCollection
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -254,14 +256,26 @@ def get_request_data(request, id):
         single_geom = json_load(shape_geometry.geom_json)
         features.append(single_geom)
 
+    file_data = {
+        'name': '',
+        'size': '',
+        'type': 'application/vnd.rar'
+    }
+
+    file_qs = qs.file.file_path
+    file_data['name'] = file_qs.name
+    file_data['size'] = file_qs.size
+
     if qs:
+        file_name = str(qs.file.file_path).split('/')[1]
         field['client_org'] = qs.client_org
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
-        field['file_path'] = str(qs.file.file_path)
+        field['file_path'] = file_data
         field['selected_tools'] = json_load(qs.file.tools)
+        field['file_name'] = file_name
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),

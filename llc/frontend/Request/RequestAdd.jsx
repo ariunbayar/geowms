@@ -18,10 +18,16 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools
+            selected_tools, id
         } = this.props.values
+        var blob = []
+        if (id) {
+            const obj = files
+            blob = new Blob([JSON.stringify(obj, null, 2)], {type : 'application/vnd.rar'})
+        }
+        else blob = files
         const form_datas = new FormData()
-        form_datas.append('files', files, files.name)
+        form_datas.append('files', blob, files.name)
         form_datas.append('project_name', project_name)
         form_datas.append('object_type', object_type)
         form_datas.append('object_count', object_count)
@@ -39,7 +45,7 @@ class SubmitClass extends Component {
         return (
             <Fragment>
                 <div>
-                    {   !values.id 
+                {   !values.id 
                         ?
                             <button
                                 type="button"
@@ -50,7 +56,7 @@ class SubmitClass extends Component {
                             </button>
                         : 
                             <p className="btn btn-secondary">
-                              <i
+                                <i
                                 className="fa fa-angle-double-left"
                                 onClick ={()=> values.closeRequestMap()}
 
@@ -82,6 +88,7 @@ export class RequestAdd extends Component {
             vector_datas: [],
             tool_datas: [],
             selected_tools: [],
+            file_name:'',
             regis_number: props.regis_number,
 
         }
@@ -111,6 +118,8 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
+                        files: form_field['file_path'],
+                        file_name: form_field['file_name']
                     })
                 }
             })
@@ -120,7 +129,6 @@ export class RequestAdd extends Component {
 
     getTools() {
         const {regis_number} = this.state
-        console.log(this.props);
         service.getToolDatas(regis_number).then(({tool_datas})=>{
             this.setState({tool_datas})
         })
@@ -128,14 +136,16 @@ export class RequestAdd extends Component {
 
     handleOnChange(e) {
         var name = e.target.name
+        var {file_name} = this.state
         var value = ''
         if (name == 'files') {
             value = e.target.files[0]
+            file_name = value.name
         }
         else {
             value = e.target.value
         }
-        this.setState({[name]: value})
+        this.setState({[name]: value, file_name})
     }
 
     modalClose() {
@@ -201,7 +211,8 @@ export class RequestAdd extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            vector_datas, tool_datas, selected_tools
+            vector_datas, tool_datas, selected_tools,
+            file_name
         } = this.state
         const {id, info} = this.props.match.params
         return (
@@ -215,6 +226,7 @@ export class RequestAdd extends Component {
                         hurungu_oruulalt={hurungu_oruulalt}
                         zahialagch={zahialagch}
                         files={files}
+                        file_name={file_name}
                         vector_datas={vector_datas}
                         handleOnChange={this.handleOnChange}
                         submitClass={SubmitClass}
