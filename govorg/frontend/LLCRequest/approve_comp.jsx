@@ -266,17 +266,6 @@ export default class RequestApprove extends Component {
         const { zahialagch, project_name, object_type, object_count, hurungu_oruulalt, vector_datas } = this.props
         return (
             <div>
-                <div className="row mt-2" style={{background:"white"}}>
-                    <div className="col-md-11">
-                        <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
-                    </div>
-                    <div className="col-md-1" onClick={() => this.handleClose()}>
-                        <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                </div>
-
                 <div className="row p-3">
                     <div className="col-md-5">
                         <form  class="form-row">

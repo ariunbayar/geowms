@@ -46,6 +46,7 @@ export default class SolveModal extends Component {
                             modalClose={this.closeModalMap}
                             refreshData={this.props.refreshData}
                             values={this.state.values}
+                            title={'Хүсэлт шийдвэрлэх'}
                             requestContent={RequestApprove}
                         />
                 }
