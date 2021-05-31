@@ -19,11 +19,20 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools,id
+            selected_tools,id, file_state
         } = this.props.values
+        var blob = []
+        if (id) {
+            if (!file_state) {
+                const obj = files
+                blob = new Blob([JSON.stringify(obj, null, 2)], {type : 'application/vnd.rar'})
+            }
+            else blob = files
+        }
+        else blob = files
         const form_datas = new FormData()
-        form_datas.append('files', files, files.name)
-        form_datas.append('id', id)
+        form_datas.append('files', blob, files.name)
+        form_datas.append('id', JSON.stringify({id}))
         form_datas.append('project_name', project_name)
         form_datas.append('object_type', object_type)
         form_datas.append('object_count', object_count)
@@ -100,8 +109,10 @@ export class RequestAdd extends Component {
             vector_datas: [],
             tool_datas: [],
             selected_tools: [],
+            file_name:'',
             state: '',
             regis_number: props.regis_number,
+            file_state: false
 
         }
 
@@ -130,6 +141,8 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
+                        files: form_field['file_path'],
+                        file_name: form_field['file_name'],
                         state: form_field['state'],
                     })
                 }
@@ -147,14 +160,21 @@ export class RequestAdd extends Component {
 
     handleOnChange(e) {
         var name = e.target.name
+        var {file_name, file_state} = this.state
+        const {id} = this.props.match.params
         var value = ''
         if (name == 'files') {
+            if (id) {
+                file_state = true
+            }
+
             value = e.target.files[0]
+            file_name = value.name
         }
         else {
             value = e.target.value
         }
-        this.setState({[name]: value})
+        this.setState({[name]: value, file_name, file_state})
     }
 
     modalClose() {
@@ -221,7 +241,7 @@ export class RequestAdd extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             vector_datas, tool_datas, selected_tools,
-            state
+            file_name, state, file_state
         } = this.state
         const {id} = this.props.match.params
         return (
@@ -235,10 +255,12 @@ export class RequestAdd extends Component {
                         hurungu_oruulalt={hurungu_oruulalt}
                         zahialagch={zahialagch}
                         files={files}
+                        file_name={file_name}
                         vector_datas={vector_datas}
                         tool_datas={tool_datas}
                         selected_tools={selected_tools}
-                        state={this.state.state}
+                        state={state}
+                        file_state={file_state}
                         history={this.props.history}
                         info={this.props.info}
                         submitClass={SubmitClass}

@@ -107,12 +107,12 @@ export default class RequestDetail extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
-            info
+            files, file_name, info
         } = this.props
         return (
             <div className="row p-3">
                 <div className="col-md-5">
-                    <form  className="form-row ">
+                    <form  className="form-row">
                         <div className="form-group col-md-12">
                             <label htmlFor=''>Захиалагч байгууллага</label>
                             <input
@@ -171,21 +171,27 @@ export default class RequestDetail extends Component {
                         <UsedTools
                             values={this.props}
                         />
-                        {
-                            !info &&
-                            <div className="form-group">
-                            <label htmlFor=''>Байр зүйн мэдээлэл</label>
+                        <div className="form-group">
+                            <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
+                            <label
+                                htmlFor="choose-file"
+                                className="custom-file-upload col-md-6 text-center"
+                                id="choose-file-label"
+                            >
+                                файл оруулах
+                            </label>
                             <input
+                                name="uploadDocument"
                                 type="file"
+                                id="choose-file"
                                 name='files'
-                                className="form-control-file"
                                 onChange={(e) => this.props.handleOnChange(e)}
+                                style={{display: 'none'}}
                             />
-                            <small className="text-center text-muted col-md-12 mt-1">
-                                Хавсаргах файл нь геометр өгөгдөл агуулсан ".rar" форматтай файл байна
-                            </small>
+                            <span className="col-md-5 ml-2">
+                                {file_name ? file_name : 'файл сонгогдоогүй байна'}
+                            </span>
                         </div>
-                        }
                     </form>
                     {
                         this.props.submitClass

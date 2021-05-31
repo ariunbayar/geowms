@@ -103,7 +103,7 @@ export default class UsedTools extends Component {
                         </tbody>
                     </table>
                 </div>
-                <div className={`form-group col-md-12 ${id} ? invisible : ''`}>
+                <div className={`form-group col-md-12 ${id ? 'invisible' : ''}`}>
                     <div className="form-group col-md-12">
                         <a
                             id='tool_id'

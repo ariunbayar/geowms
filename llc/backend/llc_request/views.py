@@ -1,8 +1,13 @@
 
+<<<<<<< HEAD
 from geoportal_app.models import User
+=======
+import os
+>>>>>>> 33fc1c66d5e8a9ee1e36228e21749b7f5207616d
 import rarfile
+from django.conf import settings
 from django.db import connections
-from geojson import FeatureCollection, Feature
+from geojson import FeatureCollection
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -167,7 +172,7 @@ def _create_shape_files(org_data, request_file, zip_ref):
 @require_POST
 @ajax_required
 def save_request(request):
-    id = request.POST.get('id')
+    id = request.POST.get('id') or None
     uploaded_file = request.FILES['files']
     project_name = request.POST.get('project_name')
     object_type = request.POST.get('object_type')
@@ -175,38 +180,48 @@ def save_request(request):
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
     selected_tools = request.POST.get('selected_tools') or []
-    if selected_tools:
-        rsp = {
-            'success': False,
-            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
-        }
 
+    if id:
+        id = json_load(id)
+        id = id.get('id')
+
+    if not selected_tools:
         selected_tools = json_load(selected_tools)
         selected_tools = selected_tools['selected_tools']
+        return JsonResponse({
+            'success': False,
+            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        })
 
-    with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
-        file_datas = zip_ref.infolist()[0]
+    check_file_name = 'llc-request-files/' + str(uploaded_file)
+    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
+    if check_data_of_file and not id:
+        return JsonResponse({
+            'success': False,
+            'info': 'Файл-ын нэр давхцаж байна !!!.'
+        })
+
+    if not check_data_of_file or not id:
+        with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
+            file_datas = zip_ref.infolist()[0]
+
         org_data = _get_leve_2_geo_id(file_datas, zip_ref)
         if not org_data:
-
             return JsonResponse({
                     'success': False,
                     'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
             })
 
         if id:
-            request_file = RequestFiles.objects.filter(pk=id)
-            request_file.update(
-                name=project_name,
-                kind=2,
-                state=1,
-                geo_id=org_data.geo_id if org_data else '',
-                file_path=uploaded_file,
-                tools=json_dumps(selected_tools)
-            )
-            request_file = request_file.first()
-        else:
+            request_file = RequestFiles.objects.filter(pk=id).first()
+            if not check_data_of_file:
+                request_file.geo_id=org_data.geo_id if org_data else ''
+                request_file.file_path=uploaded_file
 
+            request_file.tools=json_dumps(selected_tools)
+            request_file.save()
+
+        else:
             request_file = RequestFiles.objects.create(
                 name=project_name,
                 kind=2,
@@ -215,28 +230,30 @@ def save_request(request):
                 file_path=uploaded_file,
                 tools=json_dumps(selected_tools)
             )
-            request_file = request_file.id
-
-        form_data = RequestForm.objects.filter(file_id=id).first()
-
-        if form_data:
-
-            form_data.client_org = zahialagch
-            form_data.project_name = project_name
-            form_data.object_type = object_type
-            form_data.object_quantum = object_count
-            form_data.investment_status = hurungu_oruulalt
-            form_data.save()
-
-        else:
-            RequestForm.objects.create(
-                client_org=zahialagch,
-                project_name=project_name,
-                object_type=object_type,
-                object_quantum=object_count,
-                investment_status=hurungu_oruulalt,
-            )
+            id = request_file.id
         _create_shape_files(org_data, request_file, zip_ref)
+
+    form_data = RequestForm.objects.filter(file_id=id).first()
+    if form_data:
+        form_data.client_org = zahialagch
+        form_data.project_name = project_name
+        form_data.object_type = object_type
+        form_data.object_quantum = object_count
+        form_data.investment_status = hurungu_oruulalt
+        form_data.save()
+
+    else:
+        print("hoh")
+        print("hoh")
+        print("hoh", id)
+        RequestForm.objects.create(
+            client_org=zahialagch,
+            project_name=project_name,
+            object_type=object_type,
+            object_quantum=object_count,
+            investment_status=hurungu_oruulalt,
+            file_id=id
+        )
 
     rsp = {
         'success': True,
@@ -278,7 +295,6 @@ def get_request_data(request, id):
     features = []
     field = {}
     qs = RequestForm.objects.filter(file_id=id).first()
-
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features = _get_feature(shape_geometries)
 
@@ -287,14 +303,26 @@ def get_request_data(request, id):
         single_geom = json_load(shape_geometry.geom_json)
         features.append(single_geom)
 
+    file_data = {
+        'name': '',
+        'size': '',
+        'type': 'application/vnd.rar'
+    }
+
+    file_qs = qs.file.file_path
+    file_data['name'] = file_qs.name
+    file_data['size'] = file_qs.size
+
     if qs:
+        file_name = str(qs.file.file_path).split('/')[1]
         field['client_org'] = qs.client_org
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
-        field['file_path'] = str(qs.file.file_path)
+        field['file_path'] = file_data
         field['selected_tools'] = json_load(qs.file.tools)
+        field['file_name'] = file_name
         field['state'] = qs.file.state
 
     return JsonResponse({
