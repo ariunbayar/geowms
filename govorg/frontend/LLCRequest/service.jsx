@@ -2,7 +2,7 @@ import {handleResponse, getPostOptions, getGetOptions} from '../components/helpe
 export const service = {
     requestReject,
     requestApprove,
-    requestReturn,
+    requestDismiss,
     llcList,
     handleRequestData,
     pg_config,
@@ -34,12 +34,12 @@ function requestApprove(ids, feature_id) {
     return fetch(`${prefix}/approve/`, requestOptions).then(handleResponse)
 }
 
-function requestReturn(ids, feature_id) {
+function requestDismiss(ids, feature_id) {
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify({ids, feature_id}),
     }
-    return fetch(`${prefix}/return/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/dismiss/`, requestOptions).then(handleResponse)
 }
 
 function llcList(id) {

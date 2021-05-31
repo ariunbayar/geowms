@@ -1,6 +1,6 @@
 import React, { Component } from "react"
 import RequestModal from './requestModal'
-import RequestApprove from './approve_comp'
+// import RequestApprove from './approve_comp'
 
 export default class SolveModal extends Component {
 
@@ -47,7 +47,7 @@ export default class SolveModal extends Component {
                             refreshData={this.props.refreshData}
                             values={this.state.values}
                             title={'Хүсэлт шийдвэрлэх'}
-                            requestContent={RequestApprove}
+                            // requestContent={RequestApprove}
                         />
                 }
             </div>

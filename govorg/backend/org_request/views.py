@@ -825,19 +825,13 @@ def get_count(request):
 
 
 def _get_state(state, item):
-    return "ШИНЭ" if state == 1 else "ИЛГЭЭСЭН"
+    display_name = _get_display_text('state', state)
+    return display_name
 
 
 def _get_kind(kind, item):
-    if kind == 1:
-        kind = "ХҮЛЭЭГДЭЖ БУЙ"
-    elif kind == 2:
-        kind = "ШИЙДВЭРЛЭГДСЭН"
-    elif kind == 3:
-        kind = "БУЦААГДСАН"
-    elif kind == 2:
-        kind = "ЦУЦЛАСАН"
-    return kind
+    display_name = _get_display_text('kind', kind)
+    return display_name
 
 
 @require_POST
@@ -1004,13 +998,47 @@ def llc_request_approve(request, payload):
             else:
                 rsp = {
                     'success': False,
-                    'info': 'Танд баталгаажуулах эрх алга байна.'
+                    'info': 'Танд баталгаажуулах эрх алга байна'
                 }
 
         refreshMaterializedView(feature_id)
         rsp = {
             'success': True,
-            'info': 'Амжилттай баталгаажуулж дууслаа'
+            'info': 'Амжилттай хүсэлт үүслээ'
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def llc_request_dismiss(request, payload):
+    ids = payload.get('ids')
+    feature_id = payload.get('feature_id')
+    employee = get_object_or_404(Employee, user__username=request.user)
+    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+
+    qs = EmpPermInspire.objects
+    qs = qs.filter(emp_perm=emp_perm)
+    qs = qs.filter(perm_kind=EmpPermInspire.PERM_REMOVE)
+    perm_dismiss = qs.filter(feature_id=feature_id)
+
+    if perm_dismiss:
+        for r_id in ids:
+            llc_req_obj = get_object_or_404(RequestFiles, pk=r_id)
+            llc_req_obj.state = RequestFiles.STATE_REJECT
+            llc_req_obj.save()
+
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай буцаалаа'
+        }
+
+    else:
+        rsp = {
+            'success': False,
+            'info': 'Буцаах эрхгүй байна'
         }
 
     return JsonResponse(rsp)
