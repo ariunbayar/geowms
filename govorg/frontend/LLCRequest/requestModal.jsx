@@ -2,8 +2,6 @@ import React, {Component, Fragment} from "react"
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
-import SelectField from '@utils/Tools/Form/select_field'
-import {LLCMap} from '../../../llc/frontend/LLCMap'
 
 
 export default class RequestModal extends Component {
@@ -297,181 +295,13 @@ export default class RequestModal extends Component {
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
-                            <div className="col-md-12">
-                                <div className="row mt-2" style={{background:"white"}}>
-                                    <div className="col-md-11">
-                                        <h5 className="text-center text-justify">Хүсэлт шийдвэрлэx</h5>
-                                    </div>
-                                    <div className="col-md-1" onClick={() => this.handleClose()}>
-                                        <button type="button" className="close float-right" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="row p-3">
-                                    <div className="col-md-5">
-                                        <form  class="form-row">
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor=''>Захиалагч байгууллага</label>
-                                                <input
-                                                    type="text"
-                                                    name='zahialagch'
-                                                    className="form-control"
-                                                    value={zahialagch}
-                                                    onChange={(e) => {this.props.handleOnChange(e)}}
-                                                    disabled={disabled}
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-12 m-0">
-                                                <label htmlFor=''>төслийн нэр</label>
-                                                <input
-                                                    type="text"
-                                                    name='project_name'
-                                                    className="form-control"
-                                                    value={project_name}
-                                                    onChange={(e) => {this.props.handleOnChange(e)}}
-                                                    disabled={disabled}
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-6 my-4 col-sm-6">
-                                                <label htmlFor=''>Обьектийн төрөл</label>
-                                                <textarea
-                                                    type="text"
-                                                    name="object_type"
-                                                    className="form-control"
-                                                    value={object_type}
-                                                    onChange={(e) => {this.props.handleOnChange(e)}}
-                                                    disabled={disabled}
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-6 col-sm-6 my-4">
-                                                <label htmlFor=''>Обьектийн тоо хэмжээ</label>
-                                                <textarea
-                                                    type="text"
-                                                    name="object_count"
-                                                    className="form-control"
-                                                    value={object_count}
-                                                    onChange={(e) => {this.props.handleOnChange(e)}}
-                                                    disabled={disabled}
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor=''> Хөрөнгө оруулалтын байдал </label>
-                                                <textarea
-                                                    name='hurungu_oruulalt'
-                                                    rows="3"
-                                                    className="form-control"
-                                                    value={hurungu_oruulalt}
-                                                    onChange={(e) => {this.props.handleOnChange(e)}}
-                                                    disabled={disabled}
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-12">
-                                                <label htmlFor=''>Байр зүйн мэдээлэл</label>
-                                                <input
-                                                    type="text"
-                                                    name='file'
-                                                    className="form-control"
-                                                    value={values.file_path}
-                                                    onChange={(e) => {this.props.handleOnChange(e)}}
-                                                    disabled={disabled}
-                                                />
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div className="col-md-7">
-                                        <LLCMap
-                                            vector_datas={vector_datas}
-                                            height="50vh"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="row my-2 mr-1 float-right">
-                                    <button
-                                        type="button mr-2 ml-2"
-                                        onClick={() => this.modalChange(
-                                            'reject',
-                                            'fa fa-exclamation-circle',
-                                            'warning',
-                                            "Тохиргоог татгалзах",
-                                            `Та ${
-                                                values.length == 1
-                                                    ?
-                                                        get_modal_text(values[0].kind)
-                                                    :
-                                                values.length > 1
-                                                    ?
-                                                        `${values.length} өгөгдлөө`
-                                                    :
-                                                    null
-                                            }
-                                            татгалзахдаа итгэлтэй байна уу?`,
-                                            true,
-                                            "татгалзах",
-                                            null
-                                        )}
-                                        className="btn gp-btn-primary waves-effect waves-light"
-                                    >
-                                        <i className="fa fa-check-square-o">Татгалзах</i>
-                                    </button>
-                                    <button
-                                        type="button mr-2 ml-2"
-                                        onClick={() => this.modalChange(
-                                            'reject',
-                                            'fa fa-exclamation-circle',
-                                            'warning',
-                                            "Тохиргоог буцаах",
-                                            `Та ${
-                                                values.length == 1
-                                                    ?
-                                                        get_modal_text(values[0].kind)
-                                                    :
-                                                values.length > 1
-                                                    ?
-                                                        `${values.length} өгөгдлөө`
-                                                    :
-                                                    null
-                                            }
-                                            буцаахдаа итгэлтэй байна уу?`,
-                                            true,
-                                            "буцаах",
-                                            null
-                                        )}
-                                        className="btn gp-btn-primary waves-effect waves-light ml-2"
-                                    >
-                                        <i className="fa fa-check-square-o">Буцаах</i>
-                                    </button>
-                                    <button
-                                        type="button mr-2 ml-2"
-                                        onClick={() => this.modalChange(
-                                            'approve',
-                                            'fa fa-exclamation-circle',
-                                            'warning',
-                                            "Хүсэлт үүсгэх",
-                                            `Та ${
-                                                values.length == 1
-                                                    ?
-                                                        get_modal_text(values[0].kind)
-                                                    :
-                                                values.length > 1
-                                                    ?
-                                                        `${values.length} өгөгдөлд`
-                                                    :
-                                                    null
-                                            }
-                                            хүсэлт үүсгэх итгэлтэй байна уу?`,
-                                            true,
-                                            "Хүсэлт үүсгэх",
-                                            null
-                                        )}
-                                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                                    >
-                                        <i className="fa fa-check">Хүсэлт үүсгэх</i>
-                                    </button>
-                                </div>
-                             <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
-                            </div>
+                            {
+                                this.props.requestContent
+                                &&
+                                <this.props.requestContent
+                                    values={ this.props}
+                                />
+                            }
                         </div>
                     </div>
                     <Modal

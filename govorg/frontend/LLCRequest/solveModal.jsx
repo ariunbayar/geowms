@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import RequestModal from './requestModal'
+import RequestApprove from './approve_comp'
 
 export default class SolveModal extends Component {
 
@@ -45,6 +46,7 @@ export default class SolveModal extends Component {
                             modalClose={this.closeModalMap}
                             refreshData={this.props.refreshData}
                             values={this.state.values}
+                            requestContent={RequestApprove}
                         />
                 }
             </div>
