@@ -172,7 +172,7 @@ export default class RequestDetail extends Component {
                             values={this.props}
                         />
                         <div className="form-group">
-                            <label htmlFor='' className="col-md-12">Байр зүйн мэдээлэл</label>
+                            <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
                             <label
                                 htmlFor="choose-file"
                                 className="custom-file-upload col-md-6 text-center"
