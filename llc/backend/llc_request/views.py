@@ -1,10 +1,16 @@
 
+from geoportal_app.models import User
 import rarfile
 from django.db import connections
 from geojson import FeatureCollection, Feature
 from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.apps import apps
+from datetime import timedelta, datetime
+from django.core.mail import send_mail, get_connection
 
 from llc.backend.llc_request.models import (
     RequestFiles,
@@ -12,15 +18,17 @@ from llc.backend.llc_request.models import (
     RequestFilesShape,
     RequestForm,
 )
-
-from backend.org.models import Org
+from backend.token.utils import TokenGeneratorUserValidationEmail
+from backend.org.models import DefaultPosition, Employee, Org
 
 from main.components import Datatable
 from main.utils import (
     json_dumps,
     json_load,
     get_sql_execute,
-    slugifyWord
+    slugifyWord,
+    send_email,
+    get_config
 )
 
 
@@ -295,17 +303,71 @@ def get_request_data(request, id):
     })
 
 
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1", "True")
+
+
+def _make_connection(from_email):
+    connection = get_connection(
+        username=from_email,
+        password=get_config('EMAIL_HOST_PASSWORD'),
+        port=get_config('EMAIL_PORT'),
+        host=get_config('EMAIL_HOST'),
+        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
+        use_ssl=False,
+        fail_silently=False,
+    )
+    return connection
+
+
+def _send_to_information_email (user_id):
+
+    user = get_object_or_404(User, pk=user_id)
+
+    if not user.email:
+         return False
+
+    token = TokenGeneratorUserValidationEmail().get()
+
+    UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
+    UserValidationEmail.objects.create(
+        user=user,
+        token=token,
+        valid_before=timezone.now() + timedelta(days=90)
+    )
+
+    host_name = get_config('EMAIL_HOST_NAME')
+    subject = 'Хүсэлт ирлээ'
+    text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
+    if host_name == 'localhost:8000':
+        msg = '{text} http://{host_name}/gov/org-request/{token}/'.format(text=text, token=token, host_name=host_name)
+    else:
+        msg = '{text} https://{host_name}/gov/org-request/{token}/'.format(text=text, token=token, host_name=host_name)
+
+    from_email = get_config('EMAIL_HOST_USER')
+    to_email = [user.email]
+    send_mail(subject, msg, from_email, ['oogii1998@gmail.com'], connection=_make_connection(from_email))
+
+    return True
+
+
 @require_GET
 @ajax_required
 def send_request(request, id):
 
-    initial_qry = RequestFiles.objects.filter(pk=id)
-    initial_qry.update(state=2)
+    qs = RequestFiles.objects.filter(pk=id)
+    query = qs.first()
+    org_obj = RequestFilesShape.objects.filter(files=query).first()
+    employee = Employee.objects.filter(org=org_obj.id).first()
+    success_mail =_send_to_information_email(employee.user_id)
 
-    return JsonResponse({
-        'success': True,
-        'info': 'Амжилттай илгээгдлээ.'
-    })
+    if success_mail:
+        qs.update(state=2)
+
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай илгээгдлээ.'
+        })
 
 
 @require_GET
