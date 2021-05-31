@@ -219,7 +219,7 @@ def save_request(request):
                 file_path=uploaded_file,
                 tools=json_dumps(selected_tools)
             )
-            request_file = request_file.id
+            id = request_file.id
         _create_shape_files(org_data, request_file, zip_ref)
 
     form_data = RequestForm.objects.filter(file_id=id).first()
@@ -232,6 +232,9 @@ def save_request(request):
         form_data.save()
 
     else:
+        print("hoh")
+        print("hoh")
+        print("hoh", id)
         RequestForm.objects.create(
             client_org=zahialagch,
             project_name=project_name,
@@ -281,7 +284,6 @@ def get_request_data(request, id):
     features = []
     field = {}
     qs = RequestForm.objects.filter(file_id=id).first()
-
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features = _get_feature(shape_geometries)
 
