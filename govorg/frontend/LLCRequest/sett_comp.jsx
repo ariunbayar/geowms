@@ -23,7 +23,7 @@ export class LLCSettings extends Component {
     }
 
     closeModel() {
-        this.setState({ is_modal_request_open: false })
+        this.setState({ model_status: false })
     }
 
     componentDidMount() {
@@ -57,7 +57,7 @@ export class LLCSettings extends Component {
                                         list_of_datas.map((value, idx) =>
                                         <tr key={idx}>
                                             <td>
-                                                {idx}
+                                                {idx+1}
                                             </td>
                                             <td>
                                                 {value.geom_type}

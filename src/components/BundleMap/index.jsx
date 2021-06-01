@@ -399,27 +399,29 @@ export default class InspireMap extends Component {
                     },
                     id: 'aimag'
                 })
+                if (aimag_geom) {
+                    var aimag_features = new GeoJSON({
+                        dataProjection: projection_display,
+                        featureProjection: projection
+                    }).readFeatures(aimag_geom)
 
-                var aimag_features = new GeoJSON({
-                    dataProjection: projection_display,
-                    featureProjection: projection
-                }).readFeatures(aimag_geom)
+                    const vectorSourceAimag = new VectorSource({
+                            features: aimag_features
+                    })
 
-                const vectorSourceAimag = new VectorSource({
-                        features: aimag_features
-                })
-
-                const aimag_layer = new VectorLayer({
-                    source: vectorSourceAimag,
-                    style: new Style({
-                        stroke: new Stroke({
-                        color: 'blue',
-                        width: 2,
+                    const aimag_layer = new VectorLayer({
+                        source: vectorSourceAimag,
+                        style: new Style({
+                            stroke: new Stroke({
+                            color: 'blue',
+                            width: 2,
+                            })
                         })
                     })
-                })
-                if (this.map) {
                     this.map.addLayer(aimag_layer)
+                }
+
+                if (this.map) {
                     this.map.addLayer(vector_layer)
                     this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
                 }

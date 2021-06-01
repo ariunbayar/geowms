@@ -12,7 +12,6 @@ export default class RequestModal extends Component {
 
         this.state = {
             status: "initial",
-
             action_type: '',
             modal_status: "closed",
             title: '',
@@ -292,7 +291,7 @@ export default class RequestModal extends Component {
                                         this.props.model_body
                                         &&
                                         <this.props.model_body
-                                            {...this.state}
+                                            {...this.props}
                                         />
                                     }
 

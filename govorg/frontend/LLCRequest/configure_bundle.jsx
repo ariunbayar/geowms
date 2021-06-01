@@ -1,8 +1,7 @@
 import React, {Component, Fragment} from "react"
 import {service} from './service'
-import Loader from "@utils/Loader/index"
 import SelectField from '@utils/Tools/Form/select_field'
-
+import {LLCMap} from '../../../llc/frontend/LLCMap'
 
 export class ConfigureBundle extends Component {
 
@@ -34,6 +33,7 @@ export class ConfigureBundle extends Component {
             selected_dt_list: [],
             data_type_list: [],
             is_loading: false,
+            selected_values: props.selected_values
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -45,6 +45,7 @@ export class ConfigureBundle extends Component {
 
     componentDidUpdate(pP, pS) {
         const { theme_name, feature_name, packages, features, table_name} = this.state
+        const { selected_values} = this.props
         if (pS.feature_name != feature_name) {
             this.setState({ feature_name })
         }
@@ -55,6 +56,9 @@ export class ConfigureBundle extends Component {
 
         if (pS.features != features) {
             this.setState({features})
+        }
+        if (pP.selected_values != selected_values) {
+            this.setState({selected_values})
         }
     }
 
@@ -83,7 +87,6 @@ export class ConfigureBundle extends Component {
     }
 
     handleChange(name, e) {
-        console.log("name", name, e.target.value)
         const { packages, features } = this.state
         const selected_value = e.target.value
         var data_list = {}
@@ -126,35 +129,36 @@ export class ConfigureBundle extends Component {
         const { is_loading, themes,
             theme_name, package_name,
             feature_name, selected_features,
-            selected_packages} = this.state
-
+            selected_packages, selected_values
+        } = this.state
         return (
-            <div className="col-md-12 d-flex justify-content-center">
-                <div className="form-row mr-3 col-md-12">
-                    <div className='form-group col-md-9'>
-                        <div className="row">
-                            <SelectField
-                                title_name='theme'
-                                data_list={themes}
-                                defualt_value={theme_name}
-                                setSelect={this.handleChange}
-                            />
-                            <SelectField
-                                title_name='package'
-                                data_list={selected_packages}
-                                defualt_value={package_name}
-                                setSelect={this.handleChange}
-                            />
-                            <SelectField
-                                title_name='feature'
-                                data_list={selected_features}
-                                defualt_value={feature_name}
-                                setSelect={this.handleChange}
-                            />
-                        </div>
-                    </div>
+            <div className="col-md-12">
+                <div className="form-row col-md-12 p-4 mx-1">
+                        <SelectField
+                            title_name='theme'
+                            data_list={themes}
+                            defualt_value={theme_name}
+                            handleSelectField={this.handleChange}
+                        />
+                        <SelectField
+                            title_name='package'
+                            data_list={selected_packages}
+                            defualt_value={package_name}
+                            handleSelectField={this.handleChange}
+                        />
+                        <SelectField
+                            title_name='feature'
+                            data_list={selected_features}
+                            defualt_value={feature_name}
+                            handleSelectField={this.handleChange}
+                        />
                 </div>
-                <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
+                <div className="col-md-12 pb-5 mt-2">
+                    <LLCMap
+                        vector_datas={selected_values.features}
+                        height={'60vh'}
+                    />
+                </div>
             </div>
         )
     }

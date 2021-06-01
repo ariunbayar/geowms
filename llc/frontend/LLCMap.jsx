@@ -22,21 +22,17 @@ export class LLCMap extends Component {
         const { vector_datas } = this.state
         const {height, aimag_geom} = this.props
         return (
-            <div className="col-12 col-md-12 col-xl-12">
-                <div className="card">
-                    <div className="card-body">
-                        <InspireMap
-                            height={height}
-                            is_menu_bar_all='close'
-                            vector_source={vector_datas}
-                            PPContent={this.props.PPContent}
-                            featurefromUrl={true}
-                            property_pp={true}
-                            PPContent={LLCPP}
-                            aimag_geom={aimag_geom}
-                        />
-                    </div>
-                </div>
+            <div className="col-12 col-md-12 col-xl-12 mx-4">
+                <InspireMap
+                    height={height}
+                    is_menu_bar_all='close'
+                    vector_source={vector_datas}
+                    PPContent={this.props.PPContent}
+                    featurefromUrl={true}
+                    property_pp={true}
+                    PPContent={LLCPP}
+                    aimag_geom={aimag_geom}
+                />
             </div>
         );
     }

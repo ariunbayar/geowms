@@ -237,7 +237,7 @@ def get_all_geo_json(request):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
-    features = _get_feature(shape_geometries)
+    features, geom_type = _get_feature(shape_geometries)
     return JsonResponse({
         'geo_json_datas': FeatureCollection(features)
     })
@@ -251,7 +251,7 @@ def get_request_data(request, id):
     aimag_name = ''
     aimag_geom = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
-    features = _get_feature(shape_geometries)
+    features, geom_type = _get_feature(shape_geometries)
 
     qs = RequestForm.objects.filter(file_id=id)
     field = [item for item in qs.values()]
@@ -300,7 +300,7 @@ def get_file_shapes(request, id):
             'theme': shape_geometry.theme_id,
             'feature': shape_geometry.feature_id,
             'package': shape_geometry.package_id,
-            'features': geoms
+            'features': FeatureCollection(geoms)
         })
 
     return JsonResponse({
