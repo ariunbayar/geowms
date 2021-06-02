@@ -11,7 +11,7 @@ class DetailModalBody extends Component {
 
         this.state = {
             status: "initial",
-
+            is_loading: false,
             action_type: '',
             modal_status: "closed",
             title: '',
@@ -23,7 +23,6 @@ class DetailModalBody extends Component {
             object_type: '',
             object_count: '',
             hurungu_oruulalt: '',
-            zahialagch: '',
             vector_datas: [],
             disabled: true,
             aimag_name: ''
@@ -39,7 +38,6 @@ class DetailModalBody extends Component {
     }
 
     handleModalAction(){
-        const { selected_value, values } = this.state
         let ids = []
         let feature_id
         this.setState({ is_loading: true })
@@ -55,7 +53,7 @@ class DetailModalBody extends Component {
         }
     }
 
-    handleRequestDismiss(ids, feature_id,) {
+    handleRequestDismiss(ids, feature_id) {
         service
             .requestDismiss(ids, feature_id)
             .then(({ success, info }) => {
@@ -101,9 +99,9 @@ class DetailModalBody extends Component {
             })
     }
 
-    handleRequestReject(id, state) {
+    handleRequestReject(ids, feature_id) {
         service
-            .requestReject(id, state)
+            .requestReject(ids, feature_id)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -262,13 +260,13 @@ class DetailModalBody extends Component {
             aimag_name, zahialagch,
             project_name, object_type,
             object_count, hurungu_oruulalt,
-            vector_datas, aimag_geom
-        } = this.props
+            vector_datas, aimag_geom, is_loading
+        } = this.state
         var is_disable = true
         return(
             <>
             <div className="row p-3">
-                {/* <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} /> */}
+                <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
                 <div className="col-md-5">
                     <form  class="form-row">
                         {
@@ -396,6 +394,17 @@ class DetailModalBody extends Component {
                     <i className="fa fa-check">Хүсэлт үүсгэх</i>
                 </button>
             </div>
+            <Modal
+                modal_status={this.state.modal_status}
+                modal_icon={this.state.modal_icon}
+                icon_color={this.state.icon_color}
+                title={this.state.title}
+                has_button={this.state.has_button}
+                text={this.state.text}
+                modalAction={this.handleModalAction}
+                actionNameDelete={this.state.action_name}
+                modalClose={this.state.modalClose}
+            />
             </>
         )
     }

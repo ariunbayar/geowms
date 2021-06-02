@@ -945,56 +945,22 @@ def get_request_data(request, id):
     })
 
 
+def _reject_request(id, state):
+    reject_request = get_object_or_404(RequestFiles, id=id)
+    reject_request.state = state
+    reject_request.save()
+    return reject_request
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def llc_request_reject(request, payload):
-    # ids = payload.get('ids')
-    # feature_id = payload.get('feature_id')
-    # employee = get_object_or_404(Employee, user__username=request.user)
-    # emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    pk = payload.get('id')
+    state = payload.get('state')
 
-    # emp = employee.position.id
-
-    # qs = EmpPermInspire.objects
-    # qs = qs.filter(emp_perm=emp_perm)
-    # qs = qs.filter(perm_kind=EmpPermInspire.PERM_REVOKE)
-    # perm_reject = qs.filter(feature_id=feature_id)
-
-    # if employee:
-    #     for r_id in ids:
-    #         llc_req_obj = get_object_or_404(RequestFiles, pk=r_id)
-    #         llc_req_obj.state = RequestFiles.STATE_REJECT
-    #         llc_req_obj.save()
-    #         print('aaaaaaaaa')
-    #         print('aaaaaaaaa')
-    #         print('aaaaaaaaa')
-    #         print('aaaaaaaaa')
-    #         print('aaaaaaaaa')
-
-    #     rsp = {
-    #         'success': True,
-    #         'info': 'Амжилттай татгалзлаа'
-    #     }
-
-    # else:
-    #     rsp = {
-    #         'success': False,
-    #         'info': 'Татгалзах эрхгүй байна'
-    #     }
-
-    # return JsonResponse(rsp)
-
-
-    # state = payload.get('state')
-    # pk = payload.get('id')
-
-    # if state == 'reject':
-    #     _change_revoke_request(pk, ChangeRequest.STATE_REJECT)
-
-    if state == 'approve':
-        change_request = _change_revoke_request(pk, ChangeRequest.STATE_APPROVE)
-        _delete_geom_data(change_request)
+    if state == 'reject':
+        _reject_request(pk, RequestFiles.STATE_REJECT)
 
     return JsonResponse({'success': True})
 
