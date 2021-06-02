@@ -998,6 +998,7 @@ def llc_request_reject(request, payload):
 
     return JsonResponse({'success': True})
 
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
