@@ -28,17 +28,14 @@ export default class Modal extends Component {
                 actionNameDelete ---> Тийм гэдэг утгыг солих
                 modalClose ---> x товч дарж modal хаахад хийж болох үйлдлүүд
                 modalAction ---> Тийм товч дарж хийж болох үйлдлүүд
-
         // import:
             import Modal from "@utils/Modal/Modal"
-
         // Modal open function:
             handleModalOpen() {
                 this.setState({ modal_status: 'open' }, () => {
                     this.setState({ modal_status: 'initial' })
                 })
             }
-
         // Modal default value function(Хэрэв has_button==false байвал ModalAlert горимоор ажиллана):
             modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
                 this.setState(
