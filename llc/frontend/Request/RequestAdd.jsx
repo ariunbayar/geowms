@@ -189,6 +189,7 @@ export class RequestAdd extends Component {
 
     handlePassValues(success, info) {
         if(success){
+            this.setState({ modal_status: 'open'})
             this.modalChange(
                 'fa fa-check-circle',
                 null,

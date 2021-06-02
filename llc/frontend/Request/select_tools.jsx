@@ -20,9 +20,14 @@ export default class UsedTools extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const {selected_tools} = this.props.values
+        const {selected_tools, state, info} = this.props.values
         if(pP.values.selected_tools != selected_tools) {
-            this.setState({selected_tools})
+            if(!state && !info ){
+                this.setState({selected_tools: selected_tools})
+            }
+            else {
+                this.setState({selected_tools: selected_tools.selected_tools})
+            }
         }
     }
 
@@ -84,9 +89,9 @@ export default class UsedTools extends Component {
                         </thead>
                         <tbody>
                             {
-                                (selected_tools.selected_tools)
+                                (selected_tools)
                                 ?
-                                selected_tools.selected_tools.map((value, idx) =>
+                                selected_tools.map((value, idx) =>
                                 <tr key={idx}>
                                     <th scope="row">{idx+1}</th>
                                     <td>{value.bagaj_dugaar}</td>
