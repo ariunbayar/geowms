@@ -5,6 +5,35 @@ import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
 
+class GetDescription extends Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            description: props.description
+        }
+        this.handleOnchange = this.handleOnchange.bind(this)
+    }
+
+    handleOnchange(e) {
+        this.props.handleOnChange(e)
+    }
+
+    render() {
+        const {description} = this.state
+        return(
+            <div className="col-md-12">
+                <label>Тайлбар оруулна уу </label>
+                <textarea
+                    className="form-control"
+                    value={description}
+                    onChange={(e) => this.handleOnchange(e)}
+                />
+            </div>
+        )
+    }
+}
+
 class DetailModalBody extends Component {
     constructor(props) {
         super(props)
@@ -25,7 +54,8 @@ class DetailModalBody extends Component {
             hurungu_oruulalt: '',
             vector_datas: [],
             disabled: true,
-            aimag_name: ''
+            aimag_name: '',
+            description: ''
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -35,27 +65,31 @@ class DetailModalBody extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.selectedFeature = this.selectedFeature.bind(this)
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
 
-    handleModalAction(){
-        var id = this.props.id
-        var state = this.props.state
-        this.setState({ is_loading: true })
+    handleOnChange(e) {
+        this.setState({ description: e.target.value })
+    }
 
+    handleModalAction() {
+        var id = this.props.id
+        var description = this.state.description
+        this.setState({ is_loading: true })
         if(this.state.action_type == 'reject') {
-            this.handleRequestReject(id, state)
+            this.handleRequestReject(id)
         }
         if(this.state.action_type == 'approve') {
             this.handleRequestApprove(ids, feature_id)
         }
         if(this.state.action_type == 'dismiss') {
-            this.handleRequestDismiss(ids, feature_id)
+            this.handleRequestDismiss(id, description)
         }
     }
 
-    handleRequestDismiss(ids, feature_id) {
+    handleRequestDismiss(id, description) {
         service
-            .requestDismiss(ids, feature_id)
+            .requestDismiss(id, description)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -99,9 +133,9 @@ class DetailModalBody extends Component {
             })
     }
 
-    handleRequestReject(id, state) {
+    handleRequestReject(id) {
         service
-            .requestReject(id, state)
+            .requestReject(id)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -364,13 +398,13 @@ class DetailModalBody extends Component {
                 <button
                     type="button mr-2 ml-2"
                     onClick={() => this.modalChange(
-                        'reject',
+                        'dismiss',
                         'fa fa-exclamation-circle',
                         'warning',
                         "Тохиргоог буцаах",
-                        `Та буцаахдаа итгэлтэй байна уу?`,
+                        GetDescription,
                         true,
-                        "буцаах",
+                        "илгээх",
                         null
                     )}
                     className="btn gp-btn-primary waves-effect waves-light ml-2"
@@ -404,6 +438,7 @@ class DetailModalBody extends Component {
                 modalAction={this.handleModalAction}
                 actionNameDelete={this.state.action_name}
                 modalClose={this.state.modalClose}
+                handleOnChange={this.handleOnChange}
             />
             </>
         )
