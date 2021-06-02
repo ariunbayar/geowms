@@ -87,7 +87,7 @@ export class LLCSettings extends Component {
                                 modalClose={this.closeModel}
                                 model_body={ConfigureBundle}
                                 {...this.state}
-                                title={'Хүсэлт шийдвэрлэх'}
+                                title={'Дэд сан тохируулах'}
                             />
                         }
                     </div>
