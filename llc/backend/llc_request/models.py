@@ -17,7 +17,7 @@ class RequestFiles(models.Model):
 
     STATE_CHOICES = (
         (STATE_NEW, 'ШИНЭ'),
-        (STATE_SENT, 'ИЛГЭЭСЭН '),
+        (STATE_SENT, 'ИЛГЭЭСЭН'),
     )
 
     KIND_SOLVED = 1

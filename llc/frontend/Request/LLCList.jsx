@@ -82,6 +82,7 @@ export class Detail extends Component {
                         "title": 'Устгах',
                         "text": '',
                         "icon": 'fa fa-trash-o text-danger',
+
                         "action": (values) => this.handleRemoveAction(values),
                     },
                     {
@@ -113,13 +114,24 @@ export class Detail extends Component {
     }
 
     handleModalOpen(values){
-        this.modalChange(
-            'fa fa-exclamation-circle',
-            "warning",
-            'Тохиргоог устгах',
-            `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+        if(values.state =='ИЛГЭЭСЭН'){
+            this.modalChange(
+                'fa fa-exclamation-circle',
+                "danger",
+                'Устгах боломжгүй',
+                `"Энэхүү хүсэлт илгээгдсэн төлөвт байгаа тул устгах боломжгүй`,
+                false
+                )
+        }
+        else {
+            this.modalChange(
+                'fa fa-exclamation-circle',
+                "warning",
+                'Тохиргоог устгах',
+                `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
                 true
-            )
+                )
+        }
     }
 
     modalChange(modal_icon, icon_color, title, text, has_button) {
