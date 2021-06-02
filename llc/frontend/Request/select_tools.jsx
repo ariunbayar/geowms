@@ -73,6 +73,7 @@ export default class UsedTools extends Component {
             select_layer_status,
             selected_tools
         } = this.state
+        console.log(this.props)
         return (
             <div className="col-md-12">
                 <label htmlFor=''> Зураглал үйлдэхдээ ашигласан багаж</label>
@@ -103,7 +104,7 @@ export default class UsedTools extends Component {
                                             !info &&
                                             <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
                                                 <GPIcon icon={"fa fa-minus-circle text-danger"}/>
-                                             </a>
+                                            </a>
                                         }
                                     </td>
                                 </tr>
@@ -112,7 +113,7 @@ export default class UsedTools extends Component {
                         </tbody>
                     </table>
                 </div>
-                <div className={`form-group col-md-12 ${id ? 'invisible' : ''}`}>
+                <div className={`form-group col-md-12 ${info ? 'invisible' : ''}`}>
                     <div className="form-group col-md-12">
                         <a
                             id='tool_id'

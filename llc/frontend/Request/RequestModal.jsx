@@ -127,13 +127,16 @@ class SendModal extends Component{
             object_count: '',
             hurungu_oruulalt: '',
             zahialagch: '',
-            vector_datas: []
+            vector_datas: [],
+            aimag_name: '',
+            aimag_geom: [],
+            selected_tools: [],
         }
     }
     componentDidMount(){
         const values = this.props.values
         const {id} = values.field
-        service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
+        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
                     vector_datas,
@@ -143,7 +146,9 @@ class SendModal extends Component{
                     object_type : form_field['object_type'],
                     object_count : form_field['object_quantum'],
                     hurungu_oruulalt : form_field['investment_status'],
-                    selected_tools: form_field['selected_tools'],
+                    selected_tools : form_field['selected_tools'],
+                    aimag_name,
+                    aimag_geom
                 })
             }
         })
@@ -152,25 +157,14 @@ class SendModal extends Component{
     render (){
         const {id} = this.props.values.field
         const {
-            files, project_name,
-            object_type, object_count,
-            hurungu_oruulalt, zahialagch,
-            vector_datas, selected_tools
         } = this.state
         return (
             <div className="col-md-12">
                 <div className="row mt-2" style={{background:"white"}}>
                     <RequestDetail
                         id={id}
-                        project_name={project_name}
-                        object_type={object_type}
-                        object_count={object_count}
-                        hurungu_oruulalt={hurungu_oruulalt}
-                        zahialagch={zahialagch}
-                        files={files}
-                        vector_datas={vector_datas}
+                        {...this.state}
                         submitClass={ActionClass}
-                        selected_tools={selected_tools}
                         closeRequestMap={this.props.closeRequestMap}
                         info={this.props.values.info}
                     />

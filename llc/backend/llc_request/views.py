@@ -20,17 +20,20 @@ from llc.backend.llc_request.models import (
     RequestForm,
 )
 from backend.token.utils import TokenGeneratorUserValidationEmail
-from backend.org.models import DefaultPosition, Employee, Org
+from backend.org.models import Employee, Org
 from geoportal_app.models import User
+
+from backend.org.models import Org
+from backend.inspire.models import MDatas, LCodeLists
 
 from main.components import Datatable
 from main.utils import (
     json_dumps,
     json_load,
     get_sql_execute,
-    slugifyWord,
     send_email,
-    get_config
+    get_config,
+    get_geom
 )
 
 
@@ -296,18 +299,41 @@ def get_request_data(request, id):
     features = []
     field = {}
     qs = RequestForm.objects.filter(file_id=id).first()
-    shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
-    features = _get_feature(shape_geometries)
 
     file_data = {
         'name': '',
         'size': '',
         'type': 'application/vnd.rar'
     }
+    field = dict()
+    aimag_name = ''
+    aimag_geom = []
+
+    shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
+    features = _get_feature(shape_geometries)
+
+    qs = RequestForm.objects.filter(file_id=id)
+    qs =  qs.first()
+    geo_id = qs.file.geo_id
+
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+    if mdata_qs:
+        code_list_id = mdata_qs.code_list_id
+        code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
+        aimag_name = code_list_data.code_list_name
+
+        aimag_geom = get_geom(geo_id, 'MultiPolygon')
+        if aimag_geom:
+            aimag_geom = aimag_geom.json
+
+    file_data = {
+        'type': 'application/vnd.rar'
+    }
 
     file_qs = qs.file.file_path
-    file_data['name'] = file_qs.name
-    file_data['size'] = file_qs.size
+    file_data['name'] = file_qs.name or ''
+    file_data['size'] = file_qs.size or ''
+
     if qs:
         file_name = str(qs.file.file_path).split('/')[1]
         field['client_org'] = qs.client_org
@@ -322,7 +348,9 @@ def get_request_data(request, id):
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
-        'form_field': field
+        'form_field': field,
+        'aimag_name': aimag_name,
+        'aimag_geom': aimag_geom
     })
 
 

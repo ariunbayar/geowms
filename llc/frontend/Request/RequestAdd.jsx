@@ -112,8 +112,9 @@ export class RequestAdd extends Component {
             file_name:'',
             state: '',
             regis_number: props.regis_number,
-            file_state: false
-
+            file_state: false,
+            aimag_name: '',
+            aimag_geom: []
         }
 
         this.handleOnChange = this.handleOnChange.bind(this)
@@ -134,7 +135,6 @@ export class RequestAdd extends Component {
         if (id) {
             service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
                 if (form_field){
-                    console.log("form_field['selected_tools']", form_field['selected_tools'])
                     this.setState({
                         vector_datas,
                         zahialagch: form_field['client_org'],
@@ -151,6 +151,23 @@ export class RequestAdd extends Component {
             })
         }
         this.getTools()
+        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
+            if (form_field){
+                this.setState({
+                    vector_datas,
+                    zahialagch: form_field['client_org'],
+                    project_name: form_field['project_name'],
+                    object_type: form_field['object_type'],
+                    object_count: form_field['object_quantum'],
+                    hurungu_oruulalt: form_field['investment_status'],
+                    selected_tools: form_field['selected_tools'],
+                    file_name: form_field['file_name'],
+                    aimag_name,
+                    aimag_geom
+                })
+            }
+        })
+
     }
 
     getTools() {
@@ -233,51 +250,39 @@ export class RequestAdd extends Component {
         this.handleModalOpen()
     }
 
-    render (){
-        const {
-            files, project_name,
-            object_type, object_count,
-            hurungu_oruulalt, zahialagch,
-            vector_datas, tool_datas, selected_tools,
-            file_name, state, file_state
-        } = this.state
-        const {id} = this.props.match.params
-        return (
-            <div className="card">
-                <div className="card-body">
-                    <RequestDetail
-                        id={id}
-                        project_name={project_name}
-                        object_type={object_type}
-                        object_count={object_count}
-                        hurungu_oruulalt={hurungu_oruulalt}
-                        zahialagch={zahialagch}
-                        files={files}
-                        file_name={file_name}
-                        vector_datas={vector_datas}
-                        tool_datas={tool_datas}
-                        selected_tools={selected_tools}
-                        state={state}
-                        file_state={file_state}
-                        history={this.props.history}
-                        info={this.props.info}
-                        submitClass={SubmitClass}
-                        handleOnChange={this.handleOnChange}
-                        handlePassValues={this.handlePassValues}
-                        handleSelectModel={this.handleSelectModel}
+    BackToList(){
+        this.props.history.push("/llc/llc-request/")
+    }
+
+        render (){
+            const {id, info} = this.props.match.params
+            return (
+                <div className="card">
+                    <div className="card-body">
+                        <RequestDetail
+                            id={id}
+                            {...this.state}
+                            handleOnChange={this.handleOnChange}
+                            submitClass={SubmitClass}
+                            handlePassValues={this.handlePassValues}
+                            BackToList={this.BackToList}
+                            info={info}
+                            handleSelectModel={this.handleSelectModel}
+                        />
+                    </div>
+                    <Modal
+                        modal_status={ this.state.modal_status }
+                        modal_icon={ this.state.modal_icon }
+                        modal_bg={ this.state.modal_bg }
+                        icon_color={ this.state.icon_color }
+                        title={ this.state.title }
+                        text={ this.state.text }
+                        has_button={ this.state.has_button }
+                        actionNameBack={ this.state.actionNameBack }
+                        actionNameDelete={ this.state.actionNameDelete }
+                        modalAction={ this.state.modalAction }
+                        modalClose={ this.state.modalClose }
                     />
-                </div>
-                <Modal
-                     modal_status={this.state.modal_status}
-                     modal_icon={this.state.modal_icon}
-                     icon_color={this.state.icon_color}
-                     title={this.state.title}
-                     has_button={this.state.has_button}
-                     text={this.state.text}
-                     modalAction={this.handleModalAction}
-                     actionNameDelete={this.state.action_name}
-                     modalClose={this.state.modalClose}
-                />
             </div>
         )}
     }

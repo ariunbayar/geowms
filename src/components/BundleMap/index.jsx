@@ -315,7 +315,10 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { vector_source, form_datas, wms_list, center} = this.props
+        const {
+            vector_source, form_datas,
+            wms_list, center
+        } = this.props
         const { layer_one_tile } = this.state
         // if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
         //     this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
@@ -378,37 +381,51 @@ export default class InspireMap extends Component {
     addVectorSource(vector_source) {
         const { projection, projection_display, form_datas} = this.state
         var styles = this.layer_styles
-
+        const {aimag_geom} = this.props
         if (Object.keys(vector_source.features).length > 0) {
-            if (this.map) {
-                this.map.getLayers().forEach(layer => {
-                    if (layer && layer.get('id') === 'aimag') {
-                        layer.getSource().clear();
-                    }
-                });
-            }
+                var nt_features = new GeoJSON({
+                    dataProjection: projection_display,
+                    featureProjection: projection
+                }).readFeatures(vector_source)
 
-            const features = new GeoJSON({
-                dataProjection: projection_display,
-                featureProjection: projection,
-            }).readFeatures(vector_source)
+                const vectorSource = new VectorSource({
+                        features: nt_features
+                })
 
-            const vectorSource = new VectorSource({
-                features: features
-            });
-            const vector_layer = new VectorLayer({
-                source: vectorSource,
-                style: function (feature) {
-                    return styles[feature.getGeometry().getType()];
-                },
-                id: 'aimag'
-            })
-            if (this.map) {
-                this.map.addLayer(vector_layer)
-                this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
-            }
+                const vector_layer = new VectorLayer({
+                    source: vectorSource,
+                    style: function (feature) {
+                        return styles[feature.getGeometry().getType()];
+                    },
+                    id: 'aimag'
+                })
+
+                if(aimag_geom && Object.keys(aimag_geom).length > 0) {
+                    var aimag_features = new GeoJSON({
+                        dataProjection: projection_display,
+                        featureProjection: projection
+                    }).readFeatures(aimag_geom)
+
+                    const vectorSourceAimag = new VectorSource({
+                            features: aimag_features
+                    })
+
+                    const aimag_layer = new VectorLayer({
+                        source: vectorSourceAimag,
+                        style: new Style({
+                            stroke: new Stroke({
+                            color: 'blue',
+                            width: 2,
+                            })
+                        })
+                    })
+                    this.map.addLayer(aimag_layer)
+                }
+                if (this.map) {
+                    this.map.addLayer(vector_layer)
+                    this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                }
         }
-
     }
 
     loadWmsLayers(wms_list) {
