@@ -348,7 +348,7 @@ def _send_to_information_email (user_id):
     user = get_object_or_404(User, pk=user_id)
 
     if not user.email:
-         return False
+        return False
 
     token = TokenGeneratorUserValidationEmail().get()
 
@@ -360,7 +360,7 @@ def _send_to_information_email (user_id):
     )
 
     host_name = get_config('EMAIL_HOST_NAME')
-    subject = 'Хүсэлт ирлээ'
+    subject = 'Хүсэлт'
     text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
     if host_name == 'localhost:8000':
         msg = '{text} http://{host_name}/gov/org-request/'.format(text=text, token=token, host_name=host_name)
@@ -378,17 +378,15 @@ def _send_to_information_email (user_id):
 @ajax_required
 def send_request(request, id):
 
-    qs = RequestFiles.objects.filter(pk=id)
-    query = qs.first()
-    org_obj = query.file
-    employee = Employee.objects.filter(org_id=org_obj.org_id).first()
-    position = employee.position_id
-
-    if position == 4:
+    qs = RequestFiles.objects.filter(pk=id).first()
+    org_obj = qs.geo_id
+    employee = Employee.objects.filter(org__geo_id=org_obj, position_id=13).first()
+    if employee:
         success_mail = _send_to_information_email(employee.user_id)
 
         if success_mail:
-            qs.update(state=2)
+            qs.state = 2
+            qs.save()
 
             return JsonResponse({
                 'success': True,
