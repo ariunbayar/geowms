@@ -297,6 +297,7 @@ class DetailModalBody extends Component {
             vector_datas, aimag_geom, is_loading
         } = this.state
         var is_disable = true
+        const { kind } = this.props
         return(
             <>
             <div className="row p-3">
@@ -378,56 +379,60 @@ class DetailModalBody extends Component {
                     />
                 </div>
             </div>
-            <div className="row my-2 mr-1 float-right">
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'reject',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог татгалзах",
-                        `Та татгалзахдаа итгэлтэй байна уу?`,
-                        true,
-                        "татгалзах",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light"
-                >
-                    <i className="fa fa-check-square-o">Татгалзах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'dismiss',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог буцаах",
-                        GetDescription,
-                        true,
-                        "илгээх",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check-square-o">Буцаах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'approve',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Хүсэлт үүсгэх",
-                        `Та хүсэлт үүсгэх итгэлтэй байна уу?`,
-                        true,
-                        "Хүсэлт үүсгэх",
-                        null
-                    )}
-                    className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check">Хүсэлт үүсгэх</i>
-                </button>
-            </div>
+            {
+                kind=='ХҮЛЭЭГДЭЖ БУЙ'
+                &&
+                    <div className="row my-2 mr-1 float-right">
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'reject',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог татгалзах",
+                                `Та татгалзахдаа итгэлтэй байна уу?`,
+                                true,
+                                "татгалзах",
+                                null
+                            )}
+                            className="btn gp-btn-primary waves-effect waves-light"
+                        >
+                            <i className="fa fa-check-square-o">Татгалзах</i>
+                        </button>
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'dismiss',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог буцаах",
+                                GetDescription,
+                                true,
+                                "илгээх",
+                                null
+                            )}
+                            className="btn gp-btn-primary waves-effect waves-light ml-2"
+                        >
+                            <i className="fa fa-check-square-o">Буцаах</i>
+                        </button>
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'approve',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Хүсэлт үүсгэх",
+                                `Та хүсэлт үүсгэхдээ итгэлтэй байна уу?`,
+                                true,
+                                "Хүсэлт үүсгэх",
+                                null
+                            )}
+                            className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                        >
+                            <i className="fa fa-check">Хүсэлт үүсгэх</i>
+                        </button>
+                    </div>
+            }
             <Modal
                 modal_status={this.state.modal_status}
                 modal_icon={this.state.modal_icon}
