@@ -217,7 +217,7 @@ export default class InspireMap extends Component {
         }
     }
 
-    componentWillMount() {
+    componentDidMount() {
     service.getUser().then(({is_authenticated}) =>
         {
             this.setState({is_authenticated})
@@ -399,7 +399,8 @@ export default class InspireMap extends Component {
                     },
                     id: 'aimag'
                 })
-                if (aimag_geom) {
+
+                if(aimag_geom && Object.keys(aimag_geom).length > 0) {
                     var aimag_features = new GeoJSON({
                         dataProjection: projection_display,
                         featureProjection: projection

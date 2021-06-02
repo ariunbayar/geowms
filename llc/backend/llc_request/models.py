@@ -17,19 +17,22 @@ class RequestFiles(models.Model):
 
     STATE_CHOICES = (
         (STATE_NEW, 'ШИНЭ'),
-        (STATE_SENT, 'ИЛГЭЭСЭН '),
+        (STATE_SENT, 'ИЛГЭЭСЭН'),
     )
 
     KIND_SOLVED = 1
     KIND_PENDING = 2
     KIND_DISMISS = 3
     KIND_REVOKE = 4
+    KIND_NEW = 5
+
 
     KIND_CHOICES = (
-        (KIND_PENDING, 'ХҮЛЭЭГДЭЖ БУЙ'),
         (KIND_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
+        (KIND_PENDING, 'ХҮЛЭЭГДЭЖ БУЙ'),
         (KIND_DISMISS, 'БУЦААГДСАН'),
-        (KIND_REVOKE, 'ЦУЦЛАСАН')
+        (KIND_REVOKE, 'ЦУЦЛАСАН'),
+        (KIND_NEW, 'ШИНЭ'),
     )
     # aan = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
     name = models.CharField(max_length=250, verbose_name='Нэр')

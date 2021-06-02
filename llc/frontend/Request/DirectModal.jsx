@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react"
+import { service } from "./service"
 import {GPIcon} from "@utils/Tools"
 import {LLCMap} from '../LLCMap'
 import UsedTools from './select_tools'
@@ -8,14 +9,35 @@ export default class RequestDetail extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            info: false,
+            state : props.state,
+            disabled: false
+        }
+    }
+
+    componentDidMount() {
+        const {info} = this.props
+        if(info) {
+            this.setState({disabled: true})
+        }
+    }
+
+    componentDidUpdate(pP, pS) {
+        const {info, state} = this.props
+        if (pP.state != state) {
+            if(state == 2) {
+                this.setState({disabled: true})
+            }
         }
     }
 
     render (){
+        console.log(this.props)
         const {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
+            files, file_name, info,
             aimag_name, aimag_geom
         } = this.props
         return (
@@ -42,6 +64,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name='zahialagch'
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={zahialagch}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -52,6 +75,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name='project_name'
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={project_name}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -62,6 +86,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name="object_type"
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={object_type}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -72,6 +97,7 @@ export default class RequestDetail extends Component {
                                 type="text"
                                 name="object_count"
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={object_count}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -82,6 +108,7 @@ export default class RequestDetail extends Component {
                                 name='hurungu_oruulalt'
                                 rows="3"
                                 className="form-control"
+                                disabled={this.state.disabled}
                                 value={hurungu_oruulalt}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -89,22 +116,35 @@ export default class RequestDetail extends Component {
                         <UsedTools
                             values={this.props}
                         />
-                        <div className="form-group">
-                            <label htmlFor=''>Байр зүйн мэдээлэл</label>
+                        <div className={`form-group ${info ? "invisible" : 'visible'}`}>
+                            <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
+                            <label
+                                htmlFor="choose-file"
+                                className="custom-file-upload col-md-6 text-center"
+                                id="choose-file-label"
+                            >
+                                файл оруулах
+                            </label>
                             <input
+                                name="uploadDocument"
                                 type="file"
+                                id="choose-file"
                                 name='files'
-                                className="form-control-file"
                                 onChange={(e) => this.props.handleOnChange(e)}
+                                style={{display: 'none'}}
                             />
-                            <small className="text-center text-muted col-md-12 mt-1">
-                                Хавсаргах файл нь геометр өгөгдөл агуулсан ".rar" форматтай файл байна
-                            </small>
+                            <span className="col-md-5 ml-2">
+                                {file_name ? file_name : 'файл сонгогдоогүй байна'}
+                            </span>
                         </div>
                     </form>
-                    <this.props.submitClass
-                        values={this.props}
-                    />
+                    {
+                        this.props.submitClass
+                        &&
+                        <this.props.submitClass
+                            values={this.props}
+                        />
+                    }
                 </div>
                 {
                     id

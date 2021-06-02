@@ -1,43 +1,49 @@
 import React, { Component, Fragment } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import DirectModal from  './DirectModal'
+import RequestModal from  './RequestModal'
 import Modal from '@utils/Modal/Modal'
+import { render } from "react-dom";
+import { service } from "./service";
 
 
 export const make_state_color = (state) => {
     let color
     if (state == "ШИНЭ") color = 'text-primary'
-    else if (state == "ТАТГАЛЗСАН") color = 'text-danger'
-    else if (state == "ЗӨВШӨӨРСӨН") color = 'text-success'
+    else  color = 'text-warning'
     return color
 }
 
 export const make_kind_color = (kind) => {
     let color
     if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-success'
-    else if (kind == "ЗАССАН") color = 'text-primary'
+    else if (kind == "ШИЙДВЭРЛЭГДСЭН") color = 'text-success'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
-    else if (kind == "УСТГАСАН") color = 'text-danger'
-    else if (kind == "ШУУД") color = 'text-danger'
+    else if (kind == "БУЦААГДСАН") color = 'text-danger'
+    else if (kind == "ШИНЭ") color = 'text-primary'
     return color
 }
 
 export const make_send_data = (values) => {
+    let kind = values.values.kind
     return (
-        <a
-            type="button"
-            href={'/media/' + values.values.file_path}
-            target="_blank"
-            className="
-                btn text-light animated bounceIn bg-danger
-            "
-        >
-        <i className="fa fa-download"> &nbsp; Татах</i>
-        </a>
+        <div>
+            {
+                kind == "БУЦААГДСАН"
+                &&
+                <a
+                    type="button"
+                    href={'/media/' + values.values.file_path}
+                    target="_blank"
+                    className= "btn text-light animated bounceIn bg-danger"
+                >
+                <i className="fa fa-download"> &nbsp; Татах</i>
+                </a>
+        }
+        </div>
+
     )
-
 }
-
 
 export class Detail extends Component {
 
@@ -63,18 +69,20 @@ export class Detail extends Component {
                         "title": 'дэлгэрэнгүй',
                         "text": '',
                         "icon": 'fa fa-eye text-primary',
-                        "action": (values) => this.handeUpdateAction(values),
+                        "action": (values) => this.handleUpdateAction(values),
                     },
                     {
                         "title": 'Илгээх',
-                        "text": '',
-                        "icon": 'fa fa-paper-plane-o text-primary',
-                        "action": (values) => this.sendData(values),
+                        'component': RequestModal,
+                        'props' :{
+                            'refreshData': () => this.refreshData(),
+                        }
                     },
                     {
                         "title": 'Устгах',
                         "text": '',
                         "icon": 'fa fa-trash-o text-danger',
+
                         "action": (values) => this.handleRemoveAction(values),
                     },
                     {
@@ -88,21 +96,16 @@ export class Detail extends Component {
             request_form:false
         }
         this.refreshData = this.refreshData.bind(this)
-        this.handeUpdateAction = this.handeUpdateAction.bind(this)
+        this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
-        this.sendData = this.sendData.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
     }
 
-    handeUpdateAction(values) {
+    handleUpdateAction(values) {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
-    }
-
-    sendData(values) {
-        this.props.history.push(`/llc/llc-request/${values.id}/${true}/Хүсэлт-илгээх/`)
     }
 
     handleRemoveAction(values){
@@ -111,13 +114,24 @@ export class Detail extends Component {
     }
 
     handleModalOpen(values){
-        this.modalChange(
-            'fa fa-exclamation-circle',
-            "warning",
-            'Тохиргоог устгах',
-            `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
-            true
-        )
+        if(values.state =='ИЛГЭЭСЭН'){
+            this.modalChange(
+                'fa fa-exclamation-circle',
+                "danger",
+                'Устгах боломжгүй',
+                `"Энэхүү хүсэлт илгээгдсэн төлөвт байгаа тул устгах боломжгүй`,
+                false
+                )
+        }
+        else {
+            this.modalChange(
+                'fa fa-exclamation-circle',
+                "warning",
+                'Тохиргоог устгах',
+                `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+                true
+                )
+        }
     }
 
     modalChange(modal_icon, icon_color, title, text, has_button) {
@@ -138,14 +152,21 @@ export class Detail extends Component {
     }
 
     handleRemove(){
-        this.modalChange(
-            'fa fa-check-circle',
-            "success",
-            'Амжилттай устгалаа',
-            '',
-            false
-        )
+        const {id} = this.state.values
+        service.RemoveRequest(id).then(({ success }) =>{
+            if(success){
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "success",
+                    'Амжилттай устгалаа',
+                    '',
+                    false
+                )
+                this.refreshData()
+            }
+        })
     }
+
     refreshData(){
         this.setState({ refresh: !this.state.refresh })
     }
@@ -159,7 +180,7 @@ export class Detail extends Component {
                         <div className="col-md-12 row">
                                 <div className="col-md-6">
                                     <label htmlFor="">Төлөв</label>
-                                    <select className="form-control form-control-xs"
+                                    <select className="form-control form-control-xs disabled"
                                         onChange={(e) => this.setState({ state: e.target.value })}
                                     >
                                         {/* <option value="">--- Төлөвөөр хайх ---</option>
@@ -176,7 +197,7 @@ export class Detail extends Component {
                                 </div>
                                 <div className="col-md-6">
                                     <label htmlFor="">Өөрчлөлт</label>
-                                    <select className="form-control form-control-sm"
+                                    <select className="form-control form-control-sm disabled"
                                         onChange={(e) => this.setState({ kind: e.target.value })}
                                     >
                                         {/* <option value="">--- Өөрчлөлтөөр хайх ---</option>
@@ -191,7 +212,7 @@ export class Detail extends Component {
                                         } */}
                                     </select>
                                 </div>
-                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right" /*onClick={() => this.handleSearch()}*/>Хайх</button>
+                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right disabled" /*onClick={() => this.handleSearch()}*/>Хайх</button>
                         </div>
                         <div className="col-md-12">
                             <PortalDataTable

@@ -2,7 +2,9 @@ import {handleResponse, getGetOptions, getPostOptions} from '../helpers/service'
 export const service = {
     SaveRequest,
     handleRequestData,
-    getToolDatas
+    getToolDatas,
+    SendRequest,
+    RemoveRequest
 }
 
 const prefix = '/llc/backend'
@@ -29,4 +31,18 @@ function getToolDatas(regis_number) {
         body: JSON.stringify({regis_number})
     }
     return fetch(`/llc/get_tool_datas/`, opts).then(handleResponse)
+}
+
+function SendRequest(id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${id}/send-request/`, opts).then(handleResponse)
+}
+
+function RemoveRequest(id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${id}/remove-request/`, opts).then(handleResponse)
 }
