@@ -15,7 +15,12 @@ export class LLCSettings extends Component {
         }
         this.handleProceed = this.handleProceed.bind(this)
         this.closeModel = this.closeModel.bind(this)
+        this.modelAction = this.modelAction.bind(this)
 
+    }
+
+    modelAction(values) {
+        console.log("values", values)
     }
 
     handleProceed(values) {
@@ -86,6 +91,7 @@ export class LLCSettings extends Component {
                             <RequestModal
                                 modalClose={this.closeModel}
                                 model_body={ConfigureBundle}
+                                model_action={this.modelAction}
                                 {...this.state}
                                 title={'Дэд сан тохируулах'}
                             />

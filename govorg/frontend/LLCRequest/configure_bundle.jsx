@@ -47,7 +47,7 @@ export class ConfigureBundle extends Component {
         const { theme_name, feature_name, packages, features, table_name} = this.state
         const { selected_values} = this.props
         if (pS.feature_name != feature_name) {
-            this.setState({ feature_name })
+            this.props.model_action(feature_name)
         }
 
         if (pS.packages != packages) {
