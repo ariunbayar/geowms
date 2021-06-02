@@ -364,9 +364,9 @@ def _send_to_information_email (user_id):
     subject = 'Хүсэлт ирлээ'
     text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
     if host_name == 'localhost:8000':
-        msg = '{text} http://{host_name}/gov/org-request/{token}/'.format(text=text, token=token, host_name=host_name)
+        msg = '{text} http://{host_name}/gov/org-request/'.format(text=text, token=token, host_name=host_name)
     else:
-        msg = '{text} https://{host_name}/gov/org-request/{token}/'.format(text=text, token=token, host_name=host_name)
+        msg = '{text} https://{host_name}/gov/org-request/'.format(text=text, token=token, host_name=host_name)
 
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]

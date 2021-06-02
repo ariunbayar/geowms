@@ -16,7 +16,7 @@ export default class OrgRequest extends Component {
             <div className="card">
               <div className="card-body">
                     <Switch>
-                        <Route path="/gov/org-request/:token/" component={OrgRequestList}/>
+                        <Route path="/gov/org-request/" component={OrgRequestList}/>
                     </Switch>
               </div>
            </div>
