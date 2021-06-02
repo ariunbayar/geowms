@@ -5,6 +5,35 @@ import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
 
+class GetDescription extends Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            description: props.description
+        }
+        this.handleOnchange = this.handleOnchange.bind(this)
+    }
+
+    handleOnchange(e) {
+        this.props.handleOnChange(e)
+    }
+
+    render() {
+        const {description} = this.state
+        return(
+            <div className="col-md-12">
+                <label>Тайлбар оруулна уу </label>
+                <textarea
+                    className="form-control"
+                    value={description}
+                    onChange={(e) => this.handleOnchange(e)}
+                />
+            </div>
+        )
+    }
+}
+
 class DetailModalBody extends Component {
     constructor(props) {
         super(props)
@@ -25,7 +54,8 @@ class DetailModalBody extends Component {
             hurungu_oruulalt: '',
             vector_datas: [],
             disabled: true,
-            aimag_name: ''
+            aimag_name: '',
+            description: ''
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -35,27 +65,31 @@ class DetailModalBody extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.selectedFeature = this.selectedFeature.bind(this)
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
 
-    handleModalAction(){
-        var id = this.props.id
-        var state = this.props.state
-        this.setState({ is_loading: true })
+    handleOnChange(e) {
+        this.setState({ description: e.target.value })
+    }
 
+    handleModalAction() {
+        var id = this.props.id
+        var description = this.state.description
+        this.setState({ is_loading: true })
         if(this.state.action_type == 'reject') {
-            this.handleRequestReject(id, state)
+            this.handleRequestReject(id)
         }
         if(this.state.action_type == 'approve') {
             this.handleRequestApprove(ids, feature_id)
         }
         if(this.state.action_type == 'dismiss') {
-            this.handleRequestDismiss(ids, feature_id)
+            this.handleRequestDismiss(id, description)
         }
     }
 
-    handleRequestDismiss(ids, feature_id) {
+    handleRequestDismiss(id, description) {
         service
-            .requestDismiss(ids, feature_id)
+            .requestDismiss(id, description)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -99,9 +133,9 @@ class DetailModalBody extends Component {
             })
     }
 
-    handleRequestReject(id, state) {
+    handleRequestReject(id) {
         service
-            .requestReject(id, state)
+            .requestReject(id)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -263,6 +297,7 @@ class DetailModalBody extends Component {
             vector_datas, aimag_geom, is_loading
         } = this.state
         var is_disable = true
+        const { kind } = this.props
         return(
             <>
             <div className="row p-3">
@@ -344,56 +379,60 @@ class DetailModalBody extends Component {
                     />
                 </div>
             </div>
-            <div className="row my-2 mr-1 float-right">
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'reject',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог татгалзах",
-                        `Та татгалзахдаа итгэлтэй байна уу?`,
-                        true,
-                        "татгалзах",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light"
-                >
-                    <i className="fa fa-check-square-o">Татгалзах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'reject',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог буцаах",
-                        `Та буцаахдаа итгэлтэй байна уу?`,
-                        true,
-                        "буцаах",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check-square-o">Буцаах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'approve',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Хүсэлт үүсгэх",
-                        `Та хүсэлт үүсгэх итгэлтэй байна уу?`,
-                        true,
-                        "Хүсэлт үүсгэх",
-                        null
-                    )}
-                    className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check">Хүсэлт үүсгэх</i>
-                </button>
-            </div>
+            {
+                kind=='ХҮЛЭЭГДЭЖ БУЙ'
+                &&
+                    <div className="row my-2 mr-1 float-right">
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'reject',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог татгалзах",
+                                `Та татгалзахдаа итгэлтэй байна уу?`,
+                                true,
+                                "татгалзах",
+                                null
+                            )}
+                            className="btn gp-btn-primary waves-effect waves-light"
+                        >
+                            <i className="fa fa-check-square-o">Татгалзах</i>
+                        </button>
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'dismiss',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог буцаах",
+                                GetDescription,
+                                true,
+                                "илгээх",
+                                null
+                            )}
+                            className="btn gp-btn-primary waves-effect waves-light ml-2"
+                        >
+                            <i className="fa fa-check-square-o">Буцаах</i>
+                        </button>
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'approve',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Хүсэлт үүсгэх",
+                                `Та хүсэлт үүсгэхдээ итгэлтэй байна уу?`,
+                                true,
+                                "Хүсэлт үүсгэх",
+                                null
+                            )}
+                            className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                        >
+                            <i className="fa fa-check">Хүсэлт үүсгэх</i>
+                        </button>
+                    </div>
+            }
             <Modal
                 modal_status={this.state.modal_status}
                 modal_icon={this.state.modal_icon}
@@ -404,6 +443,7 @@ class DetailModalBody extends Component {
                 modalAction={this.handleModalAction}
                 actionNameDelete={this.state.action_name}
                 modalClose={this.state.modalClose}
+                handleOnChange={this.handleOnChange}
             />
             </>
         )

@@ -849,7 +849,6 @@ def _get_kind(kind, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-    # employee = get_object_or_404(Employee, user=request.user)
     org = Org.objects.filter(employee__user=request.user).first()
     state = RequestFiles.STATE_SENT
 
@@ -945,33 +944,41 @@ def get_request_data(request, id):
     })
 
 
-def _reject_request(id, state):
-    reject_request = get_object_or_404(RequestFiles, id=id)
-    reject_request.state = state
+def _reject_request(id, state, text):
+    reject_request = get_object_or_404(RequestFiles, pk=id)
+    reject_request.kind = state
+    reject_request.description = text
     reject_request.save()
-    return reject_request
 
 
 @require_POST
 @ajax_required
-@login_required(login_url='/gov/secure/login/')
 def llc_request_reject(request, payload):
     pk = payload.get('id')
-    state = payload.get('state')
-
-    if state == 'reject':
-        _reject_request(pk, RequestFiles.STATE_REJECT)
+    _reject_request(pk, RequestFiles.KIND_REVOKE, '')
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай цуцлагдлаа'
+        'info': 'Амжилттай татгалзлаа'
     }
     return JsonResponse(rsp)
 
 
 @require_POST
 @ajax_required
-@login_required(login_url='/gov/secure/login/')
+def llc_request_dismiss(request, payload):
+    description = payload.get('description')
+    id = payload.get('id')
+    _reject_request(id, RequestFiles.KIND_DISMISS, description)
+
+    return JsonResponse({
+        'success': True,
+        'info': 'Амжилттай илгээгдлээ'
+    })
+
+
+@require_POST
+@ajax_required
 def llc_request_approve(request, payload):
 
     employee = get_object_or_404(Employee, user=request.user)
@@ -1028,40 +1035,6 @@ def llc_request_approve(request, payload):
         rsp = {
             'success': True,
             'info': 'Амжилттай хүсэлт үүслээ'
-        }
-
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@login_required(login_url='/gov/secure/login/')
-def llc_request_dismiss(request, payload):
-    ids = payload.get('ids')
-    feature_id = payload.get('feature_id')
-    employee = get_object_or_404(Employee, user__username=request.user)
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
-
-    qs = EmpPermInspire.objects
-    qs = qs.filter(emp_perm=emp_perm)
-    qs = qs.filter(perm_kind=EmpPermInspire.PERM_REMOVE)
-    perm_dismiss = qs.filter(feature_id=feature_id)
-
-    if perm_dismiss:
-        for r_id in ids:
-            llc_req_obj = get_object_or_404(RequestFiles, pk=r_id)
-            llc_req_obj.state = RequestFiles.STATE_REJECT
-            llc_req_obj.save()
-
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай буцаалаа'
-        }
-
-    else:
-        rsp = {
-            'success': False,
-            'info': 'Буцаах эрхгүй байна'
         }
 
     return JsonResponse(rsp)

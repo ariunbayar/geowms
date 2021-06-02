@@ -18,10 +18,10 @@ function getFilesDetal(id) {
     return fetch(`/llc/backend/${id}/get-file-shapes/`, opts).then(handleResponse)
 }
 
-function requestReject(id, state) {
+function requestReject(id) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ id, state }),
+        body: JSON.stringify({ id }),
     }
     return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
@@ -34,10 +34,10 @@ function requestApprove(ids, feature_id) {
     return fetch(`${prefix}/approve/`, requestOptions).then(handleResponse)
 }
 
-function requestDismiss(ids, feature_id) {
+function requestDismiss(id, description) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ids, feature_id}),
+        body: JSON.stringify({id, description}),
     }
     return fetch(`${prefix}/dismiss/`, requestOptions).then(handleResponse)
 }
