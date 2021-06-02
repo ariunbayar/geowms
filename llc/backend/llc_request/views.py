@@ -296,6 +296,7 @@ def get_file_shapes(request, id):
     for shape_geometry in shape_geometries:
         geoms, geom_type = _get_shapes_geoms(shape_geometry)
         list_of_datas.append({
+            'id': shape_geometry.id,
             'geom_type': geom_type,
             'theme': shape_geometry.theme_id,
             'feature': shape_geometry.feature_id,

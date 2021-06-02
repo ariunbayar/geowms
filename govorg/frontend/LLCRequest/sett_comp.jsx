@@ -8,19 +8,37 @@ export class LLCSettings extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            values: props.values,
             list_of_datas: [],
             model_status: false,
-            selected_values: []
+            selected_values: [],
+            themes: [],
+            packages: [],
+            features: [],
+            theme_state: false
         }
         this.handleProceed = this.handleProceed.bind(this)
         this.closeModel = this.closeModel.bind(this)
         this.modelAction = this.modelAction.bind(this)
+        this.getInspireTree = this.getInspireTree.bind(this)
 
     }
 
+
+    getInspireTree(){
+        service.getInspireTree().then(({themes, packages, features}) => {
+            this.setState({themes, packages, features})
+        })
+    }
+
     modelAction(values) {
-        console.log("values", values)
+        var {list_of_datas, theme_state} = this.state
+        var key = values.key
+        var value_list_of = obj => obj.id == values.selected_values.id
+        var index_of_list = list_of_datas.findIndex(value_list_of)
+
+        list_of_datas[index_of_list][key] = values.selected_ins
+
+        this.setState({list_of_datas})
     }
 
     handleProceed(values) {
@@ -36,6 +54,7 @@ export class LLCSettings extends Component {
         service.getFilesDetal(id).then(({list_of_datas}) => {
             this.setState({list_of_datas})
         })
+        this.getInspireTree()
     }
 
     render () {

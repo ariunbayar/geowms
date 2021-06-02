@@ -22,12 +22,12 @@ export class ConfigureBundle extends Component {
             modalClose: null,
             values: props.values,
             table_name: '',
-            themes: [],
-            packages: [],
-            features: [],
-            feature_name: '',
-            theme_name: '',
-            package_name: '',
+            themes: props.themes,
+            packages: props.packages,
+            features: props.features,
+            feature_name: props.selected_values.feature,
+            theme_name: props.selected_values.theme,
+            package_name: props.selected_values.package,
             selected_packages: [],
             selected_features: [],
             selected_dt_list: [],
@@ -36,48 +36,43 @@ export class ConfigureBundle extends Component {
             selected_values: props.selected_values
         }
         this.handleChange = this.handleChange.bind(this)
-        this.getInspireTree = this.getInspireTree.bind(this)
         this.getArray = this.getArray.bind(this)
     }
+
     componentDidMount() {
-        this.getInspireTree()
     }
 
     componentDidUpdate(pP, pS) {
-        const { theme_name, feature_name, packages, features, table_name} = this.state
-        const { selected_values} = this.props
+        const { theme_name, feature_name,  package_name} = this.state
+        const { selected_values, packages, features, theme_state} = this.props
+        var values = {}
+
+        if (pS.theme_name != theme_name) {
+            values = {
+                'selected_ins': theme_name,
+                'selected_values': selected_values,
+                'key': 'theme'
+            }
+            this.props.model_action(values)
+        }
+
+        if (pS.package_name != package_name) {
+            values = {
+                'selected_ins': package_name,
+                'selected_values': selected_values,
+                'key': 'package'
+            }
+            this.props.model_action(values)
+        }
+
         if (pS.feature_name != feature_name) {
-            this.props.model_action(feature_name)
+            values = {
+                'selected_ins': feature_name,
+                'selected_values': selected_values,
+                'key': 'feature'
+            }
+            this.props.model_action(values)
         }
-
-        if (pS.packages != packages) {
-            this.setState({packages})
-        }
-
-        if (pS.features != features) {
-            this.setState({features})
-        }
-        if (pP.selected_values != selected_values) {
-            this.setState({selected_values})
-        }
-    }
-
-    // handleGetDetial( packages, features ){
-    //     const {table_id, id} = this.state
-    //     this.setState({ is_loading: true })
-    //     service.pg_config.tableDetail(id, table_id).then(({success, form_datas}) => {
-    //         if(success){
-    //             form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
-    //             form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
-    //             this.setState({ ...form_datas, is_loading: false })
-    //         }
-    //     })
-    // }
-
-    getInspireTree(){
-        service.getInspireTree().then(({themes, packages, features}) => {
-            this.setState({themes, packages, features})
-        })
     }
 
     getArray(data, selected_value) {
@@ -86,19 +81,17 @@ export class ConfigureBundle extends Component {
         return seleted_datas
     }
 
-    handleChange(name, e) {
-        const { packages, features } = this.state
-        const selected_value = e.target.value
+    handleChange(name, value, fn) {
+        const { packages, features, selected_values } = this.state
+        const selected_value = parseInt(value)
         var data_list = {}
+        var values = {}
         var seleted_datas = []
-        var array = []
-
         if ( name == 'theme' ) {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
             data_list['feature_name'] = ''
-            data_list['id_list'] = []
         }
 
         else if ( name == 'package' ) {
@@ -121,7 +114,6 @@ export class ConfigureBundle extends Component {
             data_list['selected_features'] = []
             data_list['feature_name'] = ''
         }
-
         this.setState({ ...data_list })
     }
 
