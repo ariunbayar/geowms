@@ -182,6 +182,10 @@ export class RequestAdd extends Component {
         this.props.history.push(`/llc/llc-request/`)
     }
 
+    ModalClose() {
+        this.setState({ modal_status: 'closed' })
+    }
+
     handleModalOpen(){
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
@@ -210,7 +214,7 @@ export class RequestAdd extends Component {
                 '',
                 false,
                 "",
-                this.handleModalClose
+                this.ModalClose
             )
         }
     }
