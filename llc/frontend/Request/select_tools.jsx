@@ -13,7 +13,7 @@ export default class UsedTools extends Component {
             modalAction: '',
             modal_title: '',
             more_detail: '',
-            selected_tools: props.values.selected_tools
+            selected_tools: []
         }
         this.handleSelectedTool = this.handleSelectedTool.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -60,17 +60,18 @@ export default class UsedTools extends Component {
 
     render (){
         const {
-            selected_tools, tool_datas, id
+            tool_datas, id, info
         } = this.props.values
         const {
             modalAction, values,
             modal_title,
-            select_layer_status
+            select_layer_status,
+            selected_tools
         } = this.state
         return (
             <div className="col-md-12">
                 <label htmlFor=''> Зураглал үйлдэхдээ ашигласан багаж</label>
-                <div className="row justify-content-center overflow-auto" style={{height: '30vh'}}>
+                <div className="row justify-content-center overflow-auto pl-5" style={{height: '23vh'}}>
                     <table className="table table-wrapper-table">
                         <thead>
                             <tr>
@@ -83,9 +84,9 @@ export default class UsedTools extends Component {
                         </thead>
                         <tbody>
                             {
-                                (selected_tools && selected_tools.length > 0)
+                                (selected_tools.selected_tools)
                                 ?
-                                selected_tools.map((value, idx) =>
+                                selected_tools.selected_tools.map((value, idx) =>
                                 <tr key={idx}>
                                     <th scope="row">{idx+1}</th>
                                     <td>{value.bagaj_dugaar}</td>
@@ -93,9 +94,12 @@ export default class UsedTools extends Component {
                                     <td>{value.certificate_number}</td>
                                     <td>{value.expired_date}</td>
                                     <td className="text-center mx-0 px-0">
-                                        <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
-                                            <GPIcon icon={"fa fa-minus-circle text-danger"}/>
-                                        </a>
+                                        {
+                                            !info &&
+                                            <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
+                                                <GPIcon icon={"fa fa-minus-circle text-danger"}/>
+                                             </a>
+                                        }
                                     </td>
                                 </tr>
                                 ): null

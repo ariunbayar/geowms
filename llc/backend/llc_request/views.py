@@ -1,5 +1,4 @@
 
-from geoportal_app.models import User
 import os
 import rarfile
 from django.conf import settings
@@ -22,6 +21,7 @@ from llc.backend.llc_request.models import (
 )
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from backend.org.models import DefaultPosition, Employee, Org
+from geoportal_app.models import User
 
 from main.components import Datatable
 from main.utils import (
@@ -299,11 +299,6 @@ def get_request_data(request, id):
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features = _get_feature(shape_geometries)
 
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        features.append(single_geom)
-
     file_data = {
         'name': '',
         'size': '',
@@ -375,7 +370,7 @@ def _send_to_information_email (user_id):
 
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
-    send_mail(subject, msg, from_email, ['oogii1998@gmail.com'], connection=_make_connection(from_email))
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
 
     return True
 
@@ -386,16 +381,26 @@ def send_request(request, id):
 
     qs = RequestFiles.objects.filter(pk=id)
     query = qs.first()
-    org_obj = RequestFilesShape.objects.filter(files=query).first()
+    org_obj = query.file
     employee = Employee.objects.filter(org_id=org_obj.org_id).first()
-    success_mail =_send_to_information_email(employee.user_id)
+    position = employee.position_id
 
-    if success_mail:
-        qs.update(state=2)
+    if position == 4:
+        success_mail = _send_to_information_email(employee.user_id)
 
+        if success_mail:
+            qs.update(state=2)
+
+            return JsonResponse({
+                'success': True,
+                'info': 'Амжилттай илгээгдлээ.'
+            })
+
+    else :
         return JsonResponse({
-            'success': True,
-            'info': 'Амжилттай илгээгдлээ.'
+            'success': False,
+            'info': 'Хариуцсан мэргэжилтэн байхгүй байна. Системийн админд хандана уу !!!'
+
         })
 
 

@@ -82,8 +82,7 @@ class ActionClass extends Component {
             const {values} = this.props
             const {url} = this.state
             return (
-                    <div>
-                        <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
+                    <div className='row ml-2'>
                             <p className="btn btn-secondary">
                                 <i
                                     className="fa fa-angle-double-left"
@@ -94,13 +93,13 @@ class ActionClass extends Component {
                                 </i>
                             </p>
                             &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
                             <p
                                 className="btn btn-primary"
                                 onClick ={()=> this.handleSubmit()}
                             >
                                 <i className="fa"> Хүсэлт илгээх</i>
                             </p>
-                        </div>
                         <Modal
                             modal_status={ this.state.modal_status }
                             modal_icon={ this.state.modal_icon }

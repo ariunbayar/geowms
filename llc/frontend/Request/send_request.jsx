@@ -51,7 +51,7 @@ export default class ModelSendData extends Component {
         this.setState({status: "closing"})
         setTimeout(() => {
             this.setState({status: "closed"})
-            this.props.modalClose()
+            this.props.closeRequestMap()
         }, 150)
     }
 
