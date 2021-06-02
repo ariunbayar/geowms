@@ -18,6 +18,7 @@ from llc.backend.llc_request.models import (
     ShapeGeom,
     RequestFilesShape,
     RequestForm,
+    LLCRequest
 )
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from backend.org.models import Employee, Org
@@ -230,7 +231,7 @@ def save_request(request):
 
         else:
             request_file = RequestFiles.objects.create(
-                name=project_name,
+                name='UTILITY SOLUTION',
                 kind=2,
                 state=1,
                 geo_id=org_data.geo_id if org_data else '',
@@ -440,6 +441,12 @@ def send_request(request, id):
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, position_id=13).first()
     if employee:
+        LLCRequest.objects.create(
+            file_id=id,
+            state=LLCRequest.STATE_NEW,
+            kind=LLCRequest.KIND_NEW,
+        )
+
         success_mail = _send_to_information_email(employee.user_id)
 
         if success_mail:

@@ -380,7 +380,7 @@ class DetailModalBody extends Component {
                 </div>
             </div>
             {
-                kind=='ХҮЛЭЭГДЭЖ БУЙ'
+                kind=='ШИНЭ'
                 &&
                     <div className="row my-2 mr-1 float-right">
                         <button

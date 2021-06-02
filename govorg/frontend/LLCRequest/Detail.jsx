@@ -44,10 +44,10 @@ export class Detail extends Component {
             is_loading: false,
             refresh: false,
             талбарууд: [
-                {'field': 'name', "title": 'Хөрөнгө оруулалт'},
+                {'field': 'name', "title": 'Нэр'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
-                {'field': 'created_at', "title": 'Үүссэн'},
+                // {'field': 'file_path', "title": 'Хавсаргасан файл'},
                 {'field': 'updated_at', "title": 'Зассан'},
             ],
             жагсаалтын_холбоос: '/gov/api/llc-request/',

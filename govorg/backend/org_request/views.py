@@ -44,7 +44,7 @@ from main.utils import (
 )
 from main.components import Datatable
 
-from llc.backend.llc_request.models import RequestFiles, RequestFilesShape, ShapeGeom, RequestForm
+from llc.backend.llc_request.models import RequestFiles, LLCRequest, ShapeGeom, RequestForm
 
 
 def _get_geom(geo_id, fid):
@@ -845,42 +845,45 @@ def _get_kind(kind, item):
     return display_name
 
 
+def _get_file_name(kind, item):
+    file = RequestFiles.objects.filter(id=item['file_id']).first()
+    return file.file_path.url
+
+
+def _get_ann_name(kind, item):
+    file = RequestFiles.objects.filter(id=item['file_id']).first()
+    return file.name
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
     org = Org.objects.filter(employee__user=request.user).first()
-    state = RequestFiles.STATE_SENT
 
-    if state:
-        qs = RequestFiles.objects
-        qs = qs.filter(geo_id=org.geo_id)
-        if qs:
-            оруулах_талбарууд = ['id', 'name', 'file_path', 'created_at', 'updated_at', 'kind', 'state']
-            хувьсах_талбарууд = [
-                {"field": "state", "action": _get_state, "new_field": "state"},
-                {"field": "kind", "action": _get_kind, "new_field": "kind"},
-            ]
+    qs = LLCRequest.objects
+    qs = qs.filter(file__geo_id=org.geo_id)
+    if qs:
+        оруулах_талбарууд = ['id', 'file_id', 'created_at', 'updated_at', 'kind', 'state', 'description']
+        хувьсах_талбарууд = [
+            {"field": "state", "action": _get_state, "new_field": "state"},
+            {"field": "kind", "action": _get_kind, "new_field": "kind"},
+            {"field": "created_at", "action": _get_file_name, "new_field": "file_path"},
+            {"field": "description", "action": _get_ann_name, "new_field": "name"}
+        ]
 
-            datatable = Datatable(
-                model=RequestFiles,
-                payload=payload,
-                initial_qs=qs,
-                оруулах_талбарууд=оруулах_талбарууд,
-                хувьсах_талбарууд=хувьсах_талбарууд,
-            )
-            items, total_page = datatable.get()
-
-            rsp = {
-                'items': items,
-                'total_page': total_page,
-            }
-        else:
-            rsp = {
-                'items': [],
-                'page': payload.get("page"),
-                'total_page': 1,
-            }
+        datatable = Datatable(
+            model=RequestFiles,
+            payload=payload,
+            initial_qs=qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд,
+        )
+        items, total_page = datatable.get()
+        rsp = {
+            'items': items,
+            'total_page': total_page,
+        }
     else:
         rsp = {
             'items': [],
@@ -914,10 +917,15 @@ def get_request_data(request, id):
     field = dict()
     aimag_name = ''
     aimag_geom = []
-    shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
+    print("hoh")
+    print("hoh")
+    print("hoh")
+    print("hoh", id)
+    llc_data = LLCRequest.objects.filter(pk=id).first()
+    shape_geometries = ShapeGeom.objects.filter(shape__files=llc_data.file)
     features = _get_feature(shape_geometries)
 
-    qs = RequestForm.objects.filter(file_id=id)
+    qs = RequestForm.objects.filter(file=llc_data.file)
     field = [item for item in qs.values()]
     selected_tools = qs.first().file.tools
     geo_id = qs.first().file.geo_id
@@ -944,18 +952,23 @@ def get_request_data(request, id):
     })
 
 
-def _reject_request(id, state, text):
-    reject_request = get_object_or_404(RequestFiles, pk=id)
-    reject_request.kind = state
-    reject_request.description = text
+def _reject_request(id, kind, state, text):
+    reject_request = LLCRequest.objects.filter(pk=id).first()
+    reject_file = RequestFiles.objects.filter(id=reject_request.file.id).first()
+    reject_request.kind = kind
+    reject_request.state = state
+    reject_file.kind = kind
+    reject_file.state = RequestFiles.STATE_NEW
+    reject_file.description = text
     reject_request.save()
+    reject_file.save()
 
 
 @require_POST
 @ajax_required
 def llc_request_reject(request, payload):
     pk = payload.get('id')
-    _reject_request(pk, RequestFiles.KIND_REVOKE, '')
+    _reject_request(pk, LLCRequest.KIND_REVOKE, LLCRequest.STATE_SENT, '')
 
     rsp = {
         'success': True,
@@ -969,7 +982,7 @@ def llc_request_reject(request, payload):
 def llc_request_dismiss(request, payload):
     description = payload.get('description')
     id = payload.get('id')
-    _reject_request(id, RequestFiles.KIND_DISMISS, description)
+    _reject_request(id, LLCRequest.KIND_DISMISS,LLCRequest.STATE_SENT,  description)
 
     return JsonResponse({
         'success': True,
