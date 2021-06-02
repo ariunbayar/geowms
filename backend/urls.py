@@ -70,7 +70,7 @@ urlpatterns = [
         path('pg/db-config-save/', geoserver_another_database.config_save),
         path('pg/get/<int:pk>/', pg_views.config_detail),
         path('pg/tables/<int:pk>/all/', pg_views.get_pg_table_list),
-        path('pg/<int:conn_id>/get-all-view-names/', pg_views.get_pg_table_names),
+        path('pg/get-all-view-names/', pg_views.get_pg_table_names),
         path('pg/get-fields/', pg_views.getFields),
         path('pg/save-table/', pg_views.save_table),
         path('pg/<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),

@@ -18,6 +18,7 @@ from llc.backend.llc_request.models import (
     ShapeGeom,
     RequestFilesShape,
     RequestForm,
+    LLCRequest
 )
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from backend.org.models import Employee, Org
@@ -230,7 +231,7 @@ def save_request(request):
 
         else:
             request_file = RequestFiles.objects.create(
-                name=project_name,
+                name='UTILITY SOLUTION',
                 kind=2,
                 state=1,
                 geo_id=org_data.geo_id if org_data else '',
@@ -268,9 +269,11 @@ def save_request(request):
 
 def _get_feature(shape_geometries):
     features = []
+    geom_type = ''
     for shape_geometry in shape_geometries:
 
         single_geom = json_load(shape_geometry.geom_json)
+        geom_type = single_geom.get('type')
         feature = {
             "type":"Feature",
             'geometry': single_geom,
@@ -278,7 +281,7 @@ def _get_feature(shape_geometries):
             'properties': json_load(shape_geometry.form_json)
         }
         features.append(feature)
-    return features
+    return features, geom_type
 
 
 @require_GET
@@ -287,7 +290,7 @@ def get_all_geo_json(request):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
-    features = _get_feature(shape_geometries)
+    features, geom_type = _get_feature(shape_geometries)
     return JsonResponse({
         'geo_json_datas': FeatureCollection(features)
     })
@@ -310,7 +313,7 @@ def get_request_data(request, id):
     aimag_geom = []
 
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
-    features = _get_feature(shape_geometries)
+    features, geom_type = _get_feature(shape_geometries)
 
     qs = RequestForm.objects.filter(file_id=id)
     qs =  qs.first()
@@ -353,6 +356,13 @@ def get_request_data(request, id):
         'aimag_geom': aimag_geom
     })
 
+def _get_shapes_geoms(shape_geometry):
+    geo_datas = []
+    geom_type = ''
+    shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
+    geo_datas, geom_type = _get_feature(shape_geoms)
+
+    return geo_datas, geom_type
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
@@ -391,9 +401,9 @@ def _send_to_information_email (user_id):
     subject = 'Хүсэлт'
     text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
     if host_name == 'localhost:8000':
-        msg = '{text} http://{host_name}/gov/org-request/'.format(text=text, token=token, host_name=host_name)
+        msg = '{text} http://{host_name}/gov/llc-request/'.format(text=text, token=token, host_name=host_name)
     else:
-        msg = '{text} https://{host_name}/gov/org-request/'.format(text=text, token=token, host_name=host_name)
+        msg = '{text} https://{host_name}/gov/llc-request/'.format(text=text, token=token, host_name=host_name)
 
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
@@ -404,12 +414,39 @@ def _send_to_information_email (user_id):
 
 @require_GET
 @ajax_required
+def get_file_shapes(request, id):
+    list_of_datas = []
+    shape_geometries = RequestFilesShape.objects.filter(files_id=id)
+    for shape_geometry in shape_geometries:
+        geoms, geom_type = _get_shapes_geoms(shape_geometry)
+        list_of_datas.append({
+            'id': shape_geometry.id,
+            'geom_type': geom_type,
+            'theme': shape_geometry.theme_id,
+            'feature': shape_geometry.feature_id,
+            'package': shape_geometry.package_id,
+            'features': FeatureCollection(geoms)
+        })
+
+    return JsonResponse({
+        'list_of_datas': list_of_datas,
+    })
+
+
+@require_GET
+@ajax_required
 def send_request(request, id):
 
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, position_id=13).first()
     if employee:
+        LLCRequest.objects.create(
+            file_id=id,
+            state=LLCRequest.STATE_NEW,
+            kind=LLCRequest.KIND_NEW,
+        )
+
         success_mail = _send_to_information_email(employee.user_id)
 
         if success_mail:
