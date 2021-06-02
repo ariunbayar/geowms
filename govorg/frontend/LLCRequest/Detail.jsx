@@ -44,7 +44,7 @@ export class Detail extends Component {
             is_loading: false,
             refresh: false,
             талбарууд: [
-                {'field': 'name', "title": 'Төсөл'},
+                {'field': 'name', "title": 'Хөрөнгө оруулалт'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүссэн'},
@@ -56,12 +56,6 @@ export class Detail extends Component {
                 {"field": "kind", "action": (values) => make_kind_color(values), "action_type": true},
             ],
             нэмэлт_талбарууд: [
-                {
-                    "title": 'Дэлгэрэнгүй',
-                    "text": '',
-                    "icon": 'fa fa-eye text-primary',
-                    "action": (values) => this.handeDetail(values)
-                },
                 {
                     "title": 'Тохиргоо',
                     "text": '',
@@ -85,11 +79,6 @@ export class Detail extends Component {
             is_modal_request_open: false,
             custom_query: {}
         }
-        this.handeDetail = this.handeDetail.bind(this)
-    }
-
-    handeDetail(values) {
-        this.props.history.push(`/gov/llc-request/${values.id}/detail/`)
     }
 
     handeUpdateAction(values) {
