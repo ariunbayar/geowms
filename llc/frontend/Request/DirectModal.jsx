@@ -32,7 +32,6 @@ export default class RequestDetail extends Component {
     }
 
     render (){
-        console.log(this.props)
         const {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,

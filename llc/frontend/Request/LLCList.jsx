@@ -92,6 +92,8 @@ export class Detail extends Component {
                         'component': (values) => make_send_data(values)
                     }
             ],
+            state: '',
+            kind: '',
             modal_status:'closed',
             request_form:false
         }
@@ -102,6 +104,15 @@ export class Detail extends Component {
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+    }
+
+    componentDidMount(){
+        service.getSearchItems().then(({ success, search_field}) =>{
+            if (success){
+                this.setState({choices: search_field})
+            }
+        })
+
     }
 
     handleUpdateAction(values) {
@@ -171,8 +182,17 @@ export class Detail extends Component {
         this.setState({ refresh: !this.state.refresh })
     }
 
+    handleSearch() {
+        const { state, kind } = this.state
+        let custom_query = Object()
+        if (state) custom_query['state'] = state
+        if (kind) custom_query['kind'] = kind
+
+        this.setState({ custom_query })
+    }
+
     render() {
-        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh }= this.state
+        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, choices }= this.state
         return (
             <Fragment>
                 <div className="card">
@@ -180,19 +200,19 @@ export class Detail extends Component {
                         <div className="col-md-12 row">
                                 <div className="col-md-6">
                                     <label htmlFor="">Төлөв</label>
-                                    <select className="form-control form-control-xs disabled"
+                                    <select className="form-control form-control-xs "
                                         onChange={(e) => this.setState({ state: e.target.value })}
                                     >
-                                        {/* <option value="">--- Төлөвөөр хайх ---</option>
+                                        <option value="">--- Төлөвөөр хайх ---</option>
                                         {
-                                            choices && choices.length > 0
+                                            choices?.state
                                             ?
-                                                choices[0].map((choice, idx) =>
+                                                choices['state'].map((choice, idx) =>
                                                     <option key={idx} value={choice[0]}>{choice[1]}</option>
                                                 )
                                             :
                                             null
-                                        } */}
+                                        }
                                     </select>
                                 </div>
                                 <div className="col-md-6">
@@ -200,19 +220,19 @@ export class Detail extends Component {
                                     <select className="form-control form-control-sm disabled"
                                         onChange={(e) => this.setState({ kind: e.target.value })}
                                     >
-                                        {/* <option value="">--- Өөрчлөлтөөр хайх ---</option>
+                                        <option value="">--- Өөрчлөлтөөр хайх ---</option>
                                         {
-                                            choices && choices.length > 0
+                                            choices?.kind
                                             ?
-                                                choices[1].map((choice, idx) =>
+                                                choices['kind'].map((choice, idx) =>
                                                     <option key={idx} value={choice[0]}>{choice[1]}</option>
                                                 )
                                             :
                                             null
-                                        } */}
+                                        }
                                     </select>
                                 </div>
-                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right disabled" /*onClick={() => this.handleSearch()}*/>Хайх</button>
+                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right " onClick={() => this.handleSearch()}>Хайх</button>
                         </div>
                         <div className="col-md-12">
                             <PortalDataTable
@@ -225,6 +245,7 @@ export class Detail extends Component {
                                 хувьсах_талбарууд={хувьсах_талбарууд}
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
                                 нэмэх_товч={'/llc/llc-request/хүсэлт-нэмэх/'}
+                                custom_query={this.state.custom_query}
                             />
                         </div>
                     </div>

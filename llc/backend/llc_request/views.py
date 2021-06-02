@@ -449,3 +449,18 @@ def remove_request(request, id):
     return JsonResponse({
         'success': True
     })
+
+
+@require_GET
+@ajax_required
+def get_search_field(request):
+    search_field = dict()
+    get_state = RequestFiles.STATE_CHOICES
+    get_kind = RequestFiles.KIND_CHOICES
+    search_field['state'] = get_state
+    search_field['kind'] = get_kind
+
+    return JsonResponse({
+        'success': True,
+        'search_field': search_field,
+    })
