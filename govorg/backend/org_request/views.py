@@ -962,7 +962,11 @@ def llc_request_reject(request, payload):
     if state == 'reject':
         _reject_request(pk, RequestFiles.STATE_REJECT)
 
-    return JsonResponse({'success': True})
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай цуцлагдлаа'
+    }
+    return JsonResponse(rsp)
 
 
 @require_POST

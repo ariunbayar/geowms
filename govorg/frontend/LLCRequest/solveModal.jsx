@@ -38,12 +38,12 @@ class DetailModalBody extends Component {
     }
 
     handleModalAction(){
-        let ids = []
-        let feature_id
+        var id = this.props.id
+        var state = this.props.state
         this.setState({ is_loading: true })
 
         if(this.state.action_type == 'reject') {
-            this.handleRequestReject(ids, feature_id)
+            this.handleRequestReject(id, state)
         }
         if(this.state.action_type == 'approve') {
             this.handleRequestApprove(ids, feature_id)
@@ -99,9 +99,9 @@ class DetailModalBody extends Component {
             })
     }
 
-    handleRequestReject(ids, feature_id) {
+    handleRequestReject(id, state) {
         service
-            .requestReject(ids, feature_id)
+            .requestReject(id, state)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
