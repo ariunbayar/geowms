@@ -134,6 +134,7 @@ export class RequestAdd extends Component {
         if (id) {
             service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
                 if (form_field){
+                    console.log("form_field['selected_tools']", form_field['selected_tools'])
                     this.setState({
                         vector_datas,
                         zahialagch: form_field['client_org'],

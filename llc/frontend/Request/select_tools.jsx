@@ -26,7 +26,7 @@ export default class UsedTools extends Component {
                 this.setState({selected_tools: selected_tools})
             }
             else {
-                this.setState({selected_tools: selected_tools.selected_tools})
+                this.setState({selected_tools: selected_tools})
             }
         }
     }

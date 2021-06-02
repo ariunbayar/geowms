@@ -183,13 +183,13 @@ def save_request(request):
         id = id.get('id')
 
     if not selected_tools:
-        selected_tools = json_load(selected_tools)
-        selected_tools = selected_tools['selected_tools']
         return JsonResponse({
             'success': False,
             'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
         })
 
+    selected_tools = json_load(selected_tools)
+    selected_tools = selected_tools['selected_tools']
     check_file_name = 'llc-request-files/' + str(uploaded_file)
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
     if check_data_of_file and not id:
@@ -308,7 +308,6 @@ def get_request_data(request, id):
     file_qs = qs.file.file_path
     file_data['name'] = file_qs.name
     file_data['size'] = file_qs.size
-
     if qs:
         file_name = str(qs.file.file_path).split('/')[1]
         field['client_org'] = qs.client_org
