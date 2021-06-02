@@ -412,10 +412,11 @@ def remove_request(request, id):
     shapes = RequestFilesShape.objects.filter(files=initial_query.id)
     form = RequestForm.objects.filter(file=initial_query.id)
     for shape in shapes:
-        geom = ShapeGeom.objects.filter(shape=shape.id)
+        geom = ShapeGeom.objects.filter(shape=shape)
         if geom:
             geom.delete()
-            shapes.delete()
+        shape.delete()
+
     if form:
         form.delete()
         initial_query.delete()

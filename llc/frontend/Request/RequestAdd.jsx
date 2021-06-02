@@ -119,9 +119,10 @@ export class RequestAdd extends Component {
         this.handleOnChange = this.handleOnChange.bind(this)
         this.handlePassValues = this.handlePassValues.bind(this)
         this.modalChange = this.modalChange.bind(this)
-        this.modalOpen = this.modalOpen.bind(this)
         this.getTools = this.getTools.bind(this)
         this.handleSelectModel = this.handleSelectModel.bind(this)
+        this.handleModalClose = this.handleModalClose.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     handleSelectModel(selected_tools) {
@@ -177,11 +178,11 @@ export class RequestAdd extends Component {
         this.setState({[name]: value, file_name, file_state})
     }
 
-    modalClose() {
+    handleModalClose() {
         this.props.history.push(`/llc/llc-request/`)
     }
 
-    modalOpen(){
+    handleModalOpen(){
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
         })
@@ -189,51 +190,42 @@ export class RequestAdd extends Component {
 
     handlePassValues(success, info) {
         if(success){
-            this.setState({ modal_status: 'open'})
             this.modalChange(
+                '',
                 'fa fa-check-circle',
-                null,
                 'success',
                 info,
                 '',
                 false,
-                '',
-                '',
-                null,
-                this.modalClose()
+                "",
+                this.handleModalClose
             )
         }
         else {
             this.modalChange(
+                '',
                 'fa fa-times-circle',
-                null,
                 'danger',
                 info,
                 '',
                 false,
-                '',
-                '',
-                null,
-                this.modalClose()
+                "",
+                this.handleModalClose
             )
         }
     }
-
-    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+    modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
         this.setState({
+            action_type,
             modal_icon,
-            modal_bg,
             icon_color,
             title,
             text,
             has_button,
-            actionNameBack,
-            actionNameDelete,
-            modalAction,
+            action_name,
             modalClose
-        }, () => {
-            this.modalOpen()
         })
+        this.handleModalOpen()
     }
 
     render (){
@@ -271,17 +263,15 @@ export class RequestAdd extends Component {
                     />
                 </div>
                 <Modal
-                    modal_status={ this.state.modal_status }
-                    modal_icon={ this.state.modal_icon }
-                    modal_bg={ this.state.modal_bg }
-                    icon_color={ this.state.icon_color }
-                    title={ this.state.title }
-                    text={ this.state.text }
-                    has_button={ this.state.has_button }
-                    actionNameBack={ this.state.actionNameBack }
-                    actionNameDelete={ this.state.actionNameDelete }
-                    modalAction={ this.state.modalAction }
-                    modalClose={ this.state.modalClose }
+                     modal_status={this.state.modal_status}
+                     modal_icon={this.state.modal_icon}
+                     icon_color={this.state.icon_color}
+                     title={this.state.title}
+                     has_button={this.state.has_button}
+                     text={this.state.text}
+                     modalAction={this.handleModalAction}
+                     actionNameDelete={this.state.action_name}
+                     modalClose={this.state.modalClose}
                 />
             </div>
         )}
