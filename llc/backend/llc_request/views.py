@@ -219,6 +219,7 @@ def save_request(request):
                                 'success': False,
                                 'info': 'Файл хоосон байна !!!'
                             })
+        utils.remove_folder(extract_path)
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
