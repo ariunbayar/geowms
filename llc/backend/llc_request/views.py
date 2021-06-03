@@ -195,106 +195,105 @@ def save_request(request):
             'success': False,
             'info': 'Форм дутуу бөглөгдсөн байна.!!!'
         })
-    else:
-        if id:
-            id = json_load(id)
-            id = id.get('id')
+    if id:
+        id = json_load(id)
+        id = id.get('id')
 
-        if not selected_tools:
-            return JsonResponse({
-                'success': False,
-                'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
-            })
+    if not selected_tools:
+        return JsonResponse({
+            'success': False,
+            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        })
 
-        selected_tools = json_load(selected_tools)
-        selected_tools = selected_tools['selected_tools']
-        check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
-        check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
+    selected_tools = json_load(selected_tools)
+    selected_tools = selected_tools['selected_tools']
+    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
+    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
-        if check_data_of_file and not id:
-            return JsonResponse({
-                'success': False,
-                'info': 'Файл-ын нэр давхцаж байна !!!.'
-            })
+    if check_data_of_file and not id:
+        return JsonResponse({
+            'success': False,
+            'info': 'Файл-ын нэр давхцаж байна !!!.'
+        })
 
-        if not check_data_of_file or not id:
-            extract_path = os.path.join(extract_path, file_not_ext_name)
-            file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
-            utils.unzip(file_path, extract_path)
-            utils.remove_file(file_path)
+    if not check_data_of_file or not id:
+        extract_path = os.path.join(extract_path, file_not_ext_name)
+        file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
+        utils.unzip(file_path, extract_path)
+        utils.remove_file(file_path)
 
-            datasource_exts = ['.gml', '.geojson']
-            for name in glob.glob(os.path.join(extract_path, '*')):
-                for ext in datasource_exts:
-                    if ext in name:
-                        ds = DataSource(name)
-                        for layer in ds:
-                            if len(layer) >= 1:
-                                org_data = _get_leve_2_geo_id(layer)
-                                if not org_data:
-                                    return JsonResponse({
-                                        'success': False,
-                                        'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-                                    })
-                            else:
-                                utils.remove_folder(extract_path)
+        datasource_exts = ['.gml', '.geojson']
+        for name in glob.glob(os.path.join(extract_path, '*')):
+            for ext in datasource_exts:
+                if ext in name:
+                    ds = DataSource(name)
+                    for layer in ds:
+                        if len(layer) >= 1:
+                            org_data = _get_leve_2_geo_id(layer)
+                            if not org_data:
                                 return JsonResponse({
                                     'success': False,
-                                    'info': 'Файл хоосон байна !!!'
+                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
                                 })
+                        else:
+                            utils.remove_folder(extract_path)
+                            return JsonResponse({
+                                'success': False,
+                                'info': 'Файл хоосон байна !!!'
+                            })
 
-            if id:
-                request_file = RequestFiles.objects.filter(pk=id).first()
-                get_shapes = RequestFilesShape.objects.filter(files=request_file)
-                if get_shapes:
-                    for shape in get_shapes:
-                        geoms = ShapeGeom.objects.filter(shape=shape)
-                        geoms.delete()
-                    get_shapes.delete()
+        if id:
+            request_file = RequestFiles.objects.filter(pk=id).first()
+            get_shapes = RequestFilesShape.objects.filter(files=request_file)
+            if get_shapes:
+                for shape in get_shapes:
+                    geoms = ShapeGeom.objects.filter(shape=shape)
+                    geoms.delete()
+                get_shapes.delete()
 
-                if not check_data_of_file:
-                    request_file.geo_id=org_data.geo_id if org_data else ''
-                    request_file.file_path=uploaded_file
+            if not check_data_of_file:
+                request_file.geo_id=org_data.geo_id if org_data else ''
+                request_file.file_path=uploaded_file
 
-                request_file.tools=json_dumps(selected_tools)
-                request_file.save()
-
-            else:
-                request_file = RequestFiles.objects.create(
-                    name='UTILITY SOLUTION',
-                    kind=2,
-                    state=1,
-                    geo_id=org_data.geo_id if org_data else '',
-                    file_path=uploaded_file,
-                    tools=json_dumps(selected_tools)
-                )
-                id = request_file.id
-            _create_shape_files(org_data, request_file, ds)
-
-        form_data = RequestForm.objects.filter(file_id=id).first()
-        if form_data:
-            form_data.client_org = zahialagch
-            form_data.project_name = project_name
-            form_data.object_type = object_type
-            form_data.object_quantum = object_count
-            form_data.investment_status = hurungu_oruulalt
-            form_data.save()
+            request_file.tools=json_dumps(selected_tools)
+            request_file.save()
 
         else:
-            RequestForm.objects.create(
-                client_org=zahialagch,
-                project_name=project_name,
-                object_type=object_type,
-                object_quantum=object_count,
-                investment_status=hurungu_oruulalt,
-                file_id=id
+            request_file = RequestFiles.objects.create(
+                name='UTILITY SOLUTION',
+                kind=2,
+                state=1,
+                geo_id=org_data.geo_id if org_data else '',
+                file_path=uploaded_file,
+                tools=json_dumps(selected_tools)
             )
+            id = request_file.id
+        _create_shape_files(org_data, request_file, ds)
 
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай хадгаллаа'
-        }
-        return JsonResponse(rsp)
+    form_data = RequestForm.objects.filter(file_id=id).first()
+    if form_data:
+        form_data.client_org = zahialagch
+        form_data.project_name = project_name
+        form_data.object_type = object_type
+        form_data.object_quantum = object_count
+        form_data.investment_status = hurungu_oruulalt
+        form_data.save()
+
+    else:
+        RequestForm.objects.create(
+            client_org=zahialagch,
+            project_name=project_name,
+            object_type=object_type,
+            object_quantum=object_count,
+            investment_status=hurungu_oruulalt,
+            file_id=id
+        )
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хадгаллаа'
+    }
+    return JsonResponse(rsp)
 
 
 def _get_feature(shape_geometries):

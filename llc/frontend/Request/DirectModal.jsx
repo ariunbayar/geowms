@@ -13,7 +13,6 @@ export default class RequestDetail extends Component {
             state : props.state,
             disabled: false
         }
-        this.ValidationForm= this.ValidationForm.bind(this)
     }
 
     componentDidMount() {
@@ -24,26 +23,11 @@ export default class RequestDetail extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { state } = this.props
+        const { state, selected_tools } = this.props
         if (pP.state != state) {
             if(state == 2) {
                 this.setState({disabled: true})
             }
-        }
-        var forms =document.getElementsByClassName('form-control')
-        for (var i = 1; i < forms.length; i++) {
-            this.ValidationForm(forms[i])
-          }
-
-    }
-
-    ValidationForm (form){
-        if(form.value == ''){
-            form.classList.add('is-invalid')
-        }
-        else {
-            form.classList.remove('is-invalid')
-            form.classList.add('is-valid')
         }
     }
 
@@ -148,9 +132,16 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => this.props.handleOnChange(e)}
                                 style={{display: 'none'}}
                             />
-                            <span className="col-md-5 ml-2">
-                                {file_name ? file_name : 'файл сонгогдоогүй байна'}
-                            </span>
+                            {
+                                file_name
+                                ?
+                                    <small className="col-md-5 ml-2">{file_name}</small>
+                                :
+                                    <small className="col-md-5 ml-2 text-danger">
+                                        файл сонгогдоогүй байна
+                                    </small>
+                            }
+
                         </div>
                     </form>
                     {
