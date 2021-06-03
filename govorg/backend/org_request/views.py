@@ -44,7 +44,13 @@ from main.utils import (
 )
 from main.components import Datatable
 
-from llc.backend.llc_request.models import RequestFiles, LLCRequest, ShapeGeom, RequestForm
+from llc.backend.llc_request.models import (
+    RequestFiles,
+    LLCRequest,
+    ShapeGeom,
+    RequestForm,
+    RequestFilesShape
+)
 
 
 def _get_geom(geo_id, fid):
@@ -1045,5 +1051,26 @@ def llc_request_approve(request, payload):
             'success': True,
             'info': 'Амжилттай хүсэлт үүслээ'
         }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def inspire_save(request, payload):
+    values = payload.get('values')
+    id = values.get('id')
+    theme_id = values.get('theme').get('id')
+    feature_id = values.get('feature').get('id')
+    package_id = values.get('package').get('id')
+    RequestFilesShape.objects.filter(id=id).update(
+        theme_id=theme_id,
+        package_id=package_id,
+        feature_id=feature_id,
+    )
+
+    rsp = {
+        'success': True,
+    }
 
     return JsonResponse(rsp)
