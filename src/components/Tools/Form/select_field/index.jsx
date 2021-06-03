@@ -18,7 +18,7 @@ export default class SelectField extends Component {
                 <select
                     value={defualt_value}
                     className={'form-control col-md-12'}
-                    onChange={(e) => this.props.handleSelectField(title_name, e.target.value)}
+                    onChange={(e) => this.props.handleSelectField(title_name, e)}
                 >
                     <option value=''>---{defualt_text ? defualt_text : ''} ---</option>
                     {
@@ -27,6 +27,7 @@ export default class SelectField extends Component {
                         data_list.map((row, idx) =>
                             <option
                                 key={idx}
+                                name={row.name}
                                 value={row.code}
                             >
                                 {row.name}

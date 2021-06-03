@@ -25,7 +25,13 @@ from backend.org.models import Employee, Org
 from geoportal_app.models import User
 
 from backend.org.models import Org
-from backend.inspire.models import MDatas, LCodeLists
+from backend.inspire.models import (
+    MDatas,
+    LCodeLists,
+    LThemes,
+    LFeatures,
+    LPackages
+)
 
 from main.components import Datatable
 from main.utils import (
@@ -356,6 +362,7 @@ def get_request_data(request, id):
         'aimag_geom': aimag_geom
     })
 
+
 def _get_shapes_geoms(shape_geometry):
     geo_datas = []
     geom_type = ''
@@ -363,6 +370,7 @@ def _get_shapes_geoms(shape_geometry):
     geo_datas, geom_type = _get_feature(shape_geoms)
 
     return geo_datas, geom_type
+
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
@@ -416,16 +424,34 @@ def _send_to_information_email (user_id):
 @ajax_required
 def get_file_shapes(request, id):
     list_of_datas = []
+    theme_name = ''
+    feature_name = ''
+    package_name = ''
     llc_data = LLCRequest.objects.filter(id=id).first()
     shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
     for shape_geometry in shape_geometries:
         geoms, geom_type = _get_shapes_geoms(shape_geometry)
+        theme_id = shape_geometry.theme_id
+        feature_id = shape_geometry.feature_id
+        package_id = shape_geometry.package_id
+        if theme_id:
+            theme = LThemes.objects.filter(theme_id=theme_id).first()
+            theme_name = theme.theme_name
+
+        if package_id:
+            package = LPackages.objects.filter(package_id=package_id).first()
+            package_name = package.package_name
+
+        if feature_id:
+            feature = LFeatures.objects.filter(feature_id=feature_id).first()
+            feature_name = feature.feature_name
+
         list_of_datas.append({
             'id': shape_geometry.id,
             'geom_type': geom_type,
-            'theme': shape_geometry.theme_id,
-            'feature': shape_geometry.feature_id,
-            'package': shape_geometry.package_id,
+            'theme': {'id': theme_id, 'name': theme_name},
+            'feature': {'id': feature_id, 'name': feature_name},
+            'package': {'id': package_id, 'name': package_name},
             'features': FeatureCollection(geoms)
         })
 

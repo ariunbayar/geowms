@@ -14,31 +14,67 @@ export class LLCSettings extends Component {
             themes: [],
             packages: [],
             features: [],
-            theme_state: false
+            theme_state: false,
+            selected_packages: [],
+            selected_features: [],
         }
         this.handleProceed = this.handleProceed.bind(this)
         this.closeModel = this.closeModel.bind(this)
-        this.modelAction = this.modelAction.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
+        this.modelAction = this.modelAction.bind(this)
 
     }
 
+    getArray(data, selected_value) {
+        var array = [...data]
+        var seleted_datas = array.filter((data) => data.parent == selected_value)
+        return seleted_datas
+    }
+
+    modelAction(name, e, selected_values) {
+        var data_list = {}
+        var seleted_datas = []
+        var { packages, features, list_of_datas } = this.state
+        const selected_value = parseInt(e.target.value)
+
+        var target_data = e.target.selectedIndex
+        var optionElement = e.target.childNodes[target_data]
+        var selected_data_name =  optionElement.getAttribute('name')
+
+        var value_list_of = obj => obj.id == selected_values.id
+        var index_of_list = list_of_datas.findIndex(value_list_of)
+
+        if ( name == 'theme' ) {
+            seleted_datas = this.getArray(packages, selected_value)
+            data_list['selected_packages'] = seleted_datas
+            list_of_datas[index_of_list]['feature']['name'] = ''
+            list_of_datas[index_of_list]['feature']['id'] = ''
+            data_list['selected_features'] = []
+        }
+
+        else if ( name == 'package' ) {
+            seleted_datas = this.getArray(features, selected_value)
+            data_list['selected_features'] = seleted_datas
+            list_of_datas[index_of_list]['feature']['name'] = ''
+            list_of_datas[index_of_list]['feature']['id'] = ''
+        }
+
+        if (! selected_value) {
+            data_list['selected_features'] = []
+            list_of_datas[index_of_list]['feature']['name'] = ''
+            list_of_datas[index_of_list]['feature']['id'] = ''
+
+        }
+        list_of_datas[index_of_list][name].id = selected_value
+        list_of_datas[index_of_list][name].name = selected_data_name
+        data_list['list_of_datas'] = list_of_datas
+        this.setState({ ...data_list })
+    }
 
     getInspireTree(){
         service.getInspireTree().then(({themes, packages, features}) => {
             this.setState({themes, packages, features})
         })
-    }
-
-    modelAction(values) {
-        var {list_of_datas, theme_state} = this.state
-        var key = values.key
-        var value_list_of = obj => obj.id == values.selected_values.id
-        var index_of_list = list_of_datas.findIndex(value_list_of)
-
-        list_of_datas[index_of_list][key] = values.selected_ins
-
-        this.setState({list_of_datas})
     }
 
     handleProceed(values) {
@@ -72,6 +108,7 @@ export class LLCSettings extends Component {
                                         <th scope="col">THEME</th>
                                         <th scope="col">PACKAGE</th>
                                         <th scope="col">FEATURE</th>
+                                        <th scope="col">дэдсан сонгох</th>
                                         <th scope="col"></th>
                                     </tr>
                                 </thead>
@@ -87,16 +124,21 @@ export class LLCSettings extends Component {
                                                 {value.geom_type}
                                             </td>
                                             <td>
-                                                {value.theme}
+                                                {value.theme.name}
                                             </td>
                                             <td>
-                                                {value.package}
+                                                {value.package.name}
                                             </td>
                                             <td>
-                                                {value.feature}
+                                                {value.feature.name}
                                             </td>
-                                            <td scope='row'>
-                                                <a className="btn btn-primary" href="#" onClick={(e) => this.handleProceed(value)}>inspire тохиргоо</a>
+                                            <td>
+                                                <a className="fa fa-cog text-primary" href="#" onClick={(e) => this.handleProceed(value)}></a>
+                                            </td>
+                                            <td>
+                                                {/* fa fa-floppy-o gp-text-primary */}
+                                                <a className="fa fa-pencil-square-o gp-text-primary" href="#" onClick={(e) => this.handleProceed(value)}>
+                                                </a>
                                             </td>
                                         </tr>
                                         ): <tr><td>дата бүртгэлгүй байна</td></tr>
