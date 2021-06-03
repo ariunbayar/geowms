@@ -21,32 +21,34 @@ export default class Help extends Component {
 
     render() {
         return (
-            <div className="container my-3 p-3  mb-5 shadow card">
-                <div className="row ml-3">
+            <div className="container my-3 p-2  mb-5 shadow card">
+                <div className="col-md-11 pl-4 ml-4">
                     <div className="col-md-12 d-flex justify-content-center my-4">
                         <label className="h4">Тусламж</label>
                     </div>
-                    <div className="col-md-12 my-4">
+                    <div className="col-md-12 my-5">
                         <label className="h4 col-md-12">ГАРЫН АВЛАГА</label>
-                        <div className="col-md-12 d-flex justify-content-between">
-                            <div className='col-md-8'>
-                                <span>Мэдээлэл оруулах цахим хэсгээс гадна QGIS програм ашиглан мэдээлэл засах боломжтой. Хэрхэн мэдээлэл оруулах болон оруулсан мэдээллийг засварлах дэлгэрэнгүй зааварчилгааг татаж аван зааврын дагуу оруулна уу.</span>
+                        <div className="col-md-12 d-flex justify-content-center">
+                            <div className='col-md-10 text-justify'>
+                                <span className="">
+                                    Мэдээлэл оруулах цахим хэсгээс гадна QGIS програм ашиглан мэдээлэл засах боломжтой. Хэрхэн мэдээлэл оруулах болон оруулсан мэдээллийг засварлах дэлгэрэнгүй зааварчилгааг татаж аван зааврын дагуу оруулна уу.
+                                </span>
                             </div>
-                            <div className="col-md-3"><label className="btn btn-success">татах</label></div>
+                            <div className="col-md-2"><label className="btn btn-success float-right">татах</label></div>
                         </div>
                     </div>
-                    <div className="col-md-12">
+                    <div className="col-md-12 my-5">
                         <label className="h4 col-md-12">СТАНДАРТЫН ТАНИЛЦУУЛГА</label>
                         <div className="col-md-12 d-flex justify-content-between">
-                            <div className='col-md-8'>
+                            <div className='col-md-10 text-justify'>
                                 <span>Таны эрхийн хүрээнд мэдээлэл оруулахад шаардлагатай стандартыг татаж аван дэлгэрэнгүй танилцах боломжтой.</span>
                             </div>
-                            <div className="col-md-3"><label className="btn btn-success">татах</label></div>
+                            <div className="col-md-2"><label className="btn btn-success float-right">татах</label></div>
                         </div>
                     </div>
                     <div className="col-md-12 my-4">
-                        <h4 className='h4 col-md-12'>Plugin суулгах заавар</h4>
-                            <ol>
+                        <span className='col-md-12 h4'>Plugin <label className="h4">суулгах заавар</label></span>
+                            <ol className="my-2">
                                 <li>
                                     <LinkExternal href="/static/assets/qgis_plugin.zip" text={'Qgis plugin татах'}/>
                                  </li>
