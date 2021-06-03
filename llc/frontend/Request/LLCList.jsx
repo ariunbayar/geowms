@@ -95,8 +95,10 @@ export class Detail extends Component {
             state: '',
             kind: '',
             modal_status:'closed',
-            request_form:false
+            request_form:false,
+            choices: [],
         }
+
         this.refreshData = this.refreshData.bind(this)
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
@@ -182,13 +184,24 @@ export class Detail extends Component {
         this.setState({ refresh: !this.state.refresh })
     }
 
-    handleSearch() {
-        const { state, kind } = this.state
+    handleSearch(e) {
         let custom_query = Object()
-        if (state) custom_query['state'] = state
-        if (kind) custom_query['kind'] = kind
+        var value = parseInt(e.target.value)
 
-        this.setState({ custom_query })
+        var table_data = e.target.selectedIndex
+        var optionElement = e.target.childNodes[table_data]
+        var selected_data_name =  optionElement.getAttribute('name')
+
+        if (selected_data_name == 'state') {
+            if (e.target.value) custom_query['state'] = value
+            if (this.state.kind) custom_query['kind'] = this.state.kind
+        }
+        else {
+            if (value) custom_query['kind'] = value
+            if (this.state.state) custom_query['state'] = this.state.state
+        }
+
+        this.setState({ custom_query, [selected_data_name]: value })
     }
 
     render() {
@@ -197,42 +210,48 @@ export class Detail extends Component {
             <Fragment>
                 <div className="card">
                     <div className="card-body">
-                        <div className="col-md-12 row">
-                                <div className="col-md-6">
-                                    <label htmlFor="">Төлөв</label>
-                                    <select className="form-control form-control-xs "
-                                        onChange={(e) => this.setState({ state: e.target.value })}
-                                    >
-                                        <option value="">--- Төлөвөөр хайх ---</option>
-                                        {
-                                            choices?.state
-                                            ?
-                                                choices['state'].map((choice, idx) =>
-                                                    <option key={idx} value={choice[0]}>{choice[1]}</option>
-                                                )
-                                            :
-                                            null
-                                        }
-                                    </select>
-                                </div>
-                                <div className="col-md-6">
-                                    <label htmlFor="">Өөрчлөлт</label>
-                                    <select className="form-control form-control-sm disabled"
-                                        onChange={(e) => this.setState({ kind: e.target.value })}
-                                    >
-                                        <option value="">--- Өөрчлөлтөөр хайх ---</option>
-                                        {
-                                            choices?.kind
-                                            ?
-                                                choices['kind'].map((choice, idx) =>
-                                                    <option key={idx} value={choice[0]}>{choice[1]}</option>
-                                                )
-                                            :
-                                            null
-                                        }
-                                    </select>
-                                </div>
-                                <p className="btn-sm gp-btn-primary d-flex justify-content-center m-3 float-right " onClick={() => this.handleSearch()}>Хайх</p>
+                        <div className="col-md-12 row mb-4">
+                            <div className="col-md-6">
+                                <label htmlFor="">Төлөв</label>
+                                <select
+                                    className="form-control form-control-xs "
+                                    onChange={(e) => this.handleSearch(e)}
+                                >
+                                    <option value="">--- Төлөвөөр хайх ---</option>
+                                    {
+                                        choices?.state
+                                        ?
+                                            choices['state'].map((choice, idx) =>
+                                                <option key={idx} name='state' value={choice[0]}>{choice[1]}</option>
+                                            )
+                                        :
+                                        null
+                                    }
+                                </select>
+                            </div>
+                            <div className="col-md-6">
+                                <label htmlFor="">Өөрчлөлт</label>
+                                <select className="form-control form-control-sm disabled"
+                                    onChange={(e) => this.handleSearch(e)}
+                                >
+                                    <option value="">--- Өөрчлөлтөөр хайх ---</option>
+                                    {
+                                        choices?.kind
+                                        ?
+                                            choices['kind'].map((choice, idx) =>
+                                                <option
+                                                    ey={idx}
+                                                    name='kind'
+                                                    value={choice[0]}
+                                                >
+                                                    {choice[1]}
+                                                </option>
+                                            )
+                                        :
+                                        null
+                                    }
+                                </select>
+                            </div>
                         </div>
                         <div className="col-md-12">
                             <PortalDataTable
