@@ -13,6 +13,10 @@ from frontend.qpay import views as qpay_views
 urlpatterns = [
 
     path('', include(([
+        path('ppt/geoportal.pptx/', bundle_views.download_ppt, name='geoportal.pptx'),
+    ], 'ppt'))),
+
+    path('', include(([
         path('', bundle_views.all, name='all'),
         path('api/aimag/', bundle_views.aimag, name='aimag'),
         path('api/sum/', bundle_views.sumfind, name='sum'),
