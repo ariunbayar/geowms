@@ -12,16 +12,19 @@ class SubmitClass extends Component {
         this.state = {
             url: "/llc/llc-request/",
             agreed_submit: true,
+            one_check: true,
+
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
 
     componentDidUpdate(){
         const {valid_request} = this.props
-        if (valid_request.length == 4 ){
-            this.setState({agreed_submit:false})
+        if (valid_request.length == 5 ){
+                if(this.state.one_check)
+                    this.setState({ agreed_submit:false, one_check:false })
+            }
         }
-    }
 
     handleSubmit(){
         const {
