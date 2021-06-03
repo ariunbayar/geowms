@@ -972,7 +972,7 @@ def llc_request_reject(request, payload):
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай татгалзлаа'
+        'info': 'Амжилттай цуцлагдлаа'
     }
     return JsonResponse(rsp)
 
