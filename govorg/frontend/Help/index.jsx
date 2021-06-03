@@ -23,8 +23,29 @@ export default class Help extends Component {
         return (
             <div className="container my-3 p-3  mb-5 shadow card">
                 <div className="row ml-3">
-                    <div className="my-0">
-                          <h4 className='text-center'>Plugin суулгах заавар</h4>
+                    <div className="col-md-12 d-flex justify-content-center my-4">
+                        <label className="h4">Тусламж</label>
+                    </div>
+                    <div className="col-md-12 my-4">
+                        <label className="h4 col-md-12">ГАРЫН АВЛАГА</label>
+                        <div className="col-md-12 d-flex justify-content-between">
+                            <div className='col-md-8'>
+                                <span>Мэдээлэл оруулах цахим хэсгээс гадна QGIS програм ашиглан мэдээлэл засах боломжтой. Хэрхэн мэдээлэл оруулах болон оруулсан мэдээллийг засварлах дэлгэрэнгүй зааварчилгааг татаж аван зааврын дагуу оруулна уу.</span>
+                            </div>
+                            <div className="col-md-3"><label className="btn btn-success">татах</label></div>
+                        </div>
+                    </div>
+                    <div className="col-md-12">
+                        <label className="h4 col-md-12">СТАНДАРТЫН ТАНИЛЦУУЛГА</label>
+                        <div className="col-md-12 d-flex justify-content-between">
+                            <div className='col-md-8'>
+                                <span>Таны эрхийн хүрээнд мэдээлэл оруулахад шаардлагатай стандартыг татаж аван дэлгэрэнгүй танилцах боломжтой.</span>
+                            </div>
+                            <div className="col-md-3"><label className="btn btn-success">татах</label></div>
+                        </div>
+                    </div>
+                    <div className="col-md-12 my-4">
+                        <h4 className='h4 col-md-12'>Plugin суулгах заавар</h4>
                             <ol>
                                 <li>
                                     <LinkExternal href="/static/assets/qgis_plugin.zip" text={'Qgis plugin татах'}/>
