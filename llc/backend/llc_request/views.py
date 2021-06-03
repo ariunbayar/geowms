@@ -169,9 +169,22 @@ def _create_shape_files(org_data, request_file, zip_ref):
                     )
 
 
+def _validation_form(request_datas):
+
+    is_agreed = True
+
+    if not request_datas.get('zahialagch'): is_agreed = False
+    if not request_datas.get('project_name'): is_agreed = False
+    if not request_datas.get('object_type'): is_agreed = False
+    if not request_datas.get('object_count'): is_agreed = False
+    if not request_datas.get('hurungu_oruulalt'): is_agreed = False
+
+    return is_agreed
+
 @require_POST
 @ajax_required
 def save_request(request):
+    request_datas = request.POST
     id = request.POST.get('id') or None
     uploaded_file = request.FILES['files']
     project_name = request.POST.get('project_name')
@@ -180,90 +193,98 @@ def save_request(request):
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
     selected_tools = request.POST.get('selected_tools') or []
+    is_agreed = _validation_form(request_datas)
 
-    if id:
-        id = json_load(id)
-        id = id.get('id')
-
-    if not selected_tools:
+    if not is_agreed:
         return JsonResponse({
             'success': False,
-            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+            'info': 'Форм дутуу бөглөгдсөн байна.!!!'
         })
-
-    selected_tools = json_load(selected_tools)
-    selected_tools = selected_tools['selected_tools']
-    check_file_name = 'llc-request-files/' + str(uploaded_file)
-    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
-    if check_data_of_file and not id:
-        return JsonResponse({
-            'success': False,
-            'info': 'Файл-ын нэр давхцаж байна !!!.'
-        })
-
-    if not check_data_of_file or not id:
-        with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
-            file_datas = zip_ref.infolist()[0]
-
-        org_data = _get_leve_2_geo_id(file_datas, zip_ref)
-        if not org_data:
-            return JsonResponse({
-                    'success': False,
-                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-            })
-
-        if id:
-            request_file = RequestFiles.objects.filter(pk=id).first()
-            get_shapes = RequestFilesShape.objects.filter(files=request_file)
-            if get_shapes:
-                for shape in get_shapes:
-                    geoms = ShapeGeom.objects.filter(shape=shape)
-                    geoms.delete()
-                get_shapes.delete()
-
-            if not check_data_of_file:
-                request_file.geo_id=org_data.geo_id if org_data else ''
-                request_file.file_path=uploaded_file
-
-            request_file.tools=json_dumps(selected_tools)
-            request_file.save()
-
-        else:
-            request_file = RequestFiles.objects.create(
-                name=project_name,
-                kind=2,
-                state=1,
-                geo_id=org_data.geo_id if org_data else '',
-                file_path=uploaded_file,
-                tools=json_dumps(selected_tools)
-            )
-            id = request_file.id
-        _create_shape_files(org_data, request_file, zip_ref)
-
-    form_data = RequestForm.objects.filter(file_id=id).first()
-    if form_data:
-        form_data.client_org = zahialagch
-        form_data.project_name = project_name
-        form_data.object_type = object_type
-        form_data.object_quantum = object_count
-        form_data.investment_status = hurungu_oruulalt
-        form_data.save()
 
     else:
-        RequestForm.objects.create(
-            client_org=zahialagch,
-            project_name=project_name,
-            object_type=object_type,
-            object_quantum=object_count,
-            investment_status=hurungu_oruulalt,
-            file_id=id
-        )
+        if id:
+            id = json_load(id)
+            id = id.get('id')
 
-    rsp = {
-        'success': True,
-        'info': 'Амжилттай хадгаллаа'
-    }
-    return JsonResponse(rsp)
+        if not selected_tools:
+            return JsonResponse({
+                'success': False,
+                'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+            })
+
+        selected_tools = json_load(selected_tools)
+        selected_tools = selected_tools['selected_tools']
+        check_file_name = 'llc-request-files/' + str(uploaded_file)
+        check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
+        if check_data_of_file and not id:
+            return JsonResponse({
+                'success': False,
+                'info': 'Файл-ын нэр давхцаж байна !!!.'
+            })
+
+        if not check_data_of_file or not id:
+            with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
+                file_datas = zip_ref.infolist()[0]
+
+            org_data = _get_leve_2_geo_id(file_datas, zip_ref)
+            if not org_data:
+                return JsonResponse({
+                        'success': False,
+                        'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                })
+
+            if id:
+                request_file = RequestFiles.objects.filter(pk=id).first()
+                get_shapes = RequestFilesShape.objects.filter(files=request_file)
+                if get_shapes:
+                    for shape in get_shapes:
+                        geoms = ShapeGeom.objects.filter(shape=shape)
+                        geoms.delete()
+                    get_shapes.delete()
+
+                if not check_data_of_file:
+                    request_file.geo_id=org_data.geo_id if org_data else ''
+                    request_file.file_path=uploaded_file
+
+                request_file.tools=json_dumps(selected_tools)
+                request_file.save()
+
+            else:
+                request_file = RequestFiles.objects.create(
+                    name=project_name,
+                    kind=2,
+                    state=1,
+                    geo_id=org_data.geo_id if org_data else '',
+                    file_path=uploaded_file,
+                    tools=json_dumps(selected_tools)
+                )
+                id = request_file.id
+            _create_shape_files(org_data, request_file, zip_ref)
+
+        form_data = RequestForm.objects.filter(file_id=id).first()
+        if form_data:
+            form_data.client_org = zahialagch
+            form_data.project_name = project_name
+            form_data.object_type = object_type
+            form_data.object_quantum = object_count
+            form_data.investment_status = hurungu_oruulalt
+            form_data.save()
+
+        else:
+            RequestForm.objects.create(
+                client_org=zahialagch,
+                project_name=project_name,
+                object_type=object_type,
+                object_quantum=object_count,
+                investment_status=hurungu_oruulalt,
+                file_id=id
+            )
+
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хадгаллаа'
+        }
+        return JsonResponse(rsp)
 
 
 def _get_feature(shape_geometries):

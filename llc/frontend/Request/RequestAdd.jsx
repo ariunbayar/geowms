@@ -3,6 +3,7 @@ import RequestDetail from './DirectModal'
 import { service } from "./service"
 import Modal from '@utils/Modal/Modal'
 import { cmpPos } from "codemirror"
+import { disable } from "ol/rotationconstraint"
 
 class SubmitClass extends Component {
 
@@ -10,8 +11,16 @@ class SubmitClass extends Component {
         super(props)
         this.state = {
             url: "/llc/llc-request/",
+            agreed_submit: true,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
+    }
+
+    componentDidUpdate(){
+        const {valid_request} = this.props
+        if (valid_request.length == 4 ){
+            this.setState({agreed_submit:false})
+        }
     }
 
     handleSubmit(){
@@ -22,6 +31,7 @@ class SubmitClass extends Component {
             selected_tools,id, file_state
         } = this.props.values
         var blob = []
+
         if (id) {
             if (!file_state) {
                 const obj = files
@@ -47,6 +57,7 @@ class SubmitClass extends Component {
 
     render (){
         const {values} = this.props
+        const {agreed_submit} = this.state
         return (
             <Fragment>
                 <div>
@@ -54,7 +65,7 @@ class SubmitClass extends Component {
                         ?
                             <button
                                 type="button"
-                                className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
+                                className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" } ${agreed_submit ? 'disabled' : ''}`}
                                 onClick ={()=> this.handleSubmit()}
                             >
                                 <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
