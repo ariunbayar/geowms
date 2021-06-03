@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import SolveModal from './solveModal'
 import LLCSettings from './sett_comp'
+import { service } from "./service"
 
 export const make_state_color = (state) => {
     let color
@@ -79,6 +80,43 @@ export class Detail extends Component {
             is_modal_request_open: false,
             custom_query: {}
         }
+        this.handleSearch = this.handleSearch.bind(this)
+    }
+
+    componentDidMount() {
+        service
+            .getChoices()
+            .then(({ success, modules, choices }) => {
+                if (success) {
+                    this.setState({ modules, choices })
+                }
+            })
+    }
+
+    handleSearch() {
+        const { state } = this.state
+        let custom_query = Object()
+        if (state) custom_query['state'] = state
+
+        let remove_query = Object()
+        if (!('theme_id' in custom_query)) {
+            if ('package_id' in custom_query) {
+                delete custom_query['package_id']
+                remove_query['package_id'] = null
+            }
+            if ('feature_id' in custom_query) {
+                delete custom_query['feature_id']
+                remove_query['feature_id'] = null
+            }
+        }
+
+        if (!('package_id' in custom_query)) {
+            if ('feature_id' in custom_query) {
+                delete custom_query['feature_id']
+                remove_query['feature_id'] = null
+            }
+        }
+        this.setState({ custom_query, ...remove_query })
     }
 
     handeUpdateAction(values) {
@@ -86,10 +124,27 @@ export class Detail extends Component {
     }
 
     render() {
-        const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
+        const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, choices } = this.state
         return (
             <div className="card">
                 <div className="card-body">
+                    <div className="col-md-6 row">
+                        <label htmlFor="">Төлөв</label>
+                        <select className="form-control form-control-sm"
+                            onChange={(e) => this.setState({ state: e.target.value })}>
+                            <option value="">--- Төлөвөөр хайх ---</option>
+                            {
+                                choices && choices.length > 0
+                                ?
+                                    choices[0].map((choice, idx) =>
+                                        <option key={idx} value={choice[0]}>{choice[1]}</option>
+                                    )
+                                :
+                                    null
+                            }
+                        </select>
+                        <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right" onClick={() => this.handleSearch()}>Хайх</button>
+                    </div>
                     <div className="row">
                         <div className="col-md-12">
                             <PortalDataTable

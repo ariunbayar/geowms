@@ -1051,3 +1051,30 @@ def llc_request_approve(request, payload):
         }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_state_choices(request):
+    choices = []
+    modules = []
+    for f in RequestFiles._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == 'state':
+                choices.append(f.choices)
+
+    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(request.user)
+    themes = LThemes.objects.filter(theme_id__in=theme_ids)
+    for theme in themes:
+        modules.append({
+            'id': theme.theme_id,
+            'name': theme.theme_name,
+            'packages': _get_packages(theme.theme_id, package_ids, feature_ids)
+        })
+
+    rsp = {
+        'success': True,
+        'choices': choices,
+        'modules': modules
+    }
+    return JsonResponse(rsp)

@@ -172,6 +172,7 @@ urlpatterns = [
             path('<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
             path('get-fields/', pg_views.getFields),
             path('<int:id>/get-request-data/', org_request_views.get_request_data, name=' save_request'),
+            path('get_state_choices/', org_request_views.get_state_choices),
         ], 'llc-request'))),
 
     ], 'back_org'))),

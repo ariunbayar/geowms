@@ -6,7 +6,8 @@ export const service = {
     llcList,
     handleRequestData,
     getFilesDetal,
-    getInspireTree
+    getInspireTree,
+    getChoices
 }
 
 const prefix = '/gov/api/llc-request'
@@ -64,3 +65,7 @@ function getInspireTree() {
     return fetch(`/back/another-database/pg/get-all-view-names/`, opts).then(handleResponse)
 }
 
+function getChoices() {
+    const requestOptions = { ...getGetOptions() }
+    return fetch(`${prefix}/get_state_choices/`, requestOptions).then(handleResponse)
+}
