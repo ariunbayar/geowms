@@ -424,13 +424,14 @@ def _send_to_information_email (user_id):
 @ajax_required
 def get_file_shapes(request, id):
     list_of_datas = []
-    theme_name = ''
-    feature_name = ''
-    package_name = ''
+
     llc_data = LLCRequest.objects.filter(id=id).first()
     shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
     for shape_geometry in shape_geometries:
         geoms, geom_type = _get_shapes_geoms(shape_geometry)
+        theme_name = ''
+        feature_name = ''
+        package_name = ''
         theme_id = shape_geometry.theme_id
         feature_id = shape_geometry.feature_id
         package_id = shape_geometry.package_id
@@ -445,6 +446,10 @@ def get_file_shapes(request, id):
         if feature_id:
             feature = LFeatures.objects.filter(feature_id=feature_id).first()
             feature_name = feature.feature_name
+        if theme_id and package_id and feature_id:
+            icon_state = True
+        else:
+            icon_state = False
 
         list_of_datas.append({
             'id': shape_geometry.id,
@@ -452,9 +457,13 @@ def get_file_shapes(request, id):
             'theme': {'id': theme_id, 'name': theme_name},
             'feature': {'id': feature_id, 'name': feature_name},
             'package': {'id': package_id, 'name': package_name},
+            'icon_state': icon_state,
             'features': FeatureCollection(geoms)
         })
-
+    print("hoh")
+    print("hoh")
+    print("hoh")
+    print("hoh", list_of_datas)
     return JsonResponse({
         'list_of_datas': list_of_datas,
     })

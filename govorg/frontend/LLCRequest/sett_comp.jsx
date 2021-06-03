@@ -2,6 +2,7 @@ import React, {Component, Fragment} from "react"
 import {service} from './service'
 import RequestModal from './requestModal'
 import {ConfigureBundle} from './configure_bundle'
+import Modal from "@utils/Modal/Modal"
 
 export class LLCSettings extends Component {
 
@@ -17,12 +18,16 @@ export class LLCSettings extends Component {
             theme_state: false,
             selected_packages: [],
             selected_features: [],
+            modal_status: 'closed',
+            save_icon: false
         }
         this.handleProceed = this.handleProceed.bind(this)
         this.closeModel = this.closeModel.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
         this.modelAction = this.modelAction.bind(this)
-
+        this.Save = this.Save.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
     getArray(data, selected_value) {
@@ -67,6 +72,9 @@ export class LLCSettings extends Component {
         }
         list_of_datas[index_of_list][name].id = selected_value
         list_of_datas[index_of_list][name].name = selected_data_name
+
+        list_of_datas[index_of_list].icon_state = !list_of_datas[index_of_list].icon_state
+
         data_list['list_of_datas'] = list_of_datas
         this.setState({ ...data_list })
     }
@@ -93,8 +101,34 @@ export class LLCSettings extends Component {
         this.getInspireTree()
     }
 
+    Save(value, idx){
+        var list_of_datas =  this.state.list_of_datas
+        if (value.icon_state)  {
+            service.Save(value).then(({ success }) => {
+                list_of_datas[idx].icon_state = true
+                this.setState({list_of_datas})
+            })
+        }
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
+        this.setState({
+            modal_icon,
+            icon_color,
+            title,
+            has_button
+        })
+        this.handleModalOpen()
+    }
+
     render () {
-        const { list_of_datas, model_status, selected_values} = this.state
+        const { list_of_datas, model_status, selected_values, save_icon} = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -108,8 +142,7 @@ export class LLCSettings extends Component {
                                         <th scope="col">THEME</th>
                                         <th scope="col">PACKAGE</th>
                                         <th scope="col">FEATURE</th>
-                                        <th scope="col">дэдсан сонгох</th>
-                                        <th scope="col"></th>
+                                        <th scope="col">дэд сан сонгох</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -133,12 +166,12 @@ export class LLCSettings extends Component {
                                                 {value.feature.name}
                                             </td>
                                             <td>
-                                                <a className="fa fa-cog text-primary" href="#" onClick={(e) => this.handleProceed(value)}></a>
-                                            </td>
-                                            <td>
-                                                {/* fa fa-floppy-o gp-text-primary */}
-                                                <a className="fa fa-pencil-square-o gp-text-primary" href="#" onClick={(e) => this.handleProceed(value)}>
-                                                </a>
+                                                {
+                                                    value.icon_state ?
+                                                    <a className='gp-text-primary fa fa-pencil-square-o' href="#"  onClick={(e) => this.handleProceed(value)}/>
+                                                    :
+                                                    <a className='gp-text-primary fa fa-floppy-o' href="#"  onClick={(e) => this.Save(value)}/>
+                                                }
                                             </td>
                                         </tr>
                                         ): <tr><td>дата бүртгэлгүй байна</td></tr>
@@ -157,6 +190,19 @@ export class LLCSettings extends Component {
                                 title={'Дэд сан тохируулах'}
                             />
                         }
+                        <Modal
+                            modal_status={ this.state.modal_status }
+                            modal_icon={ this.state.modal_icon }
+                            modal_bg={ this.state.modal_bg }
+                            icon_color={ this.state.icon_color }
+                            text={ this.state.text }
+                            title={ this.state.title }
+                            has_button={ this.state.has_button }
+                            actionNameBack={ this.state.actionNameBack }
+                            actionNameDelete={ this.state.actionNameDelete }
+                            modalAction={ this.state.modalAction }
+                            modalClose={ this.state.modalClose }
+                        />
                     </div>
                 </div>
             </div>
