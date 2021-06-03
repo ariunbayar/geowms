@@ -135,23 +135,32 @@ def _get_leve_2_geo_id(layer):
     return data_of_range
 
 
-def _create_shape_files(org_data, request_file, datasource):
-    for layer in datasource:
-        for feature in layer:
-            geo_json = feature.geom.json
-            properties = dict()
-            for field in layer.fields:
-                properties[field] = feature.get(field)
-            json_content = json_load(geo_json)
-            request_shape = RequestFilesShape.objects.create(
-                files=request_file,
-                org=org_data
-            )
-            ShapeGeom.objects.create(
-                shape=request_shape,
-                geom_json=json_dumps(json_content),
-                form_json=json_dumps(properties)
-            )
+def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
+    for name in glob.glob(os.path.join(extract_path, '*')):
+        if [item for item in datasource_exts if item in name]:
+            print('bgaa', name)
+            ds = DataSource(name)
+            for layer in ds:
+                print(layer)
+                for feature in layer:
+                    print(feature)
+                    geo_json = feature.geom.json
+                    properties = dict()
+                    for field in layer.fields:
+                        properties[field] = feature.get(field)
+                    json_content = json_load(geo_json)
+                    request_shape = RequestFilesShape.objects.create(
+                        files=request_file,
+                        org=org_data
+                    )
+                    ShapeGeom.objects.create(
+                        shape=request_shape,
+                        geom_json=json_dumps(json_content),
+                        form_json=json_dumps(properties)
+                    )
+            utils.remove_file(name)
+        elif '.zip' not in name:
+            utils.remove_file(name)
 
 
 @require_POST
@@ -219,7 +228,6 @@ def save_request(request):
                                 'success': False,
                                 'info': 'Файл хоосон байна !!!'
                             })
-        utils.remove_folder(extract_path)
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
@@ -247,7 +255,7 @@ def save_request(request):
                 tools=json_dumps(selected_tools)
             )
             id = request_file.id
-        _create_shape_files(org_data, request_file, ds)
+        _create_shape_files(org_data, request_file, extract_path, datasource_exts)
 
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:

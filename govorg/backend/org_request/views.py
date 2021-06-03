@@ -1,37 +1,42 @@
 import json
 import datetime
 from geojson import FeatureCollection
-from django.contrib.gis.geos import GEOSGeometry
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
-from main.decorators import ajax_required
 from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
-from main.utils import (
-    get_geoJson,
-    get_cursor_pg,
-    convert_3d_with_srid
-)
-
-from backend.org.models import Employee, Org
 from django.db import connections, transaction
 from django.db.models import Q
-from govorg.backend.org_request.models import ChangeRequest
+from django.contrib.auth.decorators import login_required
+from django.contrib.gis.geos import GEOSGeometry
+
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
-from main.inspire import GEoIdGenerator
+from backend.dedsanbutets.models import ViewNames
+from backend.dedsanbutets.models import ViewProperties
+from backend.org.models import Employee, Org
 from backend.inspire.models import (
     LThemes,
     LPackages,
     LFeatures,
     LCodeLists,
+    LProperties,
     MGeoDatas,
     MDatas,
     EmpPermInspire,
     EmpPerm
 )
-from django.contrib.auth.decorators import login_required
+from llc.backend.llc_request.models import RequestFiles
+from llc.backend.llc_request.models import LLCRequest
+from llc.backend.llc_request.models import ShapeGeom
+from llc.backend.llc_request.models import RequestForm
+from llc.backend.llc_request.models import RequestFilesShape
+from govorg.backend.org_request.models import ChangeRequest
+
+from main.decorators import ajax_required
+from main.components import Datatable
+from main.inspire import GEoIdGenerator
 from main.utils import (
     dict_fetchall,
     refreshMaterializedView,
@@ -40,11 +45,13 @@ from main.utils import (
     get_fields,
     get_feature_from_geojson,
     json_load,
-    get_geom
+    get_geom,
+    get_geoJson,
+    get_cursor_pg,
+    convert_3d_with_srid
 )
-from main.components import Datatable
+from main import utils
 
-from llc.backend.llc_request.models import RequestFiles, LLCRequest, ShapeGeom, RequestForm
 
 
 def _get_geom(geo_id, fid):
@@ -986,64 +993,152 @@ def llc_request_dismiss(request, payload):
     })
 
 
-@require_POST
+def _get_request_need_attrs(main_dict, request_dict):
+    get_attrs = ['theme_id', 'package_id', 'feature_id', 'org_id', 'group_id', 'form_json', 'geo_json', 'employee']
+    for att in get_attrs:
+        if att in main_dict.keys():
+            request_dict[att] = main_dict[att]
+    return request_dict
+
+
+def _create_request(request_datas):
+    change_request = ChangeRequest()
+
+    change_request.old_geo_id = None
+    change_request.new_geo_id = None
+    change_request.theme_id = request_datas['theme_id']
+    change_request.package_id = request_datas['package_id']
+    change_request.feature_id = request_datas['feature_id']
+    change_request.employee = request_datas['employee']
+    change_request.org_id = request_datas['employee'].org.id
+    change_request.state = request_datas['state']
+    change_request.kind = request_datas['kind']
+    change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
+    change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
+    change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
+    change_request.order_at = utils.date_to_timezone(request_datas['order_at']) if 'order_at' in request_datas else None
+    change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
+
+    change_request.save()
+    return change_request.id
+
+
+def _make_request_datas(request_file_shape):
+    request_datas = dict()
+    request_datas = _get_request_need_attrs(request_file_shape, request_datas)
+    request_datas['state'] = ChangeRequest.STATE_NEW
+    request_datas['kind'] = ChangeRequest.KIND_CREATE
+    root_id = _create_request(request_datas)
+    return root_id
+
+
+def _get_ins_shat(values):
+    ins = dict()
+    get_attrs = ['theme_id', 'package_id', 'feature_id']
+    for item in get_attrs:
+        ins[item] = values[item]
+    return ins
+
+
+def _check_bef_items(shapes, ins):
+    for r_idx in range(0, len(shapes)):
+        shape = shapes[r_idx]
+        for idx in range(0, len(shape)):
+            item = shape[idx]
+            if item['theme_id'] == ins['theme_id'] and item['package_id'] == ins['package_id'] and item['feature_id'] == ins['feature_id']:
+                return True, r_idx
+    return False, ''
+
+
+def _check_and_make_form_json(feature_id, values):
+    form_json_list = list()
+    code_list_values = ""
+
+    view_qs = ViewNames.objects
+    view_qs = view_qs.filter(feature_id=feature_id)
+    view = view_qs.first()
+
+    view_props = ViewProperties.objects.filter(view=view)
+
+    for view_prop in view_props:
+        prop_qs = LProperties.objects
+        prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+        prop_qs = prop_qs.first()
+
+        form_json = dict()
+        form_json['property_name'] = prop_qs.property_name
+        form_json['property_id'] = prop_qs.property_id
+        form_json['property_code'] = prop_qs.property_code
+        form_json['property_definition'] = prop_qs.property_definition
+        if prop_qs.value_type_id == 'single-select':
+            code_list_values = utils.get_code_list_from_property_id(prop_qs.property_id)
+        form_json['value_type_id'] = prop_qs.value_type_id
+        form_json['value_type'] = prop_qs.value_type_id
+        form_json['data_list'] = code_list_values
+        form_json['data'] = ''
+
+        for p_code, value in values.items():
+            if p_code.lower() in prop_qs.property_name.lower():
+                form_json['data'] = value
+                if prop_qs.value_type_id == 'date':
+                    form_json['data'] = utils.date_fix_format(value)
+
+        form_json_list.append(form_json)
+
+    form_json_list = json.dumps(form_json_list, ensure_ascii=False)
+    return form_json_list
+
+
+@require_GET
 @ajax_required
-def llc_request_approve(request, payload):
-
+def llc_request_approve(request, request_id):
+    first_item = 0
     employee = get_object_or_404(Employee, user=request.user)
-    emp_perm = get_object_or_404(EmpPerm, employee=employee)
-    request_ids = payload.get("ids")
-    feature_id = payload.get("feature_id")
-    success = False
-    new_geo_id = None
+    llc_request = get_object_or_404(LLCRequest, id=request_id)
 
-    feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
-    requests_qs = RequestFiles.objects
-    requests_qs = requests_qs.filter(id__in=request_ids)
-    with transaction.atomic():
-        for r_approve in requests_qs:
-            feature_id = r_approve.feature_id
-            perm_approve = EmpPermInspire.objects.filter(
-                emp_perm=emp_perm,
-                feature_id=feature_id,
-                perm_kind=EmpPermInspire.PERM_APPROVE
-            )
+    request_file_shape_qs = RequestFilesShape.objects
+    request_file_shapes = request_file_shape_qs.filter(files_id=llc_request.file.id)
 
-            if perm_approve:
-                old_geo_id = r_approve.old_geo_id
-                geo_json = r_approve.geo_json
-                form_json = r_approve.form_json
-                request_datas = dict()
-                m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
-                if r_approve.kind == RequestFiles.KIND_PENDING:
-                    new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
-                    request_datas['geo_id'] = new_geo_id
-
-                    request_datas['geo_json'] = geo_json
-                    request_datas['approve_type'] = 'create'
-                    request_datas['feature_id'] = feature_id
-                    request_datas['form_json'] = form_json
-                    request_datas['m_geo_datas_qs'] = m_geo_datas_qs
-                    success = _request_to_m(request_datas)
-                    if success and new_geo_id:
-                        r_approve.new_geo_id = new_geo_id
-                        _insert_data_another_table(request_datas, new_geo_id, 'create')
-
-                r_approve.state = RequestFiles.STATE_SENT
-                _check_group_items(r_approve)
-                r_approve.group_id = None
-                r_approve.save()
-
-            else:
-                rsp = {
-                    'success': False,
-                    'info': 'Танд баталгаажуулах эрх алга байна'
-                }
-
-        refreshMaterializedView(feature_id)
+    if not request_file_shapes:
         rsp = {
-            'success': True,
-            'info': 'Амжилттай хүсэлт үүслээ'
+            'success': False,
+            'info': 'Файл хоосон байна'
         }
+        return JsonResponse(rsp)
 
+    shapes = list()
+    for file_shape in request_file_shapes.values():
+        dic = _get_ins_shat(file_shape)
+        has_shape, idx = _check_bef_items(shapes, dic)
+        dic['id'] = file_shape['id']
+        dic['org_id'] = file_shape['org_id']
+        dic['employee'] = employee
+
+        if not has_shape:
+            shapes.append([dic])
+        else:
+            shapes[idx].append(dic)
+
+    for shape in shapes:
+        if len(shape) == 1:
+            _make_request_datas(shape[first_item])
+        else:
+            root_id = _make_request_datas(shape[first_item])
+            for item in shape:
+                item['group_id'] = root_id
+
+                shape_geom_qs = ShapeGeom.objects
+                shape_geom_qs = shape_geom_qs.filter(shape_id=item['id'])
+                shape_geom = shape_geom_qs.first()
+
+                item['form_json'] = utils.json_load(shape_geom.form_json)
+                item['form_json'] = _check_and_make_form_json(item['feature_id'], item['form_json'])
+                item['geo_json'] = shape_geom.geom_json
+
+                _make_request_datas(item)
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай хүсэлт үүслээ'
+    }
     return JsonResponse(rsp)
