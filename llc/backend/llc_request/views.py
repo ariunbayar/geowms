@@ -1,16 +1,20 @@
 
 import os
 import rarfile
+import zipfile
+import glob
+from datetime import timedelta, datetime
+
+from django.db.backends.utils import logger
 from django.conf import settings
 from django.db import connections
-from geojson import FeatureCollection
-from main.decorators import ajax_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.apps import apps
-from datetime import timedelta, datetime
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.gdal import DataSource
 from django.core.mail import send_mail, get_connection
 
 from llc.backend.llc_request.models import (
@@ -22,12 +26,14 @@ from llc.backend.llc_request.models import (
 )
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from backend.org.models import Employee, Org
-from geoportal_app.models import User
-
 from backend.org.models import Org
 from backend.inspire.models import MDatas, LCodeLists
+from geoportal_app.models import User
+
+from geojson import FeatureCollection
 
 from main.components import Datatable
+from main.decorators import ajax_required
 from main.utils import (
     json_dumps,
     json_load,
@@ -36,6 +42,7 @@ from main.utils import (
     get_config,
     get_geom
 )
+from main import utils
 
 
 # Create your views here.
@@ -93,81 +100,58 @@ def llc_request_list(request, payload):
     return JsonResponse(rsp)
 
 
-def _get_leve_2_geo_id(file_data, zip_ref):
+def _get_leve_2_geo_id(layer):
     org_datas = Org.objects.filter(level=2)
     cursor = connections['default'].cursor()
     data_of_range = []
+    for feature in layer:
+        geo_json = feature.geom.json
+        break
+    if geo_json:
+        for org_data in org_datas:
+            sql = '''
+                SELECT ST_AsText(st_force2d(ST_GeomFromGeoJSON('{geo_json}'))) As wkt
+            '''.format(geo_json=geo_json)
+            valid_geodata = get_sql_execute(sql, cursor, 'all')[0].get('wkt')
 
-    with zip_ref.open(file_data, "r") as fo:
-        json_content = json_load(fo)
-        for i in json_content:
-            if isinstance(i, bytes):
-                contents = i.decode()
-            else:
-                contents = i
-
-            contents = contents.replace("\'", "\"")
-            contents = json_load(contents)
-            features = contents.get('features')
-
-            for org_data in org_datas:
-                for feature in features:
-                    geometry = feature.get('geometry')
-                    geometry = str(geometry).replace("\'", "\"")
-                    sql = '''
-                        SELECT ST_AsText(st_force2d(ST_GeomFromGeoJSON('{geo_json}'))) As wkt
-                    '''.format(geo_json=geometry)
-                    valid_geodata = get_sql_execute(sql, cursor, 'all')[0].get('wkt')
-
-                    sql_2 = '''
-                    select
-                        ST_Contains(
-                            ST_Transform(geo_data, 4326),
-                            ST_GeomFromText('{geom}', 4326)
-                        )
-                    As check_geom
-                    from
-                        m_geo_datas
-                    where geo_id='{geo_id}'
-                    '''.format(
-                        geom=valid_geodata,
-                        geo_id=org_data.geo_id
-                    )
-                    check_geom = get_sql_execute(sql_2, cursor, 'all')[0].get('check_geom')
-                    if check_geom:
-                        data_of_range = org_data
-                        break
+            sql_2 = '''
+            select
+                ST_Contains(
+                    ST_Transform(geo_data, 4326),
+                    ST_GeomFromText('{geom}', 4326)
+                )
+            As check_geom
+            from
+                m_geo_datas
+            where geo_id='{geo_id}'
+            '''.format(
+                geom=valid_geodata,
+                geo_id=org_data.geo_id
+            )
+            check_geom = get_sql_execute(sql_2, cursor, 'all')[0].get('check_geom')
+            if check_geom:
+                data_of_range = org_data
+                break
     return data_of_range
 
 
-def _create_shape_files(org_data, request_file, zip_ref):
-    file_datas = zip_ref.infolist()
-    for file_data in file_datas:
-        with zip_ref.open(file_data, "r") as fo:
-            json_content = json_load(fo)
-            for i in json_content:
-                if isinstance(i, bytes):
-                    contents = i.decode()
-                else:
-                    contents = i
-
-                contents = contents.replace("\'", "\"")
-                contents = json_load(contents)
-                features = contents.get('features')
-
-                requets_shape = RequestFilesShape.objects.create(
-                    files=request_file,
-                    org=org_data
-                )
-
-                for feature in features:
-                    geometry = feature.get('geometry')
-                    properties = feature.get('properties')
-                    ShapeGeom.objects.create(
-                        shape=requets_shape,
-                        geom_json=json_dumps(geometry),
-                        form_json=json_dumps(properties)
-                    )
+def _create_shape_files(org_data, request_file, datasource):
+    for layer in datasource:
+        for feature in layer:
+            geo_json = feature.geom.json
+            properties = dict()
+            for field in layer.fields:
+                properties[field] = feature.get(field)
+            json_content = json_load(geo_json)
+            request_shape = RequestFilesShape.objects.create(
+                files=request_file,
+                org=org_data
+            )
+            ShapeGeom.objects.create(
+                shape=request_shape,
+                geom_json=json_dumps(json_content),
+                form_json=json_dumps(properties)
+            )
 
 
 @require_POST
@@ -182,6 +166,14 @@ def save_request(request):
     zahialagch = request.POST.get('zahialagch')
     selected_tools = request.POST.get('selected_tools') or []
 
+    main_path = 'llc-request-files'
+    file_name = uploaded_file.name
+    file_not_ext_name = utils.get_file_name(file_name)
+    file_path = os.path.join(main_path, file_not_ext_name)
+
+    utils.save_file_to_storage(uploaded_file, file_path, file_name)
+    extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
+
     if id:
         id = json_load(id)
         id = id.get('id')
@@ -194,7 +186,7 @@ def save_request(request):
 
     selected_tools = json_load(selected_tools)
     selected_tools = selected_tools['selected_tools']
-    check_file_name = 'llc-request-files/' + str(uploaded_file)
+    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
     if check_data_of_file and not id:
         return JsonResponse({
@@ -203,15 +195,30 @@ def save_request(request):
         })
 
     if not check_data_of_file or not id:
-        with rarfile.RarFile(uploaded_file, 'r') as zip_ref:
-            file_datas = zip_ref.infolist()[0]
+        extract_path = os.path.join(extract_path, file_not_ext_name)
+        file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
+        utils.unzip(file_path, extract_path)
+        utils.remove_file(file_path)
 
-        org_data = _get_leve_2_geo_id(file_datas, zip_ref)
-        if not org_data:
-            return JsonResponse({
-                    'success': False,
-                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-            })
+        datasource_exts = ['.gml', '.geojson']
+        for name in glob.glob(os.path.join(extract_path, '*')):
+            for ext in datasource_exts:
+                if ext in name:
+                    ds = DataSource(name)
+                    for layer in ds:
+                        if len(layer) >= 1:
+                            org_data = _get_leve_2_geo_id(layer)
+                            if not org_data:
+                                return JsonResponse({
+                                    'success': False,
+                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                                })
+                        else:
+                            utils.remove_folder(extract_path)
+                            return JsonResponse({
+                                'success': False,
+                                'info': 'Файл хоосон байна !!!'
+                            })
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
@@ -239,7 +246,7 @@ def save_request(request):
                 tools=json_dumps(selected_tools)
             )
             id = request_file.id
-        _create_shape_files(org_data, request_file, zip_ref)
+        _create_shape_files(org_data, request_file, ds)
 
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:
@@ -275,7 +282,7 @@ def _get_feature(shape_geometries):
         single_geom = json_load(shape_geometry.geom_json)
         geom_type = single_geom.get('type')
         feature = {
-            "type":"Feature",
+            "type": "Feature",
             'geometry': single_geom,
             'id': shape_geometry.id,
             'properties': json_load(shape_geometry.form_json)

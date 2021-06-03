@@ -12,6 +12,7 @@ import math
 import json
 import psycopg2
 import socket
+import shutil
 from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
@@ -1566,6 +1567,10 @@ def remove_file(file_path):
     os.remove(file_path)
 
 
+def remove_folder(folder_path):
+    shutil.rmtree(folder_path)
+
+
 def copy_image(img, plus):
 
     # get legends
@@ -1819,3 +1824,7 @@ def drop_table(table_name, cursor, schema='public'):
         schema=schema
     )
     cursor.execute(detete_query)
+
+
+def get_file_name(file_name):
+    return file_name.split('.')[0] if file_name.split('.') else file_name
