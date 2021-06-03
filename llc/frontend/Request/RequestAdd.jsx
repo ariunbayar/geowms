@@ -236,6 +236,7 @@ export class RequestAdd extends Component {
             )
         }
     }
+
     modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
         this.setState({
             action_type,
@@ -250,39 +251,35 @@ export class RequestAdd extends Component {
         this.handleModalOpen()
     }
 
-    BackToList(){
-        this.props.history.push("/llc/llc-request/")
-    }
-
-        render (){
-            const {id, info} = this.props.match.params
-            return (
-                <div className="card">
-                    <div className="card-body">
-                        <RequestDetail
-                            id={id}
-                            {...this.state}
-                            handleOnChange={this.handleOnChange}
-                            submitClass={SubmitClass}
-                            handlePassValues={this.handlePassValues}
-                            BackToList={this.BackToList}
-                            info={info}
-                            handleSelectModel={this.handleSelectModel}
-                        />
-                    </div>
-                    <Modal
-                        modal_status={ this.state.modal_status }
-                        modal_icon={ this.state.modal_icon }
-                        modal_bg={ this.state.modal_bg }
-                        icon_color={ this.state.icon_color }
-                        title={ this.state.title }
-                        text={ this.state.text }
-                        has_button={ this.state.has_button }
-                        actionNameBack={ this.state.actionNameBack }
-                        actionNameDelete={ this.state.actionNameDelete }
-                        modalAction={ this.state.modalAction }
-                        modalClose={ this.state.modalClose }
+    render (){
+        const {id, info} = this.props.match.params
+        return (
+            <div className="card">
+                <div className="card-body">
+                    <RequestDetail
+                        id={id}
+                        {...this.state}
+                        handleOnChange={this.handleOnChange}
+                        submitClass={SubmitClass}
+                        handlePassValues={this.handlePassValues}
+                        history={this.props.history}
+                        info={info}
+                        handleSelectModel={this.handleSelectModel}
                     />
-            </div>
-        )}
-    }
+                </div>
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    text={ this.state.text }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
+                />
+        </div>
+    )}
+}

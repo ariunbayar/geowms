@@ -1,7 +1,13 @@
+import os
 from django.db import models
 from django.db.models.base import Model
 from django.db.models.fields import TextField
 from backend.org.models import Org
+from main import utils
+
+
+def upload_file_path(instance, filename):
+    return os.path.join('llc-request-files', utils.get_file_name(filename), filename)
 
 
 # Create your models here.
@@ -39,7 +45,7 @@ class RequestFiles(models.Model):
     description = models.TextField(default='')
     tools = models.TextField(default='')
     geo_id = models.CharField(max_length=100)
-    file_path = models.FileField(upload_to='llc-request-files/')
+    file_path = models.FileField(upload_to=upload_file_path)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
