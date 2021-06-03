@@ -173,7 +173,7 @@ const pg_config = {
         const opts = {
             ...getGetOptions(),
         }
-        return fetch(`${prefix}/pg/${connection_id}/get-all-view-names/`, opts).then(handleResponse)
+        return fetch(`${prefix}/pg/get-all-view-names/`, opts).then(handleResponse)
     },
 
     getProperties: function(feature_id) {

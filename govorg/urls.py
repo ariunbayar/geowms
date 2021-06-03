@@ -13,6 +13,7 @@ from govorg.backend.meta_data import views as meta_data_views
 from govorg.backend.revoke_request import views as revoke_request_views
 from govorg.backend.secure import views as secure_views
 from govorg.backend.tseg import views as tseg_view
+from backend.another_database import pg_views
 
 urlpatterns = [
     path('api/', include(([
@@ -161,6 +162,17 @@ urlpatterns = [
             # path('revoke-search/', revoke_request_views.revoke_paginate),
             path('get_choices/', revoke_request_views.get_choices),
         ], 'revoke_request'))),
+
+        path('llc-request/', include(([
+            path('', org_request_views.get_llc_list),
+            path('reject/', org_request_views.llc_request_reject, name="reject"),
+            path('approve/', org_request_views.llc_request_approve, name="approve"),
+            path('dismiss/', org_request_views.llc_request_dismiss, name="dismiss"),
+            path('<int:conn_id>/get-all-view-names/', pg_views.get_pg_table_names),
+            path('<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
+            path('get-fields/', pg_views.getFields),
+            path('<int:id>/get-request-data/', org_request_views.get_request_data, name=' save_request'),
+        ], 'llc-request'))),
 
     ], 'back_org'))),
 

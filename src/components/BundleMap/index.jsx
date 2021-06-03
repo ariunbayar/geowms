@@ -421,6 +421,7 @@ export default class InspireMap extends Component {
                     })
                     this.map.addLayer(aimag_layer)
                 }
+
                 if (this.map) {
                     this.map.addLayer(vector_layer)
                     this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })

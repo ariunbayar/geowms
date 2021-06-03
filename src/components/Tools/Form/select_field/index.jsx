@@ -9,7 +9,7 @@ export default class SelectField extends Component {
     }
 
     render() {
-        const {title_name, data_list, defualt_value, defualt_text} = this.props
+        const {title_name, defualt_value, defualt_text, data_list} = this.props
         return (
             <div className="form-group col-md-4">
                 <label className=''>
@@ -18,7 +18,7 @@ export default class SelectField extends Component {
                 <select
                     value={defualt_value}
                     className={'form-control col-md-12'}
-                    onChange={(e) => this.props.handleSelectField(title_name, e)}
+                    onChange={(e) => this.props.handleSelectField(title_name, e.target.value)}
                 >
                     <option value=''>---{defualt_text ? defualt_text : ''} ---</option>
                     {

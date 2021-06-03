@@ -151,7 +151,15 @@ export default class Modal extends Component {
                             <div className="modal-body text-center text-wrap ml-2 mr-2 text-justify">
                                 {
                                     this.props.text &&
-                                        this.props.text
+                                    (
+                                        typeof(this.props.text) == 'string'
+                                        ?
+                                            this.props.text
+                                        :
+                                            <this.props.text
+                                                {...this.props}
+                                            />
+                                    )
                                 }
                             </div>
                             {

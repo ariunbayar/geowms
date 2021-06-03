@@ -12,8 +12,6 @@ class RequestFiles(models.Model):
 
     STATE_NEW = 1
     STATE_SENT = 2
-    STATE_APPROVE = 3
-    STATE_REJECT = 4
 
     STATE_CHOICES = (
         (STATE_NEW, 'ШИНЭ'),
@@ -34,7 +32,7 @@ class RequestFiles(models.Model):
         (KIND_REVOKE, 'ЦУЦЛАСАН'),
         (KIND_NEW, 'ШИНЭ'),
     )
-    # aan = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
+
     name = models.CharField(max_length=250, verbose_name='Нэр')
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
     state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, null=True)
@@ -44,6 +42,7 @@ class RequestFiles(models.Model):
     file_path = models.FileField(upload_to='llc-request-files/')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+
 
 class RequestFilesShape(models.Model):
 
@@ -84,3 +83,38 @@ class RequestForm(models.Model):
     object_quantum = models.TextField()
     investment_status = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class LLCRequest(models.Model):
+
+    class Meta:
+        db_table = "llc_request"
+
+    STATE_NEW = 1
+    STATE_SENT = 2
+
+    STATE_CHOICES = (
+        (STATE_NEW, 'ШИНЭ'),
+        (STATE_SENT, 'ИЛГЭЭСЭН'),
+    )
+
+    KIND_SOLVED = 1
+    KIND_PENDING = 2
+    KIND_DISMISS = 3
+    KIND_REVOKE = 4
+    KIND_NEW = 5
+
+    KIND_CHOICES = (
+        (KIND_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
+        (KIND_PENDING, 'ХҮЛЭЭГДЭЖ БУЙ'),
+        (KIND_DISMISS, 'БУЦААГДСАН'),
+        (KIND_REVOKE, 'ЦУЦЛАСАН'),
+        (KIND_NEW, 'ШИНЭ')
+    )
+
+    file = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
+    kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
+    state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, null=True)
+    description = models.TextField(default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)

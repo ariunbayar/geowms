@@ -14,7 +14,7 @@ from main.utils import (
     convert_3d_with_srid
 )
 
-from backend.org.models import Employee
+from backend.org.models import Employee, Org
 from django.db import connections, transaction
 from django.db.models import Q
 from govorg.backend.org_request.models import ChangeRequest
@@ -25,6 +25,7 @@ from backend.inspire.models import (
     LThemes,
     LPackages,
     LFeatures,
+    LCodeLists,
     MGeoDatas,
     MDatas,
     EmpPermInspire,
@@ -38,8 +39,12 @@ from main.utils import (
     get_display_items,
     get_fields,
     get_feature_from_geojson,
+    json_load,
+    get_geom
 )
 from main.components import Datatable
+
+from llc.backend.llc_request.models import RequestFiles, LLCRequest, ShapeGeom, RequestForm
 
 
 def _get_geom(geo_id, fid):
@@ -817,5 +822,232 @@ def get_count(request):
         'count': request_count,
         'revoke_count': revoke_count,
     }
+
+    return JsonResponse(rsp)
+
+
+def _get_display(field, value):
+    for f in RequestFiles._meta.get_fields():
+        if hasattr(f, 'choices'):
+            if f.name == field:
+                for c_id, c_type in f.choices:
+                    if c_id == value:
+                        return c_type
+
+
+def _get_state(state, item):
+    display_name = _get_display('state', state)
+    return display_name
+
+
+def _get_kind(kind, item):
+    display_name = _get_display('kind', kind)
+    return display_name
+
+
+def _get_file_name(kind, item):
+    file = RequestFiles.objects.filter(id=item['file_id']).first()
+    return file.file_path.url
+
+
+def _get_ann_name(kind, item):
+    file = RequestFiles.objects.filter(id=item['file_id']).first()
+    return file.name
+
+
+@require_POST
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_llc_list(request, payload):
+    org = Org.objects.filter(employee__user=request.user).first()
+
+    qs = LLCRequest.objects
+    qs = qs.filter(file__geo_id=org.geo_id)
+    if qs:
+        оруулах_талбарууд = ['id', 'file_id', 'created_at', 'updated_at', 'kind', 'state', 'description']
+        хувьсах_талбарууд = [
+            {"field": "state", "action": _get_state, "new_field": "state"},
+            {"field": "kind", "action": _get_kind, "new_field": "kind"},
+            {"field": "created_at", "action": _get_file_name, "new_field": "file_path"},
+            {"field": "description", "action": _get_ann_name, "new_field": "name"}
+        ]
+
+        datatable = Datatable(
+            model=RequestFiles,
+            payload=payload,
+            initial_qs=qs,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд,
+        )
+        items, total_page = datatable.get()
+        rsp = {
+            'items': items,
+            'total_page': total_page,
+        }
+    else:
+        rsp = {
+            'items': [],
+            'page': payload.get("page"),
+            'total_page': 1,
+        }
+
+    return JsonResponse(rsp)
+
+
+def _get_feature(shape_geometries):
+    features = []
+    for shape_geometry in shape_geometries:
+
+        single_geom = json_load(shape_geometry.geom_json)
+        feature = {
+            "type": "Feature",
+            'geometry': single_geom,
+            'id': shape_geometry.id,
+            'properties': json_load(shape_geometry.form_json)
+        }
+        features.append(feature)
+    return features
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_request_data(request, id):
+    features = []
+    field = dict()
+    aimag_name = ''
+    aimag_geom = []
+    print("hoh")
+    print("hoh")
+    print("hoh")
+    print("hoh", id)
+    llc_data = LLCRequest.objects.filter(pk=id).first()
+    shape_geometries = ShapeGeom.objects.filter(shape__files=llc_data.file)
+    features = _get_feature(shape_geometries)
+
+    qs = RequestForm.objects.filter(file=llc_data.file)
+    field = [item for item in qs.values()]
+    selected_tools = qs.first().file.tools
+    geo_id = qs.first().file.geo_id
+
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+    if mdata_qs:
+        code_list_id = mdata_qs.code_list_id
+        code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
+        aimag_name = code_list_data.code_list_name
+
+        aimag_geom = get_geom(geo_id, 'MultiPolygon')
+        if aimag_geom:
+            aimag_geom = aimag_geom.json
+
+    if qs:
+        field = [item for item in qs.values()]
+
+    return JsonResponse({
+        'vector_datas': FeatureCollection(features),
+        'form_field': field[0],
+        'selected_tools': json_load(selected_tools),
+        'aimag_name': aimag_name,
+        'aimag_geom': aimag_geom
+    })
+
+
+def _reject_request(id, kind, state, text):
+    reject_request = LLCRequest.objects.filter(pk=id).first()
+    reject_file = RequestFiles.objects.filter(id=reject_request.file.id).first()
+    reject_request.kind = kind
+    reject_request.state = state
+    reject_file.kind = kind
+    reject_file.state = RequestFiles.STATE_NEW
+    reject_file.description = text
+    reject_request.save()
+    reject_file.save()
+
+
+@require_POST
+@ajax_required
+def llc_request_reject(request, payload):
+    pk = payload.get('id')
+    _reject_request(pk, LLCRequest.KIND_REVOKE, LLCRequest.STATE_SENT, '')
+
+    rsp = {
+        'success': True,
+        'info': 'Амжилттай татгалзлаа'
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+def llc_request_dismiss(request, payload):
+    description = payload.get('description')
+    id = payload.get('id')
+    _reject_request(id, LLCRequest.KIND_DISMISS,LLCRequest.STATE_SENT,  description)
+
+    return JsonResponse({
+        'success': True,
+        'info': 'Амжилттай илгээгдлээ'
+    })
+
+
+@require_POST
+@ajax_required
+def llc_request_approve(request, payload):
+
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_perm = get_object_or_404(EmpPerm, employee=employee)
+    request_ids = payload.get("ids")
+    feature_id = payload.get("feature_id")
+    success = False
+    new_geo_id = None
+
+    feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
+    requests_qs = RequestFiles.objects
+    requests_qs = requests_qs.filter(id__in=request_ids)
+    with transaction.atomic():
+        for r_approve in requests_qs:
+            feature_id = r_approve.feature_id
+            perm_approve = EmpPermInspire.objects.filter(
+                emp_perm=emp_perm,
+                feature_id=feature_id,
+                perm_kind=EmpPermInspire.PERM_APPROVE
+            )
+
+            if perm_approve:
+                old_geo_id = r_approve.old_geo_id
+                geo_json = r_approve.geo_json
+                form_json = r_approve.form_json
+                request_datas = dict()
+                m_geo_datas_qs = _has_data_in_geo_datas(old_geo_id, feature_id)
+                if r_approve.kind == RequestFiles.KIND_PENDING:
+                    new_geo_id = GEoIdGenerator(feature_obj.feature_id, feature_obj.feature_code).get()
+                    request_datas['geo_id'] = new_geo_id
+
+                    request_datas['geo_json'] = geo_json
+                    request_datas['approve_type'] = 'create'
+                    request_datas['feature_id'] = feature_id
+                    request_datas['form_json'] = form_json
+                    request_datas['m_geo_datas_qs'] = m_geo_datas_qs
+                    success = _request_to_m(request_datas)
+                    if success and new_geo_id:
+                        r_approve.new_geo_id = new_geo_id
+                        _insert_data_another_table(request_datas, new_geo_id, 'create')
+
+                r_approve.state = RequestFiles.STATE_SENT
+                _check_group_items(r_approve)
+                r_approve.group_id = None
+                r_approve.save()
+
+            else:
+                rsp = {
+                    'success': False,
+                    'info': 'Танд баталгаажуулах эрх алга байна'
+                }
+
+        refreshMaterializedView(feature_id)
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай хүсэлт үүслээ'
+        }
 
     return JsonResponse(rsp)
