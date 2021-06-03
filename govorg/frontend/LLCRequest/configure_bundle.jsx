@@ -24,9 +24,6 @@ export class ConfigureBundle extends Component {
             themes: props.themes,
             packages: props.packages,
             features: props.features,
-            feature_name: props.selected_values.feature.id,
-            theme_name: props.selected_values.theme.id,
-            package_name: props.selected_values.package.id,
             selected_packages: props.selected_packages,
             selected_features: props.selected_features,
             selected_dt_list: [],
@@ -53,10 +50,9 @@ export class ConfigureBundle extends Component {
     }
 
     render () {
-        const { is_loading, themes, selected_features,
-            selected_packages
+        const { is_loading, themes,
         } = this.state
-        const {selected_values} = this.props
+        const {selected_values, selected_packages, selected_features} = this.props
         const { theme, feature } = selected_values
         return (
             <div className="col-md-12">
@@ -69,13 +65,19 @@ export class ConfigureBundle extends Component {
                         />
                         <SelectField
                             title_name='package'
-                            data_list={selected_packages}
+                            data_list={
+                                selected_values.package?.list && selected_values.package?.list.length >0
+                                ? selected_values.package?.list : selected_packages
+                            }
                             defualt_value={selected_values.package?.id || ''}
                             handleSelectField={this.handleChange}
                         />
                         <SelectField
                             title_name='feature'
-                            data_list={selected_features}
+                            data_list={
+                                selected_values.feature?.list && selected_values.feature?.list.length >0
+                                ? selected_values.feature?.list : selected_features
+                            }
                             defualt_value={feature?.id || ''}
                             handleSelectField={this.handleChange}
                         />

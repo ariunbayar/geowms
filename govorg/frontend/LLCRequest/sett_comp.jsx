@@ -55,6 +55,8 @@ export class LLCSettings extends Component {
             list_of_datas[index_of_list]['feature']['name'] = ''
             list_of_datas[index_of_list]['feature']['id'] = ''
             data_list['selected_features'] = []
+            list_of_datas[index_of_list]['package'].list = []
+            list_of_datas[index_of_list]['feature'].list = []
         }
 
         else if ( name == 'package' ) {
@@ -62,6 +64,7 @@ export class LLCSettings extends Component {
             data_list['selected_features'] = seleted_datas
             list_of_datas[index_of_list]['feature']['name'] = ''
             list_of_datas[index_of_list]['feature']['id'] = ''
+            list_of_datas[index_of_list]['feature'].list = []
         }
 
         if (! selected_value) {
@@ -73,16 +76,14 @@ export class LLCSettings extends Component {
         list_of_datas[index_of_list][name].id = selected_value
         list_of_datas[index_of_list][name].name = selected_data_name
 
-        list_of_datas[index_of_list].icon_state = !list_of_datas[index_of_list].icon_state
+        list_of_datas[index_of_list].icon_state = false
 
         data_list['list_of_datas'] = list_of_datas
         this.setState({ ...data_list })
     }
 
     getInspireTree(){
-        service.getInspireTree().then(({themes, packages, features}) => {
-            this.setState({themes, packages, features})
-        })
+        return service.getInspireTree()
     }
 
     handleProceed(values) {
@@ -95,20 +96,27 @@ export class LLCSettings extends Component {
 
     componentDidMount() {
         const {id} = this.props.match.params
-        service.getFilesDetal(id).then(({list_of_datas}) => {
-            this.setState({list_of_datas})
+
+        service.getFilesDetal(id).then(async ({list_of_datas}) => {
+            const {themes, packages, features} = await service.getInspireTree()
+            list_of_datas.map((list_of_data, idx) => {
+                if (list_of_data.theme.id) {
+                    var selected_packages = this.getArray(packages, list_of_data.theme.id)
+                    var selected_features = this.getArray(features, list_of_data.package.id)
+                    list_of_datas[idx]['package']['list'] = selected_packages
+                    list_of_datas[idx]['feature']['list'] = selected_features
+                }
+            })
+            this.setState({list_of_datas, themes, packages, features})
         })
-        this.getInspireTree()
     }
 
     Save(value, idx){
-        var list_of_datas =  this.state.list_of_datas
-        if (value.icon_state)  {
-            service.Save(value).then(({ success }) => {
-                list_of_datas[idx].icon_state = true
-                this.setState({list_of_datas})
-            })
-        }
+        var list_of_datas = this.state.list_of_datas
+        service.Save(value).then(({ success }) => {
+            list_of_datas[idx].icon_state = true
+            this.setState({list_of_datas})
+        })
     }
 
     handleModalOpen() {
@@ -129,6 +137,7 @@ export class LLCSettings extends Component {
 
     render () {
         const { list_of_datas, model_status, selected_values, save_icon} = this.state
+
         return (
             <div className="card">
                 <div className="card-body">
@@ -170,7 +179,7 @@ export class LLCSettings extends Component {
                                                     value.icon_state ?
                                                     <a className='gp-text-primary fa fa-pencil-square-o' href="#"  onClick={(e) => this.handleProceed(value)}/>
                                                     :
-                                                    <a className='gp-text-primary fa fa-floppy-o' href="#"  onClick={(e) => this.Save(value)}/>
+                                                    <a className='gp-text-primary fa fa-floppy-o' href="#"  onClick={(e) => this.Save(value, idx)}/>
                                                 }
                                             </td>
                                         </tr>

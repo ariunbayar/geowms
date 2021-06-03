@@ -446,10 +446,7 @@ def get_file_shapes(request, id):
         if feature_id:
             feature = LFeatures.objects.filter(feature_id=feature_id).first()
             feature_name = feature.feature_name
-        if theme_id and package_id and feature_id:
-            icon_state = True
-        else:
-            icon_state = False
+        icon_state = True
 
         list_of_datas.append({
             'id': shape_geometry.id,
@@ -460,10 +457,6 @@ def get_file_shapes(request, id):
             'icon_state': icon_state,
             'features': FeatureCollection(geoms)
         })
-    print("hoh")
-    print("hoh")
-    print("hoh")
-    print("hoh", list_of_datas)
     return JsonResponse({
         'list_of_datas': list_of_datas,
     })
