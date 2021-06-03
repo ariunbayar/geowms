@@ -36,7 +36,6 @@ function getSum(code) {
 }
 
 function getBaga(code) {
-    console.log(code)
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify({code})

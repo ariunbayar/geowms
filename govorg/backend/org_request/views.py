@@ -917,10 +917,6 @@ def get_request_data(request, id):
     field = dict()
     aimag_name = ''
     aimag_geom = []
-    print("hoh")
-    print("hoh")
-    print("hoh")
-    print("hoh", id)
     llc_data = LLCRequest.objects.filter(pk=id).first()
     shape_geometries = ShapeGeom.objects.filter(shape__files=llc_data.file)
     features = _get_feature(shape_geometries)
