@@ -232,7 +232,7 @@ export class Detail extends Component {
                                         }
                                     </select>
                                 </div>
-                                <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right " onClick={() => this.handleSearch()}>Хайх</button>
+                                <p className="btn-sm gp-btn-primary d-flex justify-content-center m-3 float-right " onClick={() => this.handleSearch()}>Хайх</p>
                         </div>
                         <div className="col-md-12">
                             <PortalDataTable
@@ -246,6 +246,8 @@ export class Detail extends Component {
                                 нэмэлт_талбарууд={нэмэлт_талбарууд}
                                 нэмэх_товч={'/llc/llc-request/хүсэлт-нэмэх/'}
                                 custom_query={this.state.custom_query}
+                                хайлт="closed"
+                                max_data="closed"
                             />
                         </div>
                     </div>
