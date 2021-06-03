@@ -1,6 +1,4 @@
-
 import os
-import rarfile
 import zipfile
 import glob
 from datetime import timedelta, datetime
@@ -13,7 +11,6 @@ from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.apps import apps
-from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.gdal import DataSource
 from django.core.mail import send_mail, get_connection
 
@@ -138,12 +135,9 @@ def _get_leve_2_geo_id(layer):
 def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
     for name in glob.glob(os.path.join(extract_path, '*')):
         if [item for item in datasource_exts if item in name]:
-            print('bgaa', name)
             ds = DataSource(name)
             for layer in ds:
-                print(layer)
                 for feature in layer:
-                    print(feature)
                     geo_json = feature.geom.json
                     properties = dict()
                     for field in layer.fields:
