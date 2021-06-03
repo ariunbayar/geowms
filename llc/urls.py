@@ -18,6 +18,7 @@ urlpatterns = [
         path('<int:id>/send-request/', llc_request_views.send_request, name=' send_request'),
         path('<int:id>/remove-request/', llc_request_views.remove_request, name=' remove_request'),
         path('<int:id>/get-request-data/', llc_request_views.get_request_data, name='get_request_data'),
+        path('get-search-field/', llc_request_views.get_search_field, name='get_search_field'),
     ], 'llc_requests'))),
 
     re_path('^.*', llc_views.llc_frontend, name='llc'),
