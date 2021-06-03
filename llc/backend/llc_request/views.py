@@ -416,7 +416,8 @@ def _send_to_information_email (user_id):
 @ajax_required
 def get_file_shapes(request, id):
     list_of_datas = []
-    shape_geometries = RequestFilesShape.objects.filter(files_id=id)
+    llc_data = LLCRequest.objects.filter(id=id).first()
+    shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
     for shape_geometry in shape_geometries:
         geoms, geom_type = _get_shapes_geoms(shape_geometry)
         list_of_datas.append({
