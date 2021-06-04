@@ -1195,3 +1195,16 @@ def inspire_save(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+def get_state_choices(request):
+    search_field = dict()
+    get_state = RequestFiles.STATE_CHOICES
+    search_field['state'] = get_state
+
+    return JsonResponse({
+        'success': True,
+        'search_field': search_field,
+    })
