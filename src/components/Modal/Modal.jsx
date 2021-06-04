@@ -148,7 +148,7 @@ export default class Modal extends Component {
                             <div className="d-flex justify-content-center">
                                 <h5 >{ this.props.title && this.props.title }</h5>
                             </div>
-                            <div className="modal-body text-wrap text-justify ml-2 mr-2 ">
+                            <div className="modal-body text-wrap text-center ml-2 mr-2 ">
                                 {
                                     this.props.text &&
                                     (

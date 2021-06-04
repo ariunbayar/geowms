@@ -1,12 +1,9 @@
 import React, { Component, Fragment } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import {NavLink} from "react-router-dom"
-import DirectModal from  './DirectModal'
 import RequestModal from  './RequestModal'
 import Modal from '@utils/Modal/Modal'
-import { render } from "react-dom";
 import { service } from "./service";
-
 
 export const make_state_color = (state) => {
     let color
@@ -24,7 +21,6 @@ export const make_kind_color = (kind) => {
     else if (kind == "ШИНЭ") color = 'text-primary'
     return color
 }
-
 
 export class FileAndDesc extends Component {
     constructor(props){
@@ -158,14 +154,15 @@ export class Detail extends Component {
     }
 
     handleModalOpen(values){
-        if(values.state =='ИЛГЭЭСЭН'){
+        let not_remove_kinds = ['ХҮЛЭЭГДЭЖ БУЙ', 'ЦУЦЛАСАН']
+        if(not_remove_kinds.includes(values.kind)){
             this.modalChange(
                 'fa fa-exclamation-circle',
                 "danger",
                 'Устгах боломжгүй',
                 `"Энэхүү хүсэлт илгээгдсэн төлөвт байгаа тул устгах боломжгүй`,
                 false
-                )
+            )
         }
         else {
             this.modalChange(
@@ -174,17 +171,18 @@ export class Detail extends Component {
                 'Тохиргоог устгах',
                 `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
                 true
-                )
+            )
         }
     }
 
-    modalChange(modal_icon, icon_color, title, text, has_button) {
+    modalChange(modal_icon, icon_color, title, text, has_button, description) {
         this.setState({
             modal_icon: modal_icon,
             icon_color: icon_color,
             title: title,
             text: text,
             has_button: has_button,
+            description: description,
         })
         this.modalOpen()
     }
@@ -250,9 +248,10 @@ export class Detail extends Component {
             'fa fa-info-circle',
             "warning",
             'Тайлбар',
+            ModalText,
+            false,
             values.description,
-            false
-            )
+        )
     }
 
     render() {
@@ -330,9 +329,19 @@ export class Detail extends Component {
                         text={this.state.text}
                         modalAction={this.handleRemove}
                         actionNameDelete="Устгах"
+                        description={this.state.description}
                     />
                 </div>
             </Fragment>
         )
     }
+}
+
+
+function ModalText(props) {
+    return (
+        <span className="text-center">
+            {props.description}
+        </span>
+    )
 }

@@ -1,11 +1,8 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 import { service } from "./service"
 import RequestDetail from './DirectModal'
 import ModelSendData from './send_request'
 import Modal from '@utils/Modal/Modal'
-
-
-
 
 class ActionClass extends Component {
     constructor(props) {
