@@ -72,7 +72,8 @@ class SubmitClass extends Component {
                         ?
                             <button
                                 type="button"
-                                className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" } ${agreed_submit || values.selected_tools.length == 0 || !values.file_name ? 'disabled' : ''}`}
+                                disabled={`${agreed_submit || values.selected_tools.length == 0 || !values.file_name ? true : false}`}
+                                className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
                                 onClick ={()=> this.handleSubmit()}
                             >
                                 <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
@@ -213,7 +214,7 @@ export class RequestAdd extends Component {
             value = e.target.value
         }
 
-        if(!id){ this.validationForm() }
+        this.validationForm()
         this.setState({[name]: value, file_name, file_state})
     }
 
