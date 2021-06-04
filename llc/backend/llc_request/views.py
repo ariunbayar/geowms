@@ -1,7 +1,8 @@
 import os
 import zipfile
 import glob
-from datetime import timedelta, datetime
+from datetime import timedelta
+import datetime
 
 from django.db.backends.utils import logger
 from django.conf import settings
@@ -105,7 +106,7 @@ def llc_request_list(request, payload):
 
 
 def _get_leve_2_geo_id(layer):
-    org_datas = Org.objects.filter(level=2)
+    org_datas = Org.objects.filter(level=2, employee__position=13)
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
@@ -154,6 +155,14 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
                         files=request_file,
                         org=org_data
                     )
+
+                    for key, value in properties.items():
+                        if value:
+                            if isinstance(value, datetime.datetime):
+                                properties[key] = utils.datetime_to_string(value)
+                        if value is None:
+                            properties[key] = ''
+
                     ShapeGeom.objects.create(
                         shape=request_shape,
                         geom_json=json_dumps(json_content),
@@ -440,12 +449,14 @@ def get_file_shapes(request, id):
     shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
     for shape_geometry in shape_geometries:
         geoms, geom_type = _get_shapes_geoms(shape_geometry)
+
         theme_name = ''
         feature_name = ''
         package_name = ''
         theme_id = shape_geometry.theme_id
         feature_id = shape_geometry.feature_id
         package_id = shape_geometry.package_id
+
         if theme_id:
             theme = LThemes.objects.filter(theme_id=theme_id).first()
             theme_name = theme.theme_name
@@ -457,7 +468,6 @@ def get_file_shapes(request, id):
         if feature_id:
             feature = LFeatures.objects.filter(feature_id=feature_id).first()
             feature_name = feature.feature_name
-        icon_state = True
 
         list_of_datas.append({
             'id': shape_geometry.id,
@@ -465,9 +475,10 @@ def get_file_shapes(request, id):
             'theme': {'id': theme_id, 'name': theme_name},
             'feature': {'id': feature_id, 'name': feature_name},
             'package': {'id': package_id, 'name': package_name},
-            'icon_state': icon_state,
+            'icon_state': True,
             'features': FeatureCollection(geoms)
         })
+
     return JsonResponse({
         'list_of_datas': list_of_datas,
     })
