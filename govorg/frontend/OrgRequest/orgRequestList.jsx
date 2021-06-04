@@ -24,6 +24,7 @@ export const make_kind_color = (kind) => {
     if (kind == "ҮҮССЭН") color = 'text-success'
     else if (kind == "ЗАССАН") color = 'text-primary'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
+    else if (kind == "БУЦААГДСАН") color = 'text-danger'
     else if (kind == "УСТГАСАН") color = 'text-danger'
     else if (kind == "ШУУД") color = 'text-danger'
     return color
