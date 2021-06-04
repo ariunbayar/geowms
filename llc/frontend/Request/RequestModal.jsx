@@ -1,8 +1,9 @@
 import React, { Component, Fragment } from "react"
 import { service } from "./service"
 import RequestDetail from './DirectModal'
-import Modal from '@utils/Modal/Modal'
 import ModelSendData from './send_request'
+import Modal from '@utils/Modal/Modal'
+
 
 
 
@@ -11,20 +12,35 @@ class ActionClass extends Component {
             super(props)
             this.state = {
                 url: "/llc/llc-request/",
-                modal_status: 'closed'
+                modal_status: 'closed',
+                is_loading:false,
             }
             this.handleSubmit = this.handleSubmit.bind(this)
             this.modalClose = this.modalClose.bind(this)
             this.modalOpen = this.modalOpen.bind(this)
+            this.handleModalOpen = this.handleModalOpen.bind(this)
+        }
+
+        handleModalOpen(){
+            this.modalChange(
+                'fa fa-info-circle',
+                'warning',
+                'Хүсэлт илгээхдээ итгэлтэй байна уу?',
+                '',
+                true,
+                'Үгүй',
+                'Тиим',
+            )
         }
 
         handleSubmit(){
             const {id} =this.props.values
+            this.props.loader(true)
             service.SendRequest(id).then(({ success, info}) =>{
                 if(success){
+                    this.props.loader(false)
                     this.modalChange(
                         'fa fa-check-circle',
-                        null,
                         'success',
                         info,
                         '',
@@ -32,13 +48,11 @@ class ActionClass extends Component {
                         '',
                         '',
                         null,
-                        this.modalClose()
                     )
                 }
                 else {
                     this.modalChange(
                         'fa fa-times-circle',
-                        null,
                         'danger',
                         info,
                         '',
@@ -46,7 +60,6 @@ class ActionClass extends Component {
                         '',
                         '',
                         null,
-                        this.modalClose()
                     )
                 }
 
@@ -62,25 +75,23 @@ class ActionClass extends Component {
             })
         }
 
-        modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        modalChange(modal_icon, icon_color, title, text, has_button, actionNameBack, actionNameDelete) {
             this.setState({
                 modal_icon,
-                modal_bg,
                 icon_color,
                 title,
                 text,
                 has_button,
                 actionNameBack,
                 actionNameDelete,
-                modalAction,
-                modalClose
             }, () => {
                 this.modalOpen()
             })
         }
+
         render (){
             const {values} = this.props
-            const {url} = this.state
+            const {url, is_loading } = this.state
             return (
                     <div className='row ml-2'>
                             <p className="btn btn-secondary">
@@ -96,7 +107,7 @@ class ActionClass extends Component {
 
                             <p
                                 className="btn btn-primary"
-                                onClick ={()=> this.handleSubmit()}
+                                onClick ={()=> this.handleModalOpen()}
                             >
                                 <i className="fa"> Хүсэлт илгээх</i>
                             </p>
@@ -110,13 +121,14 @@ class ActionClass extends Component {
                             has_button={ this.state.has_button }
                             actionNameBack={ this.state.actionNameBack }
                             actionNameDelete={ this.state.actionNameDelete }
-                            modalAction={ this.state.modalAction }
-                            modalClose={ this.state.modalClose, values.closeRequestMap }
+                            modalAction={ this.handleSubmit}
+                            modalClose={ this.modalClose, values.closeRequestMap }
                         />
                     </div>
             )
         }
     }
+
 class SendModal extends Component{
     constructor(props) {
         super(props)
@@ -182,10 +194,17 @@ export default class RequestModal extends Component {
             values: props.values,
             icon : this.props.icon,
             modal_status:'closed',
-            state: props.values.state
+            state: props.values.state,
+            kind : props.values.kind,
+            invis : false
         }
         this.openRequestModal = this.openRequestModal.bind(this)
         this.closeRequestMap = this.closeRequestMap.bind(this)
+    }
+
+    componentDidMount(){
+        if(this.state.kind == 'ЦУЦЛАСАН')
+            this.setState({invis: true})
     }
 
     openRequestModal(){
@@ -194,16 +213,17 @@ export default class RequestModal extends Component {
 
     closeRequestMap() {
         this.setState({ modal_status: 'closed' })
+        this.props.refreshData()
     }
 
     render() {
-        const {values, modal_status, state} = this.state
+        const {values, modal_status, state, kind, invis} = this.state
         return (
             <div className="col-md-12">
                 {
-                state == 'ШИНЭ'
+                (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
                         ?
-                            <a className="fa fa-paper-plane-o text-primary mt-2 ml-2" onClick={this.openRequestModal}></a>
+                            <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2 ${invis && 'invisible'}`} onClick={this.openRequestModal}></a>
                         :
                              <a className="fa fa-check text-success mt-2 ml-2" ></a>
                 }

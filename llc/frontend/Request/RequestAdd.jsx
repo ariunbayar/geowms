@@ -133,7 +133,7 @@ export class RequestAdd extends Component {
     componentDidMount() {
         const {id} = this.props.match.params
         if (id) {
-            service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
+            service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
                 if (form_field){
                     this.setState({
                         vector_datas,
@@ -143,31 +143,14 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
-                        files: form_field['file_path'],
                         file_name: form_field['file_name'],
-                        state: form_field['state'],
+                        aimag_name,
+                        aimag_geom
                     })
                 }
             })
         }
         this.getTools()
-        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
-            if (form_field){
-                this.setState({
-                    vector_datas,
-                    zahialagch: form_field['client_org'],
-                    project_name: form_field['project_name'],
-                    object_type: form_field['object_type'],
-                    object_count: form_field['object_quantum'],
-                    hurungu_oruulalt: form_field['investment_status'],
-                    selected_tools: form_field['selected_tools'],
-                    file_name: form_field['file_name'],
-                    aimag_name,
-                    aimag_geom
-                })
-            }
-        })
-
     }
 
     getTools() {

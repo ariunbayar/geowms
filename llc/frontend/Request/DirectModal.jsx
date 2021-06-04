@@ -1,6 +1,8 @@
 import React, { Component, Fragment } from "react"
 import { service } from "./service"
 import {GPIcon} from "@utils/Tools"
+import Loader from "@utils/Loader"
+
 import {LLCMap} from '../LLCMap'
 import UsedTools from './select_tools'
 
@@ -11,8 +13,10 @@ export default class RequestDetail extends Component {
         this.state = {
             info: false,
             state : props.state,
-            disabled: false
+            disabled: false,
+            is_loading:false
         }
+        this.handleLoaderActive = this.handleLoaderActive.bind(this)
     }
 
     componentDidMount() {
@@ -31,6 +35,10 @@ export default class RequestDetail extends Component {
         }
     }
 
+    handleLoaderActive(status){
+        this.setState({is_loading: status})
+    }
+
     render (){
         const {
             object_type, object_count,
@@ -41,6 +49,7 @@ export default class RequestDetail extends Component {
         } = this.props
         return (
             <div className="row p-3">
+                <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна түр хүлээнэ үү !!!"}/>
                 <div className="col-md-5">
                     <form  class="form-row">
                         {
@@ -142,6 +151,7 @@ export default class RequestDetail extends Component {
                         &&
                         <this.props.submitClass
                             values={this.props}
+                            loader={this.handleLoaderActive}
                         />
                     }
                 </div>
