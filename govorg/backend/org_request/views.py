@@ -20,6 +20,8 @@ from backend.inspire.models import (
     LThemes,
     LPackages,
     LFeatures,
+    LFeatureConfigs,
+    LDataTypeConfigs,
     LCodeLists,
     LProperties,
     MGeoDatas,
@@ -1053,15 +1055,14 @@ def _check_and_make_form_json(feature_id, values):
     form_json_list = list()
     code_list_values = ""
 
-    view_qs = ViewNames.objects
-    view_qs = view_qs.filter(feature_id=feature_id)
-    view = view_qs.first()
+    property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id, False)
+    property_filtered_qs = LProperties.objects.none()
+    for code in values.keys():
+        property_filtered_qs |= property_qs.filter(property_code__iexact=code)
 
-    view_props = ViewProperties.objects.filter(view=view)
-
-    for view_prop in view_props:
+    for prop in property_filtered_qs:
         prop_qs = LProperties.objects
-        prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+        prop_qs = prop_qs.filter(property_id=prop.property_id)
         prop_qs = prop_qs.first()
 
         form_json = dict()
