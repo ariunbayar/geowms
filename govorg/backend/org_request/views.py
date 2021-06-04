@@ -1175,24 +1175,27 @@ def llc_request_approve(request, request_id):
         else:
             shapes[idx].append(dic)
 
+    def _get_geom_and_form(item):
+        shape_geom_qs = ShapeGeom.objects
+        shape_geom_qs = shape_geom_qs.filter(shape_id=item['id'])
+        shape_geom = shape_geom_qs.first()
+
+        item['form_json'] = utils.json_load(shape_geom.form_json)
+        item['form_json'] = _check_and_make_form_json(item['feature_id'], item['form_json'])
+        item['geo_json'] = shape_geom.geom_json
+        return item
+
     for shape in shapes:
         if len(shape) == 1:
-            _make_request_datas(shape[first_item])
+            item = _get_geom_and_form(shape[first_item])
+            _make_request_datas(item)
         else:
             root_id = _make_request_datas(shape[first_item])
             for item in shape:
                 item['group_id'] = root_id
-
-                shape_geom_qs = ShapeGeom.objects
-                shape_geom_qs = shape_geom_qs.filter(shape_id=item['id'])
-                shape_geom = shape_geom_qs.first()
-
-                item['form_json'] = utils.json_load(shape_geom.form_json)
-                item['form_json'] = _check_and_make_form_json(item['feature_id'], item['form_json'])
-                item['geo_json'] = shape_geom.geom_json
+                item = _get_geom_and_form(item)
 
                 _make_request_datas(item)
-
     rsp = {
         'success': True,
         'info': 'Амжилттай хүсэлт үүслээ'
