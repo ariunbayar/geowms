@@ -13,8 +13,6 @@ class SubmitClass extends Component {
             url: "/llc/llc-request/",
             agreed_submit: false,
             one_check: true,
-            info_status: false,
-
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
@@ -65,7 +63,7 @@ class SubmitClass extends Component {
 
     render (){
         const {values} = this.props
-        const {agreed_submit, info_status} = this.state
+        const {agreed_submit} = this.state
         return (
             <Fragment>
                     {   !values.id
@@ -79,7 +77,7 @@ class SubmitClass extends Component {
                                 <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
                             </button>
                         :
-                        <div className={`${info_status ? "col-md-8 col-sm-8" : "col-md-6 col-sm-6"} mt-2 d-flex justify-content-between`}>
+                        <div className="col-md-8 mt-2 ">
                             <p className="btn btn-secondary">
                                 <i
                                     className="fa fa-angle-double-left"
@@ -88,22 +86,7 @@ class SubmitClass extends Component {
                                 >
                                     Буцах
                                 </i>
-                            </p>
-                            {
-                                values.kind == 3 || values.kind == 4
-                                ?
-                                    <p className="btn btn-warning">
-                                        <i
-                                            className="fa fa-info-circle"
-                                            onClick ={()=> this.props.values.handlePassValues('', values.desc, true)}
-
-                                        > &nbsp;
-                                            Тайлбар
-                                        </i>
-                                    </p>
-                                :
-                                    null
-                            }
+                            </p> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
                                 values.state != 2
 

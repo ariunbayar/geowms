@@ -119,11 +119,11 @@ export default class RequestDetail extends Component {
                             <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
                             <label
                                 htmlFor="choose-file"
-                                className="custom-file-upload col-md-6 text-center border-danger"
+                                className={`custom-file-upload col-md-6 text-center ${!file_name  ? "border-danger" : ''}`}
                                 id="choose-file-label"
                                 data-toggle="toolpit"
                                 data-placement="top"
-                                title='файл сонгогдоогүй байна '
+                                title={!file_name ? 'файл сонгогдоогүй байна ' : file_name}
                             >
                                 файл оруулах
                             </label>
@@ -136,12 +136,7 @@ export default class RequestDetail extends Component {
                                 style={{display: 'none'}}
                             />
                             {
-                                file_name
-                                ?
-                                    <small className="col-md-5 ml-2">{file_name}</small>
-                                :
-                                    <small className="col-md-5 ml-2 text-danger">
-                                    </small>
+                                file_name && <small className="col-md-5 ml-2">{file_name}</small>
                             }
 
                         </div>

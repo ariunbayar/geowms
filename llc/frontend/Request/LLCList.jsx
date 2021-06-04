@@ -24,25 +24,50 @@ export const make_kind_color = (kind) => {
     return color
 }
 
-export const make_send_data = (values) => {
-    let kind = values.values.kind
-    return (
-        <div>
-            {
-                kind == "БУЦААГДСАН"
-                &&
-                <a
-                    type="button"
-                    href={'/media/' + values.values.file_path}
-                    target="_blank"
-                    className= "btn text-light animated bounceIn bg-danger"
-                >
-                <i className="fa fa-download"> &nbsp; Татах</i>
-                </a>
-        }
-        </div>
 
-    )
+export class FileAndDesc extends Component {
+    constructor(props){
+        super(props)
+        this.state = {
+        }
+    }
+    render() {
+        const {values} = this.props
+        return (
+            <div className='p-0'>
+                {
+                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦАЛСАН") &&
+                    <span className="p-0">
+                        <a
+                            type="button"
+                            href={'/media/' + values.file_path}
+                            target="_blank"
+                            className= "btn text-light  bg-danger"
+                            style={{
+                                padding: 4,
+                                backgroundColor: '#fd355е',
+                                borderColor: '#fd355е',
+                                borderRadius: '.25rem'
+                            }}
+                        >
+                            <i className="fa fa-download"> &nbsp; Татах</i>
+                        </a> &nbsp; &nbsp;
+                        <a
+                            className="btn border rounded animated bounceIn text-light"
+                            style={{
+                                padding: 4,
+                                backgroundColor: '#ff9700',
+                                borderColor: '#ff9700',
+                                borderRadius: '.25rem'
+                            }}
+                        >
+                            <i className="fa fa-info-circle"> &nbsp; Тайлбар</i>
+                        </a>
+                    </span>
+                }
+            </div>
+        )
+    }
 }
 
 export class Detail extends Component {
@@ -87,9 +112,7 @@ export class Detail extends Component {
                     },
                     {
                         "title": '',
-                        "text": 'татах',
-                        "icon": 'text-primary',
-                        'component': (values) => make_send_data(values)
+                        'component': FileAndDesc,
                     }
             ],
             state: '',
