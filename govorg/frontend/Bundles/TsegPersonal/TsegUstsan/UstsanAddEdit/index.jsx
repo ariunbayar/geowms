@@ -7,7 +7,6 @@ export default class UstsanAdd extends Component {
     }
 
     render() {
-        console.log('tseg nemeh');
         return (
             <div>
                 <h1>Ustan Nemeh bolon zasah</h1>
