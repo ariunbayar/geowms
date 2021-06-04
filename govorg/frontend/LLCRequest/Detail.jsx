@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import SolveModal from './solveModal'
-import LLCSettings from './sett_comp'
 import { service } from "./service"
 
 export const make_state_color = (state) => {
@@ -82,6 +81,7 @@ export class Detail extends Component {
             custom_query: {}
         }
         this.handleSearch = this.handleSearch.bind(this)
+        this.refreshData = this.refreshData.bind(this)
     }
 
     componentDidMount() {
@@ -109,6 +109,10 @@ export class Detail extends Component {
         this.setState({ custom_query, [selected_data_name]: value })
     }
 
+    refreshData(){
+        this.setState({ refresh: !this.state.refresh })
+    }
+
     handeUpdateAction(values) {
         this.props.history.push(`/gov/llc-request/${values.id}/configure-bundle/`)
     }
@@ -118,10 +122,10 @@ export class Detail extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="col-md-6 row">
+                    <div className="col-md-6 row mb-3">
                         <label htmlFor="">Төлөв</label>
                         <select
-                            className="form-control form-control-xs "
+                            className="form-control form-control-xs"
                             onChange={(e) => this.handleSearch(e)}
                         >
                             <option value="">--- Төлөвөөр хайх ---</option>

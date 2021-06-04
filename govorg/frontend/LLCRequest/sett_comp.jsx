@@ -137,7 +137,6 @@ export class LLCSettings extends Component {
 
     render () {
         const { list_of_datas, model_status, selected_values, save_icon} = this.state
-
         return (
             <div className="card">
                 <div className="card-body">
