@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
-import { NavLink } from "react-router-dom"
 import { PortalDataTable } from '@utils/DataTable/index'
+import {NavLink} from "react-router-dom"
 import DirectModal from  './DirectModal'
 import RequestModal from  './RequestModal'
 import Modal from '@utils/Modal/Modal'
@@ -39,12 +39,12 @@ export class FileAndDesc extends Component {
             <div className='p-0'>
                 {
                     (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН") &&
-                    <div className="p-0 d-flex btn-group ">
+                    <div className="p-0 d-flex justify-content-between btn-group ">
                         <NavLink
                             type="button"
                             to={'/media/' + values.file_path}
                             target="_blank"
-                            className= "btn text-light  bg-danger"
+                            className="btn animated bounceIn text-light bg-danger"
                             style={{
                                 padding: 4,
                                 backgroundColor: '#fd355е',
