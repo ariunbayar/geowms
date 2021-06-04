@@ -4,7 +4,6 @@ import {LLCMap} from '../../../llc/frontend/LLCMap'
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
-import {Дэлгэрэнгүй} from './Дэлгэрэнгүй'
 
 class GetDescription extends Component {
     constructor(props) {
@@ -35,7 +34,7 @@ class GetDescription extends Component {
     }
 }
 
-export class DetailModalBody extends Component {
+class DetailModalBody extends Component {
     constructor(props) {
         super(props)
 
