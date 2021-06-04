@@ -344,8 +344,8 @@ def get_request_data(request, id):
     qs = RequestForm.objects.filter(file_id=id)
     qs =  qs.first()
     geo_id = qs.file.geo_id
-
     mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+
     if mdata_qs:
         code_list_id = mdata_qs.code_list_id
         code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
@@ -476,7 +476,7 @@ def get_file_shapes(request, id):
             'feature': {'id': feature_id, 'name': feature_name},
             'package': {'id': package_id, 'name': package_name},
             'icon_state': True,
-            'features': FeatureCollection(geoms)
+            'features': geoms
         })
 
     return JsonResponse({
