@@ -21,4 +21,3 @@ djangorestframework==3.12.2
 pyodbc==4.0.30
 pymongo==3.11.3
 python-crontab==2.5.1
-rarfile==4.0

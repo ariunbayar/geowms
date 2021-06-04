@@ -166,7 +166,7 @@ urlpatterns = [
         path('llc-request/', include(([
             path('', org_request_views.get_llc_list),
             path('reject/', org_request_views.llc_request_reject, name="reject"),
-            path('approve/', org_request_views.llc_request_approve, name="approve"),
+            path('approve/<int:request_id>/', org_request_views.llc_request_approve),
             path('dismiss/', org_request_views.llc_request_dismiss, name="dismiss"),
             path('<int:conn_id>/get-all-view-names/', pg_views.get_pg_table_names),
             path('<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),

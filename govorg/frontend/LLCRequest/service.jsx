@@ -27,12 +27,11 @@ function requestReject(id) {
     return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
 
-function requestApprove(ids, feature_id) {
+function requestApprove(id) {
     const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ids, feature_id}),
+        ...getGetOptions(),
     }
-    return fetch(`${prefix}/approve/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/approve/${id}/`, requestOptions).then(handleResponse)
 }
 
 function requestDismiss(id, description) {

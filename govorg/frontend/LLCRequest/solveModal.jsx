@@ -80,7 +80,7 @@ class DetailModalBody extends Component {
             this.handleRequestReject(id)
         }
         if(this.state.action_type == 'approve') {
-            this.handleRequestApprove(ids, feature_id)
+            this.handleRequestApprove(id)
         }
         if(this.state.action_type == 'dismiss') {
             this.handleRequestDismiss(id, description)
@@ -179,9 +179,9 @@ class DetailModalBody extends Component {
             })
     }
 
-    handleRequestApprove(ids, feature_id){
+    handleRequestApprove(id){
         service
-            .requestApprove(ids, feature_id)
+            .requestApprove(id)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
