@@ -332,6 +332,16 @@ def _geojson_to_featurecollection(geo_json, item):
     return geo_json
 
 
+def _get_ann_and_project_name(llc_request_id, item):
+    name = ''
+    if llc_request_id:
+        llc_request = LLCRequest.objects.filter(id=llc_request_id).first()
+        if llc_request:
+            form = RequestForm.objects.filter(file_id=llc_request.file.id).first()
+            name = '{} / {}'.format(llc_request.file.name, form.project_name)
+    return name
+
+
 def _хувьсах_талбарууд():
     хувьсах_талбарууд = [
         {'field': 'feature_id', 'action': _get_feature_name, "new_field": "feature_name"},
@@ -344,7 +354,8 @@ def _хувьсах_талбарууд():
         {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
         {'field': 'form_json', 'action': _str_to_json, "new_field": "form_json"},
         {'field': 'group_id', 'action': _make_group_request, "new_field": "group"},
-        {'field': 'geo_json', 'action': _geojson_to_featurecollection, "new_field": "geo_json"}
+        {'field': 'geo_json', 'action': _geojson_to_featurecollection, "new_field": "geo_json"},
+        {"field": "llc_request_id", "action": _get_ann_and_project_name, "new_field": "llc_request"},
     ]
 
     return хувьсах_талбарууд
@@ -394,12 +405,51 @@ def get_list(request, payload):
     return JsonResponse(rsp)
 
 
+def _set_llc_request(llc_request_id, payload):
+    description = payload.get('desc')
+    action_type = payload.get('action_type')
+    change_request_data = dict()
+    llc_request_data = dict()
+
+    if action_type == 'dismiss':
+        change_request_data['kind'] = ChangeRequest.KIND_DISMISS
+        llc_request_data['kind'] = LLCRequest.KIND_DISMISS
+
+    elif action_type == 'revoke':
+        change_request_data['kind'] = ChangeRequest.KIND_DISMISS
+        llc_request_data['kind'] = LLCRequest.KIND_REVOKE
+
+    change_request_data['state'] = ChangeRequest.STATE_REJECT
+    llc_request_data['state'] = LLCRequest.STATE_NEW
+    llc_request_data['description'] = description or ''
+
+    llc_changerequest_qs = ChangeRequest.objects
+    llc_changerequest_qs = llc_changerequest_qs.filter(llc_request_id=llc_request_id)
+    llc_changerequest_qs.update(**change_request_data)
+
+    llc_request_qs = LLCRequest.objects
+    llc_request_qs = llc_request_qs.filter(id=llc_request_id)
+    llc_request_qs.update(**llc_request_data)
+
+    if action_type == 'revoke':
+        llc_request = llc_request_qs.first()
+
+        request_file_data = dict()
+        request_file_data['kind'] = RequestFiles.KIND_REVOKE
+        request_file_data['state'] = RequestFiles.STATE_NEW
+        request_file_data['description'] = description or ''
+
+        request_file = RequestFiles.objects.filter(id=llc_request.file.id)
+        request_file.update(**request_file_data)
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def request_reject(request, payload):
     ids = payload.get('ids')
     feature_id = payload.get('feature_id')
+    action_type = payload.get('action_type')
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
@@ -411,9 +461,14 @@ def request_reject(request, payload):
     if perm_reject:
         for r_id in ids:
             change_req_obj = get_object_or_404(ChangeRequest, pk=r_id)
-            _check_group_items(change_req_obj)
-            change_req_obj.state = ChangeRequest.STATE_REJECT
-            change_req_obj.save()
+            if change_req_obj.llc_request_id:
+               _set_llc_request(change_req_obj.llc_request_id, payload)
+               break
+            if action_type == 'reject':
+                _check_group_items(change_req_obj)
+                change_req_obj.state = ChangeRequest.STATE_REJECT
+                change_req_obj.group_id = None
+                change_req_obj.save()
 
         rsp = {
             'success': True,
@@ -993,7 +1048,7 @@ def llc_request_dismiss(request, payload):
 
 
 def _get_request_need_attrs(main_dict, request_dict):
-    get_attrs = ['theme_id', 'package_id', 'feature_id', 'org_id', 'group_id', 'form_json', 'geo_json', 'employee']
+    get_attrs = ['theme_id', 'package_id', 'feature_id', 'org_id', 'group_id', 'form_json', 'geo_json', 'employee', 'llc_request_id']
     for att in get_attrs:
         if att in main_dict.keys():
             request_dict[att] = main_dict[att]
@@ -1017,6 +1072,7 @@ def _create_request(request_datas):
     change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
     change_request.order_at = utils.date_to_timezone(request_datas['order_at']) if 'order_at' in request_datas else None
     change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
+    change_request.llc_request_id = request_datas['llc_request_id']
 
     change_request.save()
     return change_request.id
@@ -1112,6 +1168,7 @@ def llc_request_approve(request, request_id):
         dic['id'] = file_shape['id']
         dic['org_id'] = file_shape['org_id']
         dic['employee'] = employee
+        dic['llc_request_id'] = request_id
 
         if not has_shape:
             shapes.append([dic])

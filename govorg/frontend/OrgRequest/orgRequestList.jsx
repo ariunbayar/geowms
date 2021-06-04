@@ -51,6 +51,7 @@ export default class OrgRequestList extends Component {
                 {'field': 'created_at', "title": 'Огноо'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
+                {'field': 'llc_request', "title": 'ААН / Төслийн нэр'},
             ],
             жагсаалтын_холбоос: '/gov/api/org-request/',
             хувьсах_талбарууд: [
