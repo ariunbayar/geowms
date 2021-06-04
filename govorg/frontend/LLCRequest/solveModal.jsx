@@ -210,6 +210,7 @@ class DetailModalBody extends Component {
                 }
             })
             .catch((error) => {
+                this.setState({ is_loading: false })
                 if(error == 'Bad Request') {
                     this.modalChange(
                         '',
