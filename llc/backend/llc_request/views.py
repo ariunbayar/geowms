@@ -106,7 +106,7 @@ def llc_request_list(request, payload):
 
 
 def _get_leve_2_geo_id(layer):
-    org_datas = Org.objects.filter(level=2)
+    org_datas = Org.objects.filter(level=2, employee__position=13)
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
