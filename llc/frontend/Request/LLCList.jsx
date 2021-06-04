@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
+import {NavLink} from "react-router-dom"
 import DirectModal from  './DirectModal'
 import RequestModal from  './RequestModal'
 import Modal from '@utils/Modal/Modal'
@@ -37,12 +38,12 @@ export class FileAndDesc extends Component {
             <div className='p-0'>
                 {
                     (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦАЛСАН") &&
-                    <span className="p-0">
-                        <a
+                    <div className="p-0 d-flex justify-content-between btn-group">
+                        <NavLink
                             type="button"
-                            href={'/media/' + values.file_path}
+                            to={'/media/' + values.file_path}
                             target="_blank"
-                            className= "btn text-light  bg-danger"
+                            className="btn animated bounceIn text-light bg-danger"
                             style={{
                                 padding: 4,
                                 backgroundColor: '#fd355е',
@@ -51,8 +52,8 @@ export class FileAndDesc extends Component {
                             }}
                         >
                             <i className="fa fa-download"> &nbsp; Татах</i>
-                        </a> &nbsp; &nbsp;
-                        <a
+                        </NavLink> &nbsp; &nbsp;
+                        <button
                             className="btn border rounded animated bounceIn text-light"
                             style={{
                                 padding: 4,
@@ -62,8 +63,8 @@ export class FileAndDesc extends Component {
                             }}
                         >
                             <i className="fa fa-info-circle"> &nbsp; Тайлбар</i>
-                        </a>
-                    </span>
+                        </button>
+                    </div>
                 }
             </div>
         )
