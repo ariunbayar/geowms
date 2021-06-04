@@ -377,6 +377,8 @@ def get_request_data(request, id):
         field['selected_tools'] = json_load(qs.file.tools)
         field['file_name'] = file_name
         field['state'] = qs.file.state
+        field['kind'] = qs.file.kind
+        field['desc'] = qs.file.description
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),

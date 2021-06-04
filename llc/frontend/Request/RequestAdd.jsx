@@ -13,18 +13,23 @@ class SubmitClass extends Component {
             url: "/llc/llc-request/",
             agreed_submit: true,
             one_check: true,
+            info_status: false,
 
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
 
-    componentDidUpdate(){
-        const {valid_request} = this.props
+    componentDidUpdate(pP, pS){
+        const {valid_request, values} = this.props
         if (valid_request.length == 5 ){
                 if(this.state.one_check)
                     this.setState({ agreed_submit:false, one_check:false })
-            }
         }
+        if(pP.values.kind !== values.kind){
+            if(values.kind == 3 || values.kind == 4)
+                this.setState({info_status: true})
+        }
+    }
 
     handleSubmit(){
         const {
@@ -60,10 +65,9 @@ class SubmitClass extends Component {
 
     render (){
         const {values} = this.props
-        const {agreed_submit} = this.state
+        const {agreed_submit, info_status} = this.state
         return (
             <Fragment>
-                <div>
                     {   !values.id
                         ?
                             <button
@@ -74,17 +78,31 @@ class SubmitClass extends Component {
                                 <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
                             </button>
                         :
-                        <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
-                        <p className="btn btn-secondary">
-                            <i
-                                className="fa fa-angle-double-left"
-                                onClick ={()=> values.history.push(this.state.url)}
+                        <div className={`${info_status ? "col-md-8 col-sm-8" : "col-md-6 col-sm-6"} mt-2 d-flex justify-content-between`}>
+                            <p className="btn btn-secondary">
+                                <i
+                                    className="fa fa-angle-double-left"
+                                    onClick ={()=> values.history.push(this.state.url)}
 
-                            >
-                                Буцах
-                            </i>
-                        </p>
-                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                >
+                                    Буцах
+                                </i>
+                            </p>
+                            {
+                                values.kind == 3 || values.kind == 4
+                                ?
+                                    <p className="btn btn-warning">
+                                        <i
+                                            className="fa fa-info-circle"
+                                            onClick ={()=> this.props.values.handlePassValues('', values.desc, true)}
+
+                                        > &nbsp;
+                                            Тайлбар
+                                        </i>
+                                    </p>
+                                :
+                                    null
+                            }
                             {
                                 values.state != 2
 
@@ -95,12 +113,11 @@ class SubmitClass extends Component {
                                     >
                                         <i className="fa"> Хадгалах</i>
                                     </p>
-                                    :
-                                        null
+                                :
+                                    null
                             }
                     </div>
                 }
-                </div>
                 </Fragment>
         )
     }
@@ -128,7 +145,9 @@ export class RequestAdd extends Component {
             regis_number: props.regis_number,
             file_state: false,
             aimag_name: '',
-            aimag_geom: []
+            aimag_geom: [],
+            kind: '',
+            state: ''
         }
 
         this.handleOnChange = this.handleOnChange.bind(this)
@@ -147,7 +166,7 @@ export class RequestAdd extends Component {
     componentDidMount() {
         const {id} = this.props.match.params
         if (id) {
-            service.handleRequestData(id).then(({ vector_datas, form_field}) =>{
+            service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
                 if (form_field){
                     this.setState({
                         vector_datas,
@@ -157,37 +176,23 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
-                        files: form_field['file_path'],
                         file_name: form_field['file_name'],
+                        aimag_name,
+                        aimag_geom,
                         state: form_field['state'],
+                        kind : form_field['kind'],
+                        desc : form_field['desc'],
                     })
                 }
             })
         }
         this.getTools()
-        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
-            if (form_field){
-                this.setState({
-                    vector_datas,
-                    zahialagch: form_field['client_org'],
-                    project_name: form_field['project_name'],
-                    object_type: form_field['object_type'],
-                    object_count: form_field['object_quantum'],
-                    hurungu_oruulalt: form_field['investment_status'],
-                    selected_tools: form_field['selected_tools'],
-                    file_name: form_field['file_name'],
-                    aimag_name,
-                    aimag_geom
-                })
-            }
-        })
-
     }
 
     getTools() {
         const {regis_number} = this.state
         service.getToolDatas(regis_number).then(({tool_datas})=>{
-            this.setState({tool_datas})
+        this.setState({tool_datas})
         })
     }
 
@@ -240,30 +245,44 @@ export class RequestAdd extends Component {
         })
     }
 
-    handlePassValues(success, info) {
-        if(success){
-            this.modalChange(
+    handlePassValues(success, info, is_description) {
+        if(is_description){
+             this.modalChange(
                 '',
-                'fa fa-check-circle',
-                'success',
+                'fa fa-info-circle',
+                'warning',
+                'Тайлбар',
                 info,
-                '',
                 false,
                 "",
-                this.handleModalClose
+                this.setState({modal_status:'closed'}),
             )
         }
         else {
-            this.modalChange(
-                '',
-                'fa fa-times-circle',
-                'danger',
-                info,
-                '',
-                false,
-                "",
-                this.ModalClose
-            )
+            if(success){
+                this.modalChange(
+                    '',
+                    'fa fa-check-circle',
+                    'success',
+                    info,
+                    '',
+                    false,
+                    "",
+                    this.handleModalClose
+                )
+            }
+            else {
+                this.modalChange(
+                    '',
+                    'fa fa-times-circle',
+                    'danger',
+                    info,
+                    '',
+                    false,
+                    "",
+                    this.ModalClose
+                )
+            }
         }
     }
     modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
@@ -280,39 +299,35 @@ export class RequestAdd extends Component {
         this.handleModalOpen()
     }
 
-    BackToList(){
-        this.props.history.push("/llc/llc-request/")
-    }
-
-        render (){
-            const {id, info} = this.props.match.params
-            return (
-                <div className="card">
-                    <div className="card-body">
-                        <RequestDetail
-                            id={id}
-                            {...this.state}
-                            handleOnChange={this.handleOnChange}
-                            submitClass={SubmitClass}
-                            handlePassValues={this.handlePassValues}
-                            BackToList={this.BackToList}
-                            info={info}
-                            handleSelectModel={this.handleSelectModel}
-                        />
-                    </div>
-                    <Modal
-                        modal_status={ this.state.modal_status }
-                        modal_icon={ this.state.modal_icon }
-                        modal_bg={ this.state.modal_bg }
-                        icon_color={ this.state.icon_color }
-                        title={ this.state.title }
-                        text={ this.state.text }
-                        has_button={ this.state.has_button }
-                        actionNameBack={ this.state.actionNameBack }
-                        actionNameDelete={ this.state.actionNameDelete }
-                        modalAction={ this.state.modalAction }
-                        modalClose={ this.state.modalClose }
+    render (){
+        const {id, info} = this.props.match.params
+        return (
+            <div className="card">
+                <div className="card-body">
+                    <RequestDetail
+                        id={id}
+                        {...this.state}
+                        handleOnChange={this.handleOnChange}
+                        submitClass={SubmitClass}
+                        handlePassValues={this.handlePassValues}
+                        history={this.props.history}
+                        info={info}
+                        handleSelectModel={this.handleSelectModel}
                     />
-            </div>
-        )}
-    }
+                </div>
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    text={ this.state.text }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
+                />
+        </div>
+    )}
+}
