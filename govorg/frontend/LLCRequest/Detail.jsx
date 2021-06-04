@@ -17,6 +17,7 @@ export const make_kind_color = (kind) => {
     else if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
     else if (kind == "БУЦААГДСАН") color = 'text-danger'
+    else if (kind == "ШИНЭ") color = 'text-primary'
     return color
 }
 
@@ -134,7 +135,6 @@ export class Detail extends Component {
                                 null
                             }
                         </select>
-                        <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right" onClick={() => this.handleSearch()}>Хайх</button>
                     </div>
                     <div className="row">
                         <div className="col-md-12">
