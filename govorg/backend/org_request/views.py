@@ -1167,25 +1167,11 @@ def inspire_save(request, payload):
 @require_GET
 @ajax_required
 def get_state_choices(request):
-    choices = []
-    modules = []
-    for f in RequestFiles._meta.get_fields():
-        if hasattr(f, 'choices'):
-            if f.name == 'state':
-                choices.append(f.choices)
+    search_field = dict()
+    get_state = RequestFiles.STATE_CHOICES
+    search_field['state'] = get_state
 
-    feature_ids, package_ids, theme_ids = _get_emp_inspire_roles(request.user)
-    themes = LThemes.objects.filter(theme_id__in=theme_ids)
-    for theme in themes:
-        modules.append({
-            'id': theme.theme_id,
-            'name': theme.theme_name,
-            'packages': _get_packages(theme.theme_id, package_ids, feature_ids)
-        })
-
-    rsp = {
+    return JsonResponse({
         'success': True,
-        'choices': choices,
-        'modules': modules
-    }
-    return JsonResponse(rsp)
+        'search_field': search_field,
+    })

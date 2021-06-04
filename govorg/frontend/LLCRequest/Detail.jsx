@@ -86,37 +86,26 @@ export class Detail extends Component {
     componentDidMount() {
         service
             .getChoices()
-            .then(({ success, modules, choices }) => {
-                if (success) {
-                    this.setState({ modules, choices })
+            .then(({ success, search_field }) =>{
+                if (success){
+                    this.setState({ choices: search_field })
                 }
             })
     }
 
-    handleSearch() {
-        const { state } = this.state
+    handleSearch(e) {
         let custom_query = Object()
-        if (state) custom_query['state'] = state
+        var value = parseInt(e.target.value)
 
-        let remove_query = Object()
-        if (!('theme_id' in custom_query)) {
-            if ('package_id' in custom_query) {
-                delete custom_query['package_id']
-                remove_query['package_id'] = null
-            }
-            if ('feature_id' in custom_query) {
-                delete custom_query['feature_id']
-                remove_query['feature_id'] = null
-            }
+        var table_data = e.target.selectedIndex
+        var optionElement = e.target.childNodes[table_data]
+        var selected_data_name =  optionElement.getAttribute('name')
+
+        if (selected_data_name == 'state') {
+            if (e.target.value) custom_query['state'] = value
         }
 
-        if (!('package_id' in custom_query)) {
-            if ('feature_id' in custom_query) {
-                delete custom_query['feature_id']
-                remove_query['feature_id'] = null
-            }
-        }
-        this.setState({ custom_query, ...remove_query })
+        this.setState({ custom_query, [selected_data_name]: value })
     }
 
     handeUpdateAction(values) {
@@ -130,17 +119,19 @@ export class Detail extends Component {
                 <div className="card-body">
                     <div className="col-md-6 row">
                         <label htmlFor="">Төлөв</label>
-                        <select className="form-control form-control-sm"
-                            onChange={(e) => this.setState({ state: e.target.value })}>
+                        <select
+                            className="form-control form-control-xs "
+                            onChange={(e) => this.handleSearch(e)}
+                        >
                             <option value="">--- Төлөвөөр хайх ---</option>
                             {
-                                choices && choices.length > 0
+                                choices?.state
                                 ?
-                                    choices[0].map((choice, idx) =>
-                                        <option key={idx} value={choice[0]}>{choice[1]}</option>
+                                    choices['state'].map((choice, idx) =>
+                                        <option key={idx} name='state' value={choice[0]}>{choice[1]}</option>
                                     )
                                 :
-                                    null
+                                null
                             }
                         </select>
                         <button className="btn gp-btn-primary d-flex justify-content-center m-3 float-right" onClick={() => this.handleSearch()}>Хайх</button>
