@@ -45,7 +45,6 @@ export default class Modal extends Component {
                 this.props.modalClose()
                 callback()
             } else {
-                console.log(callback)
                 this.props.modalClose && this.props.modalClose()
             }
         }, 150)

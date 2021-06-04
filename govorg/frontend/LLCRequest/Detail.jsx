@@ -79,6 +79,11 @@ export class Detail extends Component {
             is_modal_request_open: false,
             custom_query: {}
         }
+        this.refreshData = this.refreshData.bind(this)
+    }
+
+    refreshData(){
+        this.setState({ refresh: !this.state.refresh })
     }
 
     handeUpdateAction(values) {

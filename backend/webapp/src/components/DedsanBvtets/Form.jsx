@@ -101,10 +101,6 @@ export default class Forms extends Component {
                 })
                 this.setState({values: fields, is_loading:false, model_id, model_name})
            }
-           else
-           {
-                console.log(fields)
-           }
         })
     }
 
