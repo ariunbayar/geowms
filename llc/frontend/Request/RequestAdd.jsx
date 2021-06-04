@@ -286,6 +286,7 @@ export class RequestAdd extends Component {
             }
         }
     }
+
     modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
         this.setState({
             action_type,
