@@ -34,7 +34,7 @@ class GetDescription extends Component {
     }
 }
 
-class DetailModalBody extends Component {
+export class DetailModalBody extends Component {
     constructor(props) {
         super(props)
 

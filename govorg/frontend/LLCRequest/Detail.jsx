@@ -57,6 +57,12 @@ export class Detail extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
+                    "title": 'дэлгэрэнгүй',
+                    "text": '',
+                    "icon": 'fa fa-eye text-primary',
+                    "action": (values) => this.handleDetail(values),
+                },
+                {
                     "title": 'Тохиргоо',
                     "text": '',
                     "icon": 'fa fa-cog text-primary',
@@ -80,10 +86,15 @@ export class Detail extends Component {
             custom_query: {}
         }
         this.refreshData = this.refreshData.bind(this)
+        this.handleDetail = this.handleDetail.bind(this)
     }
 
     refreshData(){
         this.setState({ refresh: !this.state.refresh })
+    }
+
+    handleDetail(values) {
+        this.props.history.push(`/gov/llc-request/${values.id}/Дэлгэрэнгүй/`)
     }
 
     handeUpdateAction(values) {
