@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from "react";
+import { NavLink } from "react-router-dom"
 import { PortalDataTable } from '@utils/DataTable/index'
 import DirectModal from  './DirectModal'
 import RequestModal from  './RequestModal'
@@ -31,16 +32,17 @@ export class FileAndDesc extends Component {
         this.state = {
         }
     }
+
     render() {
         const {values} = this.props
         return (
             <div className='p-0'>
                 {
-                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦАЛСАН") &&
-                    <span className="p-0">
-                        <a
+                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН") &&
+                    <div className="p-0 d-flex btn-group ">
+                        <NavLink
                             type="button"
-                            href={'/media/' + values.file_path}
+                            to={'/media/' + values.file_path}
                             target="_blank"
                             className= "btn text-light  bg-danger"
                             style={{
@@ -51,8 +53,8 @@ export class FileAndDesc extends Component {
                             }}
                         >
                             <i className="fa fa-download"> &nbsp; Татах</i>
-                        </a> &nbsp; &nbsp;
-                        <a
+                        </NavLink> &nbsp; &nbsp;
+                        <button
                             className="btn border rounded animated bounceIn text-light"
                             style={{
                                 padding: 4,
@@ -60,10 +62,11 @@ export class FileAndDesc extends Component {
                                 borderColor: '#ff9700',
                                 borderRadius: '.25rem'
                             }}
+                            onClick={()=> this.props.infoModal(values)}
                         >
                             <i className="fa fa-info-circle"> &nbsp; Тайлбар</i>
-                        </a>
-                    </span>
+                        </button>
+                    </div>
                 }
             </div>
         )
@@ -101,6 +104,7 @@ export class Detail extends Component {
                         'component': RequestModal,
                         'props' :{
                             'refreshData': () => this.refreshData(),
+                            'modal_status': this.modal_status,
                         }
                     },
                     {
@@ -113,6 +117,9 @@ export class Detail extends Component {
                     {
                         "title": '',
                         'component': FileAndDesc,
+                        'props':{
+                            'infoModal': (values) => this.infoModal(values),
+                        }
                     }
             ],
             state: '',
@@ -126,6 +133,7 @@ export class Detail extends Component {
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.infoModal = this.infoModal.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
@@ -225,6 +233,16 @@ export class Detail extends Component {
         }
 
         this.setState({ custom_query, [selected_data_name]: value })
+    }
+
+    infoModal(values){
+        this.modalChange(
+            'fa fa-info-circle',
+            "warning",
+            'Тайлбар',
+            values.description,
+            false
+            )
     }
 
     render() {

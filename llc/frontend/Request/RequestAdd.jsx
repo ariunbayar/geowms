@@ -2,8 +2,6 @@ import React, { Component, Fragment } from "react"
 import RequestDetail from './DirectModal'
 import { service } from "./service"
 import Modal from '@utils/Modal/Modal'
-import { cmpPos } from "codemirror"
-import { disable } from "ol/rotationconstraint"
 
 class SubmitClass extends Component {
 

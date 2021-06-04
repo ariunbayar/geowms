@@ -74,7 +74,7 @@ def _choice_kind_display(kind, item):
 def llc_request_list(request, payload):
     qs = RequestFiles.objects.all()
     if qs:
-        оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path']
+        оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
         хувьсах_талбарууд = [
             {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
             {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"}
@@ -566,3 +566,5 @@ def get_search_field(request):
         'success': True,
         'search_field': search_field,
     })
+
+
