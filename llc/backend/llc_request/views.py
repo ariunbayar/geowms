@@ -75,7 +75,7 @@ def _choice_kind_display(kind, item):
 def llc_request_list(request, payload):
     qs = RequestFiles.objects.all()
     if qs:
-        оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path']
+        оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
         хувьсах_талбарууд = [
             {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
             {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"}
@@ -173,9 +173,23 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
             utils.remove_file(name)
 
 
+def _validation_form(request_datas):
+
+    is_agreed = True
+
+    if not request_datas.get('zahialagch'): is_agreed = False
+    if not request_datas.get('project_name'): is_agreed = False
+    if not request_datas.get('object_type'): is_agreed = False
+    if not request_datas.get('object_count'): is_agreed = False
+    if not request_datas.get('hurungu_oruulalt'): is_agreed = False
+
+    return is_agreed
+
+
 @require_POST
 @ajax_required
 def save_request(request):
+    request_datas = request.POST
     id = request.POST.get('id') or None
     uploaded_file = request.FILES['files']
     project_name = request.POST.get('project_name')
@@ -184,7 +198,7 @@ def save_request(request):
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
     selected_tools = request.POST.get('selected_tools') or []
-
+    is_agreed = _validation_form(request_datas)
     main_path = 'llc-request-files'
     file_name = uploaded_file.name
     file_not_ext_name = utils.get_file_name(file_name)
@@ -192,12 +206,20 @@ def save_request(request):
 
     utils.save_file_to_storage(uploaded_file, file_path, file_name)
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
+    selected_tools = json_load(selected_tools)
+
+    if not is_agreed:
+
+        return JsonResponse({
+            'success': False,
+            'info': 'Форм дутуу бөглөгдсөн байна.!!!'
+        })
 
     if id:
         id = json_load(id)
         id = id.get('id')
 
-    if not selected_tools:
+    if not selected_tools['selected_tools']:
         return JsonResponse({
             'success': False,
             'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
@@ -207,6 +229,7 @@ def save_request(request):
     selected_tools = selected_tools['selected_tools']
     check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
+
     if check_data_of_file and not id:
         return JsonResponse({
             'success': False,
@@ -258,8 +281,8 @@ def save_request(request):
         else:
             request_file = RequestFiles.objects.create(
                 name='UTILITY SOLUTION',
-                kind=2,
-                state=1,
+                kind=RequestFiles.KIND_NEW,
+                state=RequestFiles.STATE_NEW,
                 geo_id=org_data.geo_id if org_data else '',
                 file_path=uploaded_file,
                 tools=json_dumps(selected_tools)
@@ -301,7 +324,7 @@ def _get_feature(shape_geometries):
         single_geom = json_load(shape_geometry.geom_json)
         geom_type = single_geom.get('type')
         feature = {
-            "type": "Feature",
+            "type":"Feature",
             'geometry': single_geom,
             'id': shape_geometry.id,
             'properties': json_load(shape_geometry.form_json)
@@ -374,6 +397,8 @@ def get_request_data(request, id):
         field['selected_tools'] = json_load(qs.file.tools)
         field['file_name'] = file_name
         field['state'] = qs.file.state
+        field['kind'] = qs.file.kind
+        field['desc'] = qs.file.description
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -501,7 +526,8 @@ def send_request(request, id):
         success_mail = _send_to_information_email(employee.user_id)
 
         if success_mail:
-            qs.state = 2
+            qs.state = RequestFiles.STATE_SENT
+            qs.kind = RequestFiles.KIND_PENDING
             qs.save()
 
             return JsonResponse({
@@ -524,18 +550,31 @@ def remove_request(request, id):
     initial_query = RequestFiles.objects.filter(pk=id).first()
     shapes = RequestFilesShape.objects.filter(files=initial_query.id)
     form = RequestForm.objects.filter(file=initial_query.id)
-    for shape in shapes:
-        geom = ShapeGeom.objects.filter(shape=shape)
-        if geom:
-            geom.delete()
-        shape.delete()
+    lvl2_request = LLCRequest.objects.filter(file=initial_query)
 
-    if form:
-        form.delete()
+    if initial_query:
+        for shape in shapes:
+            geom = ShapeGeom.objects.filter(shape=shape)
+            if geom:
+                geom.delete()
+            shape.delete()
+
+        if form:
+            form.delete()
+
+        if lvl2_request:
+            lvl2_request.delete()
+
         initial_query.delete()
 
+        return JsonResponse({
+            'success': True,
+            'info': "Амжилттай устгалаа"
+        })
+
     return JsonResponse({
-        'success': True
+        'success': False,
+        'info': "Устгахад алдаа гарлаа"
     })
 
 
@@ -552,3 +591,5 @@ def get_search_field(request):
         'success': True,
         'search_field': search_field,
     })
+
+

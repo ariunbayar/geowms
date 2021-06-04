@@ -2,7 +2,6 @@ import React, { Component, Fragment } from "react"
 import RequestDetail from './DirectModal'
 import { service } from "./service"
 import Modal from '@utils/Modal/Modal'
-import { cmpPos } from "codemirror"
 
 class SubmitClass extends Component {
 
@@ -10,8 +9,22 @@ class SubmitClass extends Component {
         super(props)
         this.state = {
             url: "/llc/llc-request/",
+            agreed_submit: false,
+            one_check: true,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
+    }
+
+    componentDidUpdate(pP, pS){
+        const {valid_request, values} = this.props
+        if (valid_request.length == 5 ){
+                if(this.state.one_check)
+                    this.setState({ agreed_submit:true, one_check:false })
+        }
+        if(pP.values.kind !== values.kind){
+            if(values.kind == 3 || values.kind == 4)
+                this.setState({info_status: true})
+        }
     }
 
     handleSubmit(){
@@ -22,6 +35,7 @@ class SubmitClass extends Component {
             selected_tools,id, file_state
         } = this.props.values
         var blob = []
+
         if (id) {
             if (!file_state) {
                 const obj = files
@@ -47,30 +61,30 @@ class SubmitClass extends Component {
 
     render (){
         const {values} = this.props
+        const {agreed_submit} = this.state
         return (
             <Fragment>
-                <div>
                     {   !values.id
                         ?
                             <button
                                 type="button"
+                                disabled={`${ !agreed_submit || !values.file_name ? true : ''}`}
                                 className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
                                 onClick ={()=> this.handleSubmit()}
                             >
                                 <i className="fa fa-envelope-open-o"> Хүсэлт үүсгэх</i>
                             </button>
                         :
-                        <div className="col-md-8 mt-2  col-sm-8 col-xl-8">
-                        <p className="btn btn-secondary">
-                            <i
-                                className="fa fa-angle-double-left"
-                                onClick ={()=> values.history.push(this.state.url)}
+                        <div className="col-md-8 mt-2 ">
+                            <p className="btn btn-secondary">
+                                <i
+                                    className="fa fa-angle-double-left"
+                                    onClick ={()=> values.history.push(this.state.url)}
 
-                            >
-                                Буцах
-                            </i>
-                        </p>
-                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                >
+                                    Буцах
+                                </i>
+                            </p> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
                                 values.state != 2
 
@@ -81,12 +95,11 @@ class SubmitClass extends Component {
                                     >
                                         <i className="fa"> Хадгалах</i>
                                     </p>
-                                    :
-                                        null
+                                :
+                                    null
                             }
                     </div>
                 }
-                </div>
                 </Fragment>
         )
     }
@@ -114,7 +127,9 @@ export class RequestAdd extends Component {
             regis_number: props.regis_number,
             file_state: false,
             aimag_name: '',
-            aimag_geom: []
+            aimag_geom: [],
+            kind: '',
+            state: ''
         }
 
         this.handleOnChange = this.handleOnChange.bind(this)
@@ -145,7 +160,10 @@ export class RequestAdd extends Component {
                         selected_tools: form_field['selected_tools'],
                         file_name: form_field['file_name'],
                         aimag_name,
-                        aimag_geom
+                        aimag_geom,
+                        state: form_field['state'],
+                        kind : form_field['kind'],
+                        desc : form_field['desc'],
                     })
                 }
             })
@@ -156,7 +174,7 @@ export class RequestAdd extends Component {
     getTools() {
         const {regis_number} = this.state
         service.getToolDatas(regis_number).then(({tool_datas})=>{
-            this.setState({tool_datas})
+        this.setState({tool_datas})
         })
     }
 
@@ -176,7 +194,23 @@ export class RequestAdd extends Component {
         else {
             value = e.target.value
         }
+
+        this.validationForm()
         this.setState({[name]: value, file_name, file_state})
+    }
+
+    validationForm (){
+        var forms = document.getElementsByClassName('form-control')
+        for (var i = 1; i < forms.length; i++) {
+            let form = forms[i]
+            if(form.value == ''){
+                form.classList.add('is-invalid')
+            }
+            else {
+                form.classList.remove('is-invalid')
+                form.classList.add('is-valid')
+            }
+        }
     }
 
     handleModalClose() {
@@ -193,30 +227,44 @@ export class RequestAdd extends Component {
         })
     }
 
-    handlePassValues(success, info) {
-        if(success){
-            this.modalChange(
+    handlePassValues(success, info, is_description) {
+        if(is_description){
+             this.modalChange(
                 '',
-                'fa fa-check-circle',
-                'success',
+                'fa fa-info-circle',
+                'warning',
+                'Тайлбар',
                 info,
-                '',
                 false,
                 "",
-                this.handleModalClose
+                this.setState({modal_status:'closed'}),
             )
         }
         else {
-            this.modalChange(
-                '',
-                'fa fa-times-circle',
-                'danger',
-                info,
-                '',
-                false,
-                "",
-                this.ModalClose
-            )
+            if(success){
+                this.modalChange(
+                    '',
+                    'fa fa-check-circle',
+                    'success',
+                    info,
+                    '',
+                    false,
+                    "",
+                    this.handleModalClose
+                )
+            }
+            else {
+                this.modalChange(
+                    '',
+                    'fa fa-times-circle',
+                    'danger',
+                    info,
+                    '',
+                    false,
+                    "",
+                    this.ModalClose
+                )
+            }
         }
     }
 

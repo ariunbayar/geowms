@@ -27,7 +27,7 @@ export default class RequestDetail extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const {info, state} = this.props
+        const { state, selected_tools } = this.props
         if (pP.state != state) {
             if(state == 2) {
                 this.setState({disabled: true})
@@ -128,8 +128,11 @@ export default class RequestDetail extends Component {
                             <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
                             <label
                                 htmlFor="choose-file"
-                                className="custom-file-upload col-md-6 text-center"
+                                className={`custom-file-upload col-md-6 text-center ${!file_name  ? "border-danger" : ''}`}
                                 id="choose-file-label"
+                                data-toggle="toolpit"
+                                data-placement="top"
+                                title={!file_name ? 'файл сонгогдоогүй байна ' : file_name}
                             >
                                 файл оруулах
                             </label>
@@ -141,15 +144,17 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => this.props.handleOnChange(e)}
                                 style={{display: 'none'}}
                             />
-                            <span className="col-md-5 ml-2">
-                                {file_name ? file_name : 'файл сонгогдоогүй байна'}
-                            </span>
+                            {
+                                file_name && <small className="col-md-5 ml-2">{file_name}</small>
+                            }
+
                         </div>
                     </form>
                     {
                         this.props.submitClass
                         &&
                         <this.props.submitClass
+                            valid_request = {document.getElementsByClassName('is-valid')}
                             values={this.props}
                             loader={this.handleLoaderActive}
                         />

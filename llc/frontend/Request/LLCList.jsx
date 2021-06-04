@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
+import {NavLink} from "react-router-dom"
 import DirectModal from  './DirectModal'
 import RequestModal from  './RequestModal'
 import Modal from '@utils/Modal/Modal'
@@ -24,25 +25,52 @@ export const make_kind_color = (kind) => {
     return color
 }
 
-export const make_send_data = (values) => {
-    let kind = values.values.kind
-    return (
-        <div>
-            {
-                kind == "БУЦААГДСАН"
-                &&
-                <a
-                    type="button"
-                    href={'/media/' + values.values.file_path}
-                    target="_blank"
-                    className= "btn text-light animated bounceIn bg-danger"
-                >
-                <i className="fa fa-download"> &nbsp; Татах</i>
-                </a>
-        }
-        </div>
 
-    )
+export class FileAndDesc extends Component {
+    constructor(props){
+        super(props)
+        this.state = {
+        }
+    }
+
+    render() {
+        const {values} = this.props
+        return (
+            <div className='p-0'>
+                {
+                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН") &&
+                    <div className="p-0 d-flex justify-content-between btn-group ">
+                        <NavLink
+                            type="button"
+                            to={'/media/' + values.file_path}
+                            target="_blank"
+                            className="btn animated bounceIn text-light bg-danger"
+                            style={{
+                                padding: 4,
+                                backgroundColor: '#fd355е',
+                                borderColor: '#fd355е',
+                                borderRadius: '.25rem'
+                            }}
+                        >
+                            <i className="fa fa-download"> &nbsp; Татах</i>
+                        </NavLink> &nbsp; &nbsp;
+                        <button
+                            className="btn border rounded animated bounceIn text-light"
+                            style={{
+                                padding: 4,
+                                backgroundColor: '#ff9700',
+                                borderColor: '#ff9700',
+                                borderRadius: '.25rem'
+                            }}
+                            onClick={()=> this.props.infoModal(values)}
+                        >
+                            <i className="fa fa-info-circle"> &nbsp; Тайлбар</i>
+                        </button>
+                    </div>
+                }
+            </div>
+        )
+    }
 }
 
 export class Detail extends Component {
@@ -76,6 +104,7 @@ export class Detail extends Component {
                         'component': RequestModal,
                         'props' :{
                             'refreshData': () => this.refreshData(),
+                            'modal_status': this.modal_status,
                         }
                     },
                     {
@@ -87,9 +116,10 @@ export class Detail extends Component {
                     },
                     {
                         "title": '',
-                        "text": 'татах',
-                        "icon": 'text-primary',
-                        'component': (values) => make_send_data(values)
+                        'component': FileAndDesc,
+                        'props':{
+                            'infoModal': (values) => this.infoModal(values),
+                        }
                     }
             ],
             state: '',
@@ -103,6 +133,7 @@ export class Detail extends Component {
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.infoModal = this.infoModal.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
@@ -166,12 +197,22 @@ export class Detail extends Component {
 
     handleRemove(){
         const {id} = this.state.values
-        service.RemoveRequest(id).then(({ success }) =>{
+        service.RemoveRequest(id).then(({ success, info}) =>{
             if(success){
                 this.modalChange(
                     'fa fa-check-circle',
                     "success",
-                    'Амжилттай устгалаа',
+                    info,
+                    '',
+                    false
+                )
+                this.refreshData()
+            }
+            else {
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "danger",
+                    info,
                     '',
                     false
                 )
@@ -202,6 +243,16 @@ export class Detail extends Component {
         }
 
         this.setState({ custom_query, [selected_data_name]: value })
+    }
+
+    infoModal(values){
+        this.modalChange(
+            'fa fa-info-circle',
+            "warning",
+            'Тайлбар',
+            values.description,
+            false
+            )
     }
 
     render() {
