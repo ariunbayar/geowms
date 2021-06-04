@@ -24,7 +24,13 @@ from llc.backend.llc_request.models import (
 from backend.token.utils import TokenGeneratorUserValidationEmail
 from backend.org.models import Employee, Org
 from backend.org.models import Org
-from backend.inspire.models import MDatas, LCodeLists
+from backend.inspire.models import (
+    MDatas,
+    LCodeLists,
+    LThemes,
+    LFeatures,
+    LPackages
+)
 from geoportal_app.models import User
 
 from geojson import FeatureCollection
@@ -73,6 +79,7 @@ def llc_request_list(request, payload):
             {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
             {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"}
         ]
+
         datatable = Datatable(
             model=RequestFiles,
             initial_qs=qs,
@@ -366,6 +373,7 @@ def get_request_data(request, id):
         'aimag_geom': aimag_geom
     })
 
+
 def _get_shapes_geoms(shape_geometry):
     geo_datas = []
     geom_type = ''
@@ -373,6 +381,7 @@ def _get_shapes_geoms(shape_geometry):
     geo_datas, geom_type = _get_feature(shape_geoms)
 
     return geo_datas, geom_type
+
 
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1", "True")
@@ -426,19 +435,39 @@ def _send_to_information_email (user_id):
 @ajax_required
 def get_file_shapes(request, id):
     list_of_datas = []
+
     llc_data = LLCRequest.objects.filter(id=id).first()
     shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
     for shape_geometry in shape_geometries:
         geoms, geom_type = _get_shapes_geoms(shape_geometry)
+        theme_name = ''
+        feature_name = ''
+        package_name = ''
+        theme_id = shape_geometry.theme_id
+        feature_id = shape_geometry.feature_id
+        package_id = shape_geometry.package_id
+        if theme_id:
+            theme = LThemes.objects.filter(theme_id=theme_id).first()
+            theme_name = theme.theme_name
+
+        if package_id:
+            package = LPackages.objects.filter(package_id=package_id).first()
+            package_name = package.package_name
+
+        if feature_id:
+            feature = LFeatures.objects.filter(feature_id=feature_id).first()
+            feature_name = feature.feature_name
+        icon_state = True
+
         list_of_datas.append({
             'id': shape_geometry.id,
             'geom_type': geom_type,
-            'theme': shape_geometry.theme_id,
-            'feature': shape_geometry.feature_id,
-            'package': shape_geometry.package_id,
+            'theme': {'id': theme_id, 'name': theme_name},
+            'feature': {'id': feature_id, 'name': feature_name},
+            'package': {'id': package_id, 'name': package_name},
+            'icon_state': icon_state,
             'features': FeatureCollection(geoms)
         })
-
     return JsonResponse({
         'list_of_datas': list_of_datas,
     })
@@ -496,4 +525,19 @@ def remove_request(request, id):
 
     return JsonResponse({
         'success': True
+    })
+
+
+@require_GET
+@ajax_required
+def get_search_field(request):
+    search_field = dict()
+    get_state = RequestFiles.STATE_CHOICES
+    get_kind = RequestFiles.KIND_CHOICES
+    search_field['state'] = get_state
+    search_field['kind'] = get_kind
+
+    return JsonResponse({
+        'success': True,
+        'search_field': search_field,
     })
