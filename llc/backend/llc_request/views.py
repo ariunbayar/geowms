@@ -281,8 +281,8 @@ def save_request(request):
         else:
             request_file = RequestFiles.objects.create(
                 name='UTILITY SOLUTION',
-                kind=2,
-                state=1,
+                kind=RequestFiles.KIND_NEW,
+                state=RequestFiles.STATE_NEW,
                 geo_id=org_data.geo_id if org_data else '',
                 file_path=uploaded_file,
                 tools=json_dumps(selected_tools)
@@ -526,7 +526,8 @@ def send_request(request, id):
         success_mail = _send_to_information_email(employee.user_id)
 
         if success_mail:
-            qs.state = 2
+            qs.state = RequestFiles.STATE_SENT
+            qs.kind = RequestFiles.KIND_PENDING
             qs.save()
 
             return JsonResponse({
@@ -549,18 +550,31 @@ def remove_request(request, id):
     initial_query = RequestFiles.objects.filter(pk=id).first()
     shapes = RequestFilesShape.objects.filter(files=initial_query.id)
     form = RequestForm.objects.filter(file=initial_query.id)
-    for shape in shapes:
-        geom = ShapeGeom.objects.filter(shape=shape)
-        if geom:
-            geom.delete()
-        shape.delete()
+    lvl2_request = LLCRequest.objects.filter(file=initial_query)
 
-    if form:
-        form.delete()
+    if initial_query:
+        for shape in shapes:
+            geom = ShapeGeom.objects.filter(shape=shape)
+            if geom:
+                geom.delete()
+            shape.delete()
+
+        if form:
+            form.delete()
+
+        if lvl2_request:
+            lvl2_request.delete()
+
         initial_query.delete()
 
+        return JsonResponse({
+            'success': True,
+            'info': "Амжилттай устгалаа"
+        })
+
     return JsonResponse({
-        'success': True
+        'success': False,
+        'info': "Устгахад алдаа гарлаа"
     })
 
 

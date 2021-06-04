@@ -197,12 +197,22 @@ export class Detail extends Component {
 
     handleRemove(){
         const {id} = this.state.values
-        service.RemoveRequest(id).then(({ success }) =>{
+        service.RemoveRequest(id).then(({ success, info}) =>{
             if(success){
                 this.modalChange(
                     'fa fa-check-circle',
                     "success",
-                    'Амжилттай устгалаа',
+                    info,
+                    '',
+                    false
+                )
+                this.refreshData()
+            }
+            else {
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "danger",
+                    info,
                     '',
                     false
                 )
