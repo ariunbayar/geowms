@@ -969,14 +969,14 @@ def _reject_request(id, kind, state, text):
 @require_POST
 @ajax_required
 def llc_request_reject(request, payload):
+    description = payload.get('description')
     pk = payload.get('id')
-    _reject_request(pk, LLCRequest.KIND_REVOKE, LLCRequest.STATE_SENT, '')
+    _reject_request(pk, LLCRequest.KIND_REVOKE, LLCRequest.STATE_SENT, description)
 
-    rsp = {
+    return JsonResponse({
         'success': True,
-        'info': 'Амжилттай цуцлагдлаа'
-    }
-    return JsonResponse(rsp)
+        'info': 'Амжилттай илгээгдлээ'
+    })
 
 
 @require_POST
@@ -984,7 +984,7 @@ def llc_request_reject(request, payload):
 def llc_request_dismiss(request, payload):
     description = payload.get('description')
     id = payload.get('id')
-    _reject_request(id, LLCRequest.KIND_DISMISS,LLCRequest.STATE_SENT,  description)
+    _reject_request(id, LLCRequest.KIND_DISMISS,LLCRequest.STATE_SENT, description)
 
     return JsonResponse({
         'success': True,
