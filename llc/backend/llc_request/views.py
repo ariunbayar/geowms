@@ -144,6 +144,10 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
     for name in glob.glob(os.path.join(extract_path, '*')):
         if [item for item in datasource_exts if item in name]:
             ds = DataSource(name)
+            request_shape = RequestFilesShape.objects.create(
+                files=request_file,
+                org=org_data
+            )
             for layer in ds:
                 for feature in layer:
                     geo_json = feature.geom.json
@@ -151,18 +155,9 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
                     for field in layer.fields:
                         properties[field] = feature.get(field)
                     json_content = json_load(geo_json)
-                    request_shape = RequestFilesShape.objects.create(
-                        files=request_file,
-                        org=org_data
-                    )
 
                     for key, value in properties.items():
-                        if value:
-                            if isinstance(value, datetime.datetime):
-                                properties[key] = utils.datetime_to_string(value)
-                        if value is None:
-                            properties[key] = ''
-
+                        properties[key] = utils.datetime_to_string(value)
                     ShapeGeom.objects.create(
                         shape=request_shape,
                         geom_json=json_dumps(json_content),
