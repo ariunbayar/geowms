@@ -77,7 +77,7 @@ class DetailModalBody extends Component {
         var description = this.state.description
         this.setState({ is_loading: true })
         if(this.state.action_type == 'reject') {
-            this.handleRequestReject(id)
+            this.handleRequestReject(id, description)
         }
         if(this.state.action_type == 'approve') {
             this.handleRequestApprove(id)
@@ -133,9 +133,9 @@ class DetailModalBody extends Component {
             })
     }
 
-    handleRequestReject(id) {
+    handleRequestReject(id, description) {
         service
-            .requestReject(id)
+            .requestReject(id, description)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -388,9 +388,9 @@ class DetailModalBody extends Component {
                         'fa fa-exclamation-circle',
                         'warning',
                         "Тохиргоог цуцлах",
-                        `Та цуцлахдаа итгэлтэй байна уу?`,
+                        GetDescription,
                         true,
-                        "цуцлах",
+                        "илгээх",
                         null
                     )}
                     className="btn gp-btn-primary waves-effect waves-light"

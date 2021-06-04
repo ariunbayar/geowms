@@ -20,10 +20,10 @@ function getFilesDetal(id) {
     return fetch(`/llc/backend/${id}/get-file-shapes/`, opts).then(handleResponse)
 }
 
-function requestReject(id) {
+function requestReject(id, description) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, description }),
     }
     return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
