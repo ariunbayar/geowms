@@ -4,7 +4,8 @@ export const service = {
     handleRequestData,
     getToolDatas,
     SendRequest,
-    RemoveRequest
+    RemoveRequest,
+    getSearchItems,
 }
 
 const prefix = '/llc/backend'
@@ -46,3 +47,11 @@ function RemoveRequest(id) {
     }
     return fetch(`${prefix}/${id}/remove-request/`, opts).then(handleResponse)
 }
+
+function getSearchItems() {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/get-search-field/`, opts).then(handleResponse)
+}
+

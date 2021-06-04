@@ -73,7 +73,6 @@ export default class UsedTools extends Component {
             select_layer_status,
             selected_tools
         } = this.state
-        console.log(this.props)
         return (
             <div className="col-md-12">
                 <label htmlFor=''> Зураглал үйлдэхдээ ашигласан багаж</label>

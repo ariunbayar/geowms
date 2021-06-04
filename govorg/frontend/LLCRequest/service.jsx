@@ -6,7 +6,8 @@ export const service = {
     llcList,
     handleRequestData,
     getFilesDetal,
-    getInspireTree
+    getInspireTree,
+    Save
 }
 
 const prefix = '/gov/api/llc-request'
@@ -26,12 +27,11 @@ function requestReject(id) {
     return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
 
-function requestApprove(ids, feature_id) {
+function requestApprove(id) {
     const requestOptions = {
-        ...getPostOptions(),
-        body: JSON.stringify({ids, feature_id}),
+        ...getGetOptions(),
     }
-    return fetch(`${prefix}/approve/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/approve/${id}/`, requestOptions).then(handleResponse)
 }
 
 function requestDismiss(id, description) {
@@ -64,3 +64,10 @@ function getInspireTree() {
     return fetch(`/back/another-database/pg/get-all-view-names/`, opts).then(handleResponse)
 }
 
+function Save(values) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ values }),
+    }
+    return fetch(`${prefix}/inspire-save/`, opts).then(handleResponse)
+}
