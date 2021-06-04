@@ -190,7 +190,6 @@ def save_request(request):
     zahialagch = request.POST.get('zahialagch')
     selected_tools = request.POST.get('selected_tools') or []
     is_agreed = _validation_form(request_datas)
-
     main_path = 'llc-request-files'
     file_name = uploaded_file.name
     file_not_ext_name = utils.get_file_name(file_name)
@@ -198,6 +197,7 @@ def save_request(request):
 
     utils.save_file_to_storage(uploaded_file, file_path, file_name)
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
+    selected_tools = json_load(selected_tools)
 
     if not is_agreed:
 
@@ -205,11 +205,12 @@ def save_request(request):
             'success': False,
             'info': 'Форм дутуу бөглөгдсөн байна.!!!'
         })
+
     if id:
         id = json_load(id)
         id = id.get('id')
 
-    if not selected_tools:
+    if not selected_tools['selected_tools']:
         return JsonResponse({
             'success': False,
             'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'

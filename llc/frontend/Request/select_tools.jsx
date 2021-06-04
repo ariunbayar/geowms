@@ -127,11 +127,7 @@ export default class UsedTools extends Component {
                         >
                             <GPIcon icon={"fa fa-plus-circle text-success mr-4 mt-2"}/>
                             <label htmlFor="tool_id">Багаж сонгох</label>
-                        </a> &nbsp; &nbsp; &nbsp;
-                        {
-                            selected_tools.length == 0 &&
-                                <small className='text-danger'>Багаж сонгогдоогүй байна</small>
-                        }
+                        </a>
                     </div>
                 </div>
                 {

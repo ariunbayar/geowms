@@ -11,7 +11,7 @@ class SubmitClass extends Component {
         super(props)
         this.state = {
             url: "/llc/llc-request/",
-            agreed_submit: true,
+            agreed_submit: false,
             one_check: true,
             info_status: false,
 
@@ -23,7 +23,7 @@ class SubmitClass extends Component {
         const {valid_request, values} = this.props
         if (valid_request.length == 5 ){
                 if(this.state.one_check)
-                    this.setState({ agreed_submit:false, one_check:false })
+                    this.setState({ agreed_submit:true, one_check:false })
         }
         if(pP.values.kind !== values.kind){
             if(values.kind == 3 || values.kind == 4)
@@ -72,7 +72,7 @@ class SubmitClass extends Component {
                         ?
                             <button
                                 type="button"
-                                disabled={`${agreed_submit || values.selected_tools.length == 0 || !values.file_name ? true : false}`}
+                                disabled={`${ !agreed_submit || !values.file_name ? true : ''}`}
                                 className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
                                 onClick ={()=> this.handleSubmit()}
                             >
