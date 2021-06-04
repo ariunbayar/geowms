@@ -416,10 +416,12 @@ def _set_llc_request(llc_request_id, payload):
     if action_type == 'dismiss':
         change_request_data['kind'] = ChangeRequest.KIND_DISMISS
         llc_request_data['kind'] = LLCRequest.KIND_DISMISS
+        info = 'Амжилттай буцаалаа'
 
     elif action_type == 'revoke':
         change_request_data['kind'] = ChangeRequest.KIND_DISMISS
         llc_request_data['kind'] = LLCRequest.KIND_REVOKE
+        info = 'Амжилттай цуцаллаа'
 
     change_request_data['state'] = ChangeRequest.STATE_REJECT
     llc_request_data['state'] = LLCRequest.STATE_NEW
@@ -443,6 +445,7 @@ def _set_llc_request(llc_request_id, payload):
 
         request_file = RequestFiles.objects.filter(id=llc_request.file.id)
         request_file.update(**request_file_data)
+    return info
 
 
 @require_POST
@@ -464,17 +467,18 @@ def request_reject(request, payload):
         for r_id in ids:
             change_req_obj = get_object_or_404(ChangeRequest, pk=r_id)
             if change_req_obj.llc_request_id:
-               _set_llc_request(change_req_obj.llc_request_id, payload)
-               break
+                info = _set_llc_request(change_req_obj.llc_request_id, payload)
+                break
             if action_type == 'reject':
                 _check_group_items(change_req_obj)
                 change_req_obj.state = ChangeRequest.STATE_REJECT
                 change_req_obj.group_id = None
                 change_req_obj.save()
+                info = 'Амжилттай татгалзлаа'
 
         rsp = {
             'success': True,
-            'info': 'Амжилттай татгалзлаа'
+            'info': info
         }
 
     else:
@@ -1049,62 +1053,33 @@ def llc_request_dismiss(request, payload):
     })
 
 
-def _get_request_need_attrs(main_dict, request_dict):
-    get_attrs = ['theme_id', 'package_id', 'feature_id', 'org_id', 'group_id', 'form_json', 'geo_json', 'employee', 'llc_request_id']
-    for att in get_attrs:
-        if att in main_dict.keys():
-            request_dict[att] = main_dict[att]
-    return request_dict
-
-
 def _create_request(request_datas):
-    change_request = ChangeRequest()
+    change_request = dict()
+    change_request['old_geo_id'] = None
+    change_request['new_geo_id'] = None
+    change_request['theme_id'] = request_datas['theme_id']
+    change_request['package_id'] = request_datas['package_id']
+    change_request['feature_id'] = request_datas['feature_id']
+    change_request['employee'] = request_datas['employee']
+    change_request['org_id'] = request_datas['employee'].org.id
+    change_request['state'] = request_datas['state']
+    change_request['kind'] = request_datas['kind']
+    change_request['form_json'] = request_datas['form_json'] if 'form_json' in request_datas else None
+    change_request['geo_json'] = request_datas['geo_json'] if 'geo_json' in request_datas else None
+    change_request['group_id'] = request_datas['group_id'] if 'group_id' in request_datas else None
+    change_request['order_at'] = utils.date_to_timezone(request_datas['order_at']) if 'order_at' in request_datas else None
+    change_request['order_no'] = request_datas['order_no'] if 'order_no' in request_datas else None
+    change_request['llc_request_id'] = request_datas['llc_request_id']
+    request = ChangeRequest(**change_request)
+    request.save()
+    return request.id
 
-    change_request.old_geo_id = None
-    change_request.new_geo_id = None
-    change_request.theme_id = request_datas['theme_id']
-    change_request.package_id = request_datas['package_id']
-    change_request.feature_id = request_datas['feature_id']
-    change_request.employee = request_datas['employee']
-    change_request.org_id = request_datas['employee'].org.id
-    change_request.state = request_datas['state']
-    change_request.kind = request_datas['kind']
-    change_request.form_json = request_datas['form_json'] if 'form_json' in request_datas else None
-    change_request.geo_json = request_datas['geo_json'] if 'geo_json' in request_datas else None
-    change_request.group_id = request_datas['group_id'] if 'group_id' in request_datas else None
-    change_request.order_at = utils.date_to_timezone(request_datas['order_at']) if 'order_at' in request_datas else None
-    change_request.order_no = request_datas['order_no'] if 'order_no' in request_datas else None
-    change_request.llc_request_id = request_datas['llc_request_id']
 
-    change_request.save()
-    return change_request.id
-
-
-def _make_request_datas(request_file_shape):
-    request_datas = dict()
-    request_datas = _get_request_need_attrs(request_file_shape, request_datas)
+def _make_request_datas(request_datas):
     request_datas['state'] = ChangeRequest.STATE_NEW
     request_datas['kind'] = ChangeRequest.KIND_CREATE
     root_id = _create_request(request_datas)
     return root_id
-
-
-def _get_ins_shat(values):
-    ins = dict()
-    get_attrs = ['theme_id', 'package_id', 'feature_id']
-    for item in get_attrs:
-        ins[item] = values[item]
-    return ins
-
-
-def _check_bef_items(shapes, ins):
-    for r_idx in range(0, len(shapes)):
-        shape = shapes[r_idx]
-        for idx in range(0, len(shape)):
-            item = shape[idx]
-            if item['theme_id'] == ins['theme_id'] and item['package_id'] == ins['package_id'] and item['feature_id'] == ins['feature_id']:
-                return True, r_idx
-    return False, ''
 
 
 def _check_and_make_form_json(feature_id, values):
@@ -1162,41 +1137,38 @@ def llc_request_approve(request, request_id):
         }
         return JsonResponse(rsp)
 
-    shapes = list()
-    for file_shape in request_file_shapes.values():
-        dic = _get_ins_shat(file_shape)
-        has_shape, idx = _check_bef_items(shapes, dic)
-        dic['id'] = file_shape['id']
-        dic['org_id'] = file_shape['org_id']
-        dic['employee'] = employee
-        dic['llc_request_id'] = request_id
-
-        if not has_shape:
-            shapes.append([dic])
-        else:
-            shapes[idx].append(dic)
-
-    def _get_geom_and_form(item):
-        shape_geom_qs = ShapeGeom.objects
-        shape_geom_qs = shape_geom_qs.filter(shape_id=item['id'])
-        shape_geom = shape_geom_qs.first()
-
-        item['form_json'] = utils.json_load(shape_geom.form_json)
-        item['form_json'] = _check_and_make_form_json(item['feature_id'], item['form_json'])
-        item['geo_json'] = shape_geom.geom_json
+    def _make_datas(shape_geom, file_shape, is_root=False):
+        item = dict()
+        item['org_id'] = shape_geom.shape.org.id
+        item['employee'] = employee
+        item['llc_request_id'] = request_id
+        item['feature_id'] = file_shape['feature_id']
+        item['package_id'] = file_shape['package_id']
+        item['theme_id'] = file_shape['theme_id']
+        if not is_root:
+            item['form_json'] = utils.json_load(shape_geom.form_json)
+            item['form_json'] = _check_and_make_form_json(item['feature_id'], item['form_json'])
+            item['geo_json'] = shape_geom.geom_json
         return item
 
-    for shape in shapes:
-        if len(shape) == 1:
-            item = _get_geom_and_form(shape[first_item])
+    for file_shape in request_file_shapes.values():
+        shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
+        if len(shape_geoms) == 1:
+            shape_geom = shape_geoms.first()
+            item = _make_datas(shape_geom, file_shape)
             _make_request_datas(item)
         else:
-            root_id = _make_request_datas(shape[first_item])
-            for item in shape:
+            item = _make_datas(shape_geoms.first(), file_shape, True)
+            root_id = _make_request_datas(item)
+            for shape in shape_geoms:
+                item = _make_datas(shape, file_shape)
                 item['group_id'] = root_id
-                item = _get_geom_and_form(item)
-
                 _make_request_datas(item)
+
+    llc_request.state = LLCRequest.STATE_SENT
+    llc_request.kind = LLCRequest.KIND_PENDING
+    llc_request.save()
+
     rsp = {
         'success': True,
         'info': 'Амжилттай хүсэлт үүслээ'
