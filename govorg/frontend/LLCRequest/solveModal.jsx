@@ -1,43 +1,9 @@
-import React, { Component } from "react"
+import React, { Component, useState } from "react"
 import RequestModal from './requestModal'
 import {LLCMap} from '../../../llc/frontend/LLCMap'
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
-
-class GetDescription extends Component {
-    constructor(props) {
-        super(props)
-
-        this.state = {
-            invalid_feedback: props.invalid_feedback,
-        }
-        this.handleOnchange = this.handleOnchange.bind(this)
-    }
-
-    componentDidUpdate(pP, pS) {
-        if(pP.invalid_feedback !== this.props.invalid_feedback){
-            this.setState({ invalid: true })
-        }
-    }
-
-    handleOnchange(e) {
-        this.props.handleOnChange(e)
-    }
-
-    render() {
-        const { invalid } = this.state
-        return(
-            <div className="col-md-12">
-                <label>Тайлбар оруулна уу </label>
-                <textarea
-                    className={`form-control ${invalid ? '' : ' is-invalid'}`}
-                    onChange={(e) => this.handleOnchange(e)}
-                />
-            </div>
-        )
-    }
-}
 
 class DetailModalBody extends Component {
     constructor(props) {
@@ -61,7 +27,6 @@ class DetailModalBody extends Component {
             disabled: true,
             aimag_name: '',
             description: '',
-            invalid_feedback: false,
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -76,11 +41,12 @@ class DetailModalBody extends Component {
 
     handleOnChange(e) {
         var description = e.target.value
-        this.setState({ description })
-        if(description) {
-            this.setState({ invalid_feedback: true, has_button: true })
-        } else {
-            this.setState({ invalid_feedback: false, has_button: false })
+        this.state.description = description
+        if(description.length > 0 && this.state.has_button == false) {
+            this.setState({ has_button: true })
+        }
+        else if(!description) {
+            this.setState({ has_button: false })
         }
     }
 
@@ -307,7 +273,7 @@ class DetailModalBody extends Component {
             project_name, object_type,
             object_count, hurungu_oruulalt,
             vector_datas, aimag_geom,
-            is_loading, invalid_feedback
+            is_loading
         } = this.state
         var is_disable = true
         const { kind } = this.props
@@ -401,7 +367,7 @@ class DetailModalBody extends Component {
                         'warning',
                         "Тохиргоог цуцлах",
                         GetDescription,
-                        invalid_feedback,
+                        this.state.has_button,
                         "илгээх",
                         null
                     )}
@@ -417,7 +383,7 @@ class DetailModalBody extends Component {
                         'warning',
                         "Тохиргоог буцаах",
                         GetDescription,
-                        invalid_feedback,
+                        this.state.has_button,
                         "илгээх",
                         null
                     )}
@@ -454,7 +420,6 @@ class DetailModalBody extends Component {
                 modalClose={this.state.modalClose}
                 handleOnChange={this.handleOnChange}
                 description={this.state.description}
-                invalid_feedback={invalid_feedback}
             />
             </>
         )
@@ -511,4 +476,25 @@ export default class SolveModal extends Component {
             </div>
         )
     }
+}
+
+function GetDescription(props) {
+
+    const [value, setValue] = useState('')
+
+    const handleOnChange = (e) => {
+        setValue(e.target.value)
+        props.handleOnChange(e)
+    }
+
+    return (
+        <div className="col-md-12">
+            <label htmlFor="desc">Тайлбар оруулна уу</label>
+            <textarea
+                id="desc"
+                className={`form-control ${value ? '' : 'is-invalid'}`}
+                onChange={handleOnChange}
+            />
+        </div>
+    )
 }
