@@ -89,29 +89,31 @@ export default class UsedTools extends Component {
                         </thead>
                         <tbody>
                             {
-                                (selected_tools)
+                                selected_tools && selected_tools.length > 0
                                 ?
                                 selected_tools.map((value, idx) =>
-                                <tr key={idx}>
-                                    <th scope="row">{idx+1}</th>
-                                    <td>{value.bagaj_dugaar}</td>
-                                    <td>{value.bagaj_mark}</td>
-                                    <td>{value.certificate_number}</td>
-                                    <td>{value.expired_date}</td>
-                                    <td className="text-center mx-0 px-0">
-                                        {
-                                            !info
-                                            ?
-                                                state != "ИЛГЭЭСЭН" &&
-                                                    <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
-                                                        <GPIcon icon={"fa fa-minus-circle text-danger"}/>
-                                                    </a>
-                                            :
-                                                null
-                                        }
-                                    </td>
-                                </tr>
-                                ): null
+                                        <tr key={idx}>
+                                            <th scope="row">{idx+1}</th>
+                                            <td>{value.bagaj_dugaar}</td>
+                                            <td>{value.bagaj_mark}</td>
+                                            <td>{value.certificate_number}</td>
+                                            <td>{value.expired_date}</td>
+                                            <td className="text-center mx-0 px-0">
+                                                {
+                                                    !info
+                                                    ?
+                                                        state != "ИЛГЭЭСЭН" &&
+                                                            <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
+                                                                <GPIcon icon={"fa fa-minus-circle text-danger"}/>
+                                                            </a>
+                                                    :
+                                                        null
+                                                }
+                                            </td>
+                                        </tr>
+                                    )
+                                :
+                                    null
                             }
                         </tbody>
                     </table>

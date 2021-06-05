@@ -224,6 +224,14 @@ def save_request(request):
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
+
+    if not uploaded_file.name.endswith('.zip'):
+        return JsonResponse({
+            'success': False,
+            'info': 'Заавал zip файл оруулах ёстой.!!!'
+        })
+
+
     if not is_agreed:
 
         return JsonResponse({
@@ -243,6 +251,7 @@ def save_request(request):
             'info': tool_validation
         })
 
+    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
     if check_data_of_file and not id:
@@ -290,7 +299,7 @@ def save_request(request):
                 request_file.geo_id=org_data.geo_id if org_data else ''
                 request_file.file_path=uploaded_file
 
-            request_file.tools=json_dumps(selected_tools)
+            request_file.tools=json_dumps(get_tools)
             request_file.save()
 
         else:
@@ -300,7 +309,7 @@ def save_request(request):
                 state=RequestFiles.STATE_NEW,
                 geo_id=org_data.geo_id if org_data else '',
                 file_path=uploaded_file,
-                tools=json_dumps(selected_tools)
+                tools=json_dumps(get_tools)
             )
             id = request_file.id
         _create_shape_files(org_data, request_file, extract_path, datasource_exts)
