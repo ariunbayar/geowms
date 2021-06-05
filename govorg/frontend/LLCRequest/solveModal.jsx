@@ -10,9 +10,15 @@ class GetDescription extends Component {
         super(props)
 
         this.state = {
-            description: props.description
+            invalid_feedback: props.invalid_feedback,
         }
         this.handleOnchange = this.handleOnchange.bind(this)
+    }
+
+    componentDidUpdate(pP, pS) {
+        if(pP.invalid_feedback !== this.props.invalid_feedback){
+            this.setState({ invalid: true })
+        }
     }
 
     handleOnchange(e) {
@@ -20,13 +26,12 @@ class GetDescription extends Component {
     }
 
     render() {
-        const {description} = this.state
+        const { invalid } = this.state
         return(
             <div className="col-md-12">
                 <label>Тайлбар оруулна уу </label>
                 <textarea
-                    className="form-control"
-                    value={description}
+                    className={`form-control ${invalid ? '' : ' is-invalid'}`}
                     onChange={(e) => this.handleOnchange(e)}
                 />
             </div>
@@ -55,7 +60,8 @@ class DetailModalBody extends Component {
             vector_datas: [],
             disabled: true,
             aimag_name: '',
-            description: ''
+            description: '',
+            invalid_feedback: false,
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -69,7 +75,13 @@ class DetailModalBody extends Component {
     }
 
     handleOnChange(e) {
-        this.setState({ description: e.target.value })
+        var description = e.target.value
+        this.setState({ description })
+        if(description) {
+            this.setState({ invalid_feedback: true, has_button: true })
+        } else {
+            this.setState({ invalid_feedback: false, has_button: false })
+        }
     }
 
     handleModalAction() {
@@ -228,7 +240,6 @@ class DetailModalBody extends Component {
 
     componentDidMount() {
         if (this.state.status == "initial") this.handleOpen()
-        // const {id} = .id
         var id = this.props.id
         service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom }) => {
             if (form_field) {
@@ -295,7 +306,8 @@ class DetailModalBody extends Component {
             aimag_name, zahialagch,
             project_name, object_type,
             object_count, hurungu_oruulalt,
-            vector_datas, aimag_geom, is_loading
+            vector_datas, aimag_geom,
+            is_loading, invalid_feedback
         } = this.state
         var is_disable = true
         const { kind } = this.props
@@ -389,7 +401,7 @@ class DetailModalBody extends Component {
                         'warning',
                         "Тохиргоог цуцлах",
                         GetDescription,
-                        true,
+                        invalid_feedback,
                         "илгээх",
                         null
                     )}
@@ -405,7 +417,7 @@ class DetailModalBody extends Component {
                         'warning',
                         "Тохиргоог буцаах",
                         GetDescription,
-                        true,
+                        invalid_feedback,
                         "илгээх",
                         null
                     )}
@@ -441,6 +453,8 @@ class DetailModalBody extends Component {
                 actionNameDelete={this.state.action_name}
                 modalClose={this.state.modalClose}
                 handleOnChange={this.handleOnChange}
+                description={this.state.description}
+                invalid_feedback={invalid_feedback}
             />
             </>
         )
