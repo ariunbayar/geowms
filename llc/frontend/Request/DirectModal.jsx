@@ -1,6 +1,8 @@
 import React, { Component, Fragment } from "react"
 import { service } from "./service"
 import {GPIcon} from "@utils/Tools"
+import Loader from "@utils/Loader"
+
 import {LLCMap} from '../LLCMap'
 import UsedTools from './select_tools'
 
@@ -11,8 +13,10 @@ export default class RequestDetail extends Component {
         this.state = {
             info: false,
             state : props.state,
-            disabled: false
+            disabled: false,
+            is_loading:false
         }
+        this.handleLoaderActive = this.handleLoaderActive.bind(this)
     }
 
     componentDidMount() {
@@ -23,12 +27,16 @@ export default class RequestDetail extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const {info, state} = this.props
+        const { state, selected_tools } = this.props
         if (pP.state != state) {
-            if(state == 2) {
+            if(state == "ИЛГЭЭСЭН") {
                 this.setState({disabled: true})
             }
         }
+    }
+
+    handleLoaderActive(status){
+        this.setState({is_loading: status})
     }
 
     render (){
@@ -37,12 +45,14 @@ export default class RequestDetail extends Component {
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
             files, file_name, info,
-            aimag_name, aimag_geom
+            aimag_name, aimag_geom,
+            state, kind,
         } = this.props
         return (
             <div className="row p-3">
+                <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна түр хүлээнэ үү !!!"}/>
                 <div className="col-md-5">
-                    <form  class="form-row">
+                    <form  className="form-row">
                         {
                             aimag_name
                             &&
@@ -115,12 +125,15 @@ export default class RequestDetail extends Component {
                         <UsedTools
                             values={this.props}
                         />
-                        <div className={`form-group ${info ? "invisible" : 'visible'}`}>
+                        <div className={`form-group ${(info || state == "ИЛГЭЭСЭН") ? "invisible" : 'visible'}`}>
                             <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
                             <label
                                 htmlFor="choose-file"
-                                className="custom-file-upload col-md-6 text-center"
+                                className={`custom-file-upload col-md-6 text-center ${!file_name  ? "border-danger" : ''}`}
                                 id="choose-file-label"
+                                data-toggle="toolpit"
+                                data-placement="top"
+                                title={!file_name ? 'файл сонгогдоогүй байна ' : file_name}
                             >
                                 файл оруулах
                             </label>
@@ -132,16 +145,19 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => this.props.handleOnChange(e)}
                                 style={{display: 'none'}}
                             />
-                            <span className="col-md-5 ml-2">
-                                {file_name ? file_name : 'файл сонгогдоогүй байна'}
-                            </span>
+                            {
+                                file_name && <small className="col-md-5 ml-2">{file_name}</small>
+                            }
+
                         </div>
                     </form>
                     {
                         this.props.submitClass
                         &&
                         <this.props.submitClass
+                            valid_request = {document.getElementsByClassName('is-valid')}
                             values={this.props}
+                            loader={this.handleLoaderActive}
                         />
                     }
                 </div>
