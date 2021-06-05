@@ -16,7 +16,7 @@ export class Дэлгэрэнгүй extends Component {
                 <div className="card-body">
                     {
                         <DetailModalBody
-                            // {...this}
+                            info = {'Дэлгэрэнгүй'}
                         />
                     }
                 </div>

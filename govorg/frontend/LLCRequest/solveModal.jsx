@@ -379,56 +379,60 @@ export class DetailModalBody extends Component {
                     />
                 </div>
             </div>
-            <div className="row my-2 mr-1 float-right">
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'reject',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог цуцлах",
-                        `Та цуцлахдаа итгэлтэй байна уу?`,
-                        true,
-                        "цуцлах",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light"
-                >
-                    <i className="fa fa-check-square-o">Цуцлах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'dismiss',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог буцаах",
-                        GetDescription,
-                        true,
-                        "илгээх",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check-square-o">Буцаах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'approve',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Хүсэлт үүсгэх",
-                        `Та хүсэлт үүсгэхдээ итгэлтэй байна уу?`,
-                        true,
-                        "Хүсэлт үүсгэх",
-                        null
-                    )}
-                    className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check">Хүсэлт үүсгэх</i>
-                </button>
-            </div>
+            {
+                !this.props.info
+                &&
+                    <div className="row my-2 mr-1 float-right">
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'reject',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог цуцлах",
+                                `Та цуцлахдаа итгэлтэй байна уу?`,
+                                true,
+                                "цуцлах",
+                                null
+                            )}
+                            className="btn gp-btn-primary waves-effect waves-light"
+                        >
+                            <i className="fa fa-check-square-o">Цуцлах</i>
+                        </button>
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'dismiss',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Тохиргоог буцаах",
+                                GetDescription,
+                                true,
+                                "илгээх",
+                                null
+                            )}
+                            className="btn gp-btn-primary waves-effect waves-light ml-2"
+                        >
+                            <i className="fa fa-check-square-o">Буцаах</i>
+                        </button>
+                        <button
+                            type="button mr-2 ml-2"
+                            onClick={() => this.modalChange(
+                                'approve',
+                                'fa fa-exclamation-circle',
+                                'warning',
+                                "Хүсэлт үүсгэх",
+                                `Та хүсэлт үүсгэхдээ итгэлтэй байна уу?`,
+                                true,
+                                "Хүсэлт үүсгэх",
+                                null
+                            )}
+                            className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                        >
+                            <i className="fa fa-check">Хүсэлт үүсгэх</i>
+                        </button>
+                    </div>
+            }
             <Modal
                 modal_status={this.state.modal_status}
                 modal_icon={this.state.modal_icon}
