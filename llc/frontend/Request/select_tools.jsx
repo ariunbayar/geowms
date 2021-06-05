@@ -1,6 +1,7 @@
-import React, { Component, Fragment } from "react"
-import {GPIcon} from "@utils/Tools"
-import {LLCMap} from '../LLCMap'
+import React, { Component } from "react"
+
+import { GPIcon } from "@utils/Tools"
+
 import ModelSelectTools from './select_modal'
 
 export default class UsedTools extends Component {
@@ -20,30 +21,30 @@ export default class UsedTools extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const {selected_tools, state, info} = this.props.values
+        const { selected_tools, state, info } = this.props.values
         if(pP.values.selected_tools != selected_tools) {
-            if(!state && !info ){
-                this.setState({selected_tools: selected_tools})
+            if(!state && !info ) {
+                this.setState({ selected_tools: selected_tools })
             }
             else {
-                this.setState({selected_tools: selected_tools})
+                this.setState({ selected_tools: selected_tools })
             }
         }
     }
 
-    modalClose(){
-        this.setState({select_layer_status: false})
+    modalClose() {
+        this.setState({ select_layer_status: false })
     }
 
     handleSelectedTool(value_type, value) {
         var array = [...this.state.selected_tools]
-        if (value_type) {
+        if(value_type) {
             array = array.concat(value)
-            this.setState({select_layer_status: false})
+            this.setState({ select_layer_status: false })
         }
         else {
-            for (let [i, layer] of array.entries()) {
-                if (layer.bagaj_dugaar == value.bagaj_dugaar) {
+            for(let [i, layer] of array.entries()) {
+                if(layer.bagaj_dugaar == value.bagaj_dugaar) {
                     array.splice(i, 1);
                 }
             }
@@ -65,7 +66,7 @@ export default class UsedTools extends Component {
 
     render (){
         const {
-            tool_datas, id, info, state
+            tool_datas, info, state
         } = this.props.values
         const {
             modalAction, values,
@@ -91,7 +92,7 @@ export default class UsedTools extends Component {
                             {
                                 selected_tools && selected_tools.length > 0
                                 ?
-                                selected_tools.map((value, idx) =>
+                                    selected_tools.map((value, idx) =>
                                         <tr key={idx}>
                                             <th scope="row">{idx+1}</th>
                                             <td>{value.bagaj_dugaar}</td>
@@ -118,33 +119,33 @@ export default class UsedTools extends Component {
                         </tbody>
                     </table>
                 </div>
-                <div className={`form-group col-md-12 ${(info || state == "ИЛГЭЭСЭН") ? 'invisible' : ''}`}>
-                    <div className="form-group col-md-12">
-                        <a
-                            id='tool_id'
-                            href="#"
-                            onClick={
-                                (e) => this.handleSelectModel(
-                                    'Эрх бүхий багажууд',
-                                    this.handleSelectedTool,
-                                    tool_datas
-                                )
-                            }
-                        >
-                            <GPIcon icon={"fa fa-plus-circle text-success mr-4 mt-2"}/>
-                            <label htmlFor="tool_id">Багаж сонгох</label>
-                        </a>
-                    </div>
-                </div>
+                {
+                    info || state == "ИЛГЭЭСЭН"
+                    ?
+                        <div className={`form-group col-md-12`}>
+                            <div className="form-group col-md-12">
+                                <a
+                                    id='tool_id'
+                                    href="#"
+                                    onClick={(e) => this.handleSelectModel('Эрх бүхий багажууд', this.handleSelectedTool, tool_datas)}
+                                >
+                                    <GPIcon icon={"fa fa-plus-circle text-success mr-4 mt-2"}/>
+                                    <label htmlFor="tool_id">Багаж сонгох</label>
+                                </a>
+                            </div>
+                        </div>
+                    :
+                        null
+                }
                 {
                     select_layer_status
                     &&
-                    <ModelSelectTools
-                        modalClose={this.modalClose}
-                        modalAction={modalAction}
-                        list_of_datas={values}
-                        title={modal_title}
-                    />
+                        <ModelSelectTools
+                            modalClose={this.modalClose}
+                            modalAction={modalAction}
+                            list_of_datas={values}
+                            title={modal_title}
+                        />
                 }
             </div>
         )

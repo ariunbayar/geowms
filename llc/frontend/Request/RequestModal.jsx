@@ -33,7 +33,7 @@ class ActionClass extends Component {
         handleSubmit(){
             const {id} =this.props.values
             this.props.loader(true)
-            service.SendRequest(id).then(({ success, info}) =>{
+            service.sendRequest(id).then(({ success, info}) =>{
                 if(success){
                     this.props.loader(false)
                     this.modalChange(

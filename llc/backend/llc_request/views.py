@@ -182,19 +182,17 @@ def _validation_form(request_datas):
 
 
 def _tools_validation(get_tools):
-    count = 0
+    saved_ids = list()
 
     if not get_tools:
         response = 'Ашигласан багажны мэдээлэл хоосон байна !!!'
         return response
 
     for tool in get_tools:
-        count += 1
-        for index in range(len(get_tools)-count):
-            next_tools = get_tools[index+count]
-            if tool['bagaj_dugaar'] == next_tools['bagaj_dugaar']:
-                response = 'Таны сонгосон багаж давхцаж байна.!!!'
-                return response
+        if tool['bagaj_dugaar'] in saved_ids:
+            response = 'Таны сонгосон багаж давхцаж байна.!!!'
+            return response
+        saved_ids.append(tool['bagaj_dugaar'])
 
 
 @require_POST

@@ -1,5 +1,4 @@
-import React, {Component, Fragment} from "react"
-import InspireMap from "@utils/BundleMap"
+import React, { Component, Fragment } from "react"
 
 export default class ModelSendData extends Component {
 
@@ -20,8 +19,8 @@ export default class ModelSendData extends Component {
         }
     }
 
-    handleIsload(status){
-        this.setState({is_loading: status})
+    handleIsload(status) {
+        this.setState({ is_loading: status })
     }
 
     componentDidUpdate(prevProps) {
@@ -40,23 +39,22 @@ export default class ModelSendData extends Component {
     }
 
     handleOpen() {
-        this.setState({status: "initial"})
+        this.setState({ status: "initial" })
         setTimeout(() => {
-            this.setState({status: "open"})
+            this.setState({ status: "open" })
         }, 0)
     }
 
     handleClose(callback) {
-
-        this.setState({status: "closing"})
+        this.setState({ status: "closing" })
         setTimeout(() => {
-            this.setState({status: "closed"})
+            this.setState({ status: "closed" })
             this.props.closeRequestMap()
         }, 150)
     }
 
     render () {
-        const {status} = this.state
+        const { status } = this.state
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -88,12 +86,14 @@ export default class ModelSendData extends Component {
 
                                     <div className="row">
                                         {
-                                            this.props.body ?
-                                            <this.props.body
-                                                values={this.props}
-                                                closeRequestMap={this.props.closeRequestMap}
-                                            />
-                                            :null
+                                            this.props.body
+                                            ?
+                                                <this.props.body
+                                                    values={this.props}
+                                                    closeRequestMap={this.props.closeRequestMap}
+                                                />
+                                            :
+                                                null
                                         }
                                     </div>
                                 </div>

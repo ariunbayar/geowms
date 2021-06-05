@@ -20,7 +20,7 @@ export default class ModelSelectTools extends Component {
     }
 
     handleIsload(status){
-        this.setState({is_loading: status})
+        this.setState({ is_loading: status })
     }
 
     componentDidUpdate(prevProps) {
@@ -39,23 +39,22 @@ export default class ModelSelectTools extends Component {
     }
 
     handleOpen() {
-        this.setState({status: "initial"})
+        this.setState({ status: "initial" })
         setTimeout(() => {
-            this.setState({status: "open"})
+            this.setState({ status: "open" })
         }, 0)
     }
 
     handleClose(callback) {
-
-        this.setState({status: "closing"})
+        this.setState({ status: "closing" })
         setTimeout(() => {
-            this.setState({status: "closed"})
+            this.setState({ status: "closed" })
             this.props.modalClose()
         }, 150)
     }
 
     render () {
-        const {status} = this.state
+        const { status } = this.state
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -67,7 +66,7 @@ export default class ModelSelectTools extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-        const { modal_title, list_of_datas } = this.props
+        const { list_of_datas } = this.props
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-fixed w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
@@ -97,20 +96,27 @@ export default class ModelSelectTools extends Component {
                                             </thead>
                                             <tbody>
                                                 {
-                                                    list_of_datas.length > 0 ?
-                                                    list_of_datas.map((value, idx) =>
-                                                    <tr key={idx}>
-                                                        <td>
-                                                            {idx}
-                                                        </td>
-                                                        <td>
-                                                            <a href="#" onClick={(e) => this.handleProceed(true, value)}>{value.bagaj_dugaar}</a>
-                                                        </td>
-                                                        <td>
-                                                            {value.bagaj_mark}
-                                                        </td>
-                                                    </tr>
-                                                    ): <tr><td>дата бүртгэлгүй байна</td></tr>
+                                                    list_of_datas.length > 0
+                                                    ?
+                                                        list_of_datas.map((value, idx) =>
+                                                            <tr key={idx}>
+                                                                <td>
+                                                                    {idx}
+                                                                </td>
+                                                                <td>
+                                                                    <a href="#" onClick={(e) => this.handleProceed(true, value)}>
+                                                                        {value.bagaj_dugaar}
+                                                                    </a>
+                                                                </td>
+                                                                <td>
+                                                                    {value.bagaj_mark}
+                                                                </td>
+                                                            </tr>
+                                                        )
+                                                    :
+                                                        <tr>
+                                                            <td>дата бүртгэлгүй байна</td>
+                                                        </tr>
                                                 }
                                             </tbody>
                                         </table>
