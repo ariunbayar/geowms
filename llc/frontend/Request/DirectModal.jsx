@@ -29,7 +29,7 @@ export default class RequestDetail extends Component {
     componentDidUpdate(pP, pS) {
         const { state, selected_tools } = this.props
         if (pP.state != state) {
-            if(state == 2) {
+            if(state == "ИЛГЭЭСЭН") {
                 this.setState({disabled: true})
             }
         }
@@ -45,13 +45,14 @@ export default class RequestDetail extends Component {
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
             files, file_name, info,
-            aimag_name, aimag_geom
+            aimag_name, aimag_geom,
+            state, kind,
         } = this.props
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна түр хүлээнэ үү !!!"}/>
                 <div className="col-md-5">
-                    <form  class="form-row">
+                    <form  className="form-row">
                         {
                             aimag_name
                             &&
@@ -124,7 +125,7 @@ export default class RequestDetail extends Component {
                         <UsedTools
                             values={this.props}
                         />
-                        <div className={`form-group ${info ? "invisible" : 'visible'}`}>
+                        <div className={`form-group ${(info || state == "ИЛГЭЭСЭН") ? "invisible" : 'visible'}`}>
                             <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
                             <label
                                 htmlFor="choose-file"

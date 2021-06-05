@@ -396,8 +396,8 @@ def get_request_data(request, id):
         field['file_path'] = file_data
         field['selected_tools'] = json_load(qs.file.tools)
         field['file_name'] = file_name
-        field['state'] = qs.file.state
-        field['kind'] = qs.file.kind
+        field['state'] = qs.file.get_state_display()
+        field['kind'] = qs.file.get_kind_display()
         field['desc'] = qs.file.description
 
     return JsonResponse({
@@ -591,5 +591,3 @@ def get_search_field(request):
         'success': True,
         'search_field': search_field,
     })
-
-

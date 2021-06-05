@@ -22,7 +22,7 @@ class SubmitClass extends Component {
                     this.setState({ agreed_submit:true, one_check:false })
         }
         if(pP.values.kind !== values.kind){
-            if(values.kind == 3 || values.kind == 4)
+            if(values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
                 this.setState({info_status: true})
         }
     }
@@ -86,7 +86,7 @@ class SubmitClass extends Component {
                                 </i>
                             </p> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
-                                values.state != 2
+                                values.state != "ИЛГЭЭСЭН"
 
                                 ?
                                     <p

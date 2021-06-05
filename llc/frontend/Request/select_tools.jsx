@@ -65,7 +65,7 @@ export default class UsedTools extends Component {
 
     render (){
         const {
-            tool_datas, id, info
+            tool_datas, id, info, state
         } = this.props.values
         const {
             modalAction, values,
@@ -100,10 +100,14 @@ export default class UsedTools extends Component {
                                     <td>{value.expired_date}</td>
                                     <td className="text-center mx-0 px-0">
                                         {
-                                            !info &&
-                                            <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
-                                                <GPIcon icon={"fa fa-minus-circle text-danger"}/>
-                                            </a>
+                                            !info
+                                            ?
+                                                state != "ИЛГЭЭСЭН" &&
+                                                    <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
+                                                        <GPIcon icon={"fa fa-minus-circle text-danger"}/>
+                                                    </a>
+                                            :
+                                                null
                                         }
                                     </td>
                                 </tr>
@@ -112,7 +116,7 @@ export default class UsedTools extends Component {
                         </tbody>
                     </table>
                 </div>
-                <div className={`form-group col-md-12 ${info ? 'invisible' : ''}`}>
+                <div className={`form-group col-md-12 ${(info || state == "ИЛГЭЭСЭН") ? 'invisible' : ''}`}>
                     <div className="form-group col-md-12">
                         <a
                             id='tool_id'

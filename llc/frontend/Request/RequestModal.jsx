@@ -63,7 +63,9 @@ class ActionClass extends Component {
             })
         }
         modalClose() {
+            const { values } = this.props
             this.setState({ modal_status: 'closed' })
+            values.closeRequestMap()
         }
 
         modalOpen(){
@@ -119,7 +121,7 @@ class ActionClass extends Component {
                             actionNameBack={ this.state.actionNameBack }
                             actionNameDelete={ this.state.actionNameDelete }
                             modalAction={ this.handleSubmit}
-                            modalClose={ this.modalClose, values.closeRequestMap }
+                            modalClose={ this.modalClose}
                         />
                     </div>
             )
