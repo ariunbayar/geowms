@@ -497,7 +497,11 @@ function DescInput(props) {
     return (
         <div>
             <label htmlFor="desc">Тайлбар:</label>
-            <textarea className="form-control" id="desc" onChange={props.getDesc}></textarea>
+            <textarea
+                className="form-control"
+                id="desc"
+                onChange={props.getDesc}
+            ></textarea>
         </div>
     )
 }
