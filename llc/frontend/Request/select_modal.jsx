@@ -25,7 +25,7 @@ export default class ModelSelectTools extends Component {
 
     componentDidUpdate(prevProps) {
         if (this.props.status != prevProps.status) {
-            if (["initial", "open"].includes(cthis.props.status)) {
+            if (["initial", "open"].includes(this.props.status)) {
                 this.handleOpen()
             }
             if (["closing", "closed"].includes(this.props.status)) {

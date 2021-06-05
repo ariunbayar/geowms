@@ -186,6 +186,22 @@ def _validation_form(request_datas):
     return is_agreed
 
 
+def _tools_validation(get_tools):
+    count = 0
+
+    if not get_tools:
+        response = 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        return response
+
+    for tool in get_tools:
+        count += 1
+        for index in range(len(get_tools)-count):
+            next_tools = get_tools[index+count]
+            if tool['bagaj_dugaar'] == next_tools['bagaj_dugaar']:
+                response = 'Таны сонгосон багаж давхцаж байна.!!!'
+                return response
+
+
 @require_POST
 @ajax_required
 def save_request(request):
@@ -207,7 +223,7 @@ def save_request(request):
     utils.save_file_to_storage(uploaded_file, file_path, file_name)
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
-
+    get_tools = selected_tools['selected_tools']
     if not is_agreed:
 
         return JsonResponse({
@@ -219,15 +235,14 @@ def save_request(request):
         id = json_load(id)
         id = id.get('id')
 
-    if not selected_tools['selected_tools']:
+    tool_validation = _tools_validation(get_tools)
+    if tool_validation:
+
         return JsonResponse({
             'success': False,
-            'info': 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+            'info': tool_validation
         })
 
-    selected_tools = json_load(selected_tools)
-    selected_tools = selected_tools['selected_tools']
-    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
     if check_data_of_file and not id:
