@@ -382,7 +382,16 @@ export default class InspireMap extends Component {
         const { projection, projection_display, form_datas} = this.state
         var styles = this.layer_styles
         const {aimag_geom} = this.props
-        if (Object.keys(vector_source.features).length > 0) {
+
+        if (this.map) {
+            this.map.getLayers().forEach(layer => {
+                if (layer && layer.get('id') === 'aimag') {
+                    layer.getSource().clear();
+                }
+            });
+        }
+
+        if (Object.keys(vector_source).length > 0) {
                 var nt_features = new GeoJSON({
                     dataProjection: projection_display,
                     featureProjection: projection
