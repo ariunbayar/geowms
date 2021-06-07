@@ -1202,9 +1202,9 @@ def inspire_save(request, payload):
         feature_id=feature_id,
     )
 
-    rsp = {
+    return JsonResponse({
         'success': True,
-    }
+    })
 
 
 @require_GET

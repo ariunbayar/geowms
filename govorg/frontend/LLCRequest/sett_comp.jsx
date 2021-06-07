@@ -66,6 +66,9 @@ export class LLCSettings extends Component {
             list_of_datas[index_of_list]['feature']['id'] = ''
             list_of_datas[index_of_list]['feature'].list = []
         }
+        else {
+            data_list['model_status'] = false
+        }
 
         if (! selected_value) {
             data_list['selected_features'] = []
@@ -73,6 +76,7 @@ export class LLCSettings extends Component {
             list_of_datas[index_of_list]['feature']['id'] = ''
 
         }
+
         list_of_datas[index_of_list][name].id = selected_value
         list_of_datas[index_of_list][name].name = selected_data_name
 
