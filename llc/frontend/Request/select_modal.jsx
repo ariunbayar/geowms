@@ -67,6 +67,7 @@ export default class ModelSelectTools extends Component {
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
         const { list_of_datas } = this.props
+        console.log("list_of_datas", list_of_datas)
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-fixed w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
@@ -104,7 +105,7 @@ export default class ModelSelectTools extends Component {
                                                                     {idx}
                                                                 </td>
                                                                 <td>
-                                                                    <a href="#" onClick={(e) => this.handleProceed(true, value)}>
+                                                                    <a onClick={(e) => this.handleProceed(true, value)}>
                                                                         {value.bagaj_dugaar}
                                                                     </a>
                                                                 </td>

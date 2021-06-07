@@ -961,18 +961,19 @@ def get_llc_list(request, payload):
     return JsonResponse(rsp)
 
 
-def _get_feature(shape_geometries):
+def _get_shape_datas(shape_geometry):
+    shape_geoms = ShapeGeom.objects.filter(shape=shape_geometry)
     features = []
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
+    for shape_geom in shape_geoms:
+        single_geom = json_load(shape_geom.geom_json)
         feature = {
             "type": "Feature",
             'geometry': single_geom,
-            'id': shape_geometry.id,
-            'properties': json_load(shape_geometry.form_json)
+            'id': shape_geom.id,
+            'properties': json_load(_check_and_make_form_json(shape_geometry.feature_id, json_load(shape_geom.form_json)))
         }
         features.append(feature)
+
     return features
 
 
@@ -980,38 +981,49 @@ def _get_feature(shape_geometries):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_request_data(request, id):
-    features = []
-    field = dict()
-    aimag_name = ''
-    aimag_geom = []
+    datas = []
     llc_data = LLCRequest.objects.filter(pk=id).first()
-    shape_geometries = ShapeGeom.objects.filter(shape__files=llc_data.file)
-    features = _get_feature(shape_geometries)
+    shape_geometries = RequestFilesShape.objects.filter(files=llc_data.file)
 
-    qs = RequestForm.objects.filter(file=llc_data.file)
-    field = [item for item in qs.values()]
-    selected_tools = qs.first().file.tools
-    geo_id = qs.first().file.geo_id
+    for shape_geometry in shape_geometries:
+        theme_name = ''
+        feature_name = ''
+        package_name = ''
 
-    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
-    if mdata_qs:
-        code_list_id = mdata_qs.code_list_id
-        code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
-        aimag_name = code_list_data.code_list_name
+        theme_id = shape_geometry.theme_id
+        feature_id = shape_geometry.feature_id
+        package_id = shape_geometry.package_id
 
-        aimag_geom = get_geom(geo_id, 'MultiPolygon')
-        if aimag_geom:
-            aimag_geom = aimag_geom.json
+        if theme_id:
+            theme = LThemes.objects.filter(theme_id=theme_id).first()
+            theme_name = theme.theme_name
 
-    if qs:
-        field = [item for item in qs.values()]
+        if feature_id:
+            feature = LFeatures.objects.filter(feature_id=feature_id).first()
+            feature_name = feature.feature_name
+
+        if package_id:
+            package = LPackages.objects.filter(package_id=package_id).first()
+            package_name = package.package_name
+
+        datas.append({
+            'features': FeatureCollection(_get_shape_datas(shape_geometry)),
+            'theme': {
+                'id': theme_id,
+                'name': theme_name
+            },
+            'package': {
+                'id': package_id,
+                'name': package_name
+            },
+            'feature': {
+                'id': feature_id,
+                'name': feature_name
+            }
+        })
 
     return JsonResponse({
-        'vector_datas': FeatureCollection(features),
-        'form_field': field[0],
-        'selected_tools': json_load(selected_tools),
-        'aimag_name': aimag_name,
-        'aimag_geom': aimag_geom
+        'datas': datas
     })
 
 
@@ -1194,8 +1206,6 @@ def inspire_save(request, payload):
         'success': True,
     }
 
-    return JsonResponse(rsp)
-
 
 @require_GET
 @ajax_required
@@ -1203,7 +1213,6 @@ def get_state_choices(request):
     search_field = dict()
     get_state = RequestFiles.STATE_CHOICES
     search_field['state'] = get_state
-
     return JsonResponse({
         'success': True,
         'search_field': search_field,
