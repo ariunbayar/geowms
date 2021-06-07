@@ -67,7 +67,7 @@ function getInspireTree() {
 
 function getChoices() {
     const requestOptions = { ...getGetOptions() }
-    return fetch(`${prefix}/get_state_choices/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/get-search-choices/`, requestOptions).then(handleResponse)
 }
 
 function Save(values) {

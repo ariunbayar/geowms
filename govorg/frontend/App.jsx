@@ -105,8 +105,8 @@ export class App extends Component {
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 {
                                     employee.is_admin
                                     &&
