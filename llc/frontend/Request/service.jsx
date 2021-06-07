@@ -1,16 +1,16 @@
-import {handleResponse, getGetOptions, getPostOptions} from '../helpers/service'
+import { handleResponse, getGetOptions, getPostOptions } from '../helpers/service'
 export const service = {
-    SaveRequest,
+    saveRequest,
     handleRequestData,
     getToolDatas,
-    SendRequest,
-    RemoveRequest,
+    sendRequest,
+    removeRequest,
     getSearchItems,
 }
 
 const prefix = '/llc/backend'
 
-function SaveRequest(form_datas) {
+function saveRequest(form_datas) {
     const opts = {
         ...getPostOptions(),
         body: form_datas
@@ -34,14 +34,14 @@ function getToolDatas(regis_number) {
     return fetch(`/llc/get_tool_datas/`, opts).then(handleResponse)
 }
 
-function SendRequest(id) {
+function sendRequest(id) {
     const opts = {
         ...getGetOptions(),
     }
     return fetch(`${prefix}/${id}/send-request/`, opts).then(handleResponse)
 }
 
-function RemoveRequest(id) {
+function removeRequest(id) {
     const opts = {
         ...getGetOptions(),
     }

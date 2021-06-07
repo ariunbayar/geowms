@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import SolveModal from './solveModal'
-import LLCSettings from './sett_comp'
+import { service } from "./service"
 
 export const make_state_color = (state) => {
     let color
@@ -16,6 +16,7 @@ export const make_kind_color = (kind) => {
     else if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
     else if (kind == "БУЦААГДСАН") color = 'text-danger'
+    else if (kind == "ШИНЭ") color = 'text-primary'
     return color
 }
 
@@ -79,7 +80,33 @@ export class Detail extends Component {
             is_modal_request_open: false,
             custom_query: {}
         }
+        this.handleSearch = this.handleSearch.bind(this)
         this.refreshData = this.refreshData.bind(this)
+    }
+
+    componentDidMount() {
+        service
+            .getChoices()
+            .then(({ success, search_field }) =>{
+                if (success){
+                    this.setState({ choices: search_field })
+                }
+            })
+    }
+
+    handleSearch(e) {
+        let custom_query = Object()
+        var value = parseInt(e.target.value)
+
+        var table_data = e.target.selectedIndex
+        var optionElement = e.target.childNodes[table_data]
+        var selected_data_name =  optionElement.getAttribute('name')
+
+        if (selected_data_name == 'state') {
+            if (e.target.value) custom_query['state'] = value
+        }
+
+        this.setState({ custom_query, [selected_data_name]: value })
     }
 
     refreshData(){
@@ -91,10 +118,28 @@ export class Detail extends Component {
     }
 
     render() {
-        const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh } = this.state
+        const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, choices } = this.state
         return (
             <div className="card">
                 <div className="card-body">
+                    <div className="col-md-6 row mb-3">
+                        <label htmlFor="">Төлөв</label>
+                        <select
+                            className="form-control form-control-xs"
+                            onChange={(e) => this.handleSearch(e)}
+                        >
+                            <option value="">--- Төлөвөөр хайх ---</option>
+                            {
+                                choices?.state
+                                ?
+                                    choices['state'].map((choice, idx) =>
+                                        <option key={idx} name='state' value={choice[0]}>{choice[1]}</option>
+                                    )
+                                :
+                                null
+                            }
+                        </select>
+                    </div>
                     <div className="row">
                         <div className="col-md-12">
                             <PortalDataTable

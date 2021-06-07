@@ -7,7 +7,8 @@ export const service = {
     handleRequestData,
     getFilesDetal,
     getInspireTree,
-    Save
+    getChoices,
+    Save,
 }
 
 const prefix = '/gov/api/llc-request'
@@ -19,10 +20,10 @@ function getFilesDetal(id) {
     return fetch(`/llc/backend/${id}/get-file-shapes/`, opts).then(handleResponse)
 }
 
-function requestReject(id) {
+function requestReject(id, description) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ id }),
+        body: JSON.stringify({ id, description }),
     }
     return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
@@ -62,6 +63,11 @@ function getInspireTree() {
         ...getGetOptions(),
     }
     return fetch(`/back/another-database/pg/get-all-view-names/`, opts).then(handleResponse)
+}
+
+function getChoices() {
+    const requestOptions = { ...getGetOptions() }
+    return fetch(`${prefix}/get_state_choices/`, requestOptions).then(handleResponse)
 }
 
 function Save(values) {

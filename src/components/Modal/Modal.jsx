@@ -148,13 +148,13 @@ export default class Modal extends Component {
                             <div className="d-flex justify-content-center">
                                 <h5 >{ this.props.title && this.props.title }</h5>
                             </div>
-                            <div className="modal-body text-center text-wrap ml-2 mr-2 text-justify">
+                            <div className="modal-body text-wrap text-center ml-2 mr-2 ">
                                 {
                                     this.props.text &&
                                     (
                                         typeof(this.props.text) == 'string'
                                         ?
-                                            this.props.text
+                                            <small className=''>{this.props.text}</small>
                                         :
                                             <this.props.text
                                                 {...this.props}

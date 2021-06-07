@@ -1,38 +1,9 @@
-import React, { Component } from "react"
+import React, { Component, useState } from "react"
 import RequestModal from './requestModal'
 import {LLCMap} from '../../../llc/frontend/LLCMap'
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
-
-class GetDescription extends Component {
-    constructor(props) {
-        super(props)
-
-        this.state = {
-            description: props.description
-        }
-        this.handleOnchange = this.handleOnchange.bind(this)
-    }
-
-    handleOnchange(e) {
-        this.props.handleOnChange(e)
-    }
-
-    render() {
-        const {description} = this.state
-        return(
-            <div className="col-md-12">
-                <label>Тайлбар оруулна уу </label>
-                <textarea
-                    className="form-control"
-                    value={description}
-                    onChange={(e) => this.handleOnchange(e)}
-                />
-            </div>
-        )
-    }
-}
 
 class DetailModalBody extends Component {
     constructor(props) {
@@ -55,7 +26,7 @@ class DetailModalBody extends Component {
             vector_datas: [],
             disabled: true,
             aimag_name: '',
-            description: ''
+            description: '',
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -69,7 +40,14 @@ class DetailModalBody extends Component {
     }
 
     handleOnChange(e) {
-        this.setState({ description: e.target.value })
+        var description = e.target.value
+        this.state.description = description
+        if(description.length > 0 && this.state.has_button == false) {
+            this.setState({ has_button: true })
+        }
+        else if(!description) {
+            this.setState({ has_button: false })
+        }
     }
 
     handleModalAction() {
@@ -77,7 +55,7 @@ class DetailModalBody extends Component {
         var description = this.state.description
         this.setState({ is_loading: true })
         if(this.state.action_type == 'reject') {
-            this.handleRequestReject(id)
+            this.handleRequestReject(id, description)
         }
         if(this.state.action_type == 'approve') {
             this.handleRequestApprove(id)
@@ -133,9 +111,9 @@ class DetailModalBody extends Component {
             })
     }
 
-    handleRequestReject(id) {
+    handleRequestReject(id, description) {
         service
-            .requestReject(id)
+            .requestReject(id, description)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -210,6 +188,7 @@ class DetailModalBody extends Component {
                 }
             })
             .catch((error) => {
+                this.setState({ is_loading: false })
                 if(error == 'Bad Request') {
                     this.modalChange(
                         '',
@@ -227,7 +206,6 @@ class DetailModalBody extends Component {
 
     componentDidMount() {
         if (this.state.status == "initial") this.handleOpen()
-        // const {id} = .id
         var id = this.props.id
         service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom }) => {
             if (form_field) {
@@ -294,7 +272,8 @@ class DetailModalBody extends Component {
             aimag_name, zahialagch,
             project_name, object_type,
             object_count, hurungu_oruulalt,
-            vector_datas, aimag_geom, is_loading
+            vector_datas, aimag_geom,
+            is_loading
         } = this.state
         var is_disable = true
         const { kind } = this.props
@@ -387,9 +366,9 @@ class DetailModalBody extends Component {
                         'fa fa-exclamation-circle',
                         'warning',
                         "Тохиргоог цуцлах",
-                        `Та цуцлахдаа итгэлтэй байна уу?`,
-                        true,
-                        "цуцлах",
+                        GetDescription,
+                        this.state.has_button,
+                        "илгээх",
                         null
                     )}
                     className="btn gp-btn-primary waves-effect waves-light"
@@ -404,7 +383,7 @@ class DetailModalBody extends Component {
                         'warning',
                         "Тохиргоог буцаах",
                         GetDescription,
-                        true,
+                        this.state.has_button,
                         "илгээх",
                         null
                     )}
@@ -440,6 +419,7 @@ class DetailModalBody extends Component {
                 actionNameDelete={this.state.action_name}
                 modalClose={this.state.modalClose}
                 handleOnChange={this.handleOnChange}
+                description={this.state.description}
             />
             </>
         )
@@ -496,4 +476,25 @@ export default class SolveModal extends Component {
             </div>
         )
     }
+}
+
+function GetDescription(props) {
+
+    const [value, setValue] = useState('')
+
+    const handleOnChange = (e) => {
+        setValue(e.target.value)
+        props.handleOnChange(e)
+    }
+
+    return (
+        <div className="col-md-12">
+            <label htmlFor="desc">Тайлбар оруулна уу</label>
+            <textarea
+                id="desc"
+                className={`form-control ${value ? '' : 'is-invalid'}`}
+                onChange={handleOnChange}
+            />
+        </div>
+    )
 }

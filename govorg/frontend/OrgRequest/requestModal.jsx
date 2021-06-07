@@ -13,17 +13,17 @@ export const get_modal_text = (kind) => {
     return text
 }
 
-export const FormJson = ({form_json, handleModalOpen, values}) => {
+export const FormJson = ({form_json, handleModalOpen, modalClose, values}) => {
     return (
         <div className="col-md-4 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
             {
-                handleModalOpen
+                handleModalOpen && !values.llc_request_id
                 ?
                 <div className="row">
                     <div className="col-md-4">
                         <button
                             className="btn gp-btn-primary"
-                            onClick={() => modalChange(
+                            onClick={() => handleModalOpen(
                                 'reject',
                                 'fa fa-exclamation-circle',
                                 'warning',
@@ -34,7 +34,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                                 татгалзахдаа итгэлтэй байна уу?`,
                                 true,
                                 "татгалзах",
-                                this.handleModalAction
+                                modalClose
                             )}
                         >
                             Татгалзах
@@ -43,7 +43,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                     <div className="ml-auto kindmr-3">
                         <button
                             className="btn gp-btn-outline-primary"
-                            onClick={() => modalChange(
+                            onClick={() => handleModalOpen(
                                 'approve',
                                 'fa fa-exclamation-circle',
                                 'warning',
@@ -54,7 +54,7 @@ export const FormJson = ({form_json, handleModalOpen, values}) => {
                                 зөвшөөрөхдөө итгэлтэй байна уу?`,
                                 true,
                                 "зөвшөөрөх",
-                                this.handleModalAction
+                                modalClose
                             )}
                         >
                             Зөвшөөрөх
@@ -110,6 +110,7 @@ export default class RequestModal extends Component {
             has_button: false,
             action_name: '',
             modalClose: null,
+            desc: '',
 
             values: props.values,
         }
@@ -121,7 +122,7 @@ export default class RequestModal extends Component {
         this.handleRequestApprove = this.handleRequestApprove.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
-
+        this.getDesc = this.getDesc.bind(this)
     }
 
     handleModalOpen(){
@@ -149,23 +150,24 @@ export default class RequestModal extends Component {
     }
 
     handleModalAction(){
-        const { selected_value, values } = this.state
+        const { selected_value, values, desc, action_type } = this.state
 
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
         this.setState({ is_loading: true })
 
-        if(this.state.action_type == 'reject')
+        const not_done = ['revoke', 'reject', 'dismiss']
+        if(not_done.includes(action_type))
         {
-           this.handleRequestReject(ids, feature_id)
+            this.handleRequestReject(ids, feature_id, desc, action_type)
         }
-        if(this.state.action_type == 'approve') {
+        if(action_type == 'approve') {
             this.handleRequestApprove(ids, feature_id)
         }
     }
 
-    handleRequestReject(ids, feature_id,) {
+    handleRequestReject(ids, feature_id, desc, action_type) {
         service
-            .requestReject(ids, feature_id)
+            .requestReject(ids, feature_id, desc, action_type)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -300,6 +302,10 @@ export default class RequestModal extends Component {
         this.props.refreshData()
     }
 
+    getDesc(e) {
+        this.state.desc = e.target.value
+    }
+
     render () {
 
         const selected_form_json = this.state.form_json
@@ -316,7 +322,6 @@ export default class RequestModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-
         return (
             <Fragment>
                 <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
@@ -350,9 +355,9 @@ export default class RequestModal extends Component {
                                                         {
                                                             values.length == 1
                                                             ?
-                                                                form_json && <FormJson form_json={form_json} />
+                                                                form_json && <FormJson form_json={form_json}/>
                                                             :
-                                                                selected_form_json && <FormJson form_json={selected_form_json} handleModalOpen={this.modalChange} values={selected_value}/>
+                                                                selected_form_json && <FormJson form_json={selected_form_json} handleModalOpen={this.modalChange} modalClose={this.modalClose} values={selected_value}/>
                                                         }
                                                         <div className={selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
                                                             <RequestMap values={values} selectedFeature={this.selectedFeature}/>
@@ -370,33 +375,72 @@ export default class RequestModal extends Component {
                                         <div className="row my-2 mr-1 float-right"></div>
                                     :
                                         <div className="row my-2 mr-1 float-right">
-                                            <button
-                                                type="button mr-2 ml-2"
-                                                onClick={() => this.modalChange(
-                                                    'reject',
-                                                    'fa fa-exclamation-circle',
-                                                    'warning',
-                                                    "Тохиргоог татгалзах",
-                                                    `Та ${
-                                                        values.length == 1
-                                                            ?
-                                                                get_modal_text(values[0].kind)
-                                                            :
-                                                        values.length > 1
-                                                            ?
-                                                                `сонгосон ${values.length} геометр өгөгдлөө`
-                                                            :
+                                            {
+                                                values.length > 0 && !values[0].llc_request_id
+                                                ?
+                                                    <button
+                                                        type="button mr-2 ml-2"
+                                                        onClick={() => this.modalChange(
+                                                            'reject',
+                                                            'fa fa-exclamation-circle',
+                                                            'warning',
+                                                            "Тохиргоог татгалзах",
+                                                            `Та ${
+                                                                values.length == 1
+                                                                    ?
+                                                                        get_modal_text(values[0].kind)
+                                                                    :
+                                                                values.length > 1
+                                                                    ?
+                                                                        `сонгосон ${values.length} геометр өгөгдлөө`
+                                                                    :
+                                                                    null
+                                                            }
+                                                            татгалзахдаа итгэлтэй байна уу?`,
+                                                            true,
+                                                            "татгалзах",
                                                             null
-                                                    }
-                                                    татгалзахдаа итгэлтэй байна уу?`,
-                                                    true,
-                                                    "татгалзах",
-                                                    null
-                                                )}
-                                                className="btn gp-btn-primary waves-effect waves-light"
-                                            >
-                                                <i className="fa fa-check-square-o">Татгалзах</i>
-                                            </button>
+                                                        )}
+                                                        className="btn gp-btn-primary waves-effect waves-light"
+                                                    >
+                                                        <i className="fa fa-check-square-o">Татгалзах</i>
+                                                    </button>
+                                                :
+                                                    <div className="btn-group">
+                                                        <button
+                                                            type="button mr-2 ml-2"
+                                                            onClick={() => this.modalChange(
+                                                                'revoke',
+                                                                'fa fa-exclamation-circle',
+                                                                'warning',
+                                                                "Цуцлах",
+                                                                DescInput,
+                                                                true,
+                                                                "цуцлах",
+                                                                null
+                                                            )}
+                                                            className="btn btn-danger waves-effect waves-light"
+                                                        >
+                                                            <i className="fa fa-times">Цуцлах</i>
+                                                        </button>
+                                                        <button
+                                                            type="button mr-2 ml-2"
+                                                            onClick={() => this.modalChange(
+                                                                'dismiss',
+                                                                'fa fa-exclamation-circle',
+                                                                'warning',
+                                                                "Буцаах",
+                                                                DescInput,
+                                                                true,
+                                                                "буцаах",
+                                                                null
+                                                            )}
+                                                            className="btn gp-btn-primary waves-effect waves-light"
+                                                        >
+                                                            <i className="fa fa-check-square-o">Буцаах</i>
+                                                        </button>
+                                                    </div>
+                                            }
                                             <button
                                                 type="button mr-2 ml-2"
                                                 onClick={() => this.modalChange(
@@ -440,10 +484,24 @@ export default class RequestModal extends Component {
                         modalAction={this.handleModalAction}
                         actionNameDelete={this.state.action_name}
                         modalClose={this.state.modalClose}
+                        getDesc={this.getDesc}
                     />
                 </div>
                 <div className={classNameBackdrop}></div>
             </Fragment>
         )
     }
+}
+
+function DescInput(props) {
+    return (
+        <div>
+            <label htmlFor="desc">Тайлбар:</label>
+            <textarea
+                className="form-control"
+                id="desc"
+                onChange={props.getDesc}
+            ></textarea>
+        </div>
+    )
 }

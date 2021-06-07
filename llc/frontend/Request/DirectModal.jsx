@@ -1,6 +1,6 @@
-import React, { Component, Fragment } from "react"
-import { service } from "./service"
-import {GPIcon} from "@utils/Tools"
+import React, { Component } from "react"
+import Loader from "@utils/Loader"
+
 import {LLCMap} from '../LLCMap'
 import UsedTools from './select_tools'
 
@@ -10,58 +10,67 @@ export default class RequestDetail extends Component {
         super(props)
         this.state = {
             info: false,
-            state : props.state,
-            disabled: false
+            state: props.state,
+            disabled: false,
+            is_loading: false,
         }
+        this.handleLoaderActive = this.handleLoaderActive.bind(this)
     }
 
     componentDidMount() {
-        const {info} = this.props
+        const { info } = this.props
         if(info) {
-            this.setState({disabled: true})
+            this.setState({ disabled: true })
         }
     }
 
     componentDidUpdate(pP, pS) {
-        const {info, state} = this.props
+        const { state } = this.props
         if (pP.state != state) {
-            if(state == 2) {
-                this.setState({disabled: true})
+            if(state == "ИЛГЭЭСЭН") {
+                this.setState({ disabled: true })
             }
         }
     }
 
-    render (){
+    handleLoaderActive(status) {
+        this.setState({ is_loading: status })
+    }
+
+    render() {
         const {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
-            files, file_name, info,
-            aimag_name, aimag_geom
+            file_name, info,
+            aimag_name, aimag_geom,
+            state,
         } = this.props
         return (
             <div className="row p-3">
+                <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна түр хүлээнэ үү !!!"}/>
                 <div className="col-md-5">
-                    <form  class="form-row">
+                    <form className="form-row">
                         {
                             aimag_name
                             &&
-                            <div className="form-group col-md-12">
-                                <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
-                                <input
-                                    type="text"
-                                    name='aimag_name'
-                                    className="form-control"
-                                    disabled={true}
-                                    value={aimag_name}
-                                />
-                            </div>
+                                <div className="form-group col-md-12">
+                                    <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
+                                    <input
+                                        type="text"
+                                        name='aimag_name'
+                                        className="form-control"
+                                        disabled={true}
+                                        value={aimag_name}
+                                    />
+                                </div>
                         }
                         <div className="form-group col-md-12">
-                            <label htmlFor=''>Захиалагч байгууллага</label>
+                            <label htmlFor='zahialagch'>Захиалагч байгууллага</label>
                             <input
                                 type="text"
                                 name='zahialagch'
+                                id="zahialagch"
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 value={zahialagch}
@@ -69,9 +78,10 @@ export default class RequestDetail extends Component {
                             />
                         </div>
                         <div className="form-group col-md-12 m-0">
-                            <label htmlFor=''>төслийн нэр</label>
+                            <label htmlFor='project_name'>Төслийн нэр</label>
                             <input
                                 type="text"
+                                id="project_name"
                                 name='project_name'
                                 className="form-control"
                                 disabled={this.state.disabled}
@@ -80,10 +90,11 @@ export default class RequestDetail extends Component {
                             />
                         </div>
                         <div className="form-group col-md-6 my-4 col-sm-6">
-                            <label htmlFor=''>Обьектийн төрөл</label>
+                            <label htmlFor='object_type'>Обьектийн төрөл</label>
                             <textarea
                                 type="text"
                                 name="object_type"
+                                id="object_type"
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 value={object_type}
@@ -91,10 +102,11 @@ export default class RequestDetail extends Component {
                             />
                         </div>
                         <div className="form-group col-md-6 col-sm-6 my-4">
-                            <label htmlFor=''>Обьектийн тоо хэмжээ</label>
+                            <label htmlFor="object_count">Обьектийн тоо хэмжээ</label>
                             <textarea
                                 type="text"
                                 name="object_count"
+                                id="object_count"
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 value={object_count}
@@ -102,10 +114,11 @@ export default class RequestDetail extends Component {
                             />
                         </div>
                         <div className="form-group col-md-12">
-                            <label htmlFor=''> Хөрөнгө оруулалтын байдал </label>
+                            <label htmlFor='hurungu_oruulalt'> Хөрөнгө оруулалтын байдал </label>
                             <textarea
                                 name='hurungu_oruulalt'
                                 rows="3"
+                                id="hurungu_oruulalt"
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 value={hurungu_oruulalt}
@@ -115,46 +128,58 @@ export default class RequestDetail extends Component {
                         <UsedTools
                             values={this.props}
                         />
-                        <div className={`form-group ${info ? "invisible" : 'visible'}`}>
-                            <label htmlFor='' className="col-md-12">Орон зайн мэдээлэл</label>
-                            <label
-                                htmlFor="choose-file"
-                                className="custom-file-upload col-md-6 text-center"
-                                id="choose-file-label"
-                            >
-                                файл оруулах
-                            </label>
-                            <input
-                                name="uploadDocument"
-                                type="file"
-                                id="choose-file"
-                                name='files'
-                                onChange={(e) => this.props.handleOnChange(e)}
-                                style={{display: 'none'}}
-                            />
-                            <span className="col-md-5 ml-2">
-                                {file_name ? file_name : 'файл сонгогдоогүй байна'}
-                            </span>
-                        </div>
+                        {
+                            info || state == "ИЛГЭЭСЭН"
+                            ?
+                                <div className={`form-group`}>
+                                    <label htmlFor='choose' className="col-md-12">Орон зайн мэдээлэл</label>
+                                    <label
+                                        htmlFor="choose-file"
+                                        id="choose"
+                                        className={`custom-file-upload col-md-6 text-center ${!file_name  ? "border-danger" : ''}`}
+                                        id="choose-file-label"
+                                        data-toggle="toolpit"
+                                        data-placement="top"
+                                        title={!file_name ? 'файл сонгогдоогүй байна ' : file_name}
+                                    >
+                                        файл оруулах
+                                    </label>
+                                    <input
+                                        name="uploadDocument"
+                                        type="file"
+                                        id="choose-file"
+                                        name='files'
+                                        onChange={(e) => this.props.handleOnChange(e)}
+                                        style={{display: 'none'}}
+                                    />
+                                    {
+                                        file_name && <small className="col-md-5 ml-2">{file_name}</small>
+                                    }
+                                </div>
+                            :
+                                null
+                        }
                     </form>
                     {
                         this.props.submitClass
                         &&
-                        <this.props.submitClass
-                            values={this.props}
-                        />
+                            <this.props.submitClass
+                                valid_request = {document.getElementsByClassName('is-valid')}
+                                values={this.props}
+                                loader={this.handleLoaderActive}
+                            />
                     }
                 </div>
                 {
                     id
                     &&
-                    <div className="col-md-7">
-                    <LLCMap
-                        vector_datas={vector_datas}
-                        height="80vh"
-                        aimag_geom={aimag_geom}
-                    />
-                </div>
+                        <div className="col-md-7">
+                            <LLCMap
+                                vector_datas={vector_datas}
+                                height="80vh"
+                                aimag_geom={aimag_geom}
+                            />
+                        </div>
 
                 }
             </div>
