@@ -104,8 +104,8 @@ export class ConfigureBundle extends Component {
                     </div>
                     <div className="p-4 mx-1">
                         <div className="col-md-12 d-flex justify-content-between">
-                            <label className="col-6 fa fa-angle-double-left fa-2x text-light  btn btn-success mx-2" onClick={(e) => this.changeGeom(false)}></label>
-                            <label className="col-6 fa fa-angle-double-right fa-2x text-light  btn btn-success" onClick={(e) => this.changeGeom(true)}></label>
+                            <label className="col-6 fa fa-angle-double-left fa-2x text-dark btn btn-outline-primary mx-2" onClick={(e) => this.changeGeom(false)}></label>
+                            <label className="col-6 fa fa-angle-double-right fa-2x text-dark btn btn-outline-primary" onClick={(e) => this.changeGeom(true)}></label>
                         </div>
                             {
                                 selected_values.features
