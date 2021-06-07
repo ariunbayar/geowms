@@ -124,7 +124,7 @@ export default class UsedTools extends Component {
                             <div className="form-group col-md-12">
                                 <a
                                     type='button'
-                                    className="btn"
+                                    className="btn text-primary"
                                     id='tool_id'
                                     onClick={(e) => this.handleSelectModel('Эрх бүхий багажууд', this.handleSelectedTool, tool_datas)}
                                 >
