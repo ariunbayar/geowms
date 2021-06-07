@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { LLCMap } from '../../../llc/frontend/LLCMap'
-import Loader from "@utils/Loader/index"
+import DetailModal from "./detailModal"
+import ModelSelectTools from "../../../llc/frontend/Request/select_modal"
 import { service } from './service'
 
 export class Detail extends Component {
@@ -16,8 +17,25 @@ export class Detail extends Component {
             vector_datas: [],
             disabled: true,
             aimag_name: '',
+            modal_status: 'closed',
+            modal_open: false,
+            features: this.props,
+
+
+
+            select_layer_status: false,
+            values: [],
+            modalAction: '',
+            modal_title: '',
+            more_detail: '',
+            selected_tools: []
         }
         this.selectedFeature = this.selectedFeature.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+
+
+        this.handleSelectedTool = this.handleSelectedTool.bind(this)
+        this.modalClose = this.modalClose.bind(this)
     }
 
     componentDidMount() {
@@ -52,15 +70,77 @@ export class Detail extends Component {
         }
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open', modal_open: true }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+
+
+    componentDidUpdate(pP, pS) {
+        const { selected_tools, state, info } = this.props.values
+        // backaas avnaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        if(pP.values.selected_tools != selected_tools) {
+            if(!state && !info ) {
+                this.setState({ selected_tools: selected_tools })
+            }
+            else {
+                this.setState({ selected_tools: selected_tools })
+            }
+        }
+    }
+
+    modalClose() {
+        this.setState({ select_layer_status: false })
+    }
+
+    handleSelectedTool(value_type, value) {
+        var array = [...this.state.selected_tools]
+        if(value_type) {
+            array = array.concat(value)
+            this.setState({ select_layer_status: false })
+        }
+        else {
+            for(let [i, layer] of array.entries()) {
+                if(layer.bagaj_dugaar == value.bagaj_dugaar) {
+                    array.splice(i, 1);
+                }
+            }
+        }
+        this.props.values.handleSelectModel(array)
+    }
+
+    handleSelectModel(modal_title, modalAction, values, more_detail) {
+        return(
+            this.setState({
+                select_layer_status: true,
+                modalAction,
+                modal_title,
+                values,
+                more_detail
+            })
+        )
+    }
+
+
     render() {
         const {
             aimag_name, zahialagch,
             project_name, object_type,
             object_count, hurungu_oruulalt,
             vector_datas, aimag_geom,
-            is_loading
+            modal_open,
         } = this.state
         var is_disable = true
+
+
+        const {
+            modalAction, values,
+            modal_title,
+            select_layer_status,
+            selected_tools
+        } = this.state
         return(
             <div className="card">
                 <div className="card-body">
@@ -132,6 +212,48 @@ export class Detail extends Component {
                                     />
                                 </div>
                             </form>
+                            <div className="overflow-auto" style={{maxHeight: '30vh'}}>
+                                <table className="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"> № </th>
+                                            <th scope="col">Багажны дугаар</th>
+                                            <th scope="col">Багажны марк</th>
+                                            <th scope="col">сертификатын дугаар</th>
+                                            <th scope="col">Дуусах хугацаа</th>
+                                        </tr>
+                                    </thead>
+                                    {/* <tbody>
+                                        {
+                                            <tr className="col-md-12" style={{fontSize: '12px'}}>
+                                                <td>{1}</td>
+                                                <td>
+                                                    <a href="#" onClick={this.handleModalOpen}>
+                                                        <i aria-hidden="true">{2}</i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody> */}
+                                    <tbody>
+                                        {
+                                            selected_tools && selected_tools.length > 0
+                                            ?
+                                                selected_tools.map((value, idx) =>
+                                                    <tr key={idx}>
+                                                        <th scope="row">{idx+1}</th>
+                                                        <td>{value.bagaj_dugaar}</td>
+                                                        <td>{value.bagaj_mark}</td>
+                                                        <td>{value.certificate_number}</td>
+                                                        <td>{value.expired_date}</td>
+                                                    </tr>
+                                                )
+                                            :
+                                                null
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         <div className="col-md-7">
                             <LLCMap
@@ -142,6 +264,11 @@ export class Detail extends Component {
                             />
                         </div>
                     </div>
+                    {
+                        modal_open
+                        &&
+                            <DetailModal/>
+                    }
                 </div>
             </div>
         )
