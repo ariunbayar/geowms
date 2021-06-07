@@ -382,7 +382,16 @@ export default class InspireMap extends Component {
         const { projection, projection_display, form_datas} = this.state
         var styles = this.layer_styles
         const {aimag_geom} = this.props
-        if (Object.keys(vector_source.features).length > 0) {
+
+        if (this.map) {
+            this.map.getLayers().forEach(layer => {
+                if (layer && layer.get('id') === 'aimag') {
+                    layer.getSource().clear();
+                }
+            });
+        }
+
+        if (Object.keys(vector_source).length > 0) {
                 var nt_features = new GeoJSON({
                     dataProjection: projection_display,
                     featureProjection: projection
@@ -406,11 +415,11 @@ export default class InspireMap extends Component {
                         featureProjection: projection
                     }).readFeatures(aimag_geom)
 
-                    const vectorSourceAimag = new VectorSource({
+                    var vectorSourceAimag = new VectorSource({
                             features: aimag_features
                     })
 
-                    const aimag_layer = new VectorLayer({
+                    var aimag_layer = new VectorLayer({
                         source: vectorSourceAimag,
                         style: new Style({
                             stroke: new Stroke({
@@ -419,12 +428,19 @@ export default class InspireMap extends Component {
                             })
                         })
                     })
-                    this.map.addLayer(aimag_layer)
                 }
 
                 if (this.map) {
-                    this.map.addLayer(vector_layer)
-                    this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    if (aimag_geom) {
+                        this.map.addLayer(vector_layer)
+                        this.map.addLayer(aimag_layer)
+                        this.map.getView().fit(vectorSourceAimag.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    }
+                    else {
+                        this.map.addLayer(vector_layer)
+                        this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    }
+                    //
                 }
         }
     }
