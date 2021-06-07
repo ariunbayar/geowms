@@ -10,6 +10,7 @@ export class Detail extends Component {
     }
 
     render() {
+        const id = this.props.match.params.id
         return (
             <div className="card">
                 <div className="card-body">
