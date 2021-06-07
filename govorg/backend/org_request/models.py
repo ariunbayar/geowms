@@ -1,7 +1,7 @@
 from django.db import models
 from backend.org.models import Employee
 from backend.org.models import Org
-
+from llc.backend.llc_request.models import LLCRequest
 # Create your models here.
 
 class ChangeRequest(models.Model):
@@ -31,7 +31,7 @@ class ChangeRequest(models.Model):
         (KIND_DELETE, 'УСТГАСАН'),
         (KIND_DIRECT, 'ШУУД'),
         (KIND_REVOKE, 'ЦУЦЛАСАН'),
-        (KIND_DISMISS, 'Буцаагдсан'),
+        (KIND_DISMISS, 'БУЦААГДСАН'),
     )
 
     old_geo_id = models.CharField(max_length=100, null=True)
@@ -48,5 +48,6 @@ class ChangeRequest(models.Model):
     form_json = models.TextField(null=True)
     geo_json = models.TextField(null=True)
     group_id = models.TextField(max_length=100, null=True)
+    llc_request = models.ForeignKey(LLCRequest, on_delete=models.PROTECT, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -1,11 +1,11 @@
 import React, { Component, Suspense } from 'react'
-import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+
 import MenuItem from "@utils/MenuItem"
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
 
 const Map = React.lazy(() => import("./Map"));
 const Request = React.lazy(() => import('./Request'));
-
 
 export class App extends Component {
 

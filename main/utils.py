@@ -1146,6 +1146,7 @@ def json_dumps(data):
         data = json.dumps(data, ensure_ascii=False)
     return data
 
+
 def make_value_dict(value, properties_qs, is_display=False):
     value = json_load(value)
     for types in value_types():

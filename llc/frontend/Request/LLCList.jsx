@@ -1,11 +1,11 @@
 import React, { Component, Fragment } from "react";
-import { PortalDataTable } from '@utils/DataTable/index'
-import DirectModal from  './DirectModal'
-import RequestModal from  './RequestModal'
-import Modal from '@utils/Modal/Modal'
-import { render } from "react-dom";
-import { service } from "./service";
+import { NavLink } from "react-router-dom"
 
+import { PortalDataTable } from '@utils/DataTable/index'
+import Modal from '@utils/Modal/Modal'
+
+import RequestModal from  './RequestModal'
+import { service } from "./service";
 
 export const make_state_color = (state) => {
     let color
@@ -24,25 +24,52 @@ export const make_kind_color = (kind) => {
     return color
 }
 
-export const make_send_data = (values) => {
-    let kind = values.values.kind
-    return (
-        <div>
-            {
-                kind == "БУЦААГДСАН"
-                &&
-                <a
-                    type="button"
-                    href={'/media/' + values.values.file_path}
-                    target="_blank"
-                    className= "btn text-light animated bounceIn bg-danger"
-                >
-                <i className="fa fa-download"> &nbsp; Татах</i>
-                </a>
+export class FileAndDesc extends Component {
+    constructor(props){
+        super(props)
+        this.state = {
         }
-        </div>
+    }
 
-    )
+    render() {
+        const { values } = this.props
+        return (
+            <div className='p-0'>
+                {
+                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
+                    &&
+                        <div className="p-0 d-flex justify-content-between btn-group">
+                            <NavLink
+                                type="button"
+                                to={'/media/' + values.file_path}
+                                target="_blank"
+                                className="btn animated bounceIn text-light bg-danger"
+                                style={{
+                                    padding: 4,
+                                    backgroundColor: '#fd355е',
+                                    borderColor: '#fd355е',
+                                    borderRadius: '.25rem'
+                                }}
+                            >
+                                <i className="fa fa-download"> &nbsp; Татах</i>
+                            </NavLink> &nbsp; &nbsp;
+                            <button
+                                className="btn border rounded animated bounceIn text-light"
+                                style={{
+                                    padding: 4,
+                                    backgroundColor: '#ff9700',
+                                    borderColor: '#ff9700',
+                                    borderRadius: '.25rem'
+                                }}
+                                onClick={()=> this.props.infoModal(values)}
+                            >
+                                <i className="fa fa-info-circle"> &nbsp; Тайлбар</i>
+                            </button>
+                        </div>
+                }
+            </div>
+        )
+    }
 }
 
 export class Detail extends Component {
@@ -50,7 +77,7 @@ export class Detail extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            refresh:false,
+            refresh: false,
             талбарууд: [
                 {'field': 'name', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
@@ -74,8 +101,9 @@ export class Detail extends Component {
                     {
                         "title": 'Илгээх',
                         'component': RequestModal,
-                        'props' :{
+                        'props': {
                             'refreshData': () => this.refreshData(),
+                            'modal_status': this.modal_status,
                         }
                     },
                     {
@@ -87,31 +115,32 @@ export class Detail extends Component {
                     },
                     {
                         "title": '',
-                        "text": 'татах',
-                        "icon": 'text-primary',
-                        'component': (values) => make_send_data(values)
+                        'component': FileAndDesc,
+                        'props': {
+                            'infoModal': (values) => this.infoModal(values),
+                        }
                     }
             ],
             state: '',
             kind: '',
-            modal_status:'closed',
-            request_form:false,
+            modal_status: 'closed',
+            request_form: false,
             choices: [],
         }
-
         this.refreshData = this.refreshData.bind(this)
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.infoModal = this.infoModal.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
     }
 
     componentDidMount(){
-        service.getSearchItems().then(({ success, search_field}) =>{
+        service.getSearchItems().then(({ success, search_field }) =>{
             if (success){
-                this.setState({choices: search_field})
+                this.setState({ choices: search_field })
             }
         })
 
@@ -122,19 +151,20 @@ export class Detail extends Component {
     }
 
     handleRemoveAction(values){
-        this.setState({values})
+        this.setState({ values })
         this.handleModalOpen(values)
     }
 
     handleModalOpen(values){
-        if(values.state =='ИЛГЭЭСЭН'){
+        let not_remove_kinds = ['ХҮЛЭЭГДЭЖ БУЙ', 'ЦУЦЛАСАН']
+        if(not_remove_kinds.includes(values.kind)) {
             this.modalChange(
                 'fa fa-exclamation-circle',
                 "danger",
                 'Устгах боломжгүй',
                 `"Энэхүү хүсэлт илгээгдсэн төлөвт байгаа тул устгах боломжгүй`,
                 false
-                )
+            )
         }
         else {
             this.modalChange(
@@ -143,35 +173,46 @@ export class Detail extends Component {
                 'Тохиргоог устгах',
                 `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
                 true
-                )
+            )
         }
     }
 
-    modalChange(modal_icon, icon_color, title, text, has_button) {
+    modalChange(modal_icon, icon_color, title, text, has_button, description) {
         this.setState({
             modal_icon: modal_icon,
             icon_color: icon_color,
             title: title,
             text: text,
             has_button: has_button,
+            description: description,
         })
         this.modalOpen()
     }
 
-    modalOpen(){
+    modalOpen() {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
         })
     }
 
-    handleRemove(){
-        const {id} = this.state.values
-        service.RemoveRequest(id).then(({ success }) =>{
-            if(success){
+    handleRemove() {
+        const { id } = this.state.values
+        service.removeRequest(id).then(({ success, info }) => {
+            if(success) {
                 this.modalChange(
                     'fa fa-check-circle',
                     "success",
-                    'Амжилттай устгалаа',
+                    info,
+                    '',
+                    false
+                )
+                this.refreshData()
+            }
+            else {
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "danger",
+                    info,
                     '',
                     false
                 )
@@ -180,7 +221,7 @@ export class Detail extends Component {
         })
     }
 
-    refreshData(){
+    refreshData() {
         this.setState({ refresh: !this.state.refresh })
     }
 
@@ -204,8 +245,19 @@ export class Detail extends Component {
         this.setState({ custom_query, [selected_data_name]: value })
     }
 
+    infoModal(values) {
+        this.modalChange(
+            'fa fa-info-circle',
+            "warning",
+            'Тайлбар',
+            ModalText,
+            false,
+            values.description,
+        )
+    }
+
     render() {
-        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, choices }= this.state
+        const { талбарууд, жагсаалтын_холбоос, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, choices } = this.state
         return (
             <Fragment>
                 <div className="card">
@@ -214,7 +266,7 @@ export class Detail extends Component {
                             <div className="col-md-6">
                                 <label htmlFor="">Төлөв</label>
                                 <select
-                                    className="form-control form-control-xs "
+                                    className="form-control form-control-xs"
                                     onChange={(e) => this.handleSearch(e)}
                                 >
                                     <option value="">--- Төлөвөөр хайх ---</option>
@@ -225,7 +277,7 @@ export class Detail extends Component {
                                                 <option key={idx} name='state' value={choice[0]}>{choice[1]}</option>
                                             )
                                         :
-                                        null
+                                            null
                                     }
                                 </select>
                             </div>
@@ -279,9 +331,18 @@ export class Detail extends Component {
                         text={this.state.text}
                         modalAction={this.handleRemove}
                         actionNameDelete="Устгах"
+                        description={this.state.description}
                     />
                 </div>
             </Fragment>
         )
     }
+}
+
+function ModalText(props) {
+    return (
+        <span className="text-center">
+            {props.description}
+        </span>
+    )
 }
