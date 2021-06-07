@@ -195,6 +195,24 @@ def _tools_validation(get_tools):
         saved_ids.append(tool['bagaj_dugaar'])
 
 
+def _change_file_in_update(uploaded_file, current_file_name, check_data_of_file, main_path, id):
+
+    current_folder = current_file_name.split('.')[0]
+    check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
+    save_file_path = os.path.join(check_folder, current_folder)
+    folder_list = os.listdir(check_folder)
+    files = glob.glob(save_file_path + '/*')
+    lastest_file_path = max(files, key=os.path.getctime)
+    lastest_file = lastest_file_path.split(save_file_path + "/")[1]
+
+    if current_folder in folder_list:
+        get_files = os.listdir(check_folder + "/" + current_folder)
+        for file in get_files:
+            delete_file_path = os.path.join(check_folder, current_folder, file)
+            utils.remove_file(delete_file_path)
+        utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
+
+
 @require_POST
 @ajax_required
 def save_request(request):
@@ -212,18 +230,16 @@ def save_request(request):
     file_name = uploaded_file.name
     file_not_ext_name = utils.get_file_name(file_name)
     file_path = os.path.join(main_path, file_not_ext_name)
-
-    utils.save_file_to_storage(uploaded_file, file_path, file_name)
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
 
-    if not uploaded_file.name.endswith('.zip'):
-        return JsonResponse({
-            'success': False,
-            'info': 'Заавал zip файл оруулах ёстой.!!!'
-        })
-
+    if file_name != 'blob' and id:
+        if not uploaded_file.name.endswith('.zip'):
+            return JsonResponse({
+                'success': False,
+                'info': 'Заавал zip файл оруулах ёстой.!!!'
+            })
 
     if not is_agreed:
 
@@ -247,11 +263,18 @@ def save_request(request):
     check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
+
     if check_data_of_file and not id:
         return JsonResponse({
             'success': False,
             'info': 'Файл-ын нэр давхцаж байна !!!.'
         })
+
+    if check_data_of_file and id :
+        _change_file_in_update(uploaded_file, file_name, check_data_of_file, main_path, id)
+        check_data_of_file = False
+    else:
+        utils.save_file_to_storage(uploaded_file, file_path, file_name)
 
     if not check_data_of_file or not id:
         extract_path = os.path.join(extract_path, file_not_ext_name)
