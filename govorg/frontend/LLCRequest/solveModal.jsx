@@ -36,8 +36,7 @@ class DetailModalBody extends Component {
 
     changeCurrentData(state) {
         let {current_count, datas} = this.state
-        var feature_count = datas.features.length - 1
-
+        var feature_count = datas.length - 1
         if(state) {
             if (current_count < feature_count) {
                 current_count = current_count + 1
@@ -279,8 +278,15 @@ class DetailModalBody extends Component {
                 <div className="col-md-12">
                     <div className="mx-1 px-4">
                         <div className="col-md-12 pb-5 mt-2 fa-2x text-dark d-flex justify-content-between">
-                            <label className="col-6 fa fa-angle-double-left btn btn-outline-primary mr-1" onClick={(e) => this.changeGeom(false)}></label>
-                            <label className="col-6 fa fa-angle-double-right btn btn-outline-primary ml-1" onClick={(e) => this.changeGeom(true)}></label>
+                            <label
+                                className="col-6 fa fa-angle-double-left btn btn-outline-primary mr-1"
+                                disabled={!current_data && true}
+                                onClick={(e) => this.changeCurrentData(false)}
+                                ></label>
+                            <label
+                                className="col-6 fa fa-angle-double-right btn btn-outline-primary ml-1"
+                                disabled={!current_data && true}
+                                onClick={(e) => this.changeCurrentData(true)}></label>
                         </div>
                             {
                                 current_data
