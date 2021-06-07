@@ -312,10 +312,10 @@ def save_request(request):
                 get_shapes.delete()
 
             if not check_data_of_file:
-                request_file.geo_id=org_data.geo_id if org_data else ''
-                request_file.file_path=uploaded_file
+                request_file.geo_id = org_data.geo_id if org_data else ''
+                request_file.file_path = uploaded_file
 
-            request_file.tools=json_dumps(get_tools)
+            request_file.tools = json_dumps(get_tools)
             request_file.save()
 
         else:
