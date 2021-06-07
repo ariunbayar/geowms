@@ -72,6 +72,7 @@ export class ConfigureBundle extends Component {
         } = this.state
         const {selected_values, selected_packages, selected_features} = this.props
         const { theme, feature } = selected_values
+
         return (
             <div className="col-md-12">
                 <div className="container">
@@ -109,20 +110,32 @@ export class ConfigureBundle extends Component {
                             {
                                 selected_values.features
                                 &&
-                                <div className="col-md-12 pb-5 mt-2 px-0 mx-0 overflow-auto d-flex justify-content-between">
-                                    <div className="col-md-5">
-                                        <div className="col-md-12 text-danger">
-                                            <h1>hoho{geom_state_count}</h1>
-                                            <h1>hoho</h1>
-                                            <h1>hoho</h1>
+                                <div className="col-md-12 pb-5 mt-2 px-0 mx-0 d-flex justify-content-between">
+                                    <div className="col-md-6">
+                                        <div className="overflow-auto" style={{maxHeight: '60vh'}}>
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col"> # </th>
+                                                        <th scope="col"> Property</th>
+                                                        <th scope="col"> Утга</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        Object.keys(selected_values.features[geom_state_count].properties).map((layer, idx) =>
+                                                            <tr className="col-md-12" style={{fontSize: '12px'}} key={idx}>
+                                                                <td>{idx+1}</td>
+                                                                <td>{layer}</td>
+                                                                <td className="font-weight-normal">
+                                                                    {selected_values.features[geom_state_count].properties[layer]}
+                                                                </td>
+                                                            </tr>
+                                                        )
+                                                    }
+                                                </tbody>
+                                            </table>
                                         </div>
-                                            {
-                                                selected_values.features[geom_state_count].properties
-                                                &&
-                                                Object.keys(selected_values.features[geom_state_count].properties).map((data, idy) =>{
-                                                    <div className="bg-info text-danger"><h1>{data}</h1></div>
-                                                })
-                                            }
                                     </div>
                                     <div className="col-md-6 d-inline-block">
                                         <LLCMap
@@ -134,38 +147,6 @@ export class ConfigureBundle extends Component {
                             }
                     </div>
                 </div>
-                {/* <div className="form-row col-md-12 p-4 mx-1">
-                        <SelectField
-                            title_name='theme'
-                            data_list={themes}
-                            defualt_value={theme?.id || ''}
-                            handleSelectField={this.handleChange}
-                        />
-                        <SelectField
-                            title_name='package'
-                            data_list={
-                                selected_values.package?.list && selected_values.package?.list.length >0
-                                ? selected_values.package?.list : selected_packages
-                            }
-                            defualt_value={selected_values.package?.id || ''}
-                            handleSelectField={this.handleChange}
-                        />
-                        <SelectField
-                            title_name='feature'
-                            data_list={
-                                selected_values.feature?.list && selected_values.feature?.list.length >0
-                                ? selected_values.feature?.list : selected_features
-                            }
-                            defualt_value={feature?.id || ''}
-                            handleSelectField={this.handleChange}
-                        />
-                </div>
-                <div className="col-md-12 pb-5 mt-2">
-                    <LLCMap
-                        vector_datas={selected_values.features}
-                        height={'60vh'}
-                    />
-                </div> */}
             </div>
         )
     }
