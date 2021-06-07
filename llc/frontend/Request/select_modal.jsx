@@ -104,7 +104,7 @@ export default class ModelSelectTools extends Component {
                                                                     {idx}
                                                                 </td>
                                                                 <td>
-                                                                    <a href="#" onClick={(e) => this.handleProceed(true, value)}>
+                                                                    <a className="text-primary" onClick={(e) => this.handleProceed(true, value)}>
                                                                         {value.bagaj_dugaar}
                                                                     </a>
                                                                 </td>

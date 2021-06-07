@@ -1,9 +1,10 @@
 import React, { Component, useState } from "react"
 import RequestModal from './requestModal'
 import {LLCMap} from '../../../llc/frontend/LLCMap'
+import InspireField from './InspireField'
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
-import Loader from "@utils/Loader/index"
+import { containsCoordinate } from "ol/extent"
 
 class DetailModalBody extends Component {
     constructor(props) {
@@ -17,17 +18,10 @@ class DetailModalBody extends Component {
             title: '',
             has_button: false,
             modalClose: null,
-
-            values: props.values,
-            project_name: '',
-            object_type: '',
-            object_count: '',
-            hurungu_oruulalt: '',
-            vector_datas: [],
-            disabled: true,
-            aimag_name: '',
-            description: '',
+            datas: [],
+            current_count: 0
         }
+
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleModalAction = this.handleModalAction.bind(this)
@@ -37,6 +31,26 @@ class DetailModalBody extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.selectedFeature = this.selectedFeature.bind(this)
         this.handleOnChange = this.handleOnChange.bind(this)
+        this.changeCurrentData = this.changeCurrentData.bind(this)
+    }
+
+    changeCurrentData(state) {
+        let {current_count, datas} = this.state
+        var feature_count = datas.features.length - 1
+
+        if(state) {
+            if (current_count < feature_count) {
+                current_count = current_count + 1
+            }
+            else current_count = 0
+        }
+        else {
+            if (current_count > 0) {
+                current_count = current_count - 1
+            }
+            else current_count = feature_count
+        }
+        this.setState({current_count})
     }
 
     handleOnChange(e) {
@@ -207,20 +221,8 @@ class DetailModalBody extends Component {
     componentDidMount() {
         if (this.state.status == "initial") this.handleOpen()
         var id = this.props.id
-        service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom }) => {
-            if (form_field) {
-                this.setState({
-                    vector_datas,
-                    zahialagch :form_field['client_org'],
-                    project_name : form_field['project_name'],
-                    object_type : form_field['object_type'],
-                    object_count : form_field['object_quantum'],
-                    hurungu_oruulalt : form_field['investment_status'],
-                    selected_tools,
-                    aimag_name,
-                    aimag_geom
-                })
-            }
+        service.handleRequestData(id).then(({ datas }) => {
+            if (datas) this.setState({datas})
         })
     }
 
@@ -269,145 +271,95 @@ class DetailModalBody extends Component {
 
     render() {
         const {
-            aimag_name, zahialagch,
-            project_name, object_type,
-            object_count, hurungu_oruulalt,
-            vector_datas, aimag_geom,
-            is_loading
+            datas, current_count
         } = this.state
-        var is_disable = true
-        const { kind } = this.props
+        var current_data = datas[current_count]
         return(
             <>
-            <div className="row p-3">
-                <Loader is_loading={is_loading} text={'Хүсэлтийг шалгаж байна түр хүлээнэ үү...'} />
-                <div className="col-md-5">
-                    <form  class="form-row">
-                        {
-                            aimag_name
-                            &&
-                                <div className="form-group col-md-12">
-                                    <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
-                                    <input
-                                        type="text"
-                                        name='aimag_name'
-                                        className="form-control"
-                                        disabled={is_disable}
-                                        value={aimag_name}
-                                    />
+                <div className="col-md-12">
+                    <div className="mx-1 px-4">
+                        <div className="col-md-12 pb-5 mt-2 fa-2x text-dark d-flex justify-content-between">
+                            <label className="col-6 fa fa-angle-double-left btn btn-outline-primary mr-1" onClick={(e) => this.changeGeom(false)}></label>
+                            <label className="col-6 fa fa-angle-double-right btn btn-outline-primary ml-1" onClick={(e) => this.changeGeom(true)}></label>
+                        </div>
+                            {
+                                current_data
+                                &&
+                                <div className="col-md-12 pb-5 mt-2">
+                                    <div className="form-row">
+                                        <InspireField
+                                            title_name='theme'
+                                            defualt_value={current_data.theme?.name || ''}
+                                        />
+                                        <InspireField
+                                            title_name='package'
+                                            defualt_value={current_data.package?.name || ''}
+                                        />
+                                        <InspireField
+                                            title_name='feature'
+                                            defualt_value={current_data.feature?.name || ''}
+                                        />
+                                    </div>
+                                    <div className="col-md-12 mx-0 px-0">
+                                        <LLCMap
+                                            vector_datas={current_data?.features || []}
+                                            height={'60vh'}
+                                        />
+                                    </div>
                                 </div>
-                        }
-                        <div className="form-group col-md-12">
-                            <label htmlFor=''>Захиалагч байгууллага</label>
-                            <input
-                                type="text"
-                                name='zahialagch'
-                                className="form-control"
-                                value={zahialagch}
-                                disabled={is_disable}
-                            />
-                        </div>
-                        <div className="form-group col-md-12 m-0">
-                            <label htmlFor=''>Төслийн нэр</label>
-                            <input
-                                type="text"
-                                name='project_name'
-                                className="form-control"
-                                value={project_name}
-                                disabled={is_disable}
-                            />
-                        </div>
-                        <div className="form-group col-md-6 my-4 col-sm-6">
-                            <label htmlFor=''>Объектийн төрөл</label>
-                            <textarea
-                                type="text"
-                                name="object_type"
-                                className="form-control"
-                                value={object_type}
-                                disabled={is_disable}
-                            />
-                        </div>
-                        <div className="form-group col-md-6 col-sm-6 my-4">
-                            <label htmlFor=''>Объектийн тоо хэмжээ</label>
-                            <textarea
-                                type="text"
-                                name="object_count"
-                                className="form-control"
-                                value={object_count}
-                                disabled={is_disable}
-                            />
-                        </div>
-                        <div className="form-group col-md-12">
-                            <label htmlFor=''> Хөрөнгө оруулалтын байдал </label>
-                            <textarea
-                                name='hurungu_oruulalt'
-                                rows="3"
-                                className="form-control"
-                                value={hurungu_oruulalt}
-                                disabled={is_disable}
-                            />
-                        </div>
-                    </form>
+                            }
+                    </div>
                 </div>
-                <div className="col-md-7">
-                    <LLCMap
-                        vector_datas={vector_datas}
-                        height="50vh"
-                        aimag_geom={aimag_geom}
-                        selectedFeature={this.selectedFeature}
-                    />
+                <div className="row my-2 mr-1 float-right">
+                    <button
+                        type="button mr-2 ml-2"
+                        onClick={() => this.modalChange(
+                            'reject',
+                            'fa fa-exclamation-circle',
+                            'warning',
+                            "Тохиргоог цуцлах",
+                            GetDescription,
+                            this.state.has_button,
+                            "илгээх",
+                            null
+                        )}
+                        className="btn gp-btn-primary waves-effect waves-light"
+                    >
+                        <i className="fa fa-check-square-o">Цуцлах</i>
+                    </button>
+                    <button
+                        type="button mr-2 ml-2"
+                        onClick={() => this.modalChange(
+                            'dismiss',
+                            'fa fa-exclamation-circle',
+                            'warning',
+                            "Тохиргоог буцаах",
+                            GetDescription,
+                            this.state.has_button,
+                            "илгээх",
+                            null
+                        )}
+                        className="btn gp-btn-primary waves-effect waves-light ml-2"
+                    >
+                        <i className="fa fa-check-square-o">Буцаах</i>
+                    </button>
+                    <button
+                        type="button mr-2 ml-2"
+                        onClick={() => this.modalChange(
+                            'approve',
+                            'fa fa-exclamation-circle',
+                            'warning',
+                            "Хүсэлт үүсгэх",
+                            `Та хүсэлт үүсгэхдээ итгэлтэй байна уу?`,
+                            true,
+                            "Хүсэлт үүсгэх",
+                            null
+                        )}
+                        className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
+                    >
+                        <i className="fa fa-check">Хүсэлт үүсгэх</i>
+                    </button>
                 </div>
-            </div>
-            <div className="row my-2 mr-1 float-right">
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'reject',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог цуцлах",
-                        GetDescription,
-                        this.state.has_button,
-                        "илгээх",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light"
-                >
-                    <i className="fa fa-check-square-o">Цуцлах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'dismiss',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Тохиргоог буцаах",
-                        GetDescription,
-                        this.state.has_button,
-                        "илгээх",
-                        null
-                    )}
-                    className="btn gp-btn-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check-square-o">Буцаах</i>
-                </button>
-                <button
-                    type="button mr-2 ml-2"
-                    onClick={() => this.modalChange(
-                        'approve',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        "Хүсэлт үүсгэх",
-                        `Та хүсэлт үүсгэхдээ итгэлтэй байна уу?`,
-                        true,
-                        "Хүсэлт үүсгэх",
-                        null
-                    )}
-                    className="btn gp-btn-outline-primary waves-effect waves-light ml-2"
-                >
-                    <i className="fa fa-check">Хүсэлт үүсгэх</i>
-                </button>
-            </div>
             <Modal
                 modal_status={this.state.modal_status}
                 modal_icon={this.state.modal_icon}
