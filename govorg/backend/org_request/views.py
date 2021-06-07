@@ -1193,9 +1193,9 @@ def llc_request_approve(request, request_id):
 def inspire_save(request, payload):
     values = payload.get('values')
     id = values.get('id')
-    theme_id = values.get('theme').get('id')
-    feature_id = values.get('feature').get('id')
-    package_id = values.get('package').get('id')
+    theme_id = values.get('theme').get('id') or None
+    feature_id = values.get('feature').get('id') or None
+    package_id = values.get('package').get('id') or None
     RequestFilesShape.objects.filter(id=id).update(
         theme_id=theme_id,
         package_id=package_id,

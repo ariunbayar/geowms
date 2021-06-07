@@ -15,11 +15,18 @@ export default class InspireField extends Component {
                 <label className=''>
                     {title_name ? title_name : ''}
                 </label>
-                <span
-                    className={'form-control'}
+                <i
+                    className={
+                        `form-control ${
+                            !defualt_value
+                            &&
+                            `border border-danger icon-exclamation text-danger`
+                        }`
+                    }
+                    title={`${title_name.toUpperCase()} сонгогдоогүй байна !!!`}
                 >
                     {defualt_value}
-                </span>
+                </i>
             </div>
         );
     }
