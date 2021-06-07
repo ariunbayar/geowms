@@ -1199,10 +1199,12 @@ def inspire_save(request, payload):
 
 @require_GET
 @ajax_required
-def get_state_choices(request):
+def get_search_choices(request):
     search_field = dict()
     get_state = RequestFiles.STATE_CHOICES
+    get_kind = RequestFiles.KIND_CHOICES
     search_field['state'] = get_state
+    search_field['kind'] = get_kind
 
     return JsonResponse({
         'success': True,

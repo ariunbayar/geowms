@@ -104,6 +104,11 @@ export class Detail extends Component {
 
         if (selected_data_name == 'state') {
             if (e.target.value) custom_query['state'] = value
+            if (this.state.kind) custom_query['kind'] = this.state.kind
+        }
+        else {
+            if (value) custom_query['kind'] = value
+            if (this.state.state) custom_query['state'] = this.state.state
         }
 
         this.setState({ custom_query, [selected_data_name]: value })
@@ -122,23 +127,49 @@ export class Detail extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="col-md-6 row mb-3">
-                        <label htmlFor="">Төлөв</label>
-                        <select
-                            className="form-control form-control-xs"
-                            onChange={(e) => this.handleSearch(e)}
-                        >
-                            <option value="">--- Төлөвөөр хайх ---</option>
-                            {
-                                choices?.state
-                                ?
-                                    choices['state'].map((choice, idx) =>
-                                        <option key={idx} name='state' value={choice[0]}>{choice[1]}</option>
-                                    )
-                                :
-                                null
-                            }
-                        </select>
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label htmlFor="">Төлөв</label>
+                            <select
+                                className="form-control form-control-xs"
+                                onChange={(e) => this.handleSearch(e)}
+                            >
+                                <option value="">--- Төлвөөр хайх ---</option>
+                                {
+                                    choices?.state
+                                    ?
+                                        choices['state'].map((choice, idx) =>
+                                            <option key={idx} name='state' value={choice[0]}>{choice[1]}</option>
+                                        )
+                                    :
+                                    null
+                                }
+                            </select>
+                        </div>
+                        <div className="col-md-6">
+                            <label htmlFor="">Өөрчлөлт</label>
+                            <select
+                                className="form-control form-control-xs"
+                                onChange={(e) => this.handleSearch(e)}
+                            >
+                                <option value="">--- Өөрчлөлтөөр хайх ---</option>
+                                {
+                                    choices?.kind
+                                    ?
+                                        choices['kind'].map((choice, idx) =>
+                                            <option
+                                                ey={idx}
+                                                name='kind'
+                                                value={choice[0]}
+                                            >
+                                                {choice[1]}
+                                            </option>
+                                        )
+                                    :
+                                    null
+                                }
+                            </select>
+                        </div>
                     </div>
                     <div className="row">
                         <div className="col-md-12">
