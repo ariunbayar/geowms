@@ -1,12 +1,11 @@
 import React, { Component } from "react"
-import { DetailModalBody } from './solveModal'
+import { DetailModalBody } from "./solveModal"
 
 export class Detail extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-
         }
     }
 
@@ -16,7 +15,8 @@ export class Detail extends Component {
                 <div className="card-body">
                     {
                         <DetailModalBody
-                            info = {'Дэлгэрэнгүй'}
+                            info={'Дэлгэрэнгүй'}
+                            id={id}
                         />
                     }
                 </div>

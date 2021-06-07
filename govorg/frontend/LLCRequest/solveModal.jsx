@@ -1,6 +1,7 @@
 import React, { Component, useState } from "react"
 import RequestModal from './requestModal'
 import {LLCMap} from '../../../llc/frontend/LLCMap'
+import {Detail} from './Detail'
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
