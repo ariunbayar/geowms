@@ -120,7 +120,6 @@ export class Detail extends Component {
 
     render() {
         const { жагсаалтын_холбоос, талбарууд, хувьсах_талбарууд, нэмэлт_талбарууд, refresh, choices } = this.state
-        console.log(this.state.custom_query);
         return (
             <div className="card">
                 <div className="card-body">
