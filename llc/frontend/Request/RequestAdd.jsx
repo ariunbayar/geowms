@@ -142,10 +142,6 @@ export class RequestAdd extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
-    handleSelectModel(selected_tools) {
-        this.setState({ selected_tools })
-    }
-
     componentDidMount() {
         const { id } = this.props.match.params
         if (id) {
@@ -179,6 +175,10 @@ export class RequestAdd extends Component {
             .then(({ tool_datas }) => {
                 this.setState({tool_datas})
             })
+    }
+
+    handleSelectModel(selected_tools) {
+        this.setState({ selected_tools })
     }
 
     handleOnChange(e) {
