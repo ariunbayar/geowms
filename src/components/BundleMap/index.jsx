@@ -1008,11 +1008,10 @@ export default class InspireMap extends Component {
         selectClick.on("select", event => this.featureSelected(event, coordinate));
     }
 
-
     featureSelected(event, coordinate){
-        const features = event.selected
-        if(features[0]) {
-            var prop = features[0].getProperties();
+        const features = event.selected[0]
+        if(features) {
+            var prop = features.getProperties();
             this.controls.popup.getData(true, prop, this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
         }
         else {
