@@ -219,6 +219,7 @@ urlpatterns = [
         path('editName/', dedsan_butets.Edit_name),
         path('get-fields/', dedsan_butets.getFields),
         path('save/', dedsan_butets.save),
+        path('make-view/<int:fid>/', dedsan_butets.make_view),
         path('property-fields/<int:fid>/', dedsan_butets.propertyFields),
         path('property-fields/save/', dedsan_butets.propertyFieldsSave),
         path('remove/', dedsan_butets.remove),

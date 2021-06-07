@@ -1829,3 +1829,18 @@ def drop_table(table_name, cursor, schema='public'):
 
 def get_file_name(file_name):
     return file_name.split('.')[0] if file_name.split('.') else file_name
+
+
+def has_materialized_view(view_name):
+    sql = '''
+        SELECT
+            *
+        FROM pg_matviews
+        WHERE
+            matviewname = '{view_name}';
+    '''.format(view_name=view_name)
+    with connections['default'].cursor() as cursor:
+        cursor.execute(sql)
+        if cursor.fetchone():
+            return True
+        return False

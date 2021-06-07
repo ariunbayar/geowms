@@ -1,44 +1,48 @@
 from django.db import connections
 from django.forms.models import model_to_dict
-from django.conf import settings
-from django.shortcuts import render, reverse
-from django.http import JsonResponse, Http404
+from django.forms.utils import flatatt
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+from django.contrib.auth.decorators import user_passes_test
+from django.urls import reverse
+from django.shortcuts import get_object_or_404
 
 from .models import ViewNames, ViewProperties, FeatureOverlaps
-from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, LDataTypes, LProperties, LValueTypes, LCodeListConfigs, LCodeLists, MGeoDatas, MDatas
-
-from django.views.decorators.http import require_GET, require_POST
-from main.decorators import ajax_required
-
-from django.contrib.auth.decorators import user_passes_test
-from geojson import FeatureCollection
+from backend.inspire.models import LThemes
+from backend.inspire.models import LPackages
+from backend.inspire.models import LFeatures
+from backend.inspire.models import LDataTypeConfigs
+from backend.inspire.models import LFeatureConfigs
+from backend.inspire.models import LDataTypes
+from backend.inspire.models import LProperties
+from backend.inspire.models import LValueTypes
+from backend.inspire.models import LCodeListConfigs
+from backend.inspire.models import LCodeLists
+from backend.inspire.models import MGeoDatas
+from backend.wms.models import WMS
+from backend.wmslayer.models import WMSLayer
+from backend.bundle.models import BundleLayer
 from backend.bundle.models import Bundle
+from geoportal_app.models import User
 from backend.geoserver.models import WmtsCacheConfig
 
-from backend.bundle.models import BundleLayer, Bundle
-from backend.wmslayer.models import WMSLayer
-from backend.wms.models import WMS
-from geoportal_app.models import User
-from main.utils import (
-    dict_fetchall,
-    slugifyWord,
-    get_geoJson,
-    check_gp_design,
-    get_colName_type,
-)
+from main.decorators import ajax_required
 import main.geoserver as geoserver
+from main import utils
 
 
 # Create your views here.
 def _get_features(package_id):
     feature_data = []
     for feature in LFeatures.objects.filter(package_id=package_id):
+        view_name = _make_view_name(feature.feature_name_eng)
+        has_mat_view = utils.has_materialized_view(view_name)
         feature_data.append({
-                'id': feature.feature_id,
-                'code': feature.feature_code,
-                'name': feature.feature_name,
-                'view':[ViewNames.objects.filter(feature_id=feature.feature_id).values('id', 'view_name', 'feature_id').first()][0]
-            })
+            'id': feature.feature_id,
+            'code': feature.feature_code,
+            'name': feature.feature_name,
+            'view': { "view_name": view_name if has_mat_view else "" }
+        })
     return feature_data
 
 
@@ -72,11 +76,13 @@ def bundleButetsAll(request):
         else:
             themes.delete()
 
-    check_design = check_gp_design()
+    utils.check_gp_design()
     geoserver_style = geoserver.get_styles()
     for style in geoserver_style:
         style_names.append(style.get('name'))
+
     url = reverse('api:service:geo_design_proxy', args=['geoserver_desing_view'])
+
     rsp = {
         'success': True,
         'data': data,
@@ -331,10 +337,24 @@ def getFields(request, payload):
     return JsonResponse(rsp)
 
 
+def _make_view_name(name):
+    view_name = utils.slugifyWord(name) + '_view'
+    return view_name
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
+
+    feature = get_object_or_404(LFeatures, feature_id=fid)
+    view_name = _make_view_name(feature.feature_name_eng)
+    has_mat_view = utils.has_materialized_view(view_name)
+    if not has_mat_view:
+        return JsonResponse({
+            'success': False,
+        })
+
     view_name = ViewNames.objects.filter(feature_id=fid).first()
     geom = MGeoDatas.objects.filter(feature_id=fid).first()
     cache_values = []
@@ -371,6 +391,31 @@ def propertyFields(request, fid):
             'cache_values': cache_values
 
         }
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def make_view(request, fid):
+    feature = get_object_or_404(LFeatures, feature_id=fid)
+    property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(fid, False)
+
+    feature_config_ids = list(l_feature_c_qs.values_list("feature_config_id", flat=True))
+    data_type_ids = list(data_type_c_qs.values_list("data_type_id", flat=True))
+
+    property_qs = property_qs.exclude(property_code__iexact='localid')
+    property_qs = property_qs.exclude(value_type_id='data_type')
+    property_ids = list(property_qs.values_list("property_id", flat=True))
+
+    view_name = _make_view_name(feature.feature_name_eng)
+    check = _create_view(list(property_ids), view_name, list(data_type_ids), list(feature_config_ids), fid)
+    rsp = {
+        "success": check,
+        "data": check
+    }
+    if not check:
+        rsp["error"] = "View үүсэхэд алдаа гарсан байна."
     return JsonResponse(rsp)
 
 
@@ -422,7 +467,7 @@ def propertyFieldsSave(request, payload):
         ViewProperties.objects.filter(view=check_name).delete()
         check_name.delete()
 
-    table_name = slugifyWord(feature.feature_name_eng) + '_view'
+    table_name = utils.slugifyWord(feature.feature_name_eng) + '_view'
     data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
     feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
 
@@ -668,7 +713,7 @@ def erese(request, payload):
 
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
 
-    geom_att, extends = get_colName_type(table_name, 'geo_data')
+    geom_att, extends = utils.get_colName_type(table_name, 'geo_data')
     if extends:
         srs = extends[0]['find_srid']
     else:
@@ -831,7 +876,6 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
     for item in data:
         col = 'Max(Case When a.property_id = {property_id} Then value_text End) As {property_code}'.format(property_id=item.property_id, property_code=item.property_code)
         cols.append(col)
-
     try:
         query = '''
             create MATERIALIZED VIEW public.{table_name} as
@@ -892,10 +936,10 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
             )
         query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
         with connections['default'].cursor() as cursor:
-                cursor.execute(query)
-                cursor.execute(query_index)
+            cursor.execute(query)
+            cursor.execute(query_index)
         return True
-    except Exception:
+    except Exception as e:
         return False
 
 
@@ -909,7 +953,6 @@ def removeView(table_name):
         return True
     except Exception:
         return False
-
 
 
 @require_POST
