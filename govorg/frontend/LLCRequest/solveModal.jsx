@@ -306,6 +306,20 @@ class DetailModalBody extends Component {
                                             defualt_value={current_data.feature?.name || ''}
                                         />
                                     </div>
+                                    <div className="col-md-12 pb-5 mt-2">
+                                        <div className="form-row d-flex justify-content-between">
+                                            <InspireField
+                                                title_name='Тушаалын дугаар'
+                                                defualt_value={current_data?.order_no || ''}
+                                                className="my-2"
+                                            />
+                                            <InspireField
+                                                title_name='Тушаал гарсан огноо'
+                                                defualt_value={current_data?.order_at || ''}
+                                                className="my-2"
+                                            />
+                                        </div>
+                                    </div>
                                     <div className="col-md-12 mx-0 px-0">
                                         <LLCMap
                                             vector_datas={current_data?.features || []}

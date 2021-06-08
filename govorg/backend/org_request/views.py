@@ -50,7 +50,8 @@ from main.utils import (
     get_geom,
     get_geoJson,
     get_cursor_pg,
-    convert_3d_with_srid
+    convert_3d_with_srid,
+    datetime_to_string
 )
 from main import utils
 
@@ -1019,7 +1020,9 @@ def get_request_data(request, id):
             'feature': {
                 'id': feature_id,
                 'name': feature_name
-            }
+            },
+            'order_no': shape_geometry.order_no or '',
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
         })
 
     return JsonResponse({

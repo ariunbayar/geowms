@@ -44,7 +44,8 @@ from main.utils import (
     get_sql_execute,
     send_email,
     get_config,
-    get_geom
+    get_geom,
+    datetime_to_string
 )
 from main import utils
 
@@ -520,7 +521,7 @@ def get_file_shapes(request, id):
             'icon_state': True,
             'features': geoms,
             'order_no': shape_geometry.order_no,
-            'order_at': shape_geometry.order_at
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
 
         })
 
