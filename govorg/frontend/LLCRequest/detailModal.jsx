@@ -51,7 +51,6 @@ export default class DetailModal extends Component {
             "modal-backdrop fade" +
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
-            console.log(this.props);
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-fixed w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>

@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { LLCMap } from '../../../llc/frontend/LLCMap'
 import DetailModal from "./detailModal"
-import ModelSelectTools from "../../../llc/frontend/Request/select_modal"
 import { service } from './service'
 
 export class LLCDetail extends Component {
@@ -32,27 +31,24 @@ export class LLCDetail extends Component {
         }
         this.selectedFeature = this.selectedFeature.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
-
-
-        this.handleSelectedTool = this.handleSelectedTool.bind(this)
         this.modalClose = this.modalClose.bind(this)
     }
 
     componentDidMount() {
         var id = this.props.match.params.id
-        service.handleRequestData(id).then(({ vector_datas, form_field, selected_tools, aimag_name, aimag_geom }) => {
+        service
+            .getLLCDetail(id)
+            .then(({ vector_datas, form_field }) => {
             if (form_field) {
-                this.setState({
-                    vector_datas,
-                    zahialagch :form_field['client_org'],
-                    project_name : form_field['project_name'],
-                    object_type : form_field['object_type'],
-                    object_count : form_field['object_quantum'],
-                    hurungu_oruulalt : form_field['investment_status'],
-                    selected_tools,
-                    aimag_name,
-                    aimag_geom,
-                })
+                    this.setState({
+                        vector_datas,
+                        zahialagch :form_field['client_org'],
+                        project_name : form_field['project_name'],
+                        object_type : form_field['object_type'],
+                        object_count : form_field['object_quantum'],
+                        hurungu_oruulalt : form_field['investment_status'],
+                        selected_tools : form_field['selected_tools']
+                    })
             }
         })
     }
@@ -76,53 +72,9 @@ export class LLCDetail extends Component {
         })
     }
 
-
-
-    componentDidUpdate(pP, pS) {
-        const { selected_tools, state, info } = this.props.values
-        // backaas avnaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        if(pP.values.selected_tools != selected_tools) {
-            if(!state && !info ) {
-                this.setState({ selected_tools: selected_tools })
-            }
-            else {
-                this.setState({ selected_tools: selected_tools })
-            }
-        }
-    }
-
     modalClose() {
         this.setState({ select_layer_status: false })
     }
-
-    handleSelectedTool(value_type, value) {
-        var array = [...this.state.selected_tools]
-        if(value_type) {
-            array = array.concat(value)
-            this.setState({ select_layer_status: false })
-        }
-        else {
-            for(let [i, layer] of array.entries()) {
-                if(layer.bagaj_dugaar == value.bagaj_dugaar) {
-                    array.splice(i, 1);
-                }
-            }
-        }
-        this.props.values.handleSelectModel(array)
-    }
-
-    handleSelectModel(modal_title, modalAction, values, more_detail) {
-        return(
-            this.setState({
-                select_layer_status: true,
-                modalAction,
-                modal_title,
-                values,
-                more_detail
-            })
-        )
-    }
-
 
     render() {
         const {
@@ -135,12 +87,7 @@ export class LLCDetail extends Component {
         var is_disable = true
 
 
-        const {
-            modalAction, values,
-            modal_title,
-            select_layer_status,
-            selected_tools
-        } = this.state
+        const { selected_tools } = this.state
         return(
             <div className="card">
                 <div className="card-body">
@@ -223,7 +170,7 @@ export class LLCDetail extends Component {
                                             <th scope="col">Дуусах хугацаа</th>
                                         </tr>
                                     </thead>
-                                    {/* <tbody>
+                                    <tbody>
                                         {
                                             <tr className="col-md-12" style={{fontSize: '12px'}}>
                                                 <td>{1}</td>
@@ -234,7 +181,7 @@ export class LLCDetail extends Component {
                                                 </td>
                                             </tr>
                                         }
-                                    </tbody> */}
+                                    </tbody>
                                     <tbody>
                                         {
                                             selected_tools && selected_tools.length > 0
