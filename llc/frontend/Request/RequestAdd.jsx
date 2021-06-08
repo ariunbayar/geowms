@@ -287,7 +287,6 @@ export class RequestAdd extends Component {
     }
 
     render (){
-        console.log(this.state.vector_datas);
         const { id, info } = this.props.match.params
         return (
             <div className="card">
