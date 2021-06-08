@@ -21,7 +21,7 @@ app_name = 'backend'
 urlpatterns = [
 
     path('wms/', include(([
-        path('all/', wms_views.all, name='all'),
+        path('all/<int:org_id>/', wms_views.all, name='all'),
         path('pagination/', wms_views.pagination, name='pagination'),
         path('create/', wms_views.create, name='create'),
         path('update/', wms_views.update, name='update'),
