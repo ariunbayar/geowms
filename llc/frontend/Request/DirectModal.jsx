@@ -55,15 +55,13 @@ export default class RequestDetail extends Component {
                             aimag_name
                             &&
                                 <div className="form-group col-md-12">
-                                    <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
-                                    <input
-                                        type="text"
-                                        name='aimag_name'
-                                        className="form-control"
-                                        disabled={true}
-                                        value={aimag_name}
-                                    />
+                                    <label htmlFor="id">Өгөгдлийн хамрах хүрээ</label>
+                                    <div class="col-md-12">
+                                            <input type="text" class="form-control" value={aimag_name} disabled={true}/>
+                                            <input type="checkbox"/>
+                                    </div>
                                 </div>
+
                         }
                         <div className="form-group col-md-12">
                             <label htmlFor='zahialagch'>Захиалагч байгууллага</label>
