@@ -1829,3 +1829,20 @@ def drop_table(table_name, cursor, schema='public'):
 
 def get_file_name(file_name):
     return file_name.split('.')[0] if file_name.split('.') else file_name
+
+
+def get_feature(shape_geometries):
+    features = []
+    geom_type = ''
+    for shape_geometry in shape_geometries:
+
+        single_geom = json_load(shape_geometry.geom_json)
+        geom_type = single_geom.get('type')
+        feature = {
+            "type": "Feature",
+            'geometry': single_geom,
+            'id': shape_geometry.id,
+            'properties': json_load(shape_geometry.form_json)
+        }
+        features.append(feature)
+    return features, geom_type

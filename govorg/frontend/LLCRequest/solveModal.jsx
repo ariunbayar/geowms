@@ -6,7 +6,7 @@ import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import { containsCoordinate } from "ol/extent"
 
-class DetailModalBody extends Component {
+export class DetailModalBody extends Component {
     constructor(props) {
         super(props)
 
