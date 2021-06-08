@@ -61,6 +61,8 @@ class RequestFilesShape(models.Model):
     theme_id = models.IntegerField(null=True)
     package_id = models.IntegerField(null=True)
     feature_id = models.IntegerField(null=True)
+    order_no = models.CharField(max_length=50, null=True)
+    order_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

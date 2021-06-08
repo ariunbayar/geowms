@@ -45,6 +45,7 @@ from main.utils import (
     send_email,
     get_config,
     get_geom,
+    datetime_to_string,
     get_feature
 )
 from main import utils
@@ -367,13 +368,21 @@ def get_request_data(request, id):
     qs = RequestForm.objects.filter(file_id=id)
     qs = qs.first()
     geo_id = qs.file.geo_id
-    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id)
+
     if mdata_qs:
-        code_list_id = mdata_qs.code_list_id
-        code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
-        aimag_name = code_list_data.code_list_name
+        if geo_id != '496':
+            mdata_qs = mdata_qs.filter(property_id=23).first()
+            code_list_id = mdata_qs.code_list_id
+            code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
+            aimag_name = code_list_data.code_list_name
+
+        else:
+            mdata_qs = mdata_qs.first()
+            aimag_name = 'Монгол улс'
 
         aimag_geom = get_geom(geo_id, 'MultiPolygon')
+
         if aimag_geom:
             aimag_geom = aimag_geom.json
 
@@ -500,7 +509,10 @@ def get_file_shapes(request, id):
             'feature': {'id': feature_id, 'name': feature_name},
             'package': {'id': package_id, 'name': package_name},
             'icon_state': True,
-            'features': geoms
+            'features': geoms,
+            'order_no': shape_geometry.order_no,
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
+
         })
 
     return JsonResponse({
