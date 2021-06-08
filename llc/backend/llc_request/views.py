@@ -234,7 +234,6 @@ def save_request(request):
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
-
     if file_name != 'blob' and id:
         if not uploaded_file.name.endswith('.zip'):
             return JsonResponse({
@@ -304,34 +303,37 @@ def save_request(request):
                                     'info': 'Файл хоосон байна !!!'
                                 })
 
-            if id:
-                request_file = RequestFiles.objects.filter(pk=id).first()
-                get_shapes = RequestFilesShape.objects.filter(files=request_file)
-                if get_shapes:
-                    for shape in get_shapes:
-                        geoms = ShapeGeom.objects.filter(shape=shape)
-                        geoms.delete()
-                    get_shapes.delete()
+        if id:
+            request_file = RequestFiles.objects.filter(pk=id).first()
+            get_shapes = RequestFilesShape.objects.filter(files=request_file)
+            if get_shapes:
+                for shape in get_shapes:
+                    geoms = ShapeGeom.objects.filter(shape=shape)
+                    geoms.delete()
+                get_shapes.delete()
 
-                if not check_data_of_file:
-                    request_file.geo_id = org_data.geo_id if org_data else ''
+            if not check_data_of_file:
+                if file_name != 'blob':
+                    request_file.geo_id = org_data.geo_id
                     request_file.file_path = uploaded_file
 
-                request_file.tools = json_dumps(get_tools)
-                request_file.geo_id = ulsiin_hemjeend
-                request_file.save()
+            request_file.tools = json_dumps(get_tools)
+            request_file.geo_id = ulsiin_hemjeend
+            request_file.save()
 
-            else:
-                request_file = RequestFiles.objects.create(
-                    name='UTILITY SOLUTION',
-                    kind=RequestFiles.KIND_NEW,
-                    state=RequestFiles.STATE_NEW,
-                    geo_id=org_data.geo_id if org_data else '',
-                    file_path=uploaded_file,
-                    tools=json_dumps(get_tools)
-                )
-                id = request_file.id
-            _create_shape_files(org_data, request_file, extract_path, datasource_exts)
+        else:
+            request_file = RequestFiles.objects.create(
+                name='UTILITY SOLUTION',
+                kind=RequestFiles.KIND_NEW,
+                state=RequestFiles.STATE_NEW,
+                geo_id=org_data.geo_id if org_data else '',
+                file_path=uploaded_file,
+                tools=json_dumps(get_tools)
+            )
+            id = request_file.id
+
+            if file_name != 'blob':
+                _create_shape_files(org_data, request_file, extract_path, datasource_exts)
 
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:
@@ -408,14 +410,18 @@ def get_request_data(request, id):
     features, geom_type = _get_feature(shape_geometries)
 
     qs = RequestForm.objects.filter(file_id=id)
-    qs =  qs.first()
+    qs = qs.first()
     geo_id = qs.file.geo_id
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id).first()
+    if geo_id != '496':
+        mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
 
-    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
     if mdata_qs:
         code_list_id = mdata_qs.code_list_id
         code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
-        aimag_name = code_list_data.code_list_name
+
+        if geo_id != '496':
+            aimag_name = code_list_data.code_list_name
 
         aimag_geom = get_geom(geo_id, 'MultiPolygon')
         if aimag_geom:
@@ -442,6 +448,7 @@ def get_request_data(request, id):
         field['state'] = qs.file.get_state_display()
         field['kind'] = qs.file.get_kind_display()
         field['desc'] = qs.file.description
+        field['geo_id'] = qs.file.geo_id
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
