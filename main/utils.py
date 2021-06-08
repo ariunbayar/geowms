@@ -1629,12 +1629,12 @@ def get_colName_type(view_name, data):
 def check_gp_design():
     ws_name = 'gp_design'
     ds_name = ws_name
-    table_name = 'geoserver_desing_view'
+    table_name = 'geoserver_design_view'
     design_space = geoserver.getWorkspace(ws_name)
 
     def _create_design_view():
         sql = '''
-                CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
+                CREATE MATERIALIZED VIEW IF not EXISTS geoserver_design_view  as
                 SELECT
                     ST_GeometryType(get_datas_of_m_geo_datas(feature_id)) as field_type,
                     get_datas_of_m_geo_datas(feature_id)  as geo_data, feature_id

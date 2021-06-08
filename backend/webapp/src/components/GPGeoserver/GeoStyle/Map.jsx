@@ -31,7 +31,7 @@ export default class StyleMap extends Component {
                 style_size: props.style_size,
                 fill_color: props.fill_color,
                 style_name: props.style_name,
-                view_name : props.view_name ? props.view_name : 'geoserver_desing_view',
+                view_name : props.view_name ? props.view_name : 'geoserver_design_view',
                 url: props.url,
                 defualt_url: props.defualt_url,
                 geom_type: props.geom_type,

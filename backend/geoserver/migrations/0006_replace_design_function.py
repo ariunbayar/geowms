@@ -6,10 +6,10 @@ from django.db import connections
 def create_design_function(apps, schema_editor):
     cursor = connections['default'].cursor()
     sql = '''
-        DROP MATERIALIZED VIEW if exists geoserver_desing_view
+        DROP MATERIALIZED VIEW if exists geoserver_design_view
     '''
     sql1 = '''
-        CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
+        CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_design_view  as
         SELECT
             ST_GeometryType(get_datas_of_m_geo_datas(feature_id)) as field_type,
             get_datas_of_m_geo_datas(feature_id)  as geo_data, feature_id

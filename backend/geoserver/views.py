@@ -453,7 +453,7 @@ def get_style_data(request, payload):
             SELECT
                 ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
             FROM
-                geoserver_desing_view
+                geoserver_design_view
             where
                 ST_GeometryType(geo_data) like '%{geom_type}%'
             limit 1000
@@ -528,7 +528,6 @@ def _get_fill_stroke(data):
         rule_name = data.get('Name') or ''
         max_range = data.get('MaxScaleDenominator') or 0
         min_range = data.get('MinScaleDenominator') or 0
-        
 
         if data.get('RasterSymbolizer'):
             return [], '', True

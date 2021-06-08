@@ -66,7 +66,7 @@ export class List extends Component {
         this.setState({ fid, tid, fname, property_loading: true })
         service
             .getPropertyFields(fid)
-            .then(({ success, fields, id_list, view_name, url, style_name, geom_type, cache_values }) => {
+            .then(({ success, fields, id_list, view, url, style_name, geom_type, cache_values }) => {
                 if(success) {
                     fields.map((f_config, idx) =>
                         f_config.data_types.map((data_type, idx) =>
@@ -77,16 +77,22 @@ export class List extends Component {
                         )
                     )
 
-                    if(property_length == id_list.length){ check_list = true }
+                    if(property_length == id_list.length) { check_list = true }
                     this.setState({
-                        fields, id_list, view_name, url, check_list,
-                        view_style_name: style_name, geom_type,
-                        property_loading:false, cache_values,
-                        property_length:property_length,
+                        fields,
+                        id_list,
+                        view,
+                        url,
+                        check_list,
+                        view_style_name: style_name,
+                        geom_type,
+                        property_loading: false,
+                        cache_values,
+                        property_length: property_length,
                         has_view: success,
                     })
                 }
-                else this.setState({ property_loading: false, has_view: success })
+                else this.setState({ property_loading: false, has_view: success, geom_type, view_style_name: '' })
             })
     }
 
@@ -97,7 +103,7 @@ export class List extends Component {
     }
 
     activeView(event){
-        this.setState({ fields: [], id_list: [], view_name: '' })
+        this.setState({ fields: [], id_list: [], view: '' })
         const id = event.id
         const prev_event = this.state.prev_event
         const prev_theme_event = this.state.prev_theme_event
@@ -245,7 +251,7 @@ export class List extends Component {
                     id_list={this.state.id_list}
                     property_length={this.state.property_length}
                     check_list={check_list}
-                    view_name={this.state.view_name}
+                    view={this.state.view}
                     style_names={style_names}
                     url={url}
                     defualt_url={defualt_url}

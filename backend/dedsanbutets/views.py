@@ -35,7 +35,7 @@ from main import utils
 def _get_features(package_id):
     feature_data = []
     for feature in LFeatures.objects.filter(package_id=package_id):
-        view_name = _make_view_name(feature.feature_name_eng)
+        view_name = _make_view_name(feature)
         has_mat_view = utils.has_materialized_view(view_name)
         feature_data.append({
             'id': feature.feature_id,
@@ -81,7 +81,7 @@ def bundleButetsAll(request):
     for style in geoserver_style:
         style_names.append(style.get('name'))
 
-    url = reverse('api:service:geo_design_proxy', args=['geoserver_desing_view'])
+    url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
 
     rsp = {
         'success': True,
@@ -337,8 +337,10 @@ def getFields(request, payload):
     return JsonResponse(rsp)
 
 
-def _make_view_name(name):
-    view_name = utils.slugifyWord(name) + '_view'
+def _make_view_name(feature):
+    feature_code = feature.feature_code
+    feature_code = feature_code.split("-")
+    view_name = utils.slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
     return view_name
 
 
@@ -348,15 +350,21 @@ def _make_view_name(name):
 def propertyFields(request, fid):
 
     feature = get_object_or_404(LFeatures, feature_id=fid)
-    view_name = _make_view_name(feature.feature_name_eng)
+    view_name = _make_view_name(feature)
     has_mat_view = utils.has_materialized_view(view_name)
+    geom = MGeoDatas.objects.filter(feature_id=fid).first()
+
+    geom_type = ''
+    if geom:
+        geom_type = geom.geo_data.geom_type
+
     if not has_mat_view:
         return JsonResponse({
             'success': False,
+            'geom_type': geom_type,
         })
 
-    view_name = ViewNames.objects.filter(feature_id=fid).first()
-    geom = MGeoDatas.objects.filter(feature_id=fid).first()
+    view = ViewNames.objects.filter(feature_id=fid).values('id', 'view_name').first()
     cache_values = []
     wmts = WmtsCacheConfig.objects.filter(feature_id=fid).first()
     if wmts:
@@ -367,37 +375,38 @@ def propertyFields(request, fid):
             'cache_type': wmts.type_of_operation,
             'number_of_cache': wmts.number_of_tasks_to_use,
         })
-    if not view_name == None:
-        id_list = [data.property_id for data in ViewProperties.objects.filter(view=view_name)]
-        url = reverse('api:service:geo_design_proxy', args=[view_name.view_name])
+    if view:
+        id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view['id'])]
+        url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': id_list,
-            'view_name': view_name.view_name,
+            'view': view,
             'url': request.build_absolute_uri(url),
-            'style_name': geoserver.get_layer_style('gp_layer_'+view_name.view_name),
-            'geom_type': geom.geo_data.geom_type if  geom else '',
-            'cache_values': cache_values
+            'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
+            'geom_type': geom_type,
+            'cache_values': cache_values,
         }
-
     else:
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': [],
-            'view_name': '',
-            'geom_type': geom.geo_data.geom_type if  geom else '',
-            'cache_values': cache_values
-
+            'view': '',
+            'geom_type': geom_type,
+            'cache_values': cache_values,
+            'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def make_view(request, fid):
+def make_view(request, payload):
+    fid = payload.get('fid')
+    theme = get_object_or_404(LThemes, theme_id=payload.get('tid'))
     feature = get_object_or_404(LFeatures, feature_id=fid)
     property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(fid, False)
 
@@ -408,8 +417,10 @@ def make_view(request, fid):
     property_qs = property_qs.exclude(value_type_id='data_type')
     property_ids = list(property_qs.values_list("property_id", flat=True))
 
-    view_name = _make_view_name(feature.feature_name_eng)
+    view_name = _make_view_name(feature)
     check = _create_view(list(property_ids), view_name, list(data_type_ids), list(feature_config_ids), fid)
+    if check:
+        rsp = _create_geoserver_detail(view_name, theme, request.user.id, feature, payload.get('values'))
     rsp = {
         "success": check,
         "data": check
@@ -423,67 +434,52 @@ def make_view(request, fid):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFieldsSave(request, payload):
-    id_list = payload.get('fields')
-    fid = payload.get('fid')
+    id_list = payload.get('id_list')
     tid = payload.get('tid')
+    fid = payload.get('fid')
+    view_id = payload.get('view_id')
     values = payload.get('values')
-    user = User.objects.filter(username=request.user).first()
     if not id_list:
         rsp = {
             'success': False,
-            'info': 'Утга сонгоно уу.'
-        }
-        return JsonResponse(rsp)
-    theme = LThemes.objects.filter(theme_id=tid).first()
-    if not theme:
-        rsp = {
-            'success': False,
-            'info': 'Тухайн хүснэгтийн мэдээлэл алга байна.'
+            'error': 'Утга сонгоно уу.'
         }
         return JsonResponse(rsp)
 
-    feature = LFeatures.objects.filter(feature_id=fid).first()
+    theme = get_object_or_404(LThemes, theme_id=tid)
+    feature = get_object_or_404(LFeatures, feature_id=fid)
 
-    if not feature:
-        rsp = {
-            'success': False,
-            'info': 'Алдаа гарлаа'
+    table_name = _make_view_name(feature)
+    has_mat_view = utils.has_materialized_view(table_name)
+    if not has_mat_view:
+        return JsonResponse({
+            "success": False,
+            "error": "View үүсээгүй байна view ийг үүсгэнэ үү",
+        })
+
+    view = ViewNames.objects.update_or_create(
+        id=view_id,
+        defaults={
+            'view_name': table_name,
+            'feature_id': fid,
         }
-        return JsonResponse(rsp)
+    )[0]
 
-    check_name = ViewNames.objects.filter(feature_id=fid).first()
-    if not theme:
-        rsp = {
-            'success': False,
-            'info': 'Тухайн хүснэгт алга байна.'
-        }
-        return JsonResponse(rsp)
+    view_prop_qs = ViewProperties.objects
+    view_prop_qs.filter(view=view).delete()
 
-    feature = LFeatures.objects.filter(feature_id=fid).first()
+    for prop_id in id_list:
+        view_prop_qs.create(view=view, property_id=prop_id)
 
-    if check_name:
-        table_name = check_name.view_name
-        removeView(table_name)
-        ViewProperties.objects.filter(view=check_name).delete()
-        check_name.delete()
-
-    table_name = utils.slugifyWord(feature.feature_name_eng) + '_view'
-    data_type_ids = [i['data_type_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("data_type_id") if i['data_type_id']]
-    feature_config_id = [i['feature_config_id'] for i in LFeatureConfigs.objects.filter(feature_id=fid).values("feature_config_id") if i['feature_config_id']]
-
-    check = _create_view(id_list, table_name, data_type_ids, feature_config_id, fid)
-    if check:
-        rsp = _create_geoserver_detail(table_name, theme, user.id, feature, values)
-        if rsp['success']:
-            new_view = ViewNames.objects.create(view_name=table_name, feature_id=fid)
-            for idx in id_list:
-                ViewProperties.objects.create(view=new_view, property_id=idx)
+    if values:
+        rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, payload.get('values'))
 
     else:
         rsp = {
-            'success': False,
-            'info': 'Амжилтгүй хадгаллаа !!!.'
+            "success": True,
+            "data": 'Амжилттай хадгаллаа'
         }
+
     return JsonResponse(rsp)
 
 
@@ -756,17 +752,17 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
             cache_values = values.get('cache_values')
             geoserver.update_layer_style(layer_name, style_name)
             if not style_name:
-                return {"success": False, "info": 'Style-ийн нэр хоосон байна.'}
+                return {"success": False, "error": 'Style-ийн нэр хоосон байна.'}
             if tile_cache_check:
                 cache_type = cache_details.get('cache_type')
                 zoom_stop = cache_details.get('zoom_stop')
                 zoom_start = cache_details.get('zoom_start')
                 image_format = cache_details.get('image_format')
                 number_of_cache = cache_details.get('number_of_cache')
-                if int(zoom_start) >21 or int(zoom_stop)>21 or int(number_of_cache)>100:
+                if int(zoom_start) > 21 or int(zoom_stop) > 21 or int(number_of_cache) > 100:
                     return {
                         'success': False,
-                        'info': 'TileCache-ийн max утга хэтэрсэн байна'
+                        'error': 'TileCache-ийн max утга хэтэрсэн байна'
                     }
                 feature_id = feature.feature_id
                 cache_layer = geoserver.create_tilelayers_cache(ws_name, layer_name, srs, image_format, zoom_start, zoom_stop, cache_type, number_of_cache)
@@ -795,15 +791,15 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                     wms.cache_url = wmts_url
                     wms.save()
 
-        return {"success": True, 'info': 'Амжилттай үүслээ'}
+        return {"success": True, 'data': 'Амжилттай үүслээ'}
     else:
-        return {"success": False, 'info': 'Давхарга үүсгэхэд алдаа гарлаа'}
+        return {"success": False, 'error': 'Давхарга үүсгэхэд алдаа гарлаа'}
 
 
 def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     layer_responce = []
     theme_code = theme.theme_code
-    ws_name = 'gp_'+theme_code
+    ws_name = 'gp_' + theme_code
     layer_name = 'gp_layer_' + table_name
     ds_name = ws_name
     layer_title = feature.feature_name
@@ -832,7 +828,7 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
 
             return {
                 'success': False,
-                'info': 'DataStore үүсгэхэд алдаа гарлаа'
+                'error': 'DataStore үүсгэхэд алдаа гарлаа'
             }
     check_layer = geoserver.getDataStoreLayer(
         ws_name,
