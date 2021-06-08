@@ -81,7 +81,7 @@ export default class RequestDetail extends Component {
                 <div className="col-md-5">
                     <form className="form-row">
                         {
-                            aimag_geom
+                            aimag_name
                             &&
                                 <div className="form-group col-md-12">
                                     <div className="form-row">
@@ -97,7 +97,7 @@ export default class RequestDetail extends Component {
                                             <label htmlFor="nationwide" className="form-check-label ml-2 my-1"> Улсын хэмжээнд </label>
                                         </div>
                                     </div>
-                                            <input type="text" class="form-control" value={aimag_name ? aimag_name : "Монгол Улс"} disabled={true}/>
+                                            <input type="text" class="form-control" value={aimag_name} disabled={true}/>
                                 </div>
 
                         }

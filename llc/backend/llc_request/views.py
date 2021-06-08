@@ -44,7 +44,8 @@ from main.utils import (
     get_sql_execute,
     send_email,
     get_config,
-    get_geom
+    get_geom,
+    get_feature
 )
 from main import utils
 
@@ -234,6 +235,7 @@ def save_request(request):
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
+    print(uploaded_file)
     if file_name != 'blob' and id:
         if not uploaded_file.name.endswith('.zip'):
             return JsonResponse({
@@ -362,30 +364,13 @@ def save_request(request):
     return JsonResponse(rsp)
 
 
-def _get_feature(shape_geometries):
-    features = []
-    geom_type = ''
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        geom_type = single_geom.get('type')
-        feature = {
-            "type":"Feature",
-            'geometry': single_geom,
-            'id': shape_geometry.id,
-            'properties': json_load(shape_geometry.form_json)
-        }
-        features.append(feature)
-    return features, geom_type
-
-
 @require_GET
 @ajax_required
 def get_all_geo_json(request):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
-    features, geom_type = _get_feature(shape_geometries)
+    features, geom_type = get_feature(shape_geometries)
     return JsonResponse({
         'geo_json_datas': FeatureCollection(features)
     })
@@ -407,21 +392,19 @@ def get_request_data(request, id):
     aimag_name = ''
     aimag_geom = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
-    features, geom_type = _get_feature(shape_geometries)
-
+    features, geom_type = get_feature(shape_geometries)
     qs = RequestForm.objects.filter(file_id=id)
     qs = qs.first()
     geo_id = qs.file.geo_id
-    mdata_qs = MDatas.objects.filter(geo_id=geo_id).first()
-    if geo_id != '496':
-        mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
-
+    mdata_qs = MDatas.objects.filter(geo_id=geo_id)
     if mdata_qs:
-        code_list_id = mdata_qs.code_list_id
-        code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
-
         if geo_id != '496':
+            mdata_qs = mdata_qs.filter(property_id=23).first()
+            code_list_id = mdata_qs.code_list_id
+            code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
             aimag_name = code_list_data.code_list_name
+        else:
+            aimag_name = 'Монгол улс'
 
         aimag_geom = get_geom(geo_id, 'MultiPolygon')
         if aimag_geom:
@@ -462,7 +445,7 @@ def _get_shapes_geoms(shape_geometry):
     geo_datas = []
     geom_type = ''
     shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
-    geo_datas, geom_type = _get_feature(shape_geoms)
+    geo_datas, geom_type = get_feature(shape_geoms)
 
     return geo_datas, geom_type
 
