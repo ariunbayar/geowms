@@ -224,6 +224,7 @@ def save_request(request):
     object_count = request.POST.get('object_count')
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
+    ulsiin_hemjeend = request.POST.get('ulsiin_hemjeend')
     selected_tools = request.POST.get('selected_tools') or []
     is_agreed = _validation_form(request_datas)
     main_path = 'llc-request-files'
@@ -270,7 +271,7 @@ def save_request(request):
             'info': 'Файл-ын нэр давхцаж байна !!!.'
         })
 
-    if check_data_of_file and id :
+    if check_data_of_file and id:
         _change_file_in_update(uploaded_file, file_name, check_data_of_file, main_path, id)
         check_data_of_file = False
     else:
@@ -313,10 +314,11 @@ def save_request(request):
                     get_shapes.delete()
 
                 if not check_data_of_file:
-                    request_file.geo_id=org_data.geo_id if org_data else ''
-                    request_file.file_path=uploaded_file
+                    request_file.geo_id = org_data.geo_id if org_data else ''
+                    request_file.file_path = uploaded_file
 
-                request_file.tools=json_dumps(get_tools)
+                request_file.tools = json_dumps(get_tools)
+                request_file.geo_id = ulsiin_hemjeend
                 request_file.save()
 
             else:

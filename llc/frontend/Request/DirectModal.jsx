@@ -13,14 +13,24 @@ export default class RequestDetail extends Component {
             state: props.state,
             disabled: false,
             is_loading: false,
+            nationwide: '',
+            form_checked: false,
         }
         this.handleLoaderActive = this.handleLoaderActive.bind(this)
+        this.getValueCheckbox = this.getValueCheckbox.bind(this)
     }
 
     componentDidMount() {
-        const { info } = this.props
+        const { info, geo_id } = this.props
         if(info) {
             this.setState({ disabled: true })
+        }
+
+        if(geo_id == '496'){
+            this.setState({ form_checked: true })
+        }
+        else {
+            this.setState({ form_checked: false })
         }
     }
 
@@ -35,6 +45,24 @@ export default class RequestDetail extends Component {
 
     handleLoaderActive(status) {
         this.setState({ is_loading: status })
+    }
+
+    getValueCheckbox(e){
+        const { geo_id } = this.props
+        const checked = e.target.checked
+        if (checked == true){
+            this.setState({
+                nationwide: '496',
+                form_checked: true
+            })
+        }
+        else{
+
+            this.setState({
+                nationwide: geo_id,
+                form_checked: false
+            })
+        }
     }
 
     render() {
@@ -55,15 +83,22 @@ export default class RequestDetail extends Component {
                             aimag_name
                             &&
                                 <div className="form-group col-md-12">
-                                    <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
-                                    <input
-                                        type="text"
-                                        name='aimag_name'
-                                        className="form-control"
-                                        disabled={true}
-                                        value={aimag_name}
-                                    />
+                                    <div className="form-row">
+                                        <div className="col-md-9">
+                                            <label htmlFor="id">Өгөгдлийн хамрах хүрээ</label>
+                                        </div>
+                                        <div className="form-check col-md-3 pl-5 ">
+                                            <input
+                                                type="checkbox" id="nationwide"
+                                                className="form-check-input align-middle"
+                                                checked={this.state.form_checked}
+                                                onChange={(e) => this.getValueCheckbox(e)}/>
+                                            <label htmlFor="nationwide" className="form-check-label ml-2 my-1"> Улсын хэмжээнд </label>
+                                        </div>
+                                    </div>
+                                            <input type="text" class="form-control" value={aimag_name} disabled={true}/>
                                 </div>
+
                         }
                         <div className="form-group col-md-12">
                             <label htmlFor='zahialagch'>Захиалагч байгууллага</label>
@@ -165,6 +200,7 @@ export default class RequestDetail extends Component {
                         &&
                             <this.props.submitClass
                                 valid_request = {document.getElementsByClassName('is-valid')}
+                                nationwide = {this.state.nationwide}
                                 values={this.props}
                                 loader={this.handleLoaderActive}
                             />
