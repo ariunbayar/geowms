@@ -83,23 +83,27 @@ export default class RequestDetail extends Component {
                         {
                             aimag_name
                             &&
-                                <div className="form-group col-md-12">
-                                    <div className="form-row">
-                                        <div className="col-md-9 col-sm-9">
-                                            <label htmlFor="id">Өгөгдлийн хамрах хүрээ</label>
-                                        </div>
-                                        <div className="form-check col-md-3 col-sm-9 pl-4">
+                                <>
+                                    <div className="col-md-12 d-flex justify-content-between">
+                                        <label htmlFor="" className="col-md-6 float-left px-0">Өгөгдлийн хамрах хүрээ</label>
+                                        <div className="col-md-6 d-flex justify-content-end align-items-center mb-1">
                                             <input
-                                                type="checkbox" id="nationwide"
-                                                className="form-check-input align-middle"
+                                                className={'form-check-label mr-1'}
+                                                type="checkbox"
+                                                id="check"
                                                 checked={this.state.form_checked}
-                                                onChange={(e) => this.getValueCheckbox(e)}/>
-                                            <label htmlFor="nationwide" className="form-check-label ml-2 my-1"> Улсын хэмжээнд </label>
+                                                onChange={(e) => this.getValueCheckbox(e)}
+                                            />
+                                            <label htmlFor="check" className="my-auto">Улсын хэмжээнд</label>
                                         </div>
                                     </div>
-                                            <input type="text" class="form-control" value={aimag_name} disabled={true}/>
-                                </div>
-
+                                    <input
+                                            className={'form-control col-md-12 mb-3  ml-1'}
+                                            type="text"
+                                            disabled={true}
+                                            value={aimag_name}
+                                        />
+                                </>
                         }
                         <div className="form-group col-md-12">
                             <label htmlFor='zahialagch'>Захиалагч байгууллага</label>

@@ -235,7 +235,6 @@ def save_request(request):
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
-    print(uploaded_file)
     if file_name != 'blob' and id:
         if not uploaded_file.name.endswith('.zip'):
             return JsonResponse({
