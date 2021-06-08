@@ -305,12 +305,13 @@ def save_request(request):
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
-            get_shapes = RequestFilesShape.objects.filter(files=request_file)
-            if get_shapes:
-                for shape in get_shapes:
-                    geoms = ShapeGeom.objects.filter(shape=shape)
-                    geoms.delete()
-                get_shapes.delete()
+            if file_name != 'blob':
+                get_shapes = RequestFilesShape.objects.filter(files=request_file)
+                if get_shapes:
+                    for shape in get_shapes:
+                        geoms = ShapeGeom.objects.filter(shape=shape)
+                        geoms.delete()
+                    get_shapes.delete()
 
             if not check_data_of_file:
                 if file_name != 'blob':
@@ -405,7 +406,6 @@ def get_request_data(request, id):
     field = dict()
     aimag_name = ''
     aimag_geom = []
-
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features, geom_type = _get_feature(shape_geometries)
 

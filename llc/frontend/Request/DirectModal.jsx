@@ -21,24 +21,25 @@ export default class RequestDetail extends Component {
     }
 
     componentDidMount() {
-        const { info, geo_id } = this.props
+        const { info } = this.props
         if(info) {
             this.setState({ disabled: true })
-        }
-
-        if(geo_id == '496'){
-            this.setState({ form_checked: true })
-        }
-        else {
-            this.setState({ form_checked: false })
         }
     }
 
     componentDidUpdate(pP, pS) {
-        const { state } = this.props
+        const { state, geo_id } = this.props
         if (pP.state != state) {
             if(state == "ИЛГЭЭСЭН") {
                 this.setState({ disabled: true })
+            }
+        }
+        if(pP.geo_id !== geo_id){
+            if( geo_id == '496'){
+                this.setState({ form_checked: true })
+            }
+            else {
+                this.setState({ form_checked: false })
             }
         }
     }
@@ -80,14 +81,14 @@ export default class RequestDetail extends Component {
                 <div className="col-md-5">
                     <form className="form-row">
                         {
-                            aimag_name
+                            aimag_geom
                             &&
                                 <div className="form-group col-md-12">
                                     <div className="form-row">
-                                        <div className="col-md-9">
+                                        <div className="col-md-9 col-sm-9">
                                             <label htmlFor="id">Өгөгдлийн хамрах хүрээ</label>
                                         </div>
-                                        <div className="form-check col-md-3 pl-5 ">
+                                        <div className="form-check col-md-3 col-sm-9 pl-4">
                                             <input
                                                 type="checkbox" id="nationwide"
                                                 className="form-check-input align-middle"
@@ -96,7 +97,7 @@ export default class RequestDetail extends Component {
                                             <label htmlFor="nationwide" className="form-check-label ml-2 my-1"> Улсын хэмжээнд </label>
                                         </div>
                                     </div>
-                                            <input type="text" class="form-control" value={aimag_name} disabled={true}/>
+                                            <input type="text" class="form-control" value={aimag_name ? aimag_name : "Монгол Улс"} disabled={true}/>
                                 </div>
 
                         }
