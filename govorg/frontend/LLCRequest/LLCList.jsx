@@ -4,14 +4,14 @@ import SolveModal from './solveModal'
 import Modal from '@utils/Modal/Modal'
 import { service } from "./service"
 
-export const make_state_color = (state) => {
+export const makeStateColor = (state) => {
     let color
     if (state == "ШИНЭ") color = 'text-primary'
     else if (state == "ИЛГЭЭСЭН") color = 'text-success'
     return color
 }
 
-export const make_kind_color = (kind) => {
+export const makeKindColor = (kind) => {
     let color
     if (kind == "ШИЙДВЭРЛЭГДСЭН") color = 'text-success'
     else if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
@@ -21,13 +21,13 @@ export const make_kind_color = (kind) => {
     return color
 }
 
-export const download_data = (values) => {
+export const downloadData = (values) => {
     return (
         <a
-            href={'/media/' + values.values.file_path}
+            href={values.values.file_path}
             target="_blank"
         >
-        <i className="fa fa-download">&nbsp; Татах</i>
+            <i className="fa fa-download">&nbsp; Татах</i>
         </a>
     )
 }
@@ -66,7 +66,7 @@ function ModalText(props) {
     )
 }
 
-export class Detail extends Component {
+export class LLCList extends Component {
     constructor(props) {
         super(props)
         this.state = {
@@ -84,14 +84,20 @@ export class Detail extends Component {
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
                 // {'field': 'file_path', "title": 'Хавсаргасан файл'},
-                {'field': 'updated_at', "title": 'Зассан'},
+                // {'field': 'updated_at', "title": 'Зассан'},
             ],
             жагсаалтын_холбоос: '/gov/api/llc-request/',
             хувьсах_талбарууд: [
-                {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
-                {"field": "kind", "action": (values) => make_kind_color(values), "action_type": true},
+                {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
+                {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
             ],
             нэмэлт_талбарууд: [
+                {
+                    "title": 'дэлгэрэнгүй',
+                    "text": '',
+                    "icon": 'fa fa-eye text-primary',
+                    "action": (values) => this.handleDetail(values),
+                },
                 {
                     "title": 'Тохиргоо',
                     "text": '',
@@ -102,7 +108,7 @@ export class Detail extends Component {
                     "title": 'Хавсаргасан файл',
                     "text": 'Татах',
                     "icon": 'text-primary',
-                    'component': (values) => download_data(values)
+                    'component': (values) => downloadData(values)
                 },
                 {
                     "title": '',
@@ -128,6 +134,7 @@ export class Detail extends Component {
         this.desModal = this.desModal.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+        this.handleDetail = this.handleDetail.bind(this)
     }
 
     componentDidMount() {
@@ -158,6 +165,10 @@ export class Detail extends Component {
 
     refreshData() {
         this.setState({ refresh: !this.state.refresh })
+    }
+
+    handleDetail(values) {
+        this.props.history.push(`/gov/llc-request/${values.id}/Дэлгэрэнгүй/`)
     }
 
     handeUpdateAction(values) {
