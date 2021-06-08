@@ -22,7 +22,7 @@ export class LLCMap extends Component {
         const { vector_datas } = this.state
         const {height, aimag_geom} = this.props
         return (
-            <div className="col-12 col-md-12 col-xl-12 mx-4">
+            <div className="col-12 col-md-12 col-xl-12">
                 <InspireMap
                     height={height}
                     is_menu_bar_all='close'
