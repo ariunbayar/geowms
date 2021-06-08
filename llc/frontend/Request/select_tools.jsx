@@ -120,7 +120,7 @@ export default class UsedTools extends Component {
                     </table>
                 </div>
                 {
-                    info || state == "ИЛГЭЭСЭН"
+                    info || state != "ИЛГЭЭСЭН"
                     ?
                         <div className={`form-group col-md-12`}>
                             <div className="form-group col-md-12">

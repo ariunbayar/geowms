@@ -206,6 +206,7 @@ def save_request(request):
     object_count = request.POST.get('object_count')
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
+    ulsiin_hemjeend = request.POST.get('ulsiin_hemjeend')
     selected_tools = request.POST.get('selected_tools') or []
     is_agreed = _validation_form(request_datas)
     main_path = 'llc-request-files'
@@ -293,6 +294,7 @@ def save_request(request):
                 request_file.file_path=uploaded_file
 
             request_file.tools=json_dumps(get_tools)
+            request_file.geo_id =ulsiin_hemjeend
             request_file.save()
 
         else:
