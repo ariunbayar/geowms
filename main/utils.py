@@ -1844,3 +1844,20 @@ def has_materialized_view(view_name):
         if cursor.fetchone():
             return True
         return False
+
+
+def get_feature(shape_geometries):
+    features = []
+    geom_type = ''
+    for shape_geometry in shape_geometries:
+
+        single_geom = json_load(shape_geometry.geom_json)
+        geom_type = single_geom.get('type')
+        feature = {
+            "type": "Feature",
+            'geometry': single_geom,
+            'id': shape_geometry.id,
+            'properties': json_load(shape_geometry.form_json)
+        }
+        features.append(feature)
+    return features, geom_type
