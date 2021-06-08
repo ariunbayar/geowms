@@ -129,11 +129,7 @@ export default class RequestDetail extends Component {
                             values={this.props}
                         />
                         {
-<<<<<<< HEAD
                             info || state != "ИЛГЭЭСЭН"
-=======
-                            !info || state == "ИЛГЭЭСЭН"
->>>>>>> 01389d6226f677b448d3239087be8874dd678872
                             ?
                                 <div className={`form-group`}>
                                     <label htmlFor='choose' className="col-md-12">Орон зайн мэдээлэл</label>
