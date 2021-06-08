@@ -53,7 +53,7 @@ class SubmitClass extends Component {
         form_datas.append('object_count', object_count)
         form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
         form_datas.append('zahialagch', zahialagch)
-        form_datas.append('ulsiin_hemjeend', this.props.nationwide)
+        form_datas.append('ulsiin_hemjeend', this.props.nationwide ? this.props.nationwide: '' )
         form_datas.append('selected_tools', JSON.stringify({ selected_tools }))
 
         service.saveRequest(form_datas).then(({ success, info }) => {
