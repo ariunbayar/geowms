@@ -24,6 +24,7 @@ export class LLCDetail extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+        this.modalClose = this.modalClose.bind(this)
     }
 
     componentDidMount() {
