@@ -121,6 +121,10 @@ export class LLCList extends Component {
         this.setState({ refresh: !this.state.refresh })
     }
 
+    handleDetail(values) {
+        this.props.history.push(`/gov/llc-request/${values.id}/Дэлгэрэнгүй/`)
+    }
+
     handeUpdateAction(values) {
         this.props.history.push(`/gov/llc-request/${values.id}/configure-bundle/`)
     }

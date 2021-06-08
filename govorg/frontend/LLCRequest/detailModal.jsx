@@ -5,7 +5,6 @@ export default class DetailModal extends Component {
         super(props)
         this.state = {
             status: this.props.status || "initial",
-            // datas: props.datas,
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -17,29 +16,25 @@ export default class DetailModal extends Component {
         }
     }
 
-    componentDidUpdate(pP) {
-        // const { datas } = this.props
-        // if (pP.datas !== datas) {
-        //     if (datas) this.setState({datas})
-        // }
-    }
-
     handleOpen() {
-        this.setState({status: "initial"})
+        this.setState({ status: "initial" })
         setTimeout(() => {
-            this.setState({status: "open"})
+            this.setState({ status: "open" })
         }, 0)
     }
 
     handleClose() {
-        // var id = this.props.id
-        this.setState({status: "closed"})
-        // this.props.history.push(`/gov/llc-request/${id}/Дэлгэрэнгүй/`)
+        this.setState({status: "closing"})
+        setTimeout(() => {
+            this.setState({status: "closed"})
+            this.props.modalClose()
+        }, 150)
     }
 
     render () {
         const { status } = this.state
-        // const { datas } = this.state
+        const { values } = this.props
+        var datas = Object.keys(values)
         const className =
             "modal fade" +
             (status == "initial" ? " d-block" : "") +
@@ -69,22 +64,22 @@ export default class DetailModal extends Component {
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-12 overflow-auto text-justify my-2" style={{height:"calc( 40vh - 35px - 7px)"}}>
+                                    <div className="col-md-12 overflow-auto text-justify my-2" style={{height:"calc(50vh - 35px - 7px)"}}>
                                         <table className="table table_wrapper_table">
                                             <tbody>
-                                                {/* {
+                                                {
                                                     datas
                                                     ?
-                                                        Object.keys(datas).map((layer, idx) =>
-                                                            <tr className="p-0" style={{fontSize: '12px'}} key={idx}>
+                                                        datas.map((layer, idx) =>
+                                                            <tr className="p-0" style={{fontSize: '16px'}} key={idx}>
                                                             <th className="font-weight-normal">
-                                                                <b>{layer}</b>
+                                                                {layer}: {values[layer]}
                                                             </th>
                                                         </tr>
                                                         )
                                                     :
-                                                    <tr><th>Хоосон байна.</th></tr>
-                                                } */}
+                                                        <tr><th>Хоосон байна.</th></tr>
+                                                }
                                             </tbody>
                                         </table>
                                     </div>

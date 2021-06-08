@@ -8,7 +8,6 @@ export class LLCDetail extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            values: props.values,
             project_name: '',
             object_type: '',
             object_count: '',
@@ -16,20 +15,10 @@ export class LLCDetail extends Component {
             vector_datas: [],
             disabled: true,
             aimag_name: '',
-            modal_status: 'closed',
-            modal_open: false,
-            features: this.props,
-
-
-
             select_layer_status: false,
             values: [],
-            modalAction: '',
-            modal_title: '',
-            more_detail: '',
-            selected_tools: []
+            selected_tools: [],
         }
-        this.selectedFeature = this.selectedFeature.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalClose = this.modalClose.bind(this)
     }
@@ -53,23 +42,8 @@ export class LLCDetail extends Component {
         })
     }
 
-    selectedFeature(e) {
-        const feature = e.selected[0]
-        if (feature) {
-            const { values } = this.props
-            const id = feature.getProperties()['id']
-            values.map((value) => {
-                if (value.id == id) {
-                    this.setState({ form_json: value.form_json, selected_value: value })
-                }
-            })
-        }
-    }
-
-    handleModalOpen() {
-        this.setState({ modal_status: 'open', modal_open: true }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
+    handleModalOpen(values, e) {
+        this.setState({ select_layer_status: true, values })
     }
 
     modalClose() {
@@ -81,13 +55,10 @@ export class LLCDetail extends Component {
             aimag_name, zahialagch,
             project_name, object_type,
             object_count, hurungu_oruulalt,
-            vector_datas, aimag_geom,
-            modal_open,
+            vector_datas, selected_tools,
+            select_layer_status, values
         } = this.state
         var is_disable = true
-
-
-        const { selected_tools } = this.state
         return(
             <div className="card">
                 <div className="card-body">
@@ -172,24 +143,16 @@ export class LLCDetail extends Component {
                                     </thead>
                                     <tbody>
                                         {
-                                            <tr className="col-md-12" style={{fontSize: '12px'}}>
-                                                <td>{1}</td>
-                                                <td>
-                                                    <a href="#" onClick={this.handleModalOpen}>
-                                                        <i aria-hidden="true">{2}</i>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                    <tbody>
-                                        {
                                             selected_tools && selected_tools.length > 0
                                             ?
                                                 selected_tools.map((value, idx) =>
                                                     <tr key={idx}>
                                                         <th scope="row">{idx+1}</th>
-                                                        <td>{value.bagaj_dugaar}</td>
+                                                        <td>
+                                                            <a href="#" onClick={(e) => this.handleModalOpen(value)}>
+                                                                <i aria-hidden="true">{value.bagaj_dugaar}</i>
+                                                            </a>
+                                                        </td>
                                                         <td>{value.bagaj_mark}</td>
                                                         <td>{value.certificate_number}</td>
                                                         <td>{value.expired_date}</td>
@@ -206,15 +169,16 @@ export class LLCDetail extends Component {
                             <LLCMap
                                 vector_datas={vector_datas}
                                 height="50vh"
-                                aimag_geom={aimag_geom}
-                                selectedFeature={this.selectedFeature}
                             />
                         </div>
                     </div>
                     {
-                        modal_open
+                        select_layer_status
                         &&
-                            <DetailModal/>
+                            <DetailModal
+                                values={values}
+                                modalClose={this.modalClose}
+                            />
                     }
                 </div>
             </div>
