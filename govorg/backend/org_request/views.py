@@ -885,10 +885,9 @@ def get_count(request):
     revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
     request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 
-    llc = RequestFiles.objects
-    llc = llc.filter(state=RequestFiles.STATE_NEW)
-    llc = llc.exclude(kind=RequestFiles.KIND_REVOKE)
-    llc = llc.exclude(kind=RequestFiles.KIND_SOLVED)
+    llc = LLCRequest.objects
+    llc = llc.exclude(kind=LLCRequest.KIND_REVOKE)
+    llc = llc.exclude(kind=LLCRequest.KIND_SOLVED)
     llc_count = llc.count()
 
     rsp = {
