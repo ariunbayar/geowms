@@ -259,7 +259,6 @@ def save_request(request):
         file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
         utils.unzip(file_path, extract_path)
         utils.remove_file(file_path)
-
         datasource_exts = ['.gml', '.geojson']
         for name in glob.glob(os.path.join(extract_path, '*')):
             for ext in datasource_exts:
@@ -290,11 +289,11 @@ def save_request(request):
                 get_shapes.delete()
 
             if not check_data_of_file:
-                request_file.geo_id=org_data.geo_id if org_data else ''
-                request_file.file_path=uploaded_file
+                request_file.geo_id = org_data.geo_id if org_data else ''
+                request_file.file_path = uploaded_file
 
-            request_file.tools=json_dumps(get_tools)
-            request_file.geo_id=ulsiin_hemjeend
+            request_file.tools = json_dumps(get_tools)
+            request_file.geo_id = ulsiin_hemjeend
             request_file.save()
 
         else:
@@ -384,14 +383,20 @@ def get_request_data(request, id):
     features, geom_type = _get_feature(shape_geometries)
 
     qs = RequestForm.objects.filter(file_id=id)
-    qs =  qs.first()
+    qs = qs.first()
     geo_id = qs.file.geo_id
-    mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+
+    if geo_id != '496':
+        mdata_qs = MDatas.objects.filter(geo_id=geo_id, property_id=23).first()
+    else:
+        mdata_qs = MDatas.objects.filter(geo_id=geo_id).first()
 
     if mdata_qs:
         code_list_id = mdata_qs.code_list_id
         code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
-        aimag_name = code_list_data.code_list_name
+
+        if geo_id != '496':
+            aimag_name = code_list_data.code_list_name
 
         aimag_geom = get_geom(geo_id, 'MultiPolygon')
         if aimag_geom:
@@ -418,6 +423,7 @@ def get_request_data(request, id):
         field['state'] = qs.file.get_state_display()
         field['kind'] = qs.file.get_kind_display()
         field['desc'] = qs.file.description
+        field['geo_id'] = qs.file.geo_id
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
