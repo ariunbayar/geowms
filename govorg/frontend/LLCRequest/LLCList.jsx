@@ -23,7 +23,7 @@ export const makeKindColor = (kind) => {
 export const downloadData = (values) => {
     return (
         <a
-            href={'/media/' + values.values.file_path}
+            href={values.values.file_path}
             target="_blank"
         >
             <i className="fa fa-download">&nbsp; Татах</i>
