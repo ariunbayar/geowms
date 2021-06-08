@@ -48,7 +48,7 @@ export default class RequestModal extends Component {
             (status == "closed" ? " d-none" : "")
         return (
             <Fragment>
-                <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap"} style={{height:"calc( 103vh - 85px - 15px)"}}>
+                <div className={className + " ml-3 mr-3 mb-3 mt-3 pl-3 pr-3 pb-3 pt-3 rounded text-wrap overflow-auto"} style={{height:"100vh"}}>
                     <div className="col-md-10 d-flex justify-content-center container">
                         <div className="modal-content animated row" >
                             <div className="col-md-12">

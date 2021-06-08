@@ -4,7 +4,7 @@ import DetailModal from "./detailModal"
 import ModelSelectTools from "../../../llc/frontend/Request/select_modal"
 import { service } from './service'
 
-export class Detail extends Component {
+export class LLCDetail extends Component {
 
     constructor(props) {
         super(props)
