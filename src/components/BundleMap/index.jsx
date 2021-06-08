@@ -88,11 +88,11 @@ export default class InspireMap extends Component {
         this.layer_styles = {
             'MultiPolygon': new Style({
                 stroke: new Stroke({
-                color: 'green',
+                color: 'black',
                 width: 2,
                 }),
                 fill: new Fill({
-                color: 'rgba(0,255,0,0.3)',
+                color: 'rgba(162,174,187)',
                 }),
             }),
             'Polygon': new Style({
@@ -114,7 +114,7 @@ export default class InspireMap extends Component {
             }),
             'LineString': new Style({
                 stroke: new Stroke({
-                color: 'green',
+                color: 'blue',
                 width: 2,
                 }),
             }),
@@ -128,7 +128,7 @@ export default class InspireMap extends Component {
                 image: new CircleStyle({
                 radius: 5,
                 fill: new Fill({
-                    color: 'green',
+                    color: '#F34213',
                 }),
                 }),
             }),
