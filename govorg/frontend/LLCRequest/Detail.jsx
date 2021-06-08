@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { PortalDataTable } from '@utils/DataTable/index'
 import SolveModal from './solveModal'
+import Modal from '@utils/Modal/Modal'
 import { service } from "./service"
 
 export const make_state_color = (state) => {
@@ -28,6 +29,40 @@ export const download_data = (values) => {
         >
         <i className="fa fa-download">&nbsp; Татах</i>
         </a>
+    )
+}
+
+export class GetDescription extends Component {
+    constructor(props){
+        super(props)
+        this.state = {
+        }
+    }
+
+    render() {
+        const { values } = this.props
+        return (
+            <div className='p-0'>
+                {
+                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
+                    &&
+                        <a
+                            className="btn btn-primary btn-sm text-white text-capitalize"
+                            onClick={() => this.props.desModal(values)}
+                        >
+                            Тайлбар
+                        </a>
+                }
+            </div>
+        )
+    }
+}
+
+function ModalText(props) {
+    return (
+        <span className="text-center">
+            {props.description}
+        </span>
     )
 }
 
@@ -70,18 +105,29 @@ export class Detail extends Component {
                     'component': (values) => download_data(values)
                 },
                 {
-                    "title": 'Шийдвэрлэх',
+                    "title": '',
                     'component': SolveModal,
                     'props': {
                         'refreshData': () => this.refreshData(),
                     }
+                },
+                {
+                    "title": '',
+                    'component': GetDescription,
+                    'props': {
+                        'desModal': (values) => this.desModal(values),
+                    }
                 }
             ],
             is_modal_request_open: false,
-            custom_query: {}
+            custom_query: {},
+            modal_status: 'closed',
         }
         this.handleSearch = this.handleSearch.bind(this)
         this.refreshData = this.refreshData.bind(this)
+        this.desModal = this.desModal.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.modalOpen = this.modalOpen.bind(this)
     }
 
     componentDidMount() {
@@ -110,12 +156,37 @@ export class Detail extends Component {
         this.setState({ custom_query, [field]: value })
     }
 
-    refreshData(){
+    refreshData() {
         this.setState({ refresh: !this.state.refresh })
     }
 
     handeUpdateAction(values) {
         this.props.history.push(`/gov/llc-request/${values.id}/configure-bundle/`)
+    }
+
+    modalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(title, text, has_button, description) {
+        this.setState({
+            title: title,
+            text: text,
+            has_button: has_button,
+            description: description,
+        })
+        this.modalOpen()
+    }
+
+    desModal(values) {
+        this.modalChange(
+            'Тайлбар',
+            ModalText,
+            false,
+            values.description,
+        )
     }
 
     render() {
@@ -186,6 +257,13 @@ export class Detail extends Component {
                         </div>
                     </div>
                 </div>
+                <Modal
+                    modal_status={this.state.modal_status}
+                    title={this.state.title}
+                    has_button={this.state.has_button}
+                    text={this.state.text}
+                    description={this.state.description}
+                />
             </div>
         );
     }
