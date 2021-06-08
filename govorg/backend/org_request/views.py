@@ -1193,13 +1193,19 @@ def llc_request_approve(request, request_id):
 def inspire_save(request, payload):
     values = payload.get('values')
     id = values.get('id')
+    order_no = values.get('order_no')
+    order_at = values.get('order_at')
+
     theme_id = values.get('theme').get('id') or None
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
+
     RequestFilesShape.objects.filter(id=id).update(
         theme_id=theme_id,
         package_id=package_id,
         feature_id=feature_id,
+        order_no=order_no,
+        order_at=order_at
     )
 
     return JsonResponse({

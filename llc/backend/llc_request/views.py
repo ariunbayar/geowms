@@ -518,7 +518,10 @@ def get_file_shapes(request, id):
             'feature': {'id': feature_id, 'name': feature_name},
             'package': {'id': package_id, 'name': package_name},
             'icon_state': True,
-            'features': geoms
+            'features': geoms,
+            'order_no': shape_geometry.order_no,
+            'order_at': shape_geometry.order_at
+
         })
 
     return JsonResponse({
