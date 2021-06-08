@@ -66,20 +66,28 @@ export class LLCSettings extends Component {
             list_of_datas[index_of_list]['feature']['id'] = ''
             list_of_datas[index_of_list]['feature'].list = []
         }
+        else {
+            data_list['model_status'] = false
+        }
 
         if (! selected_value) {
             data_list['selected_features'] = []
             list_of_datas[index_of_list]['feature']['name'] = ''
             list_of_datas[index_of_list]['feature']['id'] = ''
 
+            data_list['selected_packages'] = []
+            list_of_datas[index_of_list]['package']['name'] = ''
+            list_of_datas[index_of_list]['package']['id'] = ''
+
         }
+
         list_of_datas[index_of_list][name].id = selected_value
         list_of_datas[index_of_list][name].name = selected_data_name
 
         list_of_datas[index_of_list].icon_state = false
 
         data_list['list_of_datas'] = list_of_datas
-        this.setState({ ...data_list })
+            this.setState({ ...data_list })
     }
 
     getInspireTree(){

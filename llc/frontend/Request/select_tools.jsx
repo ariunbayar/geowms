@@ -53,27 +53,25 @@ export default class UsedTools extends Component {
     }
 
     handleSelectModel(modal_title, modalAction, values, more_detail) {
-        return(
-            this.setState({
-                select_layer_status: true,
-                modalAction,
-                modal_title,
-                values,
-                more_detail
-            })
-        )
+        this.setState({
+            select_layer_status: true,
+            modalAction,
+            modal_title,
+            values,
+            more_detail
+        })
     }
 
     render (){
         const {
-            tool_datas, info, state
+            tool_datas, info, state, selected_tools
         } = this.props.values
         const {
             modalAction, values,
             modal_title,
             select_layer_status,
-            selected_tools
         } = this.state
+
         return (
             <div className="col-md-12">
                 <label htmlFor=''> Зураглал үйлдэхдээ ашигласан багаж</label>
@@ -104,7 +102,7 @@ export default class UsedTools extends Component {
                                                     !info
                                                     ?
                                                         state != "ИЛГЭЭСЭН" &&
-                                                            <a href="#" onClick={(e) => this.handleSelectedTool(false, value)}>
+                                                            <a onClick={(e) => this.handleSelectedTool(false, value)}>
                                                                 <GPIcon icon={"fa fa-minus-circle text-danger"}/>
                                                             </a>
                                                     :
@@ -125,12 +123,13 @@ export default class UsedTools extends Component {
                         <div className={`form-group col-md-12`}>
                             <div className="form-group col-md-12">
                                 <a
+                                    type='button'
+                                    className="btn text-primary"
                                     id='tool_id'
-                                    href="#"
                                     onClick={(e) => this.handleSelectModel('Эрх бүхий багажууд', this.handleSelectedTool, tool_datas)}
                                 >
-                                    <GPIcon icon={"fa fa-plus-circle text-success mr-4 mt-2"}/>
-                                    <label htmlFor="tool_id">Багаж сонгох</label>
+                                <i className="fa fa-plus-circle text-success mt-2 mr-2"> </i>
+                                    Багаж сонгох
                                 </a>
                             </div>
                         </div>
