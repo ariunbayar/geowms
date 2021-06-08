@@ -277,58 +277,59 @@ def save_request(request):
         utils.save_file_to_storage(uploaded_file, file_path, file_name)
 
     if not check_data_of_file or not id:
-        extract_path = os.path.join(extract_path, file_not_ext_name)
-        file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
-        utils.unzip(file_path, extract_path)
-        utils.remove_file(file_path)
+        if file_name != 'blob':
+            extract_path = os.path.join(extract_path, file_not_ext_name)
+            file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
+            utils.unzip(file_path, extract_path)
+            utils.remove_file(file_path)
 
-        datasource_exts = ['.gml', '.geojson']
-        for name in glob.glob(os.path.join(extract_path, '*')):
-            for ext in datasource_exts:
-                if ext in name:
-                    ds = DataSource(name)
-                    for layer in ds:
-                        if len(layer) >= 1:
-                            org_data = _get_leve_2_geo_id(layer)
-                            if not org_data:
+            datasource_exts = ['.gml', '.geojson']
+            for name in glob.glob(os.path.join(extract_path, '*')):
+                for ext in datasource_exts:
+                    if ext in name:
+                        ds = DataSource(name)
+                        for layer in ds:
+                            if len(layer) >= 1:
+                                org_data = _get_leve_2_geo_id(layer)
+                                if not org_data:
+                                    return JsonResponse({
+                                        'success': False,
+                                        'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                                    })
+                            else:
+                                utils.remove_folder(extract_path)
                                 return JsonResponse({
                                     'success': False,
-                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                                    'info': 'Файл хоосон байна !!!'
                                 })
-                        else:
-                            utils.remove_folder(extract_path)
-                            return JsonResponse({
-                                'success': False,
-                                'info': 'Файл хоосон байна !!!'
-                            })
 
-        if id:
-            request_file = RequestFiles.objects.filter(pk=id).first()
-            get_shapes = RequestFilesShape.objects.filter(files=request_file)
-            if get_shapes:
-                for shape in get_shapes:
-                    geoms = ShapeGeom.objects.filter(shape=shape)
-                    geoms.delete()
-                get_shapes.delete()
+            if id:
+                request_file = RequestFiles.objects.filter(pk=id).first()
+                get_shapes = RequestFilesShape.objects.filter(files=request_file)
+                if get_shapes:
+                    for shape in get_shapes:
+                        geoms = ShapeGeom.objects.filter(shape=shape)
+                        geoms.delete()
+                    get_shapes.delete()
 
-            if not check_data_of_file:
-                request_file.geo_id=org_data.geo_id if org_data else ''
-                request_file.file_path=uploaded_file
+                if not check_data_of_file:
+                    request_file.geo_id=org_data.geo_id if org_data else ''
+                    request_file.file_path=uploaded_file
 
-            request_file.tools=json_dumps(get_tools)
-            request_file.save()
+                request_file.tools=json_dumps(get_tools)
+                request_file.save()
 
-        else:
-            request_file = RequestFiles.objects.create(
-                name='UTILITY SOLUTION',
-                kind=RequestFiles.KIND_NEW,
-                state=RequestFiles.STATE_NEW,
-                geo_id=org_data.geo_id if org_data else '',
-                file_path=uploaded_file,
-                tools=json_dumps(get_tools)
-            )
-            id = request_file.id
-        _create_shape_files(org_data, request_file, extract_path, datasource_exts)
+            else:
+                request_file = RequestFiles.objects.create(
+                    name='UTILITY SOLUTION',
+                    kind=RequestFiles.KIND_NEW,
+                    state=RequestFiles.STATE_NEW,
+                    geo_id=org_data.geo_id if org_data else '',
+                    file_path=uploaded_file,
+                    tools=json_dumps(get_tools)
+                )
+                id = request_file.id
+            _create_shape_files(org_data, request_file, extract_path, datasource_exts)
 
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:
