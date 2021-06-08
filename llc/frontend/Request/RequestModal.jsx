@@ -92,7 +92,7 @@ class ActionClass extends Component {
             const {values} = this.props
             const {url, is_loading } = this.state
             return (
-                    <div className='row ml-2'>
+                    <div className='row ml-2 my-4'>
                             <p className="btn btn-secondary">
                                 <i
                                     className="fa fa-angle-double-left"

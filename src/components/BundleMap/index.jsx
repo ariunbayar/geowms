@@ -88,11 +88,11 @@ export default class InspireMap extends Component {
         this.layer_styles = {
             'MultiPolygon': new Style({
                 stroke: new Stroke({
-                color: 'green',
+                color: 'black',
                 width: 2,
                 }),
                 fill: new Fill({
-                color: 'rgba(0,255,0,0.3)',
+                color: 'rgba(162,174,187)',
                 }),
             }),
             'Polygon': new Style({
@@ -114,7 +114,7 @@ export default class InspireMap extends Component {
             }),
             'LineString': new Style({
                 stroke: new Stroke({
-                color: 'green',
+                color: 'blue',
                 width: 2,
                 }),
             }),
@@ -128,7 +128,7 @@ export default class InspireMap extends Component {
                 image: new CircleStyle({
                 radius: 5,
                 fill: new Fill({
-                    color: 'green',
+                    color: '#F34213',
                 }),
                 }),
             }),
@@ -382,7 +382,16 @@ export default class InspireMap extends Component {
         const { projection, projection_display, form_datas} = this.state
         var styles = this.layer_styles
         const {aimag_geom} = this.props
-        if (Object.keys(vector_source.features).length > 0) {
+
+        if (this.map) {
+            this.map.getLayers().forEach(layer => {
+                if (layer && layer.get('id') === 'aimag') {
+                    layer.getSource().clear();
+                }
+            });
+        }
+
+        if (Object.keys(vector_source).length > 0) {
                 var nt_features = new GeoJSON({
                     dataProjection: projection_display,
                     featureProjection: projection
@@ -406,11 +415,11 @@ export default class InspireMap extends Component {
                         featureProjection: projection
                     }).readFeatures(aimag_geom)
 
-                    const vectorSourceAimag = new VectorSource({
+                    var vectorSourceAimag = new VectorSource({
                             features: aimag_features
                     })
 
-                    const aimag_layer = new VectorLayer({
+                    var aimag_layer = new VectorLayer({
                         source: vectorSourceAimag,
                         style: new Style({
                             stroke: new Stroke({
@@ -419,12 +428,19 @@ export default class InspireMap extends Component {
                             })
                         })
                     })
-                    this.map.addLayer(aimag_layer)
                 }
 
                 if (this.map) {
-                    this.map.addLayer(vector_layer)
-                    this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    if (aimag_geom) {
+                        this.map.addLayer(vector_layer)
+                        this.map.addLayer(aimag_layer)
+                        this.map.getView().fit(vectorSourceAimag.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    }
+                    else {
+                        this.map.addLayer(vector_layer)
+                        this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    }
+                    //
                 }
         }
     }
@@ -999,11 +1015,15 @@ export default class InspireMap extends Component {
         selectClick.on("select", event => this.featureSelected(event, coordinate));
     }
 
-
     featureSelected(event, coordinate){
-        const features = event.selected
-        var prop = features[0].getProperties();
-        this.controls.popup.getData(true, prop, this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
+        const features = event.selected[0]
+        if(features) {
+            var prop = features.getProperties();
+            this.controls.popup.getData(true, prop, this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
+        }
+        else {
+            this.controls.popup.getData(true, {} , this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
+        }
     }
 
     setSourceInPopUp(mode) {
