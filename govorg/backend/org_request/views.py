@@ -51,7 +51,8 @@ from main.utils import (
     get_geoJson,
     get_cursor_pg,
     convert_3d_with_srid,
-    datetime_to_string
+    datetime_to_string,
+    get_feature
 )
 from main import utils
 
@@ -1027,6 +1028,34 @@ def get_request_data(request, id):
 
     return JsonResponse({
         'datas': datas
+    })
+
+
+@require_GET
+@ajax_required
+@login_required(login_url='/gov/secure/login/')
+def get_request_detail(request, id):
+    llc_data = LLCRequest.objects.filter(pk=id).first()
+    features = []
+    field = {}
+    file_id = llc_data.file.id
+    shape_geometries = ShapeGeom.objects.filter(shape__files_id=file_id)
+    features, geom_type = get_feature(shape_geometries)
+
+    qs = RequestForm.objects.filter(file_id=file_id)
+    qs = qs.first()
+
+    if qs:
+        field['client_org'] = qs.client_org
+        field['project_name'] = qs.project_name
+        field['object_type'] = qs.object_type
+        field['object_quantum'] = qs.object_quantum
+        field['investment_status'] = qs.investment_status
+        field['selected_tools'] = json_load(qs.file.tools)
+
+    return JsonResponse({
+        'vector_datas': FeatureCollection(features),
+        'form_field': field,
     })
 
 

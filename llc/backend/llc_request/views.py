@@ -45,7 +45,8 @@ from main.utils import (
     send_email,
     get_config,
     get_geom,
-    datetime_to_string
+    datetime_to_string,
+    get_feature
 )
 from main import utils
 
@@ -334,30 +335,13 @@ def save_request(request):
     return JsonResponse(rsp)
 
 
-def _get_feature(shape_geometries):
-    features = []
-    geom_type = ''
-    for shape_geometry in shape_geometries:
-
-        single_geom = json_load(shape_geometry.geom_json)
-        geom_type = single_geom.get('type')
-        feature = {
-            "type":"Feature",
-            'geometry': single_geom,
-            'id': shape_geometry.id,
-            'properties': json_load(shape_geometry.form_json)
-        }
-        features.append(feature)
-    return features, geom_type
-
-
 @require_GET
 @ajax_required
 def get_all_geo_json(request):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
-    features, geom_type = _get_feature(shape_geometries)
+    features, geom_type = get_feature(shape_geometries)
     return JsonResponse({
         'geo_json_datas': FeatureCollection(features)
     })
@@ -380,10 +364,9 @@ def get_request_data(request, id):
     aimag_geom = []
 
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
-    features, geom_type = _get_feature(shape_geometries)
-
+    features, geom_type = get_feature(shape_geometries)
     qs = RequestForm.objects.filter(file_id=id)
-    qs =  qs.first()
+    qs = qs.first()
     geo_id = qs.file.geo_id
     mdata_qs = MDatas.objects.filter(geo_id=geo_id)
 
@@ -437,7 +420,7 @@ def _get_shapes_geoms(shape_geometry):
     geo_datas = []
     geom_type = ''
     shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
-    geo_datas, geom_type = _get_feature(shape_geoms)
+    geo_datas, geom_type = get_feature(shape_geoms)
 
     return geo_datas, geom_type
 
