@@ -2,12 +2,14 @@ import React, { Component } from "react"
 import { LLCMap } from '../../../llc/frontend/LLCMap'
 import DetailModal from "./detailModal"
 import { service } from './service'
+import Modal from "@utils/Modal/Modal"
 
 export class LLCDetail extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
+            text: '',
             project_name: '',
             object_type: '',
             object_count: '',
@@ -15,12 +17,13 @@ export class LLCDetail extends Component {
             vector_datas: [],
             disabled: true,
             aimag_name: '',
-            select_layer_status: false,
             values: [],
             selected_tools: [],
+            modal_status: 'closed',
         }
         this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.modalClose = this.modalClose.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.modalOpen = this.modalOpen.bind(this)
     }
 
     componentDidMount() {
@@ -42,12 +45,32 @@ export class LLCDetail extends Component {
         })
     }
 
-    handleModalOpen(values, e) {
-        this.setState({ select_layer_status: true, values })
+    handleModalOpen(values) {
+        this.modalChange(
+            'Багажны мэдээлэл',
+            DetailModal,
+            this.modalChange, values
+        )
+    }
+
+    modalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
     }
 
     modalClose() {
-        this.setState({ select_layer_status: false })
+        this.setState({ modal_status: 'closed' })
+    }
+
+    modalChange(title, text, modalClose, values) {
+        this.setState({
+            title: title,
+            text: text,
+            modalClose: modalClose,
+            values
+        })
+        this.modalOpen()
     }
 
     render() {
@@ -55,8 +78,8 @@ export class LLCDetail extends Component {
             aimag_name, zahialagch,
             project_name, object_type,
             object_count, hurungu_oruulalt,
-            vector_datas, selected_tools,
-            select_layer_status, values
+            vector_datas, selected_tools
+            , text,title, modal_status
         } = this.state
         var is_disable = true
         return(
@@ -172,15 +195,14 @@ export class LLCDetail extends Component {
                             />
                         </div>
                     </div>
-                    {
-                        select_layer_status
-                        &&
-                            <DetailModal
-                                values={values}
-                                modalClose={this.modalClose}
-                            />
-                    }
                 </div>
+                <Modal
+                    modal_status={modal_status}
+                    title={title}
+                    text={text}
+                    {...this.state}
+                    modalClose={this.modalClose}
+                />
             </div>
         )
     }
