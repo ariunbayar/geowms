@@ -84,7 +84,7 @@ export class LLCList extends Component {
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
                 // {'field': 'file_path', "title": 'Хавсаргасан файл'},
-                // {'field': 'updated_at', "title": 'Зассан'},
+                {'field': 'updated_at', "title": 'Зассан'},
             ],
             жагсаалтын_холбоос: '/gov/api/llc-request/',
             хувьсах_талбарууд: [
