@@ -3,43 +3,41 @@ from django.db import migrations, models
 
 def fix_kind(apps, schema_editor):
 
-    ChangeRequest = apps.get_model('org_request', 'ChangeRequest')
+    LLCRequest = apps.get_model('llc_request', 'LLCRequest')
+    RequestFiles = apps.get_model('llc_request', 'RequestFiles')
 
-    KIND_UPDATE = 2
-    KIND_DELETE = 3
+    KIND_APPROVED = 1
+    KIND_REVOKE = 4
+    STATE_SOLVED = 3
 
-    change_requests = ChangeRequest.objects.filter(
+    llc_requests = LLCRequest.objects.filter(
         kind__in=[
-            KIND_UPDATE,
-            KIND_DELETE,
+            KIND_APPROVED,
+            KIND_REVOKE,
         ],
     )
 
-    for change_request in change_requests:
+    for llc_request in llc_requests:
+        llc_request.state = STATE_SOLVED
+        llc_request.save()
 
+    file_requests = RequestFiles.objects.filter(
+        kind__in=[
+            KIND_APPROVED,
+            KIND_REVOKE,
+        ],
+    )
 
-
-        if change_request.form_json:
-            if change_request.kind != KIND_UPDATE:
-                change_request.kind = KIND_UPDATE
-                change_request.save()
-        else:
-            if change_request.kind != KIND_DELETE:
-                change_request.kind = KIND_DELETE
-                change_request.save()
-
+    for file_request in file_requests:
+        file_request.state = STATE_SOLVED
+        file_request.save()
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('org_request', '0012_auto_20201128_0917'),
+        ('llc_request', '0010_auto_20210610_0939'),
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='changerequest',
-            name='kind',
-            field=models.PositiveIntegerField(choices=[(1, 'ҮҮССЭН'), (3, 'УСТГАСАН'), (2, 'ЗАССАН'), (4, 'ШУУД'), (5, 'ЦУЦЛАСАН')], db_index=True, null=True),
-        ),
         migrations.RunPython(fix_kind),
     ]
