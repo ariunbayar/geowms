@@ -59,7 +59,7 @@ export default class App extends Component {
   render() {
     return (
       <div>
-        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачаалж байна."}/>}>
+        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
           <BrowserRouter>
             <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true" className="color-sidebar bg-dark">
               <div className="brand-logo">

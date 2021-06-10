@@ -538,14 +538,10 @@ def get_file_shapes(request, id):
             'feature': {'id': feature_id, 'name': feature_name},
             'package': {'id': package_id, 'name': package_name},
             'icon_state': True,
-<<<<<<< HEAD
-            'features': FeatureCollection(geoms)
-=======
             'features': geoms,
             'order_no': shape_geometry.order_no,
             'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
 
->>>>>>> b68449cdf73560af961f6c27b3c0492cf50c7195
         })
 
     return JsonResponse({

@@ -5,5 +5,5 @@
 
 .bundle-view-right-scroll {
     overflow-y: scroll;
-    height: calc(95vh - 36px);
+    height: calc(95vh);
 }
