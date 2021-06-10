@@ -1,11 +1,12 @@
 import React, { Component, Fragment } from "react"
-
+import Loader from "@utils/Loader"
 export default class ModelSendData extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
             status: this.props.status || "initial",
+            is_loading: false,
         }
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
@@ -73,6 +74,7 @@ export default class ModelSendData extends Component {
                         <div className="col-md-12">
                             <div className="modal-content animated row" >
                                 <div className="col-md-12">
+                                    <Loader is_loading={this.state.is_loading}/>
                                     <div className="row mt-2" style={{background:"white"}} onClick={() => this.handleClose()} >
                                         <div className="col-md-11">
                                             <h5 className="text-center text-justify">Хүсэлт илгээх</h5>
@@ -90,6 +92,7 @@ export default class ModelSendData extends Component {
                                             ?
                                                 <this.props.body
                                                     values={this.props}
+                                                    handleIsload={this.handleIsload}
                                                     closeRequestMap={this.props.closeRequestMap}
                                                 />
                                             :
