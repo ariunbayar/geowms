@@ -427,17 +427,13 @@ export default class SolveModal extends Component {
         return (
             <div>
                 {
-                    state == "ШИНЭ" && kind == "ШИНЭ"
-                    ?
+                    state == "ШИНЭ"
+                    &&
                         <a
                             className="btn btn-primary btn-sm text-white text-capitalize"
                             onClick={this.openModalMap}
                         >
                             Шийдвэрлэх
-                        </a>
-                    :
-                        <a className="text-primary">
-                            ШИЙДВЭРЛЭСЭН
                         </a>
                 }
                 {

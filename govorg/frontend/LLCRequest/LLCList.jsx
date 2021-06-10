@@ -111,14 +111,14 @@ export class LLCList extends Component {
                     'component': (values) => downloadData(values)
                 },
                 {
-                    "title": '',
+                    "title": 'Шийдвэрлэх',
                     'component': SolveModal,
                     'props': {
                         'refreshData': () => this.refreshData(),
                     }
                 },
                 {
-                    "title": '',
+                    "title": 'Тайлбар',
                     'component': GetDescription,
                     'props': {
                         'desModal': (values) => this.desModal(values),
