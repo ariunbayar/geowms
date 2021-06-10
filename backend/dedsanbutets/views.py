@@ -364,7 +364,7 @@ def propertyFields(request, fid):
             'geom_type': geom_type,
         })
 
-    view = ViewNames.objects.filter(feature_id=fid).values('id', 'view_name').first()
+    view_qs = ViewNames.objects.filter(feature_id=fid)
     cache_values = []
     wmts = WmtsCacheConfig.objects.filter(feature_id=fid).first()
     if wmts:
@@ -375,14 +375,16 @@ def propertyFields(request, fid):
             'cache_type': wmts.type_of_operation,
             'number_of_cache': wmts.number_of_tasks_to_use,
         })
-    if view:
-        id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view['id'])]
+    if view_qs:
+        view = view_qs.first()
+        id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view.id)]
         url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': id_list,
-            'view': view,
+            'open_datas': utils.json_load(view.open_datas),
+            'view': view_qs.values('id', 'view_name').first(),
             'url': request.build_absolute_uri(url),
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
             'geom_type': geom_type,
@@ -393,6 +395,7 @@ def propertyFields(request, fid):
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': [],
+            'open_datas': [],
             'view': '',
             'geom_type': geom_type,
             'cache_values': cache_values,
@@ -439,6 +442,7 @@ def propertyFieldsSave(request, payload):
     fid = payload.get('fid')
     view_id = payload.get('view_id')
     values = payload.get('values')
+    open_datas = payload.get('open_datas')
     if not id_list:
         rsp = {
             'success': False,
@@ -462,6 +466,7 @@ def propertyFieldsSave(request, payload):
         defaults={
             'view_name': table_name,
             'feature_id': fid,
+            'open_datas': utils.json_dumps(open_datas),
         }
     )[0]
 
@@ -704,7 +709,6 @@ def erese(request, payload):
             'info': 'Алдаа гарсан байна: ' + str(e)
         }
     return JsonResponse(rsp)
-
 
 
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
