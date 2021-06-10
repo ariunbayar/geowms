@@ -888,9 +888,10 @@ def get_count(request):
     request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 
     llc = LLCRequest.objects
-    llc = llc.exclude(kind=LLCRequest.KIND_REVOKE)
-    llc = llc.exclude(kind=LLCRequest.KIND_SOLVED)
-    llc_count = llc.count()
+    kind_new = llc.filter(kind=LLCRequest.KIND_NEW).count()
+    kind_pending = llc.filter(kind=LLCRequest.KIND_PENDING).count()
+    kind_dismiss = llc.filter(kind=LLCRequest.KIND_DISMISS).count()
+    llc_count = kind_new + kind_pending + kind_dismiss
 
     rsp = {
         'success': True,
