@@ -887,12 +887,10 @@ def get_count(request):
     revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
     request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 
+    geo_id = employee.org.geo_id
     llc = LLCRequest.objects
-    kind_new = llc.filter(kind=LLCRequest.KIND_NEW).count()
-    kind_pending = llc.filter(kind=LLCRequest.KIND_PENDING).count()
-    kind_dismiss = llc.filter(kind=LLCRequest.KIND_DISMISS).count()
-    llc_count = kind_new + kind_pending + kind_dismiss
-
+    llc = llc.filter(file__geo_id=geo_id)
+    llc_count = llc.exclude(kind__in=[LLCRequest.KIND_APPROVED, LLCRequest.KIND_REVOKE]).count()
     rsp = {
         'success': True,
         'count': request_count,
