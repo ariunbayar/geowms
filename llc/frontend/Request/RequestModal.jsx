@@ -218,13 +218,17 @@ export default class RequestModal extends Component {
     render() {
         const {values, modal_status, state, kind, invis} = this.state
         return (
-            <div className="col-md-12">
+            <div className="col-md-12 ">
                 {
-                (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
-                        ?
-                            <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2 ${invis && 'invisible'}`} onClick={this.openRequestModal}></a>
-                        :
-                             <a className="fa fa-check text-success mt-2 ml-2" ></a>
+                    !invis
+                    ?
+                        (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
+                                ?
+                                    <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2`} onClick={this.openRequestModal}></a>
+                                :
+                                    <a className="fa fa-check text-success mt-2 ml-2" ></a>
+                    :
+                        null
                 }
                 {
                     modal_status == 'open'

@@ -81,7 +81,7 @@ export default class RequestDetail extends Component {
                 <div className="col-md-5">
                     <form className="form-row">
                         {
-                            aimag_name
+                            (aimag_name && !info)
                             &&
                                 <>
                                     <div className="col-md-12 d-flex justify-content-between">
@@ -169,7 +169,7 @@ export default class RequestDetail extends Component {
                             values={this.props}
                         />
                         {
-                            info || state != "ИЛГЭЭСЭН"
+                            !info
                             ?
                                 <div className={`form-group`}>
                                     <label htmlFor='choose' className="col-md-12">Орон зайн мэдээлэл</label>
