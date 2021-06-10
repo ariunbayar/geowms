@@ -17,7 +17,7 @@ export const make_state_color = (state) => {
 
 export const make_kind_color = (kind) => {
     let color
-    if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warining'
+    if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
     else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
     else if (kind == "БУЦААГДСАН") color = 'text-danger'
