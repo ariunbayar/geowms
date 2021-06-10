@@ -40,54 +40,61 @@ export class LLCSettings extends Component {
         var data_list = {}
         var seleted_datas = []
         var { packages, features, list_of_datas } = this.state
-        const selected_value = parseInt(e.target.value)
-
-        var target_data = e.target.selectedIndex
-        var optionElement = e.target.childNodes[target_data]
-        var selected_data_name =  optionElement.getAttribute('name')
-
         var value_list_of = obj => obj.id == selected_values.id
         var index_of_list = list_of_datas.findIndex(value_list_of)
 
-        if ( name == 'theme' ) {
-            seleted_datas = this.getArray(packages, selected_value)
-            data_list['selected_packages'] = seleted_datas
-            list_of_datas[index_of_list]['feature']['name'] = ''
-            list_of_datas[index_of_list]['feature']['id'] = ''
-            data_list['selected_features'] = []
-            list_of_datas[index_of_list]['package'].list = []
-            list_of_datas[index_of_list]['feature'].list = []
+        var value = e.target.value
+        if (name == 'order_no' || name == 'order_at') {
+            list_of_datas[index_of_list][name] = value
         }
 
-        else if ( name == 'package' ) {
-            seleted_datas = this.getArray(features, selected_value)
-            data_list['selected_features'] = seleted_datas
-            list_of_datas[index_of_list]['feature']['name'] = ''
-            list_of_datas[index_of_list]['feature']['id'] = ''
-            list_of_datas[index_of_list]['feature'].list = []
-        }
         else {
-            data_list['model_status'] = false
+            const selected_value = parseInt(value)
+            var target_data = e.target.selectedIndex
+            var optionElement = e.target.childNodes[target_data]
+            var selected_data_name =  optionElement.getAttribute('name')
+
+
+            if ( name == 'theme' ) {
+                seleted_datas = this.getArray(packages, selected_value)
+                data_list['selected_packages'] = seleted_datas
+                list_of_datas[index_of_list]['feature']['name'] = ''
+                list_of_datas[index_of_list]['feature']['id'] = ''
+                data_list['selected_features'] = []
+                list_of_datas[index_of_list]['package'].list = []
+                list_of_datas[index_of_list]['feature'].list = []
+            }
+
+            else if ( name == 'package' ) {
+                seleted_datas = this.getArray(features, selected_value)
+                data_list['selected_features'] = seleted_datas
+                list_of_datas[index_of_list]['feature']['name'] = ''
+                list_of_datas[index_of_list]['feature']['id'] = ''
+                list_of_datas[index_of_list]['feature'].list = []
+            }
+            else {
+                data_list['model_status'] = false
+            }
+
+            if (! selected_value) {
+                data_list['selected_features'] = []
+                list_of_datas[index_of_list]['feature']['name'] = ''
+                list_of_datas[index_of_list]['feature']['id'] = ''
+
+                data_list['selected_packages'] = []
+                list_of_datas[index_of_list]['package']['name'] = ''
+                list_of_datas[index_of_list]['package']['id'] = ''
+
+            }
+
+            list_of_datas[index_of_list][name].id = selected_value
+            list_of_datas[index_of_list][name].name = selected_data_name
         }
-
-        if (! selected_value) {
-            data_list['selected_features'] = []
-            list_of_datas[index_of_list]['feature']['name'] = ''
-            list_of_datas[index_of_list]['feature']['id'] = ''
-
-            data_list['selected_packages'] = []
-            list_of_datas[index_of_list]['package']['name'] = ''
-            list_of_datas[index_of_list]['package']['id'] = ''
-
-        }
-
-        list_of_datas[index_of_list][name].id = selected_value
-        list_of_datas[index_of_list][name].name = selected_data_name
 
         list_of_datas[index_of_list].icon_state = false
 
         data_list['list_of_datas'] = list_of_datas
-            this.setState({ ...data_list })
+        this.setState({ ...data_list })
     }
 
     getInspireTree(){

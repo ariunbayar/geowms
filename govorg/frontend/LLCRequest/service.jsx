@@ -9,6 +9,7 @@ export const service = {
     getInspireTree,
     getChoices,
     Save,
+    getLLCDetail
 }
 
 const prefix = '/gov/api/llc-request'
@@ -49,6 +50,13 @@ function llcList(id) {
         body: JSON.stringify({ id }),
     }
     return fetch(`${prefix}`, requestOptions).then(handleResponse)
+}
+
+function getLLCDetail(id) {
+    const opts = {
+        ...getGetOptions(),
+    }
+    return fetch(`${prefix}/${id}/get-request-detail/`, opts).then(handleResponse)
 }
 
 function handleRequestData(id) {

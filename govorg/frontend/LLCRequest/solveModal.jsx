@@ -6,7 +6,7 @@ import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import { containsCoordinate } from "ol/extent"
 
-class DetailModalBody extends Component {
+export class DetailModalBody extends Component {
     constructor(props) {
         super(props)
 
@@ -305,6 +305,20 @@ class DetailModalBody extends Component {
                                             title_name='feature'
                                             defualt_value={current_data.feature?.name || ''}
                                         />
+                                    </div>
+                                    <div className="col-md-12 pb-5 mt-2 px-0">
+                                        <div className="form-row d-flex justify-content-between">
+                                            <InspireField
+                                                title_name='Тушаалын дугаар'
+                                                defualt_value={current_data?.order_no || ''}
+                                                className="my-2 col-md-6"
+                                            />
+                                            <InspireField
+                                                title_name='Тушаал гарсан огноо'
+                                                defualt_value={current_data?.order_at || ''}
+                                                className="my-2 col-md-6"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="col-md-12 mx-0 px-0">
                                         <LLCMap

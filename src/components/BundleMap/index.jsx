@@ -431,7 +431,7 @@ export default class InspireMap extends Component {
                 }
 
                 if (this.map) {
-                    if (aimag_geom) {
+                    if (aimag_geom && Object.keys(aimag_geom).length > 0) {
                         this.map.addLayer(vector_layer)
                         this.map.addLayer(aimag_layer)
                         this.map.getView().fit(vectorSourceAimag.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
@@ -440,7 +440,6 @@ export default class InspireMap extends Component {
                         this.map.addLayer(vector_layer)
                         this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
                     }
-                    //
                 }
         }
     }
