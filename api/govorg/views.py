@@ -239,8 +239,8 @@ def qgis_submit(request, token):
 def _get_layer_name(employee):
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).values_list('feature_id', flat=True)
-    allowed_layers = ViewNames.objects.filter(feature_id__in=feature_ids).values_list("view_name", flat=True)
-    allowed_layers = ['gp_layer_' + allowed_layer for allowed_layer in allowed_layers]
+    features = LFeatures.objects.filter(feature_id__in=feature_ids)
+    allowed_layers = ['gp_layer_' + utils.make_view_name(feature) for feature in features]
     return allowed_layers
 
 
@@ -275,7 +275,6 @@ def qgis_proxy(request, base_url, token):
     headers = {**BASE_HEADERS}
     employee = utils.geo_cache("qgis_employee", token, Employee.objects.filter(token=token).first(), 300)
     allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee), 300)
-
     if not employee:
         raise Http404
 
