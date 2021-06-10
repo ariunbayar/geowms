@@ -21,8 +21,8 @@ def _get_to_view_name(feature, view_name):
 
 
 def _rename_geoserver_layer_name(feature, apps, to_view_name, view_name):
-    LPackages = apps.get_model('inspire', 'LPackages')
-    LThemes = apps.get_model('inspire', 'LThemes')
+    LPackages = apps.get_model('backend_inspire', 'LPackages')
+    LThemes = apps.get_model('backend_inspire', 'LThemes')
     BASE_URL, AUTH = geoserver.getHeader()
     HEADERS = geoserver.HEADERS
 
@@ -34,23 +34,23 @@ def _rename_geoserver_layer_name(feature, apps, to_view_name, view_name):
     to_layer_name = 'gp_layer_' + to_view_name
 
     payload = '''
-        <wmsLayer>
+        <featureType>
             <name>{to_layer_name}</name>
             <nativeName>{to_view_name}</nativeName>
-        </wmsLayer>
+        </featureType>
     '''.format(to_view_name=to_view_name, to_layer_name=to_layer_name)
 
     wk_name = 'gp_' + theme.theme_code
 
-    url = 'workspaces/{workspaceName}/wmsstores/{store}/wmslayers/{layer_name}'.format(workspaceName=wk_name, store=wk_name, layer_name=layer_name)
+    url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=wk_name, datastore_name=wk_name, layer_name=layer_name)
     rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
     return rsp
 
 
 def _rename_views(apps, schema_editor):
     ViewNames = apps.get_model('dedsanbutets', 'ViewNames')
-    LFeatures = apps.get_model('inspire', 'LFeatures')
-    WMSLayer = apps.get_model('wmslayer', 'WMSLayer')
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    WMSLayer = apps.get_model('backend_wmslayer', 'WMSLayer')
     views = ViewNames.objects.all()
     for view in views:
         feature_id = view.feature_id
@@ -71,7 +71,9 @@ def _rename_views(apps, schema_editor):
         WMSLayer.objects.filter(code=gp_layer).update(
             code='gp_layer_' + to_view_name
         )
-        # _rename_geoserver_layer_name(feature, apps, to_view_name, view_name)
+        _rename_geoserver_layer_name(feature, apps, to_view_name, view_name)
+        view.view_name = to_view_name
+        view.save()
 
 
 class Migration(migrations.Migration):
