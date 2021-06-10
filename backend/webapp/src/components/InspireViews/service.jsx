@@ -3,6 +3,7 @@ export const service ={
     getall,
     getPropertyFields,
     setPropertyFields,
+    makeView,
 }
 
 const prefix = '/back/dedsan-butests'
@@ -21,11 +22,18 @@ function getPropertyFields(fid) {
     return fetch(`${prefix}/property-fields/${fid}/`, opts).then(handleResponse)
 }
 
-
-function setPropertyFields(fid, fields, tid, values){
+function setPropertyFields(fid, tid, id_list, view_id, values){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ fid, fields, tid, values}),
+        body: JSON.stringify({ fid, tid, id_list, view_id, values }),
     }
     return fetch(`${prefix}/property-fields/save/`, opts).then(handleResponse)
+}
+
+function makeView(fid, tid, view_id, values) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ fid, tid, view_id, values}),
+    }
+    return fetch(`${prefix}/make-view/`, opts).then(handleResponse)
 }

@@ -3,31 +3,25 @@ import 'ol/ol.css';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
 import Tile from 'ol/layer/Tile'
-import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
+import {OSM, TileWMS} from 'ol/source'
 import View from 'ol/View';
-import GeoJSON from 'ol/format/GeoJSON';
-import {Fill, Stroke, Style, Circle as CircleStyle, RegularShape, Image} from 'ol/style';
-import {Vector as VectorLayer} from 'ol/layer';
-import { service } from './service'
-
 
 export default class StyleMap extends Component {
     constructor(props) {
-            super(props)
-            this.state = {
-                geojson: [],
-                dataProjection: 'EPSG:4326',
-                featureProjection: 'EPSG:3857',
-                style_name: props.style_name,
-                view_name : props.view_name ? props.view_name : 'geoserver_desing_view',
-                url: props.url,
-                defualt_url: props.defualt_url,
-                geom_type: props.geom_type,
-                is_loading: false
-            }
-            this.loadMapData = this.loadMapData.bind(this)
-            this.loadMap = this.loadMap.bind(this)
+        super(props)
+        this.state = {
+            geojson: [],
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857',
+            style_name: props.style_name,
+            url: props.url,
+            defualt_url: props.defualt_url,
+            geom_type: props.geom_type,
+            is_loading: false
         }
+        this.loadMapData = this.loadMapData.bind(this)
+        this.loadMap = this.loadMap.bind(this)
+    }
 
     componentDidMount() {
         this.loadMap()
@@ -35,8 +29,8 @@ export default class StyleMap extends Component {
     }
 
     componentDidUpdate(pP, pS){
-        if(pP.geom_type !=this.props.geom_type){
-            this.setState({geom_type:this.props.geom_type})
+        if(pP.geom_type != this.props.geom_type) {
+            this.setState({ geom_type: this.props.geom_type })
         }
     }
 
@@ -56,24 +50,31 @@ export default class StyleMap extends Component {
         this.map = map
     }
 
+    getType(geom_type) {
+        let g_type
+        let types = ['line', 'point', 'poly']
+        types.map((type, idx) => {
+            if (geom_type.toLowerCase().includes(type)) {
+                g_type = type
+            }
+        })
+        if (!g_type) g_type = geom_type
+        return g_type
+    }
+
     loadMapData(){
         const {
             style_name, url,
             defualt_url, geom_type,
             dataProjection, featureProjection,
         } = this.state
-        var params = []
-        if ( style_name){
-            params= {
-                'FORMAT': 'image/png',
-                'styles': style_name,
-            }
-        }
-        else{
-            params= {
-                'FORMAT': 'image/png',
-                'cql_filter':  `field_type like '${geom_type}'`
-            }
+
+        let type = this.getType(geom_type)
+
+        const params= {
+            'FORMAT': 'image/png',
+            'styles': style_name,
+            'cql_filter':  `field_type iLIKE '%${type}%'`
         }
 
         const updata_layer = {
@@ -93,7 +94,17 @@ export default class StyleMap extends Component {
                 <div className="col-md-12 m-1 h-100 w-100">
                     <div id="map" style={{height:"calc( 49vh - 34px - 7px)"}}></div>
                 </div>
-                {this.state.is_loading ? <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </span> :null}
+                {
+                    this.state.is_loading
+                    ?
+                        <span className="text-center d-block text-sp" style={{position:"fixed", top:"60%", right:"20%"}}>
+                            <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                            <br/>
+                            Түр хүлээнэ үү...
+                        </span>
+                    :
+                        null
+                }
             </div>
         )
     }

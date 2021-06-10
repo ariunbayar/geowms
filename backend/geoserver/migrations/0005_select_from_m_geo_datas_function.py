@@ -9,7 +9,7 @@ def create_design_function(apps, schema_editor):
         CREATE OR REPLACE FUNCTION get_datas_of_m_geo_datas(n_feature_id int)
         RETURNS setof geometry
         AS $$
-        SELECT geo_data  FROM m_geo_datas where feature_id=n_feature_id limit 1000;
+        SELECT geo_data  FROM m_geo_datas where feature_id=n_feature_id limit 10;
         $$ LANGUAGE sql;
     '''
     cursor.execute(sql)
