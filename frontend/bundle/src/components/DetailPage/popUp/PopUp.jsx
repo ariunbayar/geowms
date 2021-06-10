@@ -1,8 +1,10 @@
-import React, { Component, Fragment } from "react"
-import {service} from '../service'
+import React, { Component } from "react"
 import ReactDOM from 'react-dom'
+import { Control } from 'ol/control'
+
 import Loader from "@utils/Loader"
-import {Control} from 'ol/control'
+
+import { service } from '../service'
 
 class PopUpCmp extends Component {
 
@@ -132,7 +134,7 @@ class PopUpCmp extends Component {
         if (this.props.is_from_inspire) data = [datas[number - 1]]
         else data = datas[number - 1]
 
-        if (code != "gp_layer_geodeticalpoint_view") {
+        if (code != "gp_layer_geodeticalpoint_gp_view") {
             this.is_from_inspire = false
         }
         this.setState({ data, mode, datas, code, geom_name })
