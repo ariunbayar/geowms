@@ -102,9 +102,9 @@ export default class  ExportCreate extends Component {
         return seleted_datas
     }
 
-    handleChange(name, value) {
+    handleChange(name, e) {
         const { packages, features } = this.state
-        const selected_value = value
+        const selected_value = e.target.value
         var data_list = {}
         var seleted_datas = []
 
