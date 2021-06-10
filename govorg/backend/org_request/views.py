@@ -51,6 +51,7 @@ from main.utils import (
     get_geoJson,
     get_cursor_pg,
     convert_3d_with_srid,
+    datetime_to_string,
     get_feature
 )
 from main import utils
@@ -341,7 +342,8 @@ def _get_ann_and_project_name(llc_request_id, item):
         llc_request = LLCRequest.objects.filter(id=llc_request_id).first()
         if llc_request:
             form = RequestForm.objects.filter(file_id=llc_request.file.id).first()
-            name = '{} / {}'.format(llc_request.file.name, form.project_name)
+            if form:
+                name = '{} / {}'.format(llc_request.file.name, form.project_name)
     return name
 
 
@@ -1026,7 +1028,9 @@ def get_request_data(request, id):
             'feature': {
                 'id': feature_id,
                 'name': feature_name
-            }
+            },
+            'order_no': shape_geometry.order_no or '',
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
         })
 
     return JsonResponse({
@@ -1114,7 +1118,7 @@ def _create_request(request_datas):
     change_request['form_json'] = request_datas['form_json'] if 'form_json' in request_datas else None
     change_request['geo_json'] = request_datas['geo_json'] if 'geo_json' in request_datas else None
     change_request['group_id'] = request_datas['group_id'] if 'group_id' in request_datas else None
-    change_request['order_at'] = utils.date_to_timezone(request_datas['order_at']) if 'order_at' in request_datas else None
+    change_request['order_at'] = request_datas['order_at'] if 'order_at' in request_datas else None
     change_request['order_no'] = request_datas['order_no'] if 'order_no' in request_datas else None
     change_request['llc_request_id'] = request_datas['llc_request_id']
     request = ChangeRequest(**change_request)
@@ -1192,10 +1196,13 @@ def llc_request_approve(request, request_id):
         item['feature_id'] = file_shape['feature_id']
         item['package_id'] = file_shape['package_id']
         item['theme_id'] = file_shape['theme_id']
+        item['order_at'] = file_shape['order_at']
+        item['order_no'] = file_shape['order_no']
         if not is_root:
             item['form_json'] = utils.json_load(shape_geom.form_json)
             item['form_json'] = _check_and_make_form_json(item['feature_id'], item['form_json'])
             item['geo_json'] = shape_geom.geom_json
+
         return item
 
     for file_shape in request_file_shapes.values():
@@ -1228,13 +1235,19 @@ def llc_request_approve(request, request_id):
 def inspire_save(request, payload):
     values = payload.get('values')
     id = values.get('id')
+    order_no = values.get('order_no')
+    order_at = values.get('order_at')
+
     theme_id = values.get('theme').get('id') or None
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
+
     RequestFilesShape.objects.filter(id=id).update(
         theme_id=theme_id,
         package_id=package_id,
         feature_id=feature_id,
+        order_no=order_no,
+        order_at=order_at or None
     )
 
     return JsonResponse({

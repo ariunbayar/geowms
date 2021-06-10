@@ -102,51 +102,73 @@ export class ConfigureBundle extends Component {
                         handleSelectField={this.handleChange}
                     />
                 </div>
-                <div className="p-4 mx-1">
-                    <div className="col-md-12 d-flex justify-content-between">
-                        <label className="col-6 fa fa-angle-double-left fa-2x text-dark btn btn-outline-primary mx-2" onClick={(e) => this.changeGeom(false)}></label>
-                        <label className="col-6 fa fa-angle-double-right fa-2x text-dark btn btn-outline-primary" onClick={(e) => this.changeGeom(true)}></label>
+                <div className="col-md-12 d-flex justify-content-between">
+                    <div className="col-md-6">
+                        <label htmlFor="">Тушаалын дугаар</label>
+                        <input
+                            className={'form-control ' + (!selected_values.order_no && 'is-invalid')}
+                            name='order_no'
+                            type="text"
+                            value={selected_values.order_no}
+                            onChange={(e) => {this.handleChange('order_no', e)}}
+                        />
                     </div>
-                        {
-                            selected_values.features
-                            &&
-                            <div className="col-md-12 pb-5 mt-2 px-0 mx-0 d-flex justify-content-between">
-                                <div className="col-md-6">
-                                    <div className="overflow-auto" style={{maxHeight: '60vh'}}>
-                                        <table className="table">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col"> # </th>
-                                                    <th scope="col"> Property</th>
-                                                    <th scope="col"> Утга</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    Object.keys(feature_data)
-                                                    &&
-                                                    Object.keys(feature_data.properties).map((layer, idx) =>
-                                                        <tr className="col-md-12" style={{fontSize: '12px'}} key={idx}>
-                                                            <td>{idx+1}</td>
-                                                            <td>{layer}</td>
-                                                            <td className="font-weight-normal">
-                                                                {feature_data.properties[layer]}
-                                                            </td>
-                                                        </tr>
-                                                    )
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div className="col-md-6 d-inline-block">
-                                    <LLCMap
-                                        vector_datas={feature_data?.geometry || []}
-                                        height={'60vh'}
-                                    />
+                    <div className="col-md-6 mb-2">
+                        <label htmlFor="">Тушаал гарсан огноо</label>
+                        <input
+                            className={'form-control ' + (!selected_values.order_at && 'is-invalid')}
+                            name='order_at'
+                            type="date"
+                            value={selected_values.order_at}
+                            onChange={(e) => {this.handleChange('order_at', e)}}
+                        />
+                    </div>
+                </div>
+                <div className="p-4 mx-1">
+                    {
+                        selected_values.features
+                        &&
+                        <div className="col-md-12 pb-5 mt-2 px-0 mx-0 d-flex justify-content-between">
+                            <div className="col-md-6">
+                                <div className="overflow-auto" style={{maxHeight: '60vh'}}>
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col"> # </th>
+                                                <th scope="col"> Property</th>
+                                                <th scope="col"> Утга</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                Object.keys(feature_data)
+                                                &&
+                                                Object.keys(feature_data.properties).map((layer, idx) =>
+                                                    <tr className="col-md-12" style={{fontSize: '12px'}} key={idx}>
+                                                        <td>{idx+1}</td>
+                                                        <td>{layer}</td>
+                                                        <td className="font-weight-normal">
+                                                            {feature_data.properties[layer]}
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            }
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        }
+                            <div className="col-md-6 d-inline-block">
+                                <LLCMap
+                                    vector_datas={feature_data?.geometry || []}
+                                    height={'60vh'}
+                                />
+                            </div>
+                        </div>
+                    }
+                    <div className="col-md-12 d-flex justify-content-between px-1">
+                        <label className="col-md-6 fa fa-angle-double-left fa-2x text-dark btn btn-outline-primary mr-2" onClick={(e) => this.changeGeom(false)}></label>
+                        <label className="col-md-6 fa fa-angle-double-right fa-2x text-dark btn btn-outline-primary" onClick={(e) => this.changeGeom(true)}></label>
+                    </div>
                 </div>
             </div>
         )

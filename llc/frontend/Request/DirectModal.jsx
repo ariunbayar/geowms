@@ -55,14 +55,20 @@ export default class RequestDetail extends Component {
                             aimag_name
                             &&
                                 <div className="form-group col-md-12">
-                                    <label htmlFor=''>Өгөгдлийн хамрагдаж буй аймгийн нэр</label>
-                                    <input
-                                        type="text"
-                                        name='aimag_name'
-                                        className="form-control"
-                                        disabled={true}
-                                        value={aimag_name}
-                                    />
+                                    <div className="form-row">
+                                        <div className="col-md-9 col-sm-9">
+                                            <label htmlFor="id">Өгөгдлийн хамрах хүрээ</label>
+                                        </div>
+                                        <div className="form-check col-md-3 col-sm-9 pl-4">
+                                            <input
+                                                type="checkbox" id="nationwide"
+                                                className="form-check-input align-middle"
+                                                checked={this.state.form_checked}
+                                                onChange={(e) => this.getValueCheckbox(e)}/>
+                                            <label htmlFor="nationwide" className="form-check-label ml-2 my-1"> Улсын хэмжээнд </label>
+                                        </div>
+                                    </div>
+                                            <input type="text" class="form-control" value={aimag_name} disabled={true}/>
                                 </div>
                         }
                         <div className="form-group col-md-12">
