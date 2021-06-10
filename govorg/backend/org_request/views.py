@@ -419,15 +419,16 @@ def _set_llc_request(llc_request_id, payload):
     if action_type == 'dismiss':
         change_request_data['kind'] = ChangeRequest.KIND_DISMISS
         llc_request_data['kind'] = LLCRequest.KIND_DISMISS
+        llc_request_data['state'] = LLCRequest.STATE_NEW
         info = 'Амжилттай буцаалаа'
 
     elif action_type == 'revoke':
         change_request_data['kind'] = ChangeRequest.KIND_DISMISS
         llc_request_data['kind'] = LLCRequest.KIND_REVOKE
+        llc_request_data['state'] = LLCRequest.STATE_SOLVED
         info = 'Амжилттай цуцаллаа'
 
     change_request_data['state'] = ChangeRequest.STATE_REJECT
-    llc_request_data['state'] = LLCRequest.STATE_SOLVED
     llc_request_data['description'] = description or ''
 
     llc_changerequest_qs = ChangeRequest.objects
