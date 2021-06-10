@@ -35,7 +35,7 @@ from main import utils
 def _get_features(package_id):
     feature_data = []
     for feature in LFeatures.objects.filter(package_id=package_id):
-        view_name = _make_view_name(feature)
+        view_name = utils.make_view_name(feature)
         has_mat_view = utils.has_materialized_view(view_name)
         feature_data.append({
             'id': feature.feature_id,
@@ -337,20 +337,13 @@ def getFields(request, payload):
     return JsonResponse(rsp)
 
 
-def _make_view_name(feature):
-    feature_code = feature.feature_code
-    feature_code = feature_code.split("-")
-    view_name = utils.slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
-    return view_name
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
 
     feature = get_object_or_404(LFeatures, feature_id=fid)
-    view_name = _make_view_name(feature)
+    view_name = utils.make_view_name(feature)
     has_mat_view = utils.has_materialized_view(view_name)
     geom = MGeoDatas.objects.filter(feature_id=fid).first()
 
@@ -417,7 +410,7 @@ def make_view(request, payload):
     property_qs = property_qs.exclude(value_type_id='data_type')
     property_ids = list(property_qs.values_list("property_id", flat=True))
 
-    view_name = _make_view_name(feature)
+    view_name = utils.make_view_name(feature)
     check = _create_view(list(property_ids), view_name, list(data_type_ids), list(feature_config_ids), fid)
     if check:
         rsp = _create_geoserver_detail(view_name, theme, request.user.id, feature, payload.get('values'))
@@ -449,7 +442,7 @@ def propertyFieldsSave(request, payload):
     theme = get_object_or_404(LThemes, theme_id=tid)
     feature = get_object_or_404(LFeatures, feature_id=fid)
 
-    table_name = _make_view_name(feature)
+    table_name = utils.make_view_name(feature)
     has_mat_view = utils.has_materialized_view(table_name)
     if not has_mat_view:
         return JsonResponse({

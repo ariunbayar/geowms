@@ -196,18 +196,19 @@ def geom_type(request, pid, fid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_wms_layer(request, tid, pid, fid):
-    view_name_ob = ViewNames.objects.filter(feature_id=fid).first()
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+    view_name = utils.make_view_name(feature)
     employee = get_object_or_404(Employee, user=request.user)
     rsp = {
         'success': False,
         'url': '',
         'code': '',
     }
-    if view_name_ob:
+    if view_name:
         rsp = {
             'success': True,
             'url': request.build_absolute_uri(reverse('api:service:qgis-proxy', args=[employee.token])),
-            'code': 'gp_layer_' + view_name_ob.view_name,
+            'code': 'gp_layer_' + view_name,
         }
     return JsonResponse(rsp)
 
@@ -353,8 +354,6 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
             if data_list and not gid:
                 data = data_list[0]['code_list_id']
             code_lists = data_list
-
-        print(value, value_type)
 
         form['pk'] = pk
         form['data_type_id'] = data_type_id

@@ -1861,3 +1861,10 @@ def get_feature(shape_geometries):
         }
         features.append(feature)
     return features, geom_type
+
+
+def make_view_name(feature):
+    feature_code = feature.feature_code
+    feature_code = feature_code.split("-")
+    view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
+    return view_name

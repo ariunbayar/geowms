@@ -252,7 +252,6 @@ export default class BarilgaSuurinGazar extends Component{
 
       const wms_layer = this.state.wms_layer
       this.setState({emp_perm_prefix: wms_layer.url})
-
       const map_wms = {
         tile: new Image({
         source: new ImageWMS({
