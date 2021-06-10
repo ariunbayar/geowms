@@ -931,11 +931,10 @@ def _refresh_feature(items):
     feature_code = items.feature_code
     feature_qs = LFeatures.objects
     feature_qs = feature_qs.filter(feature_code=feature_code).first()
-    feature_id = feature_qs.feature_id
-    view_qs = ViewNames.objects
-    view_qs = view_qs.filter(feature_id=feature_id)
-    if view_qs:
-        utils.refreshMaterializedView(feature_id)
+    view_name = utils.make_view_name(feature_qs)
+    has_mat = utils.has_materialized_view(view_name)
+    if has_mat:
+        utils.refreshMaterializedView(feature_qs.feature_id)
 
 
 @require_POST

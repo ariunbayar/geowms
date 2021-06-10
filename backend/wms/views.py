@@ -14,8 +14,10 @@ from backend.inspire.models import GovPerm
 from backend.inspire.models import GovPermInspire
 from backend.payment.models import PaymentLayer
 from backend.dedsanbutets.models import ViewNames, ViewProperties
+
 from main.decorators import ajax_required
 from main.components import Datatable
+from main import utils
 
 from .models import WMS
 from .forms import WMSForm
@@ -29,13 +31,7 @@ def _get_wms_display(request, wms, org_id=''):
         properties = []
         if 'gp_layer' in wms_layer['code']:
             layer_code = wms_layer['code'].split('gp_layer_')[1]
-            layer_code = layer_code.split('_view')[0]
-            splited = layer_code.split('_')
-            code = splited.pop()
-            eng_name = "_".join(splited)
-            feature_qs = LFeatures.objects
-            feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
-            feature = feature_qs.first()
+            feature = utils.get_feature_from_layer_code(layer_code)
             if feature:
                 if not org_id:
                     prop_qs = ViewProperties.objects

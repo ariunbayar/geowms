@@ -88,19 +88,21 @@ def wms_layers(request, pk):
                 role_id__in=roles
             )
 
-        view_obj = ViewNames.objects.filter(view_name=code).first()
-        if view_obj:
-            feature_id = view_obj.feature_id
-            wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
-            if wmts_obj:
-                if wmts_obj.zoom_start < 4:
-                    zoom_start = 5
-                else:
-                    zoom_start = wmts_obj.zoom_start
-                if wmts_obj.zoom_stop < 13:
-                    zoom_stop = 21
-                else:
-                    zoom_stop = wmts_obj.zoom_stop
+        has_mat = utils.has_materialized_view(code)
+        if has_mat:
+            feature = utils.get_feature_from_layer_code(code)
+            if feature:
+                feature_id = feature.feature_id
+                wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+                if wmts_obj:
+                    if wmts_obj.zoom_start < 4:
+                        zoom_start = 5
+                    else:
+                        zoom_start = wmts_obj.zoom_start
+                    if wmts_obj.zoom_stop < 13:
+                        zoom_stop = 21
+                    else:
+                        zoom_stop = wmts_obj.zoom_stop
         return {
                 'id': ob.pk,
                 'name': ob.name,

@@ -1868,3 +1868,15 @@ def make_view_name(feature):
     feature_code = feature_code.split("-")
     view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
     return view_name
+
+
+def get_feature_from_layer_code(layer_code):
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    layer_code = layer_code.split('_view')[0]
+    splited = layer_code.split('_')
+    code = splited.pop()
+    eng_name = "_".join(splited)
+    feature_qs = LFeatures.objects
+    feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
+    feature = feature_qs.first()
+    return feature
