@@ -427,7 +427,7 @@ export default class SolveModal extends Component {
         return (
             <div>
                 {
-                    state == "ШИНЭ" && !kind == "ШИНЭ"
+                    state == "ШИНЭ" && kind == "ШИНЭ"
                     &&
                         <a
                             className="btn btn-primary btn-sm text-white text-capitalize"
