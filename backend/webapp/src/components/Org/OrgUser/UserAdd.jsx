@@ -517,16 +517,14 @@ export class UserAdd extends Component {
                                                 <label htmlFor='id_state'>Төлөв:</label>
                                                 <Field name="state" as="select" id="state"
                                                     style={{ fontSize: '0.8rem' }}
-                                                    className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                    className={'custom-select '}
                                                 >
-                                                    <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
                                                     {
                                                         states.map((item, idx) =>
                                                             <option key={idx} value={item[0]}>{item[1]}</option>
                                                         )
                                                     }
                                                 </Field>
-                                                <ErrorMessage name="state" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className='form-row'>

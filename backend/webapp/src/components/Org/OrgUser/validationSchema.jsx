@@ -13,8 +13,6 @@ export const validationSchema = object().shape({
         .required('Хоосон байна утга оруулна уу.'),
     position: string()
         .required('Хоосон байна нэгийг сонгоно уу.'),
-    state: string()
-        .required('Хоосон байна нэгийг сонгоно уу.'),
     email: string()
         .email(({ value }) => `Зөв e-mail хаяг оруулна уу.`)
         .max(254, '254-с илүүгүй урттай утга оруулна уу!')
