@@ -45,7 +45,7 @@ export class GetDescription extends Component {
         return (
             <div className='p-0'>
                 {
-                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
+                    values.description
                     &&
                         <a
                             className="btn btn-primary btn-sm text-white text-capitalize"
