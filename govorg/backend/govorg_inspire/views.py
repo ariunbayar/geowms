@@ -799,7 +799,7 @@ def _check_and_make_form_json(feature_id, employee, values):
 
     for perm_prop in perm_prop_ids:
         prop_qs = LProperties.objects
-        prop_qs = prop_qs.filter(property_id=perm_prop.property_id)
+        prop_qs = prop_qs.filter(property_id=perm_prop)
         prop_qs = prop_qs.first()
 
         form_json = dict()

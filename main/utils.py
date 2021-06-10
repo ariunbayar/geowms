@@ -244,14 +244,14 @@ def slugifyWord(word):
 
 def refreshMaterializedView(fid):
 
-    view_data = ViewNames.objects.filter(feature_id=fid).first()
-    if view_data:
-        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_data.view_name)
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+    view_name = make_view_name(feature)
+    if view_name:
+        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_name)
         with connections['default'].cursor() as cursor:
             cursor.execute(sql)
             return True
-
-        return False
     else:
         return True
 
