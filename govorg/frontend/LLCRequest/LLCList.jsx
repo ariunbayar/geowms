@@ -60,9 +60,9 @@ export class GetDescription extends Component {
 
 function ModalText(props) {
     return (
-        <span className="text-center">
+        <div className="text-center border border-warning rounded p-4 my-2">
             {props.description}
-        </span>
+        </div>
     )
 }
 
@@ -193,7 +193,7 @@ export class LLCList extends Component {
 
     desModal(values) {
         this.modalChange(
-            'Тайлбар',
+            'ТАЙЛБАР',
             ModalText,
             false,
             values.description,
