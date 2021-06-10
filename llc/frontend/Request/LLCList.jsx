@@ -9,15 +9,16 @@ import { service } from "./service";
 
 export const make_state_color = (state) => {
     let color
-    if (state == "ШИНЭ") color = 'text-primary'
+    if (state == "ШИНЭ") color = 'text-success'
+    else if (state == "ШИЙДВЭРЛЭГДСЭН") color = 'text-primary'
     else  color = 'text-warning'
     return color
 }
 
 export const make_kind_color = (kind) => {
     let color
-    if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-success'
-    else if (kind == "ШИЙДВЭРЛЭГДСЭН") color = 'text-success'
+    if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warining'
+    else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
     else if (kind == "БУЦААГДСАН") color = 'text-danger'
     else if (kind == "ШИНЭ") color = 'text-primary'
