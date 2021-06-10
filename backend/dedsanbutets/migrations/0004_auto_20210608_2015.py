@@ -50,6 +50,7 @@ def _rename_geoserver_layer_name(feature, apps, to_view_name, view_name):
 def _rename_views(apps, schema_editor):
     ViewNames = apps.get_model('dedsanbutets', 'ViewNames')
     LFeatures = apps.get_model('inspire', 'LFeatures')
+    WMSLayer = apps.get_model('wmslayer', 'WMSLayer')
     views = ViewNames.objects.all()
     for view in views:
         feature_id = view.feature_id
@@ -66,6 +67,10 @@ def _rename_views(apps, schema_editor):
         """.format(view_name=view_name, to_view_name=to_view_name)
         with connections['default'].cursor() as cursor:
             cursor.execute(sql)
+        gp_layer = 'gp_layer_' + view_name
+        WMSLayer.objects.filter(code=gp_layer).update(
+            code='gp_layer_' + to_view_name
+        )
         # _rename_geoserver_layer_name(feature, apps, to_view_name, view_name)
 
 
