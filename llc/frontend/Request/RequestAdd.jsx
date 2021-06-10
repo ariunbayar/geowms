@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react"
 import RequestDetail from './DirectModal'
 import { service } from "./service"
 import Modal from '@utils/Modal/Modal'
-import { Field } from "formik"
+import Loader from "@utils/Loader"
 
 class SubmitClass extends Component {
 
@@ -147,6 +147,7 @@ export class RequestAdd extends Component {
     componentDidMount() {
         const { id } = this.props.match.params
         if (id) {
+            this.setState({ is_loading: true })
             service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom }) =>{
                 if (form_field) {
                     this.setState({
@@ -164,6 +165,7 @@ export class RequestAdd extends Component {
                         kind: form_field['kind'],
                         desc: form_field['desc'],
                         geo_id: form_field['geo_id'],
+                        is_loading: false,
                     })
                 }
             })
@@ -291,6 +293,7 @@ export class RequestAdd extends Component {
         const { id, info } = this.props.match.params
         return (
             <div className="card">
+                <Loader is_loading={this.state.is_loading}/>
                 <div className="card-body">
                     <RequestDetail
                         id={id}

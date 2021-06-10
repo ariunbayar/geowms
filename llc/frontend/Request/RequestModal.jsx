@@ -147,6 +147,7 @@ class SendModal extends Component{
     componentDidMount(){
         const values = this.props.values
         const {id} = values.field
+        this.props.handleIsload(true)
         service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
@@ -162,6 +163,7 @@ class SendModal extends Component{
                     aimag_geom
                 })
             }
+        this.props.handleIsload(false)
         })
     }
 
