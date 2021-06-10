@@ -6,8 +6,9 @@ import { service } from "./service"
 
 export const makeStateColor = (state) => {
     let color
-    if (state == "ШИНЭ") color = 'text-primary'
-    else if (state == "ИЛГЭЭСЭН") color = 'text-success'
+    if (state == "ШИНЭ") color = 'text-success'
+    else if (state == "ИЛГЭЭСЭН") color = 'text-warning'
+    else if (state == "ШИЙДВЭРЛЭГДСЭН") color = 'text-primary'
     return color
 }
 
