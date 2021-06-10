@@ -406,6 +406,7 @@ export default class SolveModal extends Component {
             is_modal_request_open: false,
             values: props.values,
             state: props.values.state,
+            kind: props.values.kind
         }
         this.openModalMap = this.openModalMap.bind(this)
         this.closeModalMap = this.closeModalMap.bind(this)
@@ -422,11 +423,11 @@ export default class SolveModal extends Component {
 
 
     render() {
-        const { is_modal_request_open, state } = this.state
+        const { is_modal_request_open, state, kind } = this.state
         return (
             <div>
                 {
-                    state == "ШИНЭ"
+                    state == "ШИНЭ" && !kind == "ШИНЭ"
                     &&
                         <a
                             className="btn btn-primary btn-sm text-white text-capitalize"
