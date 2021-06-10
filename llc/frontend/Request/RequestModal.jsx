@@ -148,7 +148,8 @@ class SendModal extends Component{
     componentDidMount(){
         const values = this.props.values
         const {id} = values.field
-        service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom}) =>{
+        this.props.handleIsload(true)
+        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
                     vector_datas,
@@ -164,6 +165,7 @@ class SendModal extends Component{
                     emp_fields: emp_fields,
                 })
             }
+        this.props.handleIsload(false)
         })
     }
 
@@ -220,13 +222,17 @@ export default class RequestModal extends Component {
     render() {
         const {values, modal_status, state, kind, invis} = this.state
         return (
-            <div className="col-md-12">
+            <div className="col-md-12 ">
                 {
-                (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
-                        ?
-                            <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2 ${invis && 'invisible'}`} onClick={this.openRequestModal}></a>
-                        :
-                             <a className="fa fa-check text-success mt-2 ml-2" ></a>
+                    !invis
+                    ?
+                        (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
+                                ?
+                                    <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2`} onClick={this.openRequestModal}></a>
+                                :
+                                    <a className="fa fa-check text-success mt-2 ml-2" ></a>
+                    :
+                        null
                 }
                 {
                     modal_status == 'open'

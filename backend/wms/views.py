@@ -10,6 +10,8 @@ from django.views.decorators.http import require_POST, require_GET
 from api.utils import replace_src_url
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
+from backend.inspire.models import GovPerm
+from backend.inspire.models import GovPermInspire
 from backend.payment.models import PaymentLayer
 from backend.dedsanbutets.models import ViewNames, ViewProperties
 from main.decorators import ajax_required
@@ -19,21 +21,38 @@ from .models import WMS
 from .forms import WMSForm
 
 
-def _get_wms_display(request, wms):
-    layer_list = []
+def _get_wms_display(request, wms, org_id=''):
+    layer_list = list()
+    property_ids = list()
     wms_layers = list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title'))
     for wms_layer in wms_layers:
         properties = []
         if 'gp_layer' in wms_layer['code']:
             layer_code = wms_layer['code'].split('gp_layer_')[1]
             layer_code = layer_code.split('_view')[0]
-            feature = LFeatures.objects.filter(feature_name_eng__iexact=layer_code).first()
+            splited = layer_code.split('_')
+            code = splited.pop()
+            eng_name = "_".join(splited)
+            feature_qs = LFeatures.objects
+            feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
+            feature = feature_qs.first()
             if feature:
-                prop_qs = ViewProperties.objects
-                prop_qs = prop_qs.filter(view__feature_id=feature.feature_id)
-                prop_qs = list(prop_qs.values_list('property_id', flat=True))
-                if prop_qs:
-                    prop_all = LProperties.objects.filter(property_id__in=prop_qs)
+                if not org_id:
+                    prop_qs = ViewProperties.objects
+                    prop_qs = prop_qs.filter(view__feature_id=feature.feature_id)
+                    property_ids = list(prop_qs.values_list('property_id', flat=True))
+                else:
+                    gov_perm = GovPerm.objects.filter(org_id=org_id).first()
+                    gov_perm_inspire_qs = gov_perm.govperminspire_set
+                    gov_perm_inspire_qs = gov_perm_inspire_qs.filter(gov_perm=gov_perm)
+                    gov_perm_inspire_qs = gov_perm_inspire_qs.filter(feature_id=feature.feature_id)
+                    gov_perm_inspire_qs = gov_perm_inspire_qs.filter(perm_kind=GovPermInspire.PERM_CREATE)
+                    has_geom_perm = len(gov_perm_inspire_qs.filter(geom=True)) > 0
+                    if has_geom_perm:
+                        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(geom=False)
+                        property_ids = list(gov_perm_inspire_qs.values_list('property_id', flat=True))
+                if property_ids:
+                    prop_all = LProperties.objects.filter(property_id__in=property_ids)
                     for prop in prop_all:
                         property_detail = {
                             'prop_id': prop.property_id,
@@ -47,6 +66,7 @@ def _get_wms_display(request, wms):
             'properties': properties
         }
         layer_list.append(wms_layer_detail)
+
     return {
         'id': wms.id,
         'name': wms.name,
@@ -63,8 +83,8 @@ def _get_wms_display(request, wms):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def all(request):
-    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()]
+def all(request, org_id):
+    wms_list = [_get_wms_display(request, ob, org_id) for ob in WMS.objects.all()]
     return JsonResponse({'wms_list': wms_list, })
 
 

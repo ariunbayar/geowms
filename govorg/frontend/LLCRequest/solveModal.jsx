@@ -4,6 +4,7 @@ import {LLCMap} from '../../../llc/frontend/LLCMap'
 import InspireField from './InspireField'
 import {service} from './service'
 import Modal from "@utils/Modal/Modal"
+import {LlcPPBody} from "./LlcPPBody"
 import { containsCoordinate } from "ol/extent"
 
 export class DetailModalBody extends Component {
@@ -324,6 +325,7 @@ export class DetailModalBody extends Component {
                                         <LLCMap
                                             vector_datas={current_data?.features || []}
                                             height={'60vh'}
+                                            PPComponent={LlcPPBody}
                                         />
                                     </div>
                                 </div>

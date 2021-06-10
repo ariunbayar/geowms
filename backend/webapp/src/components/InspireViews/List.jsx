@@ -31,12 +31,12 @@ export class List extends Component {
             property_loading: false,
             cache_values: [],
             property_length:null,
-            check_list:false,
-
+            check_list: false,
+            has_view: false
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
-        this.active_view= this.active_view.bind(this)
+        this.activeView= this.activeView.bind(this)
     }
 
     componentDidMount(){
@@ -44,55 +44,66 @@ export class List extends Component {
     }
 
     getAll(){
-        this.setState({is_loading:true})
-        service.getall().then(({success, data, style_names, defualt_url}) => {
-            if(success){
-                this.setState({
-                    list_all: data,
-                    style_names,
-                    defualt_url:defualt_url,
-                    is_loading: false
-                })
-            }
-        })
+        this.setState({ is_loading: true })
+        service
+            .getall()
+            .then(({ success, data, style_names, defualt_url }) => {
+                if(success){
+                    this.setState({
+                        list_all: data,
+                        style_names,
+                        defualt_url: defualt_url,
+                        is_loading: false
+                    })
+                }
+            })
     }
 
     getProperties(fid, tid, fname, event) {
         var check_list = this.state.check_list
         let property_length = 0
-        this.active_view(event)
-        this.setState({fid, tid, fname, property_loading: true})
-        service.getPropertyFields(fid).then(({success ,fields, id_list, view_name, url, style_name, geom_type, cache_values}) => {
-            if(success){
-                fields.map((f_config, idx) =>
-                    f_config.data_types.map((data_type, idx) =>
-                        data_type.data_type_configs.map((data_type_config, idx) =>
-                        {
-                            if (data_type_config.property_id) { property_length += 1 }
-                        })
+        if (event) this.activeView(event)
+        this.setState({ fid, tid, fname, property_loading: true })
+        service
+            .getPropertyFields(fid)
+            .then(({ success, fields, id_list, view, url, style_name, geom_type, cache_values }) => {
+                if(success) {
+                    fields.map((f_config, idx) =>
+                        f_config.data_types.map((data_type, idx) =>
+                            data_type.data_type_configs.map((data_type_config, idx) =>
+                            {
+                                if (data_type_config.property_id) { property_length += 1 }
+                            })
+                        )
                     )
-                )
 
-                if(property_length == id_list.length){ check_list = true }
-                this.setState({
-                        fields, id_list, view_name, url, check_list,
-                        view_style_name: style_name, geom_type,
-                        property_loading:false, cache_values,
-                        property_length:property_length,
+                    if(property_length == id_list.length) { check_list = true }
+                    this.setState({
+                        fields,
+                        id_list,
+                        view,
+                        url,
+                        check_list,
+                        view_style_name: style_name,
+                        geom_type,
+                        property_loading: false,
+                        cache_values,
+                        property_length: property_length,
+                        has_view: success,
                     })
-            }
-            else this.setState({property_loading: false})
-        })
+                }
+                else this.setState({ property_loading: false, has_view: success, geom_type, view_style_name: '' })
+            })
     }
 
     componentDidUpdate(pP, pS){
-
         if(pS.geom_type !== this.state.geom_type){
-            this.setState({geom_type: this.state.geom_type})
+            this.setState({ geom_type: this.state.geom_type })
         }
     }
-    active_view(event){
-        this.setState({fields: [], id_list: [], view_name: ''})
+
+    activeView(event){
+        this.setState({ fields: [], id_list: [], view: '' })
         const id = event.id
         const prev_event = this.state.prev_event
         const prev_theme_event = this.state.prev_theme_event
@@ -101,7 +112,7 @@ export class List extends Component {
         const id_array = id.split('-')
         const id_array_length = id_array.length
         event.className = "list-group-item collapsed active"
-        if (id_array_length === 1){
+        if (id_array_length === 1) {
             event.querySelector('i').className = "icon expand-icon fa fa-minus"
             if (prev_theme_event !== null){
                 prev_event.className = "list-group-item collapsed"
@@ -118,26 +129,26 @@ export class List extends Component {
                             prev_event.className = "list-group-item collapsed"
                             event.querySelector('i').className = "icon expand-icon fa fa-plus ml-4"
                         }
-                        else{
+                        else {
                             event.querySelector('i').className = "icon expand-icon fa fa-minus ml-4"
                         }
                     }
-                    else{
+                    else {
                         event.querySelector('i').className = "icon expand-icon fa fa-minus ml-4"
                         prev_event.className = "list-group-item collapsed"
                         prev_package_event.querySelector('i').className = "icon expand-icon fa fa-plus ml-4"
                     }
                 }
-                else{
+                else {
                     event.querySelector('i').className = "icon expand-icon fa fa-minus ml-4"
-                    if (check_package_event !== null){
+                    if (check_package_event !== null) {
                         prev_event.className = "list-group-item collapsed"
                         check_package_event.querySelector('i').className = "icon expand-icon fa fa-plus ml-4"
                     }
                     this.setState({check_package_event: prev_package_event})
                 }
             }
-            else{
+            else {
                 event.querySelector('i').className = "icon expand-icon fa fa-minus ml-4"
             }
             this.setState({prev_package_event:  event})
@@ -145,11 +156,11 @@ export class List extends Component {
         if (id_array_length === 3){
             prev_event.className = "list-group-item collapsed"
         }
-        this.setState({prev_event: event})
+        this.setState({ prev_event: event })
     }
 
     render() {
-        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading, cache_values, check_list} = this.state
+        const { list_all, fid, tid, style_names, view_style_name, url, defualt_url, geom_type, is_loading, property_loading, cache_values, check_list } = this.state
         return (
             <div className="row m-0">
                 <div className="col-md-6">
@@ -160,12 +171,14 @@ export class List extends Component {
                                 {list_all.map((theme, theme_idx) =>
                                     <ul className="list-group" key={theme_idx}>
                                         <li className="list-group-item collapsed"
+                                            role="button"
                                             id={`${theme_idx}`}
                                             data-toggle="collapse"
                                             data-target={`#collapse-theme${theme_idx}`}
                                             aria-expanded="false"
                                             aria-controls={`collapse-theme${theme_idx}`}
-                                            onClick={(e) => this.active_view(e.currentTarget)}>
+                                            onClick={(e) => this.activeView(e.currentTarget)}
+                                        >
                                             <i className="icon expand-icon fa fa-plus" id={`${theme_idx}`}></i>
                                             &nbsp;&nbsp;{theme.name}
                                         </li>
@@ -174,12 +187,14 @@ export class List extends Component {
                                                 {theme.package.map((packages, pack_idx) =>
                                                     <ul className="list-group" key={pack_idx}>
                                                         <li className="list-group-item collapsed"
+                                                            role="button"
                                                             id={`${theme_idx}-${pack_idx}`}
                                                             data-toggle="collapse"
                                                             data-target={`#collapse-packages${theme_idx}${pack_idx}`}
                                                             aria-expanded="false"
                                                             aria-controls={`collapse-packages${theme_idx}${pack_idx}`}
-                                                            onClick={(e) => this.active_view(e.currentTarget)}>
+                                                            onClick={(e) => this.activeView(e.currentTarget)}
+                                                        >
                                                             <i className="icon expand-icon fa fa-plus ml-4" id={`${theme_idx}-${pack_idx}`}></i>
                                                             &nbsp;&nbsp;{packages.name}
                                                         </li>
@@ -188,14 +203,27 @@ export class List extends Component {
                                                                 {packages.features.map((feature, idx) =>
                                                                     <ul className="list-group" key={idx}>
                                                                         <li className="list-group-item"
+                                                                            role="button"
                                                                             id={`${theme_idx}-${pack_idx}-${idx}`}
-                                                                            onClick={(e) => this.getProperties(feature.id, theme.id, feature.name, e.currentTarget)}>
-                                                                            <i className={feature.view ? "fa fa-table text-success": "fa fa-table text-muted"} style={{paddingLeft: "40px"}}></i> &nbsp;
+                                                                            onClick={(e) => this.getProperties(feature.id, theme.id, feature.name, e.currentTarget)}
+                                                                        >
+                                                                            <i
+                                                                                className={feature.view.view_name ? "fa fa-table text-success": "fa fa-table text-muted"}
+                                                                                style={{paddingLeft: "40px"}}
+                                                                            >
+                                                                            </i>
+                                                                            &nbsp;
                                                                             <span className="p-0" id={`${theme_idx}-${pack_idx}-${idx}`}> {feature.name}</span>
-                                                                            {feature.view &&
-                                                                                <ul style={{paddingLeft: "90px"}} id={`${theme_idx}-${pack_idx}-${idx}`}>
-                                                                                    <li id={`features-${theme_idx}${pack_idx}${idx}`}>{feature.view['view_name']}</li>
-                                                                                </ul>
+                                                                            {
+                                                                                feature.view.view_name
+                                                                                &&
+                                                                                    <ul style={{paddingLeft: "90px"}} id={`${theme_idx}-${pack_idx}-${idx}`}>
+                                                                                        <li
+                                                                                            id={`features-${theme_idx}${pack_idx}${idx}`}
+                                                                                        >
+                                                                                            {feature.view['view_name']}
+                                                                                        </li>
+                                                                                    </ul>
                                                                             }
                                                                         </li>
                                                                     </ul>
@@ -215,6 +243,7 @@ export class List extends Component {
                 </div>
                 <SideBar
                     getAll={this.getAll}
+                    getProperties={this.getProperties}
                     fields={this.state.fields}
                     fid={this.state.fid}
                     fname={this.state.fname}
@@ -222,7 +251,7 @@ export class List extends Component {
                     id_list={this.state.id_list}
                     property_length={this.state.property_length}
                     check_list={check_list}
-                    view_name={this.state.view_name}
+                    view={this.state.view}
                     style_names={style_names}
                     url={url}
                     defualt_url={defualt_url}
@@ -230,6 +259,7 @@ export class List extends Component {
                     geom_type={geom_type}
                     property_loading={property_loading}
                     cache_values={cache_values}
+                    has_view={this.state.has_view}
                 />
             </div>
         )

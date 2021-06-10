@@ -3,9 +3,7 @@ import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
 import ModalAlert from "../../ModalAlert"
-import BackButton from "@utils/Button/BackButton"
 import Attributes from  './Attributes'
-
 
 export class GovorgForm extends Component {
 
@@ -32,18 +30,20 @@ export class GovorgForm extends Component {
     }
 
     componentDidMount() {
-
-        const system_id = this.props.match.params.system_id
-        service.getWMSList().then(({wms_list}) => {
-            this.setState({wms_list})
-        })
+        const { system_id, id } = this.props.match.params
+        service
+            .getWMSList(id)
+            .then(({ wms_list }) => {
+                this.setState({ wms_list })
+            })
 
         if (system_id) {
-            service.detail(system_id).then(({govorg}) => {
-                this.setState(({govorg, layers: govorg.layers, accepted_props: govorg.govorg_attributes}))
-            })
+            service
+                .detail(system_id)
+                .then(({ govorg }) => {
+                    this.setState(({ govorg, layers: govorg.layers, accepted_props: govorg.govorg_attributes }))
+                })
         }
-
     }
 
     getIndexOfLayer(layer_id, val_dict) {
@@ -74,7 +74,7 @@ export class GovorgForm extends Component {
             var lists = accepted_props[index_of].attributes.filter((val) => val != value)
             accepted_props[index_of].attributes = lists
         }
-        this.setState({accepted_props})
+        this.setState({ accepted_props })
     }
 
     handleCheck(layer_id, value) {
@@ -100,10 +100,10 @@ export class GovorgForm extends Component {
             layers = layers.filter((id) => id != value)
             accepted_props = accepted_props.filter((val) => val.layer_id != value)
         }
-        this.setState({layers, accepted_props})
+        this.setState({ layers, accepted_props })
     }
 
-    handleSubmit(values, {setStatus, setSubmitting, setErrors}) {
+    handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
         const org_id = this.props.match.params.id
         const data = {
             ...values,
@@ -115,10 +115,10 @@ export class GovorgForm extends Component {
         setStatus('checking')
         setSubmitting(true)
 
-        if(this.state.govorg.id){
+        if(this.state.govorg.id) {
             data.id = this.state.govorg.id
-            service.update(data).then(({success, info, errors}) => {
-                if (success){
+            service.update(data).then(({ success, info, errors }) => {
+                if (success) {
                     setStatus('saved')
                     setSubmitting(false)
                     this.setState({
@@ -133,8 +133,8 @@ export class GovorgForm extends Component {
                 }
             })
         } else{
-            service.create(data).then(({success, info, errors}) => {
-                if (success){
+            service.create(data).then(({ success, info, errors }) => {
+                if (success) {
                     setStatus('saved')
                     setSubmitting(false)
                     this.setState({
@@ -153,7 +153,7 @@ export class GovorgForm extends Component {
 
     }
 
-    modalCloseTime(){
+    modalCloseTime() {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         this.state.timer = setTimeout(() => {
@@ -169,7 +169,6 @@ export class GovorgForm extends Component {
 
     render() {
         return (
-
             <div className="my-4">
                 <div className="row">
                     <div className="col-md-4">
@@ -196,13 +195,10 @@ export class GovorgForm extends Component {
                                 const has_error = Object.keys(errors).length > 0
                                 return (
                                     <Form>
-
                                         <div className="form-group">
-
-                                            <label htmlFor="id_name" >
+                                            <label htmlFor="id_name">
                                                 Системүүдийн нэр:
                                             </label>
-
                                             <Field
                                                 className={'form-control mb-2' + (errors.name ? ' is-invalid' : '')}
                                                 placeholder="Системүүдийн нэр"
@@ -242,37 +238,47 @@ export class GovorgForm extends Component {
                         </Formik>
                     </div>
                     <div className="col-md-8">
-                    {this.state.wms_list.map((wms, wms_index) =>
-                        <div className="col-md-12" id="accordion1" key={wms_index}>
-                            <div className="row">
-                                <div className="col-md-8 arrow-tree">
-                                    <a className="btn btn-link shadow-none collapsed"
-                                        data-toggle="collapse"
-                                        data-target={`#collapse-${wms_index}`}
-                                        aria-expanded="true"
-                                        aria-controls="collapse-1"
-                                    >
-                                    {wms.is_active ?
-                                    <i className="fa fa-check-circle" style={{color:"green"}} aria-hidden="false"></i>:
-                                    <i className="fa fa-times-circle" style={{color:"#FF4748"}}></i>
+                        {
+                            this.state.wms_list.map((wms, wms_index) =>
+                                <div className="col-md-12" id="accordion1" key={wms_index}>
+                                    <div className="row">
+                                        <div className="col-md-8 arrow-tree">
+                                            <a className="btn btn-link shadow-none collapsed"
+                                                data-toggle="collapse"
+                                                data-target={`#collapse-${wms_index}`}
+                                                aria-expanded="true"
+                                                aria-controls="collapse-1"
+                                            >
+                                            {
+                                                wms.is_active
+                                                ?
+                                                    <i className="fa fa-check-circle" style={{color:"green"}} aria-hidden="false"></i>
+                                                :
+                                                    <i className="fa fa-times-circle" style={{color:"#FF4748"}}></i>
+                                            }
+                                            <strong>{wms.name}</strong> {wms.public_url}
+                                            </a>
+                                        </div>
+                                    </div>
+                                    {
+                                        wms.is_active
+                                        &&
+                                            wms.layer_list.map((layer, idx) =>
+                                                <Attributes
+                                                    key={idx}
+                                                    idx={idx}
+                                                    layer={layer}
+                                                    wms_index={wms_index}
+                                                    layers={this.state.layers}
+                                                    handlePropCheck={this.handlePropCheck}
+                                                    handleCheck={this.handleCheck}
+                                                    handleLayerToggle={this.handleLayerToggle}
+                                                />
+                                            )
                                     }
-                                    <strong> {wms.name}</strong> {wms.public_url}
-                                    </a>
                                 </div>
-                            </div>
-                            {wms.is_active && wms.layer_list.map((layer, idx) =>
-                                <Attributes
-                                    idx={idx}
-                                    layer={layer}
-                                    wms_index={wms_index}
-                                    layers={this.state.layers}
-                                    handlePropCheck={this.handlePropCheck}
-                                    handleCheck={this.handleCheck}
-                                    handleLayerToggle={this.handleLayerToggle}
-                                />
-                            )}
-                        </div>
-                    )}
+                            )
+                        }
                     </div>
                 </div>
                 <ModalAlert
