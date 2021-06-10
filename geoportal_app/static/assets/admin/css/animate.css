@@ -3492,3 +3492,18 @@
   -webkit-animation-name: slideOutUp;
   animation-name: slideOutUp;
 }
+
+.blinking {
+  animation: blink 2s steps(5, start) infinite;
+  -webkit-animation: blink 1s steps(5, start) infinite;
+}
+@keyframes blinking {
+  to {
+    visibility: hidden;
+  }
+}
+@-webkit-keyframes blinking {
+  to {
+    visibility: hidden;
+  }
+}
