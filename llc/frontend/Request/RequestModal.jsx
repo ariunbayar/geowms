@@ -148,18 +148,17 @@ class SendModal extends Component{
     componentDidMount(){
         const values = this.props.values
         const {id} = values.field
-        this.props.handleIsload(true)
-        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
+        service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
+                    files: form_field['file_path'],
+                    zahialagch: form_field['client_org'],
+                    project_name: form_field['project_name'],
+                    object_type: form_field['object_type'],
+                    object_count: form_field['object_quantum'],
+                    hurungu_oruulalt: form_field['investment_status'],
+                    selected_tools: form_field['selected_tools'],
                     vector_datas,
-                    files :form_field['file_path'],
-                    zahialagch :form_field['client_org'],
-                    project_name : form_field['project_name'],
-                    object_type : form_field['object_type'],
-                    object_count : form_field['object_quantum'],
-                    hurungu_oruulalt : form_field['investment_status'],
-                    selected_tools : form_field['selected_tools'],
                     aimag_name,
                     aimag_geom,
                     emp_fields: emp_fields,
