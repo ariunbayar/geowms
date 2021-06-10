@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Max, Value
+from django.db.models.functions import Coalesce
 
 
 class BaseLayer(models.Model):
@@ -22,5 +24,5 @@ class BaseLayer(models.Model):
     sort_order = models.PositiveIntegerField()
 
     def save(self, *args, **kwargs):
-        self.sort_order = BaseLayer.objects.count() + 1
+        self.sort_order = BaseLayer.objects.aggregate(max_rating=Coalesce(Max('sort_order'), Value(0)))['max_rating'] + 1
         super(BaseLayer, self).save(*args, **kwargs)
