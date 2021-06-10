@@ -206,7 +206,7 @@ export class App extends Component {
 
                 <div className="clearfix">
                     <div className="content-wrapper">
-                        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачаалж байна."}/>}>
+                        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
                             <Switch>
                                 <Route path={"/gov/forms/"} component={Forms} />
                                 <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />

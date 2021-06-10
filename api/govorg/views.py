@@ -308,11 +308,11 @@ def qgis_proxy(request, base_url, token):
 
 @require_GET
 @get_conf_geoserver_base_url('ows')
-def geo_design_proxy(request, base_url, veiw_name):
+def geo_design_proxy(request, base_url, view_name):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
-    layer_code = 'gp_layer_' + veiw_name
+    layer_code = 'gp_layer_' + view_name
 
     headers = {**BASE_HEADERS}
 

@@ -21,7 +21,7 @@ app_name = 'backend'
 urlpatterns = [
 
     path('wms/', include(([
-        path('all/', wms_views.all, name='all'),
+        path('all/<int:org_id>/', wms_views.all, name='all'),
         path('pagination/', wms_views.pagination, name='pagination'),
         path('create/', wms_views.create, name='create'),
         path('update/', wms_views.update, name='update'),
@@ -219,6 +219,7 @@ urlpatterns = [
         path('editName/', dedsan_butets.Edit_name),
         path('get-fields/', dedsan_butets.getFields),
         path('save/', dedsan_butets.save),
+        path('make-view/', dedsan_butets.make_view),
         path('property-fields/<int:fid>/', dedsan_butets.propertyFields),
         path('property-fields/save/', dedsan_butets.propertyFieldsSave),
         path('remove/', dedsan_butets.remove),

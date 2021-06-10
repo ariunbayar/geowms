@@ -17,7 +17,7 @@ urlpatterns = [
         path('<str:token>/<int:pk>/', govorg_views.proxy, name='proxy'),
         path('<str:token>/', govorg_views.qgis_proxy, name='qgis-proxy'),
         path('<str:token>/qgis-submit/', govorg_views.qgis_submit, name='qgis_submit'),
-        path('geo_design_proxy/<str:veiw_name>/', govorg_views.geo_design_proxy, name='geo_design_proxy')
+        path('geo_design_proxy/<str:view_name>/', govorg_views.geo_design_proxy, name='geo_design_proxy')
     ], 'service'))),
 
     path('inspire/', include(([
