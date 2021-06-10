@@ -1,5 +1,4 @@
-import {Capabilities} from "./Capabilities"
-
+import { Capabilities } from "./Capabilities"
 
 export const service = {
     getAll,
@@ -89,8 +88,6 @@ function pagination(last,first) {
     return fetch(`${prefix}/wms/pagination/`, requestOptions).then(handleResponse)
 }
 
-
-
 function getAll() {
     const requestOptions = {
         ..._getGetOptions(),
@@ -98,13 +95,11 @@ function getAll() {
     return fetch(`${prefix}/wms/all/`, requestOptions).then(handleResponse)
 }
 
-
 function detail(id) {
     const requestOptions = {..._getGetOptions()}
 
     return fetch(`${prefix}/wms/${id}/updatemore/`, requestOptions).then(handleResponse)
 }
-
 
 function wmsLayerall(id) {
     const opts = {

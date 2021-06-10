@@ -782,19 +782,25 @@ def control_to_remove(request, payload):
     return JsonResponse(rsp)
 
 
-def _check_and_make_form_json(feature_id, values):
+def _check_and_make_form_json(feature_id, employee, values):
     form_json_list = list()
     code_list_values = ""
+    perm_prop_ids = list()
 
-    view_qs = ViewNames.objects
-    view_qs = view_qs.filter(feature_id=feature_id)
-    view = view_qs.first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    perm_qs = EmpPermInspire.objects
+    perm_qs = perm_qs.filter(emp_perm=emp_perm)
+    perm_qs = perm_qs.filter(feature_id=feature_id)
+    perm_qs = perm_qs.filter(perm_kind=EmpPermInspire.PERM_CREATE)
 
-    view_props = ViewProperties.objects.filter(view=view)
+    has_perm_geom = len(perm_qs.filter(geom=True)) > 0
+    if has_perm_geom:
+        perm_qs = perm_qs.filter(geom=False)
+        perm_prop_ids = perm_qs.values_list('property_id', flat=True)
 
-    for view_prop in view_props:
+    for perm_prop in perm_prop_ids:
         prop_qs = LProperties.objects
-        prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+        prop_qs = prop_qs.filter(property_id=perm_prop.property_id)
         prop_qs = prop_qs.first()
 
         form_json = dict()
@@ -846,7 +852,8 @@ def _create_request(request_datas):
 def _make_request(values, request_values):
     form_json_list = _check_and_make_form_json(
         request_values['feature_id'],
-        values
+        request_values['employee'],
+        values,
     )
 
     request_datas = {

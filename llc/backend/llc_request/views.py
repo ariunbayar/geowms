@@ -215,6 +215,8 @@ def save_request(request):
     file_not_ext_name = utils.get_file_name(file_name)
     file_path = os.path.join(main_path, file_not_ext_name)
 
+    org_data = ''
+
     utils.save_file_to_storage(uploaded_file, file_path, file_name)
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
