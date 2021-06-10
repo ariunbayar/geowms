@@ -63,9 +63,9 @@ export class App extends Component {
 
     requestCount() {
         // service.component
-        service.getCount().then(({ success, count, revoke_count, info }) => {
+        service.getCount().then(({ success, count, revoke_count, llc_count, info }) => {
             if (success) {
-                this.setState({ request_count: count, revoke_count })
+                this.setState({ request_count: count, revoke_count, llc_count })
             } else {
                 // TODO
             }
@@ -135,7 +135,7 @@ export class App extends Component {
                             >
                             </MenuItem>
                         }
-                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт" count={this.state.llc_count}></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>

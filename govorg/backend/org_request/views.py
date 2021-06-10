@@ -888,10 +888,15 @@ def get_count(request):
     revoke_count = qs.filter(kind=ChangeRequest.KIND_REVOKE).count()
     request_count = qs.exclude(kind=ChangeRequest.KIND_REVOKE).count()
 
+    geo_id = employee.org.geo_id
+    llc = LLCRequest.objects
+    llc = llc.filter(file__geo_id=geo_id)
+    llc_count = llc.exclude(kind__in=[LLCRequest.KIND_APPROVED, LLCRequest.KIND_REVOKE]).count()
     rsp = {
         'success': True,
         'count': request_count,
         'revoke_count': revoke_count,
+        'llc_count': llc_count,
     }
 
     return JsonResponse(rsp)
