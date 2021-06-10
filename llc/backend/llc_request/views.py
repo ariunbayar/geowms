@@ -606,6 +606,7 @@ def remove_request(request, id):
             lvl2_request.delete()
 
         initial_query.delete()
+        _delete_prev_files(initial_query)
 
         return JsonResponse({
             'success': True,
@@ -616,6 +617,14 @@ def remove_request(request, id):
         'success': False,
         'info': "Устгахад алдаа гарлаа"
     })
+
+
+def _delete_prev_files(file):
+    main_folder = 'llc-request-files'
+    file_path = file.file_path
+    delete_folder = str(file_path).split("/")[1]
+    delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
+    utils.remove_folder(delete_folder)
 
 
 @require_GET
