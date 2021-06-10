@@ -427,7 +427,7 @@ def _set_llc_request(llc_request_id, payload):
         info = 'Амжилттай цуцаллаа'
 
     change_request_data['state'] = ChangeRequest.STATE_REJECT
-    llc_request_data['state'] = LLCRequest.STATE_NEW
+    llc_request_data['state'] = LLCRequest.STATE_SOLVED
     llc_request_data['description'] = description or ''
 
     llc_changerequest_qs = ChangeRequest.objects
@@ -443,7 +443,7 @@ def _set_llc_request(llc_request_id, payload):
 
         request_file_data = dict()
         request_file_data['kind'] = RequestFiles.KIND_REVOKE
-        request_file_data['state'] = RequestFiles.STATE_NEW
+        request_file_data['state'] = RequestFiles.STATE_SOLVED
         request_file_data['description'] = description or ''
 
         request_file = RequestFiles.objects.filter(id=llc_request.file.id)
@@ -1077,7 +1077,7 @@ def _reject_request(id, kind, state, text):
 def llc_request_reject(request, payload):
     description = payload.get('description')
     pk = payload.get('id')
-    _reject_request(pk, LLCRequest.KIND_REVOKE, LLCRequest.STATE_SENT, description)
+    _reject_request(pk, LLCRequest.KIND_REVOKE, LLCRequest.STATE_SOLVED, description)
 
     return JsonResponse({
         'success': True,
