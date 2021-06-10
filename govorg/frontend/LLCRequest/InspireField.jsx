@@ -9,10 +9,10 @@ export default class InspireField extends Component {
     }
 
     render() {
-        const {title_name, defualt_value} = this.props
+        const {title_name, defualt_value, className} = this.props
         return (
-            <div className="form-group col-md-4">
-                <label className=''>
+            <div className={`'form-group '  ${className ? className : 'col-md-4'}`}>
+                <label className='text-center'>
                     {title_name ? title_name : ''}
                 </label>
                 <i
@@ -23,7 +23,7 @@ export default class InspireField extends Component {
                             `border border-danger icon-exclamation text-danger`
                         }`
                     }
-                    title={`${title_name.toUpperCase()} сонгогдоогүй байна !!!`}
+                    title={`${title_name.toUpperCase()} хоосон байна !!!`}
                 >
                     {defualt_value}
                 </i>
