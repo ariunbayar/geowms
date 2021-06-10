@@ -37,6 +37,11 @@ export default class RequestDetail extends Component {
         this.setState({ is_loading: status })
     }
 
+    getProf(e){
+        const send_mail = e.target.value
+        this.setState({ send_mail })
+    }
+
     render() {
         const {
             object_type, object_count,
@@ -44,7 +49,7 @@ export default class RequestDetail extends Component {
             project_name, vector_datas, id,
             file_name, info,
             aimag_name, aimag_geom,
-            state,
+            state, emp_fields
         } = this.props
         return (
             <div className="row p-3">
@@ -131,6 +136,31 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
+                        {
+                            info &&
+                            <div className="form-group col-md-12">
+                                <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
+                                <select className="form-control" id="mergejilten"
+                                    onChange={(e) => this.getProf(e)}
+                                >
+                                    <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
+                                   {
+                                       (emp_fields && emp_fields.length > 0)
+                                       ?
+                                            emp_fields.map((value, idx) => (
+                                                <optgroup
+                                                    id={idx}
+                                                    label={value.org_name}
+                                                >
+                                                    <option value={value.first_name, value.mail}>{value.first_name}</option>
+                                                </optgroup>
+                                            ))
+                                        :
+                                            null
+                                   }
+                                </select>
+                            </div>
+                        }
                         <UsedTools
                             values={this.props}
                         />
@@ -172,6 +202,7 @@ export default class RequestDetail extends Component {
                             <this.props.submitClass
                                 valid_request = {document.getElementsByClassName('is-valid')}
                                 values={this.props}
+                                mergejilten={this.state.send_mail}
                                 loader={this.handleLoaderActive}
                             />
                     }

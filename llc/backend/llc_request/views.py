@@ -350,10 +350,10 @@ def get_all_geo_json(request):
 @require_GET
 @ajax_required
 def get_request_data(request, id):
+
     features = []
     field = {}
     qs = RequestForm.objects.filter(file_id=id).first()
-
     file_data = {
         'name': '',
         'size': '',
@@ -369,7 +369,7 @@ def get_request_data(request, id):
     qs = qs.first()
     geo_id = qs.file.geo_id
     mdata_qs = MDatas.objects.filter(geo_id=geo_id)
-
+    emp_fields = _get_employees(geo_id)
     if mdata_qs:
         if geo_id != '496':
             mdata_qs = mdata_qs.filter(property_id=23).first()
@@ -411,9 +411,25 @@ def get_request_data(request, id):
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
         'form_field': field,
+        'emp_fields': emp_fields,
         'aimag_name': aimag_name,
         'aimag_geom': aimag_geom
     })
+
+
+def _get_employees(geo_id):
+    emp_fields = list()
+    emp_detail = dict()
+    get_org = Org.objects.filter(level=2, geo_id=geo_id)
+    for org in get_org:
+        get_employees = Employee.objects.filter(org_id=org.id, position_id=13)
+        for emp in get_employees:
+            get_name = User.objects.filter(pk=emp.user_id).first()
+            emp_detail['org_name'] = org.name
+            emp_detail['first_name'] = get_name.first_name
+            emp_detail['mail'] = get_name.email
+            emp_fields.append(emp_detail)
+    return emp_fields
 
 
 def _get_shapes_geoms(shape_geometry):
@@ -440,37 +456,6 @@ def _make_connection(from_email):
         fail_silently=False,
     )
     return connection
-
-
-def _send_to_information_email (user_id):
-
-    user = get_object_or_404(User, pk=user_id)
-
-    if not user.email:
-        return False
-
-    token = TokenGeneratorUserValidationEmail().get()
-
-    UserValidationEmail = apps.get_model('geoportal_app', 'UserValidationEmail')
-    UserValidationEmail.objects.create(
-        user=user,
-        token=token,
-        valid_before=timezone.now() + timedelta(days=90)
-    )
-
-    host_name = get_config('EMAIL_HOST_NAME')
-    subject = 'Хүсэлт'
-    text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
-    if host_name == 'localhost:8000':
-        msg = '{text} http://{host_name}/gov/llc-request/'.format(text=text, token=token, host_name=host_name)
-    else:
-        msg = '{text} https://{host_name}/gov/llc-request/'.format(text=text, token=token, host_name=host_name)
-
-    from_email = get_config('EMAIL_HOST_USER')
-    to_email = [user.email]
-    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
-
-    return True
 
 
 @require_GET
@@ -520,10 +505,27 @@ def get_file_shapes(request, id):
     })
 
 
-@require_GET
-@ajax_required
-def send_request(request, id):
+def _send_to_information_email (email):
 
+    host_name = get_config('EMAIL_HOST_NAME')
+    subject = 'Хүсэлт'
+    text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
+    if host_name == 'localhost:8000':
+        msg = '{text} http://{host_name}/gov/llc-request/'.format(text=text, host_name=host_name)
+    else:
+        msg = '{text} https://{host_name}/gov/llc-request/'.format(text=text, host_name=host_name)
+
+    from_email = get_config('EMAIL_HOST_USER')
+    to_email = [email]
+    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
+
+    return True
+
+
+@require_POST
+@ajax_required
+def send_request(request, payload, id):
+    email = payload.get('mergejilten')
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, position_id=13).first()
@@ -534,7 +536,7 @@ def send_request(request, id):
             kind=LLCRequest.KIND_NEW,
         )
 
-        success_mail = _send_to_information_email(employee.user_id)
+        success_mail = _send_to_information_email(email)
 
         if success_mail:
             qs.state = RequestFiles.STATE_SENT

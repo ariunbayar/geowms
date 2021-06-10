@@ -34,11 +34,14 @@ function getToolDatas(regis_number) {
     return fetch(`/llc/get_tool_datas/`, opts).then(handleResponse)
 }
 
-function sendRequest(id) {
+function sendRequest(id, mergejilten) {
     const opts = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({mergejilten})
     }
+
     return fetch(`${prefix}/${id}/send-request/`, opts).then(handleResponse)
+
 }
 
 function removeRequest(id) {
