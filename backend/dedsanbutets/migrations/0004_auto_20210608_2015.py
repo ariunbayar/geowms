@@ -20,17 +20,15 @@ def _get_to_view_name(feature, view_name):
     return to_view_name
 
 
+def _get_theme_code(feature_code):
+    return feature_code.split("-")[0]
+
+
 def _rename_geoserver_layer_name(feature, apps, to_view_name, view_name):
-    LPackages = apps.get_model('backend_inspire', 'LPackages')
-    LThemes = apps.get_model('backend_inspire', 'LThemes')
     BASE_URL, AUTH = geoserver.getHeader()
     HEADERS = geoserver.HEADERS
 
     layer_name = 'gp_layer_' + view_name
-
-    pack = LPackages.objects.filter(package_id=feature.package_id).first()
-    theme = LThemes.objects.filter(theme_id=pack.theme_id).first()
-
     to_layer_name = 'gp_layer_' + to_view_name
 
     payload = '''
@@ -40,7 +38,7 @@ def _rename_geoserver_layer_name(feature, apps, to_view_name, view_name):
         </featureType>
     '''.format(to_view_name=to_view_name, to_layer_name=to_layer_name)
 
-    wk_name = 'gp_' + theme.theme_code
+    wk_name = 'gp_' + _get_theme_code(feature.feature_code)
 
     url = 'workspaces/{workspace_name}/datastores/{datastore_name}/featuretypes/{layer_name}'.format(workspace_name=wk_name, datastore_name=wk_name, layer_name=layer_name)
     rsp = requests.put(BASE_URL + url, headers=HEADERS, auth=AUTH, data=payload.encode('utf-8'))
