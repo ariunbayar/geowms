@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react'
 
 import Loader from "@utils/Loader"
-import ModalAlert from '../ModalAlert'
+import Modal from "@utils/Modal/Modal"
 import ChooseStyle from './ChooseStyle'
 import SetTileCache from './setTileCache'
 
@@ -16,9 +16,7 @@ export default class SideBar extends Component {
             show: false,
             id_list: [],
             save_is_load: false,
-            modal_alert_check: 'closed',
-            title: '',
-            model_type_icon: 'success',
+            modal_status: 'closed',
             view: '',
             style_names: props.style_names,
             url: props.url,
@@ -74,25 +72,37 @@ export default class SideBar extends Component {
             values = this.getValuesFromState()
         }
 
-        let model_type_icon
-        let msg
         service
             .setPropertyFields(fid, tid, id_list, view.id, values)
-            .then(({ success, data, error }) => {
+            .then(({ success, msg }) => {
                 if(success) {
                     this.props.getAll()
-                    model_type_icon = 'success'
-                    msg = data
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        'success',
+                        msg,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null,
+                    )
                 }
                 else {
-                    msg = error
-                    model_type_icon = 'danger'
+                    this.modalChange(
+                        'fa fa-exclamation-circle',
+                        null,
+                        'danger',
+                        msg,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null,
+                    )
                 }
-                this.setState({ save_is_load: false, is_loading: false, modal_alert_check: 'open', title: msg, model_type_icon })
-            })
-            .catch(() => {
-                this.setState({ save_is_load: false, is_loading: false, modal_alert_check: 'open', title: "Алдаа гарсан байна", model_type_icon: "danger" })
-                this.modalCloseTime()
+                this.setState({ save_is_load: false, is_loading: false})
             })
     }
 
@@ -203,12 +213,6 @@ export default class SideBar extends Component {
         clearTimeout(this.state.timer)
     }
 
-    modalCloseTime() {
-        this.state.timer = setTimeout(() => {
-            this.setState({ modal_alert_check: 'closed' })
-        }, 2000)
-    }
-
     getValuesFromState() {
         const {
             style_name, geom_type, zoom_stop,
@@ -257,11 +261,34 @@ export default class SideBar extends Component {
         this.state.style_name = style_name
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
     render() {
         const { fields, fid, fname, has_view } = this.props
         const { is_loading, id_list, check_list } = this.state
         const state = this.state
-        console.log(state);
         return (
             <Fragment>
                 <Loader is_loading={is_loading} text={state.load_text ? state.load_text : "Хүсэлтийг уншиж байна."}/>
@@ -386,11 +413,18 @@ export default class SideBar extends Component {
                                 </div>
                         }
                     </div>
-                    <ModalAlert
-                        title={this.state.title}
-                        model_type_icon ={this.state.model_type_icon}
-                        status={this.state.modal_alert_check}
-                        modalAction={() => this.handleModalAlert()}
+                    <Modal
+                        modal_status={ this.state.modal_status }
+                        modal_icon={ this.state.modal_icon }
+                        modal_bg={ this.state.modal_bg }
+                        icon_color={ this.state.icon_color }
+                        title={ this.state.title }
+                        text={ this.state.text }
+                        has_button={ this.state.has_button }
+                        actionNameBack={ this.state.actionNameBack }
+                        actionNameDelete={ this.state.actionNameDelete }
+                        modalAction={ this.state.modalAction }
+                        modalClose={ this.state.modalClose }
                     />
                 </div>
             </Fragment>
