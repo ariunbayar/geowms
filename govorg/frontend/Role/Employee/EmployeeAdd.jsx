@@ -30,7 +30,7 @@ export class EmployeeAdd extends Component {
                 phone_number: '',
                 is_admin: false,
                 choose_role: '',
-                state: '1',
+                state: 1,
                 pro_class: '',
                 is_user: true,
             },

@@ -28,7 +28,7 @@ export class UserAdd extends Component {
                 is_super: false,
                 re_password_mail: false,
                 phone_number: '',
-                state: '1',
+                state: 1,
                 pro_class: '',
             },
             aimag: [],

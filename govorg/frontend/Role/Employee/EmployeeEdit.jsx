@@ -31,7 +31,7 @@ export class EmployeeEdit extends Component {
                 register: '',
                 phone_number: '',
                 is_admin: false,
-                state: '1',
+                state: 1,
                 pro_class: '',
                 is_user: false,
             },
