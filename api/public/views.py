@@ -118,6 +118,8 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     date_now = str(localtime(now()).strftime("%Y-%m-%d_%H-%M"))
 
     view = ViewNames.objects.filter(view_name=view_name).first()
+    if not view or not view.open_datas:
+        raise Http404
 
     open_properties = _get_property_names(view)
 

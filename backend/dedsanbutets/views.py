@@ -383,7 +383,7 @@ def propertyFields(request, fid):
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': id_list,
-            'open_datas': utils.json_load(view.open_datas),
+            'open_datas': utils.json_load(view.open_datas) if view.open_datas else [],
             'view': view_qs.values('id', 'view_name').first(),
             'url': request.build_absolute_uri(url),
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
@@ -401,6 +401,7 @@ def propertyFields(request, fid):
             'cache_values': cache_values,
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
+
     return JsonResponse(rsp)
 
 
