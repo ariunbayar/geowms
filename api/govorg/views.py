@@ -51,6 +51,12 @@ def allowed_attbs(request, token, system, code):
     return allowed_att
 
 
+def _get_qgis_service_url(request, token):
+    url = reverse('api:service:qgis-proxy', args=[token])
+    absolute_url = request.build_absolute_uri(url)
+    return absolute_url
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def proxy(request, base_url, token, pk=None):
@@ -79,6 +85,7 @@ def proxy(request, base_url, token, pk=None):
             content = filter_layers(content, allowed_layers)
         else:
             raise Exception()
+
 
     qs_request = queryargs.get('REQUEST', 'no request')
     base_url_wfs = base_url.replace('ows', 'wfs')
@@ -116,19 +123,22 @@ def json_proxy(request, base_url, token, code):
 
     allowed_att = allowed_attbs(request, token, system, code)
 
-    if not system:
-        raise Http404
+    # if not system:
+    #     raise Http404
     allowed_layers = [code]
     queryargs = {
         'service': 'WFS',
         'version': '1.0.0',
         'request': 'GetFeature',
         'typeName': code,
-        'outputFormat': 'application/json',
-        "propertyName": [allowed_att]
+        # 'outputFormat': 'application/json',
+        # "propertyName": [allowed_att]
     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
+    print("hoh")
+    print("hoh")
+    print("hoh", rsp.status_code, rsp.text)
     content = rsp.content
     content = filter_layers_wfs(content, allowed_layers)
 
@@ -251,18 +261,100 @@ def _get_cql_filter(geo_id):
 
 
 def _get_request_content(base_url, request, geo_id, headers):
-    if request.GET.get('REQUEST') == 'GetMap' and geo_id != utils.get_1stOrder_geo_id():
-
-        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+    queryargs = request.GET
+    print("hoho")
+    print("hoho")
+    print("hoho")
+    print("hoho", queryargs)
+    if geo_id != utils.get_1stOrder_geo_id() and (request.GET.get('REQUEST') == 'GetMap' or request.GET.get('REQUEST') == 'GetFeature'):
         queryargs = {
-            **request.GET,
-            'cql_filter': cql_filter,
+            **request.GET
+            # 'service': 'WFS',
+            # 'version': '1.0.0',
+            # 'request': 'GetFeature',
+            # 'typeName': 'gp_layer_building_b_view',
+            # 'outputFormat': 'application/json',
         }
-        rsp = requests.post(base_url, data=queryargs, headers=headers, timeout=5, verify=False)
+
+
+        # queryargs = {
+        #     'service':'wfs',
+        #     'version':'2.0.0',
+        #     'request':'GetFeature',
+        #     'typeNames':'gp_bu:gp_layer_building_b_view',
+        #     'srsName':'EPSG:4326',
+        #     'bbox':'90.00002124600024, 48.42005555600019,95.6890555560002,50.88442842400025'
+        # }
+        # base_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=gp_bu:gp_layer_building_b_view&count=10&srsName=EPSG:4326&%20bbox=90.00002124600024,%2048.42005555600019,95.6890555560002,50.88442842400025'
+        # if request.GET.get('REQUEST') == 'GetMap':
+        #     cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        #     queryargs = {
+        #         **request.GET,
+        #         'cql_filter': cql_filter,
+        #     }
+        # else:
+        #     print("hoho")
+        #     print("hoho", request.GET)
+        #     # cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+
+        #     cql_filter = '''
+        #         <fes:Filter>
+        #             <fes:Within>
+        #             <fes:ValueReference>geo_data</fes:ValueReference>
+        #             <gml:Polygon  gml:id="polygon.1" srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">
+        #                 <gml:exterior>
+        #                 <gml:LinearRing>
+        #                     <gml:posList>
+        #                         90.00002124600024 48.42005555600019
+        #                         90.00002124600024 50.88442842400025
+        #                         95.6890555560002 50.88442842400025
+        #                         95.6890555560002 48.42005555600019
+        #                         90.00002124600024 48.42005555600019
+        #                     </gml:posList>
+        #                 </gml:LinearRing>
+        #                 </gml:exterior>
+        #             </gml:Polygon>
+        #             </fes:Within>
+        #         </fes:Filter>
+        #     '''
+        #     queryargs = {
+        #         'service': 'WFS',
+        #         'request': 'GetFeature',
+        #         'typeName': request.GET.get('TYPENAME'),
+        #         'version': request.GET.get('VERSIO'),
+        #         'TYPENAMES': request.GET.get('TYPENAMES'),
+        #         'STARTINDEX': request.GET.get('STARTINDEX'),
+        #         'COUNT': request.GET.get('COUNT'),
+        #         'SRSNAME': request.GET.get('SRSNAME'),
+        #         'BBOX': '90.00002124600024,48.42005555600019,95.6890555560002,50.88442842400025',
+        #     }
+        base_url = 'http://127.0.0.1:8080/geoserver/wfs?'
+        # print("jpjp")
+        # print("jpjp")
+        # print("jpjp", queryargs)
+        data = '''
+            <wfs:GetFeature service="WFS" version="2.0.0"
+                xmlns:lcv="http://inspire.ec.europa.eu/schemas/lcv/3.0"
+                xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                xmlns:fes="http://www.opengis.net/fes/2.0"
+                xmlns:gml="http://www.opengis.net/gml/3.2">
+                <wfs:Query typeNames="gp_bu:gp_layer_building_b_view">
+                    <fes:Filter>
+                    <fes:PropertyIsEqualTo>
+                        <fes:ValueReference>gml:geo_data</fes:ValueReference>
+                        <fes:Literal>VIAREGGIO</fes:Literal>
+                    </fes:PropertyIsEqualTo>
+                    </fes:Filter>
+                </wfs:Query>
+            </wfs:GetFeature>
+        '''
+        rsp = requests.get(base_url, headers=headers, timeout=5, verify=False)
+        print("hoh")
+        print("hoh")
+        print("hoh", rsp.status_code, rsp.text)
     else:
         queryargs = request.GET
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
-
     return rsp, queryargs
 
 
@@ -279,16 +371,27 @@ def qgis_proxy(request, base_url, token):
         raise Http404
 
     geo_id = employee.org.geo_id
-    rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
+    queryargs = {
+        **request.GET,
+    }
+    # rsp, queryargs = 
+    rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
+    print("rsp")
+    print("rsp")
+    print("rsp")
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
         if request.GET.get('SERVICE') == 'WFS':
             content = filter_layers_wfs(content, allowed_layers)
+            base_url = base_url.replace('ows', 'wfs')
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
             raise Exception()
+
+        service_url = _get_qgis_service_url(request, token)
+        content = replace_src_url(content, base_url, service_url)
 
     qs_request = queryargs.get('REQUEST', 'no request')
 
