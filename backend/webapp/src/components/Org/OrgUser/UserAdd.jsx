@@ -64,7 +64,7 @@ export class UserAdd extends Component {
             states: [],
             pro_classes: [],
 
-            is_user: false,
+            is_user: true,
             modal_status: 'closed',
         }
 
@@ -373,8 +373,10 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, is_loading,
-            feature, street, apartment, door_number, point, errors, address_state
+        const { form_values, aimag, sum, horoo,
+            aimag_id, sum_id, horoo_id, is_loading,
+            feature, street, apartment, door_number,
+            point, errors, address_state, is_user
         } = this.state
 
         const { positions, states, pro_classes } = this.state
@@ -573,19 +575,20 @@ export class UserAdd extends Component {
                                             </div>
                                             <div className="form-group col-12">
                                                 <label htmlFor='id_is_user'>хэрэглэгч</label>
-                                                <Field
-                                                    className="ml-2"
+                                                <input
+                                                    onChange={(e) => this.setState({ is_user: e.target.checked })}
                                                     name='is_user'
-                                                    id="id_is_user"
+                                                    className="ml-2"
                                                     type="checkbox"
+                                                    id="id_is_user"
+                                                    checked={is_user}
                                                 />
-                                                <ErrorMessage name="is_user" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         {org_level ==4 &&
                                             <div className='form-row'>
                                                 <div className="form-group col-12">
-                                                    <label htmlFor='is_super'>Системийн админ</label>
+                                                    <label htmlFor='id_is_super'>Системийн админ</label>
                                                     <Field
                                                         className="ml-2"
                                                         name='is_super'
