@@ -54,24 +54,24 @@ def _rename_views(apps, schema_editor):
         feature_id = view.feature_id
         view_name = view.view_name
         feature = LFeatures.objects.filter(feature_id=feature_id).first()
+        if feature:
+            to_view_name = _get_to_view_name(feature, view_name)
 
-        to_view_name = _get_to_view_name(feature, view_name)
-
-        sql = """
-            ALTER MATERIALIZED VIEW IF EXISTS
-                {view_name}
-            RENAME to
-                {to_view_name};
-        """.format(view_name=view_name, to_view_name=to_view_name)
-        with connections['default'].cursor() as cursor:
-            cursor.execute(sql)
-        gp_layer = 'gp_layer_' + view_name
-        WMSLayer.objects.filter(code=gp_layer).update(
-            code='gp_layer_' + to_view_name
-        )
-        _rename_geoserver_layer_name(feature, apps, to_view_name, view_name)
-        view.view_name = to_view_name
-        view.save()
+            sql = """
+                ALTER MATERIALIZED VIEW IF EXISTS
+                    {view_name}
+                RENAME to
+                    {to_view_name};
+            """.format(view_name=view_name, to_view_name=to_view_name)
+            with connections['default'].cursor() as cursor:
+                cursor.execute(sql)
+            gp_layer = 'gp_layer_' + view_name
+            WMSLayer.objects.filter(code=gp_layer).update(
+                code='gp_layer_' + to_view_name
+            )
+            _rename_geoserver_layer_name(feature, apps, to_view_name, view_name)
+            view.view_name = to_view_name
+            view.save()
 
 
 class Migration(migrations.Migration):
