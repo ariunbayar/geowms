@@ -4,6 +4,7 @@ from django.shortcuts import render, reverse
 from backend.dedsanbutets.models import ViewNames
 from backend.bundle.models import Bundle, BundleLayer
 from backend.geoserver.models import WmtsCacheConfig
+from main import utils
 
 
 def _get_service_url(request, bundle, wms, layer, file_type):
@@ -34,9 +35,8 @@ def wms_layers(request, bundle):
                 layer_id=ob.id,
                 role_id__in=roles
             )
-
         view_obj = ViewNames.objects.filter(view_name=code).first()
-        if view_obj:
+        if view_obj and utils.json_load(view_obj.open_datas):
             feature_id = view_obj.feature_id
             wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
             if wmts_obj:
@@ -74,12 +74,11 @@ def wms_layers(request, bundle):
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         if wms.is_active:
-            filter_layer = []
+            filter_layer = list()
             for layer in layers:
                 lyr = _layer_to_display(bundle, wms, layer)
                 if lyr:
                     filter_layer.append(lyr)
-
             wms_data = {
                 'id': wms.id,
                 'name': wms.name,

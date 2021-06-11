@@ -160,8 +160,6 @@ def _get_property_names(view):
 
 @require_GET
 def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
-    if not request.user.is_sso:
-        raise Http404
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
