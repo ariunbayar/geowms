@@ -2,6 +2,9 @@ import React, { Component } from "react"
 import { Map, View, Feature } from 'ol'
 import Tile from 'ol/layer/Tile'
 import TileImage from 'ol/source/TileImage'
+import TileWMS from 'ol/source/TileWMS'
+import WMTS from 'ol/source/WMTS'
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
 
 import { Vector as VectorSource, OSM } from 'ol/source'
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer'
@@ -136,7 +139,6 @@ export default class AddressMap extends Component {
                                 "STYLES": '',
                                 "exceptions": 'application/vnd.ogc.se_inimage',
                             },
-                            tileLoadFunction: securedImageWMS
                         }),
                         name: base_layer_name,
                     })
@@ -157,7 +159,6 @@ export default class AddressMap extends Component {
                                 resolutions: resolutions,
                                 matrixIds: gridNames,
                             }),
-                            tileLoadFunction: securedImageWMS,
                             style: '',
                             wrapX: true,
                         }),
