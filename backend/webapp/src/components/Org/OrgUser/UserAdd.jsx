@@ -28,7 +28,7 @@ export class UserAdd extends Component {
                 is_super: false,
                 re_password_mail: false,
                 phone_number: '',
-                state: '',
+                state: '1',
                 pro_class: '',
             },
             aimag: [],
@@ -519,7 +519,7 @@ export class UserAdd extends Component {
                                                 <label htmlFor='id_state'>Төлөв:</label>
                                                 <Field name="state" as="select" id="state"
                                                     style={{ fontSize: '0.8rem' }}
-                                                    className={'custom-select '}
+                                                    className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
                                                 >
                                                     {
                                                         states.map((item, idx) =>
@@ -527,6 +527,7 @@ export class UserAdd extends Component {
                                                         )
                                                     }
                                                 </Field>
+                                                <ErrorMessage name="state" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className='form-row'>

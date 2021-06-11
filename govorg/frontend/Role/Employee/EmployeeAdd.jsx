@@ -30,7 +30,7 @@ export class EmployeeAdd extends Component {
                 phone_number: '',
                 is_admin: false,
                 choose_role: '',
-                state: '',
+                state: '1',
                 pro_class: '',
                 is_user: true,
             },
@@ -357,7 +357,7 @@ export class EmployeeAdd extends Component {
                     <div className="row">
                         <Formik
                             enableReinitialize
-                            initialValues = {form_values}
+                            initialValues={form_values}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
@@ -498,29 +498,28 @@ export class EmployeeAdd extends Component {
                                             </div>
                                             <div className="form-row col-md-3 mt-4 text-center"><br/>
                                                 <label htmlFor='id_is_user'>Хэрэглэгч</label>
-                                                <input
-                                                    onChange={(e) => this.setState({ is_user: e.target.checked })}
+                                                <Field
                                                     name='is_user'
                                                     className="ml-2"
                                                     type="checkbox"
                                                     id="id_is_user"
-                                                    checked={form_values.is_user}
                                                 />
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                    <label htmlFor='id_state'>Төлөв:</label>
-                                                    <Field name="state" as="select" id="state"
-                                                        style={{ fontSize: '0.8rem' }}
-                                                        className={'custom-select'}
-                                                    >
-                                                        {
-                                                            states.map((item, idx) =>
-                                                                <option key={idx} value={item[0]}>{item[1]}</option>
-                                                            )
-                                                        }
-                                                    </Field>
+                                                <label htmlFor='id_state'>Төлөв:</label>
+                                                <Field name="state" as="select" id="state"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                >
+                                                    {
+                                                        states.map((item, idx) =>
+                                                            <option key={idx} value={item[0]}>{item[1]}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="state" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>
