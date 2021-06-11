@@ -449,33 +449,38 @@ def employee_add(request, payload, level, pk):
     return JsonResponse(rsp)
 
 
+def _set_state(employee):
+    employee.state = 3
+    employee.save()
+    return True
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_remove(request, pk):
-
     user = get_object_or_404(User, id=pk)
     employee = get_object_or_404(Employee, user=user)
-    check = _remove_user(user, employee)
+    check = _set_state(employee)
     return JsonResponse({'success': check})
 
 
-def _remove_user(user, employee):
-    emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    change_requests = ChangeRequest.objects.filter(employee=employee)
+# def _remove_user(user, employee):
+#     emp_perm = EmpPerm.objects.filter(employee=employee).first()
+#     change_requests = ChangeRequest.objects.filter(employee=employee)
 
-    with transaction.atomic():
-        for change_request in change_requests:
-            change_request.employee = None
-            change_request.save()
-        if emp_perm:
-            EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
-            emp_perm.delete()
-        employee.delete()
-        user.delete()
+#     with transaction.atomic():
+#         for change_request in change_requests:
+#             change_request.employee = None
+#             change_request.save()
+#         if emp_perm:
+#             EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
+#             emp_perm.delete()
+#         employee.delete()
+#         user.delete()
 
-        return True
-    return False
+#         return True
+#     return False
 
 
 def _org_validation(org_name, org_id):
