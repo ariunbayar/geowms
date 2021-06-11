@@ -351,7 +351,6 @@ export class EmployeeAdd extends Component {
             pro_classes, is_user
         } = this.state
         const { org_roles } = this.props
-        console.log(form_values.is_user);
         return (
             <div className="card">
                 <div className="card-body">
