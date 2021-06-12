@@ -245,6 +245,9 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
       }
+      if(roles.PERM_VIEW) {
+        map.addControl(new FormBarButton({FormButton: this.FormButton}))
+      }
       this.setState({ is_loading:false, roles})
     }
 
