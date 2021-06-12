@@ -307,15 +307,13 @@ def _get_cql_filter(geo_id):
 def _get_request_content(base_url, request, geo_id, headers):
     queryargs = request.GET
     if geo_id != utils.get_1stOrder_geo_id() and (request.GET.get('REQUEST') == 'GetMap' or request.GET.get('REQUEST') == 'GetFeature'):
-        # queryargs = {
-        #     **request.GET
-            # 'service': 'WFS',
-            # 'version': '1.0.0',
-            # 'request': 'GetFeature',
-            # 'typeName': 'gp_layer_building_b_view',
-            # 'outputFormat': 'application/json',
-        # }
-
+        queryargs = {
+            'service': 'WFS',
+            'version': '1.0.0',
+            'request': 'GetFeature',
+            'typeName': 'gp_layer_building_b_view',
+            'outputFormat': 'application/json',
+        }
 
         # queryargs = {
         #     'service':'wfs',
@@ -327,11 +325,11 @@ def _get_request_content(base_url, request, geo_id, headers):
         # }
         # base_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=gp_bu:gp_layer_building_b_view&count=10&srsName=EPSG:4326&%20bbox=90.00002124600024,%2048.42005555600019,95.6890555560002,50.88442842400025'
         # if request.GET.get('REQUEST') == 'GetMap':
-        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
-        queryargs = {
-            **request.GET,
-            'cql_filter': cql_filter,
-        }
+        #     cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        #     queryargs = {
+        #         **request.GET,
+        #         'cql_filter': cql_filter,
+        #     }
         # else:
         #     print("hoho")
         #     print("hoho", request.GET)
@@ -373,6 +371,13 @@ def _get_request_content(base_url, request, geo_id, headers):
         print("hoho")
         print("hoho")
         print("hoho", rsp.status_code)
+        # print("jpjp")
+        # print("jpjp")
+        # print("jpjp", queryargs)
+        rsp = requests.get('http://localhost:8080/geoserver/wfs', headers=headers, timeout=5, verify=False)
+        print("hoh")
+        print("hoh")
+        print("hoh", rsp.status_code, rsp.text)
     else:
         queryargs = request.GET
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
