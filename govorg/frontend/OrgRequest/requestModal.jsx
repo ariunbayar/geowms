@@ -357,7 +357,7 @@ export default class RequestModal extends Component {
                                                             ?
                                                                 form_json && <FormJson form_json={form_json}/>
                                                             :
-                                                                selected_form_json && <FormJson form_json={selected_form_json} handleModalOpen={this.modalChange} modalClose={this.modalClose} values={selected_value}/>
+                                                                selected_form_json && <FormJ    son form_json={selected_form_json} handleModalOpen={this.modalChange} modalClose={this.modalClose} values={selected_value}/>
                                                         }
                                                         <div className={selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
                                                             <RequestMap values={values} selectedFeature={this.selectedFeature}/>

@@ -1,3 +1,4 @@
+from django.db.models import base
 import requests
 import json
 
@@ -11,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrgWMSLayer, GovOrg as System
-from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire
+from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire, LProperties
 from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
@@ -175,6 +176,47 @@ def _geojson_convert_3d_geojson(geojson):
         return geo_json['geo_json']
 
 
+def _get_type(value_type_id):
+    if value_type_id == 'number':
+        value_type = 'number'
+    elif value_type_id == 'double':
+        value_type = 'number'
+    elif value_type_id == 'multi-text':
+        value_type = 'text'
+    elif value_type_id == 'text':
+        value_type = 'text'
+    elif value_type_id == 'date':
+        value_type = 'date'
+    elif value_type_id == 'link':
+        value_type = 'text'
+    elif value_type_id == 'boolean':
+        value_type = 'text'
+    else:
+        value_type = 'option'
+    return value_type
+
+
+def _get_property_data(values):
+    datas = []
+    for value in values:
+        form = {}
+        property = LProperties.objects.filter(property_code__iexact=value).first()
+        if property:
+            form['pk'] = ''
+            form['property_id'] = property.property_id
+            form['property_name'] = property.property_name
+            form['property_code'] = property.property_code
+            form['property_definition'] = property.property_definition
+            form['value_type_id'] = property.value_type_id
+            form['value_type'] = _get_type(property.value_type_id)
+            form['data'] = values[value] or ''
+            form['data_list'] = []
+            form['roles'] = {"PERM_VIEW": True, "PERM_CREATE": True, "PERM_REMOVE": False, "PERM_UPDATE": True, "PERM_APPROVE": True, "PERM_REVOKE": False}
+            datas.append(form)
+
+    return datas
+
+
 @require_POST
 @csrf_exempt
 def qgis_submit(request, token):
@@ -186,6 +228,7 @@ def qgis_submit(request, token):
     delete_lists = json.loads(delete)
     objs = []
     msg = []
+    form_json = []
     for update_item in update_lists:
         feature_id = update_item['att']['feature_id']
         if update_item['att']['inspire_id']:
@@ -196,6 +239,8 @@ def qgis_submit(request, token):
         theme = LPackages.objects.filter(package_id=package.package_id).first()
         geo_json = _geojson_convert_3d_geojson(update_item['geom'])
         success, info = utils.has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
+        form_json = _get_property_data(update_item['att'])
+
         if success:
             objs.append(ChangeRequest(
                 old_geo_id=geo_id,
@@ -207,7 +252,7 @@ def qgis_submit(request, token):
                 org=org,
                 state=ChangeRequest.STATE_CONTROL,
                 kind=ChangeRequest.KIND_UPDATE,
-                form_json=None,
+                form_json=utils.json_dumps(form_json),
                 geo_json=geo_json,
             ))
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'update'})
@@ -241,8 +286,7 @@ def qgis_submit(request, token):
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    ChangeRequest.objects.bulk_create(objs)
-
+    hoho = ChangeRequest.objects.bulk_create(objs)
     return JsonResponse({'success': True, 'msg': msg})
 
 
@@ -285,7 +329,7 @@ def _get_request_content(base_url, request, geo_id, headers):
         #     'srsName':'EPSG:4326',
         #     'bbox':'90.00002124600024, 48.42005555600019,95.6890555560002,50.88442842400025'
         # }
-        # base_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=gp_bu:gp_layer_building_b_view&count=10&srsName=EPSG:4326&%20bbox=90.00002124600024,%2048.42005555600019,95.6890555560002,50.88442842400025'
+        base_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=gp_bu:gp_layer_building_b_view&count=10&srsName=EPSG:4326&%20bbox=90.00002124600024,%2048.42005555600019,95.6890555560002,50.88442842400025'
         # if request.GET.get('REQUEST') == 'GetMap':
         #     cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
         #     queryargs = {
@@ -328,26 +372,7 @@ def _get_request_content(base_url, request, geo_id, headers):
         #         'SRSNAME': request.GET.get('SRSNAME'),
         #         'BBOX': '90.00002124600024,48.42005555600019,95.6890555560002,50.88442842400025',
         #     }
-        base_url = 'http://127.0.0.1:8080/geoserver/wfs?'
-        # print("jpjp")
-        # print("jpjp")
-        # print("jpjp", queryargs)
-        data = '''
-            <wfs:GetFeature service="WFS" version="2.0.0"
-                xmlns:lcv="http://inspire.ec.europa.eu/schemas/lcv/3.0"
-                xmlns:wfs="http://www.opengis.net/wfs/2.0"
-                xmlns:fes="http://www.opengis.net/fes/2.0"
-                xmlns:gml="http://www.opengis.net/gml/3.2">
-                <wfs:Query typeNames="gp_bu:gp_layer_building_b_view">
-                    <fes:Filter>
-                    <fes:PropertyIsEqualTo>
-                        <fes:ValueReference>gml:geo_data</fes:ValueReference>
-                        <fes:Literal>VIAREGGIO</fes:Literal>
-                    </fes:PropertyIsEqualTo>
-                    </fes:Filter>
-                </wfs:Query>
-            </wfs:GetFeature>
-        '''
+        # base_url = 'http://127.0.0.1:8080/geoserver/wfs?'
         rsp = requests.get(base_url, headers=headers, timeout=5, verify=False)
         print("hoh")
         print("hoh")
@@ -371,14 +396,33 @@ def qgis_proxy(request, base_url, token):
         raise Http404
 
     geo_id = employee.org.geo_id
+
     queryargs = {
         **request.GET,
     }
-    # rsp, queryargs = 
+    # rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
+    # if request.GET.get('REQUEST') == 'GetFeature':
+
+    #     queryargs = {
+    #         'SERVICE':'WFS',
+    #         'REQUEST':'GetFeature',
+    #         'VERSION':'2.0.0',
+    #         'TYPENAMES':'gp_bu:gp_layer_building_b_view',
+    #         'TYPENAME':'gp_bu:gp_layer_building_b_view',
+    #         'STARTINDEX':0,
+    #         'COUNT':1000000,
+    #         'srsName':'EPSG:4326',
+    #         'bbox':'90.00002124600024, 48.42005555600019,95.6890555560002,50.88442842400025'
+    #     }
+    #     print("hoho")
+    #     print("hoho", base_url, queryargs)
+    #     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
+    #     print("hoho")
+    #     print("hoho")
+    #     print("hoho", rsp.status_code)
+    # else:
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
-    print("rsp")
-    print("rsp")
-    print("rsp")
+
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities':

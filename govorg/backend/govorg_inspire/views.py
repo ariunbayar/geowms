@@ -443,7 +443,6 @@ def _get_user_perm(request, fid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detail(request, gid, fid, tid):
-
     user_perm_property = _get_user_perm(request, fid)
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
