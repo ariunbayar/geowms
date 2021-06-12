@@ -306,19 +306,15 @@ def _get_cql_filter(geo_id):
 
 def _get_request_content(base_url, request, geo_id, headers):
     queryargs = request.GET
-    print("hoho")
-    print("hoho")
-    print("hoho")
-    print("hoho", queryargs)
     if geo_id != utils.get_1stOrder_geo_id() and (request.GET.get('REQUEST') == 'GetMap' or request.GET.get('REQUEST') == 'GetFeature'):
-        queryargs = {
-            **request.GET
+        # queryargs = {
+        #     **request.GET
             # 'service': 'WFS',
             # 'version': '1.0.0',
             # 'request': 'GetFeature',
             # 'typeName': 'gp_layer_building_b_view',
             # 'outputFormat': 'application/json',
-        }
+        # }
 
 
         # queryargs = {
@@ -329,13 +325,13 @@ def _get_request_content(base_url, request, geo_id, headers):
         #     'srsName':'EPSG:4326',
         #     'bbox':'90.00002124600024, 48.42005555600019,95.6890555560002,50.88442842400025'
         # }
-        base_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=gp_bu:gp_layer_building_b_view&count=10&srsName=EPSG:4326&%20bbox=90.00002124600024,%2048.42005555600019,95.6890555560002,50.88442842400025'
+        # base_url = 'http://localhost:8080/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=gp_bu:gp_layer_building_b_view&count=10&srsName=EPSG:4326&%20bbox=90.00002124600024,%2048.42005555600019,95.6890555560002,50.88442842400025'
         # if request.GET.get('REQUEST') == 'GetMap':
-        #     cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
-        #     queryargs = {
-        #         **request.GET,
-        #         'cql_filter': cql_filter,
-        #     }
+        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        queryargs = {
+            **request.GET,
+            'cql_filter': cql_filter,
+        }
         # else:
         #     print("hoho")
         #     print("hoho", request.GET)
@@ -373,10 +369,10 @@ def _get_request_content(base_url, request, geo_id, headers):
         #         'BBOX': '90.00002124600024,48.42005555600019,95.6890555560002,50.88442842400025',
         #     }
         # base_url = 'http://127.0.0.1:8080/geoserver/wfs?'
-        rsp = requests.get(base_url, headers=headers, timeout=5, verify=False)
-        print("hoh")
-        print("hoh")
-        print("hoh", rsp.status_code, rsp.text)
+        rsp = requests.post(base_url, queryargs,  headers=headers, timeout=5, verify=False)
+        print("hoho")
+        print("hoho")
+        print("hoho", rsp.status_code)
     else:
         queryargs = request.GET
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
@@ -402,25 +398,28 @@ def qgis_proxy(request, base_url, token):
     }
     # rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
     # if request.GET.get('REQUEST') == 'GetFeature':
+    #     cql_filter = 'BBOX(geo_data, 90.00002124600024, 48.42005555600019,95.6890555560002,50.88442842400025)'
 
-    #     queryargs = {
-    #         'SERVICE':'WFS',
-    #         'REQUEST':'GetFeature',
-    #         'VERSION':'2.0.0',
-    #         'TYPENAMES':'gp_bu:gp_layer_building_b_view',
-    #         'TYPENAME':'gp_bu:gp_layer_building_b_view',
-    #         'STARTINDEX':0,
-    #         'COUNT':1000000,
-    #         'srsName':'EPSG:4326',
-    #         'bbox':'90.00002124600024, 48.42005555600019,95.6890555560002,50.88442842400025'
-    #     }
-    #     print("hoho")
-    #     print("hoho", base_url, queryargs)
+    # queryargs = {
+    #     'SERVICE':'WFS',
+    #     'REQUEST':'GetFeature',
+    #     'VERSION':'2.0.0',
+    #     'TYPENAMES':'gp_bu:gp_layer_building_b_view',
+    #     'TYPENAME':'gp_bu:gp_layer_building_b_view',
+    #     'STARTINDEX':0,
+    #     'COUNT':1000000,
+    #     'srsName':'urn:ogc:def:crs:EPSG::4326',
+    #     # 'srsName':'EPSG:4326',
+    #     # cql_filter: cql_filter
+    # }
+
     #     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
-    #     print("hoho")
-    #     print("hoho")
-    #     print("hoho", rsp.status_code)
+    #     print("res")
+    #     print("res")
+    #     print("res")
+    #     print("res", rsp.status_code, rsp.text)
     # else:
+    base_url = 'http://localhost:8080/geoserver/gp_bu/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=gp_bu%3Agp_layer_building_b_view&maxFeatures=50&srsName=EPSG:4326&bbox=90.00002124600024,%2048.42005555600019,95.6890555560002,50.88442842400025'
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
 
     content = rsp.content
