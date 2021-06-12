@@ -24,7 +24,7 @@ export class ButtonDelete extends Component {
             if (status == 'success') {
                 modal_icon = 'fa fa-check-circle'
                 icon_color = 'success'
-                text = 'Албан хаагчийг амжилттай устгалаа!'
+                text = 'Албан хаагчийн төлөв чөлөөлөгдсөн боллоо!'
                 modalClose = this.props.onSuccess
             }
             if (status == 'fail') {
@@ -83,7 +83,7 @@ export class ButtonDelete extends Component {
                             null,
                             'danger',
                             'Албан хаагчийг устгах',
-                            `${`Та "${this.props.employee_name}" нэртэй албан хаагчийг устгахдаа итгэлтэй байна уу?`}`,
+                            `${`Та "${this.props.employee_name}" нэртэй албан хаагчийн төлөв чөлөөлөгдсөн болно. Та устгахдаа итгэлтэй байна уу?`}`,
                             true,
                             '',
                             'Тийм',
