@@ -268,6 +268,7 @@ export default class  ExportCreate extends Component {
     setSelectedField(data) {
         const { matched_feilds } = this.state
         var selected_field = ''
+        console.log('matched_feilds', matched_feilds)
         if (Object.keys(matched_feilds).length > 0) {
                 var field_of_data = obj => obj.property_id == data.property_id
                 var index_of = matched_feilds.findIndex(field_of_data)
@@ -275,6 +276,7 @@ export default class  ExportCreate extends Component {
                     selected_field = matched_feilds[index_of].table_field
                 }
         }
+        console.log("selected_field", selected_field)
         return selected_field
     }
 
@@ -287,11 +289,14 @@ export default class  ExportCreate extends Component {
         if (index) {
             var prop_data_type = data_type_list[data_key].properties[prop_key].value_type_id
             var table_data_type = ano_table_fields[parseInt(index)].data_type.slice(0,4)
-
             if (prop_data_type != table_data_type) {
                 type = true
-                if (check_data_type && check_data_type == -1) {
-                    list_check_error.push(prop_id)
+                if (table_data_type == 'text' && prop_data_type =='char') type = false
+                else if (table_data_type == 'date' && prop_data_type =='time') type = false
+                else {
+                    if (check_data_type && check_data_type == -1) {
+                        list_check_error.push(prop_id)
+                    }
                 }
             }
             else {
@@ -309,7 +314,6 @@ export default class  ExportCreate extends Component {
                 list_check_error = list_check_error.filter((val) => val != prop_id)
             }
         }
-
         this.setState({
             ...data_type_list,
             check_error: list_check_error
@@ -406,7 +410,7 @@ export default class  ExportCreate extends Component {
                         ?
                             data_type_list.map((data_type_data, idx) =>
                                 <>
-                                    <div key={idx} className="form-row mr-3">
+                                    <div className="form-row mr-3">
                                         <div className='form-group col-md-3 align-self-center text-center px-2 '>
                                             <b className="text-wrap">{data_type_data.data_type_name}</b><br/>
                                             <small className="text-center">({data_type_data.data_type_definition})</small>
