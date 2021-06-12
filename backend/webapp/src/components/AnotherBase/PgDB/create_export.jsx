@@ -114,6 +114,7 @@ export default class  ExportCreate extends Component {
             data_list['selected_packages'] = seleted_datas
             data_list['feature_name'] = ''
             data_list['matched_feilds'] = []
+            data_list['selected_features'] = []
         }
 
         else if ( name == 'package' ) {
@@ -127,6 +128,7 @@ export default class  ExportCreate extends Component {
             }
             else {
                 data_list['feature_name'] = ''
+                data_list['selected_features'] = []
             }
         }
         else {
@@ -134,10 +136,9 @@ export default class  ExportCreate extends Component {
         }
 
         if (! selected_value) {
-            data_list['selected_features'] = []
+            // data_list['selected_features'] = []
             data_list['feature_name'] = ''
         }
-
         this.setState({ ...data_list })
     }
 
@@ -145,8 +146,7 @@ export default class  ExportCreate extends Component {
         const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
-            else this.setState({feature_name})
-            this.setState({ matched_feilds: [] })
+            else this.setState({feature_name, matched_feilds: []})
         }
 
         if (pS.packages != packages) {
@@ -268,7 +268,6 @@ export default class  ExportCreate extends Component {
     setSelectedField(data) {
         const { matched_feilds } = this.state
         var selected_field = ''
-        console.log('matched_feilds', matched_feilds)
         if (Object.keys(matched_feilds).length > 0) {
                 var field_of_data = obj => obj.property_id == data.property_id
                 var index_of = matched_feilds.findIndex(field_of_data)
@@ -276,7 +275,6 @@ export default class  ExportCreate extends Component {
                     selected_field = matched_feilds[index_of].table_field
                 }
         }
-        console.log("selected_field", selected_field)
         return selected_field
     }
 
