@@ -37,6 +37,7 @@ import {ApiModal} from './controls/ApiLink/ApiPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
+import { DownloadTemplate } from './controls/DownloadTemplate/DownloadTemplate';
 import {Modal} from "@utils/MapModal/Modal"
 import { service } from './service'
 import Маягт from "./Маягт"
@@ -116,6 +117,7 @@ export default class BarilgaSuurinGazar extends Component{
         sidebar: new Sidebar(),
         metaList: new MetaList(),
         coordList: new CoordList(),
+        download_temp: new DownloadTemplate(),
       }
 
       this.modifyE = this.Modify()
@@ -197,9 +199,10 @@ export default class BarilgaSuurinGazar extends Component{
 
     getRole(){
       const fid = this.state.fid
+      const tid = this.state.tid
 
       service
-          .getRole(fid)
+          .getRole(fid, tid)
           .then(({ success, roles }) => {
               if(success){
                 this.loadControls(roles)
@@ -244,6 +247,10 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(this.controls.coordList)
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
+      }
+
+      if(roles.PERM_VIEW){
+        map.addControl(new DownloadTemplate({file_url: roles.file_url}))
       }
       this.setState({ is_loading:false, roles})
     }

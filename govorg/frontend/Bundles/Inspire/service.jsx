@@ -47,9 +47,12 @@ export const service = {
 const prefix = '/gov/api/inspire'
 const meta_prefix = '/gov/api/meta-data'
 
-function getRole(fid) {
-    const requestOptions = getGetOptions()
-    return fetch(`${prefix}/${fid}/getRoles/`, requestOptions).then(handleResponse)
+function getRole(fid, tid) {
+        const opts = {
+            ...getPostOptions(),
+            body: JSON.stringify({fid, tid}),
+        }
+        return fetch(`${prefix}/${fid}/getRoles/`, opts).then(handleResponse)
 }
 
 function getWmsLayer(tid, pid, fid) {
