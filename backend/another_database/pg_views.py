@@ -711,10 +711,20 @@ def get_ano_tables(request, pk):
             ORDER BY table_name;
     '''
 
-    table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
+    sql_views = '''
+        SELECT
+            relname as table_name
+        FROM
+            pg_class
+        WHERE
+            relkind = 'm'
+    '''
 
+    table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
+    view_names = utils.get_sql_execute(sql_views, cursor_pg, 'all')
+    
     return JsonResponse({
-        'table_names': table_names
+        'table_names': table_names + view_names,
     })
 
 

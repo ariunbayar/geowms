@@ -125,8 +125,7 @@ export default class  PgForm extends Component {
         const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
-            else this.setState({feature_name})
-            this.setState({ id_list: [] })
+            else this.setState({feature_name, id_list: []})
         }
 
         if (pS.packages != packages) {
