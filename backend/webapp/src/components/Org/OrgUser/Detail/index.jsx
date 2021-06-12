@@ -81,7 +81,12 @@ export class Detail extends Component {
         const { emp } = this.props.match.params
         this.setState({ status_delete: 'loading' })
         service.employeeRemove(emp).then(({ success }) => {
-            this.setState({ status_delete: success ? 'success' : 'fail' })
+            if (success) {
+                this.setState({ status_delete: 'success' })
+            }
+            else {
+                this.setState({ status_delete: 'fail' })
+            }
         })
     }
 

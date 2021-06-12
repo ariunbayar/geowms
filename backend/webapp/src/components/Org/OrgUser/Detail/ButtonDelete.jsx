@@ -19,6 +19,7 @@ export class ButtonDelete extends Component {
             var status = this.props.status
             var modal_icon
             var icon_color
+            var title
             var text
             var modalClose
             if (status == 'success') {
@@ -30,15 +31,16 @@ export class ButtonDelete extends Component {
             if (status == 'fail') {
                 modal_icon = 'fa fa-times-circle'
                 icon_color = 'danger'
-                text = 'Устгахад алдаа гарлаа!'
+                title = 'Устгах боломжгүй хэрэглэгч байна!'
+                text = 'Хэрэглэгч худалдан авалт хийсэн байна.'
                 modalClose = null
             }
             this.modalChange(
                 modal_icon,
                 null,
                 icon_color,
+                title,
                 text,
-                '',
                 false,
                 '',
                 '',

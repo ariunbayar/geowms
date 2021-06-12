@@ -31,6 +31,7 @@ from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
+from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
@@ -462,9 +463,12 @@ def _set_state(employee):
 def employee_remove(request, pk):
     user = get_object_or_404(User, id=pk)
     employee = get_object_or_404(Employee, user=user)
-    check = _set_state(employee)
-
-    return JsonResponse({'success': check})
+    user_log = Payment.objects.filter(user=user)
+    if user_log:
+        return JsonResponse({'success': False})
+    else:
+        check = _set_state(employee)
+        return JsonResponse({'success': check})
 
 
 def _remove_user(user, employee):
