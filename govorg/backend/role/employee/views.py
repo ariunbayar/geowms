@@ -584,6 +584,7 @@ def delete(request, pk):
     return JsonResponse({'success': True})
 
 
+# ------------- Хэрэглэгчийг баазаас устгах үед ашиглана -------------
 # @require_GET
 # @ajax_required
 # @login_required(login_url='/gov/secure/login/')
