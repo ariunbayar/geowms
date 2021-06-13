@@ -110,7 +110,7 @@ export class Detail extends Component {
         service
             .deleteEmployee(id)
             .then(({ success }) => {
-                this.modalChange('fa fa-check-circle', "success", 'Албан хаагчийг амжилттай устгалаа!', '', false, this.handleDeleteSuccess)
+                this.modalChange('fa fa-check-circle', "success", 'Албан хаагчийн төлөв чөлөөлөгдсөн боллоо!', '', false, this.handleDeleteSuccess)
             })
     }
 

@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react"
 import RequestDetail from './DirectModal'
 import { service } from "./service"
 import Modal from '@utils/Modal/Modal'
-import { Field } from "formik"
+import Loader from "@utils/Loader"
 
 class SubmitClass extends Component {
 
@@ -33,7 +33,7 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools, id, file_state
+            selected_tools, id, file_state,
         } = this.props.values
         var blob = []
 
@@ -53,6 +53,7 @@ class SubmitClass extends Component {
         form_datas.append('object_count', object_count)
         form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
         form_datas.append('zahialagch', zahialagch)
+        form_datas.append('ulsiin_hemjeend', this.props.nationwide ? this.props.nationwide: '' )
         form_datas.append('selected_tools', JSON.stringify({ selected_tools }))
 
         service.saveRequest(form_datas).then(({ success, info }) => {
@@ -143,13 +144,10 @@ export class RequestAdd extends Component {
         this.handleModalOpen = this.handleModalOpen.bind(this)
     }
 
-    handleSelectModel(selected_tools) {
-        this.setState({ selected_tools })
-    }
-
     componentDidMount() {
         const { id } = this.props.match.params
         if (id) {
+            this.setState({ is_loading: true })
             service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom }) =>{
                 if (form_field) {
                     this.setState({
@@ -166,6 +164,8 @@ export class RequestAdd extends Component {
                         state: form_field['state'],
                         kind: form_field['kind'],
                         desc: form_field['desc'],
+                        geo_id: form_field['geo_id'],
+                        is_loading: false,
                     })
                 }
             })
@@ -180,6 +180,10 @@ export class RequestAdd extends Component {
             .then(({ tool_datas }) => {
                 this.setState({tool_datas})
             })
+    }
+
+    handleSelectModel(selected_tools) {
+        this.setState({ selected_tools })
     }
 
     handleOnChange(e) {
@@ -289,6 +293,7 @@ export class RequestAdd extends Component {
         const { id, info } = this.props.match.params
         return (
             <div className="card">
+                <Loader is_loading={this.state.is_loading}/>
                 <div className="card-body">
                     <RequestDetail
                         id={id}

@@ -30,9 +30,9 @@ export class EmployeeAdd extends Component {
                 phone_number: '',
                 is_admin: false,
                 choose_role: '',
-                state: '',
+                state: 1,
                 pro_class: '',
-                is_user: false,
+                is_user: true,
             },
             role_list: [],
             emp_role_id: null,
@@ -343,9 +343,13 @@ export class EmployeeAdd extends Component {
     }
 
     render() {
-        const { form_values, roles, role_list, emp_role_id, prefix, is_inspire_role, is_inspire_role_null } = this.state
-        const { aimag, sum, horoo, aimag_id, sum_id, horoo_id, feature, street, apartment, door_number, point, address_state, is_address_map } = this.state
-        const { positions, states, pro_classes } = this.state
+        const { form_values, roles, role_list, emp_role_id,
+            prefix, is_inspire_role, is_inspire_role_null,
+            aimag, sum, horoo, aimag_id, sum_id, horoo_id,
+            feature, street, apartment, door_number, point,
+            address_state, is_address_map, positions, states,
+            pro_classes, is_user
+        } = this.state
         const { org_roles } = this.props
         return (
             <div className="card">
@@ -353,7 +357,7 @@ export class EmployeeAdd extends Component {
                     <div className="row">
                         <Formik
                             enableReinitialize
-                            initialValues = {form_values}
+                            initialValues={form_values}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >
@@ -483,7 +487,7 @@ export class EmployeeAdd extends Component {
                                                 <ErrorMessage name="phone_number" component="div" className="text-danger"/>
                                             </div>
                                             <div className="form-row col-md-3 mt-4 text-center"><br/>
-                                                <label className="" htmlFor='is_admin'>Байгууллагын админ</label>
+                                                <label className="" htmlFor='id_is_admin'>Байгууллагын админ</label>
                                                 <Field
                                                     className="ml-2"
                                                     name='is_admin'
@@ -493,31 +497,29 @@ export class EmployeeAdd extends Component {
                                                 <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                             </div>
                                             <div className="form-row col-md-3 mt-4 text-center"><br/>
-                                                <label className="" htmlFor='is_user'>Хэрэглэгч</label>
+                                                <label htmlFor='id_is_user'>Хэрэглэгч</label>
                                                 <Field
-                                                    className="ml-2"
                                                     name='is_user'
-                                                    id="id_is_user"
+                                                    className="ml-2"
                                                     type="checkbox"
+                                                    id="id_is_user"
                                                 />
-                                                <ErrorMessage name="is_user" component="div" className="text-danger"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                    <label htmlFor='id_state'>Төлөв:</label>
-                                                    <Field name="state" as="select" id="state"
-                                                        style={{ fontSize: '0.8rem' }}
-                                                        className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
-                                                    >
-                                                        <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
-                                                        {
-                                                            states.map((item, idx) =>
-                                                                <option key={idx} value={item[0]}>{item[1]}</option>
-                                                            )
-                                                        }
-                                                    </Field>
-                                                    <ErrorMessage name="state" component="div" className="invalid-feedback"/>
+                                                <label htmlFor='id_state'>Төлөв:</label>
+                                                <Field name="state" as="select" id="state"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                >
+                                                    {
+                                                        states.map((item, idx) =>
+                                                            <option key={idx} value={item[0]}>{item[1]}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="state" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>

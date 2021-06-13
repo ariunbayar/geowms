@@ -30,7 +30,7 @@ export class LLCMap extends Component {
                     PPContent={this.props.PPContent}
                     featurefromUrl={true}
                     property_pp={true}
-                    PPContent={LLCPP}
+                    PPContent={this.props.PPComponent ?  this.props.PPComponent : LLCPP}
                     aimag_geom={aimag_geom}
                 />
             </div>

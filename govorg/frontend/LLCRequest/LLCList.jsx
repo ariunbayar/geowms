@@ -6,8 +6,9 @@ import { service } from "./service"
 
 export const makeStateColor = (state) => {
     let color
-    if (state == "ШИНЭ") color = 'text-primary'
-    else if (state == "ИЛГЭЭСЭН") color = 'text-success'
+    if (state == "ШИНЭ") color = 'text-success'
+    else if (state == "ИЛГЭЭСЭН") color = 'text-warning'
+    else if (state == "ШИЙДВЭРЛЭГДСЭН") color = 'text-primary'
     return color
 }
 
@@ -44,7 +45,7 @@ export class GetDescription extends Component {
         return (
             <div className='p-0'>
                 {
-                    (values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
+                    values.description
                     &&
                         <a
                             className="btn btn-primary btn-sm text-white text-capitalize"
@@ -60,9 +61,9 @@ export class GetDescription extends Component {
 
 function ModalText(props) {
     return (
-        <span className="text-center">
+        <div className="text-center border border-warning rounded p-4 my-2">
             {props.description}
-        </span>
+        </div>
     )
 }
 
@@ -111,14 +112,14 @@ export class LLCList extends Component {
                     'component': (values) => downloadData(values)
                 },
                 {
-                    "title": '',
+                    "title": 'Шийдвэрлэх',
                     'component': SolveModal,
                     'props': {
                         'refreshData': () => this.refreshData(),
                     }
                 },
                 {
-                    "title": '',
+                    "title": 'Тайлбар',
                     'component': GetDescription,
                     'props': {
                         'desModal': (values) => this.desModal(values),
@@ -193,7 +194,7 @@ export class LLCList extends Component {
 
     desModal(values) {
         this.modalChange(
-            'Тайлбар',
+            'ТАЙЛБАР',
             ModalText,
             false,
             values.description,

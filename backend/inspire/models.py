@@ -297,7 +297,7 @@ class MDatas(models.Model):
         db_table = 'm_datas'
         managed = False
 
-    geo_id = models.CharField(max_length=100, null=True)
+    geo_id = models.CharField(primary_key=True, max_length=100)
     feature_config_id = models.IntegerField(null=True)
     data_type_id = models.IntegerField(null=True)
     property_id = models.IntegerField(null=True)

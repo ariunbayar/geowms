@@ -197,6 +197,24 @@ def _tools_validation(get_tools):
         saved_ids.append(tool['bagaj_dugaar'])
 
 
+def _change_file_in_update(uploaded_file, current_file_name, check_data_of_file, main_path, id):
+
+    current_folder = current_file_name.split('.')[0]
+    check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
+    save_file_path = os.path.join(check_folder, current_folder)
+    folder_list = os.listdir(check_folder)
+    files = glob.glob(save_file_path + '/*')
+    lastest_file_path = max(files, key=os.path.getctime)
+    lastest_file = lastest_file_path.split(save_file_path + "/")[1]
+
+    if current_folder in folder_list:
+        get_files = os.listdir(check_folder + "/" + current_folder)
+        for file in get_files:
+            delete_file_path = os.path.join(check_folder, current_folder, file)
+            utils.remove_file(delete_file_path)
+        utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
+
+
 @require_POST
 @ajax_required
 def save_request(request):
@@ -208,26 +226,22 @@ def save_request(request):
     object_count = request.POST.get('object_count')
     hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
     zahialagch = request.POST.get('zahialagch')
+    ulsiin_hemjeend = request.POST.get('ulsiin_hemjeend')
     selected_tools = request.POST.get('selected_tools') or []
     is_agreed = _validation_form(request_datas)
     main_path = 'llc-request-files'
     file_name = uploaded_file.name
     file_not_ext_name = utils.get_file_name(file_name)
     file_path = os.path.join(main_path, file_not_ext_name)
-
-    org_data = ''
-
-    utils.save_file_to_storage(uploaded_file, file_path, file_name)
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
-
-    if not uploaded_file.name.endswith('.zip'):
-        return JsonResponse({
-            'success': False,
-            'info': 'Заавал zip файл оруулах ёстой.!!!'
-        })
-
+    if file_name != 'blob' and id:
+        if not uploaded_file.name.endswith('.zip'):
+            return JsonResponse({
+                'success': False,
+                'info': 'Заавал zip файл оруулах ёстой.!!!'
+            })
 
     if not is_agreed:
 
@@ -251,52 +265,64 @@ def save_request(request):
     check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
+
     if check_data_of_file and not id:
         return JsonResponse({
             'success': False,
             'info': 'Файл-ын нэр давхцаж байна !!!.'
         })
 
-    if not check_data_of_file or not id:
-        extract_path = os.path.join(extract_path, file_not_ext_name)
-        file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
-        utils.unzip(file_path, extract_path)
-        utils.remove_file(file_path)
+    if check_data_of_file and id:
+        _change_file_in_update(uploaded_file, file_name, check_data_of_file, main_path, id)
+        check_data_of_file = False
+    else:
+        utils.save_file_to_storage(uploaded_file, file_path, file_name)
 
-        datasource_exts = ['.gml', '.geojson']
-        for name in glob.glob(os.path.join(extract_path, '*')):
-            for ext in datasource_exts:
-                if ext in name:
-                    ds = DataSource(name)
-                    for layer in ds:
-                        if len(layer) >= 1:
-                            org_data = _get_leve_2_geo_id(layer)
-                            if not org_data:
+    if not check_data_of_file or not id:
+        if file_name != 'blob':
+            extract_path = os.path.join(extract_path, file_not_ext_name)
+            file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
+            utils.unzip(file_path, extract_path)
+            utils.remove_file(file_path)
+
+            datasource_exts = ['.gml', '.geojson']
+            for name in glob.glob(os.path.join(extract_path, '*')):
+                for ext in datasource_exts:
+                    if ext in name:
+                        ds = DataSource(name)
+                        for layer in ds:
+                            if len(layer) >= 1:
+                                org_data = _get_leve_2_geo_id(layer)
+                                if not org_data:
+                                    return JsonResponse({
+                                        'success': False,
+                                        'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                                    })
+                            else:
+                                utils.remove_folder(extract_path)
                                 return JsonResponse({
                                     'success': False,
-                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                                    'info': 'Файл хоосон байна !!!'
                                 })
-                        else:
-                            utils.remove_folder(extract_path)
-                            return JsonResponse({
-                                'success': False,
-                                'info': 'Файл хоосон байна !!!'
-                            })
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
-            get_shapes = RequestFilesShape.objects.filter(files=request_file)
-            if get_shapes:
-                for shape in get_shapes:
-                    geoms = ShapeGeom.objects.filter(shape=shape)
-                    geoms.delete()
-                get_shapes.delete()
+            if file_name != 'blob':
+                get_shapes = RequestFilesShape.objects.filter(files=request_file)
+                if get_shapes:
+                    for shape in get_shapes:
+                        geoms = ShapeGeom.objects.filter(shape=shape)
+                        geoms.delete()
+                    get_shapes.delete()
 
             if not check_data_of_file:
-                request_file.geo_id=org_data.geo_id if org_data else ''
-                request_file.file_path=uploaded_file
+                if file_name != 'blob':
+                    request_file.geo_id = org_data.geo_id
+                    request_file.file_path = uploaded_file
 
-            request_file.tools=json_dumps(get_tools)
+            request_file.tools = json_dumps(get_tools)
+            if ulsiin_hemjeend:
+                request_file.geo_id = ulsiin_hemjeend
             request_file.save()
 
         else:
@@ -309,7 +335,9 @@ def save_request(request):
                 tools=json_dumps(get_tools)
             )
             id = request_file.id
-        _create_shape_files(org_data, request_file, extract_path, datasource_exts)
+
+            if file_name != 'blob':
+                _create_shape_files(org_data, request_file, extract_path, datasource_exts)
 
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:
@@ -364,14 +392,12 @@ def get_request_data(request, id):
     field = dict()
     aimag_name = ''
     aimag_geom = []
-
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
     features, geom_type = get_feature(shape_geometries)
     qs = RequestForm.objects.filter(file_id=id)
     qs = qs.first()
     geo_id = qs.file.geo_id
     mdata_qs = MDatas.objects.filter(geo_id=geo_id)
-
     if mdata_qs:
         if geo_id != '496':
             mdata_qs = mdata_qs.filter(property_id=23).first()
@@ -409,6 +435,7 @@ def get_request_data(request, id):
         field['state'] = qs.file.get_state_display()
         field['kind'] = qs.file.get_kind_display()
         field['desc'] = qs.file.description
+        field['geo_id'] = qs.file.geo_id
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -579,6 +606,7 @@ def remove_request(request, id):
             lvl2_request.delete()
 
         initial_query.delete()
+        _delete_prev_files(initial_query)
 
         return JsonResponse({
             'success': True,
@@ -589,6 +617,14 @@ def remove_request(request, id):
         'success': False,
         'info': "Устгахад алдаа гарлаа"
     })
+
+
+def _delete_prev_files(file):
+    main_folder = 'llc-request-files'
+    file_path = file.file_path
+    delete_folder = str(file_path).split("/")[1]
+    delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
+    utils.remove_folder(delete_folder)
 
 
 @require_GET

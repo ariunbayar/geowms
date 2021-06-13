@@ -211,7 +211,7 @@ def employee_update(request, payload, pk, level):
     values = payload.get('values')
     username = values.get('username')
     position = int(values.get('position'))
-    state = int(values.get('state'))
+    state = values.get('state')
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -350,7 +350,7 @@ def employee_add(request, payload, level, pk):
     values = payload.get('values')
     username = values.get('username')
     position = int(values.get('position'))
-    state = int(values.get('state'))
+    state = values.get('state')
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -449,14 +449,21 @@ def employee_add(request, payload, level, pk):
     return JsonResponse(rsp)
 
 
+def _set_state(employee):
+    employee.state = 3
+    employee.save()
+
+    return True
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_remove(request, pk):
-
     user = get_object_or_404(User, id=pk)
     employee = get_object_or_404(Employee, user=user)
-    check = _remove_user(user, employee)
+    check = _set_state(employee)
+
     return JsonResponse({'success': check})
 
 

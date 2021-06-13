@@ -151,7 +151,7 @@ def _get_valid_data_type(value_type_id):
     elif value_type_id == 'boolean':
         value_type = 'bool'
     else:
-        value_type = 'inte'
+        value_type = 'char'
     return value_type
 
 
@@ -711,10 +711,20 @@ def get_ano_tables(request, pk):
             ORDER BY table_name;
     '''
 
+    sql_views = '''
+        SELECT
+            relname as table_name
+        FROM
+            pg_class
+        WHERE
+            relkind = 'm'
+    '''
+
     table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
+    view_names = utils.get_sql_execute(sql_views, cursor_pg, 'all')
 
     return JsonResponse({
-        'table_names': table_names
+        'table_names': table_names + view_names,
     })
 
 
@@ -791,7 +801,6 @@ def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
 
 
 def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
-
     property_ids = _get_row_to_list('property_id', columns, True)
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_id__in=property_ids)
@@ -802,7 +811,13 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
         for prop_data in columns:
             if data['property_id'] == prop_data['property_id']:
                 mdata_value = dict()
-                mdata_value[value_type] = ona_data[prop_data['table_field']]
+                if value_type == "code_list_id":
+                    mdata_value[value_type] = ona_data[prop_data['table_field']]
+                    if str(mdata_value[value_type])[0] == '0':
+                        mdata_value[value_type] = mdata_value[value_type][1:]
+                else:
+                    mdata_value[value_type] = ona_data[prop_data['table_field']]
+
                 MDatas.objects.create(
                     geo_id=geo_id,
                     **data,
@@ -845,12 +860,10 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
     total_count = len(ona_table_datas)
     for ona_data in ona_table_datas:
-        try:
-            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
-            success_count = success_count + 1
-        except Exception:
-            pass
+        geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
+        _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+        success_count = success_count + 1
+    
 
     return success_count, failed_count, total_count
 
@@ -931,11 +944,10 @@ def _refresh_feature(items):
     feature_code = items.feature_code
     feature_qs = LFeatures.objects
     feature_qs = feature_qs.filter(feature_code=feature_code).first()
-    feature_id = feature_qs.feature_id
-    view_qs = ViewNames.objects
-    view_qs = view_qs.filter(feature_id=feature_id)
-    if view_qs:
-        utils.refreshMaterializedView(feature_id)
+    view_name = utils.make_view_name(feature_qs)
+    has_mat = utils.has_materialized_view(view_name)
+    if has_mat:
+        utils.refreshMaterializedView(feature_qs.feature_id)
 
 
 @require_POST

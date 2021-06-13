@@ -18,13 +18,15 @@ class RequestFiles(models.Model):
 
     STATE_NEW = 1
     STATE_SENT = 2
+    STATE_SOLVED = 3
 
     STATE_CHOICES = (
         (STATE_NEW, 'ШИНЭ'),
         (STATE_SENT, 'ИЛГЭЭСЭН'),
+        (STATE_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
     )
 
-    KIND_SOLVED = 1
+    KIND_APPROVED = 1
     KIND_PENDING = 2
     KIND_DISMISS = 3
     KIND_REVOKE = 4
@@ -32,7 +34,7 @@ class RequestFiles(models.Model):
 
 
     KIND_CHOICES = (
-        (KIND_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
+        (KIND_APPROVED, 'БАТАЛГААЖСАН'),
         (KIND_PENDING, 'ХҮЛЭЭГДЭЖ БУЙ'),
         (KIND_DISMISS, 'БУЦААГДСАН'),
         (KIND_REVOKE, 'ЦУЦЛАСАН'),
@@ -100,20 +102,22 @@ class LLCRequest(models.Model):
 
     STATE_NEW = 1
     STATE_SENT = 2
+    STATE_SOLVED = 3
 
     STATE_CHOICES = (
         (STATE_NEW, 'ШИНЭ'),
         (STATE_SENT, 'ИЛГЭЭСЭН'),
+        (STATE_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
     )
 
-    KIND_SOLVED = 1
+    KIND_APPROVED = 1
     KIND_PENDING = 2
     KIND_DISMISS = 3
     KIND_REVOKE = 4
     KIND_NEW = 5
 
     KIND_CHOICES = (
-        (KIND_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
+        (KIND_APPROVED, 'БАТАЛГААЖСАН'),
         (KIND_PENDING, 'ХҮЛЭЭГДЭЖ БУЙ'),
         (KIND_DISMISS, 'БУЦААГДСАН'),
         (KIND_REVOKE, 'ЦУЦЛАСАН'),

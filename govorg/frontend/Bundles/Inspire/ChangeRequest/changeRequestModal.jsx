@@ -88,32 +88,9 @@ export default class ChangeRequestModal extends Component {
                                 </div>
 
                                 <div className="row">
-                                    {form_json &&
-                                    <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
-                                        {form_json.map((prop, idx)=>
-                                            <div key={idx} className="row my-3">
-                                                <div className="col-md-3">
-                                                    <label className="col-form-label">{prop.property_code}</label>
-                                                </div>
-                                                <div className="col-md-2"></div>
-                                                <div  className="col-md-6 mr-1">
-                                                    <input
-                                                        className='form-control'
-                                                        disabled={true}
-                                                        placeholder={prop.property_name}
-                                                        value={prop.data}
-                                                        type={prop.value_type}
-                                                    />
-                                                <div  className="col-form-label " >{prop.property_definition}</div>
-                                                </div>
-                                            </div>
-                                            )
-                                        }
-                                    </div>
-                                    }
                                     {state == 'ХЯНАХ' &&
                                         <div className="col-md-6 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
-                                            <Маягт handleIsload={this.handleIsload} handleClose={this.handleClose} tid={theme_id} fid={feature_id} gid={old_geo_id} change_request_id={change_request_id}></Маягт>
+                                            <Маягт handleIsload={this.handleIsload} handleClose={this.handleClose} tid={theme_id} fid={feature_id} gid={old_geo_id} change_request_id={change_request_id} form_json={form_json}></Маягт>
                                         </div>
                                     }
                                     <div className={form_json || state == 'ХЯНАХ' ? "col-md-6" : "col-md-12"}>
