@@ -12,7 +12,15 @@ from django.views.decorators.csrf import csrf_exempt
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrgWMSLayer, GovOrg as System
-from backend.inspire.models import LPackages, LFeatures, EmpPerm, EmpPermInspire, LProperties
+from backend.inspire.models import (
+    LCodeLists,
+    LPackages,
+    LFeatures,
+    EmpPerm,
+    EmpPermInspire,
+    LProperties,
+    LCodeListConfigs
+)
 from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
@@ -192,21 +200,53 @@ def _get_type(value_type_id):
     return value_type
 
 
+def _code_list_display(property_id):
+    code_list_values = list()
+    code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
+    if code_list_configs:
+        for code_list_config in code_list_configs:
+            property_id = code_list_config.property_id
+            to_property_id = code_list_config.to_property_id
+            if property_id == to_property_id:
+                to_property_id += 1
+            x_range = range(property_id, to_property_id)
+            for i in x_range:
+                code_lists = LCodeLists.objects.filter(property_id=i)
+                if code_lists:
+                    for code_list in code_lists:
+                        code_list_values.append({
+                            'code_list_id': code_list.code_list_id,
+                            'code_list_name': code_list.code_list_name,
+                            'code_list_definition': code_list.code_list_definition,
+                        })
+    return code_list_values
+
+
 def _get_property_data(values):
     datas = []
     for value in values:
         form = {}
         property = LProperties.objects.filter(property_code__iexact=value).first()
         if property:
+            data_list = []
+            value_type = property.value_type_id
+            valid_type = _get_type(value_type)
+            data = values[value]
+            if data and valid_type == 'option':
+                code_list = LCodeLists.objects.filter(code_list_name__iexact=data).first()
+                if code_list:
+                    data = code_list.code_list_id
+                    data_list = _code_list_display(property.property_id)
+
             form['pk'] = ''
             form['property_id'] = property.property_id
             form['property_name'] = property.property_name
             form['property_code'] = property.property_code
             form['property_definition'] = property.property_definition
-            form['value_type_id'] = property.value_type_id
-            form['value_type'] = _get_type(property.value_type_id)
-            form['data'] = values[value] or ''
-            form['data_list'] = []
+            form['value_type_id'] = value_type
+            form['value_type'] = valid_type
+            form['data'] = data if data != 'NULL' else ''
+            form['data_list'] = data_list
             form['roles'] = {"PERM_VIEW": True, "PERM_CREATE": True, "PERM_REMOVE": False, "PERM_UPDATE": True, "PERM_APPROVE": True, "PERM_REVOKE": False}
             datas.append(form)
 
