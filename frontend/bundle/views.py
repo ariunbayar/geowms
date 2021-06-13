@@ -119,13 +119,13 @@ def wms_layers(request, pk):
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         if wms.is_active:
-            # `  if utils.check_nsdi_address(request):
-            #         url = wms.url
-            #         ws_name = url.split('/')[3]
-            #         # chache_url = 'http://{}/{ws_name}/gwc/service/wmts'.format(ws_name=ws_name)
-            #     else:`
-            url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
-            chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+            if utils.check_nsdi_address(request):
+                    url = wms.url
+                    ws_name = url.split('/')[3]
+                    chache_url = 'http://{geo.nsdi.gov.mn}/{ws_name}/gwc/service/wmts'.format(ws_name=ws_name)
+            else:
+                url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
+                chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
             wms_data = {
                 'name': wms.name,
