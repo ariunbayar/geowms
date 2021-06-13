@@ -137,15 +137,11 @@ def json_proxy(request, base_url, token, code):
     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
-    print("hoh")
-    print("hoh")
-    print("hoh", rsp.status_code, rsp.text)
     content = rsp.content
     content = filter_layers_wfs(content, allowed_layers)
 
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
-
     service_url = request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[token, code]))
     base_url_wfs = base_url.replace('ows', 'wfs')
     rsp.content = replace_src_url(rsp.content, base_url_wfs, service_url)
