@@ -775,7 +775,6 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
             {columns}
         from
             public.{table_name}
-        limit 10
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
