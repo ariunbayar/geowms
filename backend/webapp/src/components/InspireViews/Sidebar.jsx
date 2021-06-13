@@ -70,9 +70,7 @@ export default class SideBar extends Component {
         const { id_list, view, tile_cache_check, zoom_start } = this.state
 
         let values
-        if (tile_cache_check && zoom_start) {
-            values = this.getValuesFromState()
-        }
+        values = this.getValuesFromState()
 
         let model_type_icon
         let msg
@@ -214,7 +212,6 @@ export default class SideBar extends Component {
             style_name, geom_type, zoom_stop,
             zoom_start, number_of_cache, image_format, cache_type, tile_cache_check
         } = this.state
-
         const values = {
             'style_name': style_name,
             'geom_type': geom_type,
@@ -261,7 +258,6 @@ export default class SideBar extends Component {
         const { fields, fid, fname, has_view } = this.props
         const { is_loading, id_list, check_list } = this.state
         const state = this.state
-        console.log(state);
         return (
             <Fragment>
                 <Loader is_loading={is_loading} text={state.load_text ? state.load_text : "Хүсэлтийг уншиж байна."}/>

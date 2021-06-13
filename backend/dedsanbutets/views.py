@@ -82,7 +82,6 @@ def bundleButetsAll(request):
         style_names.append(style.get('name'))
 
     url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
-
     rsp = {
         'success': True,
         'data': data,
@@ -341,7 +340,6 @@ def getFields(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
-
     feature = get_object_or_404(LFeatures, feature_id=fid)
     view_name = utils.make_view_name(feature)
     has_mat_view = utils.has_materialized_view(view_name)
@@ -432,6 +430,7 @@ def propertyFieldsSave(request, payload):
     fid = payload.get('fid')
     view_id = payload.get('view_id')
     values = payload.get('values')
+
     if not id_list:
         rsp = {
             'success': False,
@@ -464,9 +463,9 @@ def propertyFieldsSave(request, payload):
     for prop_id in id_list:
         view_prop_qs.create(view=view, property_id=prop_id)
 
-    if values:
+    is_created = _check_geoserver_detail(table_name, theme)
+    if values or not is_created:
         rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, payload.get('values'))
-
     else:
         rsp = {
             "success": True,
@@ -474,6 +473,20 @@ def propertyFieldsSave(request, payload):
         }
 
     return JsonResponse(rsp)
+
+def _check_geoserver_detail(table_name, theme):
+    theme_code = theme.theme_code
+    ws_name = 'gp_' + theme_code
+    layer_name = 'gp_layer_' + table_name
+
+    rsp = geoserver.getWorkspace(ws_name)
+    if rsp.status_code == 200:
+        ds_rsp = geoserver.getDataStore(ws_name, ws_name)
+        if ds_rsp.status_code == 200:
+            ds_layer_rsp = geoserver.getDataStoreLayer(ws_name, ws_name, layer_name)
+            if ds_layer_rsp.status_code == 200:
+                return True
+    return False
 
 
 def getModel(model_name):
@@ -701,7 +714,10 @@ def erese(request, payload):
 
 
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
-
+    print(";lhoh")
+    print(";lhoh")
+    print(";lhoh")
+    print(";lhoh", values)
     geom_att, extends = utils.get_colName_type(table_name, 'geo_data')
     if extends:
         srs = extends[0]['find_srid']
