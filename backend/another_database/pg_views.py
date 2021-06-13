@@ -964,10 +964,11 @@ def refresh_view(request, payload):
     if table_id :
         ano_db_table_pg = initial_qs.filter(id=table_id).first()
         # _refresh_feature(ano_db_table_pg)
+
     else :
         ano_db_table_pg = initial_qs.filter(another_database_id=id)
 
-        for item in ano_db_table_pg:
+        # for item in ano_db_table_pg:
             # _refresh_feature(item)
 
     return JsonResponse({
