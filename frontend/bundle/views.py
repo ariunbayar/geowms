@@ -20,6 +20,7 @@ from django.db import connections
 from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, MGeoDatas, MDatas
 from main import utils
 from backend.geoserver.models import WmtsCacheConfig
+from backend.config.models import Config
 
 from django.contrib.postgres.search import SearchVector
 
@@ -122,7 +123,14 @@ def wms_layers(request, pk):
             if utils.check_nsdi_address(request):
                     url = wms.url
                     ws_name = url.split('/')[3]
-                    chache_url = 'http://{geo.nsdi.gov.mn}/{ws_name}/gwc/service/wmts'.format(ws_name=ws_name)
+                    host = utils.get_config('EMAIL_HOST_NAME', Model=Config)
+                    port = utils.get_config('geoserver_protocol', Model=Config)
+                    if wms.cache_url:
+                        chache_url = 'https://geo.nsdi.gov.mn/{ws_name}/gwc/service/wmts'.format(
+                            ws_name=ws_name,
+                            host=host,
+                            port=port
+                        )
             else:
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
                 chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
