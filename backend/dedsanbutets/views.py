@@ -462,15 +462,17 @@ def propertyFieldsSave(request, payload):
 
     for prop_id in id_list:
         view_prop_qs.create(view=view, property_id=prop_id)
-    is_created = _check_geoserver_detail(table_name, theme, )
+
+    is_created = _check_geoserver_detail(table_name, theme)
     if values or not is_created:
         rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, payload.get('values'))
     else:
         rsp = {
-             "success": True,
-                "data": 'Амжилттай хадгаллаа'
+            "success": True,
+            "data": 'Амжилттай хадгаллаа'
         }
-        return JsonResponse(rsp)
+
+    return JsonResponse(rsp)
 
 def _check_geoserver_detail(table_name, theme):
     theme_code = theme.theme_code
@@ -712,7 +714,10 @@ def erese(request, payload):
 
 
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
-
+    print(";lhoh")
+    print(";lhoh")
+    print(";lhoh")
+    print(";lhoh", values)
     geom_att, extends = utils.get_colName_type(table_name, 'geo_data')
     if extends:
         srs = extends[0]['find_srid']
@@ -1001,14 +1006,3 @@ def feature_overlaps_get(request, feature_id):
     }
 
     return JsonResponse(rsp)
-
-
-
-
-
-
-
-
-# ---------------------------
-
-
