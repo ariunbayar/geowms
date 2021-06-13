@@ -70,7 +70,7 @@ export default class SideBar extends Component {
         const { id_list, view, tile_cache_check, zoom_start } = this.state
 
         let values
-        if (tile_cache_check && zoom_start) {
+        if (tile_cache_check) {
             values = this.getValuesFromState()
         }
 
