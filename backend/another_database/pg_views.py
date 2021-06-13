@@ -1,6 +1,7 @@
 from geojson import feature
 from backend import another_database
 import datetime
+from django.utils import timezone
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
@@ -786,7 +787,6 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
 
 
 def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
-
     geo_data = _geojson_to_geom(ona_data[table_geo_data])
     geom =utils.convert_3d_with_srid(geo_data)
     new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
@@ -797,7 +797,7 @@ def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
         feature_id=feature.feature_id,
         created_by=unique_id
     )
-    return new_geo.geo_id
+    return new_geo_id
 
 
 def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
@@ -805,25 +805,37 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_id__in=property_ids)
     prop_codes = list(prop_qs.values_list('property_code', flat=True))
-
+    m_datas_object =  []
     for prop_code in prop_codes:
+
         data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature.feature_code)
         for prop_data in columns:
             if data['property_id'] == prop_data['property_id']:
                 mdata_value = dict()
+                first_time = datetime.datetime.now()
                 if value_type == "code_list_id":
                     mdata_value[value_type] = ona_data[prop_data['table_field']]
                     if str(mdata_value[value_type])[0] == '0':
                         mdata_value[value_type] = mdata_value[value_type][1:]
+                elif value_type == "value_date":
+
+                    if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
+                        mdata_value[value_type] = datetime.datetime.strptime(str(ona_data[prop_data['table_field']]), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                    else:
+                        mdata_value[value_type] = None
+
                 else:
                     mdata_value[value_type] = ona_data[prop_data['table_field']]
 
-                MDatas.objects.create(
+                m_datas_object.append(MDatas(
                     geo_id=geo_id,
                     **data,
                     **mdata_value,
                     created_by=unique_id
-                )
+                ))
+
+    return m_datas_object
+
 
 
 def _get_row_to_list(field_name, dict_data, table_field):
@@ -856,17 +868,23 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
         filter(lambda x: x['property_id'] == 'geo_datas', columns)
     )[0]['table_field']
 
+    m_datas_object = []
     table_fields = _get_row_to_list('table_field', columns, False)
-    ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
-    total_count = len(ona_table_datas)
-    for ona_data in ona_table_datas:
-        try:
+    try:
+        ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
+        total_count = len(ona_table_datas)
+        for ona_data in ona_table_datas:
+            
             geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+            m_d_data = _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+            m_datas_object = m_datas_object + m_d_data
             success_count = success_count + 1
-        except Exception:
-            pass
+        
+        MDatas.objects.bulk_create(m_datas_object)
 
+    except Exception:
+        pass
+    
     return success_count, failed_count, total_count
 
 
