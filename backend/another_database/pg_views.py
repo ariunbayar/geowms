@@ -775,6 +775,7 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
             {columns}
         from
             public.{table_name}
+        limit 10
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
@@ -801,7 +802,6 @@ def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
 
 
 def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
-
     property_ids = _get_row_to_list('property_id', columns, True)
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_id__in=property_ids)
@@ -814,7 +814,7 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
                 mdata_value = dict()
                 if value_type == "code_list_id":
                     mdata_value[value_type] = ona_data[prop_data['table_field']]
-                    if mdata_value[value_type][0] == '0':
+                    if str(mdata_value[value_type])[0] == '0':
                         mdata_value[value_type] = mdata_value[value_type][1:]
                 else:
                     mdata_value[value_type] = ona_data[prop_data['table_field']]
@@ -861,12 +861,10 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
     total_count = len(ona_table_datas)
     for ona_data in ona_table_datas:
-        try:
-            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
-            success_count = success_count + 1
-        except Exception:
-            pass
+        geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
+        _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+        success_count = success_count + 1
+    
 
     return success_count, failed_count, total_count
 
