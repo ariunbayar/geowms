@@ -775,6 +775,7 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
             {columns}
         from
             public.{table_name}
+        limit 10
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
@@ -860,10 +861,12 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
     total_count = len(ona_table_datas)
     for ona_data in ona_table_datas:
-        geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-        _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
-        success_count = success_count + 1
-    
+        try:
+            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
+            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+            success_count = success_count + 1
+        except Exception:
+            pass
 
     return success_count, failed_count, total_count
 
