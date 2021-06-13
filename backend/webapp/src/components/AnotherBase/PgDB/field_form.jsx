@@ -8,6 +8,9 @@ export default class FieldForm extends Component {
         }
     }
 
+    componentDidUpdate(pP, pS) {
+    }
+
     render() {
         const {
             property_data, setSelectedField, ano_table_fields,

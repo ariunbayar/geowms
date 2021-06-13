@@ -578,23 +578,36 @@ def detail(request, pk):
 def delete(request, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     employee = get_object_or_404(Employee, pk=pk)
-    user = User.objects.filter(pk=employee.user_id).first()
-    emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    change_requests = ChangeRequest.objects.filter(employee=employee)
+    employee.state = 3
+    employee.save()
 
-    with transaction.atomic():
-        for change_request in change_requests:
-            change_request.employee = None
-            change_request.save()
-        if emp_perm:
-            EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
-            emp_perm.delete()
-        employee.delete()
-        user.delete()
+    return JsonResponse({'success': True})
 
-        return JsonResponse({'success': True})
 
-    return JsonResponse({'success': False})
+# ------------- Хэрэглэгчийг баазаас устгах үед ашиглана -------------
+# @require_GET
+# @ajax_required
+# @login_required(login_url='/gov/secure/login/')
+# def delete(request, pk):
+#     get_object_or_404(Employee, user=request.user, is_admin=True)
+#     employee = get_object_or_404(Employee, pk=pk)
+#     user = User.objects.filter(pk=employee.user_id).first()
+#     emp_perm = EmpPerm.objects.filter(employee=employee).first()
+#     change_requests = ChangeRequest.objects.filter(employee=employee)
+
+#     with transaction.atomic():
+#         for change_request in change_requests:
+#             change_request.employee = None
+#             change_request.save()
+#         if emp_perm:
+#             EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
+#             emp_perm.delete()
+#         employee.delete()
+#         user.delete()
+
+#         return JsonResponse({'success': True})
+
+#     return JsonResponse({'success': False})
 
 
 @require_GET
