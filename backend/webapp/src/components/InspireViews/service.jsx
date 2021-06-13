@@ -22,10 +22,10 @@ function getPropertyFields(fid) {
     return fetch(`${prefix}/property-fields/${fid}/`, opts).then(handleResponse)
 }
 
-function setPropertyFields(fid, tid, id_list, view_id, values){
+function setPropertyFields(fid, tid, id_list, view_id, values, open_datas){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ fid, tid, id_list, view_id, values }),
+        body: JSON.stringify({ fid, tid, id_list, view_id, values, open_datas }),
     }
     return fetch(`${prefix}/property-fields/save/`, opts).then(handleResponse)
 }

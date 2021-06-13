@@ -14,7 +14,8 @@ export default class SideBar extends Component {
         super(props)
         this.state = {
             show: false,
-            id_list: [],
+            id_list: props.id_list || [],
+            open_datas: [],
             save_is_load: false,
             modal_status: 'closed',
             view: '',
@@ -25,6 +26,7 @@ export default class SideBar extends Component {
             is_loading: props.property_loading,
             tile_cache_check: false,
             check_list: props.check_list,
+            check_open: props.check_open,
             is_loading: false,
             invalid_feedback: false,
 
@@ -47,32 +49,30 @@ export default class SideBar extends Component {
         this.state[field] = value
     }
 
-    handleInput(e){
-        let id_list = this.state.id_list
-        var check_list = this.state.check_list
-        const value = parseInt(e.target.value)
+    handleInput(e, value, list, list_name, total_field){
+        var check = this.state[total_field]
         if (e.target.checked) {
-            id_list.push(value)
+            list.push(value)
         } else {
-            id_list = id_list.filter((oid) => oid != value)
+            list = list.filter((oid) => oid != value)
         }
 
-        if(id_list.length == this.props.property_length){ check_list = true }
-        else { check_list = false }
+        if (list.length == this.props.property_length) { check = true }
+        else { check = false }
 
-        this.setState({ id_list, check_list })
+        this.setState({ [list_name]: list, [total_field]: check })
     }
 
     handleSave() {
         const { fid, tid } = this.props
-        const { id_list, view, tile_cache_check, zoom_start } = this.state
+        const { id_list, view, tile_cache_check, zoom_start, open_datas } = this.state
 
         let values
         values = this.getValuesFromState()
 
         service
-            .setPropertyFields(fid, tid, id_list, view.id, values)
-            .then(({ success, msg }) => {
+            .setPropertyFields(fid, tid, id_list, view.id, values, open_datas)
+            .then(({ success, data, error }) => {
                 if(success) {
                     this.props.getAll()
                     this.modalChange(
@@ -104,7 +104,7 @@ export default class SideBar extends Component {
             })
     }
 
-    handleAllCheck(e) {
+    handleAllCheck(e, list_name, check_name, field) {
         let id_list = []
         const { fields } = this.props
         if(e.target.checked)
@@ -112,18 +112,13 @@ export default class SideBar extends Component {
             fields.map((f_config, idx) =>
                 f_config.data_types.map((data_type, idx) =>
                     data_type.data_type_configs.map((data_type_config, idx) =>
-                        id_list.push(data_type_config.property_id)
+                        id_list.push(data_type_config[field])
                     )
                 )
             )
-            this.setState({id_list:id_list, check_list: true })
+            this.setState({ [list_name]: id_list, [check_name]: true })
         }
-        else { this.setState({ id_list: [], check_list: false }) }
-    }
-
-    componentDidMount() {
-        const{ id_list }= this.props
-        this.setState({ id_list })
+        else { this.setState({ [list_name]: [], [check_name]: false }) }
     }
 
     componentDidUpdate(pP, pS) {
@@ -131,6 +126,10 @@ export default class SideBar extends Component {
 
         if(pP.check_list != this.props.check_list) {
             this.setState({ check_list: this.props.check_list })
+        }
+
+        if(pP.check_open != this.props.check_open) {
+            this.setState({ check_open: this.props.check_open })
         }
 
         if(pS.tile_cache_check != tile_cache_check) {
@@ -155,6 +154,11 @@ export default class SideBar extends Component {
         if(pP.id_list !== this.props.id_list){
             const id_list = this.props.id_list
             this.setState({ id_list })
+        }
+
+        if(pP.open_datas !== this.props.open_datas){
+            const open_datas = this.props.open_datas
+            this.setState({ open_datas })
         }
 
         if(pP.style_names !== this.props.style_names){
@@ -248,7 +252,7 @@ export default class SideBar extends Component {
                     else {
                         alert(error)
                     }
-                    this.setState({ is_loading: false, load_text: "", check_list: false })
+                    this.setState({ is_loading: false, load_text: "", check_list: false, check_open: false })
                 })
         }
         else this.setState({ invalid_feedback: true })
@@ -284,7 +288,7 @@ export default class SideBar extends Component {
 
     render() {
         const { fields, fid, fname, has_view } = this.props
-        const { is_loading, id_list, check_list } = this.state
+        const { is_loading, id_list, check_list, check_open, open_datas } = this.state
         const state = this.state
         return (
             <Fragment>
@@ -313,16 +317,29 @@ export default class SideBar extends Component {
                                                     Data <br/> type
                                                 </th>
                                                 <th className="text-center" style={{width: "15%"}}>
-                                                    View
+                                                    <label htmlFor="allcheck" className="text-dark"> Public </label>
                                                     <div className="custom-control custom-switch ml-1">
                                                         <input
                                                             id="allcheck"
                                                             type="checkbox"
                                                             className="custom-control-input"
                                                             checked={check_list}
-                                                            onChange={this.handleAllCheck}
+                                                            onChange={(e) => this.handleAllCheck(e, 'id_list', 'check_list', 'property_id')}
                                                         />
                                                             <label className="custom-control-label" htmlFor="allcheck"></label>
+                                                    </div>
+                                                </th>
+                                                <th className="text-center" style={{width: "15%"}}>
+                                                    <label htmlFor="open_datas" className="text-dark"> Нээлттэй <br /> өгөгдөл </label>
+                                                    <div className="custom-control custom-switch ml-1">
+                                                        <input
+                                                            id="check_open"
+                                                            type="checkbox"
+                                                            className="custom-control-input"
+                                                            checked={check_open}
+                                                            onChange={(e) => this.handleAllCheck(e, 'open_datas', 'check_open', 'property_code')}
+                                                        />
+                                                            <label className="custom-control-label" htmlFor="check_open"> </label>
                                                     </div>
                                                 </th>
                                                 <th className="text-center" style={{width: "70%"}}>
@@ -351,10 +368,20 @@ export default class SideBar extends Component {
                                                                                     id={data_type_config.property_name}
                                                                                     type="checkbox"
                                                                                     checked={id_list.indexOf(data_type_config.property_id) > -1}
-                                                                                    onChange={this.handleInput}
-                                                                                    value={data_type_config.property_id}
+                                                                                    onChange={(e) => this.handleInput(e, parseInt(data_type_config.property_id), id_list, 'id_list', 'check_list')}
                                                                                 />
                                                                                 <label htmlFor={data_type_config.property_name}></label>
+                                                                            </div>
+                                                                        </th>
+                                                                        <th>
+                                                                            <div className="icheck-primary text-center">
+                                                                                <input
+                                                                                    id={idx + data_type_config.property_code}
+                                                                                    type="checkbox"
+                                                                                    checked={open_datas.indexOf(data_type_config.property_code) > -1}
+                                                                                    onChange={(e) => this.handleInput(e, data_type_config.property_code, open_datas, 'open_datas', 'check_open')}
+                                                                                />
+                                                                                <label htmlFor={idx + data_type_config.property_code}></label>
                                                                             </div>
                                                                         </th>
                                                                         <th>

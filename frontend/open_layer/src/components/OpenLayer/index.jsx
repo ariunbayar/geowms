@@ -27,16 +27,7 @@ export class OpenLayerPage extends Component {
 
     setWms(wms, layer){
         this.setState({
-            wms_obj: wms,
             layer_obj: layer,
-            wms_url: wms.url,
-            wfs_url: wms.url,
-            wmts_url: wms.chache_url,
-
-            shape_file_url: layer.shape_file_url,
-            gml_url: layer.gml_url,
-            geo_json_url: layer.geo_json_url,
-            csv_url: layer.csv_url,
             is_loading: true,
         })
         setTimeout(() => {
@@ -49,15 +40,6 @@ export class OpenLayerPage extends Component {
             bundle,
             is_loading: true,
             layer_obj: {},
-            wms_obj: {},
-            wms_url: '',
-            wfs_url: '',
-            wmts_url: '',
-
-            shape_file_url: '',
-            gml_url: '',
-            geo_json_url: '',
-            csv_url: '',
         })
         setTimeout(() => {
             this.setState({is_loading: false})
@@ -65,14 +47,14 @@ export class OpenLayerPage extends Component {
     }
 
     componentDidMount(){
-        const {open_layer} = this.props
-        if(open_layer){
-            this.setState({bundle: open_layer[0]})
+        const { open_layer } = this.props
+        if(open_layer) {
+            this.setState({ bundle: open_layer[0] })
         }
     }
 
     render() {
-        const {open_layer, bundle, wms_url, wfs_url, wmts_url, layer_obj, wms_obj, shape_file_url, gml_url, geo_json_url, is_loading} = this.state
+        const { open_layer, bundle, layer_obj, is_loading } = this.state
         return (
             <div className="col-md-12">
                 <Loader is_loading={is_loading}></Loader>
@@ -82,13 +64,15 @@ export class OpenLayerPage extends Component {
                             <div className="card-body">
                                 <div className="row">
                                     <div id="owl-demo" className="owl-carousel owl-theme">
-                                        {open_layer.map((bundle_obj, idx) =>
-                                            <div className="item" key={idx} onClick={() => this.setBundle(bundle_obj)}>
-                                                <img src={bundle_obj.icon} className="ahha" style={{height: "80px"}}></img>
-                                                <h6 className={bundle_obj.id == bundle.id ? 'text-primary' : ''}>{bundle_obj.name}</h6>
-                                                {bundle_obj.id == bundle.id && <hr className="bg-primary"></hr>}
-                                            </div>
-                                        )}
+                                        {
+                                            open_layer.map((bundle_obj, idx) =>
+                                                <div className="item" key={idx} onClick={() => this.setBundle(bundle_obj)}>
+                                                    <img src={bundle_obj.icon} className="ahha" style={{height: "80px"}}></img>
+                                                    <h6 className={bundle_obj.id == bundle.id ? 'text-primary' : ''}>{bundle_obj.name}</h6>
+                                                    {bundle_obj.id == bundle.id && <hr className="bg-primary"></hr>}
+                                                </div>
+                                            )
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -100,17 +84,20 @@ export class OpenLayerPage extends Component {
                         <h1 className="text-center">{bundle && bundle.name}</h1>
                     </div>
                 </div>
-                {layer_obj &&
-                layer_obj.code &&
-                <div className="row">
-                    <CardLink name='WMS' url={wms_url} color='bg-dark'/>
-                    <CardLink name='WMTS' url={wmts_url} color='bg-dark'/>
-                    <CardLink name='WFS' url={wfs_url} color='bg-dark'/>
+                {
+                    layer_obj
+                    &&
+                        layer_obj.code
+                        &&
+                            <div className="row">
+                                <CardLink name='WMS' url={layer_obj.wms_url} color='bg-dark'/>
+                                <CardLink name='WMTS' url={layer_obj.wmts_url} color='bg-dark'/>
+                                <CardLink name='WFS' url={layer_obj.wfs_url} color='bg-dark'/>
 
-                    <CardLink name='GEOJSON' link={true} url={geo_json_url} color='bg-dark'/>
-                    <CardLink name='GML' link={true} url={gml_url} color='bg-dark'/>
-                    <CardLink name='SHAPE FILE' link={true} url={shape_file_url} color='bg-dark'/>
-                </div>
+                                <CardLink name='GEOJSON' link={true} url={layer_obj.geo_json_url} color='bg-dark'/>
+                                <CardLink name='GML' link={true} url={layer_obj.gml_url} color='bg-dark'/>
+                                <CardLink name='SHAPE FILE' link={true} url={layer_obj.shape_file_url} color='bg-dark'/>
+                            </div>
                 }
                 <div className="row mb-5">
                     <div className="col-2 mt-3 col-md-2 col-xl-2">
@@ -153,7 +140,10 @@ export class OpenLayerPage extends Component {
                             <div className="card-body">
                                 <InspireMap
                                     bundle={bundle}
-                                    url={wms_url}
+                                    url={layer_obj.wms_url}
+                                    // PPContent={PopUp}
+                                    is_menu_bar_all="close"
+                                    has_popup={false}
                                     code={layer_obj.code}
                                 />
                             </div>
@@ -163,5 +153,10 @@ export class OpenLayerPage extends Component {
             </div>
         )
     }
+}
 
+function PopUp(props) {
+    return (
+        'HI'
+    )
 }
