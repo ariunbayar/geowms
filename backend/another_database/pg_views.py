@@ -786,18 +786,25 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
     return datas
 
 
-def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
+def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
     geo_data = _geojson_to_geom(ona_data[table_geo_data])
     geom =utils.convert_3d_with_srid(geo_data)
-    new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+    # new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
 
-    new_geo = MGeoDatas.objects.create(
+    # new_geo = MGeoDatas.objects.create(
+    #     geo_id=new_geo_id,
+    #     geo_data=geom,
+    #     feature_id=feature.feature_id,
+    #     created_by=unique_id
+    # )
+    m_datas_object = MGeoDatas(
         geo_id=new_geo_id,
         geo_data=geom,
         feature_id=feature.feature_id,
         created_by=unique_id
     )
-    return new_geo_id
+
+    return new_geo_id, m_datas_object
 
 
 def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
@@ -869,22 +876,34 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     )[0]['table_field']
 
     m_datas_object = []
+    geo_data_objs = []
     table_fields = _get_row_to_list('table_field', columns, False)
+    start = datetime.datetime.now()
     try:
         ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
         total_count = len(ona_table_datas)
+        last_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+
+        code = last_geo_id.split('__')
+        now_number_of_geo_id = int(code[1])
+
         for ona_data in ona_table_datas:
-            
-            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-            m_d_data = _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
+            now_number_of_geo_id = now_number_of_geo_id + 1
+            new_geo_id = code[0] + '__' + str(now_number_of_geo_id)
+            geo_id, geo_data_obj = _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id)
+
+            geo_data_objs.append(geo_data_obj)
+
+            m_d_data = _insert_m_datas(ona_data, feature, new_geo_id, columns, unique_id)
             m_datas_object = m_datas_object + m_d_data
             success_count = success_count + 1
-        
+
+        MGeoDatas.objects.bulk_create(geo_data_objs)
         MDatas.objects.bulk_create(m_datas_object)
 
     except Exception:
         pass
-    
+    done = datetime.datetime.now() - start
     return success_count, failed_count, total_count
 
 
