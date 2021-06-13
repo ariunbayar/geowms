@@ -434,7 +434,7 @@ def propertyFieldsSave(request, payload):
     if not id_list:
         rsp = {
             'success': False,
-            'error': 'Утга сонгоно уу.'
+            'msg': 'Утга сонгоно уу.'
         }
         return JsonResponse(rsp)
 
@@ -446,7 +446,7 @@ def propertyFieldsSave(request, payload):
     if not has_mat_view:
         return JsonResponse({
             "success": False,
-            "error": "View үүсээгүй байна view ийг үүсгэнэ үү",
+            "msg": "View үүсээгүй байна view ийг үүсгэнэ үү",
         })
 
     view = ViewNames.objects.update_or_create(
@@ -469,7 +469,7 @@ def propertyFieldsSave(request, payload):
     else:
         rsp = {
             "success": True,
-            "data": 'Амжилттай хадгаллаа'
+            "msg": 'Амжилттай хадгаллаа'
         }
 
     return JsonResponse(rsp)
