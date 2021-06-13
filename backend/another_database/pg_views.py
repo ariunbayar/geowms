@@ -151,7 +151,7 @@ def _get_valid_data_type(value_type_id):
     elif value_type_id == 'boolean':
         value_type = 'bool'
     else:
-        value_type = 'inte'
+        value_type = 'char'
     return value_type
 
 

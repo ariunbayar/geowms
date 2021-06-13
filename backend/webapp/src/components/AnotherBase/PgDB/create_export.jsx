@@ -292,6 +292,7 @@ export default class  ExportCreate extends Component {
                 if (table_data_type == 'text' && prop_data_type =='char') type = false
                 else if (table_data_type == 'date' && prop_data_type =='time') type = false
                 else if (table_data_type == 'nume' && prop_data_type =='inte') type = false
+                else if (table_data_type == 'inte' && prop_data_type =='char') type = false
                 else {
                     if (check_data_type && check_data_type == -1) {
                         list_check_error.push(prop_id)
