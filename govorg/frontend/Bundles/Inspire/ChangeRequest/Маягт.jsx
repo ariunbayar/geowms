@@ -55,29 +55,34 @@ export default class Маягт extends Component {
 
     handleUpdate(){
         const {tid, fid, gid} = this.state
-        service.detail(gid, tid, fid).then(({success, datas}) => {
-            if(success){
-                this.setState({
-                    values:datas,
-                    is_loading: false
-                })
-            }
-        })
+        if (!this.props.form_json) {
+            service.detail(gid, tid, fid).then(({success, datas}) => {
+                if(success){
+                    this.setState({
+                        values:datas,
+                        is_loading: false
+                    })
+                }
+            })
+        }
     }
 
     render() {
         const { values } = this.state
-        if (this.state.is_loading || values.length == 0) {
+        const {form_json} = this.props
+        if ((this.state.is_loading || values.length == 0) && !form_json) {
             return (
                 <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
             )
         }
+        var datas = values
+        if (form_json) datas = form_json
         return (
             <div className='overflow-auto card-body'>
                 <Formik
                     enableReinitialize
                     initialValues={{
-                        form_values: values,
+                        form_values: datas,
                         order_at: this.state.order_at,
                         order_no: this.state.order_no,
                     }}
