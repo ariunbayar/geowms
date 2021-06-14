@@ -838,31 +838,31 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
     prop_codes = list(prop_qs.values_list('property_code', flat=True))
     m_datas_object =  []
     for prop_code in prop_codes:
-
         data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature.feature_code)
-        for prop_data in columns:
-            if data['property_id'] == prop_data['property_id']:
-                mdata_value = dict()
-                if value_type == "code_list_id":
-                    mdata_value[value_type] = ona_data[prop_data['table_field']]
-                    if str(mdata_value[value_type])[0] == '0':
-                        mdata_value[value_type] = mdata_value[value_type][1:]
-                elif value_type == "value_date":
+        if data:
+            for prop_data in columns:
+                if data['property_id'] == prop_data['property_id']:
+                    mdata_value = dict()
+                    if value_type == "code_list_id":
+                        mdata_value[value_type] = ona_data[prop_data['table_field']]
+                        if str(mdata_value[value_type])[0] == '0':
+                            mdata_value[value_type] = mdata_value[value_type][1:]
+                    elif value_type == "value_date":
 
-                    if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
-                        mdata_value[value_type] = datetime.datetime.strptime(str(ona_data[prop_data['table_field']]), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                        if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
+                            mdata_value[value_type] = datetime.datetime.strptime(str(ona_data[prop_data['table_field']]), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                        else:
+                            mdata_value[value_type] = None
+
                     else:
-                        mdata_value[value_type] = None
+                        mdata_value[value_type] = ona_data[prop_data['table_field']]
 
-                else:
-                    mdata_value[value_type] = ona_data[prop_data['table_field']]
-
-                m_datas_object.append(MDatas(
-                    geo_id=geo_id,
-                    **data,
-                    **mdata_value,
-                    created_by=unique_id
-                ))
+                    m_datas_object.append(MDatas(
+                        geo_id=geo_id,
+                        **data,
+                        **mdata_value,
+                        created_by=unique_id
+                    ))
 
     return m_datas_object
 
@@ -921,7 +921,6 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
             geo_data_objs = []
             ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name)
             start_data = ona_table_datas[-1][pk_field_name]
-            total_count = len(ona_table_datas)
             for ona_data in ona_table_datas[0:99]:
                 current_geo_id = str_to_int(current_geo_id)
                 current_geo_id = current_geo_id + 1
@@ -940,7 +939,9 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
 
     except Exception:
         pass
-    return success_count, failed_count, total_count
+
+    failed_count = count - success_count
+    return success_count, failed_count, count
 
 
 def _insert_single_table(ano_db, ano_db_table_pg, cursor):
