@@ -37,39 +37,30 @@ def _check_column():
 
 
 def _theme_name_change(old_theme):
+    old_theme = old_theme.first()
+    old_name = 0
+    new_name = 1
     filter_names = [
-        "Геодезийн цэг тэмдэгт",
-        "Барилга, суурин газар",
-        "Өндөржилт, гүн",
-        "Газрын нэгж талбар",
-        "Тээврийн сүлжээ",
-        "Ус зүйн мэдээлэл",
-        "Хүн ам зүйн мэдээлэл",
-        "Түүх соёл, археологийн өв",
+        ["Геодезийн цэг тэмдэгт", "Геодезийн байнгын цэг тэмдэгт"],
+        ["Барилга, суурин газар", "Барилга байгууламж"],
+        ["Өндөржилт, гүн", "Өндөр"],
+        ["Газрын нэгж талбар", "Кадастрын нэгж талбар"],
+        ["Тээврийн сүлжээ", "Зам тээврийн сүлжээ"],
+        ["Ус зүйн мэдээлэл", "Ус зүй"],
+        ["Хүн ам зүйн мэдээлэл", "Хүн ам, нийгэм"],
+        ["Түүх соёл, археологийн өв", "Түүх, соёл, археологийн өв"]
     ]
 
-    replaceable_names = [
-        "Геодезийн байнгын цэг тэмдэгт",
-        "Барилга байгууламж",
-        "Өндөр",
-        "Кадастрын нэгж талбар",
-        "Зам тээврийн сүлжээ",
-        "Ус зүй",
-        "Хүн ам, нийгэм",
-        "Түүх, соёл, археологийн өв",
-    ]
-
-    count = 0
     for theme_name in filter_names:
-        theme = old_theme.filter(theme_name=theme_name).first()
-        if theme:
-            theme.theme_name = replaceable_names[count]
-            theme.save()
-        count += 1
+        if theme_name[old_name] == old_theme.theme_name:
+            old_theme.theme_name = theme_name[new_name]
+            old_theme.save()
+
 
 def make_bundle_same_as_theme(apps, schema_editor):
     print('\nУншиж байна ...')
 
+    ID = 0
     _check_column()
 
     Bundle = apps.get_model('backend_bundle', 'Bundle')
@@ -81,12 +72,12 @@ def make_bundle_same_as_theme(apps, schema_editor):
         line_count = 0
         for row in csv_reader:
             if line_count != 0:
-                old_theme = LThemes.objects.filter(theme_id=int(row[0]))
+                old_theme = LThemes.objects.filter(theme_id=int(row[ID]))
                 if not old_theme:
                     with transaction.atomic():
                         qs_bundle = Bundle.objects
                         LThemes.objects.create(
-                            theme_id=int(row[0]),
+                            theme_id=int(row[ID]),
                             theme_code=row[1],
                             theme_name=row[2],
                             theme_name_eng=row[3],
@@ -99,9 +90,9 @@ def make_bundle_same_as_theme(apps, schema_editor):
                         )
                         qs_bundle.create(
                             is_removeable=True,
-                            created_by_id=2,
+                            created_by_id=1,
                             sort_order=qs_bundle.aggregate(max_rating=Coalesce(Max('sort_order'), Value(0)))['max_rating'],
-                            ltheme_id=int(row[0]),
+                            ltheme_id=int(row[ID]),
                         )
                 else:
                     _theme_name_change(old_theme)
