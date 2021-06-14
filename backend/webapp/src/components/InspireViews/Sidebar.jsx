@@ -72,7 +72,7 @@ export default class SideBar extends Component {
 
         service
             .setPropertyFields(fid, tid, id_list, view.id, values, open_datas)
-            .then(({ success, data, error }) => {
+            .then(({ success, msg }) => {
                 if(success) {
                     this.props.getAll()
                     this.modalChange(
