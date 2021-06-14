@@ -370,6 +370,7 @@ export default class  ExportCreate extends Component {
                         title_name='theme'
                         data_list={themes}
                         defualt_value={theme_name}
+                        className={"col-md-4"}
                         defualt_text={'theme-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
@@ -377,6 +378,8 @@ export default class  ExportCreate extends Component {
                         title_name='package'
                         data_list={selected_packages}
                         defualt_value={package_name}
+                        className={"col-md-4"}
+
                         defualt_text={'package-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
@@ -384,6 +387,7 @@ export default class  ExportCreate extends Component {
                         title_name='feature'
                         data_list={selected_features}
                         defualt_value={feature_name}
+                        className={"col-md-4"}
                         defualt_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />

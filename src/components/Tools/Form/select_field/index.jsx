@@ -9,9 +9,13 @@ export default class SelectField extends Component {
     }
 
     render() {
-        const {title_name, defualt_value, defualt_text, data_list} = this.props
+        const { title_name,
+                defualt_value,
+                defualt_text, op_key,
+                name_key, className, data_list
+        } = this.props
         return (
-            <div className="form-group col-md-4">
+            <div className={`form-group ${className}`} >
                 <label className=''>
                     {title_name ? title_name : ''}
                 </label>
@@ -20,23 +24,44 @@ export default class SelectField extends Component {
                     className={'form-control col-md-12'}
                     onChange={(e) => this.props.handleSelectField(title_name, e)}
                 >
-                    <option value=''>---{defualt_text ? defualt_text : ''} ---</option>
-                    {
-                        (data_list && data_list.length >0)
-                        &&
-                        data_list.map((row, idx) =>
-                            <option
+                {
+                    name_key
+                    ?
+                        data_list.map((data, idx) =>
+                            <optgroup
                                 key={idx}
-                                name={row.name}
-                                value={row.code}
+                                label={data[name_key]}
+                                value={defualt_text}
                             >
-                                {row.name}
-                            </option>
+                            {
+                                    OptionComp (data[op_key], defualt_text)
+                            }
+                            </optgroup>
                         )
-                    }
+                    :
+                        OptionComp (data_list, defualt_text)
+                }
                 </select>
 
             </div>
         );
     }
+}
+
+
+function OptionComp (options_data, defualt_text){
+    const options =
+        (options_data && options_data.length >0)
+        &&
+            options_data.map((row, idx) =>
+                <option
+                    key={idx}
+                    name={row.name}
+                    value={row.code}
+
+                >
+                    {row.name}
+                </option>
+            )
+    return options
 }
