@@ -1,4 +1,4 @@
-from django.db.models import fields
+import json
 from geojson import feature
 from backend import another_database
 import datetime
@@ -789,20 +789,21 @@ def _get_count_of_table(cursor, table_name):
     return datas[0]['count']
 
 
-def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data):
+def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name):
     sql = '''
         SELECT
-            parcel_id,
+            {pk_field_name},
             {columns}
         FROM public.{table_name}
-        WHERE CAST (parcel_id AS INTEGER) >= {start} ORDER BY parcel_id ASC
+        WHERE CAST ({pk_field_name} AS INTEGER) >= {start} ORDER BY {pk_field_name} ASC
         limit 100
 
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
         table_geo_data=table_geo_data,
-        start=start_data
+        start=start_data,
+        pk_field_name=pk_field_name
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
@@ -897,6 +898,8 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     total_count = 0
     failed_count = 0
     unique_id = ano_db.unique_id
+    pk_field_config = ano_db.pk_field_config
+    pk_field_config = utils.json_load(pk_field_config)
     feature_id = feature.feature_id
     _delete_datas_of_pg(unique_id, feature_id)
 
@@ -909,14 +912,15 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     last_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
     try:
         count = 200
-        start_data = '6783213'
+        start_data = str(pk_field_config['pk_start_index'])
+        pk_field_name = pk_field_config['pk_field_name']
         current_data_counts = 0
         current_geo_id = last_geo_id
         while current_data_counts < count:
             m_datas_object = []
             geo_data_objs = []
-            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data)
-            start_data = ona_table_datas[-1]['parcel_id']
+            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name)
+            start_data = ona_table_datas[-1][pk_field_name]
             total_count = len(ona_table_datas)
             for ona_data in ona_table_datas[0:99]:
                 current_geo_id = str_to_int(current_geo_id)
