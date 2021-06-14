@@ -184,10 +184,10 @@ const pg_config = {
         return fetch(`${prefix}/pg/get-fields/`, opts).then(handleResponse)
     },
 
-    tableSave: function(id, table_id, id_list, feature_name, table_name, is_insert) {
+    tableSave: function(id, table_id, id_list, feature_name, table_name, is_insert, pk_field_config) {
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify({ id, table_id, id_list, feature_name, table_name, is_insert }),
+            body: JSON.stringify({ id, table_id, id_list, feature_name, table_name, is_insert, pk_field_config }),
         }
         return fetch(`${prefix}/pg/save-table/`, opts).then(handleResponse)
     },
