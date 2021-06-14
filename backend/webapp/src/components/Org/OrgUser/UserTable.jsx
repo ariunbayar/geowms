@@ -17,7 +17,7 @@ export class GetPassword extends Component {
             <div className='p-0'>
                 <button
                     type="button"
-                    className="btn btn-primary btn-sm"
+                    className="btn gp-btn-primary waves-effect waves-light btn-sm mr-2"
                     onClick={() => this.props.getPass(values)}
                 >
                     НУУЦ ҮГ СОЛИХ
@@ -67,6 +67,7 @@ export class UserTable extends Component {
             ],
             is_user: true,
             is_loading: false,
+            text: '',
             drop_name: 'Хэрэглэгч',
         }
         this.getPass = this.getPass.bind(this)
@@ -77,18 +78,18 @@ export class UserTable extends Component {
     }
 
     handleSendMail() {
-        this.setState({ is_loading: true })
+        this.setState({ is_loading: true, text: 'Нууц үг солих имэйл илгээгдэж байна. Түр хүлээнэ үү!' })
         const {values} = this.state
 
         service
             .sendMail(values.id)
             .then(({ success, info }) => {
                 if(success) {
-                    this.setState({ is_loading: false })
+                    this.setState({ is_loading: false, text: '' })
                     this.modalChange(
                         'fa fa-check-circle',
                         null,
-                        "warning",
+                        "success",
                         info,
                         false,
                         '',
@@ -129,7 +130,7 @@ export class UserTable extends Component {
             'fa fa-exclamation-circle',
             null,
             'warning',
-            `Та нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?`,
+            `Нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?`,
             true,
             '',
             'Тийм',
@@ -170,7 +171,7 @@ export class UserTable extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                <Loader is_loading={this.state.is_loading} text={'Нууц үг илгээгдэж байна. Түр хүлээнэ үү!'}/>
+                <Loader is_loading={this.state.is_loading} text={this.state.text}/>
                     <div className="d-flex flex-row-reverse mb-2">
                         <div className="dropdown-menu-right show">
                             <a className="btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
