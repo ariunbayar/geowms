@@ -369,26 +369,25 @@ export default class  ExportCreate extends Component {
                     <SelectField
                         title_name='theme'
                         data_list={themes}
-                        defualt_value={theme_name}
+                        default_value={theme_name}
                         className={"col-md-4"}
-                        defualt_text={'theme-ийн нэр сонгоно уу'}
+                        default_text={'theme-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
                         title_name='package'
                         data_list={selected_packages}
-                        defualt_value={package_name}
+                        default_value={package_name}
                         className={"col-md-4"}
-
-                        defualt_text={'package-ийн нэр сонгоно уу'}
+                        default_text={'package-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
                         title_name='feature'
                         data_list={selected_features}
-                        defualt_value={feature_name}
+                        default_value={feature_name}
                         className={"col-md-4"}
-                        defualt_text={'feature-ийн нэр сонгоно уу'}
+                        default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                 </div>
