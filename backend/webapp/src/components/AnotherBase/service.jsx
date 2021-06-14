@@ -95,10 +95,10 @@ const mongo_config = {
         return fetch(`${prefix}/mongo/save/`, opts).then(handleResponse)
     },
 
-    tableSave: function(id, tableId, field_names, table_name, feature_code, pk_field_config) {
+    tableSave: function(id, tableId, field_names, table_name, feature_code) {
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify({tableId, field_names, table_name, feature_code, pk_field_config}),
+            body: JSON.stringify({tableId, field_names, table_name, feature_code}),
         }
         return fetch(`${prefix}/mongo/tables/${id}/save/`, opts).then(handleResponse)
     },
@@ -184,10 +184,10 @@ const pg_config = {
         return fetch(`${prefix}/pg/get-fields/`, opts).then(handleResponse)
     },
 
-    tableSave: function(id, table_id, id_list, feature_name, table_name, is_insert) {
+    tableSave: function(id, table_id, id_list, feature_name, table_name, is_insert, pk_field_config) {
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify({ id, table_id, id_list, feature_name, table_name, is_insert }),
+            body: JSON.stringify({ id, table_id, id_list, feature_name, table_name, is_insert, pk_field_config }),
         }
         return fetch(`${prefix}/pg/save-table/`, opts).then(handleResponse)
     },

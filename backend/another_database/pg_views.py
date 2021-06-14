@@ -1,3 +1,4 @@
+from django.db.models import fields
 from geojson import feature
 from backend import another_database
 import datetime
@@ -236,6 +237,9 @@ def save_table(request, payload):
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
     is_insert = payload.get('is_insert')
+    pk_field_configs = payload.get("pk_field_config")
+    pk_field_configs = utils.json_dumps(pk_field_configs)
+
     result = []
     cursor_pg = utils.get_cursor_pg(id)
 
@@ -253,7 +257,8 @@ def save_table(request, payload):
             'feature_code': feature_name.feature_code,
             'field_config': utils.json_dumps(id_list),
             'another_database': another_database,
-            'created_by': request.user
+            'created_by': request.user,
+            'field_config_index': pk_field_configs
         }
     )
     return JsonResponse({
