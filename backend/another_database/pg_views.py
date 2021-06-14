@@ -1,6 +1,7 @@
 from geojson import feature
 from backend import another_database
 import datetime
+from django.utils import timezone
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
@@ -151,7 +152,7 @@ def _get_valid_data_type(value_type_id):
     elif value_type_id == 'boolean':
         value_type = 'bool'
     else:
-        value_type = 'inte'
+        value_type = 'char'
     return value_type
 
 
@@ -711,10 +712,20 @@ def get_ano_tables(request, pk):
             ORDER BY table_name;
     '''
 
+    sql_views = '''
+        SELECT
+            relname as table_name
+        FROM
+            pg_class
+        WHERE
+            relkind = 'm'
+    '''
+
     table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
+    view_names = utils.get_sql_execute(sql_views, cursor_pg, 'all')
 
     return JsonResponse({
-        'table_names': table_names
+        'table_names': table_names + view_names,
     })
 
 
@@ -775,40 +786,63 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data):
     return datas
 
 
-def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
-
+def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
     geo_data = _geojson_to_geom(ona_data[table_geo_data])
     geom =utils.convert_3d_with_srid(geo_data)
-    new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+    # new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
 
-    new_geo = MGeoDatas.objects.create(
+    # new_geo = MGeoDatas.objects.create(
+    #     geo_id=new_geo_id,
+    #     geo_data=geom,
+    #     feature_id=feature.feature_id,
+    #     created_by=unique_id
+    # )
+    m_datas_object = MGeoDatas(
         geo_id=new_geo_id,
         geo_data=geom,
         feature_id=feature.feature_id,
         created_by=unique_id
     )
-    return new_geo.geo_id
+
+    return new_geo_id, m_datas_object
 
 
 def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
-
     property_ids = _get_row_to_list('property_id', columns, True)
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_id__in=property_ids)
     prop_codes = list(prop_qs.values_list('property_code', flat=True))
-
+    m_datas_object =  []
     for prop_code in prop_codes:
+
         data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature.feature_code)
         for prop_data in columns:
             if data['property_id'] == prop_data['property_id']:
                 mdata_value = dict()
-                mdata_value[value_type] = ona_data[prop_data['table_field']]
-                MDatas.objects.create(
+                first_time = datetime.datetime.now()
+                if value_type == "code_list_id":
+                    mdata_value[value_type] = ona_data[prop_data['table_field']]
+                    if str(mdata_value[value_type])[0] == '0':
+                        mdata_value[value_type] = mdata_value[value_type][1:]
+                elif value_type == "value_date":
+
+                    if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
+                        mdata_value[value_type] = datetime.datetime.strptime(str(ona_data[prop_data['table_field']]), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                    else:
+                        mdata_value[value_type] = None
+
+                else:
+                    mdata_value[value_type] = ona_data[prop_data['table_field']]
+
+                m_datas_object.append(MDatas(
                     geo_id=geo_id,
                     **data,
                     **mdata_value,
                     created_by=unique_id
-                )
+                ))
+
+    return m_datas_object
+
 
 
 def _get_row_to_list(field_name, dict_data, table_field):
@@ -841,17 +875,35 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
         filter(lambda x: x['property_id'] == 'geo_datas', columns)
     )[0]['table_field']
 
+    m_datas_object = []
+    geo_data_objs = []
     table_fields = _get_row_to_list('table_field', columns, False)
-    ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
-    total_count = len(ona_table_datas)
-    for ona_data in ona_table_datas:
-        try:
-            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
-            success_count = success_count + 1
-        except Exception:
-            pass
+    start = datetime.datetime.now()
+    try:
+        ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
+        total_count = len(ona_table_datas)
+        last_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
 
+        code = last_geo_id.split('__')
+        now_number_of_geo_id = int(code[1])
+
+        for ona_data in ona_table_datas:
+            now_number_of_geo_id = now_number_of_geo_id + 1
+            new_geo_id = code[0] + '__' + str(now_number_of_geo_id)
+            geo_id, geo_data_obj = _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id)
+
+            geo_data_objs.append(geo_data_obj)
+
+            m_d_data = _insert_m_datas(ona_data, feature, new_geo_id, columns, unique_id)
+            m_datas_object = m_datas_object + m_d_data
+            success_count = success_count + 1
+
+        MGeoDatas.objects.bulk_create(geo_data_objs)
+        MDatas.objects.bulk_create(m_datas_object)
+
+    except Exception:
+        pass
+    done = datetime.datetime.now() - start
     return success_count, failed_count, total_count
 
 
@@ -947,12 +999,13 @@ def refresh_view(request, payload):
 
     if table_id :
         ano_db_table_pg = initial_qs.filter(id=table_id).first()
-        _refresh_feature(ano_db_table_pg)
+        # _refresh_feature(ano_db_table_pg)
+
     else :
         ano_db_table_pg = initial_qs.filter(another_database_id=id)
 
-        for item in ano_db_table_pg:
-            _refresh_feature(item)
+        # for item in ano_db_table_pg:
+            # _refresh_feature(item)
 
     return JsonResponse({
         'success': True

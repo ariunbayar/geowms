@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react'
 
 import Loader from "@utils/Loader"
-import ModalAlert from '../ModalAlert'
+import Modal from "@utils/Modal/Modal"
 import ChooseStyle from './ChooseStyle'
 import SetTileCache from './setTileCache'
 
@@ -14,11 +14,10 @@ export default class SideBar extends Component {
         super(props)
         this.state = {
             show: false,
-            id_list: [],
+            id_list: props.id_list || [],
+            open_datas: [],
             save_is_load: false,
-            modal_alert_check: 'closed',
-            title: '',
-            model_type_icon: 'success',
+            modal_status: 'closed',
             view: '',
             style_names: props.style_names,
             url: props.url,
@@ -27,6 +26,7 @@ export default class SideBar extends Component {
             is_loading: props.property_loading,
             tile_cache_check: false,
             check_list: props.check_list,
+            check_open: props.check_open,
             is_loading: false,
             invalid_feedback: false,
 
@@ -49,54 +49,62 @@ export default class SideBar extends Component {
         this.state[field] = value
     }
 
-    handleInput(e){
-        let id_list = this.state.id_list
-        var check_list = this.state.check_list
-        const value = parseInt(e.target.value)
+    handleInput(e, value, list, list_name, total_field){
+        var check = this.state[total_field]
         if (e.target.checked) {
-            id_list.push(value)
+            list.push(value)
         } else {
-            id_list = id_list.filter((oid) => oid != value)
+            list = list.filter((oid) => oid != value)
         }
 
-        if(id_list.length == this.props.property_length){ check_list = true }
-        else { check_list = false }
+        if (list.length == this.props.property_length) { check = true }
+        else { check = false }
 
-        this.setState({ id_list, check_list })
+        this.setState({ [list_name]: list, [total_field]: check })
     }
 
     handleSave() {
         const { fid, tid } = this.props
-        const { id_list, view, tile_cache_check, zoom_start } = this.state
+        const { id_list, view, tile_cache_check, zoom_start, open_datas } = this.state
 
         let values
-        if (tile_cache_check && zoom_start) {
-            values = this.getValuesFromState()
-        }
+        values = this.getValuesFromState()
 
-        let model_type_icon
-        let msg
         service
-            .setPropertyFields(fid, tid, id_list, view.id, values)
-            .then(({ success, data, error }) => {
+            .setPropertyFields(fid, tid, id_list, view.id, values, open_datas)
+            .then(({ success, msg }) => {
                 if(success) {
                     this.props.getAll()
-                    model_type_icon = 'success'
-                    msg = data
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        'success',
+                        msg,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null,
+                    )
                 }
                 else {
-                    msg = error
-                    model_type_icon = 'danger'
+                    this.modalChange(
+                        'fa fa-exclamation-circle',
+                        null,
+                        'danger',
+                        msg,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null,
+                    )
                 }
-                this.setState({ save_is_load: false, is_loading: false, modal_alert_check: 'open', title: msg, model_type_icon })
-            })
-            .catch(() => {
-                this.setState({ save_is_load: false, is_loading: false, modal_alert_check: 'open', title: "Алдаа гарсан байна", model_type_icon: "danger" })
-                this.modalCloseTime()
+                this.setState({ save_is_load: false, is_loading: false})
             })
     }
 
-    handleAllCheck(e) {
+    handleAllCheck(e, list_name, check_name, field) {
         let id_list = []
         const { fields } = this.props
         if(e.target.checked)
@@ -104,18 +112,13 @@ export default class SideBar extends Component {
             fields.map((f_config, idx) =>
                 f_config.data_types.map((data_type, idx) =>
                     data_type.data_type_configs.map((data_type_config, idx) =>
-                        id_list.push(data_type_config.property_id)
+                        id_list.push(data_type_config[field])
                     )
                 )
             )
-            this.setState({id_list:id_list, check_list: true })
+            this.setState({ [list_name]: id_list, [check_name]: true })
         }
-        else { this.setState({ id_list: [], check_list: false }) }
-    }
-
-    componentDidMount() {
-        const{ id_list }= this.props
-        this.setState({ id_list })
+        else { this.setState({ [list_name]: [], [check_name]: false }) }
     }
 
     componentDidUpdate(pP, pS) {
@@ -123,6 +126,10 @@ export default class SideBar extends Component {
 
         if(pP.check_list != this.props.check_list) {
             this.setState({ check_list: this.props.check_list })
+        }
+
+        if(pP.check_open != this.props.check_open) {
+            this.setState({ check_open: this.props.check_open })
         }
 
         if(pS.tile_cache_check != tile_cache_check) {
@@ -147,6 +154,11 @@ export default class SideBar extends Component {
         if(pP.id_list !== this.props.id_list){
             const id_list = this.props.id_list
             this.setState({ id_list })
+        }
+
+        if(pP.open_datas !== this.props.open_datas){
+            const open_datas = this.props.open_datas
+            this.setState({ open_datas })
         }
 
         if(pP.style_names !== this.props.style_names){
@@ -203,18 +215,11 @@ export default class SideBar extends Component {
         clearTimeout(this.state.timer)
     }
 
-    modalCloseTime() {
-        this.state.timer = setTimeout(() => {
-            this.setState({ modal_alert_check: 'closed' })
-        }, 2000)
-    }
-
     getValuesFromState() {
         const {
             style_name, geom_type, zoom_stop,
             zoom_start, number_of_cache, image_format, cache_type, tile_cache_check
         } = this.state
-
         const values = {
             'style_name': style_name,
             'geom_type': geom_type,
@@ -247,7 +252,7 @@ export default class SideBar extends Component {
                     else {
                         alert(error)
                     }
-                    this.setState({ is_loading: false, load_text: "", check_list: false })
+                    this.setState({ is_loading: false, load_text: "", check_list: false, check_open: false })
                 })
         }
         else this.setState({ invalid_feedback: true })
@@ -257,11 +262,34 @@ export default class SideBar extends Component {
         this.state.style_name = style_name
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
     render() {
         const { fields, fid, fname, has_view } = this.props
-        const { is_loading, id_list, check_list } = this.state
+        const { is_loading, id_list, check_list, check_open, open_datas } = this.state
         const state = this.state
-        console.log(state);
         return (
             <Fragment>
                 <Loader is_loading={is_loading} text={state.load_text ? state.load_text : "Хүсэлтийг уншиж байна."}/>
@@ -289,16 +317,29 @@ export default class SideBar extends Component {
                                                     Data <br/> type
                                                 </th>
                                                 <th className="text-center" style={{width: "15%"}}>
-                                                    View
+                                                    <label htmlFor="allcheck" className="text-dark"> Public </label>
                                                     <div className="custom-control custom-switch ml-1">
                                                         <input
                                                             id="allcheck"
                                                             type="checkbox"
                                                             className="custom-control-input"
                                                             checked={check_list}
-                                                            onChange={this.handleAllCheck}
+                                                            onChange={(e) => this.handleAllCheck(e, 'id_list', 'check_list', 'property_id')}
                                                         />
                                                             <label className="custom-control-label" htmlFor="allcheck"></label>
+                                                    </div>
+                                                </th>
+                                                <th className="text-center" style={{width: "15%"}}>
+                                                    <label htmlFor="open_datas" className="text-dark"> Нээлттэй <br /> өгөгдөл </label>
+                                                    <div className="custom-control custom-switch ml-1">
+                                                        <input
+                                                            id="check_open"
+                                                            type="checkbox"
+                                                            className="custom-control-input"
+                                                            checked={check_open}
+                                                            onChange={(e) => this.handleAllCheck(e, 'open_datas', 'check_open', 'property_code')}
+                                                        />
+                                                            <label className="custom-control-label" htmlFor="check_open"> </label>
                                                     </div>
                                                 </th>
                                                 <th className="text-center" style={{width: "70%"}}>
@@ -327,10 +368,20 @@ export default class SideBar extends Component {
                                                                                     id={data_type_config.property_name}
                                                                                     type="checkbox"
                                                                                     checked={id_list.indexOf(data_type_config.property_id) > -1}
-                                                                                    onChange={this.handleInput}
-                                                                                    value={data_type_config.property_id}
+                                                                                    onChange={(e) => this.handleInput(e, parseInt(data_type_config.property_id), id_list, 'id_list', 'check_list')}
                                                                                 />
                                                                                 <label htmlFor={data_type_config.property_name}></label>
+                                                                            </div>
+                                                                        </th>
+                                                                        <th>
+                                                                            <div className="icheck-primary text-center">
+                                                                                <input
+                                                                                    id={idx + data_type_config.property_code}
+                                                                                    type="checkbox"
+                                                                                    checked={open_datas.indexOf(data_type_config.property_code) > -1}
+                                                                                    onChange={(e) => this.handleInput(e, data_type_config.property_code, open_datas, 'open_datas', 'check_open')}
+                                                                                />
+                                                                                <label htmlFor={idx + data_type_config.property_code}></label>
                                                                             </div>
                                                                         </th>
                                                                         <th>
@@ -386,11 +437,18 @@ export default class SideBar extends Component {
                                 </div>
                         }
                     </div>
-                    <ModalAlert
-                        title={this.state.title}
-                        model_type_icon ={this.state.model_type_icon}
-                        status={this.state.modal_alert_check}
-                        modalAction={() => this.handleModalAlert()}
+                    <Modal
+                        modal_status={ this.state.modal_status }
+                        modal_icon={ this.state.modal_icon }
+                        modal_bg={ this.state.modal_bg }
+                        icon_color={ this.state.icon_color }
+                        title={ this.state.title }
+                        text={ this.state.text }
+                        has_button={ this.state.has_button }
+                        actionNameBack={ this.state.actionNameBack }
+                        actionNameDelete={ this.state.actionNameDelete }
+                        modalAction={ this.state.modalAction }
+                        modalClose={ this.state.modalClose }
                     />
                 </div>
             </Fragment>

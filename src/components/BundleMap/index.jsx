@@ -73,6 +73,7 @@ export default class InspireMap extends Component {
             is_search_bar: props.is_search_bar || true,
             is_menu_bar: props.is_menu_bar || 'open',
             is_menu_bar_all: props.is_menu_bar_all || 'open',
+            has_popup: props.has_popup == undefined ? true : props.has_popup,
         }
 
         this.controls = {
@@ -218,10 +219,11 @@ export default class InspireMap extends Component {
     }
 
     componentDidMount() {
-    service.getUser().then(({is_authenticated}) =>
-        {
-            this.setState({is_authenticated})
-        })
+        service
+            .getUser()
+            .then(({ is_authenticated }) => {
+                this.setState({is_authenticated})
+            })
 
         this.loadMapData()
 
@@ -566,7 +568,7 @@ export default class InspireMap extends Component {
     }
 
     handleMapDataLoaded(base_layer_list) {
-        const { center } = this.state
+        const { center, has_popup } = this.state
         var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
         var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
 
@@ -669,28 +671,33 @@ export default class InspireMap extends Component {
             name: maker_layer_name,
         })
         this.marker_layer = marker_layer
+
+        let buttons = [
+            new FullScreen(),
+            new MousePosition({
+                projection: this.state.projection_display,
+                coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
+                undefinedHTML: '',
+            }),
+            new СуурьДавхарга({layers: base_layer_controls}),
+            new ScaleLine(),
+            this.controls.modal,
+            this.controls.shopmodal,
+            this.controls.drawModal,
+            this.controls.coordinateCopy,
+            this.controls.sidebar,
+            this.controls.cart,
+            this.controls.alertBox,
+        ]
+
+        if (has_popup) {
+            buttons.push(this.controls.popup)
+        }
+
         const map = new Map({
             maxTilesLoading: 16,
             target: 'map',
-            controls: defaultControls().extend([
-                new FullScreen(),
-                new MousePosition({
-                    projection: this.state.projection_display,
-                    coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
-                    undefinedHTML: '',
-                }),
-                new СуурьДавхарга({layers: base_layer_controls}),
-                new ScaleLine(),
-                this.controls.modal,
-                this.controls.shopmodal,
-                this.controls.drawModal,
-                this.controls.coordinateCopy,
-                this.controls.sidebar,
-                this.controls.cart,
-                this.controls.alertBox,
-                this.controls.popup,
-
-            ]),
+            controls: defaultControls().extend(buttons),
             layers: [
                 ...base_layers,
                 vector_layer,
@@ -707,14 +714,14 @@ export default class InspireMap extends Component {
         this.map = map
 
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
-        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
+        if (has_popup) this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
         this.getErguulLayer()
         this.setState({is_loading: false})
 
     }
 
     ChoosePopUp(values) {
-        const {PPContent} = this.props
+        const { PPContent } = this.props
         return (
                 <PPContent {...values}/>
         )
@@ -987,9 +994,9 @@ export default class InspireMap extends Component {
         this.is_empty = true
         this.sendFeatureInfo = []
         const overlay = this.overlay
-        overlay.setPosition(coordinate)
+        if (this.state.has_popup) overlay.setPosition(coordinate)
         // this.setState({ pay_modal_check: false })
-        if (this.props.form_datas) {
+        if (this.props.form_datas && this.state.has_popup) {
 
             this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
         }
@@ -1375,7 +1382,7 @@ export default class InspireMap extends Component {
         const settings_component = () => {
             return(
                 <div>
-                    <button class="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i class="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
+                    <button className="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i className="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
                 </div>
             )
         }
