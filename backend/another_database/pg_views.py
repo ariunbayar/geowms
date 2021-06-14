@@ -893,12 +893,12 @@ def int_to_str(number):
     return str(number).zfill(9)
 
 
-def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
+def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, feature):
     success_count = 0
     total_count = 0
     failed_count = 0
     unique_id = ano_db.unique_id
-    pk_field_config = ano_db.pk_field_config
+    pk_field_config = ano_db_table_pg.field_config_index
     pk_field_config = utils.json_load(pk_field_config)
     feature_id = feature.feature_id
     _delete_datas_of_pg(unique_id, feature_id)
@@ -911,7 +911,7 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
     table_fields = _get_row_to_list('table_field', columns, False)
     last_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
     try:
-        count = 200
+        count = _get_count_of_table(cursor, table_name)
         start_data = str(pk_field_config['pk_start_index'])
         pk_field_name = pk_field_config['pk_field_name']
         current_data_counts = 0
@@ -950,7 +950,7 @@ def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     columns = utils.json_load(field_config)
     feature_code = ano_db_table_pg.feature_code
     feature = LFeatures.objects.filter(feature_code=feature_code).first()
-    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, table_name, cursor, columns, feature)
+    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, ano_db_table_pg, table_name, cursor, columns, feature)
     table_info_text = '''
         {table_name} хүснэгт
         нийт {total_count} мөр дата-наас

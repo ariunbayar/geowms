@@ -462,6 +462,7 @@ export default class  ExportCreate extends Component {
                                             name='pk_field_type'
                                             type="text"
                                             id='pk_field_type'
+                                            placeholder="ӨСӨХ ЭРЭМБЭЭР"
                                             className={`form-control col-md-5 m-1 `}
                                             onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
                                         >
