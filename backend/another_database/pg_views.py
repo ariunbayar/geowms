@@ -785,7 +785,6 @@ def _get_count_of_table(cursor, table_name):
 
 
 def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data):
-    print("start", start_data)
     sql = '''
         SELECT
             parcel_id,
@@ -838,7 +837,6 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
         for prop_data in columns:
             if data['property_id'] == prop_data['property_id']:
                 mdata_value = dict()
-                first_time = datetime.datetime.now()
                 if value_type == "code_list_id":
                     mdata_value[value_type] = ona_data[prop_data['table_field']]
                     if str(mdata_value[value_type])[0] == '0':
@@ -903,7 +901,6 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
 
 
     table_fields = _get_row_to_list('table_field', columns, False)
-    start = datetime.datetime.now()
     last_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
     try:
         count = 200
@@ -913,13 +910,7 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
         while current_data_counts < count:
             m_datas_object = []
             geo_data_objs = []
-            print("start_data")
-            print("start_data")
-            print("start_data", start_data, current_geo_id)
             ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data)
-            print("ho;h")
-            print("ho;h")
-            print("ho;h", len(ona_table_datas))
             start_data = ona_table_datas[-1]['parcel_id']
             total_count = len(ona_table_datas)
             for ona_data in ona_table_datas[0:99]:
@@ -940,10 +931,6 @@ def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
 
     except Exception:
         pass
-    done = datetime.datetime.now() - start
-    print("doen")
-    print("doen")
-    print("doen", done)
     return success_count, failed_count, total_count
 
 
