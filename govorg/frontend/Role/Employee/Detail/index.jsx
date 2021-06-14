@@ -110,7 +110,26 @@ export class Detail extends Component {
         service
             .deleteEmployee(id)
             .then(({ success }) => {
-                this.modalChange('fa fa-check-circle', "success", 'Албан хаагчийн төлөв чөлөөлөгдсөн боллоо!', '', false, this.handleDeleteSuccess)
+                if (success) {
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        "success",
+                        'Албан хаагчийн төлөв чөлөөлөгдсөн боллоо!',
+                        '',
+                        false,
+                        this.handleDeleteSuccess
+                    )
+                }
+                else {
+                    this.modalChange(
+                        'fa fa-times-circle',
+                        "danger",
+                        'Устгах боломжгүй хэрэглэгч байна!',
+                        'Хэрэглэгч худалдан авалт хийсэн байна.',
+                        false,
+                        this.handleDeleteSuccess
+                    )
+                }
             })
     }
 

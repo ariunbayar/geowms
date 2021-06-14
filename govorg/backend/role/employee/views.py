@@ -9,6 +9,7 @@ from geoportal_app.models import User
 from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
+from backend.payment.models import Payment
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from main.components import Datatable
@@ -578,10 +579,13 @@ def detail(request, pk):
 def delete(request, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     employee = get_object_or_404(Employee, pk=pk)
-    employee.state = 3
-    employee.save()
-
-    return JsonResponse({'success': True})
+    user_log = Payment.objects.filter(user=employee.user)
+    if user_log:
+        return JsonResponse({'success': False})
+    else:
+        employee.state = 3
+        employee.save()
+        return JsonResponse({'success': True})
 
 
 # ------------- Хэрэглэгчийг баазаас устгах үед ашиглана -------------
