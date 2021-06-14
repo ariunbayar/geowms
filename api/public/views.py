@@ -128,22 +128,23 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
 
     if types == 'json':
         req_url = '{base_url}&outputFormat=application%2Fjson'.format(base_url=base_geoserver_url)
+        filename = '{}-{}-{}.geojson'.format(types, date_now, file_code)
     elif types == 'gml':
         req_url = '{base_url}'.format(base_url=base_geoserver_url)
+        filename = '{}-{}-{}.gml'.format(types, date_now, file_code)
     elif types == 'shape-zip':
         req_url = '{base_url}&outputFormat=SHAPE-ZIP'.format(base_url=base_geoserver_url)
+        filename = '{}-{}-{}.zip'.format(types, date_now, file_code)
     elif types == 'csv':
         req_url = '{base_url}&outputFormat=csv'.format(base_url=base_geoserver_url)
+        filename = '{}-{}-{}.csv'.format(types, date_now, file_code)
     else:
         raise Http404
 
-    filename = '{}-{}-{}.zip'.format(types, date_now, file_code)
-
     response = requests.get(req_url, request.GET, headers={**BASE_HEADERS}, timeout=5)
     content_type = response.headers.get('content-type')
-    content = response.content
     #TODO shape zip file tathad wfsrequest.txt gesen file tataj bgaa teriig exclude hiih
-    response = HttpResponse(content, content_type=content_type)
+    response = HttpResponse(response.content, content_type=content_type)
     response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=filename)
 
     return response

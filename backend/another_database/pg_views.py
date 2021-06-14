@@ -895,7 +895,6 @@ def int_to_str(number):
 
 def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, feature):
     success_count = 0
-    total_count = 0
     failed_count = 0
     unique_id = ano_db.unique_id
     pk_field_config = ano_db_table_pg.field_config_index
