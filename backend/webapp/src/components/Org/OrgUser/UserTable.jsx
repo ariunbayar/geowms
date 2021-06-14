@@ -4,31 +4,21 @@ import Modal from '@utils/Modal/Modal'
 import { service } from '../service'
 import Loader from "@utils/Loader"
 
-export class GetPassword extends Component {
-    constructor(props){
-        super(props)
-        this.state = {
-        }
-    }
-
-    render() {
-        const { values } = this.props
-        return (
-            <div className='p-0'>
-                <button
-                    type="button"
-                    className="btn gp-btn-primary waves-effect waves-light btn-sm mr-2"
-                    onClick={() => this.props.getPass(values)}
-                >
-                    НУУЦ ҮГ СОЛИХ
-                </button>
-            </div>
-        )
-    }
+function GetPassword(props) {
+    return (
+        <div className='p-0'>
+            <button
+                type="button"
+                className="btn gp-btn-primary waves-effect waves-light btn-sm mr-2"
+                onClick={() => props.getPass(props.values)}
+            >
+                НУУЦ ҮГ СОЛИХ
+            </button>
+        </div>
+    )
 }
 
 export class UserTable extends Component {
-
 
     constructor(props) {
 
@@ -59,7 +49,7 @@ export class UserTable extends Component {
             нэмэлт_талбарууд: [
                 {
                     "title": '',
-                    'component': GetPassword,
+                    'component': (values) => GetPassword(values),
                     'props': {
                         'getPass': (values) => this.getPass(values),
                     }
@@ -79,7 +69,7 @@ export class UserTable extends Component {
 
     handleSendMail() {
         this.setState({ is_loading: true, text: 'Нууц үг солих имэйл илгээгдэж байна. Түр хүлээнэ үү!' })
-        const {values} = this.state
+        const { values } = this.state
 
         service
             .sendMail(values.id)
