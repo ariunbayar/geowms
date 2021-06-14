@@ -223,7 +223,6 @@ def employee_update(request, payload, pk, level):
     is_super = values.get('is_super')
     pro_class = values.get('pro_class')
     phone_number = values.get('phone_number')
-    re_password_mail = values.get('re_password_mail')
     is_user = values.get('is_user')
     address = payload.get('address')
     level_1 = address.get('level_1')
@@ -266,11 +265,6 @@ def employee_update(request, payload, pk, level):
             else:
                 user.is_active = False
             user.save()
-
-            if re_password_mail:
-                subject = 'Геопортал нууц үг солих'
-                text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-                utils.send_approve_email(user, subject, text)
 
             if pro_class:
                 pro_class = int(pro_class)
@@ -1931,3 +1925,16 @@ def emp_age_count(request, pk):
     }
 
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def send_mail(request, pk):
+    subject = 'Геопортал нууц үг солих'
+    text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+
+    user = get_object_or_404(User, pk=pk)
+    utils.send_approve_email(user, subject, text)
+
+    return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})
