@@ -81,7 +81,7 @@ export class ButtonDelete extends Component {
                 <span
                     onClick={() =>
                         this.modalChange(
-                            'fa fa-times-circle',
+                            'fa fa-exclamation-circle',
                             null,
                             'danger',
                             'Албан хаагчийг устгах',
