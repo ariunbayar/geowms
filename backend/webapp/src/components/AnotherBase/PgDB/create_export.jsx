@@ -35,7 +35,10 @@ export default class  ExportCreate extends Component {
             table_field_name: '',
             matched_feilds: [],
             check_data_type:false,
-            check_error: []
+            check_error: [],
+            pk_field_name: "",
+            pk_start_index: '',
+            pk_field_type: "",
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -107,7 +110,6 @@ export default class  ExportCreate extends Component {
         const selected_value = e.target.value
         var data_list = {}
         var seleted_datas = []
-
         if ( name == 'theme' ) {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
@@ -124,13 +126,13 @@ export default class  ExportCreate extends Component {
                 data_list['selected_features'] = seleted_datas
                 data_list['feature_name'] = ''
                 data_list['matched_feilds'] = []
-
             }
             else {
                 data_list['feature_name'] = ''
                 data_list['selected_features'] = []
             }
         }
+
         else {
             data_list['feature_name'] = selected_value
         }
@@ -172,8 +174,14 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field} = this.state
+        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index} = this.state
             this.setState({ is_loading: true })
+
+            var pk_field_config = {
+                "pk_field_name": pk_field_name,
+                "pk_start_index": pk_start_index
+            }
+
             var values = {
                     'table_field': geo_data_field,
                     'property_id': 'geo_datas',
@@ -181,7 +189,7 @@ export default class  ExportCreate extends Component {
             }
 
             var all_fields = matched_feilds.concat(values)
-            service.pg_config.tableSave(id, table_id, all_fields, feature_name, table_name, true).then(({success, info}) => {
+            service.pg_config.tableSave(id, table_id, all_fields, feature_name, table_name, true, pk_field_config).then(({success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
@@ -329,7 +337,7 @@ export default class  ExportCreate extends Component {
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
             matched_feilds, geo_data_field, check_data_type,
-            check_error
+            check_error, pk_field_name, pk_start_index,
         } = this.state
         return (
             <div className="card p-2">
@@ -404,6 +412,63 @@ export default class  ExportCreate extends Component {
                                 </div>
                             </div>
                         </div>
+                        <div className='row'>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                        <span
+                                            className="col-md-6 m-1 border rounded mr-auto"
+                                            name='inspire_property'
+                                        >
+                                            Давтагдашгүй талбар
+                                        </span>&nbsp;
+                                        <select
+                                            name='pk_field_name'
+                                            id='pk_field_name'
+                                            className={`form-control col-md-5 m-1 `}
+                                            value={pk_field_name}
+                                            onChange={(e) => this.setState({ pk_field_name: e.target.value })}
+                                        >
+                                            <option value=''></option>
+                                            {
+                                                (ano_table_fields && Object.keys(ano_table_fields).length >0)
+                                                &&
+                                                ano_table_fields.map((value, idy) =>
+                                                    <option
+                                                        key = {idy}
+                                                        value={value.column_name}
+                                                        name = {value.data_type}
+                                                        id = {idy}
+                                                >{value.column_name}</option>
+                                                )
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className='row'>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                        <span
+                                            className="col-md-6 m-1 border rounded mr-auto"
+                                            name='inspire_property'
+                                        >
+                                            Эхний өгөгдлийн утга
+                                        </span>&nbsp;
+                                        <input
+                                            name='pk_field_type'
+                                            type="text"
+                                            id='pk_field_type'
+                                            className={`form-control col-md-5 m-1 `}
+                                            onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
+                                        >
+                                        </input>
+                                    </div>
+                                </div>
+                            </div>
                         <hr />
                     {
                         data_type_list && data_type_list.length > 0

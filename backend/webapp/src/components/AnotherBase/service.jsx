@@ -95,10 +95,10 @@ const mongo_config = {
         return fetch(`${prefix}/mongo/save/`, opts).then(handleResponse)
     },
 
-    tableSave: function(id, tableId, field_names, table_name, feature_code) {
+    tableSave: function(id, tableId, field_names, table_name, feature_code, pk_field_config) {
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify({tableId, field_names, table_name, feature_code}),
+            body: JSON.stringify({tableId, field_names, table_name, feature_code, pk_field_config}),
         }
         return fetch(`${prefix}/mongo/tables/${id}/save/`, opts).then(handleResponse)
     },
