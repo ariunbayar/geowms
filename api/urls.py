@@ -20,6 +20,10 @@ urlpatterns = [
         path('geo_design_proxy/<str:view_name>/', govorg_views.geo_design_proxy, name='geo_design_proxy')
     ], 'service'))),
 
+    path('open-layer/', include(([
+        path('<int:bundle_id>/<int:wms_id>/<int:layer_id>/<str:url_type>/', public_views.open_layer_proxy, name='open_layer_proxy'),
+    ], 'open-layer'))),
+
     path('inspire/', include(([
         path('token-auth/', obtain_jwt_token, name='token-auth'),
         path('create/', inspire_views.create, name='create'),
