@@ -13,10 +13,10 @@
     canvas.style.backgroundColor = "#0B3A7D"
     canvas.style.cursor = "pointer"
     makeCaptcha()
+
     canvas.addEventListener("click", function() {
         makeCaptcha()
     })
-
 
     function fifty(size) {
         return size / 2
