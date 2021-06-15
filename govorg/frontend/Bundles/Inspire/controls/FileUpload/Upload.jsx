@@ -47,6 +47,11 @@ export class Upload extends Component {
                     else {
                         this.setState({ files: state_files.concat(files[i]) })
                     }
+                    // const type = files[i].name.split('.')
+                    // const urt = type.length - 1
+                    // if(type[urt] == 'shp'){
+                    //     this.props.notif('warning', `.shx төрлийн файл хамт байх ёстойг анхаарна уу`, 'info')
+                    // }
                 }
                 else if(check == false)
                 {
@@ -64,7 +69,9 @@ export class Upload extends Component {
                 this.setState({ files: files })
             }
             else {
-                this.props.notif('danger', `өөр төрлийн файл орсон байна. Зөвхөн ${name == 'gml' ? ' .gml болон .gfs' : name == 'geojson' ? ' .geojson болон .gfs' : 'буруу'} байна.`, 'info')
+                this.props.notif('danger', `өөр төрлийн файл орсон байна. Зөвхөн ${name == 'gml' ? ' .gml болон .gfs' : name == 'geojson' ? ' .geojson болон .gfs' :
+                // name == 'shp' ? ' .shp, .shx, .prj, .dbf болон .cpg' :
+                 'буруу'} байна.`, 'info')
                 file_value.value = ''
                 this.setState({ files: [] })
             }
@@ -82,6 +89,15 @@ export class Upload extends Component {
                 const idx = file_ext.length - 1
                 if (file_ext[idx] == type[urt]) return 'not'
             }
+            // if (name == 'shp'){
+            //     if (type[urt] == 'shp' || type[urt] == 'shx' || type[urt] == 'prj' || type[urt] == 'dbf' || type[urt] == 'cpg'){
+            //         check = true
+            //     }
+            //     else{
+            //         check = false
+            //         return check
+            //     }
+            // }
             if (name == 'geojson') {
                 if (type[urt] == 'geojson' || type[urt] == 'gfs'){
                     check = true
@@ -152,6 +168,10 @@ export class Upload extends Component {
             const text = '.GML файл оруулах'
             this.setState({ text, type })
         }
+        // if (type == 'shp') {
+        //     const text = '.shp файл оруулах'
+        //     this.setState({ text, type })
+        // }
         if (type == 'geojson') {
             const text = '.geojson файл оруулах'
             this.setState({ text, type })
@@ -247,6 +267,31 @@ export class Upload extends Component {
                             </i>
                         </div>
                     </div>
+                    {/* <div>
+                        <div className="custom-control custom-switch">
+                            <input
+                                type='radio'
+                                id="SHP"
+                                className="custom-control-input"
+                                name="types"
+                                value="SHP"
+                                onChange={() => this.setType("shp")}
+                            />
+                            <label className="custom-control-label" htmlFor="SHP">SHP</label>
+                            &nbsp;
+                            <i role="button"
+                                className="fa fa-info-circle"
+                                onMouseOver={() => this.setInfo('shp')}
+                                onMouseOut={() => this.setState({ text: '' })}
+                            >
+                                    {
+                                        type == 'shp' && text !== ''
+                                        ? <b className="position-absolute card card-body" style={{zIndex: '1050'}}>{text}</b>
+                                        : null
+                                    }
+                            </i>
+                        </div>
+                    </div> */}
                     <div>
                         <div className="custom-control custom-switch">
                             <input
