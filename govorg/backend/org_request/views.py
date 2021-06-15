@@ -589,6 +589,9 @@ def _create_mdatas(geo_id, feature_id, form, value):
     value['feature_config_id'] = ids[0]['feature_config_id']
     value['data_type_id'] = ids[0]['data_type_id']
     value['property_id'] = form['property_id']
+    if form["value_type"] == "option":
+        if form["data"]:
+            value['code_list_id'] = form ["data"]
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
             if value['value_date']:
@@ -773,7 +776,6 @@ def request_approve(request, payload):
     feature_id = payload.get("feature_id")
     success = False
     new_geo_id = None
-
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
     requests_qs = ChangeRequest.objects
     requests_qs = requests_qs.filter(id__in=request_ids)

@@ -67,6 +67,8 @@ export default class  ExportCreate extends Component {
                 form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
                 form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
                 form_datas['matched_feilds'] = form_datas.id_list
+                form_datas['pk_field_name'] = form_datas.pk_field_name
+                form_datas['pk_start_index'] = form_datas.pk_start_index
                 this.setState({ ...form_datas, is_loading: false })
             }
         })
@@ -414,7 +416,7 @@ export default class  ExportCreate extends Component {
                                         <span
                                             className={"col-md-5 m-1 border rounded form-control" + ( !geo_data_field ? ' is-invalid border-danger' : '')}
                                             name='inspire_property'
-                                            title={!geo_data_field && 'Геометр талбаргүй хүснэгт байна !!!'}
+                                            title={!geo_data_field ? 'Геометр талбаргүй хүснэгт байна !!!': ''}
                                         >
                                             {geo_data_field}
                                         </span>
@@ -472,6 +474,7 @@ export default class  ExportCreate extends Component {
                                             type="text"
                                             id='pk_field_type'
                                             placeholder="ӨСӨХ ЭРЭМБЭЭР"
+                                            value={pk_start_index}
                                             className={`form-control col-md-5 m-1 `}
                                             onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
                                         >
@@ -484,7 +487,7 @@ export default class  ExportCreate extends Component {
                         data_type_list && data_type_list.length > 0
                         ?
                             data_type_list.map((data_type_data, idx) =>
-                                <>
+                                <Fragment key={idx}>
                                     <div className="form-row mr-3">
                                         <div className='form-group col-md-3 align-self-center text-center px-2 '>
                                             <b className="text-wrap">{data_type_data.data_type_name}</b><br/>
@@ -495,7 +498,7 @@ export default class  ExportCreate extends Component {
                                                 data_type_data.properties && data_type_data.properties.length > 0
                                                 ?
                                                     data_type_data.properties.map((property_data, idy) =>
-                                                        <FieldForm
+                                                        <FieldForm key={idy}
                                                             data_key={idx}
                                                             prop_key={idy}
                                                             property_data={property_data}
@@ -511,7 +514,7 @@ export default class  ExportCreate extends Component {
                                         </div>
                                     </div>
                                     <hr />
-                                </>
+                                </Fragment>
                             )
                         : null
                     }
