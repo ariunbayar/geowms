@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.views.decorators.http import require_POST, require_GET
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.db import connections
 from django.shortcuts import get_object_or_404
@@ -286,7 +286,8 @@ def table__detail(request, id, table_id):
         'theme_name': package.theme_id,
         'package_name': package.package_id,
         'pk_field_name': store_field_config['pk_field_name'],
-        'pk_start_index': store_field_config['pk_start_index']
+        'pk_start_index': store_field_config['pk_start_index'],
+        'pk_field_type': store_field_config['pk_field_type']
     }
 
     return JsonResponse({
@@ -793,19 +794,23 @@ def _get_count_of_table(cursor, table_name):
     return datas[0]['count']
 
 
-def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name):
+def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name, pk_field_type):
+    type_in = ['inte', 'numb', 'nume', 'doub']
+    start_field = '{}'.format(start_data)
+    if pk_field_type[:4] in type_in:
+        start_field = int(start_data)
     sql = '''
         SELECT
             {pk_field_name},
             {columns}
         FROM public.{table_name}
-        WHERE {pk_field_name} >= '{start}' ORDER BY {pk_field_name} ASC
+        WHERE {pk_field_name} >= {start_field} ORDER BY {pk_field_name} ASC
         limit {select_count}
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
         table_geo_data=table_geo_data,
-        start=str(start_data),
+        start_field=start_field,
         pk_field_name=pk_field_name,
         select_count=SELECTCOUNT,
     )
@@ -909,14 +914,15 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         count = _get_count_of_table(cursor, table_name)
         start_data = str(pk_field_config['pk_start_index'])
         pk_field_name = pk_field_config['pk_field_name']
+        pk_field_type = pk_field_config['pk_field_type']
         current_data_counts = 0
         current_geo_id = last_geo_id
         while current_data_counts < count:
             m_datas_object = []
             geo_data_objs = []
-            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, str(start_data), pk_field_name)
+            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type)
             start_data = ona_table_datas[-1][pk_field_name]
-            for ona_data in ona_table_datas[0:SELECTCOUNT - 1]:
+            for ona_data in ona_table_datas[0:SELECTCOUNT-1]:
                 current_geo_id = str_to_int(current_geo_id)
                 current_geo_id = current_geo_id + 1
                 new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
