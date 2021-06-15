@@ -157,13 +157,14 @@ export class Detail extends Component {
     }
 
     handleModalOpen(values){
-        let not_remove_kinds = ['ХҮЛЭЭГДЭЖ БУЙ', 'ЦУЦЛАСАН']
-        if(not_remove_kinds.includes(values.kind)) {
+        let not_rm_kind = 'ЦУЦЛАСАН'
+        let not_rm_state = 'ИЛГЭЭСЭН'
+        if(not_rm_kind == values.kind || not_rm_state == values.state) {
             this.modalChange(
                 'fa fa-exclamation-circle',
                 "danger",
                 'Устгах боломжгүй',
-                `"Энэхүү хүсэлт илгээгдсэн төлөвт байгаа тул устгах боломжгүй`,
+                `"Энэхүү хүсэлт ${values.kind == 'ЦУЦЛАСАН' ? values.kind : values.state} төлөвт байгаа тул устгах боломжгүй`,
                 false
             )
         }
