@@ -354,7 +354,6 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
                 data = data_list[0]['code_list_id']
             code_lists = data_list
 
-        print(value, value_type)
 
         form['pk'] = pk
         form['data_type_id'] = data_type_id
