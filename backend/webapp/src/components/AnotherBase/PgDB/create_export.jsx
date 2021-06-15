@@ -105,9 +105,9 @@ export default class  ExportCreate extends Component {
         return seleted_datas
     }
 
-    handleChange(name, e) {
+    handleChange(name, selection) {
         const { packages, features } = this.state
-        const selected_value = e.target.value
+        const selected_value = selection.code
         var data_list = {}
         var seleted_datas = []
         if ( name == 'theme' ) {
@@ -368,6 +368,8 @@ export default class  ExportCreate extends Component {
                 <div className="form-row col-md-12 p-4 mx-1">
                     <SelectField
                         title_name='theme'
+                        option_name = "name"
+                        option_key = "code"
                         data_list={themes}
                         default_value={theme_name}
                         className={"col-md-4"}
@@ -376,6 +378,8 @@ export default class  ExportCreate extends Component {
                     />
                     <SelectField
                         title_name='package'
+                        option_name = "name"
+                        option_key = "code"
                         data_list={selected_packages}
                         default_value={package_name}
                         className={"col-md-4"}
@@ -385,6 +389,8 @@ export default class  ExportCreate extends Component {
                     <SelectField
                         title_name='feature'
                         data_list={selected_features}
+                        option_name = "name"
+                        option_key = "code"
                         default_value={feature_name}
                         className={"col-md-4"}
                         default_text={'feature-ийн нэр сонгоно уу'}
