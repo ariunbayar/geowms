@@ -21,20 +21,10 @@ export default class Employee extends Component {
         return (
             <Switch>
                 <Route exact path="/gov/perm/employee/" component={ (props) => <EmployeeForm {...props} employee={employee}/>}/>
+                <Route exact path="/gov/perm/employee/:id/detail/" component={ (props) => <Detail {...props} org_roles={org_roles} employee={employee}/>}/>
                 {is_admin
                     &&
                     <>
-                        <Route exact path="/gov/perm/employee/add/" component={ (props) =>
-                            <EmployeeAdd
-                                {...props}
-                                org_roles={org_roles}
-                                employee={employee}
-                                states={this.state.states}
-                                pro_classes={this.state.pro_classes}
-                                positions={this.state.positions}
-                            />
-                        }
-                        />
                         <Route exact path="/gov/perm/employee/:id/edit/" component={(props) =>
                             <EmployeeEdit
                                 {...props}
@@ -47,9 +37,20 @@ export default class Employee extends Component {
                             />
                         }
                         />
+                        <Route exact path="/gov/perm/employee/add/" component={ (props) =>
+                            <EmployeeAdd
+                                {...props}
+                                org_roles={org_roles}
+                                employee={employee}
+                                states={this.state.states}
+                                pro_classes={this.state.pro_classes}
+                                positions={this.state.positions}
+                            />
+                        }
+                        />
                     </>
+
                 }
-                <Route exact path="/gov/perm/employee/:id/detail/" component={ (props) => <Detail {...props} org_roles={org_roles} employee={employee}/>}/>
             </Switch>
         )
     }
