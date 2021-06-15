@@ -1,23 +1,22 @@
 import React, { Component } from "react"
 
-import { GPIcon } from "@utils/Tools"
-
 import ModelSelectTools from './select_modal'
+import Modal from "@utils/Modal/Modal"
+import { GPIcon } from "@utils/Tools"
 
 export default class UsedTools extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            select_layer_status: false,
-            values: [],
-            modalAction: '',
-            modal_title: '',
-            more_detail: '',
-            selected_tools: []
+
+            modal_status: 'closed',
+            selected_tools: [],
         }
+        this.modalOpen = this.modalOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleSelectedTool = this.handleSelectedTool.bind(this)
-        this.modalClose = this.modalClose.bind(this)
     }
 
     componentDidUpdate(pP, pS) {
@@ -32,15 +31,10 @@ export default class UsedTools extends Component {
         }
     }
 
-    modalClose() {
-        this.setState({ select_layer_status: false })
-    }
-
     handleSelectedTool(value_type, value) {
         var array = [...this.state.selected_tools]
         if(value_type) {
             array = array.concat(value)
-            this.setState({ select_layer_status: false })
         }
         else {
             for(let [i, layer] of array.entries()) {
@@ -52,25 +46,39 @@ export default class UsedTools extends Component {
         this.props.values.handleSelectModel(array)
     }
 
-    handleSelectModel(modal_title, modalAction, values, more_detail) {
-        this.setState({
-            select_layer_status: true,
-            modalAction,
-            modal_title,
+    handleModalOpen(values) {
+        this.modalChange(
+            'Эрх бүхий багажны жагсаалт',
+            ModelSelectTools,
+            null,
             values,
-            more_detail
+            {
+                handleSelectedTool: this.handleSelectedTool
+            },
+        )
+    }
+
+    modalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
         })
+    }
+
+    modalChange(title, text, modalClose, values, modal_comp_props) {
+        this.setState({
+            title,
+            text,
+            modalClose,
+            list_of_datas: values,
+            modal_comp_props,
+        })
+        this.modalOpen()
     }
 
     render (){
         const {
             tool_datas, info, state, selected_tools
         } = this.props.values
-        const {
-            modalAction, values,
-            modal_title,
-            select_layer_status,
-        } = this.state
 
         return (
             <div className="col-md-12">
@@ -126,26 +134,24 @@ export default class UsedTools extends Component {
                                     type='button'
                                     className="btn text-primary"
                                     id='tool_id'
-                                    onClick={(e) => this.handleSelectModel('Эрх бүхий багажууд', this.handleSelectedTool, tool_datas)}
+                                    onClick={(e) => this.handleModalOpen(tool_datas)}
                                 >
-                                <i className="fa fa-plus-circle text-success mt-2 mr-2"> </i>
-                                    Багаж сонгох
+                                    <i className="fa fa-plus-circle text-success mt-2 mr-2"> </i>
+                                        Багаж сонгох
                                 </a>
                             </div>
                         </div>
                     :
                         null
                 }
-                {
-                    select_layer_status
-                    &&
-                        <ModelSelectTools
-                            modalClose={this.modalClose}
-                            modalAction={modalAction}
-                            list_of_datas={values}
-                            title={modal_title}
-                        />
-                }
+                <Modal
+                    {...this.state}
+                    text={this.state.text}
+                    title={this.state.title}
+                    modalClose={this.state.modalClose}
+                    modal_status={this.state.modal_status}
+                    modal_comp_props={this.state.modal_comp_props}
+                />
             </div>
         )
     }
