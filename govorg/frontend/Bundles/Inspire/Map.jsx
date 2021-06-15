@@ -209,7 +209,7 @@ export default class BarilgaSuurinGazar extends Component{
               }
           })
     }
-
+  
     loadControls(roles){
       const map = this.map
       const { type } = this.state
@@ -229,14 +229,16 @@ export default class BarilgaSuurinGazar extends Component{
       if(roles.PERM_CREATE || roles.PERM_UPDATE) {
         map.addControl(new SaveBtn({SaveBtn: this.FormButton}))
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
-        map.addControl(this.controls.upload)
         map.addControl(this.controls.qgis)
         map.addControl(this.controls.api)
         map.addControl(this.controls.metaList)
         map.addControl(this.controls.sidebar)
-        map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
         map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
         if(this.props.employee.is_admin) map.addControl(new ApiButton({showApiBtn: this.showApiBtn}))
+        if( roles.PERM_CREATE){
+          map.addControl(this.controls.upload)
+          map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
+        }
       }
       if(roles.PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
       if(roles.PERM_REVOKE) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
@@ -251,6 +253,7 @@ export default class BarilgaSuurinGazar extends Component{
 
       if(roles.PERM_VIEW){
         map.addControl(new DownloadTemplate({file_url: roles.file_url}))
+        map.addControl(new FormBarButton({FormButton: this.FormButton}))
       }
       this.setState({ is_loading:false, roles})
     }

@@ -144,6 +144,7 @@ urlpatterns = [
         path('<int:pk>/emp-gender-count/', org_views.emp_gender_count),
         path('<int:pk>/emp-age-count/', org_views.emp_age_count),
         path('get-all-org/', org_views.get_all_org),
+        path('send-mail/<int:pk>/', org_views.send_mail),
     ], 'org'))),
 
     path('api/log/', include(([

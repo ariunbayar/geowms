@@ -10,6 +10,7 @@ PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'geoportal_app/static/assets/pw
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 IS_TESTING = False
+USE_TZ = False
 
 AUTH_USER_MODEL = 'geoportal_app.User'
 

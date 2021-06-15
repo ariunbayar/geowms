@@ -26,7 +26,6 @@ export class UserAdd extends Component {
                 register:'',
                 is_admin: false,
                 is_super: false,
-                re_password_mail: false,
                 phone_number: '',
                 state: 1,
                 pro_class: '',
@@ -547,22 +546,6 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
-                                        {
-                                            org_emp
-                                            &&
-                                                <div className="form-row">
-                                                    <div className="form-group col-12">
-                                                        <label htmlFor='id_re_password_mail'>Нууц үг солих e-mail илгээх</label>
-                                                        <Field
-                                                            className="ml-2"
-                                                            name='re_password_mail'
-                                                            id="id_re_password_mail"
-                                                            type="checkbox"
-                                                        />
-                                                        <ErrorMessage name="re_password_mail" component="div" className="invalid-feedback"/>
-                                                    </div>
-                                                </div>
-                                        }
                                         <div className='form-row'>
                                             <div className="form-group col-12">
                                                 <label htmlFor='id_is_admin'>Байгууллагын админ</label>

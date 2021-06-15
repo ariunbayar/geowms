@@ -88,7 +88,7 @@ urlpatterns = [
     ], 'profile'))),
 
     re_path('^payment/.*', payment_views.index, name='payment'),
-    # re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
+    re_path('^open-layer/.*', open_layer_views.index, name='open-layer'),
     re_path('^profile/.*', profile_views.history, name='history'),
 
 ]

@@ -24,6 +24,7 @@ export const service = {
     genderCount,
     ageCount,
     loadBaseLayers,
+    sendMail,
 }
 
 
@@ -181,4 +182,12 @@ function ageCount(pk) {
 function loadBaseLayers() {
     const requestOptions = getGetOptions()
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
+}
+
+function sendMail(pk) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify()
+    }
+    return fetch(`${prefix}/send-mail/${pk}/`, requestOptions).then(handleResponse)
 }

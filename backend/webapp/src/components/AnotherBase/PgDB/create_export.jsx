@@ -35,7 +35,10 @@ export default class  ExportCreate extends Component {
             table_field_name: '',
             matched_feilds: [],
             check_data_type:false,
-            check_error: []
+            check_error: [],
+            pk_field_name: "",
+            pk_start_index: '',
+            pk_field_type: "",
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -107,13 +110,13 @@ export default class  ExportCreate extends Component {
         const selected_value = e.target.value
         var data_list = {}
         var seleted_datas = []
-
         if ( name == 'theme' ) {
             data_list['theme_name'] = selected_value
             seleted_datas = this.getArray(packages, selected_value)
             data_list['selected_packages'] = seleted_datas
             data_list['feature_name'] = ''
             data_list['matched_feilds'] = []
+            data_list['selected_features'] = []
         }
 
         else if ( name == 'package' ) {
@@ -123,21 +126,21 @@ export default class  ExportCreate extends Component {
                 data_list['selected_features'] = seleted_datas
                 data_list['feature_name'] = ''
                 data_list['matched_feilds'] = []
-
             }
             else {
                 data_list['feature_name'] = ''
+                data_list['selected_features'] = []
             }
         }
+
         else {
             data_list['feature_name'] = selected_value
         }
 
         if (! selected_value) {
-            data_list['selected_features'] = []
+            // data_list['selected_features'] = []
             data_list['feature_name'] = ''
         }
-
         this.setState({ ...data_list })
     }
 
@@ -145,8 +148,7 @@ export default class  ExportCreate extends Component {
         const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
-            else this.setState({feature_name})
-            this.setState({ matched_feilds: [] })
+            else this.setState({feature_name, matched_feilds: []})
         }
 
         if (pS.packages != packages) {
@@ -172,8 +174,14 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field} = this.state
+        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index} = this.state
             this.setState({ is_loading: true })
+
+            var pk_field_config = {
+                "pk_field_name": pk_field_name,
+                "pk_start_index": pk_start_index
+            }
+
             var values = {
                     'table_field': geo_data_field,
                     'property_id': 'geo_datas',
@@ -181,7 +189,7 @@ export default class  ExportCreate extends Component {
             }
 
             var all_fields = matched_feilds.concat(values)
-            service.pg_config.tableSave(id, table_id, all_fields, feature_name, table_name, true).then(({success, info}) => {
+            service.pg_config.tableSave(id, table_id, all_fields, feature_name, table_name, true, pk_field_config).then(({success, info}) => {
                 this.setState({ is_loading: false })
                 if(success){
                     this.modalChange(
@@ -287,11 +295,16 @@ export default class  ExportCreate extends Component {
         if (index) {
             var prop_data_type = data_type_list[data_key].properties[prop_key].value_type_id
             var table_data_type = ano_table_fields[parseInt(index)].data_type.slice(0,4)
-
             if (prop_data_type != table_data_type) {
                 type = true
-                if (check_data_type && check_data_type == -1) {
-                    list_check_error.push(prop_id)
+                if (table_data_type == 'text' && prop_data_type =='char') type = false
+                else if (table_data_type == 'date' && prop_data_type =='time') type = false
+                else if (table_data_type == 'nume' && prop_data_type =='inte') type = false
+                else if (table_data_type == 'inte' && prop_data_type =='char') type = false
+                else {
+                    if (check_data_type && check_data_type == -1) {
+                        list_check_error.push(prop_id)
+                    }
                 }
             }
             else {
@@ -309,7 +322,6 @@ export default class  ExportCreate extends Component {
                 list_check_error = list_check_error.filter((val) => val != prop_id)
             }
         }
-
         this.setState({
             ...data_type_list,
             check_error: list_check_error
@@ -325,7 +337,7 @@ export default class  ExportCreate extends Component {
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
             matched_feilds, geo_data_field, check_data_type,
-            check_error
+            check_error, pk_field_name, pk_start_index,
         } = this.state
         return (
             <div className="card p-2">
@@ -400,13 +412,71 @@ export default class  ExportCreate extends Component {
                                 </div>
                             </div>
                         </div>
+                        <div className='row'>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                        <span
+                                            className="col-md-6 m-1 border rounded mr-auto"
+                                            name='inspire_property'
+                                        >
+                                            Давтагдашгүй талбар
+                                        </span>&nbsp;
+                                        <select
+                                            name='pk_field_name'
+                                            id='pk_field_name'
+                                            className={`form-control col-md-5 m-1 `}
+                                            value={pk_field_name}
+                                            onChange={(e) => this.setState({ pk_field_name: e.target.value })}
+                                        >
+                                            <option value=''></option>
+                                            {
+                                                (ano_table_fields && Object.keys(ano_table_fields).length >0)
+                                                &&
+                                                ano_table_fields.map((value, idy) =>
+                                                    <option
+                                                        key = {idy}
+                                                        value={value.column_name}
+                                                        name = {value.data_type}
+                                                        id = {idy}
+                                                >{value.column_name}</option>
+                                                )
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className='row'>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                        <span
+                                            className="col-md-6 m-1 border rounded mr-auto"
+                                            name='inspire_property'
+                                        >
+                                            Эхний өгөгдлийн утга
+                                        </span>&nbsp;
+                                        <input
+                                            name='pk_field_type'
+                                            type="text"
+                                            id='pk_field_type'
+                                            placeholder="ӨСӨХ ЭРЭМБЭЭР"
+                                            className={`form-control col-md-5 m-1 `}
+                                            onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
+                                        >
+                                        </input>
+                                    </div>
+                                </div>
+                            </div>
                         <hr />
                     {
                         data_type_list && data_type_list.length > 0
                         ?
                             data_type_list.map((data_type_data, idx) =>
                                 <>
-                                    <div key={idx} className="form-row mr-3">
+                                    <div className="form-row mr-3">
                                         <div className='form-group col-md-3 align-self-center text-center px-2 '>
                                             <b className="text-wrap">{data_type_data.data_type_name}</b><br/>
                                             <small className="text-center">({data_type_data.data_type_definition})</small>

@@ -82,7 +82,6 @@ def bundleButetsAll(request):
         style_names.append(style.get('name'))
 
     url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
-
     rsp = {
         'success': True,
         'data': data,
@@ -341,7 +340,6 @@ def getFields(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
-
     feature = get_object_or_404(LFeatures, feature_id=fid)
     view_name = utils.make_view_name(feature)
     has_mat_view = utils.has_materialized_view(view_name)
@@ -357,7 +355,7 @@ def propertyFields(request, fid):
             'geom_type': geom_type,
         })
 
-    view = ViewNames.objects.filter(feature_id=fid).values('id', 'view_name').first()
+    view_qs = ViewNames.objects.filter(feature_id=fid)
     cache_values = []
     wmts = WmtsCacheConfig.objects.filter(feature_id=fid).first()
     if wmts:
@@ -368,14 +366,16 @@ def propertyFields(request, fid):
             'cache_type': wmts.type_of_operation,
             'number_of_cache': wmts.number_of_tasks_to_use,
         })
-    if view:
-        id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view['id'])]
+    if view_qs:
+        view = view_qs.first()
+        id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view.id)]
         url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': id_list,
-            'view': view,
+            'open_datas': utils.json_load(view.open_datas) if view.open_datas else [],
+            'view': view_qs.values('id', 'view_name').first(),
             'url': request.build_absolute_uri(url),
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
             'geom_type': geom_type,
@@ -386,11 +386,13 @@ def propertyFields(request, fid):
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': [],
+            'open_datas': [],
             'view': '',
             'geom_type': geom_type,
             'cache_values': cache_values,
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
+
     return JsonResponse(rsp)
 
 
@@ -432,10 +434,11 @@ def propertyFieldsSave(request, payload):
     fid = payload.get('fid')
     view_id = payload.get('view_id')
     values = payload.get('values')
+    open_datas = payload.get('open_datas')
     if not id_list:
         rsp = {
             'success': False,
-            'error': 'Утга сонгоно уу.'
+            'msg': 'Утга сонгоно уу.'
         }
         return JsonResponse(rsp)
 
@@ -447,7 +450,7 @@ def propertyFieldsSave(request, payload):
     if not has_mat_view:
         return JsonResponse({
             "success": False,
-            "error": "View үүсээгүй байна view ийг үүсгэнэ үү",
+            "msg": "View үүсээгүй байна view ийг үүсгэнэ үү",
         })
 
     view = ViewNames.objects.update_or_create(
@@ -455,6 +458,7 @@ def propertyFieldsSave(request, payload):
         defaults={
             'view_name': table_name,
             'feature_id': fid,
+            'open_datas': utils.json_dumps(open_datas),
         }
     )[0]
 
@@ -464,16 +468,30 @@ def propertyFieldsSave(request, payload):
     for prop_id in id_list:
         view_prop_qs.create(view=view, property_id=prop_id)
 
-    if values:
+    is_created = _check_geoserver_detail(table_name, theme)
+    if values or not is_created:
         rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, payload.get('values'))
-
     else:
         rsp = {
             "success": True,
-            "data": 'Амжилттай хадгаллаа'
+            "msg": 'Амжилттай хадгаллаа'
         }
 
     return JsonResponse(rsp)
+
+def _check_geoserver_detail(table_name, theme):
+    theme_code = theme.theme_code
+    ws_name = 'gp_' + theme_code
+    layer_name = 'gp_layer_' + table_name
+
+    rsp = geoserver.getWorkspace(ws_name)
+    if rsp.status_code == 200:
+        ds_rsp = geoserver.getDataStore(ws_name, ws_name)
+        if ds_rsp.status_code == 200:
+            ds_layer_rsp = geoserver.getDataStoreLayer(ws_name, ws_name, layer_name)
+            if ds_layer_rsp.status_code == 200:
+                return True
+    return False
 
 
 def getModel(model_name):
@@ -699,9 +717,7 @@ def erese(request, payload):
     return JsonResponse(rsp)
 
 
-
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
-
     geom_att, extends = utils.get_colName_type(table_name, 'geo_data')
     if extends:
         srs = extends[0]['find_srid']
@@ -784,9 +800,9 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                     wms.cache_url = wmts_url
                     wms.save()
 
-        return {"success": True, 'data': 'Амжилттай үүслээ'}
+        return {"success": True, 'msg': 'Амжилттай үүслээ'}
     else:
-        return {"success": False, 'error': 'Давхарга үүсгэхэд алдаа гарлаа'}
+        return {"success": False, 'msg': 'Давхарга үүсгэхэд алдаа гарлаа'}
 
 
 def _create_geoserver_detail(table_name, theme, user_id, feature, values):
