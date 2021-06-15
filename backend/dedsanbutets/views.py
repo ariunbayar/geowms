@@ -800,9 +800,9 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                     wms.cache_url = wmts_url
                     wms.save()
 
-        return {"success": True, 'data': 'Амжилттай үүслээ'}
+        return {"success": True, 'msg': 'Амжилттай үүслээ'}
     else:
-        return {"success": False, 'error': 'Давхарга үүсгэхэд алдаа гарлаа'}
+        return {"success": False, 'msg': 'Давхарга үүсгэхэд алдаа гарлаа'}
 
 
 def _create_geoserver_detail(table_name, theme, user_id, feature, values):

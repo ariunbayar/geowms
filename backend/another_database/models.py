@@ -40,6 +40,7 @@ class AnotherDatabaseTable(models.Model):
     table_name = models.CharField(max_length=250)
     feature_code = models.CharField(max_length=250)
     field_config = models.TextField()
+    field_config_index = models.TextField(null=True)
     another_database = models.ForeignKey(AnotherDatabase, on_delete=models.CASCADE, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

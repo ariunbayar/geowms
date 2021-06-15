@@ -5,10 +5,13 @@ from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, Value
+from django.contrib.postgres.search import SearchVector
+
 from geoportal_app.models import User
 from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
+from backend.payment.models import Payment
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from main.components import Datatable
@@ -136,11 +139,19 @@ def list(request, payload):
     is_user = payload.get('is_user')
 
     org = get_object_or_404(Org, employee__user=request.user)
+
+    qs = Employee.objects
+    qs = qs.filter(org=org)
+    qs = qs.annotate(search=SearchVector(
+        "user__email",
+        "user__first_name",
+        "user__last_name"
+    ))
+
     if is_user:
-        qs = Employee.objects.filter(org=org)
         qs = qs.filter(user__is_user=True)
-    else:
-        qs = Employee.objects.filter(org=org)
+
+    qs = qs.filter(search__icontains=payload.get('query'))
     if not qs:
         rsp = {
             'items': [],
@@ -165,7 +176,8 @@ def list(request, payload):
         initial_qs=qs,
         оруулах_талбарууд=оруулах_талбарууд,
         нэмэлт_талбарууд=нэмэлт_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        has_search=False,
     )
     items, total_page = datatable.get()
     rsp = {
@@ -578,10 +590,13 @@ def detail(request, pk):
 def delete(request, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     employee = get_object_or_404(Employee, pk=pk)
-    employee.state = 3
-    employee.save()
-
-    return JsonResponse({'success': True})
+    user_log = Payment.objects.filter(user=employee.user)
+    if user_log:
+        return JsonResponse({'success': False})
+    else:
+        employee.state = 3
+        employee.save()
+        return JsonResponse({'success': True})
 
 
 # ------------- Хэрэглэгчийг баазаас устгах үед ашиглана -------------
