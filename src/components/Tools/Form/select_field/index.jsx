@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 
-
-
 // <SelectField
-//     title_name='feature'
+//     state_name='feature'
 //     data_list={selected_features}                       //сонголтын жагсаалт
 //     default_value={feature_name}
 //     name_key                                           // data_list датанаас грүппын нэрийг агуулсан key
@@ -23,7 +21,7 @@ import React, { Component } from 'react';
 // --------------------------------------------------------
 
 {/* <SelectField
-    title_name='package'
+    state_name='package'
     option_name = "name"
     option_key = "code"
     data_list={selected_packages}
@@ -40,6 +38,7 @@ export default class SelectField extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            selected_value: ''
         }
         this.dataSelection = this.dataSelection.bind(this)
     }
@@ -47,39 +46,42 @@ export default class SelectField extends Component {
     dataSelection(e){
         const selection_value = e.target.value
         const { data_list,
-                title_name, name_key,
+                state_name, name_key,
                 opt_key, option_key
         } = this.props
 
-        data_list.map((row, idx) =>{
+        data_list.map((row, idx) => {
             if (name_key){
                 row[opt_key].map((data, idx) => {
                     if(selection_value == data[option_key]){
-                        this.props.handleSelectField(title_name, row[opt_key])
+                        this.props.handleSelectField(state_name, row[opt_key])
                     }
                 })
             }
             else {
                 if (selection_value == row[option_key]){
-                    this.props.handleSelectField(title_name, row)
+                    this.props.handleSelectField(state_name, row)
                 }
             }
         })
+        this.setState({ selected_value: selection_value })
     }
 
     render() {
-        const { title_name, default_value,
+        const { default_value, label,
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list
         } = this.props
+        const state = this.state
+        let title = label ? label : ''
         return (
             <div className={`form-group ${className ? className : "col-md-4"}`} >
-                <label className=''>
-                    {title_name ? title_name : ''}
+                <label id={title}>
+                    {title}
                 </label>
                 <select
-                    value={default_value}
-                    className={'form-control col-md-12'}
+                    value={state.selected_value ? state.selected_value : default_value}
+                    className={'form-control'}
                     onChange={(e) => this.dataSelection(e)}
                 >
                     <option value=''>---{default_text ? default_text : ''} ---</option>

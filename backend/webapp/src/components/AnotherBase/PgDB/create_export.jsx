@@ -69,6 +69,7 @@ export default class  ExportCreate extends Component {
                 form_datas['matched_feilds'] = form_datas.id_list
                 form_datas['pk_field_name'] = form_datas.pk_field_name
                 form_datas['pk_start_index'] = form_datas.pk_start_index
+                form_datas['pk_field_type'] = form_datas.pk_field_type
                 this.setState({ ...form_datas, is_loading: false })
             }
         })
@@ -109,39 +110,47 @@ export default class  ExportCreate extends Component {
 
     handleChange(name, selection) {
         const { packages, features } = this.state
-        const selected_value = selection.code
+        var selected_value = ''
         var data_list = {}
         var seleted_datas = []
-        if ( name == 'theme' ) {
-            data_list['theme_name'] = selected_value
-            seleted_datas = this.getArray(packages, selected_value)
-            data_list['selected_packages'] = seleted_datas
-            data_list['feature_name'] = ''
-            data_list['matched_feilds'] = []
-            data_list['selected_features'] = []
+        if (name == 'pk_field_name') {
+            data_list['pk_field_name'] = selection.column_name
+            data_list['pk_field_type'] = selection.data_type
         }
 
-        else if ( name == 'package' ) {
-            if (selected_value) {
-                data_list['package_name'] = selected_value
-                seleted_datas = this.getArray(features, selected_value)
-                data_list['selected_features'] = seleted_datas
+        else{
+            selected_value = selection.code
+            if ( name == 'theme' ) {
+                data_list['theme_name'] = selected_value
+                seleted_datas = this.getArray(packages, selected_value)
+                data_list['selected_packages'] = seleted_datas
                 data_list['feature_name'] = ''
                 data_list['matched_feilds'] = []
-            }
-            else {
-                data_list['feature_name'] = ''
                 data_list['selected_features'] = []
             }
-        }
 
-        else {
-            data_list['feature_name'] = selected_value
-        }
+            else if ( name == 'package' ) {
+                if (selected_value) {
+                    data_list['package_name'] = selected_value
+                    seleted_datas = this.getArray(features, selected_value)
+                    data_list['selected_features'] = seleted_datas
+                    data_list['feature_name'] = ''
+                    data_list['matched_feilds'] = []
+                }
+                else {
+                    data_list['feature_name'] = ''
+                    data_list['selected_features'] = []
+                }
+            }
 
-        if (! selected_value) {
-            // data_list['selected_features'] = []
-            data_list['feature_name'] = ''
+            else {
+                data_list['feature_name'] = selected_value
+            }
+
+            if (! selected_value) {
+                // data_list['selected_features'] = []
+                data_list['feature_name'] = ''
+            }
         }
         this.setState({ ...data_list })
     }
@@ -176,12 +185,13 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index} = this.state
+        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index, pk_field_type} = this.state
             this.setState({ is_loading: true })
 
             var pk_field_config = {
                 "pk_field_name": pk_field_name,
-                "pk_start_index": pk_start_index
+                "pk_start_index": pk_start_index,
+                "pk_field_type": pk_field_type,
             }
 
             var values = {
@@ -320,7 +330,7 @@ export default class  ExportCreate extends Component {
         data_type_list[data_key].properties[prop_key]['form_state'] = type
 
         if (!type){
-            if (check_data_type >-1) {
+            if (check_data_type > -1) {
                 list_check_error = list_check_error.filter((val) => val != prop_id)
             }
         }
@@ -339,7 +349,7 @@ export default class  ExportCreate extends Component {
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
             matched_feilds, geo_data_field, check_data_type,
-            check_error, pk_field_name, pk_start_index,
+            check_error, pk_field_name, pk_start_index, pk_field_type
         } = this.state
         return (
             <div className="card p-2">
@@ -369,7 +379,8 @@ export default class  ExportCreate extends Component {
                 </div>
                 <div className="form-row col-md-12 p-4 mx-1">
                     <SelectField
-                        title_name='theme'
+                        state_name='theme'
+                        label="Theme"
                         option_name = "name"
                         option_key = "code"
                         data_list={themes}
@@ -379,7 +390,8 @@ export default class  ExportCreate extends Component {
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
-                        title_name='package'
+                        state_name='package'
+                        label="package"
                         option_name = "name"
                         option_key = "code"
                         data_list={selected_packages}
@@ -389,7 +401,8 @@ export default class  ExportCreate extends Component {
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
-                        title_name='feature'
+                        state_name='feature'
+                        label="feature"
                         data_list={selected_features}
                         option_name = "name"
                         option_key = "code"
@@ -434,27 +447,15 @@ export default class  ExportCreate extends Component {
                                         >
                                             Давтагдашгүй талбар
                                         </span>&nbsp;
-                                        <select
-                                            name='pk_field_name'
-                                            id='pk_field_name'
-                                            className={`form-control col-md-5 m-1 `}
-                                            value={pk_field_name}
-                                            onChange={(e) => this.setState({ pk_field_name: e.target.value })}
-                                        >
-                                            <option value=''></option>
-                                            {
-                                                (ano_table_fields && Object.keys(ano_table_fields).length >0)
-                                                &&
-                                                ano_table_fields.map((value, idy) =>
-                                                    <option
-                                                        key = {idy}
-                                                        value={value.column_name}
-                                                        name = {value.data_type}
-                                                        id = {idy}
-                                                >{value.column_name}</option>
-                                                )
-                                            }
-                                        </select>
+                                        <SelectField
+                                            state_name='pk_field_name'
+                                            data_list={ano_table_fields}
+                                            option_name = "column_name"
+                                            option_key = "data_type"
+                                            default_value={pk_field_name}
+                                            className={"d-flex col-md-5 m-1 p-0 align-items-middle"}
+                                            handleSelectField={this.handleChange}
+                                        />
                                     </div>
                                 </div>
                             </div>
