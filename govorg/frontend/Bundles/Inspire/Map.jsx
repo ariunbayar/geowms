@@ -198,18 +198,16 @@ export default class BarilgaSuurinGazar extends Component{
     }
 
     getRole(){
-      const fid = this.state.fid
-      const tid = this.state.tid
-
+      const { tid, fid } = this.state
       service
-          .getRole(fid, tid)
+          .getRole(tid, fid)
           .then(({ success, roles }) => {
               if(success){
                 this.loadControls(roles)
               }
           })
     }
-  
+
     loadControls(roles){
       const map = this.map
       const { type } = this.state

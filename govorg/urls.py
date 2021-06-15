@@ -58,7 +58,7 @@ urlpatterns = [
         ], 'system'))),
 
         path('inspire/', include(([
-            path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
+            path('<int:tid>/<int:fid>/getRoles/', govorg_inspire_views.getRoles),
             path('<int:tid>/<int:pid>/<int:fid>/get-wms-layer/', govorg_inspire_views.get_wms_layer),
             path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
             path('<int:pid>/<int:fid>/add/', govorg_inspire_views.add),

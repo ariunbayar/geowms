@@ -110,13 +110,11 @@ def _get_feature_coll(ob, changeset_list):
         return Feature(type = 'Feature', properties={"changeset_id": str(changeset_list[ob]['changeset_id'])}, geometry=point)
 
 
-@require_POST
+@require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def getRoles(request, payload, fid):
-
+def getRoles(request, tid, fid):
     main_folder = "bundles_template"
-    tid = payload.get("tid")
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
     employee = get_object_or_404(Employee, user__username=request.user)
