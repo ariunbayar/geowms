@@ -184,7 +184,8 @@ export default class RequestDetail extends Component {
                                     >
                                         файл оруулах
                                     </label>
-                                    <input
+                                    <input type="file" accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
+                                     
                                         name="uploadDocument"
                                         type="file"
                                         id="choose-file"
