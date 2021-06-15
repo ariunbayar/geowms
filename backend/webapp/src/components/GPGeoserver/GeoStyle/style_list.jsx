@@ -27,6 +27,7 @@ export class StyleList extends Component {
         this.handleSearch = this.handleSearch.bind(this)
         this.paginate = this.paginate.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
     componentDidMount() {
@@ -61,14 +62,28 @@ export class StyleList extends Component {
             if (success) {
                 this.modalChange(
                     'fa fa-check-circle',
-                    'success',
-                    info
+                    null,
+                    "success",
+                    info,
+                    ``,
+                    false,
+                    "",
+                    "",
+                    null,
+                    null,
                 )
             } else {
                 this.modalChange(
                     'fa fa-times-circle',
-                    'danger',
-                    info
+                    null,
+                    "danger",
+                    info,
+                    ``,
+                    false,
+                    "",
+                    "",
+                    null,
+                    null,
                 )
             }
             this.handleListUpdated()
@@ -81,14 +96,24 @@ export class StyleList extends Component {
         })
     }
 
-    modalChange(modal_icon, icon_color, title) {
-        this.setState({
-            modal_icon,
-            icon_color,
-            title,
-        })
-        this.handleModalOpen()
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
     }
+
     render() {
         const {
             style_list, currentStyles, search_query,
@@ -134,13 +159,27 @@ export class StyleList extends Component {
                             </thead>
                             <tbody>
                                 { currentStyles.length ===0 ?
-                                    <tr><td>geoserver дээр style бүртгэлгүй байна</td></tr>:
+                                    <tr><th>geoserver дээр style бүртгэлгүй байна</th></tr>:
 
                                     currentStyles.map((value, idx) =>
                                         <StyleTableList
+                                            key={idx}
                                             idx={(currentPage*stylePerPage)-stylePerPage+idx+1}
                                             value={value}
-                                            handleRemove={() => this.handleStyleDelete(value)}
+                                            handleRemove={
+                                                () => this.modalChange(
+                                                    'fa fa-exclamation-circle',
+                                                    null,
+                                                    "warning",
+                                                    'Загвар устгах',
+                                                    `Та "${value}" нэртэй загварыг устгахдаа итгэлтэй байна уу?`,
+                                                    true,
+                                                    "Үгүй",
+                                                    "Тийм",
+                                                    () => this.handleStyleDelete(value),
+                                                    null,
+                                                )
+                                            }
                                         />
                                     )}
                             </tbody>
@@ -155,15 +194,19 @@ export class StyleList extends Component {
                     />
                 </div>
                 <Modal
-                    modal_status={this.state.modal_status}
-                    modal_icon={this.state.modal_icon}
-                    icon_color={this.state.icon_color}
-                    title={this.state.title}
-                    text=''
-                    has_button={false}
-                    modalAction={null}
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    text={ this.state.text }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
                 />
-        </div>
+            </div>
         )
     }
 }
