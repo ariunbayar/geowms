@@ -912,7 +912,7 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
 
     table_fields = _get_row_to_list('table_field', columns, False)
 
-    last_geo_data = MGeoDatas.objects.all().order_by('-created_on').first()
+    last_geo_data = MGeoDatas.objects.filter(feature_id=feature_id).order_by('-created_on').first()
 
     if last_geo_data:
         last_geo_id = last_geo_data.geo_id
@@ -930,7 +930,6 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
 
         current_data_counts = 0
         current_geo_id = last_geo_id
-
         while current_data_counts < int(count):
             m_datas_object = []
             geo_data_objs = []
