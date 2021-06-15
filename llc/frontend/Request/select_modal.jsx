@@ -33,7 +33,7 @@ export default class ModelSelectTools extends Component {
                                     list_of_datas.map((value, idx) =>
                                         <tr key={idx}>
                                             <td>
-                                                {idx}
+                                                {idx+1}
                                             </td>
                                             <td>
                                                 <a className="text-primary" onClick={(e) => this.handleProceed(true, value)}>
