@@ -116,7 +116,6 @@ export default class  ExportCreate extends Component {
         var data_list = {}
         var seleted_datas = []
         if (name == 'pk_field_name') {
-            console.log(selection.data_type)
             data_list['pk_field_name'] = selection.column_name
             data_list['pk_field_type'] = selection.data_type
         }
