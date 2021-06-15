@@ -795,14 +795,14 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_f
             {pk_field_name},
             {columns}
         FROM public.{table_name}
-        WHERE CAST ({pk_field_name} AS INTEGER) >= {start} ORDER BY {pk_field_name} ASC
+        WHERE {pk_field_name} >= '{start}' ORDER BY {pk_field_name} ASC
         limit 100
 
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
         table_geo_data=table_geo_data,
-        start=start_data,
+        start=str(start_data),
         pk_field_name=pk_field_name
     )
     cursor.execute(sql)
@@ -918,7 +918,7 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         while current_data_counts < count:
             m_datas_object = []
             geo_data_objs = []
-            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name)
+            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, str(start_data), pk_field_name)
             start_data = ona_table_datas[-1][pk_field_name]
             for ona_data in ona_table_datas[0:99]:
                 current_geo_id = str_to_int(current_geo_id)
