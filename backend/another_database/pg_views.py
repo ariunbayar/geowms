@@ -37,7 +37,7 @@ from backend.inspire.models import (
 )
 
 
-SELECTCOUNT = 1000
+SELECTCOUNT = 100
 
 
 @require_GET
@@ -820,8 +820,10 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_f
 
 
 def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
-    geo_data = _geojson_to_geom(ona_data[table_geo_data])
-    geom =utils.convert_3d_with_srid(geo_data)
+    geom = None
+    if ona_data[table_geo_data]:
+        geo_data = _geojson_to_geom(ona_data[table_geo_data])
+        geom =utils.convert_3d_with_srid(geo_data)
     m_datas_object = MGeoDatas(
         geo_id=new_geo_id,
         geo_data=geom,
@@ -955,6 +957,7 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
 
     return success_count, failed_count, count
 
+data = MGeoDatas.objects.filter(created_by=-13).count()
 
 def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     table_info = []
