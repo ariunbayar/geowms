@@ -39,6 +39,7 @@ export default class  ExportCreate extends Component {
             pk_field_name: "",
             pk_start_index: '',
             pk_field_type: "",
+            pk_field_count: "",
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -70,6 +71,7 @@ export default class  ExportCreate extends Component {
                 form_datas['pk_field_name'] = form_datas.pk_field_name
                 form_datas['pk_start_index'] = form_datas.pk_start_index
                 form_datas['pk_field_type'] = form_datas.pk_field_type
+                form_datas['pk_field_count'] = form_datas.pk_field_count
                 this.setState({ ...form_datas, is_loading: false })
             }
         })
@@ -114,6 +116,7 @@ export default class  ExportCreate extends Component {
         var data_list = {}
         var seleted_datas = []
         if (name == 'pk_field_name') {
+            console.log(selection.data_type)
             data_list['pk_field_name'] = selection.column_name
             data_list['pk_field_type'] = selection.data_type
         }
@@ -185,13 +188,13 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index, pk_field_type} = this.state
+        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index, pk_field_type, pk_field_count} = this.state
             this.setState({ is_loading: true })
-
             var pk_field_config = {
                 "pk_field_name": pk_field_name,
                 "pk_start_index": pk_start_index,
                 "pk_field_type": pk_field_type,
+                "pk_field_count": pk_field_count
             }
 
             var values = {
@@ -349,7 +352,8 @@ export default class  ExportCreate extends Component {
             id_list, table_name, is_loading,
             ano_table_names, ano_table_fields,
             matched_feilds, geo_data_field, check_data_type,
-            check_error, pk_field_name, pk_start_index, pk_field_type
+            check_error, pk_field_name, pk_start_index,
+            pk_field_type, pk_field_count
         } = this.state
         return (
             <div className="card p-2">
@@ -450,8 +454,9 @@ export default class  ExportCreate extends Component {
                                         <SelectField
                                             state_name='pk_field_name'
                                             data_list={ano_table_fields}
-                                            option_name = "column_name"
-                                            option_key = "data_type"
+                                            option_name = "data_type"
+                                            option_key = "column_name"
+                                            option_text = 'column_name'
                                             default_value={pk_field_name}
                                             className={"d-flex col-md-5 m-1 p-0 align-items-middle"}
                                             handleSelectField={this.handleChange}
@@ -464,25 +469,46 @@ export default class  ExportCreate extends Component {
                             </div>
                             <div className='col-md-9 px-0'>
                                 <div className='row d-flex mr-3'>
-                                        <span
-                                            className="col-md-6 m-1 border rounded mr-auto"
-                                            name='inspire_property'
-                                        >
-                                            Эхний өгөгдлийн утга
-                                        </span>&nbsp;
-                                        <input
-                                            name='pk_field_type'
-                                            type="text"
-                                            id='pk_field_type'
-                                            placeholder="ӨСӨХ ЭРЭМБЭЭР"
-                                            value={pk_start_index}
-                                            className={`form-control col-md-5 m-1 `}
-                                            onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
-                                        >
-                                        </input>
-                                    </div>
+                                    <span
+                                        className="col-md-6 m-1 border rounded mr-auto"
+                                        name='inspire_property'
+                                    >
+                                        Эхний өгөгдлийн утга
+                                    </span>&nbsp;
+                                    <input
+                                        name='pk_field_type'
+                                        type="text"
+                                        id='pk_field_type'
+                                        placeholder="ӨСӨХ ЭРЭМБЭЭР"
+                                        value={pk_start_index}
+                                        className={`form-control col-md-5 m-1 `}
+                                        onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
+                                    >
+                                    </input>
                                 </div>
                             </div>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                    <span
+                                        className="col-md-6 m-1 border rounded mr-auto"
+                                        name='inspire_property'
+                                    >
+                                        Оруулах өгөгдлийн тоо хэмжээ
+                                    </span>&nbsp;
+                                    <input
+                                        name='pk_field_type'
+                                        type="number"
+                                        id='pk_field_type'
+                                        value={pk_field_count}
+                                        className={`form-control col-md-5 m-1 `}
+                                        onChange={(e) => {this.setState({pk_field_count: e.target.value})}}
+                                    >
+                                    </input>
+                                </div>
+                            </div>
+                        </div>
                         <hr />
                     {
                         data_type_list && data_type_list.length > 0

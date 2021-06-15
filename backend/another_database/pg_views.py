@@ -37,7 +37,7 @@ from backend.inspire.models import (
 )
 
 
-SELECTCOUNT = 1000
+SELECTCOUNT = 10
 
 
 @require_GET
@@ -240,7 +240,6 @@ def save_table(request, payload):
     is_insert = payload.get('is_insert')
     pk_field_configs = payload.get("pk_field_config")
     pk_field_configs = utils.json_dumps(pk_field_configs)
-
     result = []
     cursor_pg = utils.get_cursor_pg(id)
 
@@ -285,9 +284,9 @@ def table__detail(request, id, table_id):
         'feature_name': feature.feature_id,
         'theme_name': package.theme_id,
         'package_name': package.package_id,
-        'pk_field_name': store_field_config['pk_field_name'],
-        'pk_start_index': store_field_config['pk_start_index'],
-        'pk_field_type': store_field_config['pk_field_type']
+        'pk_field_name': store_field_config.get('pk_field_name') or '',
+        'pk_start_index': store_field_config.get('pk_start_index') or '',
+        'pk_field_count': store_field_config.get('pk_field_count') or '',
     }
 
     return JsonResponse({
@@ -796,9 +795,10 @@ def _get_count_of_table(cursor, table_name):
 
 def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name, pk_field_type):
     type_in = ['inte', 'numb', 'nume', 'doub']
-    start_field = '{}'.format(start_data)
+    start_field = ''' '{}' '''.format(start_data)
     if pk_field_type[:4] in type_in:
         start_field = int(start_data)
+
     sql = '''
         SELECT
             {pk_field_name},
@@ -901,23 +901,35 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
     pk_field_config = ano_db_table_pg.field_config_index
     pk_field_config = utils.json_load(pk_field_config)
     feature_id = feature.feature_id
-    _delete_datas_of_pg(unique_id, feature_id)
+    # хуучин датаг утсгах хэсэг
+    # _delete_datas_of_pg(unique_id, feature_id)
 
     table_geo_data = list(
         filter(lambda x: x['property_id'] == 'geo_datas', columns)
     )[0]['table_field']
 
     table_fields = _get_row_to_list('table_field', columns, False)
-    last_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+
+    last_geo_data = MGeoDatas.objects.all().order_by('-created_on').first()
+
+    if last_geo_data:
+        last_geo_id = last_geo_data.geo_id
+    else:
+        last_geo_id = feature.feature_code + '__' +  int_to_str(1)
 
     try:
-        count = _get_count_of_table(cursor, table_name)
-        start_data = str(pk_field_config['pk_start_index'])
-        pk_field_name = pk_field_config['pk_field_name']
-        pk_field_type = pk_field_config['pk_field_type']
+        start_data = pk_field_config.get('pk_start_index') or ""
+        pk_field_name = pk_field_config.get('pk_field_name') or ""
+        pk_field_type = pk_field_config.get('pk_field_type') or ""
+        count = pk_field_config.get('pk_field_count') or ''
+
+        if not count:
+            count = _get_count_of_table(cursor, table_name)
+
         current_data_counts = 0
         current_geo_id = last_geo_id
-        while current_data_counts < count:
+
+        while current_data_counts < int(count):
             m_datas_object = []
             geo_data_objs = []
             ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type)

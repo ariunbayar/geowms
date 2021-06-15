@@ -70,7 +70,8 @@ export default class SelectField extends Component {
     render() {
         const { default_value, label,
                 default_text, option_key, option_name,
-                opt_key, name_key, className, data_list
+                opt_key, name_key, className, data_list,
+                option_text
         } = this.props
         const state = this.state
         let title = label ? label : ''
@@ -92,15 +93,15 @@ export default class SelectField extends Component {
                             <optgroup
                                 key={idx}
                                 label={ data[name_key] }
-                                value={default_text}
+                                value={default_value}
                             >
                             {
-                                    OptionComp (data[opt_key], option_key, option_name)
+                                    OptionComp (data[opt_key], option_key, option_name, option_text)
                             }
                             </optgroup>
                         )
                     :
-                        OptionComp (data_list, option_key, option_name)
+                        OptionComp (data_list, option_key, option_name, option_text)
                 }
                 </select>
 
@@ -110,7 +111,7 @@ export default class SelectField extends Component {
 }
 
 
-function OptionComp (options_data,  option_key, option_name){
+function OptionComp (options_data,  option_key, option_name, option_text){
     const options =
         (options_data && options_data.length >0)
         &&
@@ -121,7 +122,7 @@ function OptionComp (options_data,  option_key, option_name){
                     value={row[option_key]}
 
                 >
-                    {row[option_name]}
+                    {option_text ? row[option_text] : row[option_name]}
                 </option>
             )
     return options

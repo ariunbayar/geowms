@@ -18,13 +18,15 @@ def update_existing_connections(apps, schema_editor):
                     field_config_index = {
                         "pk_field_name": '',
                         "pk_start_index": '',
-                        "pk_field_type": ''
+                        "pk_field_type": '',
+                        "pk_field_count": ''
                     }
                     table_config = json_load(ano_conn_table.field_config_index)
                     if table_config:
                         field_config_index['pk_field_name'] = table_config.get('pk_field_name') or ''
                         field_config_index['pk_start_index'] = table_config.get('pk_start_index') or ''
                         field_config_index['pk_field_type'] = table_config.get('pk_field_type') or ''
+                        field_config_index['pk_field_count'] = table_config.get('pk_field_count') or ''
 
                     ano_conn_table.field_config_index = json_dumps(field_config_index)
                     ano_conn_table.save()
