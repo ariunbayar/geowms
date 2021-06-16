@@ -96,11 +96,10 @@ def proxy(request, base_url, token, pk=None):
         else:
             raise Exception()
 
-
-    qs_request = queryargs.get('REQUEST', 'no request')
-    base_url_wfs = base_url.replace('ows', 'wfs')
-    service_url = _get_service_url(request, token)
-    content = replace_src_url(content, base_url_wfs, service_url)
+        service_type = request.GET.get('SERVICE')
+        qs_request = queryargs.get('REQUEST', 'no request')
+        service_url = _get_service_url(request, token)
+        content = replace_src_url(content, base_url, service_url, service_type)
 
     WMSLog.objects.create(
         qs_all=dict(queryargs),
@@ -152,8 +151,8 @@ def json_proxy(request, base_url, token, code):
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
     service_url = request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[token, code]))
-    base_url_wfs = base_url.replace('ows', 'wfs')
-    rsp.content = replace_src_url(rsp.content, base_url_wfs, service_url)
+    service_type = request.GET.get('SERVICE')
+    rsp.content = replace_src_url(rsp.content, base_url, service_url, service_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
     WMSLog.objects.create(
@@ -395,20 +394,16 @@ def qgis_proxy(request, base_url, token):
         content = replace_src_url(content, 'featureMembers', 'Members')
 
     if request.GET.get('REQUEST') != 'GetMap':
-        service = 'ows'
         if request.GET.get('SERVICE') == 'WFS':
             content = filter_layers_wfs(content, allowed_layers)
-            service = 'wfs'
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
             raise Exception()
 
         service_url = _get_qgis_service_url(request, token)
-
-        base_url = 'https://192.168.10.15/{service_type}'.format(service_type=service)
-
-        content = replace_src_url(content, base_url, service_url)
+        service_type = request.GET.get('SERVICE')
+        content = replace_src_url(content, base_url, service_url, service_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
 
