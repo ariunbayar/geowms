@@ -1847,6 +1847,9 @@ def _get_choices(Model, field_name):
 @ajax_required
 def get_select_values(request, payload):
     org_id = payload.get('org_id')
+    if not org_id:
+        employee = get_object_or_404(Employee, user=request.user)
+        org_id = employee.org_id
 
     qs = Position.objects
     qs = qs.filter(org_id=org_id)
