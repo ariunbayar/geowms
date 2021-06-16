@@ -1,3 +1,4 @@
+import re
 from backend.inspire.models import LFeatures, LPackages, LProperties
 import requests
 from django.http import HttpResponse
@@ -331,7 +332,6 @@ def _get_service_url(request, wms):
 @require_GET
 @user_passes_test(lambda u: u.is_superuser)
 def proxy(request, wms_id):
-
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -344,7 +344,9 @@ def proxy(request, wms_id):
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
         service_url = _get_service_url(request, wms)
-        content = replace_src_url(content, wms.url, service_url)
+        rep_url = wms.url
+        service_type = request.GET.get('SERVICE')
+        content = replace_src_url(content, rep_url, service_url, service_type)
 
     content_type = rsp.headers.get('content-type')
 
