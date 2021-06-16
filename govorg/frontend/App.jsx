@@ -23,6 +23,7 @@ const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
+const Position = React.lazy(() => import('./Role/Position'));
 const LLCRequest = React.lazy(() => import("./LLCRequest"));
 
 const Tseg = React.lazy(() => import('./Bundles/TsegPersonal'));
@@ -106,11 +107,14 @@ export class App extends Component {
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
+                                {
+                                    employee.is_admin &&
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/position/" text="Албан тушаал"></MenuItem>
+                                }
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 {
-                                    employee.is_admin
-                                    &&
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                                    employee.is_admin &&
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
                                 }
                                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
                             </ul>
@@ -220,6 +224,7 @@ export class App extends Component {
 
                                 <Route path="/gov/perm/region/" component={MapRegion} />
                                 <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
+                                <Route path="/gov/perm/position/" component={(props) => <Position {...props} org_roles={org_role} employee={employee}/> } />
                                 <Route path="/gov/role/role/" component={Role} />
                                 <Route
                                     path="/gov/org/map/:tid/:pid/:fid/"
