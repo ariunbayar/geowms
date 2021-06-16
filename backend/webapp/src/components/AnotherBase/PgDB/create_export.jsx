@@ -40,6 +40,7 @@ export default class  ExportCreate extends Component {
             pk_start_index: '',
             pk_field_type: "",
             pk_field_count: "",
+            pk_field_max_range: "",
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -72,6 +73,7 @@ export default class  ExportCreate extends Component {
                 form_datas['pk_start_index'] = form_datas.pk_start_index
                 form_datas['pk_field_type'] = form_datas.pk_field_type
                 form_datas['pk_field_count'] = form_datas.pk_field_count
+                form_datas['pk_field_max_range'] = form_datas.pk_field_max_range
                 this.setState({ ...form_datas, is_loading: false })
             }
         })
@@ -187,19 +189,25 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index, pk_field_type, pk_field_count} = this.state
+        const {
+            id, table_id, table_name, matched_feilds,
+            feature_name, geo_data_field, pk_field_name,
+            pk_start_index, pk_field_type, pk_field_count,
+            pk_field_max_range
+        } = this.state
             this.setState({ is_loading: true })
             var pk_field_config = {
                 "pk_field_name": pk_field_name,
                 "pk_start_index": pk_start_index,
                 "pk_field_type": pk_field_type,
-                "pk_field_count": pk_field_count
+                "pk_field_count": pk_field_count,
+                "pk_field_max_range": pk_field_max_range,
             }
 
             var values = {
-                    'table_field': geo_data_field,
-                    'property_id': 'geo_datas',
-                    'data_type': 'geom'
+                'table_field': geo_data_field,
+                'property_id': 'geo_datas',
+                'data_type': 'geom'
             }
 
             var all_fields = matched_feilds.concat(values)
@@ -352,7 +360,7 @@ export default class  ExportCreate extends Component {
             ano_table_names, ano_table_fields,
             matched_feilds, geo_data_field, check_data_type,
             check_error, pk_field_name, pk_start_index,
-            pk_field_type, pk_field_count
+            pk_field_type, pk_field_count,pk_field_max_range
         } = this.state
         return (
             <div className="card p-2">
@@ -472,7 +480,7 @@ export default class  ExportCreate extends Component {
                                         className="col-md-6 m-1 border rounded mr-auto"
                                         name='inspire_property'
                                     >
-                                        Эхний өгөгдлийн утга
+                                        Дата-ны эхний утга
                                     </span>&nbsp;
                                     <input
                                         name='pk_field_type'
@@ -482,6 +490,27 @@ export default class  ExportCreate extends Component {
                                         value={pk_start_index}
                                         className={`form-control col-md-5 m-1 `}
                                         onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
+                                    >
+                                    </input>
+                                </div>
+                            </div>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                    <span
+                                        className="col-md-6 m-1 border rounded mr-auto"
+                                        name='inspire_property'
+                                    >
+                                        Дата-ны эцсийн утга
+                                    </span>&nbsp;
+                                    <input
+                                        name='pk_field_type'
+                                        type="text"
+                                        id='pk_field_type'
+                                        value={pk_field_max_range}
+                                        className={`form-control col-md-5 m-1 `}
+                                        onChange={(e) => {this.setState({pk_field_max_range: e.target.value})}}
                                     >
                                     </input>
                                 </div>
