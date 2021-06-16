@@ -1880,3 +1880,9 @@ def get_feature_from_layer_code(layer_code):
     feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
     feature = feature_qs.first()
     return feature
+
+
+def get_employee_from_user(user):
+    Employee = apps.get_model("backend_org", "Employee")
+    employee = get_object_or_404(Employee, user=user)
+    return employee

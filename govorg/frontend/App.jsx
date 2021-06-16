@@ -103,16 +103,17 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Байгууллага">
                             <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 {
-                                    employee.is_admin
-                                    &&
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                                    employee.is_admin &&
+                                        <>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                                        </>
                                 }
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
