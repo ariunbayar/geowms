@@ -61,6 +61,9 @@ export class RoleDetail extends Component {
                     this.setState({ role_name, role_description, roles, is_continue: true })
                 }
             })
+            .catch(() => {
+                this.props.history.goBack()
+            })
     }
 
     render() {
