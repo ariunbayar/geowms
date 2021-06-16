@@ -107,10 +107,13 @@ def _get_org_request(ob, employee):
         geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
+    description = ob.description
     if ob.llc_request_id:
         project_name = _get_ann_and_project_name(ob.llc_request_id, [])
+        description = ob.llc_request.description
 
     return {
+        'description': description,
         'change_request_id': ob.id,
         'old_geo_id': ob.old_geo_id,
         'new_geo_id': ob.new_geo_id,
@@ -483,6 +486,7 @@ def request_reject(request, payload):
                 break
             if action_type == 'reject':
                 _check_group_items(change_req_obj)
+                change_req_obj.description = payload.get("desc")
                 change_req_obj.state = ChangeRequest.STATE_REJECT
                 change_req_obj.group_id = None
                 change_req_obj.save()

@@ -1,7 +1,5 @@
 import React, { Component } from "react"
 import ChangeRequestModal from './changeRequestModal'
-import {service} from './service'
-
 
 export class ChangeRequestTable extends Component {
 
@@ -47,6 +45,7 @@ export class ChangeRequestTable extends Component {
           old_geo_id,
           change_request_id,
           project_name,
+          description,
         } = this.props.values
         return (
             <tr className="text-center">
@@ -84,38 +83,31 @@ export class ChangeRequestTable extends Component {
                 <td>
                     {project_name}
                 </td>
-                {
-                    state =='ШИНЭ' || state == 'ХЯНАХ' ?
-                        <td>
-                            <button className="btn btn-primary" onClick={this.handleRequestOpen}>
-                                {state == 'ШИНЭ' ? 'ДЭЛГЭРЭНГҮЙ' : 'ХЯНАХ'}
-                            </button>
-                            {
-                                is_model_request_open
-                                &&
-                                    <ChangeRequestModal
-                                        modalClose={this.handleRequestClose}
-                                        geo_json = {geo_json}
-                                        form_json = {form_json}
-                                        title="Илгээсэн хүсэлт"
-                                        kind={kind}
-                                        id = {id}
-                                        state = {state}
-                                        feature_id = {feature_id}
-                                        theme_id = {theme_id}
-                                        old_geo_id = {old_geo_id}
-                                        change_request_id = {change_request_id}
-                                        getAll={this.props.getAll}
-                                    />
-                            }
-                        </td>
-                        :
-                        <td>
-                        </td>
-                }
+                <td>
+                    <button className="btn btn-primary" onClick={this.handleRequestOpen}>
+                        {state == 'ХЯНАХ' ? 'ХЯНАХ' : 'ДЭЛГЭРЭНГҮЙ'}
+                    </button>
+                    {
+                        is_model_request_open
+                        &&
+                            <ChangeRequestModal
+                                modalClose={this.handleRequestClose}
+                                geo_json={geo_json}
+                                form_json={form_json}
+                                title="Илгээсэн хүсэлт"
+                                kind={kind}
+                                id={id}
+                                state={state}
+                                description={description}
+                                feature_id={feature_id}
+                                theme_id={theme_id}
+                                old_geo_id={old_geo_id}
+                                change_request_id={change_request_id}
+                                getAll={this.props.getAll}
+                            />
+                    }
+                </td>
             </tr>
         )
-
     }
-
 }

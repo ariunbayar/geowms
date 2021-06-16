@@ -1,4 +1,4 @@
-import React, {Component, Fragment} from "react"
+import React, { Component, Fragment, useState } from "react"
 import RequestMap from './Map/Map'
 
 import {service} from './service'
@@ -13,28 +13,26 @@ export const get_modal_text = (kind) => {
     return text
 }
 
-export const FormJson = ({form_json, handleModalOpen, modalClose, values}) => {
+export const FormJson = ({form_json, modalChange, modalClose, values, cancelWarningRequest}) => {
     return (
         <div className="col-md-4 overflow-auto text-justify" style={{height:"calc( 90vh - 85px - 15px)"}}>
             {
-                handleModalOpen && !values.llc_request_id
+                modalChange && !values.llc_request_id
                 ?
                 <div className="row">
                     <div className="col-md-4">
                         <button
                             className="btn gp-btn-primary"
-                            onClick={() => handleModalOpen(
+                            onClick={() => modalChange(
                                 'reject',
                                 'fa fa-exclamation-circle',
                                 'warning',
                                 "Тохиргоог татгалзах",
-                                `Та ${
-                                    get_modal_text(values.kind)
-                                }
-                                татгалзахдаа итгэлтэй байна уу?`,
+                                `Та ${get_modal_text(values.kind)} татгалзахдаа итгэлтэй байна уу?`,
                                 true,
                                 "татгалзах",
-                                modalClose
+                                modalClose,
+                                cancelWarningRequest,
                             )}
                         >
                             Татгалзах
@@ -43,15 +41,12 @@ export const FormJson = ({form_json, handleModalOpen, modalClose, values}) => {
                     <div className="ml-auto kindmr-3">
                         <button
                             className="btn gp-btn-outline-primary"
-                            onClick={() => handleModalOpen(
+                            onClick={() => modalChange(
                                 'approve',
                                 'fa fa-exclamation-circle',
                                 'warning',
                                 "Тохиргоог зөвшөөрөх",
-                                `Та ${
-                                    get_modal_text(values.kind)
-                                }
-                                зөвшөөрөхдөө итгэлтэй байна уу?`,
+                                `Та ${get_modal_text(values.kind)} зөвшөөрөхдөө итгэлтэй байна уу?`,
                                 true,
                                 "зөвшөөрөх",
                                 modalClose
@@ -64,7 +59,7 @@ export const FormJson = ({form_json, handleModalOpen, modalClose, values}) => {
             :
                 null
             }
-            {handleModalOpen && <hr/>}
+            {modalChange && <hr/>}
             {
                 form_json
                 ?
@@ -123,6 +118,7 @@ export default class RequestModal extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.getDesc = this.getDesc.bind(this)
+        this.cancelWarningRequest = this.cancelWarningRequest.bind(this)
     }
 
     handleModalOpen(){
@@ -149,7 +145,7 @@ export default class RequestModal extends Component {
         return {ids, feature_id}
     }
 
-    handleModalAction(){
+    handleModalAction() {
         const { selected_value, values, desc, action_type } = this.state
 
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
@@ -283,7 +279,7 @@ export default class RequestModal extends Component {
         }
     }
 
-    modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
+    modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose, modalAction=this.handleModalAction) {
         this.setState({
             action_type,
             modal_icon,
@@ -292,7 +288,8 @@ export default class RequestModal extends Component {
             text,
             has_button,
             action_name,
-            modalClose
+            modalClose,
+            modalAction,
         })
         this.handleModalOpen()
     }
@@ -304,6 +301,46 @@ export default class RequestModal extends Component {
 
     getDesc(e) {
         this.state.desc = e.target.value
+    }
+
+    cancelWarningRequest() {
+        this.modalChange(
+            'reject',
+            'fa fa-exclamation-circle',
+            'warning',
+            "Тохиргоог татгалзах",
+            DescInput,
+            true,
+            "татгалзах",
+            null,
+        )
+    }
+
+    cancelRequest() {
+        const { values } = this.props
+        this.modalChange(
+            'reject',
+            'fa fa-exclamation-circle',
+            'warning',
+            "Тохиргоог татгалзах",
+            `Та ${
+                values.length == 1
+                    ?
+                        get_modal_text(values[0].kind)
+                    :
+                values.length > 1
+                    ?
+                        `сонгосон ${values.length} геометр өгөгдлөө`
+                    :
+                    null
+            }
+            татгалзахдаа итгэлтэй байна уу?`,
+            true,
+            "татгалзах",
+            null,
+            this.cancelWarningRequest
+        )
+
     }
 
     render () {
@@ -357,7 +394,7 @@ export default class RequestModal extends Component {
                                                             ?
                                                                 form_json && <FormJson form_json={form_json}/>
                                                             :
-                                                                selected_form_json && <FormJ    son form_json={selected_form_json} handleModalOpen={this.modalChange} modalClose={this.modalClose} values={selected_value}/>
+                                                                selected_form_json && <FormJson form_json={selected_form_json} cancelWarningRequest={() => this.cancelWarningRequest()} modalChange={this.modalChange} modalClose={this.modalClose} values={selected_value}/>
                                                         }
                                                         <div className={selected_form_json || (values.length == 1 && form_json) ? "col-md-8" : "col-md-12"}>
                                                             <RequestMap values={values} selectedFeature={this.selectedFeature}/>
@@ -380,27 +417,7 @@ export default class RequestModal extends Component {
                                                 ?
                                                     <button
                                                         type="button mr-2 ml-2"
-                                                        onClick={() => this.modalChange(
-                                                            'reject',
-                                                            'fa fa-exclamation-circle',
-                                                            'warning',
-                                                            "Тохиргоог татгалзах",
-                                                            `Та ${
-                                                                values.length == 1
-                                                                    ?
-                                                                        get_modal_text(values[0].kind)
-                                                                    :
-                                                                values.length > 1
-                                                                    ?
-                                                                        `сонгосон ${values.length} геометр өгөгдлөө`
-                                                                    :
-                                                                    null
-                                                            }
-                                                            татгалзахдаа итгэлтэй байна уу?`,
-                                                            true,
-                                                            "татгалзах",
-                                                            null
-                                                        )}
+                                                        onClick={() => this.cancelRequest()}
                                                         className="btn gp-btn-primary waves-effect waves-light"
                                                     >
                                                         <i className="fa fa-check-square-o">Татгалзах</i>
@@ -481,7 +498,7 @@ export default class RequestModal extends Component {
                         title={this.state.title}
                         has_button={this.state.has_button}
                         text={this.state.text}
-                        modalAction={this.handleModalAction}
+                        modalAction={this.state.modalAction}
                         actionNameDelete={this.state.action_name}
                         modalClose={this.state.modalClose}
                         getDesc={this.getDesc}
@@ -494,14 +511,31 @@ export default class RequestModal extends Component {
 }
 
 function DescInput(props) {
+
+    const [value, setValue] = useState('')
+    const [is_invalid, setInValid] = useState(false)
+
+    const handleOnChange = (e) => {
+        let value = e.target.value
+        if (!value) setInValid(true)
+        else setInValid(false)
+        setValue(value)
+        props.getDesc(e)
+    }
+
     return (
         <div>
             <label htmlFor="desc">Тайлбар:</label>
             <textarea
-                className="form-control"
+                className={`form-control ${is_invalid ? "is-invalid" : ""}`}
                 id="desc"
-                onChange={props.getDesc}
+                onChange={handleOnChange}
             ></textarea>
+            {
+                is_invalid
+                &&
+                    <span className="invalid-feedback">Тайлбар оруулна уу</span>
+            }
         </div>
     )
 }
