@@ -50,7 +50,8 @@ export class LLCDetail extends Component {
         this.modalChange(
             'Багажны мэдээлэл',
             DetailModal,
-            this.modalChange, values
+            this.modalChange,
+            values
         )
     }
 
