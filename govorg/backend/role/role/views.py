@@ -1,8 +1,8 @@
-from django.http.response import Http404
-from govorg.backend import org
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.http.response import Http404
 from django.db import transaction
 from main.decorators import ajax_required
 
@@ -285,32 +285,29 @@ def _get_emp_roles_data_display(emp_role):
 @require_GET
 @ajax_required
 def detail(request, pk):
-    employee = utils.get_employee_from_user(request.user)
-    allowed_org_id = employee.org_id
-    is_admin = employee.is_admin
-    emp_role = get_object_or_404(EmpRole, pk=pk)
-    gov_perm_id = emp_role.gov_perm_id
-    allowed_gov_perm = get_object_or_404(GovPerm, id=gov_perm_id)
-    org_id = allowed_gov_perm.org_id
-
-    if allowed_org_id == org_id and is_admin:
-        rsp = {
-            'role_id': emp_role.id,
-            'role_name': emp_role.name,
-            'role_description': emp_role.description,
-            'gov_perm_id': emp_role.gov_perm.id,
-            'roles': _get_emp_roles_data_display(emp_role),
-            'success': True,
-        }
-
-        return JsonResponse(rsp)
-    else:
+    org = utils.get_org_from_user(request.user, )
+    if not org:
         raise Http404
 
+    emp_role = get_object_or_404(EmpRole, pk=pk)
+    allowed_gov_perm = get_object_or_404(GovPerm, id=emp_role.gov_perm_id)
+    if org.id != allowed_gov_perm.org_id:
+        raise Http404
+
+    rsp = {
+        'role_id': emp_role.id,
+        'role_name': emp_role.name,
+        'role_description': emp_role.description,
+        'gov_perm_id': emp_role.gov_perm.id,
+        'roles': _get_emp_roles_data_display(emp_role),
+        'success': True,
+    }
+    return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
+@login_required
 def delete(request, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     emp_role = get_object_or_404(EmpRole, pk=pk)

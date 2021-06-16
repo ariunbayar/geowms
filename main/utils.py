@@ -1882,7 +1882,12 @@ def get_feature_from_layer_code(layer_code):
     return feature
 
 
-def get_employee_from_user(user):
+def get_org_from_user(user, is_admin=True):
     Employee = apps.get_model("backend_org", "Employee")
-    employee = get_object_or_404(Employee, user=user)
-    return employee
+    emp_qs = Employee.objects
+    emp_qs = emp_qs.filter(user=user)
+    if is_admin:
+        emp_qs = emp_qs.filter(is_admin=is_admin)
+    if not emp_qs:
+        return False
+    return emp_qs.first().org
