@@ -162,9 +162,10 @@ function saveErguul(values, emp_id, point, photo, erguul_id) {
     return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
 }
 
-function getSelectValue() {
+function getSelectValue(org_id) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({ org_id }),
     }
     return fetch(`${prefix}/get-select-values/`, requestOptions).then(handleResponse)
 }

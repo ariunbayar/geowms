@@ -8,7 +8,7 @@ from django.db.models import CharField, Value
 from django.contrib.postgres.search import SearchVector
 
 from geoportal_app.models import User
-from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
+from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from backend.payment.models import Payment
@@ -127,7 +127,7 @@ def _get_role_name(item):
 
 
 def _get_position_name(postition_id, item):
-    position = DefaultPosition.objects.filter(id=postition_id).first()
+    position = Position.objects.filter(id=postition_id).first()
     position_name = position.name
     return position_name
 

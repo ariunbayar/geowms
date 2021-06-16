@@ -34,7 +34,7 @@ from backend.inspire.models import EmpPermInspire
 from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
 from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
@@ -582,6 +582,29 @@ def org_add(request, payload, level):
                     updated_by=gov_role_inspire.updated_by,
                 ))
             GovPermInspire.objects.bulk_create(objs)
+
+        def_pos = [
+            "Байхгүй",
+            "Сайд",
+            "Дэд сайд",
+            "Төрийн нарийн бичгийн дарга",
+            "Дарга",
+            "Орлогч дарга",
+            "Тэргүүн дэд",
+            "Газрын дарга",
+            "Хэлтсийн дарга",
+            "Ахлах шинжээч",
+            "Шинжээч",
+            "Ахлах мэргэжилтэн",
+            "Мэргэжилтэн",
+            "Зөвлөх"
+        ]
+
+        for pos in def_pos:
+            Position.objects.create(
+                name=pos,
+                org=org
+            )
 
         return JsonResponse({'success': True})
 
@@ -1820,12 +1843,13 @@ def _get_choices(Model, field_name):
     return choices
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_select_values(request):
+def get_select_values(request, payload):
+    org_id = payload.get('org_id')
 
-    qs = DefaultPosition.objects
-    qs = qs.all()
+    qs = Position.objects
+    qs = qs.filter(org_id=org_id)
     positions = list(qs.values())
 
     states = _get_choices(Employee, 'state')

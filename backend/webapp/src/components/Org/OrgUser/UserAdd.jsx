@@ -81,7 +81,8 @@ export class UserAdd extends Component {
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
-        this.getSelectValue()
+        const org_id = this.props.match.params.id
+        this.getSelectValue(org_id)
         if(org_emp){
             this.handleGetAll(org_emp)
         }
@@ -90,9 +91,9 @@ export class UserAdd extends Component {
         }
     }
 
-    getSelectValue() {
+    getSelectValue(org_id) {
         service
-            .getSelectValue()
+            .getSelectValue(org_id)
             .then(({ success, positions, states, pro_classes }) => {
                 if (success) {
                     this.setState({ positions, states, pro_classes })
