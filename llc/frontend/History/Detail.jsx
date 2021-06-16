@@ -37,7 +37,6 @@ export class Detail extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
-                        // description: form_field['description'],
                         desc: form_field['desc'],
                     })
                 }
