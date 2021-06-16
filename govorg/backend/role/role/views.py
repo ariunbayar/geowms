@@ -42,6 +42,7 @@ def _get_role_data_display(role):
 
 @require_GET
 @ajax_required
+@login_required
 def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -63,6 +64,7 @@ def list(request):
 
 @require_POST
 @ajax_required
+@login_required
 def role_list(request, payload):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -169,6 +171,7 @@ def _role_name_validation(payload, role):
 
 @require_POST
 @ajax_required
+@login_required
 def create(request, payload):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
@@ -196,6 +199,7 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+@login_required
 def update(request, payload, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
@@ -284,6 +288,7 @@ def _get_emp_roles_data_display(emp_role):
 
 @require_GET
 @ajax_required
+@login_required
 def detail(request, pk):
     org = utils.get_org_from_user(request.user, )
     if not org:
