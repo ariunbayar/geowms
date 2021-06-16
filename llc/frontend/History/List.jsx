@@ -2,24 +2,7 @@ import React, { Component, Fragment } from "react";
 
 import { PortalDataTable } from '@utils/DataTable/index'
 import { service } from "../Request/service";
-
-export const makeStateColor = (state) => {
-    let color
-    if (state == "ШИНЭ") color = 'text-success'
-    else if (state == "ШИЙДВЭРЛЭГДСЭН") color = 'text-primary'
-    else  color = 'text-warning'
-    return color
-}
-
-export const makeKindColor = (kind) => {
-    let color
-    if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
-    else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
-    else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
-    else if (kind == "БУЦААГДСАН") color = 'text-danger'
-    else if (kind == "ШИНЭ") color = 'text-primary'
-    return color
-}
+import { makeStateColor, makeKindColor } from '../helpers/service'
 
 export class List extends Component {
 
@@ -129,7 +112,7 @@ export class List extends Component {
                                         ?
                                             choices['kind'].map((choice, idx) =>
                                                 <option
-                                                    ey={idx}
+                                                    key={idx}
                                                     name='kind'
                                                     value={choice[0]}
                                                 >
