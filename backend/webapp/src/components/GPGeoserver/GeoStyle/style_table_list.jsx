@@ -8,17 +8,6 @@ export class StyleTableList extends Component {
     constructor(props) {
         super(props)
 
-        this.state = {
-            modal_status: "closed"
-        }
-
-        this.handleModalOpen = this.handleModalOpen.bind(this)
-    }
-
-    handleModalOpen() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
     }
 
     render() {
@@ -37,21 +26,10 @@ export class StyleTableList extends Component {
                     </NavLink>
                 </td>
                 <td>
-                    <a href="#" onClick={this.handleModalOpen}>
+                    <a href="#" onClick={this.props.handleRemove}>
                         <GPIcon icon={"fa fa-trash-o text-danger"}/>
                     </a>
                 </td>
-                <Modal
-                    modal_status={this.state.modal_status}
-                    modal_icon='fa fa-exclamation-circle'
-                    icon_color="warning"
-                    title='Тохиргоог устгах'
-                    text={`Та "${value}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`}
-                    has_button={true}
-                    modalAction={this.props.handleRemove}
-                    actionNameDelete="Тийм"
-                    actionNameBack="Үгүй"
-                />
             </tr>
         )
     }
