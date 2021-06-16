@@ -82,6 +82,7 @@ def _get_geom(geo_id, fid):
 def _get_org_request(ob, employee):
 
     geo_json = []
+    project_name = ''
     old_geo_data = []
     current_geo_json = []
     feature_name = LFeatures.objects.filter(feature_id=ob.feature_id).first().feature_name
@@ -106,6 +107,9 @@ def _get_org_request(ob, employee):
         geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
+    if ob.llc_request_id:
+        project_name = _get_ann_and_project_name(ob.llc_request_id, [])
+
     return {
         'change_request_id': ob.id,
         'old_geo_id': ob.old_geo_id,
@@ -129,6 +133,7 @@ def _get_org_request(ob, employee):
         'org': employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
+        'project_name': project_name
     }
 
 
@@ -136,16 +141,19 @@ def _get_org_request(ob, employee):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
-    org_request = []
+    org_request_list = []
     employee = get_object_or_404(Employee, user=request.user)
-    org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by("-created_at")
+    org_request_qs = ChangeRequest.objects
+    org_request_qs = org_request_qs.exclude(form_json__isnull=True, geo_json__isnull=True, group_id__isnull=True)
+    org_request_qs = org_request_qs.filter(employee_id=employee.id)
+    org_request_qs = org_request_qs.order_by("-created_at")
 
-    if org_request_list:
-        org_request = [_get_org_request(ob, employee) for ob in org_request_list]
-        if org_request[0] != '':
+    if org_request_qs:
+        org_request_list = [_get_org_request(ob, employee) for ob in org_request_qs]
+        if org_request_list[0] != '':
             rsp = {
                 'success': True,
-                'org_request': org_request,
+                'org_request': org_request_list,
             }
         else:
             rsp = {
