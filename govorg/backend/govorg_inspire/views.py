@@ -924,9 +924,9 @@ def _check_file_for_geom(form_file_name, uniq_name, ext):
     file_type_name = ''
     uniq_file_name = ''
 
-    if ext == 'shp':
-        exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
-    elif ext == 'gml':
+    # if ext == 'shp':
+    #     exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
+    if ext == 'gml':
         exts = ['.gml', '.gfs']
     elif ext == 'geojson':
         exts = ['.geojson', '.gfs']
