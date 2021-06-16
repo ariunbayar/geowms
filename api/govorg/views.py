@@ -347,7 +347,7 @@ def _get_request_content(base_url, request, geo_id, headers):
         if request.GET.get('REQUEST') == 'GetMap':
             queryargs = {
                 **request.GET,
-                'cql_filter': cql_filter,
+                'cql_filter': cql_filter
             }
 
         else:
@@ -358,7 +358,7 @@ def _get_request_content(base_url, request, geo_id, headers):
                 'typeName': request.GET.get('TYPENAME'),
                 'srsName': 'EPSG:4326',
                 'outputFormat': 'gml3',
-                'cql_filter': _get_cql_filter(geo_id)
+                'cql_filter': cql_filter
             }
         rsp = requests.post(base_url, queryargs,  headers=headers, timeout=300, verify=False)
     else:
@@ -391,7 +391,7 @@ def qgis_proxy(request, base_url, token):
 
     if request.GET.get('REQUEST') == 'GetFeature':
         content = rsp.content
-        content = replace_src_url(content, 'featureMembers', 'Members')
+        content = replace_src_url(content, 'featureMembers', 'Members', None)
 
     if request.GET.get('REQUEST') != 'GetMap':
         if request.GET.get('SERVICE') == 'WFS':
