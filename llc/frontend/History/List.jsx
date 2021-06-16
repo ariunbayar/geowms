@@ -56,24 +56,20 @@ export class List extends Component {
         this.setState({ refresh: !this.state.refresh })
     }
 
-    handleSearch(e) {
+    handleSearch(e, field) {
         let custom_query = Object()
         var value = parseInt(e.target.value)
 
-        var table_data = e.target.selectedIndex
-        var optionElement = e.target.childNodes[table_data]
-        var selected_data_name =  optionElement.getAttribute('name')
-
-        if (selected_data_name == 'state') {
+        if (field == 'state') {
             if (e.target.value) custom_query['state'] = value
+            else delete custom_query['state']
             if (this.state.kind) custom_query['kind'] = this.state.kind
         }
         else {
             if (value) custom_query['kind'] = value
             if (this.state.state) custom_query['state'] = this.state.state
         }
-
-        this.setState({ custom_query, [selected_data_name]: value })
+        this.setState({ custom_query, [field]: value })
     }
 
     render() {
@@ -87,7 +83,7 @@ export class List extends Component {
                                 <label htmlFor="">Төлөв</label>
                                 <select
                                     className="form-control form-control-xs"
-                                    onChange={(e) => this.handleSearch(e)}
+                                    onChange={(e) => this.handleSearch(e, 'state')}
                                 >
                                     <option value="">--- Төлөвөөр хайх ---</option>
                                     {
@@ -104,7 +100,7 @@ export class List extends Component {
                             <div className="col-md-6">
                                 <label htmlFor="">Өөрчлөлт</label>
                                 <select className="form-control form-control-sm disabled"
-                                    onChange={(e) => this.handleSearch(e)}
+                                    onChange={(e) => this.handleSearch(e, 'kind')}
                                 >
                                     <option value="">--- Өөрчлөлтөөр хайх ---</option>
                                     {
