@@ -141,7 +141,8 @@ export class StyleList extends Component {
                             <div className="float-sm-right">
                                 <NavLink
                                     className="btn gp-btn-primary waves-effect waves-light btn-sm"
-                                    to="/back/gp-geoserver/style/add/">
+                                    to="/back/gp-geoserver/style/add/"
+                                >
                                     Нэмэх
                                 </NavLink>
                             </div>
@@ -159,7 +160,7 @@ export class StyleList extends Component {
                             </thead>
                             <tbody>
                                 { currentStyles.length ===0 ?
-                                    <tr><th>geoserver дээр style бүртгэлгүй байна</th></tr>:
+                                    <tr className="text-center"><th colSpan="4">geoserver дээр style бүртгэлгүй байна</th></tr>:
 
                                     currentStyles.map((value, idx) =>
                                         <StyleTableList
