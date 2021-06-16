@@ -7,7 +7,7 @@ import Modal from '@utils/Modal/Modal'
 import RequestModal from  './RequestModal'
 import { service } from "./service";
 
-export const make_state_color = (state) => {
+export const makeStateColor = (state) => {
     let color
     if (state == "ШИНЭ") color = 'text-success'
     else if (state == "ШИЙДВЭРЛЭГДСЭН") color = 'text-primary'
@@ -15,7 +15,7 @@ export const make_state_color = (state) => {
     return color
 }
 
-export const make_kind_color = (kind) => {
+export const makeKindColor = (kind) => {
     let color
     if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
     else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
@@ -89,8 +89,8 @@ export class Detail extends Component {
             ],
             жагсаалтын_холбоос: '/llc/backend/llc-request-list/',
             хувьсах_талбарууд: [
-                {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
-                {"field": "kind", "action": (values) => make_kind_color(values), "action_type": true},
+                {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
+                {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
             ],
             нэмэлт_талбарууд: [
                     {
