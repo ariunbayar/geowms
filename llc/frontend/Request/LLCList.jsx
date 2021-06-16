@@ -264,7 +264,7 @@ export class Detail extends Component {
                             </div>
                             <div className="col-md-6">
                                 <label htmlFor="">Өөрчлөлт</label>
-                                <select className="form-control form-control-sm disabled"
+                                <select className="form-control form-control-xs"
                                     onChange={(e) => this.handleSearch(e, 'kind')}
                                 >
                                     <option value="">--- Өөрчлөлтөөр хайх ---</option>
