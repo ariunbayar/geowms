@@ -3,7 +3,6 @@ import StyleMap from "./Map"
 import { service } from './service'
 import ShowStyleData from './style_data'
 import Modal from "@utils/Modal/Modal"
-import { modes } from "codemirror"
 
 
 export class CreateStyle extends Component {
@@ -59,6 +58,8 @@ export class CreateStyle extends Component {
         this.handleStyleDetial = this.handleStyleDetial.bind(this)
         this.handleSetStyleValues = this.handleSetStyleValues.bind(this)
         this.handleSetXml = this.handleSetXml.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
     componentDidMount() {
@@ -95,10 +96,19 @@ export class CreateStyle extends Component {
         }
         else
         {
-            this.setState({
-                modal_status: 'open', modal_text: 'Буруу форматтай файл байна',
-                modal_icon: 'fa fa-times-circle', icon_color: 'danger'
-            })
+            this.modalChange(
+                'fa fa-times-circle',
+                null,
+                'danger',
+                'Буруу форматтай файл байна',
+                '',
+                false,
+                '',
+                '',
+                null,
+                null,
+            )
+
         }
 
     }
@@ -341,11 +351,32 @@ export class CreateStyle extends Component {
         }
         service.createStyle(values, style_name, style_title, style_abstract, style_update, old_style_name).then(({success, info}) =>{
             if (success) {
-                this.setState({modal_status: 'open', modal_text: info})
-                this.props.history.push("/back/gp-geoserver/style/")
+                this.modalChange(
+                    'fa fa-check-circle',
+                    null,
+                    'success',
+                    info,
+                    '',
+                    false,
+                    '',
+                    '',
+                    null,
+                    () => this.props.history.push("/back/gp-geoserver/style/"),
+                )
             }
             else {
-                this.setState({modal_status: 'open', modal_text: info, modal_icon: 'fa fa-times-circle', icon_color: 'danger'})
+                this.modalChange(
+                    'fa fa-times-circle',
+                    null,
+                    'danger',
+                    info,
+                    '',
+                    false,
+                    '',
+                    '',
+                    null,
+                    null,
+                )
             }
         })
     }
@@ -378,6 +409,30 @@ export class CreateStyle extends Component {
             }
         }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
     render() {
             const {
                 range_number,
@@ -389,8 +444,7 @@ export class CreateStyle extends Component {
                 check_style_name, wellknownname,
                 wellknowshape, div_angle, only_clicked,
                 single_select_datas, geom_type,
-                data_state, modal_status, modal_icon, icon_color,
-                modal_text, sld_file, check_style_content, desing_file_content
+                data_state, check_style_content, desing_file_content
 
             } = this.state
             var style_update = this.props.match.params.style_name
@@ -574,12 +628,17 @@ export class CreateStyle extends Component {
                         </button>
                     </div>
                     <Modal
-                        modal_status={modal_status}
-                        modal_icon={modal_icon}
-                        icon_color={icon_color}
-                        title='STYLE ХАДГАЛАХ'
-                        text={modal_text}
-                        modalAction={this.modalAction}
+                        modal_status={ this.state.modal_status }
+                        modal_icon={ this.state.modal_icon }
+                        modal_bg={ this.state.modal_bg }
+                        icon_color={ this.state.icon_color }
+                        title={ this.state.title }
+                        text={ this.state.text }
+                        has_button={ this.state.has_button }
+                        actionNameBack={ this.state.actionNameBack }
+                        actionNameDelete={ this.state.actionNameDelete }
+                        modalAction={ this.state.modalAction }
+                        modalClose={ this.state.modalClose }
                     />
                 </div>
             )

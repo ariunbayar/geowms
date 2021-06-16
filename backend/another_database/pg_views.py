@@ -1,4 +1,3 @@
-import json
 from geojson import feature
 from backend import another_database
 import datetime
@@ -7,14 +6,13 @@ from django.utils import timezone
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.views.decorators.http import require_POST, require_GET
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.db import connections
 from django.shortcuts import get_object_or_404
 
 from backend.another_database.models import AnotherDatabase
 from backend.another_database.models import AnotherDatabaseTable
-from backend.dedsanbutets.models import ViewNames
 
 from main.components import Datatable
 from django.views.decorators.csrf import csrf_exempt
@@ -37,6 +35,9 @@ from backend.inspire.models import (
     MGeoDatas,
     MDatas
 )
+
+
+SELECTCOUNT = 100
 
 
 @require_GET
@@ -239,7 +240,6 @@ def save_table(request, payload):
     is_insert = payload.get('is_insert')
     pk_field_configs = payload.get("pk_field_config")
     pk_field_configs = utils.json_dumps(pk_field_configs)
-
     result = []
     cursor_pg = utils.get_cursor_pg(id)
 
@@ -273,16 +273,20 @@ def save_table(request, payload):
 def table__detail(request, id, table_id):
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
     field_config = another_db_tb.field_config.replace("'", '"')
+    field_config_index = another_db_tb.field_config_index.replace("'", '"')
     field_config = utils.json_load(field_config)
+    store_field_config = utils.json_load(field_config_index)
     feature = LFeatures.objects.filter(feature_code=another_db_tb.feature_code).first()
     package = LPackages.objects.filter(package_id=feature.package_id).first()
-
     form_datas = {
         'id_list': field_config,
         'table_name': another_db_tb.table_name,
         'feature_name': feature.feature_id,
         'theme_name': package.theme_id,
-        'package_name': package.package_id
+        'package_name': package.package_id,
+        'pk_field_name': store_field_config.get('pk_field_name') or '',
+        'pk_start_index': store_field_config.get('pk_start_index') or '',
+        'pk_field_count': store_field_config.get('pk_field_count') or '',
     }
 
     return JsonResponse({
@@ -750,7 +754,7 @@ def get_table_fields(request, payload, pk):
         attrelid = '{table_name}'::regclass AND    attnum > 0
         ORDER  BY attnum
     '''.format(
-        table_name = table_name,
+        table_name=table_name,
     )
 
     columns = utils.get_sql_execute(sql, cursor_pg, 'all')
@@ -789,21 +793,26 @@ def _get_count_of_table(cursor, table_name):
     return datas[0]['count']
 
 
-def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name):
+def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name, pk_field_type):
+    type_in = ['inte', 'numb', 'nume', 'doub']
+    start_field = ''' '{}' '''.format(start_data)
+    if pk_field_type[:4] in type_in:
+        start_field = int(start_data)
+
     sql = '''
         SELECT
             {pk_field_name},
             {columns}
         FROM public.{table_name}
-        WHERE CAST ({pk_field_name} AS INTEGER) >= {start} ORDER BY {pk_field_name} ASC
-        limit 100
-
+        WHERE {pk_field_name} >= {start_field} ORDER BY {pk_field_name} ASC
+        limit {select_count}
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
         table_geo_data=table_geo_data,
-        start=start_data,
-        pk_field_name=pk_field_name
+        start_field=start_field,
+        pk_field_name=pk_field_name,
+        select_count=SELECTCOUNT,
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
@@ -811,16 +820,10 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_f
 
 
 def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
-    geo_data = _geojson_to_geom(ona_data[table_geo_data])
-    geom =utils.convert_3d_with_srid(geo_data)
-    # new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
-
-    # new_geo = MGeoDatas.objects.create(
-    #     geo_id=new_geo_id,
-    #     geo_data=geom,
-    #     feature_id=feature.feature_id,
-    #     created_by=unique_id
-    # )
+    geom = None
+    if ona_data[table_geo_data]:
+        geo_data = _geojson_to_geom(ona_data[table_geo_data])
+        geom =utils.convert_3d_with_srid(geo_data)
     m_datas_object = MGeoDatas(
         geo_id=new_geo_id,
         geo_data=geom,
@@ -867,7 +870,6 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
     return m_datas_object
 
 
-
 def _get_row_to_list(field_name, dict_data, table_field):
     row_list = []
     for i in dict_data:
@@ -889,6 +891,7 @@ def _get_row_to_list(field_name, dict_data, table_field):
 def str_to_int(geo_id):
     return int(geo_id[-9:])
 
+
 def int_to_str(number):
     return str(number).zfill(9)
 
@@ -900,27 +903,39 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
     pk_field_config = ano_db_table_pg.field_config_index
     pk_field_config = utils.json_load(pk_field_config)
     feature_id = feature.feature_id
-    _delete_datas_of_pg(unique_id, feature_id)
+    # хуучин датаг утсгах хэсэг
+    # _delete_datas_of_pg(unique_id, feature_id)
 
     table_geo_data = list(
         filter(lambda x: x['property_id'] == 'geo_datas', columns)
     )[0]['table_field']
 
-
     table_fields = _get_row_to_list('table_field', columns, False)
-    last_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
+
+    last_geo_data = MGeoDatas.objects.filter(feature_id=feature_id).order_by('-created_on').first()
+
+    if last_geo_data:
+        last_geo_id = last_geo_data.geo_id
+    else:
+        last_geo_id = feature.feature_code + '__' +  int_to_str(1)
+
     try:
-        count = _get_count_of_table(cursor, table_name)
-        start_data = str(pk_field_config['pk_start_index'])
-        pk_field_name = pk_field_config['pk_field_name']
+        start_data = pk_field_config.get('pk_start_index') or ""
+        pk_field_name = pk_field_config.get('pk_field_name') or ""
+        pk_field_type = pk_field_config.get('pk_field_type') or ""
+        count = pk_field_config.get('pk_field_count') or ''
+
+        if not count:
+            count = _get_count_of_table(cursor, table_name)
+
         current_data_counts = 0
         current_geo_id = last_geo_id
-        while current_data_counts < count:
+        while current_data_counts < int(count):
             m_datas_object = []
             geo_data_objs = []
-            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name)
+            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type)
             start_data = ona_table_datas[-1][pk_field_name]
-            for ona_data in ona_table_datas[0:99]:
+            for ona_data in ona_table_datas[0:SELECTCOUNT-1]:
                 current_geo_id = str_to_int(current_geo_id)
                 current_geo_id = current_geo_id + 1
                 new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
@@ -934,14 +949,14 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
                 success_count = success_count + 1
             MGeoDatas.objects.bulk_create(geo_data_objs)
             MDatas.objects.bulk_create(m_datas_object)
-            current_data_counts = current_data_counts + 100
-
+            current_data_counts = current_data_counts + SELECTCOUNT
     except Exception:
+        failed_count += 1
         pass
 
-    failed_count = count - success_count
     return success_count, failed_count, count
 
+data = MGeoDatas.objects.filter(created_by=-13).count()
 
 def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     table_info = []

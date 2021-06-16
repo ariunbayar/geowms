@@ -39,6 +39,7 @@ export default class  ExportCreate extends Component {
             pk_field_name: "",
             pk_start_index: '',
             pk_field_type: "",
+            pk_field_count: "",
         }
         this.handleChange = this.handleChange.bind(this)
         this.getInspireTree = this.getInspireTree.bind(this)
@@ -67,6 +68,10 @@ export default class  ExportCreate extends Component {
                 form_datas['selected_packages'] = this.getArray(packages, form_datas.theme_name)
                 form_datas['selected_features'] = this.getArray(features, form_datas.package_name)
                 form_datas['matched_feilds'] = form_datas.id_list
+                form_datas['pk_field_name'] = form_datas.pk_field_name
+                form_datas['pk_start_index'] = form_datas.pk_start_index
+                form_datas['pk_field_type'] = form_datas.pk_field_type
+                form_datas['pk_field_count'] = form_datas.pk_field_count
                 this.setState({ ...form_datas, is_loading: false })
             }
         })
@@ -105,41 +110,49 @@ export default class  ExportCreate extends Component {
         return seleted_datas
     }
 
-    handleChange(name, e) {
+    handleChange(name, selection) {
         const { packages, features } = this.state
-        const selected_value = e.target.value
+        var selected_value = ''
         var data_list = {}
         var seleted_datas = []
-        if ( name == 'theme' ) {
-            data_list['theme_name'] = selected_value
-            seleted_datas = this.getArray(packages, selected_value)
-            data_list['selected_packages'] = seleted_datas
-            data_list['feature_name'] = ''
-            data_list['matched_feilds'] = []
-            data_list['selected_features'] = []
+        if (name == 'pk_field_name') {
+            data_list['pk_field_name'] = selection.column_name
+            data_list['pk_field_type'] = selection.data_type
         }
 
-        else if ( name == 'package' ) {
-            if (selected_value) {
-                data_list['package_name'] = selected_value
-                seleted_datas = this.getArray(features, selected_value)
-                data_list['selected_features'] = seleted_datas
+        else{
+            selected_value = selection.code
+            if ( name == 'theme' ) {
+                data_list['theme_name'] = selected_value
+                seleted_datas = this.getArray(packages, selected_value)
+                data_list['selected_packages'] = seleted_datas
                 data_list['feature_name'] = ''
                 data_list['matched_feilds'] = []
-            }
-            else {
-                data_list['feature_name'] = ''
                 data_list['selected_features'] = []
             }
-        }
 
-        else {
-            data_list['feature_name'] = selected_value
-        }
+            else if ( name == 'package' ) {
+                if (selected_value) {
+                    data_list['package_name'] = selected_value
+                    seleted_datas = this.getArray(features, selected_value)
+                    data_list['selected_features'] = seleted_datas
+                    data_list['feature_name'] = ''
+                    data_list['matched_feilds'] = []
+                }
+                else {
+                    data_list['feature_name'] = ''
+                    data_list['selected_features'] = []
+                }
+            }
 
-        if (! selected_value) {
-            // data_list['selected_features'] = []
-            data_list['feature_name'] = ''
+            else {
+                data_list['feature_name'] = selected_value
+            }
+
+            if (! selected_value) {
+                // data_list['selected_features'] = []
+                data_list['feature_name'] = ''
+            }
         }
         this.setState({ ...data_list })
     }
@@ -174,12 +187,13 @@ export default class  ExportCreate extends Component {
     }
 
     handleSave(){
-        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index} = this.state
+        const {id, table_id, table_name, matched_feilds, feature_name, geo_data_field, pk_field_name, pk_start_index, pk_field_type, pk_field_count} = this.state
             this.setState({ is_loading: true })
-
             var pk_field_config = {
                 "pk_field_name": pk_field_name,
-                "pk_start_index": pk_start_index
+                "pk_start_index": pk_start_index,
+                "pk_field_type": pk_field_type,
+                "pk_field_count": pk_field_count
             }
 
             var values = {
@@ -318,7 +332,7 @@ export default class  ExportCreate extends Component {
         data_type_list[data_key].properties[prop_key]['form_state'] = type
 
         if (!type){
-            if (check_data_type >-1) {
+            if (check_data_type > -1) {
                 list_check_error = list_check_error.filter((val) => val != prop_id)
             }
         }
@@ -338,6 +352,7 @@ export default class  ExportCreate extends Component {
             ano_table_names, ano_table_fields,
             matched_feilds, geo_data_field, check_data_type,
             check_error, pk_field_name, pk_start_index,
+            pk_field_type, pk_field_count
         } = this.state
         return (
             <div className="card p-2">
@@ -367,24 +382,36 @@ export default class  ExportCreate extends Component {
                 </div>
                 <div className="form-row col-md-12 p-4 mx-1">
                     <SelectField
-                        title_name='theme'
+                        state_name='theme'
+                        label="Theme"
+                        option_name = "name"
+                        option_key = "code"
                         data_list={themes}
-                        defualt_value={theme_name}
-                        defualt_text={'theme-ийн нэр сонгоно уу'}
+                        default_value={theme_name}
+                        className={"col-md-4"}
+                        default_text={'theme-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
-                        title_name='package'
+                        state_name='package'
+                        label="package"
+                        option_name = "name"
+                        option_key = "code"
                         data_list={selected_packages}
-                        defualt_value={package_name}
-                        defualt_text={'package-ийн нэр сонгоно уу'}
+                        default_value={package_name}
+                        className={"col-md-4"}
+                        default_text={'package-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
-                        title_name='feature'
+                        state_name='feature'
+                        label="feature"
                         data_list={selected_features}
-                        defualt_value={feature_name}
-                        defualt_text={'feature-ийн нэр сонгоно уу'}
+                        option_name = "name"
+                        option_key = "code"
+                        default_value={feature_name}
+                        className={"col-md-4"}
+                        default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                 </div>
@@ -405,7 +432,7 @@ export default class  ExportCreate extends Component {
                                         <span
                                             className={"col-md-5 m-1 border rounded form-control" + ( !geo_data_field ? ' is-invalid border-danger' : '')}
                                             name='inspire_property'
-                                            title={!geo_data_field && 'Геометр талбаргүй хүснэгт байна !!!'}
+                                            title={!geo_data_field ? 'Геометр талбаргүй хүснэгт байна !!!': ''}
                                         >
                                             {geo_data_field}
                                         </span>
@@ -423,27 +450,16 @@ export default class  ExportCreate extends Component {
                                         >
                                             Давтагдашгүй талбар
                                         </span>&nbsp;
-                                        <select
-                                            name='pk_field_name'
-                                            id='pk_field_name'
-                                            className={`form-control col-md-5 m-1 `}
-                                            value={pk_field_name}
-                                            onChange={(e) => this.setState({ pk_field_name: e.target.value })}
-                                        >
-                                            <option value=''></option>
-                                            {
-                                                (ano_table_fields && Object.keys(ano_table_fields).length >0)
-                                                &&
-                                                ano_table_fields.map((value, idy) =>
-                                                    <option
-                                                        key = {idy}
-                                                        value={value.column_name}
-                                                        name = {value.data_type}
-                                                        id = {idy}
-                                                >{value.column_name}</option>
-                                                )
-                                            }
-                                        </select>
+                                        <SelectField
+                                            state_name='pk_field_name'
+                                            data_list={ano_table_fields}
+                                            option_name = "data_type"
+                                            option_key = "column_name"
+                                            option_text = 'column_name'
+                                            default_value={pk_field_name}
+                                            className={"d-flex col-md-5 m-1 p-0 align-items-middle"}
+                                            handleSelectField={this.handleChange}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -452,30 +468,52 @@ export default class  ExportCreate extends Component {
                             </div>
                             <div className='col-md-9 px-0'>
                                 <div className='row d-flex mr-3'>
-                                        <span
-                                            className="col-md-6 m-1 border rounded mr-auto"
-                                            name='inspire_property'
-                                        >
-                                            Эхний өгөгдлийн утга
-                                        </span>&nbsp;
-                                        <input
-                                            name='pk_field_type'
-                                            type="text"
-                                            id='pk_field_type'
-                                            placeholder="ӨСӨХ ЭРЭМБЭЭР"
-                                            className={`form-control col-md-5 m-1 `}
-                                            onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
-                                        >
-                                        </input>
-                                    </div>
+                                    <span
+                                        className="col-md-6 m-1 border rounded mr-auto"
+                                        name='inspire_property'
+                                    >
+                                        Эхний өгөгдлийн утга
+                                    </span>&nbsp;
+                                    <input
+                                        name='pk_field_type'
+                                        type="text"
+                                        id='pk_field_type'
+                                        placeholder="ӨСӨХ ЭРЭМБЭЭР"
+                                        value={pk_start_index}
+                                        className={`form-control col-md-5 m-1 `}
+                                        onChange={(e) => {this.setState({pk_start_index: e.target.value})}}
+                                    >
+                                    </input>
                                 </div>
                             </div>
+                            <div className='col-md-3 '>
+                            </div>
+                            <div className='col-md-9 px-0'>
+                                <div className='row d-flex mr-3'>
+                                    <span
+                                        className="col-md-6 m-1 border rounded mr-auto"
+                                        name='inspire_property'
+                                    >
+                                        Оруулах өгөгдлийн тоо хэмжээ
+                                    </span>&nbsp;
+                                    <input
+                                        name='pk_field_type'
+                                        type="number"
+                                        id='pk_field_type'
+                                        value={pk_field_count}
+                                        className={`form-control col-md-5 m-1 `}
+                                        onChange={(e) => {this.setState({pk_field_count: e.target.value})}}
+                                    >
+                                    </input>
+                                </div>
+                            </div>
+                        </div>
                         <hr />
                     {
                         data_type_list && data_type_list.length > 0
                         ?
                             data_type_list.map((data_type_data, idx) =>
-                                <>
+                                <Fragment key={idx}>
                                     <div className="form-row mr-3">
                                         <div className='form-group col-md-3 align-self-center text-center px-2 '>
                                             <b className="text-wrap">{data_type_data.data_type_name}</b><br/>
@@ -486,7 +524,7 @@ export default class  ExportCreate extends Component {
                                                 data_type_data.properties && data_type_data.properties.length > 0
                                                 ?
                                                     data_type_data.properties.map((property_data, idy) =>
-                                                        <FieldForm
+                                                        <FieldForm key={idy}
                                                             data_key={idx}
                                                             prop_key={idy}
                                                             property_data={property_data}
@@ -502,7 +540,7 @@ export default class  ExportCreate extends Component {
                                         </div>
                                     </div>
                                     <hr />
-                                </>
+                                </Fragment>
                             )
                         : null
                     }
