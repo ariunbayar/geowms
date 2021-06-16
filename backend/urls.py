@@ -248,6 +248,7 @@ urlpatterns = [
         path('style-detail/', geoserver_views.style_detail),
         path('conver-sld-json/', geoserver_views.conver_sld_json),
         path('ws-list/', geoserver_views.get_ws_list),
+        path('refresh-view-by-crontab/', geoserver_views.refresh_view_by_crontab),
     ], 'geoserver'))),
 
     re_path('^.*', webapp_views.index, name='webapp'),

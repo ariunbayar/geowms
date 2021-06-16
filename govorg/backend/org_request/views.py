@@ -771,6 +771,8 @@ def request_approve(request, payload):
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
     request_ids = payload.get("ids")
     feature_id = payload.get("feature_id")
+    is_refresh = payload.get("ref_in_direct")
+
     success = False
     new_geo_id = None
 
@@ -865,11 +867,17 @@ def request_approve(request, payload):
                     'info': 'Танд баталгаажуулах эрх алга байна.'
                 }
 
-        refreshMaterializedView(feature_id)
-        rsp = {
+        if is_refresh:
+            refreshMaterializedView(feature_id)
+            rsp = {
             'success': True,
             'info': 'Амжилттай баталгаажуулж дууслаа'
-        }
+            }
+        else:
+            rsp = {
+            'success': True,
+            'info': 'Хүсэлтийг хүлээн авлаа'
+            }
 
     return JsonResponse(rsp)
 

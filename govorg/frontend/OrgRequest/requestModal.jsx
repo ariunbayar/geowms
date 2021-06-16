@@ -150,6 +150,11 @@ export default class RequestModal extends Component {
     }
 
     handleModalAction(){
+        var ref_in_direct = document.getElementById("directRef").checked
+
+        if (!ref_in_direct){
+            ref_in_direct = false
+        }
         const { selected_value, values, desc, action_type } = this.state
 
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
@@ -161,7 +166,7 @@ export default class RequestModal extends Component {
             this.handleRequestReject(ids, feature_id, desc, action_type)
         }
         if(action_type == 'approve') {
-            this.handleRequestApprove(ids, feature_id)
+            this.handleRequestApprove(ids, feature_id, ref_in_direct)
         }
     }
 
@@ -211,9 +216,9 @@ export default class RequestModal extends Component {
             })
     }
 
-    handleRequestApprove(ids, feature_id){
+    handleRequestApprove(ids, feature_id, ref_in_direct){
         service
-            .requestApprove(ids, feature_id)
+            .requestApprove(ids, feature_id, ref_in_direct)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -448,18 +453,7 @@ export default class RequestModal extends Component {
                                                     'fa fa-exclamation-circle',
                                                     'warning',
                                                     "Тохиргоог зөвшөөрөх",
-                                                    `Та ${
-                                                        values.length == 1
-                                                            ?
-                                                                get_modal_text(values[0].kind)
-                                                            :
-                                                        values.length > 1
-                                                            ?
-                                                                `сонгосон ${values.length} геометр өгөгдлөө`
-                                                            :
-                                                            null
-                                                    }
-                                                    зөвшөөрөхдөө итгэлтэй байна уу?`,
+                                                    RefreshView,
                                                     true,
                                                     "зөвшөөрөх",
                                                     null
@@ -485,6 +479,7 @@ export default class RequestModal extends Component {
                         actionNameDelete={this.state.action_name}
                         modalClose={this.state.modalClose}
                         getDesc={this.getDesc}
+                        values = {values}
                     />
                 </div>
                 <div className={classNameBackdrop}></div>
@@ -503,5 +498,48 @@ function DescInput(props) {
                 onChange={props.getDesc}
             ></textarea>
         </div>
+    )
+}
+
+
+
+function RefreshView(props) {
+    const { values } = props
+
+    return (
+        <Fragment>
+            <div className="col-md-12 d-flex justify-content-between">
+                <div className="col-md-4 my-auto">
+                    <label>View шинэчлэлт</label>
+                </div>
+                <div className="col-md-8 ml-5 mt-3 ">
+                    <div class="custom-control custom-radio  ">
+                        <input type="radio" className="custom-control-input " id="directRef" name="radio-stacked" required/>
+                        <label className="custom-control-label float-left pt-1" for="directRef">Шууд шинэчлэх</label>
+                    </div>
+                    <div className="custom-control custom-radio  mb-3">
+                            <input type="radio" className="custom-control-input " id="24HourRef" name="radio-stacked" required/>
+                            <label className="custom-control-label float-left pt-1" for="24HourRef">24 цагийн дотор шинэчлэх</label>
+                    </div>
+                </div>
+            </div>
+            <div className="col-md-12">
+                <small>{
+                        `Та ${
+                        values.length == 1
+                            ?
+                                get_modal_text(values[0].kind)
+                            :
+                        values.length > 1
+                            ?
+                                `сонгосон ${values.length} геометр өгөгдлөө`
+                            :
+                            null
+                        }
+                        зөвшөөрөхдөө итгэлтэй байна уу?`
+                    }
+                </small>
+            </div>
+        </Fragment>
     )
 }

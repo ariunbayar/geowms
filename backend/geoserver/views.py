@@ -1,4 +1,8 @@
+from backend.inspire.models import MGeoDatas
+
 from django.db.models import base
+from django.db.models import Count
+
 import requests
 from requests.api import request
 from requests.auth import HTTPBasicAuth
@@ -12,6 +16,7 @@ from django.db import connections
 from geojson import FeatureCollection
 
 from main import geoserver, update_cache_layer
+from main import utils
 from main.decorators import get_conf_geoserver, ajax_required
 from .models import WmtsCacheConfig
 from geoportal_app.models import User
@@ -416,6 +421,35 @@ def check_geoserver_wms(request):
 
                 wms_layer.delete()
             qs.delete()
+
+    return JsonResponse({'success': True})
+
+@require_GET
+@csrf_exempt
+def refresh_view_by_crontab(request):
+
+    feature_ids = list()
+
+    wmts_configs = WmtsCacheConfig.objects.all()
+    get_features = (MGeoDatas.objects
+        .values('feature_id')
+        .annotate(f_count=Count('feature_id'))
+        .order_by()
+    )
+
+    for feature in get_features:
+        feature_ids.append(feature['feature_id'])
+
+    for wmts_config in wmts_configs:
+        if wmts_config.feature_id:
+            if wmts_config.feature_id in feature_ids:
+                m_datas = list(get_features.filter(feature_id=wmts_config.feature_id))
+                m_data = m_datas[0]
+                f_count = m_data['f_count']
+                if wmts_config.feature_count != f_count:
+                    utils.refreshMaterializedView(wmts_config.feature_id)
+                    wmts_config.feature_count = f_count
+                    wmts_config.save()
 
     return JsonResponse({'success': True})
 
