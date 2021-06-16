@@ -1,3 +1,4 @@
+import re
 from backend.inspire.models import LFeatures, LPackages, LProperties
 import requests
 from django.http import HttpResponse
@@ -344,7 +345,11 @@ def proxy(request, wms_id):
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
         service_url = _get_service_url(request, wms)
-        content = replace_src_url(content, wms.url, service_url)
+        rep_url = wms.url
+        if 'wms' in rep_url:
+            rep_url = wms.url.replace('wms', 'ows')
+
+        content = replace_src_url(content, rep_url, service_url)
 
     content_type = rsp.headers.get('content-type')
 

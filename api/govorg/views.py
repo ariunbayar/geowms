@@ -1,3 +1,4 @@
+from frontend.page.views import service
 from django.db.models import base
 import requests
 import json
@@ -352,20 +353,18 @@ def _get_request_content(base_url, request, geo_id, headers):
 
         else:
             queryargs = {
-                'service':'WFS',
-                'request':'GetFeature',
-                'version':'1.0.0',
-                'typeName':'gp_bu:gp_layer_building_b_view',
-                'srsName':'EPSG:4326',
+                'service': 'WFS',
+                'request': 'GetFeature',
+                'version': '1.0.0',
+                'typeName': request.GET.get('TYPENAME'),
+                'srsName': 'EPSG:4326',
                 'outputFormat': 'gml3',
                 'cql_filter': _get_cql_filter(geo_id)
             }
-
-        rsp = requests.post(base_url, queryargs,  headers=headers, timeout=5, verify=False)
-
+        rsp = requests.post(base_url, queryargs,  headers=headers, timeout=300, verify=False)
     else:
         queryargs = request.GET
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=300, verify=False)
 
     return rsp, queryargs
 
@@ -389,23 +388,26 @@ def qgis_proxy(request, base_url, token):
     }
 
     rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
-
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetFeature':
         content = rsp.content
         content = replace_src_url(content, 'featureMembers', 'Members')
 
-    if request.GET.get('REQUEST') == 'GetCapabilities':
+    if request.GET.get('REQUEST') != 'GetMap':
+        service = 'ows'
         if request.GET.get('SERVICE') == 'WFS':
             content = filter_layers_wfs(content, allowed_layers)
-            base_url = base_url.replace('ows', 'wfs')
+            service = 'wfs'
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
             raise Exception()
 
         service_url = _get_qgis_service_url(request, token)
+
+        base_url = 'https://192.168.10.15/{service_type}'.format(service_type=service)
+
         content = replace_src_url(content, base_url, service_url)
 
     qs_request = queryargs.get('REQUEST', 'no request')
