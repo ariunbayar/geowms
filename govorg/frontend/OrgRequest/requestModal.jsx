@@ -1,9 +1,10 @@
 import React, { Component, Fragment, useState } from "react"
 import RequestMap from './Map/Map'
 
-import {service} from './service'
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
+
+import { service } from './service'
 
 export const get_modal_text = (kind) => {
     let text = ''
@@ -19,45 +20,45 @@ export const FormJson = ({form_json, modalChange, modalClose, values, cancelWarn
             {
                 modalChange && !values.llc_request_id
                 ?
-                <div className="row">
-                    <div className="col-md-4">
-                        <button
-                            className="btn gp-btn-primary"
-                            onClick={() => modalChange(
-                                'reject',
-                                'fa fa-exclamation-circle',
-                                'warning',
-                                "Тохиргоог татгалзах",
-                                `Та ${get_modal_text(values.kind)} татгалзахдаа итгэлтэй байна уу?`,
-                                true,
-                                "татгалзах",
-                                modalClose,
-                                cancelWarningRequest,
-                            )}
-                        >
-                            Татгалзах
-                        </button>
+                    <div className="row">
+                        <div className="col-md-4">
+                            <button
+                                className="btn gp-btn-primary"
+                                onClick={() => modalChange(
+                                    'reject',
+                                    'fa fa-exclamation-circle',
+                                    'warning',
+                                    "Тохиргоог татгалзах",
+                                    `Та ${get_modal_text(values.kind)} татгалзахдаа итгэлтэй байна уу?`,
+                                    true,
+                                    "татгалзах",
+                                    modalClose,
+                                    cancelWarningRequest,
+                                )}
+                            >
+                                Татгалзах
+                            </button>
+                        </div>
+                        <div className="ml-auto kindmr-3">
+                            <button
+                                className="btn gp-btn-outline-primary"
+                                onClick={() => modalChange(
+                                    'approve',
+                                    'fa fa-exclamation-circle',
+                                    'warning',
+                                    "Тохиргоог зөвшөөрөх",
+                                    `Та ${get_modal_text(values.kind)} зөвшөөрөхдөө итгэлтэй байна уу?`,
+                                    true,
+                                    "зөвшөөрөх",
+                                    modalClose
+                                )}
+                            >
+                                Зөвшөөрөх
+                            </button>
+                        </div>
                     </div>
-                    <div className="ml-auto kindmr-3">
-                        <button
-                            className="btn gp-btn-outline-primary"
-                            onClick={() => modalChange(
-                                'approve',
-                                'fa fa-exclamation-circle',
-                                'warning',
-                                "Тохиргоог зөвшөөрөх",
-                                `Та ${get_modal_text(values.kind)} зөвшөөрөхдөө итгэлтэй байна уу?`,
-                                true,
-                                "зөвшөөрөх",
-                                modalClose
-                            )}
-                        >
-                            Зөвшөөрөх
-                        </button>
-                    </div>
-                </div>
-            :
-                null
+                :
+                    null
             }
             {modalChange && <hr/>}
             {

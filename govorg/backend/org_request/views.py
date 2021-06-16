@@ -144,11 +144,11 @@ def _get_org_request(ob, employee):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
-    org_request_list = []
+    org_request_list = list()
     employee = get_object_or_404(Employee, user=request.user)
     org_request_qs = ChangeRequest.objects
     org_request_qs = org_request_qs.exclude(form_json__isnull=True, geo_json__isnull=True, group_id__isnull=True)
-    org_request_qs = org_request_qs.filter(employee_id=employee.id)
+    org_request_qs = org_request_qs.filter(employee=employee)
     org_request_qs = org_request_qs.order_by("-created_at")
 
     if org_request_qs:
