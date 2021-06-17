@@ -1891,3 +1891,10 @@ def get_org_from_user(user, is_admin=True):
     if not emp_qs:
         return False
     return emp_qs.first().org
+
+
+def get_today_datetime(is_string=False):
+    now = datetime.now()
+    if is_string:
+        return datetime_to_string(now)
+    return now

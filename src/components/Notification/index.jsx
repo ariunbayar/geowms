@@ -66,3 +66,36 @@ export class Notif extends Component {
         )
     }
 }
+
+export class DisplayNotif extends Component {
+
+    constructor(props) {
+        super(props);
+        this.too = 0
+        this.state = {
+            show: false
+        }
+        this.addNotif = this.addNotif.bind(this)
+    }
+
+    componentDidMount() {
+        this.props.getNotifFunc(this.addNotif)
+    }
+
+    addNotif(style, msg, icon) {
+        this.too ++
+        this.setState({ show: true, style, msg, icon })
+        const time = setInterval(() => {
+            this.too --
+            this.setState({ show: true })
+            clearInterval(time)
+        }, 3000);
+    }
+
+    render() {
+        const { show, style, msg, icon } = this.state
+        return (
+            <Notif show={show} too={this.too} style={style} msg={msg} icon={icon}/>
+        );
+    }
+}
