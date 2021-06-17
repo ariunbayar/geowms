@@ -97,10 +97,9 @@ def proxy(request, base_url, token, pk=None):
             raise Exception()
 
         service_type = request.GET.get('SERVICE')
-        qs_request = queryargs.get('REQUEST', 'no request')
         service_url = _get_service_url(request, token)
         content = replace_src_url(content, base_url, service_url, service_type)
-
+    qs_request = queryargs.get('REQUEST', 'no request')
     WMSLog.objects.create(
         qs_all=dict(queryargs),
         qs_request=qs_request,
@@ -349,7 +348,6 @@ def _get_request_content(base_url, request, geo_id, headers):
                 **request.GET,
                 'cql_filter': cql_filter
             }
-
         else:
             queryargs = {
                 'service': 'WFS',

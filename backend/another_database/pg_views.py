@@ -37,7 +37,7 @@ from backend.inspire.models import (
 )
 
 
-SELECTCOUNT = 100
+SELECTCOUNT = 1000
 
 
 @require_GET
@@ -891,6 +891,9 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
                         mdata_value[value_type] = ona_data[prop_data['table_field']]
                         if str(mdata_value[value_type])[0] == '0':
                             mdata_value[value_type] = mdata_value[value_type][1:]
+                            if '_' in mdata_value[value_type]:
+                                mdata_value[value_type] = mdata_value[value_type].split('_')[0]
+                        mdata_value[value_type] = int(mdata_value[value_type])
                     elif value_type == "value_date":
 
                         if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
