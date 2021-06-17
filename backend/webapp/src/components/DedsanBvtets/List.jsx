@@ -130,7 +130,7 @@ export class List extends Component {
             this.setState({ info, top_id: '' })
         })
         .catch(() => {
-            alert("Алдаа гарсан байна1")
+            alert("Алдаа гарсан байна")
         })
     }
 
@@ -151,7 +151,7 @@ export class List extends Component {
                 this.setState({ info, top_id: '' })
             })
             .catch(() => {
-                alert("Алдаа гарсан байна2")
+                alert("Алдаа гарсан байна")
             })
         }
         else {
