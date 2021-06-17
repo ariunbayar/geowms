@@ -979,8 +979,6 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         while current_data_counts < int(count):
             m_datas_object = []
             geo_data_objs = []
-            print("ohoh")
-            print("ohoh", start_data)
             ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type, pk_field_max_range)
             start_data = ona_table_datas[-1][pk_field_name]
             for ona_data in ona_table_datas[0:SELECTCOUNT-1]:
