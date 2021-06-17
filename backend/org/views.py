@@ -18,6 +18,7 @@ from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 from django.conf import settings
 from django.forms.models import model_to_dict
+from requests.api import request
 
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
@@ -1972,15 +1973,21 @@ def send_mail(request, pk):
 @require_POST
 @ajax_required
 def position_list(request, payload):
+    user = request.user
+    is_superuser = user.is_superuser
     items = []
+    page = 1
     total_page = 1
     оруулах_талбарууд = ['id', 'name', 'org_id']
-    org = utils.get_org_from_user(request.user)
 
-    if not org:
+    qs = Position.objects
+    org = utils.get_org_from_user(user)
+    if not org and not is_superuser:
         raise Http404
 
-    qs = Position.objects.filter(org=org)
+    if not is_superuser:
+        qs = qs.filter(org=org)
+
     if qs:
         datatable = Datatable(
             model=Position,
@@ -1989,10 +1996,11 @@ def position_list(request, payload):
             оруулах_талбарууд=оруулах_талбарууд
         )
         items, total_page = datatable.get()
+        page = payload.get('page')
 
     rsp = {
         'items': items,
-        'page': payload.get('page'),
+        'page': page,
         'total_page': total_page
     }
 
@@ -2010,8 +2018,9 @@ def _do_emp_have_pos(position, org):
 @require_GET
 @ajax_required
 def remove(request, pk):
+    user = request.user
     org = utils.get_org_from_user(request.user)
-    if not org:
+    if not org and not user.is_superuser:
         raise Http404
 
     position = get_object_or_404(Position, id=pk)
@@ -2043,13 +2052,19 @@ def _pos_name_check(qs_pos, name):
 @ajax_required
 def create(request, payload):
     user = request.user
+    is_superuser = user.is_superuser
     name = payload.get("name")
     org = utils.get_org_from_user(user)
-    if not org:
+    if not org and not is_superuser:
         raise Http404
 
     qs = Position.objects
-    qs_pos = qs.filter(org=org)
+    if is_superuser:
+        org_id = payload.get('org_id')
+        qs_pos = qs.filter(org_id=org_id)
+    else:
+        qs_pos = qs.filter(org=org)
+        org_id = org.id
     has_pos_name = _pos_name_check(qs_pos, name)
 
     if has_pos_name:
@@ -2060,7 +2075,7 @@ def create(request, payload):
     else:
         Position.objects.create(
             name=name,
-            org=org
+            org_id=org_id
         )
         rsp = {
             'success': True,

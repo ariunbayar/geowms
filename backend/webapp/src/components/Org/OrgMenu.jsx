@@ -8,6 +8,7 @@ import {OrgUser} from './OrgUser'
 import {OrgRole} from './OrgRole'
 import {Addresses} from './OrgUsersAddress'
 import {Graph} from './OrgGraph'
+import Position from "@help_comp/Position"
 
 export class OrgMenu extends Component {
 
@@ -21,6 +22,7 @@ export class OrgMenu extends Component {
             allowed_geom: null,
             sistem_count: 0,
             employee_count: null,
+            is_superuser: true, // default value
         }
         this.getOrgName = this.getOrgName.bind(this)
         this.handleSistemCount = this.handleSistemCount.bind(this)
@@ -30,7 +32,7 @@ export class OrgMenu extends Component {
     componentDidMount() {
         Promise.all([
             this.getOrgName(this.state.level),
-            this.handleSistemCount()
+            this.handleSistemCount(),
         ])
     }
 
@@ -63,7 +65,7 @@ export class OrgMenu extends Component {
     }
 
     render() {
-        const { org_name, employee_count, allowed_geom } = this.state
+        const { org_name, employee_count, allowed_geom, is_superuser } = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
@@ -137,6 +139,17 @@ export class OrgMenu extends Component {
                             <span className="hidden-xs"> График мэдээлэл</span>
                         </NavLink>
                     </li>
+
+                    <li className="nav-item gp-text-primary">
+                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/position/`}
+                            className="nav-link"
+                            activeClassName="active"
+                            data-toggle="tab"
+                        >
+                            <i className="fa fa-bar-chart" aria-hidden="true"/>
+                            <span className="hidden-xs">Албан тушаал</span>
+                        </NavLink>
+                    </li>
                 </ul>
                 <div className="tab-content">
                     <Switch>
@@ -163,6 +176,12 @@ export class OrgMenu extends Component {
                         <Route
                             path="/back/байгууллага/түвшин/:level/:id/graph/"
                             component={Graph}
+                        />
+                        <Route
+                            path="/back/байгууллага/түвшин/:level/:id/position/" component={Position}
+                            component={(props) =>
+                                <Position {...props} is_superuser={is_superuser}/>
+                            }
                         />
                     </Switch>
                 </div>

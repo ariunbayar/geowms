@@ -24,6 +24,7 @@ export class PositionAdd extends Component {
             },
             prefix: "/gov/api/role/position/create/",
             modal_status: "closed",
+            is_backend: props.is_backend,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
@@ -31,7 +32,15 @@ export class PositionAdd extends Component {
     }
 
     handleSubmit(form_values, { setStatus, setSubmitting, setErrors }) {
-        const { prefix } = this.state
+        const { prefix, is_backend } = this.state
+        var go_list
+        if (is_backend) {
+            form_values["org_id"] = this.props.match.params.id
+            go_list = `/back/байгууллага/түвшин/${this.props.match.params.level}/${this.props.match.params.id}/position/`
+        }
+        else {
+            go_list = "/gov/perm/position/"
+        }
         service
             .postRequest(prefix, form_values)
             .then(({success, data, error}) => {
@@ -46,7 +55,7 @@ export class PositionAdd extends Component {
                         "",
                         "",
                         null,
-                        () => this.props.history.push("/gov/perm/position/")
+                        () => this.props.history.push(go_list)
                     )
                 }
                 else {

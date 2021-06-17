@@ -12,15 +12,32 @@ export default class Position extends Component {
     }
 
     render() {
-        const employee = this.props.employee
+        const is_superuser = this.props.is_superuser
+        const is_admin = this.props.is_admin
+
+        var allow
+        var is_backend
+        if (is_superuser) {
+            allow = is_superuser
+            is_backend = true
+        }
+        else {
+            allow = is_admin
+            is_backend = false
+        }
 
         return (
             <Switch>
-                {employee.is_admin
+                {allow
                     &&
                     <>
-                        <Route exact path="/gov/perm/position/" component={ (props) => <PositionList {...props} employee={employee} />}/>
-                        <Route exact path="/gov/perm/position/add/" component={ (props) => <PositionAdd {...props} employee={employee} />}/>
+                        {/* gov */}
+                        <Route exact path="/gov/perm/position/" component={ (props) => <PositionList {...props} allow={allow} is_backend={is_backend} />}/>
+                        <Route exact path="/gov/perm/position/add/" component={ (props) => <PositionAdd {...props} allow={allow} is_backend={is_backend} />}/>
+
+                        {/* back */}
+                        <Route exact path="/back/байгууллага/түвшин/:level/:id/position/" component={ (props) => <PositionList {...props} allow={allow} is_backend={is_backend} />}/>
+                        <Route exact path="/back/байгууллага/түвшин/:level/:id/position/add/" component={ (props) => <PositionAdd {...props} allow={allow} is_backend={is_backend} />}/>
 
                     </>
                 }

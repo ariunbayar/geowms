@@ -70,9 +70,6 @@ export class PortalDataTable extends Component {
         if(pp.refresh !== this.props.refresh){
             this.setState({ refresh: this.props.refresh })
         }
-        if(pp.custom_query !== this.props.custom_query){
-            this.setState({ custom_query: this.props.custom_query })
-        }
         if(pp.жагсаалтын_холбоос !== this.props.жагсаалтын_холбоос) {
             this.setState({ жагсаалтын_холбоос: this.props.жагсаалтын_холбоос })
         }
@@ -193,7 +190,7 @@ export class PortalDataTable extends Component {
                         <Pagination
                             refresh={this.state.refresh}
                             current_page={current_page}
-                            custom_query={this.state.custom_query}
+                            custom_query={this.props.custom_query}
                             paginate={this.paginate}
                             query={this.state.query}
                             sort_name={this.state.sort_name}

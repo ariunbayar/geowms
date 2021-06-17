@@ -16,7 +16,7 @@ export class Pagination extends Component {
             sort_name: props.sort_name,
             custom_query: props.custom_query,
             per_page: props.per_page,
-            is_user: this.props.is_user,
+            is_user: props.is_user,
         }
 
         this.loadPage = this.loadPage.bind(this)

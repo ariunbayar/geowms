@@ -11,8 +11,8 @@ class PositionList extends Component {
         this.state={
             refresh: false,
             жагсаалтын_холбоос: `/gov/api/role/position/`,
-            нэмэх_товч: `/gov/perm/position/add/`,
-            custom_query: {},
+            нэмэх_товч: props.is_backend ? `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/position/add/`: `/gov/perm/position/add/`,
+            custom_query: {'org_id': props.match.params.id},
             талбарууд: [
                 {'field': 'name', "title": 'Албан тушаал'},
             ],
@@ -127,11 +127,12 @@ class PositionList extends Component {
             нэмэх_товч,
             нэмэлт_талбарууд,
             is_user,
+            body,
         } = this.state
-        const { is_admin } = this.props.employee
+
         return (
-            <div className="card">
-                <div className="card-body">
+            <div className={`${!this.props.is_backend && "card"}`}>
+                <div className={`${!this.props.is_backend && "card-body"}`}>
                     <div className="col-md-12">
                         <PortalDataTable
                             refresh={refresh}
@@ -141,10 +142,10 @@ class PositionList extends Component {
                             per_page={20}
                             уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                             хувьсах_талбарууд={хувьсах_талбарууд}
-                            нэмэх_товч={is_admin ? нэмэх_товч : null}
+                            нэмэх_товч={нэмэх_товч ? нэмэх_товч : null}
                             custom_query={custom_query}
                             нэмэлт_талбарууд={нэмэлт_талбарууд}
-                            is_user={is_user}
+                            body={body}
                         />
                     </div>
                 </div>
