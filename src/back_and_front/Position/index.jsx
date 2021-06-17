@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 
-import PositionList from "./PositionList"
+import PositionList from "@help_comp/Position/PositionList"
 
 
 export default class Position extends Component {

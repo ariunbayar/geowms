@@ -1965,3 +1965,37 @@ def send_mail(request, pk):
     utils.send_approve_email(user, subject, text)
 
     return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})
+
+
+@require_POST
+@ajax_required
+def position_list(request, payload):
+    items = []
+    total_page = 1
+    # qs = Org.objects.filter(level=level)
+    user = request.user
+    qs = Position.objects
+    print(payload)
+    # if qs:
+    #     qs = qs.annotate(num_employees=Count('employee', distinct=True))
+    #     qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+
+    #     datatable = Datatable(
+    #         model=Org,
+    #         initial_qs=qs,
+    #         payload=payload,
+    #         оруулах_талбарууд=оруулах_талбарууд
+    #     )
+    #     items, total_page = datatable.get()
+
+    # rsp = {
+    #     'items': items,
+    #     'page': payload.get('page'),
+    #     'total_page': total_page
+    # }
+    rsp = {
+        'items': [],
+        'page': 1,
+        'total_page': 1,
+    }
+    return JsonResponse(rsp)

@@ -54,6 +54,7 @@ export const service = {
 }
 
 function list(жагсаалтын_холбоос, page, perpage, query, sort_name, custom_query, is_user){
+    console.log(жагсаалтын_холбоос)
     const requestOptions = {
         ...getPostOptions(),
         body: JSON.stringify({ page, perpage, query, sort_name, custom_query, is_user }),
