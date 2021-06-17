@@ -31,17 +31,13 @@ export default class UsedTools extends Component {
         }
     }
 
-    handleSelectedTool(value_type, value) {
+    handleSelectedTool(value_type, value, idx) {
         var array = [...this.state.selected_tools]
         if(value_type) {
             array = array.concat(value)
         }
         else {
-            for(let [i, layer] of array.entries()) {
-                if(layer.bagaj_dugaar == value.bagaj_dugaar) {
-                    array.splice(i, 1);
-                }
-            }
+            array.splice(idx, 1);
         }
         this.props.values.handleSelectModel(array)
     }
@@ -110,7 +106,7 @@ export default class UsedTools extends Component {
                                                     !info
                                                     ?
                                                         state != "ИЛГЭЭСЭН" &&
-                                                            <a onClick={(e) => this.handleSelectedTool(false, value)}>
+                                                            <a onClick={(e) => this.handleSelectedTool(false, value, idx)}>
                                                                 <GPIcon icon={"fa fa-minus-circle text-danger"}/>
                                                             </a>
                                                     :
