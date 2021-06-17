@@ -1,10 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.http.response import Http404
 from django.db import transaction
-
 from main.decorators import ajax_required
+
+from main import utils
 from backend.org.models import Org, Employee
 from backend.inspire.models import (
     GovPerm,
@@ -40,6 +43,7 @@ def _get_role_data_display(role):
 
 @require_GET
 @ajax_required
+@login_required
 def list(request):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -61,6 +65,7 @@ def list(request):
 
 @require_POST
 @ajax_required
+@login_required
 def role_list(request, payload):
 
     org = get_object_or_404(Org, employee__user=request.user)
@@ -167,6 +172,7 @@ def _role_name_validation(payload, role):
 
 @require_POST
 @ajax_required
+@login_required
 def create(request, payload):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
@@ -194,6 +200,7 @@ def create(request, payload):
 
 @require_POST
 @ajax_required
+@login_required
 def update(request, payload, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     name = payload.get('role_name')
@@ -282,9 +289,16 @@ def _get_emp_roles_data_display(emp_role):
 
 @require_GET
 @ajax_required
+@login_required
 def detail(request, pk):
+    org = utils.get_org_from_user(request.user, )
+    if not org:
+        raise Http404
 
     emp_role = get_object_or_404(EmpRole, pk=pk)
+    allowed_gov_perm = get_object_or_404(GovPerm, id=emp_role.gov_perm_id)
+    if org.id != allowed_gov_perm.org_id:
+        raise Http404
 
     rsp = {
         'role_id': emp_role.id,
@@ -294,12 +308,12 @@ def detail(request, pk):
         'roles': _get_emp_roles_data_display(emp_role),
         'success': True,
     }
-
     return JsonResponse(rsp)
 
 
 @require_GET
 @ajax_required
+@login_required
 def delete(request, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     emp_role = get_object_or_404(EmpRole, pk=pk)

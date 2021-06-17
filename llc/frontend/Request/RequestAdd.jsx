@@ -71,7 +71,7 @@ class SubmitClass extends Component {
                     ?
                         <button
                             type="button"
-                            disabled={`${ !agreed_submit || !values.file_name ? true : ''}`}
+                            disabled={!agreed_submit || !values.file_name ? true : ''}
                             className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
                             onClick ={()=> this.handleSubmit()}
                         >

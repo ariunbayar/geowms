@@ -1,7 +1,5 @@
 import React, { Component } from "react"
 import ChangeRequestModal from './changeRequestModal'
-import {service} from './service'
-
 
 export class ChangeRequestTable extends Component {
 
@@ -45,14 +43,16 @@ export class ChangeRequestTable extends Component {
           feature_id,
           theme_id,
           old_geo_id,
-          change_request_id
+          change_request_id,
+          project_name,
+          description,
         } = this.props.values
         return (
-            <tr>
+            <tr className="text-center">
                 <td>
                     {idx + 1}
                 </td>
-                <td>
+                <td className="text-left">
                     {theme_name + '/'+ package_name + '/' +feature_name}
                 </td>
                 <td>
@@ -67,44 +67,47 @@ export class ChangeRequestTable extends Component {
                 <td>
                     {created_at}
                 </td>
-                {state=='ШИНЭ' ? <td className="text-priamry">ШИНЭ</td>:
-                state=='ТАТГАЛЗСАН' ? <td className="text-danger">ТАТГАЛЗСАН</td>:
-                state=='ЗӨВШӨӨРСӨН' ? <td className="text-success">ЗӨВШӨӨРСӨН</td>:
-                state=='ХЯНАХ' ? <td className="gp-text-primary">ХЯНАХ</td>: null
-                }
-
-                {kind=='ҮҮССЭН' ? <td className="text-success">ҮҮССЭН</td>:
-                kind=='ЗАССАН' ? <td className="text-primary">ЗАССАН</td>:
-                kind=='ЦУЦЛАСАН' ? <td className="text-danger">ЦУЦЛАСАН</td>:
-                kind=='УСТГАСАН' ? <td className="text-danger">УСТГАСАН</td>: null
+                {
+                    state=='ШИНЭ' ? <td className="text-priamry">ШИНЭ</td>:
+                    state=='ТАТГАЛЗСАН' ? <td className="text-danger">ТАТГАЛЗСАН</td>:
+                    state=='ЗӨВШӨӨРСӨН' ? <td className="text-success">ЗӨВШӨӨРСӨН</td>:
+                    state=='ХЯНАХ' ? <td className="gp-text-primary">ХЯНАХ</td>: null
                 }
                 {
-                state =='ШИНЭ' || state == 'ХЯНАХ' ?
-                    <td>
-                    <button className="btn btn-primary" onClick={this.handleRequestOpen}>
-                       {state == 'ШИНЭ' ?  'ДЭЛГЭРЭНГҮЙ' : 'ХЯНАХ'}
-                    </button>
-                    {is_model_request_open &&
-                        <ChangeRequestModal
-                            modalClose={this.handleRequestClose}
-                            geo_json = {geo_json}
-                            form_json = {form_json}
-                            title="Илгээсэн хүсэлт"
-                            kind={kind}
-                            id = {id}
-                            state = {state}
-                            feature_id = {feature_id}
-                            theme_id = {theme_id}
-                            old_geo_id = {old_geo_id}
-                            change_request_id = {change_request_id}
-                            getAll={this.props.getAll}
-                        />
-                    }
-                </td>:<td></td>
+                    kind=='ҮҮССЭН' ? <td className="text-success">ҮҮССЭН</td>:
+                    kind=='ЗАССАН' ? <td className="text-primary">ЗАССАН</td>:
+                    kind=='ЦУЦЛАСАН' ? <td className="text-danger">ЦУЦЛАСАН</td>:
+                    kind=='БУЦААГДСАН' ? <td className="text-danger">БУЦААГДСАН</td>:
+                    kind=='УСТГАСАН' ? <td className="text-danger">УСТГАСАН</td>: null
                 }
+                <td>
+                    {project_name}
+                </td>
+                <td>
+                    <button className="btn btn-primary" onClick={this.handleRequestOpen}>
+                        {state == 'ХЯНАХ' ? 'ХЯНАХ' : 'ДЭЛГЭРЭНГҮЙ'}
+                    </button>
+                    {
+                        is_model_request_open
+                        &&
+                            <ChangeRequestModal
+                                modalClose={this.handleRequestClose}
+                                geo_json={geo_json}
+                                form_json={form_json}
+                                title="Илгээсэн хүсэлт"
+                                kind={kind}
+                                id={id}
+                                state={state}
+                                description={description}
+                                feature_id={feature_id}
+                                theme_id={theme_id}
+                                old_geo_id={old_geo_id}
+                                change_request_id={change_request_id}
+                                getAll={this.props.getAll}
+                            />
+                    }
+                </td>
             </tr>
         )
-
     }
-
 }

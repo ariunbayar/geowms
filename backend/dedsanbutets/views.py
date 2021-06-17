@@ -409,7 +409,7 @@ def make_view(request, payload):
     data_type_ids = list(data_type_c_qs.values_list("data_type_id", flat=True))
 
     property_qs = property_qs.exclude(property_code__iexact='localid')
-    property_qs = property_qs.exclude(value_type_id='data_type')
+    property_qs = property_qs.exclude(value_type_id='data-type')
     property_ids = list(property_qs.values_list("property_id", flat=True))
 
     view_name = utils.make_view_name(feature)
@@ -478,6 +478,7 @@ def propertyFieldsSave(request, payload):
         }
 
     return JsonResponse(rsp)
+
 
 def _check_geoserver_detail(table_name, theme):
     theme_code = theme.theme_code
@@ -867,6 +868,22 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     return layer_responce
 
 
+def _get_value_type_for_view(value_type_id):
+    obj = {
+        'boolean': 'value_text',
+        'date': 'value_date',
+        'double': 'value_number',
+        'link': 'value_text',
+        'multi-select': 'value_text',
+        'multi-text': 'value_text',
+        'single-select': 'value_text',
+        'number': 'value_number',
+        'text': 'value_text',
+    }
+    value_type = obj[value_type_id] if value_type_id in obj else 'value_text'
+    return value_type
+
+
 def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
     ids.sort()
     data = LProperties.objects.filter(property_id__in=ids).order_by('property_id')
@@ -879,7 +896,8 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
             fields.append(row.property_code)
     cols = list()
     for item in data:
-        col = 'Max(Case When a.property_id = {property_id} Then value_text End) As {property_code}'.format(property_id=item.property_id, property_code=item.property_code)
+        value_type = _get_value_type_for_view(item.value_type_id)
+        col = 'Max(Case When a.property_id = {property_id} Then {value_type} End) As {property_code}'.format(value_type=value_type, property_id=item.property_id, property_code=item.property_code)
         cols.append(col)
     try:
         query = '''
@@ -904,15 +922,15 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
                         mg.modified_on,
                         COALESCE(
                                 a.value_text::character varying(1000),
-                                a.value_number::character varying(1000),
-                                a.value_date::character varying(1000),
                                 case when a.code_list_id is null then null
                                 else (
                                     select code_list_name
                                     from l_code_lists
                                     where code_list_id=a.code_list_id
                                 ) end
-                            ) as value_text
+                            ) as value_text,
+                        a.value_number,
+						a.value_date
                     from
                         public.m_datas a
                     inner join

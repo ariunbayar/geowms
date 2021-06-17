@@ -557,31 +557,41 @@ def _get_emp_perm_display(emp_perm):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detail(request, pk):
+    user = request.user
+    qs = Employee.objects
 
-    employee = get_object_or_404(Employee, pk=pk)
-    employee_detail = _get_employee_display(employee)
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    logged_in_employee = qs.filter(user=user).first()
+    allowed_org_id = logged_in_employee.org_id
 
-    role_id = ''
-    role_name = ''
-    perms = None
-    if emp_perm:
-        if emp_perm.emp_role:
-            emp_role = emp_perm.emp_role
-            role_id = emp_role.id
-            role_name = emp_role.name
-        perms = _get_emp_perm_display(emp_perm)
+    employee = get_object_or_404(qs, pk=pk)
+    org_id = employee.org_id
 
-    rsp = {
-        'success': True,
-        'employee_detail': employee_detail,
-        'role_id': role_id,
-        'role_name': role_name,
-        'perms': perms,
+    if allowed_org_id == org_id:
+        employee_detail = _get_employee_display(employee)
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
-    }
+        role_id = ''
+        role_name = ''
+        perms = None
+        if emp_perm:
+            if emp_perm.emp_role:
+                emp_role = emp_perm.emp_role
+                role_id = emp_role.id
+                role_name = emp_role.name
+            perms = _get_emp_perm_display(emp_perm)
 
-    return JsonResponse(rsp)
+        rsp = {
+            'success': True,
+            'employee_detail': employee_detail,
+            'role_id': role_id,
+            'role_name': role_name,
+            'perms': perms,
+
+        }
+
+        return JsonResponse(rsp)
+    else:
+        raise Http404
 
 
 @require_GET

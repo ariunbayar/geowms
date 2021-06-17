@@ -29,6 +29,7 @@ export class UserAdd extends Component {
                 phone_number: '',
                 state: 1,
                 pro_class: '',
+                is_user: true,
             },
             aimag: [],
             sum: [],
@@ -63,7 +64,6 @@ export class UserAdd extends Component {
             states: [],
             pro_classes: [],
 
-            is_user: true,
             modal_status: 'closed',
         }
 
@@ -560,17 +560,15 @@ export class UserAdd extends Component {
                                             </div>
                                             <div className="form-group col-12">
                                                 <label htmlFor='id_is_user'>хэрэглэгч</label>
-                                                <input
-                                                    onChange={(e) => this.setState({ is_user: e.target.checked })}
-                                                    name='is_user'
+                                                <Field
                                                     className="ml-2"
-                                                    type="checkbox"
+                                                    name='is_user'
                                                     id="id_is_user"
-                                                    checked={is_user}
+                                                    type="checkbox"
                                                 />
                                             </div>
                                         </div>
-                                        {org_level ==4 &&
+                                        {org_level == 4 &&
                                             <div className='form-row'>
                                                 <div className="form-group col-12">
                                                     <label htmlFor='id_is_super'>Системийн админ</label>

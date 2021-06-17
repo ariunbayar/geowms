@@ -20,12 +20,12 @@ export default class ChangeRequestForm extends Component {
 
     getAll(){
         service
-        .getAll()
-        .then(({ success ,org_request }) => {
-           if(success){
-               this.setState({org_request})
-            }
-        })
+            .getAll()
+            .then(({ success ,org_request }) => {
+                if(success) {
+                    this.setState({ org_request })
+                }
+            })
     }
 
     render() {
@@ -36,7 +36,7 @@ export default class ChangeRequestForm extends Component {
                     <div className="table-responsive">
                         <table className="table">
                             <thead>
-                                <tr>
+                                <tr className="text-center">
                                     <th scope="col">№</th>
                                     <th scope="col">Орон зайн өгөгдөл</th>
                                     <th scope="col">Байгууллага / мэргэжилтэн</th>
@@ -45,23 +45,26 @@ export default class ChangeRequestForm extends Component {
                                     <th scope="col">Огноо</th >
                                     <th>Төлөв</th>
                                     <th>Өөрчлөлт</th>
+                                    <th>ААН / ТӨСЛИЙН НЭР</th>
                                     <th></th>
-
                                 </tr>
                             </thead>
                             <tbody>
                                 {
-                                    org_request.length > 0 ? org_request.map((req, idx) =>
-                                        <ChangeRequestTable
-                                            key={idx}
-                                            idx={idx}
-                                            values = {req}
-                                            getAll = {this.getAll}
-                                        />
-                                    )
-                                    :<tr>
-                                    <td className="text-justify">Өөрчлөлт байхгүй байна</td>
-                                    </tr>
+                                    org_request.length > 0
+                                    ?
+                                        org_request.map((req, idx) =>
+                                            <ChangeRequestTable
+                                                key={idx}
+                                                idx={idx}
+                                                values={req}
+                                                getAll={this.getAll}
+                                            />
+                                        )
+                                    :
+                                        <tr>
+                                            <td className="text-justify">Өөрчлөлт байхгүй байна</td>
+                                        </tr>
                                 }
                             </tbody>
                         </table>

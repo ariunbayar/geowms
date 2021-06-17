@@ -1,3 +1,4 @@
+from frontend.page.views import service
 from django.db.models import base
 import requests
 import json
@@ -95,11 +96,10 @@ def proxy(request, base_url, token, pk=None):
         else:
             raise Exception()
 
-
-    qs_request = queryargs.get('REQUEST', 'no request')
-    base_url_wfs = base_url.replace('ows', 'wfs')
-    service_url = _get_service_url(request, token)
-    content = replace_src_url(content, base_url_wfs, service_url)
+        service_type = request.GET.get('SERVICE')
+        qs_request = queryargs.get('REQUEST', 'no request')
+        service_url = _get_service_url(request, token)
+        content = replace_src_url(content, base_url, service_url, service_type)
 
     WMSLog.objects.create(
         qs_all=dict(queryargs),
@@ -151,8 +151,8 @@ def json_proxy(request, base_url, token, code):
     content_type = rsp.headers.get('content-type')
     rsp = HttpResponse(content, content_type=content_type)
     service_url = request.build_absolute_uri(reverse('api:service:system_json_proxy', args=[token, code]))
-    base_url_wfs = base_url.replace('ows', 'wfs')
-    rsp.content = replace_src_url(rsp.content, base_url_wfs, service_url)
+    service_type = request.GET.get('SERVICE')
+    rsp.content = replace_src_url(rsp.content, base_url, service_url, service_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
     WMSLog.objects.create(
@@ -347,25 +347,23 @@ def _get_request_content(base_url, request, geo_id, headers):
         if request.GET.get('REQUEST') == 'GetMap':
             queryargs = {
                 **request.GET,
-                'cql_filter': cql_filter,
+                'cql_filter': cql_filter
             }
 
         else:
             queryargs = {
-                'service':'WFS',
-                'request':'GetFeature',
-                'version':'1.0.0',
-                'typeName':'gp_bu:gp_layer_building_b_view',
-                'srsName':'EPSG:4326',
+                'service': 'WFS',
+                'request': 'GetFeature',
+                'version': '1.0.0',
+                'typeName': request.GET.get('TYPENAME'),
+                'srsName': 'EPSG:4326',
                 'outputFormat': 'gml3',
-                'cql_filter': _get_cql_filter(geo_id)
+                'cql_filter': cql_filter
             }
-
-        rsp = requests.post(base_url, queryargs,  headers=headers, timeout=5, verify=False)
-
+        rsp = requests.post(base_url, queryargs,  headers=headers, timeout=300, verify=False)
     else:
         queryargs = request.GET
-        rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=300, verify=False)
 
     return rsp, queryargs
 
@@ -389,24 +387,23 @@ def qgis_proxy(request, base_url, token):
     }
 
     rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
-
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetFeature':
         content = rsp.content
-        content = replace_src_url(content, 'featureMembers', 'Members')
+        content = replace_src_url(content, 'featureMembers', 'Members', None)
 
-    if request.GET.get('REQUEST') == 'GetCapabilities':
+    if request.GET.get('REQUEST') != 'GetMap':
         if request.GET.get('SERVICE') == 'WFS':
             content = filter_layers_wfs(content, allowed_layers)
-            base_url = base_url.replace('ows', 'wfs')
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
             raise Exception()
 
         service_url = _get_qgis_service_url(request, token)
-        content = replace_src_url(content, base_url, service_url)
+        service_type = request.GET.get('SERVICE')
+        content = replace_src_url(content, base_url, service_url, service_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
 
