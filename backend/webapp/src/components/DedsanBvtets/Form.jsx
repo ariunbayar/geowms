@@ -162,7 +162,6 @@ export default class Forms extends Component {
         const prop_id = this.props.model_id
         const { values, model_id, isTrue, isC, jumped, edit_name, info, is_connected_to_feature_idx, is_loading } = this.state
         const btn_name = edit_name !== '' ? 'Засах' : 'Хадгалах'
-        console.log(values);
         return (
             <div className='overflow-auto card-body'>
                  {
