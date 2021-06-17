@@ -36,7 +36,7 @@ export default class ModelSelectTools extends Component {
                                                 {idx+1}
                                             </td>
                                             <td>
-                                                <a className="text-primary" onClick={(e) => this.handleProceed(true, value)}>
+                                                <a role="button" className="text-primary" onClick={(e) => this.handleProceed(true, value)}>
                                                     {value.bagaj_dugaar}
                                                 </a>
                                             </td>
