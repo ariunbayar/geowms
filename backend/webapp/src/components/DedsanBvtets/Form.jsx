@@ -15,14 +15,10 @@ export default class Forms extends Component {
             model_name: null,
             values: {},
             code: this.props.code,
-            hasDatas: false,
-            isTrue: false,
-            isC: false,
             before_id: '',
             before_name: '',
             jumped: false,
             edit_name: '',
-            has_options: false,
         }
         this.onSubmit = this.onSubmit.bind(this)
         this.getFields = this.getFields.bind(this)
@@ -160,7 +156,7 @@ export default class Forms extends Component {
         const prop_name = this.props.model_name
         const prop_edit_name = this.props.edit_name
         const prop_id = this.props.model_id
-        const { values, model_id, isTrue, isC, jumped, edit_name, info, is_connected_to_feature_idx, is_loading } = this.state
+        const { values, jumped, edit_name, is_connected_to_feature_idx, is_loading } = this.state
         const btn_name = edit_name !== '' ? 'Засах' : 'Хадгалах'
         return (
             <div className='overflow-auto card-body'>
