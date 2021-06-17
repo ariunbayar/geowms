@@ -271,11 +271,15 @@ def save_table(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def table__detail(request, id, table_id):
+
+    store_field_config = dict()
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
     field_config = another_db_tb.field_config.replace("'", '"')
-    field_config_index = another_db_tb.field_config_index.replace("'", '"')
-    field_config = utils.json_load(field_config)
-    store_field_config = utils.json_load(field_config_index)
+    field_config_index = another_db_tb.field_config_index
+    if field_config_index:
+        field_config_index = field_config_index.replace("'", '"')
+        field_config = utils.json_load(field_config)
+        store_field_config = utils.json_load(field_config_index)
     feature = LFeatures.objects.filter(feature_code=another_db_tb.feature_code).first()
     package = LPackages.objects.filter(package_id=feature.package_id).first()
     form_datas = {

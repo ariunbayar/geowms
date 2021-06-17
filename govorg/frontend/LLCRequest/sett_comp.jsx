@@ -36,25 +36,19 @@ export class LLCSettings extends Component {
         return seleted_datas
     }
 
-    modelAction(name, e, selected_values) {
+    modelAction(name, selection) {
         var data_list = {}
         var seleted_datas = []
         var { packages, features, list_of_datas } = this.state
-        var value_list_of = obj => obj.id == selected_values.id
+        var value_list_of = obj => obj.id == this.state.selected_values.id
         var index_of_list = list_of_datas.findIndex(value_list_of)
 
-        var value = e.target.value
         if (name == 'order_no' || name == 'order_at') {
-            list_of_datas[index_of_list][name] = value
+            list_of_datas[index_of_list][name] = selection.target.value
         }
 
         else {
-            const selected_value = parseInt(value)
-            var target_data = e.target.selectedIndex
-            var optionElement = e.target.childNodes[target_data]
-            var selected_data_name =  optionElement.getAttribute('name')
-
-
+            const selected_value = selection.code
             if ( name == 'theme' ) {
                 seleted_datas = this.getArray(packages, selected_value)
                 data_list['selected_packages'] = seleted_datas
@@ -88,7 +82,6 @@ export class LLCSettings extends Component {
             }
 
             list_of_datas[index_of_list][name].id = selected_value
-            list_of_datas[index_of_list][name].name = selected_data_name
         }
 
         list_of_datas[index_of_list].icon_state = false
