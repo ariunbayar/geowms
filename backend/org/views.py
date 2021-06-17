@@ -1,5 +1,7 @@
 import os
 import io
+from django import http
+from django.http.response import Http404
 from geojson import FeatureCollection
 import PIL.Image as Image
 import datetime
@@ -1972,30 +1974,97 @@ def send_mail(request, pk):
 def position_list(request, payload):
     items = []
     total_page = 1
-    # qs = Org.objects.filter(level=level)
-    user = request.user
-    qs = Position.objects
-    print(payload)
-    # if qs:
-    #     qs = qs.annotate(num_employees=Count('employee', distinct=True))
-    #     qs = qs.annotate(num_systems=Count('govorg', distinct=True))
+    оруулах_талбарууд = ['id', 'name', 'org_id']
+    org = utils.get_org_from_user(request.user)
 
-    #     datatable = Datatable(
-    #         model=Org,
-    #         initial_qs=qs,
-    #         payload=payload,
-    #         оруулах_талбарууд=оруулах_талбарууд
-    #     )
-    #     items, total_page = datatable.get()
+    if not org:
+        raise Http404
 
-    # rsp = {
-    #     'items': items,
-    #     'page': payload.get('page'),
-    #     'total_page': total_page
-    # }
+    qs = Position.objects.filter(org=org)
+    if qs:
+        datatable = Datatable(
+            model=Position,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд
+        )
+        items, total_page = datatable.get()
+
     rsp = {
-        'items': [],
-        'page': 1,
-        'total_page': 1,
+        'items': items,
+        'page': payload.get('page'),
+        'total_page': total_page
     }
+
+    return JsonResponse(rsp)
+
+
+def _do_emp_have_pos(position, org):
+    employee = Employee.objects.filter(position=position, org=org).first()
+    if employee:
+        return True
+    else:
+        return False
+
+
+@require_GET
+@ajax_required
+def remove(request, pk):
+    org = utils.get_org_from_user(request.user)
+    if not org:
+        raise Http404
+
+    position = get_object_or_404(Position, id=pk)
+    has_emp_pos = _do_emp_have_pos(position, org)
+
+    if has_emp_pos:
+        rsp = {
+            'success': False,
+            'error': '"{position}" албан тушаалыг хэрэглэгчид оноосон байна!!!'.format(position=position.name),
+        }
+    else:
+        position.delete()
+        rsp = {
+            'success': True,
+            'data': "Амжилттай устгалаа"
+        }
+
+    return JsonResponse(rsp)
+
+def _pos_name_check(qs_pos, name):
+    has_pos_name = False
+    for pos in qs_pos.all():
+        if pos.name == name:
+            has_pos_name = True
+    return has_pos_name
+
+
+@require_POST
+@ajax_required
+def create(request, payload):
+    user = request.user
+    name = payload.get("name")
+    org = utils.get_org_from_user(user)
+    if not org:
+        raise Http404
+
+    qs = Position.objects
+    qs_pos = qs.filter(org=org)
+    has_pos_name = _pos_name_check(qs_pos, name)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        Position.objects.create(
+            name=name,
+            org=org
+        )
+        rsp = {
+            'success': True,
+            'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
+        }
+
     return JsonResponse(rsp)

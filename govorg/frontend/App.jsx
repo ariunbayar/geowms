@@ -227,7 +227,7 @@ export class App extends Component {
 
                                 <Route path="/gov/perm/region/" component={MapRegion} />
                                 <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
-                                <Route path="/gov/perm/position/" component={(props) => <Position {...props} org_roles={org_role} employee={employee}/> } />
+                                <Route path="/gov/perm/position/" component={(props) => <Position {...props} employee={employee}/> } />
                                 <Route path="/gov/role/role/" component={Role} />
                                 <Route
                                     path="/gov/org/map/:tid/:pid/:fid/"

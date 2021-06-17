@@ -48,11 +48,11 @@ urlpatterns = [
             ], 'role'))),
             path('position/', include(([
                 path('', back_org_views.position_list),
+                path('<int:pk>/delete/', back_org_views.remove),
+                path('create/', back_org_views.create),
                 # path('role-list/', role_views.role_list),
-                # path('create/', role_views.create),
                 # path('<int:pk>/update/', role_views.update),
                 # path('<int:pk>/detail/', role_views.detail),
-                # path('<int:pk>/delete/', role_views.delete),
             ], 'position'))),
         ], 'role'))),
 

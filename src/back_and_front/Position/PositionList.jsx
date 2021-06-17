@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { PortalDataTable } from "@utils/DataTable/index"
+import Modal from "@utils/Modal/Modal"
+import { service } from "./service"
 
 class PositionList extends Component {
 
@@ -9,24 +11,110 @@ class PositionList extends Component {
         this.state={
             refresh: false,
             жагсаалтын_холбоос: `/gov/api/role/position/`,
-            нэмэх_товч: `/gov/perm/employee/add/`,
+            нэмэх_товч: `/gov/perm/position/add/`,
             custom_query: {},
             талбарууд: [
-                {'field': 'name', "title": 'Албан тушаал', 'has_action': true},
-                // {'field': 'user__email', "title": 'Цахим шуудан'},
-                // {'field': 'position', "title": 'Албан тушаал'},
-                // {'field': 'role_name', "title": 'Role', "is_sort": true},
-                // {'field': 'is_admin', "title": 'Админ', 'has_action': true, "is_center": true},
+                {'field': 'name', "title": 'Албан тушаал'},
             ],
             хувьсах_талбарууд: [
-                // {"field": "user__first_name", "action": (values) => this.go_link(values)},
-                // {"field": "user__email",  "text": ""},
-                // {"field": "position",  "text": ""},
-                // {"field": "is_admin",  "action": (values) => this.set_icon(values) , "action_type": true, "is_center": true},
+                {"field": "name", "text": ""},
             ],
+            нэмэлт_талбарууд: [
+                {
+                    "title": 'Устгах',
+                    "text": '',
+                    "icon": 'fa fa-trash-o text-danger',
+                    "action": (values) => this.handleAsk(values),
+                    "width": "100px"
+                }
+            ],
+            prefix: `/gov/api/role/position/`,
             is_user: true,
-            drop_name: 'Хэрэглэгч',
+            icon: "",
+            modal_status: 'closed',
         }
+        this.handleRemove = this.handleRemove.bind(this)
+        this.handleAsk = this.handleAsk.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+    }
+
+    handleAsk(values){
+        this.modalChange(
+            "fa fa-exclamation-circle",
+            null,
+            "warning",
+            "Албан тушаал устгах",
+            `Та "${values.name}" нэртэй албан тушаалыг устгахдаа итгэлтэй байна уу?`,
+            true,
+            "Үгүй",
+            "Тийм",
+            () => this.handleRemove(values),
+            null
+        )
+    }
+
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
+    handleRemove(values) {
+        const { prefix } = this.state
+        var remove_link = prefix + values.id + "/" + "delete/"
+        service.getRequest(remove_link)
+            .then(({success, data, error}) => {
+                if (success) {
+                    this.setState({refresh: !this.state.refresh})
+                    this.modalChange(
+                        "fa fa-check-circle",
+                        null,
+                        "success",
+                        data,
+                        "",
+                        false,
+                        "",
+                        "",
+                        null,
+                        null
+                    )
+                }
+                else {
+                    this.modalChange(
+                        "fa fa-exclamation-circle",
+                        null,
+                        "danger",
+                        "Устгах боломжгүй",
+                        error,
+                        false,
+                        "",
+                        "",
+                        null,
+                        null
+                    )
+                }
+            })
+            .catch(() => {
+                this.props.history.goBack()
+            })
     }
 
     render() {
@@ -44,18 +132,6 @@ class PositionList extends Component {
         return (
             <div className="card">
                 <div className="card-body">
-                    <div className="d-flex flex-row-reverse mb-2">
-                        <div className="dropdown-menu-right show">
-                            <a className="btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                {this.state.drop_name}
-                            </a>
-
-                            <div className="dropdown-menu mr-2" aria-labelledby="dropdownMenuLink">
-                                <button className="dropdown-item" onClick={() => this.handleListChange(true, 'Хэрэглэгч')}>Хэрэглэгч</button>
-                                <button className="dropdown-item" onClick={() => this.handleListChange(false, 'Бүх ажилчид')}>Бүх ажилчид</button>
-                            </div>
-                        </div>
-                    </div>
                     <div className="col-md-12">
                         <PortalDataTable
                             refresh={refresh}
@@ -72,6 +148,19 @@ class PositionList extends Component {
                         />
                     </div>
                 </div>
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    text={ this.state.text }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
+                />
             </div>
         )
     }

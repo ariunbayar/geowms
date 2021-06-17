@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.conf import settings
-
+import django
 
 class Org(models.Model):
     LEVEL_CHOICES = [
@@ -20,6 +20,10 @@ class Position(models.Model):
 
     name = models.CharField(max_length=250, verbose_name='Албан тушаалын нэр')
     org = models.ForeignKey(Org, on_delete=models.PROTECT, default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
 class Employee(models.Model):
