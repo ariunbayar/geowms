@@ -1,13 +1,12 @@
-import React, { Component, Fragment } from "react"
-import { Formik, Form, Field, ErrorMessage, validateYupSchema , FieldArray} from 'formik'
+import React, { Component, Fragment, useState, useEffect } from "react"
 import { service } from "./service"
+import Loader from "@utils/Loader"
 
 export default class Forms extends Component {
 
     constructor(props) {
         super(props)
 
-        this.options = []
         this.state = {
             is_loading: true,
             pid: props.pid,
@@ -15,7 +14,6 @@ export default class Forms extends Component {
             model_id: null,
             model_name: null,
             values: {},
-            datas: [],
             code: this.props.code,
             hasDatas: false,
             isTrue: false,
@@ -24,18 +22,19 @@ export default class Forms extends Component {
             before_name: '',
             jumped: false,
             edit_name: '',
-            options: false,
+            has_options: false,
         }
-
         this.onSubmit = this.onSubmit.bind(this)
         this.getFields = this.getFields.bind(this)
         this.makeModel = this.makeModel.bind(this)
-        this.getOptions = this.getOptions.bind(this)
+        this.getValue = this.getValue.bind(this)
+        this.connectedFields = this.connectedFields.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
 
-    onSubmit(values, { setStatus, setSubmitting }) {
-        this.setState({is_loading:true})
-        const {model_name, code, model_id, edit_name} = this.state
+    onSubmit() {
+        this.setState({ is_loading: true })
+        const { values, model_name, code, model_id, edit_name } = this.state
         service.save(values, model_name, model_id, edit_name).then(({ success, info }) => {
             if (success) {
                 this.setState({ is_loading: false, info })
@@ -48,63 +47,88 @@ export default class Forms extends Component {
         })
     }
 
-    componentDidUpdate(pP){
+    handleRemove() {
+        const { model_name, model_id, edit_name, type, top_id } = this.props
+        this.props.remove(model_name, model_id, edit_name, type, top_id)
+    }
+
+    openModal(logo, title, text, action) {
+        const modal = {
+            modal_status: 'open',
+            modal_icon: `fa fa-${logo}`,
+            modal_bg: '',
+            title: title,
+            text: text,
+            has_button: true,
+            actionNameBack: 'Буцах',
+            actionNameDelete: title,
+            modalAction: action,
+            modalClose: ""
+        }
+        this.props.setModal(modal)
+    }
+
+    connectedFields(value_obj, idx) {
+
+        function getOposite(data) {
+            if (data == 'true') return 'false'
+            if (data == 'false') return 'true'
+        }
+
+        if (value_obj.field_name == 'is_connect_to_feature') {
+            this.state.values[idx - 3].data = getOposite(value_obj.data)
+            this.setState({ values: this.state.values })
+        }
+        if (value_obj.field_name == 'has_class') {
+            this.state.values[idx + 3].data = getOposite(value_obj.data)
+            this.setState({ values: this.state.values })
+        }
+    }
+
+    getValue(data, idx) {
+        let value_obj = this.state.values[idx]
+        this.state.values[idx].data = data
+        this.connectedFields(value_obj, idx)
+    }
+
+    componentDidUpdate(pP) {
         const {model_id, model_name, edit_name} = this.props
         if(pP.model_id !== model_id){
-            if(model_id) this.getFields(model_name, model_id, edit_name)
+            this.getFields(model_name, model_id, edit_name)
             this.setState({ before_id: pP.model_id, before_name: pP.model_name, before_edit_name: pP.edit_name })
         }
         if(pP.model_name !== model_name || pP.edit_name !== edit_name)
         {
             this.setState({model_id, model_name, edit_name})
-            if(model_name) this.getFields(model_name, model_id, edit_name)
+            this.getFields(model_name, model_id, edit_name)
         }
     }
 
     componentDidMount() {
         const {model_id, model_name, edit_name} = this.props
         this.setState({ model_id, model_name, edit_name })
-        if(model_name) this.getFields(model_name, model_id, edit_name)
+        this.getFields(model_name, model_id, edit_name)
     }
 
-    getFields(model_name, model_id, edit_name){
-        this.setState({ values: {} })
-        service.getFields(model_name, model_id, edit_name).then(({ success, fields }) => {
-           if(success)
-           {
-                if (model_name == 'property'){
-                    var name = 'value_type_id'
-                    var find = 'value_type'
+    getFields(model_name, model_id, edit_name) {
+        this.setState({ values: {}, is_loading: true })
+        service
+            .getFields(model_name, model_id, edit_name)
+            .then(({ success, fields }) => {
+                if(success)
+                {
+                    let has_class_idx
+                    let is_connected_to_feature_idx
+                    fields.map((field, idx) => {
+                        if (field.field_name == 'has_class') has_class_idx = idx
+                        if (field.field_name == 'is_connect_to_feature') is_connected_to_feature_idx = idx
+                    })
+                    this.setState({values: fields, is_loading: false, model_id, model_name, has_class_idx, is_connected_to_feature_idx })
                 }
-                if (model_name == 'feature_config'){
-                    var name = 'data_type_id'
-                    var find = 'data_type'
-                }
-                if (model_name == 'data_type_config' || model_name == 'code_list_config'){
-                    var name = 'property_id'
-                    var find = 'property'
-                }
-                fields.map(field => {
-                    if (field.field_name == name)
-                    {
-                        service
-                            .getDatas(find)
-                            .then(rsp => {
-                                if(rsp.success){
-                                    this.setState({ datas: rsp.datas })
-                                }
-                        })
-                    }
-                    if (field.field_name == 'connect_feature_id' ) {
-                        this.getOptions()
-                    }
-                })
-                this.setState({values: fields, is_loading:false, model_id, model_name})
-           }
-        })
+            })
     }
 
-    makeModel(){
+    makeModel() {
         this.setState({ jumped: true })
         if (this.props.model_name == 'feature_config') {
             this.props.handleFormLeft('data_type', '')
@@ -127,209 +151,235 @@ export default class Forms extends Component {
         }
     }
 
-    getOptions(){
-        this.options = []
-        service.getDatas('feature').then(rsp => {
-            if(rsp.success){
-                rsp.datas.map((data, idx) =>
-                    this.options.push(<option key={idx} value={data.id}>{data.name}</option>)
-                )
-            }
-            this.setState({ options: true })
-        })
+    checkSelectAddData(data) {
+        let has_btn = !(data.field_name.includes('connect_feature')) && !(data.field_name == 'top_code_list_id')
+        return has_btn
     }
 
     render() {
         const prop_name = this.props.model_name
         const prop_edit_name = this.props.edit_name
         const prop_id = this.props.model_id
-        if (this.state.is_loading) {
-            return (
-                <p className="text-center"> <i className="fa fa-spinner fa-pulse fa-3x fa-fw"></i> <br/> Түр хүлээнэ үү... </p>
-            )
-        }
-        const { values, model_id, datas, isTrue, isC, jumped, edit_name, info } = this.state
+        const { values, model_id, isTrue, isC, jumped, edit_name, info, is_connected_to_feature_idx, is_loading } = this.state
+        const btn_name = edit_name !== '' ? 'Засах' : 'Хадгалах'
+        console.log(values);
         return (
             <div className='overflow-auto card-body'>
                  {
                     jumped
-                    ?
+                    &&
                         <div className="mb-2">
                             <button type="button" className="btn btn-block gp-btn-primary" onClick={() => this.backToForm()}>Буцах</button>
                         </div>
-                    :
-                        null
                 }
+                <Loader is_loading={is_loading} text={'Уншиж байна'} />
                 {
                     prop_edit_name && prop_name
                     ?
-                    <h4 className="text-center">{prop_name}-{prop_edit_name}{(prop_id ? `-` + prop_id : '')}</h4>
+                        <h4 className="text-center">{prop_name}-{prop_edit_name}{(prop_id ? `-` + prop_id : '')}</h4>
                     :
-                    <h4 className="text-center"> Model-{prop_name}{(prop_id ? `-` + prop_id : '')}</h4>
+                        <h4 className="text-center"> Model-{prop_name}{(prop_id ? `-` + prop_id : '')}</h4>
                 }
                 <hr></hr>
-                <Formik
-                    enableReinitialize
-                    initialValues={{ form_values: values }}
-                    onSubmit={ this.onSubmit}
-                >
-                    {({
-                        errors,
-                        status,
-                        touched,
-                        isSubmitting,
-                        setFieldValue,
-                        handleBlur,
-                        handleChange,
-                        setValues,
-                        values,
-                        isValid,
-                        dirty,
-                    }) => {
-                    return(
-                        <Form>
-                        <FieldArray
-                                name="form_values"
-                                render={arrayHelpers => (
-                                <div>
-                                    {values.form_values && values.form_values.length > 0 ? (
-                                    values.form_values.map((friend, index) => (
-                                        <div key={index} className="row my-3">
-                                            <div className="col-md-4 overflow-hidden test-wrap">
-                                                <label className="col-form-label">{friend.field_name}</label>
-                                            </div>
-                                                <div className="col-md-8">
-                                                    {friend.field_type == 'radio' ?
-                                                    <div role="group" className="form-check" aria-labelledby="my-radio-group">
-                                                        <label>
-                                                            <Field
-                                                                type="radio"
-                                                                className="form-check-input"
-                                                                name={`form_values.${index}.data`}
-                                                                value='true'
-                                                                onChange={(e) => {
-                                                                    handleChange(e)
-                                                                    if (friend.field_name == 'is_connect_to_feature') {
-                                                                        setFieldValue(`form_values.${index - 3}.data`, 'false')
-                                                                        this.setState({ isTrue: true })
-                                                                    }
-                                                                    if (friend.field_name == 'has_class') {
-                                                                        setFieldValue(`form_values.${index + 3}.data`, 'false')
-                                                                        this.setState({ isTrue: false })
-                                                                    }
-                                                                }}
+                <div>
+                    {
+                        values && values.length > 0
+                        ?
+                            values.map((friend, index) =>
+                                <div key={index} className="row my-3">
+                                    <div className="col-md-4 overflow-hidden test-wrap">
+                                        <label className="col-form-label">{friend.field_name}</label>
+                                    </div>
+                                    <div className="col-md-8">
+                                        {
+                                            friend.field_type == 'radio'
+                                            ?
+                                                <RadioInputs
+                                                    {...friend}
+                                                    index={index}
+                                                    setValue={this.getValue}
+                                                />
+                                            :
+                                                (
+                                                    friend.field_type == 'select'
+                                                    ?
+                                                        <div className="input-group">
+                                                            <Select
+                                                                {...friend}
+                                                                index={index}
+                                                                setValue={this.getValue}
+                                                                can_connect_feature={is_connected_to_feature_idx && values[is_connected_to_feature_idx].data == 'false'}
                                                             />
-                                                                <b className="text-center">True</b>
-                                                        </label>
-                                                            <br/>
-                                                        <label>
-                                                            <Field
-                                                                type="radio"
-                                                                className="form-check-input"
-                                                                name={`form_values.${index}.data`}
-                                                                value='false'
-                                                                onChange={(e) => {
-                                                                    handleChange(e)
-                                                                    if (friend.field_name == 'is_connect_to_feature') {
-                                                                        setFieldValue(`form_values.${index - 3}.data`, 'true')
-                                                                        this.setState({ isTrue: false })
-                                                                    }
-                                                                    if (friend.field_name == 'has_class') {
-                                                                        setFieldValue(`form_values.${index + 3}.data`, 'true')
-                                                                        this.setState({ isTrue: true })
-                                                                    }
-                                                                }}
-                                                            />
-                                                                <b className="text-center">False</b>
-                                                        </label>
-                                                    </div>
-                                                    :
-                                                        (
-                                                            (friend.field_name == 'data_type_id' && prop_name !== 'data_type_config')||
-                                                            (friend.field_name == 'property_id' && prop_name === 'data_type_config')||
-                                                            (friend.field_name.includes('connect_feature') &&  prop_name === 'feature_config')||
-                                                            (friend.field_name == 'value_type_id' && prop_name !== 'value_type') ||
-                                                            // (friend.field_name == 'value_type_id' && prop_name == 'value_type' && edit_name != '') ||
-                                                            ((friend.field_name.includes('property_id') && prop_name == 'code_list_config'))
-                                                            ?
-                                                            <div className="input-group">
-                                                                <Field
-                                                                    name={`form_values.${index}.data`}
-                                                                    className='form-control'
-                                                                    placeholder={friend.field_name}
-                                                                    as='select'
-                                                                    disabled = {friend.field_name.includes('connect_feature') && isTrue ? 'disabled' : ''}
-                                                                >
-                                                                    <option value=""> --- Сонгоно уу --- </option>
-                                                                    {
-                                                                        friend.field_name.includes('connect_feature') && !isTrue && this.state.options
-                                                                        ?
-                                                                        this.options
-                                                                        :
-                                                                        datas.map((data, idx) =>
-                                                                            <option
-                                                                                key={idx}
-                                                                                value={data.id}
-                                                                            >
-                                                                                {data.name}
-                                                                            </option>
-                                                                        )
-                                                                    }
-                                                                </Field>
-                                                                {
-                                                                    prop_name != 'code_list_config'
+                                                            {
+                                                                prop_name != 'code_list_config'
+                                                                ?
+                                                                    this.checkSelectAddData(friend)
                                                                     ?
-                                                                        !(friend.field_name.includes('connect_feature'))
-                                                                        ?
-                                                                            <a className="input-group-btn">
-                                                                                <i
-                                                                                    role="button"
-                                                                                    className="fa fa-plus-square gp-text-primary input-group-addon fa-2x m-0 p-0"
-                                                                                    onClick={() => this.makeModel()}
-                                                                                    aria-hidden="true"
-                                                                                >
-                                                                                </i>
-                                                                            </a>
-                                                                        : null
+                                                                        <a className="input-group-btn">
+                                                                            <i
+                                                                                role="button"
+                                                                                className="fa fa-plus-square gp-text-primary input-group-addon fa-2x m-0 p-0"
+                                                                                onClick={() => this.makeModel()}
+                                                                                aria-hidden="true"
+                                                                            >
+                                                                            </i>
+                                                                        </a>
                                                                     :
                                                                         null
+                                                                :
+                                                                    null
 
-                                                                }
-                                                            </div>
-                                                            :
-                                                                <Field
-                                                                    name={`form_values.${index}.data`}
-                                                                    className='form-control'
-                                                                    placeholder={friend.field_name}
-                                                                    type={friend.field_type}
-                                                                    disabled={(friend.data !== '' && friend.field_name.includes("id")) ? 'disabled' : ''}
-                                                                />
-                                                        )
-                                                    }
-                                                </div>
-                                        </div>
-                                    ))
-                                    ) : ( null
-                                    )}
-                                    <div className={edit_name !== '' ? ' row' : ''}>
-                                        {
-                                            edit_name ?
-                                                prop_name != 'value_type' ?
-                                                <a className="btn col-md-4 btn-danger mr-1 text-white" onClick={() => this.props.remove(prop_name, prop_id, prop_edit_name, this.props.type, this.props.top_id)}>
-                                                    Устгах
-                                                </a>
-                                                : null
-                                                : null
-                                        }
-                                        <button type="submit" className={`btn ` + (edit_name ? 'col-md-7' : 'btn-block') +` gp-btn-primary`}>{edit_name !== '' ? 'Засах' : 'Хадгалах'}</button>
+                                                            }
+                                                        </div>
+                                                    :
+                                                        <Input
+                                                            {...friend}
+                                                            index={index}
+                                                            setValue={this.getValue}
+                                                            model_name={prop_name}
+                                                        />
+                                                )
+                                            }
                                     </div>
                                 </div>
-                                )}
-                            />
-                        </Form>
-                    )}}
-                </Formik>
+                            )
+                        :
+                            null
+                    }
+                    <div className={edit_name !== '' ? ' row' : ''}>
+                        {
+                            edit_name
+                            ?
+                                prop_name != 'value_type'
+                                ?
+                                    <a
+                                        className="btn col-md-4 btn-danger mr-1 text-white"
+                                        onClick={() => this.openModal('times-circle text-danger', 'Устгах', `Та ${prop_edit_name} - нэртэй ${prop_name}-г устгахдаа итгэлтэй байна уу ?`, this.handleRemove)}
+                                    >
+                                        Устгах
+                                    </a>
+                                :
+                                    null
+                            :
+                                null
+                        }
+                        <button
+                            type="button"
+                            onClick={() => this.openModal('check-circle text-success', btn_name, `Та ${edit_name ? `${prop_edit_name} - нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`, this.onSubmit)}
+                            className={`btn ${edit_name ? 'col-md-7' : 'btn-block'} gp-btn-primary`}
+                        >
+                            {btn_name}
+                        </button>
+                    </div>
+                </div>
             </div>
         )
     }
+}
+
+function Select(props) {
+
+    const [value, setValue] = useState(props.data)
+
+    const handleOnChange = (e) => {
+        let val = e.target.value
+        setValue(val)
+        props.setValue(val, props.index)
+    }
+
+    return (
+        <select
+            className='form-control'
+            placeholder={props.field_name}
+            disabled={
+                props.can_connect_feature && props.field_name.includes('connect_feature')
+                ?
+                    'disabled'
+                :
+                    ''
+            }
+            value={value}
+            onChange={handleOnChange}
+        >
+            <option value=""> --- Сонгоно уу --- </option>
+            {
+                props.options.map((data, idx) =>
+                    <option
+                        key={idx}
+                        value={data.id}
+                    >
+                        {data.name}
+                    </option>
+                )
+            }
+        </select>
+    )
+}
+
+function Input(props) {
+
+    const [value, setValue] = useState(props.data)
+
+    const handleOnChange = (e) => {
+        let val = e.target.value
+        setValue(val)
+        props.setValue(val, props.index)
+    }
+
+    return (
+        <input
+            type={props.field_type}
+            placeholder={props.field_name}
+            onChange={handleOnChange}
+            value={value}
+            className={'form-control'}
+            disabled={props.data && props.field_name.includes("id") && !(props.field_name == props.model_name + "_id") ? 'disabled' : ''}
+        />
+    )
+}
+
+function RadioInputs(props) {
+
+    const [value, setValue] = useState(props.data.toString())
+
+    useEffect(() => {
+        setValue(props.data.toString())
+    }, [props.data])
+
+    const handleOnchange = (e) => {
+        setValue(e.target.value)
+        props.setValue(e.target.value, props.index)
+    }
+
+    return (
+        <div className="form-check">
+            <div>
+                <input
+                    type="radio"
+                    id={`${props.field_name}-true`}
+                    name={props.field_name}
+                    checked={value == 'true' ? true : false} value={`true`}
+                    onChange={handleOnchange}
+                />
+                &nbsp;
+                <label htmlFor={`${props.field_name}-true`}>
+                    True
+                </label>
+            </div>
+            <div>
+                <input
+                    type="radio"
+                    id={`${props.field_name}-false`}
+                    name={props.field_name}
+                    checked={value == 'false' ? true : false}
+                    value={`false`}
+                    onChange={handleOnchange}
+                />
+                &nbsp;
+                <label htmlFor={`${props.field_name}-false`}>
+                    False
+                </label>
+            </div>
+        </div>
+    )
 }
