@@ -445,7 +445,7 @@ def employee_add(request, payload, level, pk):
 
 
 def _set_state(employee):
-    employee.state = Employee.STATE_FIRED
+    employee.state = 3
     employee.save()
 
     return True

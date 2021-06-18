@@ -16,7 +16,7 @@ export default class DetailModal extends Component {
                         <table className="table table_wrapper_table">
                             <thead>
                                 <tr>
-                                    <th scope="col"> # </th>
+                                    <th scope="col"> № </th>
                                     <th scope="col"> Нэр</th>
                                     <th scope="col"> Утга</th>
                                 </tr>

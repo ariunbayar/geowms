@@ -237,7 +237,7 @@ export class LLCList extends Component {
                                     ?
                                         choices['kind'].map((choice, idx) =>
                                             <option
-                                                ey={idx}
+                                                key={idx}
                                                 name='kind'
                                                 value={choice[0]}
                                             >

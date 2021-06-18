@@ -1880,3 +1880,21 @@ def get_feature_from_layer_code(layer_code):
     feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
     feature = feature_qs.first()
     return feature
+
+
+def get_org_from_user(user, is_admin=True):
+    Employee = apps.get_model("backend_org", "Employee")
+    emp_qs = Employee.objects
+    emp_qs = emp_qs.filter(user=user)
+    if is_admin:
+        emp_qs = emp_qs.filter(is_admin=is_admin)
+    if not emp_qs:
+        return False
+    return emp_qs.first().org
+
+
+def get_today_datetime(is_string=False):
+    now = datetime.now()
+    if is_string:
+        return datetime_to_string(now)
+    return now

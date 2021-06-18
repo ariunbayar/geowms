@@ -37,7 +37,7 @@ from backend.inspire.models import (
 )
 
 
-SELECTCOUNT = 100
+SELECTCOUNT = 1000
 
 
 @require_GET
@@ -291,6 +291,7 @@ def table__detail(request, id, table_id):
         'pk_field_name': store_field_config.get('pk_field_name') or '',
         'pk_start_index': store_field_config.get('pk_start_index') or '',
         'pk_field_count': store_field_config.get('pk_field_count') or '',
+        'pk_field_max_range': store_field_config.get('pk_field_max_range') or '',
     }
 
     return JsonResponse({
@@ -783,38 +784,79 @@ def _delete_datas_of_pg(unique_id, feature_id):
         m_geo_datas.delete()
 
 
-def _get_count_of_table(cursor, table_name):
+def _get_count_of_table(cursor, table_name, has_range, start_data, data_type, field_name):
+    start_data = _get_type_of_data(start_data, data_type)
+    end_field = _get_type_of_data(has_range, data_type)
+    filter_data= ''
+    if has_range:
+        filter_data = '''
+            where
+            {start} <={field_name}  and {field_name}<={end}
+			group by {field_name}
+            order by {field_name} asc
+        '''.format(
+            field_name=field_name,
+            start=start_data,
+            end=end_field
+        )
+
     sql = '''
         select
             count(*) as count
         from
             public.{table_name}
+            {filter_data}
     '''.format(
         table_name=table_name,
+        filter_data = filter_data
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
-    return datas[0]['count']
+    if has_range:
+        datas = len(datas)
+    else:
+        datas = datas[0]['count']
+    return datas
 
 
-def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name, pk_field_type):
+def _get_type_of_data(data, column_type):
     type_in = ['inte', 'numb', 'nume', 'doub']
-    start_field = ''' '{}' '''.format(start_data)
-    if pk_field_type[:4] in type_in:
-        start_field = int(start_data)
+    data_field = ''' '{}' '''.format(data)
+    if column_type[:4] in type_in:
+        data_field = int(data)
+    return data_field
+
+
+def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name, pk_field_type, has_range):
+    start_field = _get_type_of_data(start_data, pk_field_type)
+    end_field = _get_type_of_data(has_range, pk_field_type)
+
+    filter_type = '''
+        {pk_field_name} >= {start_field}
+    '''.format(pk_field_name=pk_field_name, start_field=start_field)
+
+    if has_range:
+        filter_type = '''
+            {start_field} <={field_name}  and {field_name}<={end_field}
+
+        '''.format(
+            field_name=pk_field_name,
+            start_field=start_field,
+            end_field=end_field
+        )
 
     sql = '''
         SELECT
             {pk_field_name},
             {columns}
         FROM public.{table_name}
-        WHERE {pk_field_name} >= {start_field} ORDER BY {pk_field_name} ASC
+        WHERE {filter_type} ORDER BY {pk_field_name} ASC
         limit {select_count}
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
         table_geo_data=table_geo_data,
-        start_field=start_field,
+        filter_type=filter_type,
         pk_field_name=pk_field_name,
         select_count=SELECTCOUNT,
     )
@@ -834,7 +876,6 @@ def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
         feature_id=feature.feature_id,
         created_by=unique_id
     )
-
     return new_geo_id, m_datas_object
 
 
@@ -854,6 +895,9 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
                         mdata_value[value_type] = ona_data[prop_data['table_field']]
                         if str(mdata_value[value_type])[0] == '0':
                             mdata_value[value_type] = mdata_value[value_type][1:]
+                            if '_' in mdata_value[value_type]:
+                                mdata_value[value_type] = mdata_value[value_type].split('_')[0]
+                            mdata_value[value_type] = int(mdata_value[value_type])
                     elif value_type == "value_date":
 
                         if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
@@ -928,16 +972,18 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         pk_field_name = pk_field_config.get('pk_field_name') or ""
         pk_field_type = pk_field_config.get('pk_field_type') or ""
         count = pk_field_config.get('pk_field_count') or ''
-
-        if not count:
-            count = _get_count_of_table(cursor, table_name)
+        pk_field_max_range = pk_field_config.get('pk_field_max_range') or ''
+        if count and int(count) >1:
+            count = count
+        else:
+            count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
 
         current_data_counts = 0
         current_geo_id = last_geo_id
         while current_data_counts < int(count):
             m_datas_object = []
             geo_data_objs = []
-            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type)
+            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type, pk_field_max_range)
             start_data = ona_table_datas[-1][pk_field_name]
             for ona_data in ona_table_datas[0:SELECTCOUNT-1]:
                 current_geo_id = str_to_int(current_geo_id)
@@ -953,14 +999,13 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
                 success_count = success_count + 1
             MGeoDatas.objects.bulk_create(geo_data_objs)
             MDatas.objects.bulk_create(m_datas_object)
-            current_data_counts = current_data_counts + SELECTCOUNT
+            current_data_counts = current_data_counts + SELECTCOUNT-1
     except Exception:
         failed_count += 1
         pass
 
     return success_count, failed_count, count
 
-data = MGeoDatas.objects.filter(created_by=-13).count()
 
 def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     table_info = []
