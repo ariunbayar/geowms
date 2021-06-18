@@ -449,16 +449,15 @@ def get_request_data(request, id):
 
 def _get_employees(geo_id):
     emp_fields = list()
-    emp_detail = dict()
-    get_org = Org.objects.filter(level=2, geo_id=geo_id)
-    for org in get_org:
-        get_employees = Employee.objects.filter(org_id=org.id, position_id=13)
-        for emp in get_employees:
-            get_name = User.objects.filter(pk=emp.user_id).first()
-            emp_detail['org_name'] = org.name
-            emp_detail['first_name'] = get_name.first_name
-            emp_detail['mail'] = get_name.email
-            emp_fields.append(emp_detail)
+    get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
+    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=13)
+    for emp in get_employees:
+        emp_detail = dict()
+        get_name = User.objects.filter(pk=emp.user_id).first()
+        emp_detail['org_name'] = get_org.name
+        emp_detail['first_name'] = get_name.first_name
+        emp_detail['mail'] = get_name.email
+        emp_fields.append(emp_detail)
     return emp_fields
 
 

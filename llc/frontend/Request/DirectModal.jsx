@@ -49,11 +49,6 @@ export default class RequestDetail extends Component {
         this.setState({ is_loading: status })
     }
 
-    getProf(e){
-        const send_mail = e.target.value
-        this.setState({ send_mail })
-    }
-
     getValueCheckbox(e){
         const { geo_id } = this.props
         const checked = e.target.checked
@@ -78,8 +73,12 @@ export default class RequestDetail extends Component {
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
             file_name, info, state, desc_info,
-            aimag_name, aimag_geom, desc, emp_fields
+            aimag_name, aimag_geom, desc, emp_fields, mergejilten
         } = this.props
+
+        var default_mergejilten = ''
+        if (mergejilten) default_mergejilten = mergejilten
+        else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0].mail}
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
@@ -179,8 +178,12 @@ export default class RequestDetail extends Component {
                             info &&
                                 <div className="form-group col-md-12">
                                     <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
-                                    <select className="form-control" id="mergejilten"
-                                        onChange={(e) => this.getProf(e)}
+                                    <select
+                                        className="form-control"
+                                        name="mergejilten"
+                                        id="mergejilten"
+                                        onChange={(e) => {this.props.handleOnChange(e)}}
+                                        value={default_mergejilten}
                                     >
                                         <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
                                     {
@@ -191,7 +194,7 @@ export default class RequestDetail extends Component {
                                                         id={idx}
                                                         label={value.org_name}
                                                     >
-                                                        <option value={value.first_name, value.mail}>{value.first_name}</option>
+                                                        <option value={value.mail}>{value.first_name}</option>
                                                     </optgroup>
                                                 ))
                                             :
@@ -257,7 +260,7 @@ export default class RequestDetail extends Component {
                                 valid_request = {document.getElementsByClassName('is-valid')}
                                 nationwide = {this.state.nationwide}
                                 values={this.props}
-                                mergejilten={this.state.send_mail}
+                                mergejilten={default_mergejilten}
                                 loader={this.handleLoaderActive}
                             />
                     }

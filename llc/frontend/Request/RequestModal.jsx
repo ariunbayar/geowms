@@ -143,7 +143,9 @@ class SendModal extends Component{
             aimag_name: '',
             aimag_geom: [],
             selected_tools: [],
+            mergejilten: ''
         }
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
     componentDidMount(){
         const values = this.props.values
@@ -161,11 +163,15 @@ class SendModal extends Component{
                     vector_datas,
                     aimag_name,
                     aimag_geom,
-                    emp_fields: emp_fields,
+                    emp_fields: emp_fields
                 })
             }
         this.props.handleIsload(false)
         })
+    }
+
+    handleOnChange(e) {
+        this.setState({[e.target.name]: e.target.value})
     }
 
     render (){
@@ -181,6 +187,7 @@ class SendModal extends Component{
                         submitClass={ActionClass}
                         closeRequestMap={this.props.closeRequestMap}
                         info={this.props.values.info}
+                        handleOnChange={this.handleOnChange}
                     />
                     </div>
                 </div>
