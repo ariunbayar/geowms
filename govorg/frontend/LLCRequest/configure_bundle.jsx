@@ -52,7 +52,7 @@ export class ConfigureBundle extends Component {
         this.setState({geom_state_count})
     }
 
-    handleChange(name, e) {
+    handleChange(name, selection, e) {
         const {selected_values} = this.props
         this.props.model_action(name, e, selected_values)
     }
