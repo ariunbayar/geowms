@@ -120,21 +120,21 @@ export class ConfigureBundle extends Component {
                     <div className="col-md-6">
                         <label htmlFor="">Тушаалын дугаар</label>
                         <input
-                            className={'form-control ' + (!order_no && 'is-invalid')}
+                            className={'form-control ' + (!selected_values.order_no && 'is-invalid')}
                             name='order_no'
                             type="text"
-                            value={order_no}
-                            onChange={(e) => {this.handleChange('order_no', e)}}
+                            value={selected_values.order_no}
+                            onChange={(e) => {this.handleChange('order_no', [], e)}}
                         />
                     </div>
                     <div className="col-md-6 mb-2">
                         <label htmlFor="">Тушаал гарсан огноо</label>
                         <input
-                            className={'form-control ' + (!order_at && 'is-invalid')}
+                            className={'form-control ' + (!selected_values.order_at && 'is-invalid')}
                             name='order_at'
                             type="date"
-                            value={order_at}
-                            onChange={(e) => {this.handleChange('order_at', e)}}
+                            value={selected_values.order_at}
+                            onChange={(e) => {this.handleChange('order_at', [], e)}}
                         />
                     </div>
                 </div>
