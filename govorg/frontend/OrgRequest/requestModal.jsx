@@ -123,6 +123,7 @@ export default class RequestModal extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.getDesc = this.getDesc.bind(this)
+        this.getRefViewStatus = this.getRefViewStatus.bind(this)
     }
 
     handleModalOpen(){
@@ -149,13 +150,17 @@ export default class RequestModal extends Component {
         return {ids, feature_id}
     }
 
-    handleModalAction(){
-        var ref_in_direct = document.getElementById("directRef").checked
-
-        if (!ref_in_direct){
-            ref_in_direct = false
+    getRefViewStatus(state, e){
+        if (state == 'Direct'){
+            this.setState({ref_in_direct: e.target.checked})
         }
-        const { selected_value, values, desc, action_type } = this.state
+        else{
+            this.setState({ref_in_direct: false})
+        }
+    }
+
+    handleModalAction(){
+        const { selected_value, values, desc, action_type, ref_in_direct } = this.state
 
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
         this.setState({ is_loading: true })
@@ -479,6 +484,7 @@ export default class RequestModal extends Component {
                         actionNameDelete={this.state.action_name}
                         modalClose={this.state.modalClose}
                         getDesc={this.getDesc}
+                        getRefViewStatus={this.getRefViewStatus}
                         values = {values}
                     />
                 </div>
@@ -513,17 +519,17 @@ function RefreshView(props) {
                     <label>View шинэчлэлт</label>
                 </div>
                 <div className="col-md-8 ml-5 mt-3 ">
-                    <div class="custom-control custom-radio  ">
-                        <input type="radio" className="custom-control-input " id="directRef" name="radio-stacked" required/>
-                        <label className="custom-control-label float-left pt-1" for="directRef">Шууд шинэчлэх</label>
+                    <div className="custom-control custom-radio  ">
+                        <input type="radio" className="custom-control-input " onClick={(e) =>{props.getRefViewStatus("Direct", e)}} id="directRef" name="radio-stacked" required/>
+                        <label className="custom-control-label float-left pt-1" htmlFor="directRef">Шууд шинэчлэх</label>
                     </div>
                     <div className="custom-control custom-radio  mb-3">
-                            <input type="radio" className="custom-control-input " id="24HourRef" name="radio-stacked" required/>
-                            <label className="custom-control-label float-left pt-1" for="24HourRef">24 цагийн дотор шинэчлэх</label>
+                            <input type="radio" className="custom-control-input " onClick={(e) =>{props.getRefViewStatus("24Hour", e)}} id="24HourRef" name="radio-stacked" required/>
+                            <label className="custom-control-label float-left pt-1" htmlFor="24HourRef">24 цагийн дотор шинэчлэх</label>
                     </div>
                 </div>
             </div>
-            <div className="col-md-12">
+            <div className="col-md-12">s
                 <small>{
                         `Та ${
                         values.length == 1
