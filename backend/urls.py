@@ -144,6 +144,7 @@ urlpatterns = [
         path('<int:pk>/emp-gender-count/', org_views.emp_gender_count),
         path('<int:pk>/emp-age-count/', org_views.emp_age_count),
         path('get-all-org/', org_views.get_all_org),
+        path('send-mail/<int:pk>/', org_views.send_mail),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -224,7 +225,6 @@ urlpatterns = [
         path('property-fields/save/', dedsan_butets.propertyFieldsSave),
         path('remove/', dedsan_butets.remove),
         path('erese/', dedsan_butets.erese),
-        path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
         path('overlaps-feature-get/<str:feature_id>/', dedsan_butets.feature_overlaps_get),
         path('overlaps-feature-set/', dedsan_butets.feature_overlaps_set),
     ], 'dedsan-butests'))),

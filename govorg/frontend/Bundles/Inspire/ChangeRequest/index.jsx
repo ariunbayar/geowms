@@ -11,8 +11,6 @@ export default class ChangeRequest extends Component {
         }
     }
 
-
-
     render() {
         return (
             <div className="card">

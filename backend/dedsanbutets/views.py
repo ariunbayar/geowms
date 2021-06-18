@@ -35,7 +35,7 @@ from main import utils
 def _get_features(package_id):
     feature_data = []
     for feature in LFeatures.objects.filter(package_id=package_id):
-        view_name = _make_view_name(feature)
+        view_name = utils.make_view_name(feature)
         has_mat_view = utils.has_materialized_view(view_name)
         feature_data.append({
             'id': feature.feature_id,
@@ -64,17 +64,20 @@ def _get_package(theme_id):
 def bundleButetsAll(request):
     data = []
     style_names = []
-    for themes in LThemes.objects.all():
-        bundle = Bundle.objects.filter(ltheme_id=themes.theme_id)
+    theme_qs = LThemes.objects
+    theme_qs = theme_qs.all()
+    themes = theme_qs.order_by("theme_id")
+    for theme in themes:
+        bundle = Bundle.objects.filter(ltheme_id=theme.theme_id)
         if bundle:
             data.append({
-                    'id': themes.theme_id,
-                    'code': themes.theme_code,
-                    'name': themes.theme_name,
-                    'package': _get_package(themes.theme_id),
-                })
+                'id': theme.theme_id,
+                'code': theme.theme_code,
+                'name': theme.theme_name,
+                'package': _get_package(theme.theme_id),
+            })
         else:
-            themes.delete()
+            theme.delete()
 
     utils.check_gp_design()
     geoserver_style = geoserver.get_styles()
@@ -82,7 +85,6 @@ def bundleButetsAll(request):
         style_names.append(style.get('name'))
 
     url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
-
     rsp = {
         'success': True,
         'data': data,
@@ -226,7 +228,6 @@ def Property(request, code):
     return JsonResponse(rsp)
 
 
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -243,11 +244,50 @@ def Edit_name(request, payload):
             'info': 'Амжилттай хадгаллаа'
         }
     except Exception:
-        sp = {
+        rsp = {
             'success': False,
             'info': 'Алдаа гарлаа'
         }
     return JsonResponse(rsp)
+
+
+def _check_select_type(field_name, model_name):
+    if '_id' not in field_name:
+        return False
+    field_name = field_name.split('_id')[0]
+    if field_name not in model_name:
+        return True
+
+
+def _get_option_datas(model_name, field_name):
+    find_data = dict()
+    if model_name == 'property':
+        find_data['name'] = 'value_type_id'
+        find_data['find'] = 'value_type'
+
+    if model_name == 'feature_config':
+        find_data['name'] = 'data_type_id'
+        find_data['find'] = 'data_type'
+
+    if model_name == 'data_type_config' or model_name == 'code_list_config':
+        find_data['name'] = 'property_id'
+        find_data['find'] = 'property'
+
+    if model_name == 'code_list':
+        find_data['name'] = 'property_id'
+        find_data['find'] = 'property'
+
+    if field_name == 'connect_feature_id':
+        find_data['find'] = 'feature'
+
+    if field_name == 'connect_feature_property_id':
+        find_data['find'] = 'property'
+
+    if field_name == 'top_code_list_id':
+        find_data['find'] = 'code_list'
+
+    datas = _get_datas(find_data['find'])
+    return datas
 
 
 @require_POST
@@ -256,101 +296,84 @@ def Edit_name(request, payload):
 def getFields(request, payload):
     model_name = payload.get('name')
     savename = payload.get('name')
+
     id = payload.get('id')
     edit_name = payload.get('edit_name')
-    try:
-        model_name = getModel(model_name)
-        fields = []
-        for i in model_name._meta.get_fields():
-            name = i.name
-            type_name = i.get_internal_type()
-            if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField' and i.name != 'bundle':
-                if type_name == "CharField":
-                    type_name = 'text'
-                if type_name == "IntegerField" or type_name == "BigIntegerField":
-                    type_name = 'number'
-                if type_name == "BooleanField":
-                    type_name = 'radio'
-                if edit_name == '':
-                    if 'id' in i.name and not 'connect' in i.name:
-                        if '_' in savename:
-                            if savename == 'data_type_config' and i.name == 'data_type_id':
-                                fields.append({
-                                    'field_name': i.name,
-                                    'field_type': type_name,
-                                    'data': id
-                                })
-                            else:
-                                out = savename.split('_')
-                                if not str(out[0]) in i.name:
-                                    fields.append({
-                                        'field_name': i.name,
-                                        'field_type': type_name,
-                                        'data': id
-                                    })
-                                else:
-                                    fields.append({
-                                        'field_name': i.name,
-                                        'field_type': type_name,
-                                        'data': ''
-                                    })
+    not_id = False
+
+    Model = _get_Model(model_name)
+    fields = []
+    for i in Model._meta.get_fields():
+        field_name = i.name
+        data = ''
+        type_name = i.get_internal_type()
+        if not field_name == 'created_on' and not field_name == 'created_by' and not field_name == 'modified_on' and not field_name == 'modified_by' and field_name != 'bundle':
+            field = dict()
+            if type_name == "CharField":
+                type_name = 'text'
+            if type_name == "IntegerField" or type_name == "BigIntegerField":
+                type_name = 'number'
+            if type_name == "BooleanField":
+                type_name = 'radio'
+            is_select = _check_select_type(field_name, savename)
+            if is_select:
+                type_name = 'select'
+            if type_name == 'select':
+                field['options'] = _get_option_datas(savename, field_name)
+
+            field['field_name'] = field_name
+            field['field_type'] = type_name
+            field['data'] = data
+
+            if not edit_name:
+                if 'id' in field_name and not 'connect' in field_name:
+                    if '_' in savename:
+                        if savename == 'data_type_config' and field_name == 'data_type_id':
+                            field['data'] = id
+                        elif savename == 'feature_config' and not field_name == 'data_type_id':
+                            field['data'] = id
+                            not_id = True
+                        elif not not_id:
+                            out = savename.split('_')
+                            if not str(out[0]) in field_name:
+                                field['data'] = id
+                    else:
+                        field['data'] = id
+            if edit_name:
+                if savename == 'theme' and field_name == 'bundle':
+                    pass
+                else:
+                    datas = Model.objects.filter(pk=id)
+                    for data in datas:
+                        data_obj = model_to_dict(data)
+                        dat = data_obj[field_name]
+
+                        if type(dat) == 'bool' and not 1 and dat:
+                            dat = 'true'
+                        if type(dat) == 'bool' and not dat and not 0:
+                            dat = 'false'
                         else:
-                            fields.append({
-                                'field_name': i.name,
-                                'field_type': type_name,
-                                'data': id
-                            })
-                    else:
-                        fields.append({
-                            'field_name': i.name,
-                            'field_type': type_name,
-                            'data': ''
-                        })
-                if edit_name != '':
-                    if savename == 'theme' and i.name == 'bundle':
-                        pass
-                    else:
-                        datas = model_name.objects.filter(pk=id)
-                        for data in datas:
-                            data_obj = model_to_dict(data)
-                            dat = data_obj[i.name]
-                            if dat == True and not 1:
-                                dat = 'true'
-                            if dat == False and not 0:
-                                dat = 'false'
-                            else:
-                                dat = dat
-                            fields.append({
-                                'field_name': i.name,
-                                'field_type': type_name,
-                                'data': dat if dat else ""
-                            })
-        rsp = {
-            'success': True,
-            'fields': fields
-        }
-    except Exception as e:
-        rsp = {
-            'success': False,
-            'fields': 'Алдаа гарсан байна' + str(e)
-        }
+                            dat = dat
+
+                        if type_name == 'radio' and not dat and not 0:
+                            dat = 'false'
+
+                        field['data'] = dat if dat else ""
+
+            fields.append(field)
+    rsp = {
+        'success': True,
+        'fields': fields
+    }
     return JsonResponse(rsp)
-
-
-def _make_view_name(feature):
-    feature_code = feature.feature_code
-    feature_code = feature_code.split("-")
-    view_name = utils.slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
-    return view_name
 
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, fid):
-
     feature = get_object_or_404(LFeatures, feature_id=fid)
-    view_name = _make_view_name(feature)
+    view_name = utils.make_view_name(feature)
     has_mat_view = utils.has_materialized_view(view_name)
     geom = MGeoDatas.objects.filter(feature_id=fid).first()
 
@@ -364,7 +387,7 @@ def propertyFields(request, fid):
             'geom_type': geom_type,
         })
 
-    view = ViewNames.objects.filter(feature_id=fid).values('id', 'view_name').first()
+    view_qs = ViewNames.objects.filter(feature_id=fid)
     cache_values = []
     wmts = WmtsCacheConfig.objects.filter(feature_id=fid).first()
     if wmts:
@@ -375,14 +398,16 @@ def propertyFields(request, fid):
             'cache_type': wmts.type_of_operation,
             'number_of_cache': wmts.number_of_tasks_to_use,
         })
-    if view:
-        id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view['id'])]
+    if view_qs:
+        view = view_qs.first()
+        id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view.id)]
         url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': id_list,
-            'view': view,
+            'open_datas': utils.json_load(view.open_datas) if view.open_datas else [],
+            'view': view_qs.values('id', 'view_name').first(),
             'url': request.build_absolute_uri(url),
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
             'geom_type': geom_type,
@@ -393,11 +418,13 @@ def propertyFields(request, fid):
             'success': True,
             'fields': _lfeatureconfig(fid),
             'id_list': [],
+            'open_datas': [],
             'view': '',
             'geom_type': geom_type,
             'cache_values': cache_values,
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
+
     return JsonResponse(rsp)
 
 
@@ -414,10 +441,10 @@ def make_view(request, payload):
     data_type_ids = list(data_type_c_qs.values_list("data_type_id", flat=True))
 
     property_qs = property_qs.exclude(property_code__iexact='localid')
-    property_qs = property_qs.exclude(value_type_id='data_type')
+    property_qs = property_qs.exclude(value_type_id='data-type')
     property_ids = list(property_qs.values_list("property_id", flat=True))
 
-    view_name = _make_view_name(feature)
+    view_name = utils.make_view_name(feature)
     check = _create_view(list(property_ids), view_name, list(data_type_ids), list(feature_config_ids), fid)
     if check:
         rsp = _create_geoserver_detail(view_name, theme, request.user.id, feature, payload.get('values'))
@@ -439,22 +466,23 @@ def propertyFieldsSave(request, payload):
     fid = payload.get('fid')
     view_id = payload.get('view_id')
     values = payload.get('values')
+    open_datas = payload.get('open_datas')
     if not id_list:
         rsp = {
             'success': False,
-            'error': 'Утга сонгоно уу.'
+            'msg': 'Утга сонгоно уу.'
         }
         return JsonResponse(rsp)
 
     theme = get_object_or_404(LThemes, theme_id=tid)
     feature = get_object_or_404(LFeatures, feature_id=fid)
 
-    table_name = _make_view_name(feature)
+    table_name = utils.make_view_name(feature)
     has_mat_view = utils.has_materialized_view(table_name)
     if not has_mat_view:
         return JsonResponse({
             "success": False,
-            "error": "View үүсээгүй байна view ийг үүсгэнэ үү",
+            "msg": "View үүсээгүй байна view ийг үүсгэнэ үү",
         })
 
     view = ViewNames.objects.update_or_create(
@@ -462,6 +490,7 @@ def propertyFieldsSave(request, payload):
         defaults={
             'view_name': table_name,
             'feature_id': fid,
+            'open_datas': utils.json_dumps(open_datas),
         }
     )[0]
 
@@ -471,40 +500,53 @@ def propertyFieldsSave(request, payload):
     for prop_id in id_list:
         view_prop_qs.create(view=view, property_id=prop_id)
 
-    if values:
+    is_created = _check_geoserver_detail(table_name, theme)
+    if values or not is_created:
         rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, payload.get('values'))
-
     else:
         rsp = {
             "success": True,
-            "data": 'Амжилттай хадгаллаа'
+            "msg": 'Амжилттай хадгаллаа'
         }
 
     return JsonResponse(rsp)
 
 
-def getModel(model_name):
-    if model_name == 'theme':
-        model_name = LThemes
-    if model_name == 'package':
-        model_name = LPackages
-    if model_name == 'feature':
-        model_name = LFeatures
-    if model_name == 'property':
-        model_name = LProperties
-    if model_name == 'feature_config':
-        model_name = LFeatureConfigs
-    if model_name == 'data_type_config':
-        model_name = LDataTypeConfigs
-    if model_name == 'code_list_config':
-        model_name = LCodeListConfigs
-    if model_name == 'data_type':
-        model_name = LDataTypes
-    if model_name == 'value_type':
-        model_name = LValueTypes
-    if model_name == 'code_list':
-        model_name = LCodeLists
-    return model_name
+def _check_geoserver_detail(table_name, theme):
+    theme_code = theme.theme_code
+    ws_name = 'gp_' + theme_code
+    layer_name = 'gp_layer_' + table_name
+
+    rsp = geoserver.getWorkspace(ws_name)
+    if rsp.status_code == 200:
+        ds_rsp = geoserver.getDataStore(ws_name, ws_name)
+        if ds_rsp.status_code == 200:
+            ds_layer_rsp = geoserver.getDataStoreLayer(ws_name, ws_name, layer_name)
+            if ds_layer_rsp.status_code == 200:
+                return True
+    return False
+
+
+def _get_Model(model_name):
+    obj = {
+        'theme': LThemes,
+        'package': LPackages,
+        'feature': LFeatures,
+        'property': LProperties,
+        'feature_config': LFeatureConfigs,
+        'data_type_config': LDataTypeConfigs,
+        'code_list_config': LCodeListConfigs,
+        'data_type': LDataTypes,
+        'value_type': LValueTypes,
+        'code_list': LCodeLists,
+    }
+    return obj[model_name]
+
+
+def _str_to_bool(str):
+    if str == 'true':
+        return True
+    return False
 
 
 @require_POST
@@ -516,126 +558,72 @@ def save(request, payload):
     edit_name = payload.get("edit_name")
     json = payload.get("form_values")
     model_name_old = model_name
-    model_name = getModel(model_name)
-    json = json['form_values']
-    fields = []
-    for i in model_name._meta.get_fields():
-        type_name = i.get_internal_type()
-        if not i.name == 'created_on' and not i.name == 'created_by' and not i.name == 'modified_on' and not i.name == 'modified_by' and not type_name == 'AutoField':
-            if type_name == "CharField":
-                type_name = 'text'
-            if type_name == "IntegerField" or type_name == "BigIntegerField":
-                type_name = 'number'
-            if type_name == "BooleanField":
-                type_name = 'radio'
-            fields.append(i.name)
+    Model = _get_Model(model_name)
 
-    check = True
     datas = {}
     for data in json:
-        if data['field_name'] in fields:
-            if not data['data']:
-               data['data'] = None
-            if data['field_type'] == 'radio':
-                if data['data'] == 'true':
-                    datas[data['field_name']] = True
-                else:
-                    datas[data['field_name']] = False
-            # if data['field_type'] == 'order_no':
-            #     order_no = len(model_name.objects.all()) + 1
-            #     datas[data['field_name']] = order_no
-            else:
-                datas[data['field_name']] = data['data']
+        if not data['data']:
+            data['data'] = None
+        if data['field_type'] == 'radio':
+            datas[data['field_name']] = _str_to_bool(data['data'])
+        # if data['field_type'] == 'order_no':
+        #     order_no = len(Model.objects.all()) + 1
+        #     datas[data['field_name']] = order_no
         else:
-            check = False
-    if check:
-        if edit_name == '':
-            datas['created_by'] = request.user.id
-            datas['modified_by'] = request.user.id
-            if model_name_old == 'theme':
+            datas[data['field_name']] = data['data']
 
-                theme_code = datas['theme_code']
-                theme_name = datas['theme_name']
-                theme_name_eng = datas['theme_name_eng']
-                order_no = datas['order_no']
-                is_active = datas['is_active']
-                modified_by = datas['modified_by']
-                created_by = datas['created_by']
-                cb_bundle = User.objects.filter(id=created_by).first()
+    model_qs = Model.objects
 
-                last_order_n = Bundle.objects.all().order_by('sort_order').last().sort_order
-                order_no = order_no if order_no else last_order_n+1
-                is_active = is_active if is_active else False
-                theme_model = model_name.objects.create(
-                                    theme_code=theme_code,
-                                    theme_name=theme_name,
-                                    theme_name_eng=theme_name_eng,
-                                    order_no=order_no,
-                                    is_active=is_active,
-                                    created_by=created_by,
-                                    modified_by=modified_by,
-                                )
+    if not edit_name:
+        datas['created_by'] = request.user.id
+        datas['modified_by'] = request.user.id
+        if model_name_old == 'theme':
+            is_active = datas['is_active']
+            order_no = datas['order_no']
 
-                Bundle.objects.create(
-                    is_removeable=is_active,
-                    created_by=cb_bundle,
-                    sort_order=order_no,
-                    ltheme=theme_model,
-                )
-            else:
-                sain = model_name.objects.create(**datas)
+            last_order_n = Bundle.objects.all().order_by('sort_order').last().sort_order
+
+            datas['order_no'] = order_no if order_no else last_order_n + 1
+            datas['is_active'] = is_active if is_active else False
+            theme_model = model_qs.create(**datas)
+
+            Bundle.objects.create(
+                is_removeable=is_active,
+                created_by=request.user,
+                sort_order=order_no,
+                ltheme=theme_model,
+            )
         else:
-            datas['modified_by'] = request.user.id
-            sain = model_name.objects.filter(pk=model_id).update(**datas)
-        rsp = {
-            'success': True,
-            'info': 'Амжилттай'
-        }
+            model_qs.create(**datas)
     else:
-        rsp = {
-            'success': True,
-            'info': 'Алдаа гарлаа'
-        }
-
-    return JsonResponse(rsp)
-
-
-@require_GET
-@ajax_required
-@user_passes_test(lambda u: u.is_superuser)
-def Get_Datas(request, name):
-    types = []
-    model_name = getModel(name)
-    datas = model_name.objects.all()
-    if name == 'data_type':
-        for data in datas:
-            types.append({
-                'id': data.data_type_id,
-                'name': data.data_type_name,
-            })
-    if name == 'value_type':
-        for data in datas:
-            types.append({
-                'id': data.value_type_id,
-                'name': data.value_type_name,
-            })
-    if name == 'property':
-        for data in datas:
-            types.append({
-                'id': data.property_id,
-                'name': data.property_name,
-            })
-    if name == 'feature':
-        for data in datas:
-            types.append({
-                'id': data.feature_id,
-                'name': data.feature_name,
-            })
+        datas['modified_by'] = request.user.id
+        datas['modified_on'] = utils.date_to_timezone(utils.get_today_datetime(is_string=True))
+        model_filter = _get_model_filter(model_name, model_id)
+        model_qs.filter(**model_filter).update(**datas)
     rsp = {
         'success': True,
-        'datas': types
+        'info': 'Амжилттай'
     }
+
     return JsonResponse(rsp)
+
+
+def _get_model_filter(model_name, model_id):
+    filter_data = dict()
+    filter_data[model_name + "_id"] = model_id
+    return filter_data
+
+
+def _get_datas(mode_name):
+    types = list()
+    Model = _get_Model(mode_name)
+    datas = Model.objects.all().values()
+    for data in datas:
+        types.append({
+            'id': data[mode_name + "_id"],
+            'name': data[mode_name + "_name"],
+        })
+    return types
 
 
 @require_POST
@@ -644,24 +632,18 @@ def Get_Datas(request, name):
 def remove(request, payload):
     model_name = payload.get('model_name')
     model_id = payload.get('model_id')
-    model_name = getModel(model_name)
-    try:
-        data = model_name.objects.filter(pk=model_id)
-        if data:
-            data.delete()
-            rsp = {
-                'success': True,
-                'info': 'Амжилттай устгалаа'
-            }
-        else:
-            rsp = {
-                'success': False,
-                'info': 'Хоосон байна'
-            }
-    except Exception as e:
+    Model = _get_Model(model_name)
+    data = Model.objects.filter(pk=model_id)
+    if data:
+        data.delete()
+        rsp = {
+            'success': True,
+            'info': 'Амжилттай устгалаа'
+        }
+    else:
         rsp = {
             'success': False,
-            'info': 'Алдаа гарсан байна: ' + str(e)
+            'info': 'Хоосон байна'
         }
     return JsonResponse(rsp)
 
@@ -672,16 +654,14 @@ def remove(request, payload):
 def erese(request, payload):
     model_name = payload.get('model_name')
     top_id = payload.get('top_id')
-    model_id = payload.get('model_id')
     if model_name == 'property':
         field_name = 'property_id'
         model_name = 'data_type_config'
     if model_name == 'data_type':
         field_name = 'data_type_id'
         model_name = 'feature_config'
-    model_name = getModel(model_name)
+    model_name = _get_Model(model_name)
     try:
-        savename = payload.get('model_name')
         updateData = {}
         data = model_name.objects.filter(pk=top_id)
         for i in model_name._meta.get_fields():
@@ -706,9 +686,7 @@ def erese(request, payload):
     return JsonResponse(rsp)
 
 
-
 def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, layer_name, feature, values, wms):
-
     geom_att, extends = utils.get_colName_type(table_name, 'geo_data')
     if extends:
         srs = extends[0]['find_srid']
@@ -791,9 +769,9 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
                     wms.cache_url = wmts_url
                     wms.save()
 
-        return {"success": True, 'data': 'Амжилттай үүслээ'}
+        return {"success": True, 'msg': 'Амжилттай үүслээ'}
     else:
-        return {"success": False, 'error': 'Давхарга үүсгэхэд алдаа гарлаа'}
+        return {"success": False, 'msg': 'Давхарга үүсгэхэд алдаа гарлаа'}
 
 
 def _create_geoserver_detail(table_name, theme, user_id, feature, values):
@@ -858,6 +836,22 @@ def _create_geoserver_detail(table_name, theme, user_id, feature, values):
     return layer_responce
 
 
+def _get_value_type_for_view(value_type_id):
+    obj = {
+        'boolean': 'value_text',
+        'date': 'value_date',
+        'double': 'value_number',
+        'link': 'value_text',
+        'multi-select': 'value_text',
+        'multi-text': 'value_text',
+        'single-select': 'value_text',
+        'number': 'value_number',
+        'text': 'value_text',
+    }
+    value_type = obj[value_type_id] if value_type_id in obj else 'value_text'
+    return value_type
+
+
 def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
     ids.sort()
     data = LProperties.objects.filter(property_id__in=ids).order_by('property_id')
@@ -870,7 +864,8 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
             fields.append(row.property_code)
     cols = list()
     for item in data:
-        col = 'Max(Case When a.property_id = {property_id} Then value_text End) As {property_code}'.format(property_id=item.property_id, property_code=item.property_code)
+        value_type = _get_value_type_for_view(item.value_type_id)
+        col = 'Max(Case When a.property_id = {property_id} Then {value_type} End) As {property_code}'.format(value_type=value_type, property_id=item.property_id, property_code=item.property_code)
         cols.append(col)
     try:
         query = '''
@@ -895,15 +890,15 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
                         mg.modified_on,
                         COALESCE(
                                 a.value_text::character varying(1000),
-                                a.value_number::character varying(1000),
-                                a.value_date::character varying(1000),
                                 case when a.code_list_id is null then null
                                 else (
                                     select code_list_name
                                     from l_code_lists
                                     where code_list_id=a.code_list_id
                                 ) end
-                            ) as value_text
+                            ) as value_text,
+                        a.value_number,
+						a.value_date
                     from
                         public.m_datas a
                     inner join

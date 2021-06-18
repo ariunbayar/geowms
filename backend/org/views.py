@@ -31,6 +31,7 @@ from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
+from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
 from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
@@ -211,7 +212,7 @@ def employee_update(request, payload, pk, level):
     values = payload.get('values')
     username = values.get('username')
     position = int(values.get('position'))
-    state = int(values.get('state'))
+    state = values.get('state')
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -222,7 +223,6 @@ def employee_update(request, payload, pk, level):
     is_super = values.get('is_super')
     pro_class = values.get('pro_class')
     phone_number = values.get('phone_number')
-    re_password_mail = values.get('re_password_mail')
     is_user = values.get('is_user')
     address = payload.get('address')
     level_1 = address.get('level_1')
@@ -265,11 +265,6 @@ def employee_update(request, payload, pk, level):
             else:
                 user.is_active = False
             user.save()
-
-            if re_password_mail:
-                subject = 'Геопортал нууц үг солих'
-                text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-                utils.send_approve_email(user, subject, text)
 
             if pro_class:
                 pro_class = int(pro_class)
@@ -350,7 +345,7 @@ def employee_add(request, payload, level, pk):
     values = payload.get('values')
     username = values.get('username')
     position = int(values.get('position'))
-    state = int(values.get('state'))
+    state = values.get('state')
     first_name = values.get('first_name')
     last_name = values.get('last_name')
     email = values.get('email')
@@ -449,15 +444,25 @@ def employee_add(request, payload, level, pk):
     return JsonResponse(rsp)
 
 
+def _set_state(employee):
+    employee.state = 3
+    employee.save()
+
+    return True
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_remove(request, pk):
-
     user = get_object_or_404(User, id=pk)
     employee = get_object_or_404(Employee, user=user)
-    check = _remove_user(user, employee)
-    return JsonResponse({'success': check})
+    user_log = Payment.objects.filter(user=user)
+    if user_log:
+        return JsonResponse({'success': False})
+    else:
+        check = _set_state(employee)
+        return JsonResponse({'success': check})
 
 
 def _remove_user(user, employee):
@@ -1920,3 +1925,16 @@ def emp_age_count(request, pk):
     }
 
     return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def send_mail(request, pk):
+    subject = 'Геопортал нууц үг солих'
+    text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+
+    user = get_object_or_404(User, pk=pk)
+    utils.send_approve_email(user, subject, text)
+
+    return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})

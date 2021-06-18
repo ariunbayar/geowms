@@ -6,24 +6,7 @@ import Modal from '@utils/Modal/Modal'
 
 import RequestModal from  './RequestModal'
 import { service } from "./service";
-
-export const make_state_color = (state) => {
-    let color
-    if (state == "ШИНЭ") color = 'text-success'
-    else if (state == "ШИЙДВЭРЛЭГДСЭН") color = 'text-primary'
-    else  color = 'text-warning'
-    return color
-}
-
-export const make_kind_color = (kind) => {
-    let color
-    if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
-    else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
-    else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
-    else if (kind == "БУЦААГДСАН") color = 'text-danger'
-    else if (kind == "ШИНЭ") color = 'text-primary'
-    return color
-}
+import { makeStateColor, makeKindColor } from '../helpers/functions'
 
 export class FileAndDesc extends Component {
     constructor(props){
@@ -89,8 +72,8 @@ export class Detail extends Component {
             ],
             жагсаалтын_холбоос: '/llc/backend/llc-request-list/',
             хувьсах_талбарууд: [
-                {"field": "state", "action": (values) => make_state_color(values) , "action_type": true},
-                {"field": "kind", "action": (values) => make_kind_color(values), "action_type": true},
+                {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
+                {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
             ],
             нэмэлт_талбарууд: [
                     {
@@ -157,13 +140,14 @@ export class Detail extends Component {
     }
 
     handleModalOpen(values){
-        let not_remove_kinds = ['ХҮЛЭЭГДЭЖ БУЙ', 'ЦУЦЛАСАН']
-        if(not_remove_kinds.includes(values.kind)) {
+        let not_rm_kind = 'ЦУЦЛАСАН'
+        let not_rm_state = 'ИЛГЭЭСЭН'
+        if(not_rm_kind == values.kind || not_rm_state == values.state) {
             this.modalChange(
                 'fa fa-exclamation-circle',
                 "danger",
                 'Устгах боломжгүй',
-                `"Энэхүү хүсэлт илгээгдсэн төлөвт байгаа тул устгах боломжгүй`,
+                `"Энэхүү хүсэлт ${values.kind == 'ЦУЦЛАСАН' ? values.kind : values.state} төлөвт байгаа тул устгах боломжгүй`,
                 false
             )
         }
@@ -226,24 +210,20 @@ export class Detail extends Component {
         this.setState({ refresh: !this.state.refresh })
     }
 
-    handleSearch(e) {
+    handleSearch(e, field) {
         let custom_query = Object()
         var value = parseInt(e.target.value)
 
-        var table_data = e.target.selectedIndex
-        var optionElement = e.target.childNodes[table_data]
-        var selected_data_name =  optionElement.getAttribute('name')
-
-        if (selected_data_name == 'state') {
+        if (field == 'state') {
             if (e.target.value) custom_query['state'] = value
+            else delete custom_query['state']
             if (this.state.kind) custom_query['kind'] = this.state.kind
         }
         else {
             if (value) custom_query['kind'] = value
             if (this.state.state) custom_query['state'] = this.state.state
         }
-
-        this.setState({ custom_query, [selected_data_name]: value })
+        this.setState({ custom_query, [field]: value })
     }
 
     infoModal(values) {
@@ -268,7 +248,7 @@ export class Detail extends Component {
                                 <label htmlFor="">Төлөв</label>
                                 <select
                                     className="form-control form-control-xs"
-                                    onChange={(e) => this.handleSearch(e)}
+                                    onChange={(e) => this.handleSearch(e, 'state')}
                                 >
                                     <option value="">--- Төлөвөөр хайх ---</option>
                                     {
@@ -284,8 +264,8 @@ export class Detail extends Component {
                             </div>
                             <div className="col-md-6">
                                 <label htmlFor="">Өөрчлөлт</label>
-                                <select className="form-control form-control-sm disabled"
-                                    onChange={(e) => this.handleSearch(e)}
+                                <select className="form-control form-control-xs"
+                                    onChange={(e) => this.handleSearch(e, 'kind')}
                                 >
                                     <option value="">--- Өөрчлөлтөөр хайх ---</option>
                                     {
@@ -293,7 +273,7 @@ export class Detail extends Component {
                                         ?
                                             choices['kind'].map((choice, idx) =>
                                                 <option
-                                                    ey={idx}
+                                                    key={idx}
                                                     name='kind'
                                                     value={choice[0]}
                                                 >

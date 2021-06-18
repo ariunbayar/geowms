@@ -244,14 +244,14 @@ def slugifyWord(word):
 
 def refreshMaterializedView(fid):
 
-    view_data = ViewNames.objects.filter(feature_id=fid).first()
-    if view_data:
-        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_data.view_name)
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+    view_name = make_view_name(feature)
+    if view_name:
+        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_name)
         with connections['default'].cursor() as cursor:
             cursor.execute(sql)
             return True
-
-        return False
     else:
         return True
 
@@ -1861,3 +1861,40 @@ def get_feature(shape_geometries):
         }
         features.append(feature)
     return features, geom_type
+
+
+def make_view_name(feature):
+    feature_code = feature.feature_code
+    feature_code = feature_code.split("-")
+    view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
+    return view_name
+
+
+def get_feature_from_layer_code(layer_code):
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    layer_code = layer_code.split('_view')[0]
+    splited = layer_code.split('_')
+    code = splited.pop()
+    eng_name = "_".join(splited)
+    feature_qs = LFeatures.objects
+    feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
+    feature = feature_qs.first()
+    return feature
+
+
+def get_org_from_user(user, is_admin=True):
+    Employee = apps.get_model("backend_org", "Employee")
+    emp_qs = Employee.objects
+    emp_qs = emp_qs.filter(user=user)
+    if is_admin:
+        emp_qs = emp_qs.filter(is_admin=is_admin)
+    if not emp_qs:
+        return False
+    return emp_qs.first().org
+
+
+def get_today_datetime(is_string=False):
+    now = datetime.now()
+    if is_string:
+        return datetime_to_string(now)
+    return now

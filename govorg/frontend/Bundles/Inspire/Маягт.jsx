@@ -200,7 +200,7 @@ export default class Маягт extends Component {
 
         return (
             <div className='overflow-auto card-body'>
-                {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Шинэ цэг</h4>}
+                {this.props.gid ? <h4 className="text-center">Geom дугаар-{this.props.gid}</h4> : <h4 className="text-center">Маягт</h4>}
                 <hr></hr>
                 <Formik
                     enableReinitialize

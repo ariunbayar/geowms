@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
-from api.utils import replace_src_url
 from backend.payment.models import PaymentLayer
 from main.decorators import ajax_required
 from main.components import Datatable

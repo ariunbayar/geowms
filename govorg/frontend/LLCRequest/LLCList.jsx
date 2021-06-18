@@ -61,9 +61,9 @@ export class GetDescription extends Component {
 
 function ModalText(props) {
     return (
-        <span className="text-center">
+        <div className="text-center border border-warning rounded p-4 my-2">
             {props.description}
-        </span>
+        </div>
     )
 }
 
@@ -112,14 +112,14 @@ export class LLCList extends Component {
                     'component': (values) => downloadData(values)
                 },
                 {
-                    "title": '',
+                    "title": 'Шийдвэрлэх',
                     'component': SolveModal,
                     'props': {
                         'refreshData': () => this.refreshData(),
                     }
                 },
                 {
-                    "title": '',
+                    "title": 'Тайлбар',
                     'component': GetDescription,
                     'props': {
                         'desModal': (values) => this.desModal(values),
@@ -194,7 +194,7 @@ export class LLCList extends Component {
 
     desModal(values) {
         this.modalChange(
-            'Тайлбар',
+            'ТАЙЛБАР',
             ModalText,
             false,
             values.description,
@@ -237,7 +237,7 @@ export class LLCList extends Component {
                                     ?
                                         choices['kind'].map((choice, idx) =>
                                             <option
-                                                ey={idx}
+                                                key={idx}
                                                 name='kind'
                                                 value={choice[0]}
                                             >

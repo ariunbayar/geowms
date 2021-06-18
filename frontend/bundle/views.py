@@ -20,6 +20,7 @@ from django.db import connections
 from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, MGeoDatas, MDatas
 from main import utils
 from backend.geoserver.models import WmtsCacheConfig
+from backend.config.models import Config
 
 from django.contrib.postgres.search import SearchVector
 
@@ -88,19 +89,21 @@ def wms_layers(request, pk):
                 role_id__in=roles
             )
 
-        view_obj = ViewNames.objects.filter(view_name=code).first()
-        if view_obj:
-            feature_id = view_obj.feature_id
-            wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
-            if wmts_obj:
-                if wmts_obj.zoom_start < 4:
-                    zoom_start = 5
-                else:
-                    zoom_start = wmts_obj.zoom_start
-                if wmts_obj.zoom_stop < 13:
-                    zoom_stop = 21
-                else:
-                    zoom_stop = wmts_obj.zoom_stop
+        has_mat = utils.has_materialized_view(code)
+        if has_mat:
+            feature = utils.get_feature_from_layer_code(code)
+            if feature:
+                feature_id = feature.feature_id
+                wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+                if wmts_obj:
+                    if wmts_obj.zoom_start < 4:
+                        zoom_start = 5
+                    else:
+                        zoom_start = wmts_obj.zoom_start
+                    if wmts_obj.zoom_stop < 13:
+                        zoom_stop = 21
+                    else:
+                        zoom_stop = wmts_obj.zoom_stop
         return {
                 'id': ob.pk,
                 'name': ob.name,
@@ -116,14 +119,18 @@ def wms_layers(request, pk):
             }
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
+        chache_url = ''
         if wms.is_active:
-            # `  if utils.check_nsdi_address(request):
-            #         url = wms.url
-            #         ws_name = url.split('/')[3]
-            #         # chache_url = 'http://{}/{ws_name}/gwc/service/wmts'.format(ws_name=ws_name)
-            #     else:`
-            url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
-            chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+            url = wms.url
+            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in url or '192.168.10.15' in url):
+                ws_name = url.split('/')[3]
+                if wms.cache_url:
+                    chache_url = 'https://geo.nsdi.gov.mn/{ws_name}/gwc/service/wmts'.format(
+                        ws_name=ws_name,
+                    )
+            else:
+                url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
+                chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
             wms_data = {
                 'name': wms.name,

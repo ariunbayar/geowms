@@ -1,3 +1,4 @@
+from frontend.page.views import service
 import re
 from xml.etree import ElementTree
 
@@ -66,8 +67,31 @@ def filter_layers_wfs(content, allowed_layers):
     return content.encode()
 
 
-def replace_src_url(content, old_url, new_url):
+def replace_src_url(content, old_url, new_url, service_type):
+
     if isinstance(content, bytes):
         content = content.decode()
+    if service_type:
+        service_type=service_type.lower()
+        if '192.168.10.15' in old_url or 'geo.nsdi.gov.mn' in old_url:
+            if service_type == 'wms':
+                service_type = 'ows'
+            datas = old_url.split('/')
+            host = datas[2]
+            if '8080' in host:
+                host = host.split(':')[0]
+
+            if len(datas) > 4:
+                old_url = 'https://{host}/{ws_name}/{service_type}'.format(
+                    service_type=service_type,
+                    ws_name=datas[-2],
+                    host=host
+                )
+            else:
+                old_url = 'https://{host}/{service_type}'.format(
+                    service_type=service_type,
+                    host=host
+                )
+
     content = content.replace(old_url, new_url)
     return content.encode()

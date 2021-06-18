@@ -82,6 +82,7 @@ def _get_geom(geo_id, fid):
 def _get_org_request(ob, employee):
 
     geo_json = []
+    project_name = ''
     old_geo_data = []
     current_geo_json = []
     feature_name = LFeatures.objects.filter(feature_id=ob.feature_id).first().feature_name
@@ -106,7 +107,13 @@ def _get_org_request(ob, employee):
         geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
+    description = ob.description
+    if ob.llc_request_id:
+        project_name = _get_ann_and_project_name(ob.llc_request_id, [])
+        description = ob.llc_request.description
+
     return {
+        'description': description,
         'change_request_id': ob.id,
         'old_geo_id': ob.old_geo_id,
         'new_geo_id': ob.new_geo_id,
@@ -129,6 +136,7 @@ def _get_org_request(ob, employee):
         'org': employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
+        'project_name': project_name
     }
 
 
@@ -136,16 +144,19 @@ def _get_org_request(ob, employee):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
-    org_request = []
+    org_request_list = list()
     employee = get_object_or_404(Employee, user=request.user)
-    org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by("-created_at")
+    org_request_qs = ChangeRequest.objects
+    org_request_qs = org_request_qs.exclude(form_json__isnull=True, geo_json__isnull=True, group_id__isnull=True)
+    org_request_qs = org_request_qs.filter(employee=employee)
+    org_request_qs = org_request_qs.order_by("-created_at")
 
-    if org_request_list:
-        org_request = [_get_org_request(ob, employee) for ob in org_request_list]
-        if org_request[0] != '':
+    if org_request_qs:
+        org_request_list = [_get_org_request(ob, employee) for ob in org_request_qs]
+        if org_request_list[0] != '':
             rsp = {
                 'success': True,
-                'org_request': org_request,
+                'org_request': org_request_list,
             }
         else:
             rsp = {
@@ -419,15 +430,16 @@ def _set_llc_request(llc_request_id, payload):
     if action_type == 'dismiss':
         change_request_data['kind'] = ChangeRequest.KIND_DISMISS
         llc_request_data['kind'] = LLCRequest.KIND_DISMISS
+        llc_request_data['state'] = LLCRequest.STATE_NEW
         info = 'Амжилттай буцаалаа'
 
     elif action_type == 'revoke':
         change_request_data['kind'] = ChangeRequest.KIND_DISMISS
         llc_request_data['kind'] = LLCRequest.KIND_REVOKE
+        llc_request_data['state'] = LLCRequest.STATE_SOLVED
         info = 'Амжилттай цуцаллаа'
 
     change_request_data['state'] = ChangeRequest.STATE_REJECT
-    llc_request_data['state'] = LLCRequest.STATE_SOLVED
     llc_request_data['description'] = description or ''
 
     llc_changerequest_qs = ChangeRequest.objects
@@ -474,6 +486,7 @@ def request_reject(request, payload):
                 break
             if action_type == 'reject':
                 _check_group_items(change_req_obj)
+                change_req_obj.description = payload.get("desc")
                 change_req_obj.state = ChangeRequest.STATE_REJECT
                 change_req_obj.group_id = None
                 change_req_obj.save()
@@ -588,6 +601,9 @@ def _create_mdatas(geo_id, feature_id, form, value):
     value['feature_config_id'] = ids[0]['feature_config_id']
     value['data_type_id'] = ids[0]['data_type_id']
     value['property_id'] = form['property_id']
+    if form["value_type"] == "option":
+        if form["data"]:
+            value['code_list_id'] = form ["data"]
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
             if value['value_date']:
@@ -772,7 +788,6 @@ def request_approve(request, payload):
     feature_id = payload.get("feature_id")
     success = False
     new_geo_id = None
-
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
     requests_qs = ChangeRequest.objects
     requests_qs = requests_qs.filter(id__in=request_ids)

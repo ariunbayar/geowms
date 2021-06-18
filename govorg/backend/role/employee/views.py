@@ -5,10 +5,13 @@ from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, Value
+from django.contrib.postgres.search import SearchVector
+
 from geoportal_app.models import User
 from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
+from backend.payment.models import Payment
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from main.components import Datatable
@@ -136,11 +139,19 @@ def list(request, payload):
     is_user = payload.get('is_user')
 
     org = get_object_or_404(Org, employee__user=request.user)
+
+    qs = Employee.objects
+    qs = qs.filter(org=org)
+    qs = qs.annotate(search=SearchVector(
+        "user__email",
+        "user__first_name",
+        "user__last_name"
+    ))
+
     if is_user:
-        qs = Employee.objects.filter(org=org)
         qs = qs.filter(user__is_user=True)
-    else:
-        qs = Employee.objects.filter(org=org)
+
+    qs = qs.filter(search__icontains=payload.get('query'))
     if not qs:
         rsp = {
             'items': [],
@@ -165,7 +176,8 @@ def list(request, payload):
         initial_qs=qs,
         оруулах_талбарууд=оруулах_талбарууд,
         нэмэлт_талбарууд=нэмэлт_талбарууд,
-        хувьсах_талбарууд=хувьсах_талбарууд
+        хувьсах_талбарууд=хувьсах_талбарууд,
+        has_search=False,
     )
     items, total_page = datatable.get()
     rsp = {
@@ -545,31 +557,41 @@ def _get_emp_perm_display(emp_perm):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detail(request, pk):
+    user = request.user
+    qs = Employee.objects
 
-    employee = get_object_or_404(Employee, pk=pk)
-    employee_detail = _get_employee_display(employee)
-    emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    logged_in_employee = qs.filter(user=user).first()
+    allowed_org_id = logged_in_employee.org_id
 
-    role_id = ''
-    role_name = ''
-    perms = None
-    if emp_perm:
-        if emp_perm.emp_role:
-            emp_role = emp_perm.emp_role
-            role_id = emp_role.id
-            role_name = emp_role.name
-        perms = _get_emp_perm_display(emp_perm)
+    employee = get_object_or_404(qs, pk=pk)
+    org_id = employee.org_id
 
-    rsp = {
-        'success': True,
-        'employee_detail': employee_detail,
-        'role_id': role_id,
-        'role_name': role_name,
-        'perms': perms,
+    if allowed_org_id == org_id:
+        employee_detail = _get_employee_display(employee)
+        emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
-    }
+        role_id = ''
+        role_name = ''
+        perms = None
+        if emp_perm:
+            if emp_perm.emp_role:
+                emp_role = emp_perm.emp_role
+                role_id = emp_role.id
+                role_name = emp_role.name
+            perms = _get_emp_perm_display(emp_perm)
 
-    return JsonResponse(rsp)
+        rsp = {
+            'success': True,
+            'employee_detail': employee_detail,
+            'role_id': role_id,
+            'role_name': role_name,
+            'perms': perms,
+
+        }
+
+        return JsonResponse(rsp)
+    else:
+        raise Http404
 
 
 @require_GET
@@ -578,23 +600,39 @@ def detail(request, pk):
 def delete(request, pk):
     get_object_or_404(Employee, user=request.user, is_admin=True)
     employee = get_object_or_404(Employee, pk=pk)
-    user = User.objects.filter(pk=employee.user_id).first()
-    emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    change_requests = ChangeRequest.objects.filter(employee=employee)
-
-    with transaction.atomic():
-        for change_request in change_requests:
-            change_request.employee = None
-            change_request.save()
-        if emp_perm:
-            EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
-            emp_perm.delete()
-        employee.delete()
-        user.delete()
-
+    user_log = Payment.objects.filter(user=employee.user)
+    if user_log:
+        return JsonResponse({'success': False})
+    else:
+        employee.state = 3
+        employee.save()
         return JsonResponse({'success': True})
 
-    return JsonResponse({'success': False})
+
+# ------------- Хэрэглэгчийг баазаас устгах үед ашиглана -------------
+# @require_GET
+# @ajax_required
+# @login_required(login_url='/gov/secure/login/')
+# def delete(request, pk):
+#     get_object_or_404(Employee, user=request.user, is_admin=True)
+#     employee = get_object_or_404(Employee, pk=pk)
+#     user = User.objects.filter(pk=employee.user_id).first()
+#     emp_perm = EmpPerm.objects.filter(employee=employee).first()
+#     change_requests = ChangeRequest.objects.filter(employee=employee)
+
+#     with transaction.atomic():
+#         for change_request in change_requests:
+#             change_request.employee = None
+#             change_request.save()
+#         if emp_perm:
+#             EmpPermInspire.objects.filter(emp_perm=emp_perm).delete()
+#             emp_perm.delete()
+#         employee.delete()
+#         user.delete()
+
+#         return JsonResponse({'success': True})
+
+#     return JsonResponse({'success': False})
 
 
 @require_GET

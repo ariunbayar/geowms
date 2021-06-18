@@ -41,7 +41,7 @@ export class ButtonDelete extends Component {
                     icon_color={'warning'}
                     has_button={true}
                     title="Албан хаагчийг устгах"
-                    text={`Та "${this.props.employee_name}" нэртэй албан хаагчийг устгахдаа итгэлтэй байна уу?`}
+                    text={`Та "${this.props.employee_name}" нэртэй албан хаагчийн төлөв чөлөөлөгдсөн болно. Та устгахдаа итгэлтэй байна уу?`}
                     actionNameDelete="Устгах"
                     modalAction={ this.props.onClick }
                 />

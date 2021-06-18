@@ -6,6 +6,7 @@ import SuspenseLoader from "@utils/Loader/SuspenseLoader"
 
 const Map = React.lazy(() => import("./Map"));
 const Request = React.lazy(() => import('./Request'));
+const History = React.lazy(() => import('./History'));
 
 export class App extends Component {
 
@@ -28,6 +29,7 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-database" url="/llc/map/" text="Map"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                     </ul>
                 </div>
                 <div className="clearfix">
@@ -36,6 +38,7 @@ export class App extends Component {
                             <Switch>
                                 <Route path="/llc/map/" component={Map} />
                                 <Route path="/llc/llc-request/" component={Request} />
+                                <Route path="/llc/history/" component={History} />
                             </Switch>
                         </Suspense>
                     </div>

@@ -138,6 +138,7 @@ export class Үүсгэх extends Component {
                 setFieldValue('wms', event.target.value)
             }
             else{
+                console.log("chache", wms.cache_url)
                 setFieldValue('url', wms.cache_url)
                 setFieldValue('wmts', event.target.value)
             }

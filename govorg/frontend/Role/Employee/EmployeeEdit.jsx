@@ -31,7 +31,7 @@ export class EmployeeEdit extends Component {
                 register: '',
                 phone_number: '',
                 is_admin: false,
-                state: '',
+                state: 1,
                 pro_class: '',
                 is_user: false,
             },
@@ -674,7 +674,7 @@ export class EmployeeEdit extends Component {
                                                                     <ErrorMessage name="is_admin" component="div" className="text-danger"/>
                                                                 </div>
                                                                 <div className="form-group col-md-2 mt-1 text-center"><br/>
-                                                                    <label htmlFor='is_user'>Хэрэглэгч</label>
+                                                                    <label htmlFor='id_is_user'>Хэрэглэгч</label>
                                                                     <Field
                                                                         className="ml-2"
                                                                         name='is_user'
@@ -737,19 +737,18 @@ export class EmployeeEdit extends Component {
                                         }
                                         <div className="form-row">
                                             <div className="form-group col-md-6">
-                                                    <label htmlFor='id_state'>Төлөв:</label>
-                                                    <Field name="state" as="select" id="state"
-                                                        style={{ fontSize: '0.8rem' }}
-                                                        className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
-                                                    >
-                                                        <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
-                                                        {
-                                                            states.map((item, idx) =>
-                                                                <option key={idx} value={item[0]}>{item[1]}</option>
-                                                            )
-                                                        }
-                                                    </Field>
-                                                    <ErrorMessage name="state" component="div" className="invalid-feedback"/>
+                                                <label htmlFor='id_state'>Төлөв:</label>
+                                                <Field name="state" as="select" id="state"
+                                                    style={{ fontSize: '0.8rem' }}
+                                                    className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
+                                                >
+                                                    {
+                                                        states.map((item, idx) =>
+                                                            <option key={idx} value={item[0]}>{item[1]}</option>
+                                                        )
+                                                    }
+                                                </Field>
+                                                <ErrorMessage name="state" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor='id_pro_class'>Мэргэжлийн ангийн бүрэлдэхүүн:</label>

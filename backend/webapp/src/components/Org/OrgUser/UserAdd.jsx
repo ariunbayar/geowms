@@ -26,10 +26,10 @@ export class UserAdd extends Component {
                 register:'',
                 is_admin: false,
                 is_super: false,
-                re_password_mail: false,
                 phone_number: '',
-                state: '',
+                state: 1,
                 pro_class: '',
+                is_user: true,
             },
             aimag: [],
             sum: [],
@@ -64,7 +64,6 @@ export class UserAdd extends Component {
             states: [],
             pro_classes: [],
 
-            is_user: false,
             modal_status: 'closed',
         }
 
@@ -373,8 +372,10 @@ export class UserAdd extends Component {
     }
 
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, is_loading,
-            feature, street, apartment, door_number, point, errors, address_state
+        const { form_values, aimag, sum, horoo,
+            aimag_id, sum_id, horoo_id, is_loading,
+            feature, street, apartment, door_number,
+            point, errors, address_state, is_user
         } = this.state
 
         const { positions, states, pro_classes } = this.state
@@ -519,7 +520,6 @@ export class UserAdd extends Component {
                                                     style={{ fontSize: '0.8rem' }}
                                                     className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
                                                 >
-                                                    <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
                                                     {
                                                         states.map((item, idx) =>
                                                             <option key={idx} value={item[0]}>{item[1]}</option>
@@ -546,22 +546,6 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
-                                        {
-                                            org_emp
-                                            &&
-                                                <div className="form-row">
-                                                    <div className="form-group col-12">
-                                                        <label htmlFor='id_re_password_mail'>Нууц үг солих e-mail илгээх</label>
-                                                        <Field
-                                                            className="ml-2"
-                                                            name='re_password_mail'
-                                                            id="id_re_password_mail"
-                                                            type="checkbox"
-                                                        />
-                                                        <ErrorMessage name="re_password_mail" component="div" className="invalid-feedback"/>
-                                                    </div>
-                                                </div>
-                                        }
                                         <div className='form-row'>
                                             <div className="form-group col-12">
                                                 <label htmlFor='id_is_admin'>Байгууллагын админ</label>
@@ -581,13 +565,12 @@ export class UserAdd extends Component {
                                                     id="id_is_user"
                                                     type="checkbox"
                                                 />
-                                                <ErrorMessage name="is_user" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
-                                        {org_level ==4 &&
+                                        {org_level == 4 &&
                                             <div className='form-row'>
                                                 <div className="form-group col-12">
-                                                    <label htmlFor='is_super'>Системийн админ</label>
+                                                    <label htmlFor='id_is_super'>Системийн админ</label>
                                                     <Field
                                                         className="ml-2"
                                                         name='is_super'

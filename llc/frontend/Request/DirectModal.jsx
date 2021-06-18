@@ -10,6 +10,7 @@ export default class RequestDetail extends Component {
         super(props)
         this.state = {
             info: false,
+            desc_info: false,
             state: props.state,
             disabled: false,
             is_loading: false,
@@ -76,13 +77,12 @@ export default class RequestDetail extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
-            file_name, info,
-            aimag_name, aimag_geom,
-            state, emp_fields
+            file_name, info, state, desc_info,
+            aimag_name, aimag_geom, desc, emp_fields
         } = this.props
         return (
             <div className="row p-3">
-                <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна түр хүлээнэ үү !!!"}/>
+                <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
                 <div className="col-md-5">
                     <form className="form-row">
                         {
@@ -118,6 +118,7 @@ export default class RequestDetail extends Component {
                                 id="zahialagch"
                                 className="form-control"
                                 disabled={this.state.disabled}
+                                disabled={this.props.disabled}
                                 value={zahialagch}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -130,6 +131,7 @@ export default class RequestDetail extends Component {
                                 name='project_name'
                                 className="form-control"
                                 disabled={this.state.disabled}
+                                disabled={this.props.disabled}
                                 value={project_name}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -142,6 +144,7 @@ export default class RequestDetail extends Component {
                                 id="object_type"
                                 className="form-control"
                                 disabled={this.state.disabled}
+                                disabled={this.props.disabled}
                                 value={object_type}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -154,6 +157,7 @@ export default class RequestDetail extends Component {
                                 id="object_count"
                                 className="form-control"
                                 disabled={this.state.disabled}
+                                disabled={this.props.disabled}
                                 value={object_count}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -166,35 +170,51 @@ export default class RequestDetail extends Component {
                                 id="hurungu_oruulalt"
                                 className="form-control"
                                 disabled={this.state.disabled}
+                                disabled={this.props.disabled}
                                 value={hurungu_oruulalt}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
-                        {
+                            {
                             info &&
-                            <div className="form-group col-md-12">
-                                <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
-                                <select className="form-control" id="mergejilten"
-                                    onChange={(e) => this.getProf(e)}
-                                >
-                                    <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
-                                   {
-                                       (emp_fields && emp_fields.length > 0)
-                                       ?
-                                            emp_fields.map((value, idx) => (
-                                                <optgroup
-                                                    id={idx}
-                                                    label={value.org_name}
-                                                >
-                                                    <option value={value.first_name, value.mail}>{value.first_name}</option>
-                                                </optgroup>
-                                            ))
-                                        :
-                                            null
-                                   }
-                                </select>
+                                <div className="form-group col-md-12">
+                                    <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
+                                    <select className="form-control" id="mergejilten"
+                                        onChange={(e) => this.getProf(e)}
+                                    >
+                                        <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
+                                    {
+                                        (emp_fields && emp_fields.length > 0)
+                                        ?
+                                                emp_fields.map((value, idx) => (
+                                                    <optgroup
+                                                        id={idx}
+                                                        label={value.org_name}
+                                                    >
+                                                        <option value={value.first_name, value.mail}>{value.first_name}</option>
+                                                    </optgroup>
+                                                ))
+                                            :
+                                                null
+                                    }
+                                    </select>
                             </div>
-                        }
+                            }
+                            {
+                            desc_info
+                            &&
+                                <div className="form-group col-md-12">
+                                    <label htmlFor='description-id'>Тайлбар</label>
+                                    <textarea
+                                        type="text"
+                                        name="description"
+                                        id="description-id"
+                                        className="form-control"
+                                        value={desc}
+                                        disabled={this.state.disabled}
+                                    />
+                                </div>
+                            }
                         <UsedTools
                             values={this.props}
                         />
@@ -252,7 +272,6 @@ export default class RequestDetail extends Component {
                                 aimag_geom={aimag_geom}
                             />
                         </div>
-
                 }
             </div>
         )
