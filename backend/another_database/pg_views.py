@@ -37,7 +37,7 @@ from backend.inspire.models import (
 )
 
 
-SELECTCOUNT = 1000
+SELECTCOUNT = 100
 
 
 @require_GET
