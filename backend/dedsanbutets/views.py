@@ -252,7 +252,7 @@ def Edit_name(request, payload):
 
 
 def _check_select_type(field_name, model_name):
-    not_select_fields = ['package']
+    not_select_fields = ['package', 'feature']
     if model_name not in not_select_fields:
         if '_id' not in field_name:
             return False
