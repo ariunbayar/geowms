@@ -61,10 +61,15 @@ def allowed_attbs(request, token, system, code):
     return allowed_att
 
 
-def _get_qgis_service_url(request, token):
-    url = reverse('api:service:qgis-proxy', args=[token])
+def _get_qgis_service_url(request, token, fid):
+    url = reverse('api:qgis:qgis-proxy', args=[token, fid])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
+
+
+def _get_perm_atts(system):
+    access = system.govorgwmslayer_set.first()
+    return utils.json_load(access.attributes)
 
 
 @require_GET
@@ -76,6 +81,7 @@ def proxy(request, base_url, token, pk=None):
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     system = utils.geo_cache("system", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
+    # access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system), 300)
     allowed_layers = utils.geo_cache("allowed_layers", token, [layer.code for layer in system.wms_layers.all() if layer.wms.is_active], 300)
     if request.GET.get('TYPENAMES'):
         code = char_in_split(request.GET.get('TYPENAMES'))
@@ -84,6 +90,12 @@ def proxy(request, base_url, token, pk=None):
             **request.GET,
             "propertyName": [allowed_att],
         }
+    # else:
+    #     queryargs = {
+    #         **request.GET,
+    #         'TYPENAMES': allowed_layers,
+    #         "propertyName": ",".join(access_attributes),
+    #     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
     content = rsp.content
@@ -99,7 +111,9 @@ def proxy(request, base_url, token, pk=None):
         service_type = request.GET.get('SERVICE')
         service_url = _get_service_url(request, token)
         content = replace_src_url(content, base_url, service_url, service_type)
+
     qs_request = queryargs.get('REQUEST', 'no request')
+
     WMSLog.objects.create(
         qs_all=dict(queryargs),
         qs_request=qs_request,
@@ -321,15 +335,17 @@ def qgis_submit(request, token):
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    hoho = ChangeRequest.objects.bulk_create(objs)
+    ChangeRequest.objects.bulk_create(objs)
     return JsonResponse({'success': True, 'msg': msg})
 
 
-def _get_layer_name(employee):
+def _get_layer_name(employee, fid):
+    allowed_layers = list()
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).values_list('feature_id', flat=True)
-    features = LFeatures.objects.filter(feature_id__in=feature_ids)
-    allowed_layers = ['gp_layer_' + utils.make_view_name(feature) for feature in features]
+    has_perm = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW, feature_id=fid)
+    if has_perm:
+        feature_qs = LFeatures.objects.filter(feature_id=fid)
+        allowed_layers = [utils.make_layer_name(utils.make_view_name(feature)) for feature in feature_qs]
     return allowed_layers
 
 
@@ -368,14 +384,14 @@ def _get_request_content(base_url, request, geo_id, headers):
 
 @require_GET
 @get_conf_geoserver_base_url('ows')
-def qgis_proxy(request, base_url, token):
+def qgis_proxy(request, base_url, token, fid=''):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     headers = {**BASE_HEADERS}
     employee = utils.geo_cache("qgis_employee", token, Employee.objects.filter(token=token).first(), 300)
-    allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee), 300)
-    if not employee:
+    allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee, fid), 300)
+    if not employee or not allowed_layers:
         raise Http404
 
     geo_id = employee.org.geo_id
@@ -399,7 +415,7 @@ def qgis_proxy(request, base_url, token):
         else:
             raise Exception()
 
-        service_url = _get_qgis_service_url(request, token)
+        service_url = _get_qgis_service_url(request, token, fid)
         service_type = request.GET.get('SERVICE')
         content = replace_src_url(content, base_url, service_url, service_type)
 

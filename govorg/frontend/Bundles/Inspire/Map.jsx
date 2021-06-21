@@ -178,18 +178,18 @@ export default class BarilgaSuurinGazar extends Component{
     componentDidMount(){
       const {pid, fid} = this.state
       Promise.all([
-        service.qgisGetUrl(),
+        service.qgisGetUrl(fid),
         service.apiGetUrl(),
-      ]).then(([{wms_url, wfs_url}, {api_links}]) => {
-        this.setState({wms_url, wfs_url, api_links})
+      ]).then(([{ wms_url, wfs_url }, { api_links }]) => {
+        this.setState({ wms_url, wfs_url, api_links })
       })
       this.geomType()
       this.loadMap()
     }
 
     geomType(){
-      const {pid, fid} = this.state
-      service.geomType(pid, fid).then(({type}) => {
+      const { pid, fid } = this.state
+      service.geomType(pid, fid).then(({ type }) => {
         this.setState({ type })
         this.loadRows()
       })
@@ -206,7 +206,7 @@ export default class BarilgaSuurinGazar extends Component{
               }
           })
     }
-  
+
     loadControls(roles){
       const map = this.map
       const { type } = this.state
@@ -1131,7 +1131,6 @@ export default class BarilgaSuurinGazar extends Component{
         this.props.match.params.pid
       )
     }
-
 
     showQgisBtn(){
       this.setInActiveButtonStyle('qgis')
