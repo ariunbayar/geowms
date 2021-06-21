@@ -208,7 +208,7 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
     request.GET['typeName'] = wms_layer_code
     request.GET['propertyName'] = properties
 
-    response = requests.get(url, request.GET, headers={**BASE_HEADERS}, timeout=5)
+    response = requests.get(url, request.GET, headers={**BASE_HEADERS}, timeout=5, verify=False)
     content_type = response.headers.get('content-type')
     content = response.content
 
