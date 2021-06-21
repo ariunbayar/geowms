@@ -1331,7 +1331,7 @@ def _get_amount(geo_id):
     m_data_qs = _filter_Model([{'geo_id': geo_id}], Model=MDatas)
     m_data_qs = _filter_Model([{'property_id': 10101103, 'feature_config_id': 101, 'data_type_id': 101011}], initial_qs=m_data_qs)
     m_data = m_data_qs.first()
-    if m_data.code_list_id and m_data == '10006':
+    if m_data and m_data.code_list_id == 10006:
         # amount = _str_to_int(utils.get_config('POINT_PRICE'))
         return 11300
     return False
