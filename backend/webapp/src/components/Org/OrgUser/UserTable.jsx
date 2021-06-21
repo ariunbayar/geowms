@@ -9,7 +9,7 @@ function GetPassword(props) {
         <div className='p-0'>
             <button
                 type="button"
-                className="btn gp-btn-primary waves-effect waves-light btn-sm mr-2"
+                className="btn btn-outline-primary"
                 onClick={() => props.getPass(props.values)}
             >
                 НУУЦ ҮГ СОЛИХ
