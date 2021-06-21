@@ -449,7 +449,6 @@ def _set_llc_request(llc_request_id, payload):
     llc_request_qs = LLCRequest.objects
     llc_request_qs = llc_request_qs.filter(id=llc_request_id)
     llc_request_qs.update(**llc_request_data)
-
     if action_type == 'revoke':
         llc_request = llc_request_qs.first()
 
@@ -1086,7 +1085,7 @@ def _reject_request(id, kind, state, text):
     reject_request.kind = kind
     reject_request.state = state
     reject_file.kind = kind
-    reject_file.state = RequestFiles.STATE_NEW
+    reject_file.state = state
     reject_file.description = text
     reject_request.save()
     reject_file.save()
