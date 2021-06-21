@@ -14,9 +14,8 @@ class Migration(migrations.Migration):
         Employee = apps.get_model('backend_org', 'Employee')
         Employee.objects.update(position=1)
 
-
     def _insert_datas(apps, schema_editor):
-        Position = apps.get_model('backend_org', 'Position')
+        DefaultPosition = apps.get_model('backend_org', 'DefaultPosition')
         item_list = [
             'Байхгүй', 'Сайд', 'Дэд сайд', 'Төрийн нарийн бичгийн дарга',
             'Дарга', 'Орлогч дарга', 'Тэргүүн дэд',
@@ -26,14 +25,13 @@ class Migration(migrations.Migration):
         ]
 
         for item in item_list:
-            Position.objects.create(
+            DefaultPosition.objects.create(
                 name=item
             )
 
-
     operations = [
         migrations.CreateModel(
-            name='Position',
+            name='DefaultPosition',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=250, verbose_name='Албан тушаалын нэр')),
@@ -47,7 +45,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(_delete_position_datas),
         migrations.AlterField(
             model_name='employee',
-            name='position',
+            name='DefaultPosition',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='backend_org.Position'),
         ),
     ]
