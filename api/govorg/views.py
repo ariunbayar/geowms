@@ -67,6 +67,11 @@ def _get_qgis_service_url(request, token, fid):
     return absolute_url
 
 
+def _get_perm_atts(system):
+    access = system.govorgwmslayer_set.first()
+    return utils.json_load(access.attributes)
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def proxy(request, base_url, token, pk=None):
@@ -76,6 +81,7 @@ def proxy(request, base_url, token, pk=None):
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     system = utils.geo_cache("system", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
+    # access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system), 300)
     allowed_layers = utils.geo_cache("allowed_layers", token, [layer.code for layer in system.wms_layers.all() if layer.wms.is_active], 300)
     if request.GET.get('TYPENAMES'):
         code = char_in_split(request.GET.get('TYPENAMES'))
@@ -84,6 +90,12 @@ def proxy(request, base_url, token, pk=None):
             **request.GET,
             "propertyName": [allowed_att],
         }
+    # else:
+    #     queryargs = {
+    #         **request.GET,
+    #         'TYPENAMES': allowed_layers,
+    #         "propertyName": ",".join(access_attributes),
+    #     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
     content = rsp.content
@@ -99,7 +111,9 @@ def proxy(request, base_url, token, pk=None):
         service_type = request.GET.get('SERVICE')
         service_url = _get_service_url(request, token)
         content = replace_src_url(content, base_url, service_url, service_type)
+
     qs_request = queryargs.get('REQUEST', 'no request')
+
     WMSLog.objects.create(
         qs_all=dict(queryargs),
         qs_request=qs_request,
@@ -321,7 +335,7 @@ def qgis_submit(request, token):
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    hoho = ChangeRequest.objects.bulk_create(objs)
+    ChangeRequest.objects.bulk_create(objs)
     return JsonResponse({'success': True, 'msg': msg})
 
 

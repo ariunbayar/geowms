@@ -25,11 +25,11 @@ from .forms import WMSForm
 
 
 def _display_property(prop):
-    property_detail = {
-        'prop_id': prop.property_id,
-        'prop_name': prop.property_name,
-        'prop_eng': prop.property_name_eng
-    }
+    property_detail = dict()
+    property_detail['prop_id'] = prop.property_id
+    property_detail['prop_name'] = prop.property_name
+    property_detail['prop_eng'] = prop.property_name_eng
+    property_detail['prop_code'] = prop.property_code
     return property_detail
 
 
