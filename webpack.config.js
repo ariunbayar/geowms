@@ -86,7 +86,7 @@ module.exports = {
         alias: {
            '@': path.resolve(__dirname, 'frontend/bundle/src/'),
            '@utils': path.resolve(__dirname, 'src/components/'),
-           '@help_comp': path.resolve(__dirname, 'src/back_and_front/'),
+           '@help_comp': path.resolve(__dirname, 'src/BackAndFront/'),
         }
     },
     optimization: {

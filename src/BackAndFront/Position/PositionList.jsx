@@ -10,9 +10,6 @@ class PositionList extends Component {
 
         this.state={
             refresh: false,
-            жагсаалтын_холбоос: `/gov/api/role/position/`,
-            нэмэх_товч: props.is_backend ? `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/position/add/`: `/gov/perm/position/add/`,
-            custom_query: {'org_id': props.match.params.id},
             талбарууд: [
                 {'field': 'name', "title": 'Албан тушаал'},
             ],
@@ -28,14 +25,44 @@ class PositionList extends Component {
                     "width": "100px"
                 }
             ],
-            prefix: `/gov/api/role/position/`,
             is_user: true,
             icon: "",
             modal_status: 'closed',
+
+            // config values
+            жагсаалтын_холбоос: `/back/api/org/${props.match.params.id}/position/`,
+            нэмэх_товч: ``,
+            custom_query: {},
+            prefix: ``,
         }
         this.handleRemove = this.handleRemove.bind(this)
         this.handleAsk = this.handleAsk.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleConfig = this.handleConfig.bind(this)
+    }
+
+    componentDidMount() {
+        this.handleConfig()
+    }
+
+    handleConfig() {
+        if (this.props.is_backend) {
+            const level = this.props.match.params.level
+            const id = this.props.match.params.id
+            this.setState({
+                жагсаалтын_холбоос: `/back/api/org/${id}/position/`,
+                нэмэх_товч: `/back/байгууллага/түвшин/${level}/${id}/position/create/`,
+                custom_query: {'org_id': id},
+                prefix: `/gov/api/role/position/`,
+            })
+        }
+        else {
+            this.setState({
+                жагсаалтын_холбоос: `/gov/api/role/position/`,
+                нэмэх_товч: `/gov/perm/position/add/`,
+                prefix: `/gov/api/role/position/`,
+            })
+        }
     }
 
     handleAsk(values){
@@ -126,7 +153,6 @@ class PositionList extends Component {
             custom_query,
             нэмэх_товч,
             нэмэлт_талбарууд,
-            is_user,
             body,
         } = this.state
 

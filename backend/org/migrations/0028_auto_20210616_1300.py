@@ -2,16 +2,23 @@
 
 from django.db import migrations
 from django.db import transaction
-from django.db.models import Q, Count
 
 
-def empower_emp(qs_pos, qs_emp, qs_org):
+def def_pos_remove(orgs, qs_pos):
+    def_org_id = 1
+    has_org = orgs.filter(id=def_org_id).first()
+    if not has_org:
+        qs_pos.filter(org_id=def_org_id).delete()
+
+
+def empower_emp(qs_pos, qs_emp):
     for emp in qs_emp.all():
         pos_name = emp.position.name
         org_id = emp.org_id
-        position_id = qs_pos.filter(name=pos_name, org_id=org_id).first().id
-        emp.position_id = position_id
-        emp.save()
+        position = qs_pos.filter(name=pos_name, org_id=org_id).first()
+        if position:
+            emp.position_id = position.id
+            emp.save()
 
 
 def authorize_org(apps, schema_editor):
@@ -51,7 +58,9 @@ def authorize_org(apps, schema_editor):
                         name=pos,
                         org=org
                     )
-        empower_emp(qs_pos, qs_emp, qs_org)
+        empower_emp(qs_pos, qs_emp)
+
+    def_pos_remove(orgs, qs_pos)
 
 
 class Migration(migrations.Migration):

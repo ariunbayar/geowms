@@ -22,16 +22,36 @@ export class PositionAdd extends Component {
             form_values: {
                 name: '',
             },
-            prefix: "/gov/api/role/position/create/",
             modal_status: "closed",
             is_backend: props.is_backend,
+            prefix: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/position/create/`,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
+        this.handleCongfig = this.handleCongfig.bind(this)
     }
 
-    handleSubmit(form_values, { setStatus, setSubmitting, setErrors }) {
+    componentDidMount() {
+        this.handleCongfig()
+    }
+
+    handleCongfig() {
+        const { is_allow, is_backend } = this.props
+        const { level, id } = this.props.match.params
+        if (is_backend) {
+            this.setState({
+                prefix: `/back/байгууллага/түвшин/${level}/${id}/position/create/`,
+            })
+        }
+        else {
+            this.setState({
+                prefix: "/gov/api/role/position/create/",
+            })
+        }
+    }
+
+    handleSubmit(form_values, { setSubmitting }) {
         const { prefix, is_backend } = this.state
         var go_list
         if (is_backend) {
@@ -45,32 +65,10 @@ export class PositionAdd extends Component {
             .postRequest(prefix, form_values)
             .then(({success, data, error}) => {
                 if (success) {
-                    this.modalChange(
-                        "fa fa-check-circle",
-                        null,
-                        "success",
-                        'Амжилттай нэмлээ',
-                        data,
-                        false,
-                        "",
-                        "",
-                        null,
-                        () => this.props.history.push(go_list)
-                    )
+                    alert("success")
                 }
                 else {
-                    this.modalChange(
-                        "fa fa-exclamation-circle",
-                        null,
-                        "danger",
-                        "Алдаа гарлаа",
-                        error,
-                        false,
-                        "",
-                        "",
-                        null,
-                        null
-                    )
+                    alert("else")
                 }
             })
         setSubmitting(false)
@@ -101,11 +99,11 @@ export class PositionAdd extends Component {
     }
 
     render() {
-        const { form_values } = this.state
+        const { form_values, is_backend } = this.state
 
         return (
-            <div className="card">
-                <div className="card-body">
+            <div className={`${!is_backend && "card" }`}>
+                <div className={`${!is_backend && "card-body" }`}>
                     <div className="row">
                         <Formik
                             enableReinitialize

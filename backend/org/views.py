@@ -1972,22 +1972,14 @@ def send_mail(request, pk):
 
 @require_POST
 @ajax_required
-def position_list(request, payload):
-    user = request.user
-    is_superuser = user.is_superuser
+@user_passes_test(lambda u: u.is_superuser)
+def position_list(request, payload, pk):
     items = []
     page = 1
     total_page = 1
     оруулах_талбарууд = ['id', 'name', 'org_id']
 
-    qs = Position.objects
-    org = utils.get_org_from_user(user)
-    if not org and not is_superuser:
-        raise Http404
-
-    if not is_superuser:
-        qs = qs.filter(org=org)
-
+    qs = Position.objects.filter(org_id=pk)
     if qs:
         datatable = Datatable(
             model=Position,
@@ -2050,21 +2042,12 @@ def _pos_name_check(qs_pos, name):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def create(request, payload):
-    user = request.user
-    is_superuser = user.is_superuser
     name = payload.get("name")
-    org = utils.get_org_from_user(user)
-    if not org and not is_superuser:
-        raise Http404
-
+    org_id = payload.get('org_id')
     qs = Position.objects
-    if is_superuser:
-        org_id = payload.get('org_id')
-        qs_pos = qs.filter(org_id=org_id)
-    else:
-        qs_pos = qs.filter(org=org)
-        org_id = org.id
+    qs_pos = qs.filter(org_id=org_id)
     has_pos_name = _pos_name_check(qs_pos, name)
 
     if has_pos_name:
@@ -2077,9 +2060,9 @@ def create(request, payload):
             name=name,
             org_id=org_id
         )
-        rsp = {
-            'success': True,
-            'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
-        }
+    rsp = {
+        'success': True,
+        'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
+    }
 
     return JsonResponse(rsp)
