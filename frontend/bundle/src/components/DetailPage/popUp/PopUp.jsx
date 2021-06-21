@@ -37,7 +37,7 @@ class PopUpCmp extends Component {
         this.checkModeAndCode = this.checkModeAndCode.bind(this)
         this.openCartSide = this.openCartSide.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
-        this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
+        // this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
         this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
     }
 
@@ -140,14 +140,14 @@ class PopUpCmp extends Component {
         this.setState({ data, mode, datas, code, geom_name })
     }
 
-    checkButtonEnableWithPdf(pdf_id){
-        service.checkButtonEnableWithPdf(pdf_id)
-            .then(({is_enable, success}) => {
-                if(success){
-                    this.setState({ is_enable, pdf_id })
-                }
-            })
-    }
+    // checkButtonEnableWithPdf(pdf_id){
+    //     service.checkButtonEnableWithPdf(pdf_id)
+    //         .then(({is_enable, success}) => {
+    //             if(success){
+    //                 this.setState({ is_enable, pdf_id })
+    //             }
+    //         })
+    // }
 
     checkButtonEnableWithId(geo_id, pdf_id){
         service.checkButtonEnableWithId(geo_id, pdf_id)
@@ -296,11 +296,11 @@ class PopUpCmp extends Component {
                                         <button
                                             className="btn btn-xs btn-primary mx-3"
                                             onClick={() => this.checkDataForPurchase()}
-                                            // disabled={is_enable ? "" : "disabled"}
-                                            disabled={true}
+                                            disabled={is_enable ? "" : "disabled"}
+                                            // disabled={true}
                                         >
-                                            {/* Худалдаж авах */}
-                                            Засвартай байгаа
+                                            Худалдаж авах
+                                            {/* Засвартай байгаа */}
                                         </button>
                                         <button
                                             className="btn btn-xs btn-primary my-2 mx-3"

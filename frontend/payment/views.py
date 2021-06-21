@@ -1166,14 +1166,11 @@ def createPdf(values):
     pdf.cell(-50)
     pdf.cell(10, 8, '1.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
-    pdf.cell(43, 8, _check_none(values, 'Pointid'), 1, 0, 'C')
+    pdf.cell(43, 8, _check_none(values, 'Pointname'), 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
-    tseg_dugaar = values['Pointid']
-    if 'localId' in values:
-        tseg_dugaar = values['localId']
-    pdf.cell(43, 8, tseg_dugaar, 1, 0, 'C')
+    pdf.cell(43, 8,  _check_none(values, 'Pointid'), 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     pdf.cell(-188)
 

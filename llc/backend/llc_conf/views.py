@@ -10,11 +10,21 @@ from main.utils import (
     json_load
 )
 
+HEADERS = {
+    'accept': 'application/json',
+    'Content-type': 'application/json',
+}
 
 def llc_frontend(request):
+    token_url = 'https://license.gazar.gov.mn/api/engineer/001/%D1%82%D0%B880101475'
+    rsp = requests.get(token_url, headers=HEADERS, verify=False)
+    content = []
+    if rsp.status_code == 200:
+        content = rsp.json()
     context = {
-        'ann_name': 'Байгууллагын нэр байна',
+        'ann_name': content[0]['company_name'] if content else '',
     }
+
     return render(request, 'llc/index.html', context)
 
 
@@ -23,11 +33,6 @@ def llc_frontend(request):
 def get_tool_datas(request, payload):
     regis_number = payload.get('regis_number') or 2841134
     tool_datas = []
-    HEADERS = {
-        'accept': 'application/json',
-        'Content-type': 'application/json',
-    }
-
     token_url = 'http://bagaj.gazar.gov.mn/api/token?email=api@gazar.gov.mn&password=hXzWneQ3vf6fkaFY'
     rsp = requests.post(token_url, headers=HEADERS)
     if rsp.status_code == 200:
