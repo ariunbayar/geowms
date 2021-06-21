@@ -2024,7 +2024,7 @@ def remove(request, pk):
 def _pos_name_check(qs_pos, name):
     has_pos_name = False
     position = qs_pos.filter(name=name).first()
-    if not position:
+    if position:
         has_pos_name = True
     return has_pos_name
 
