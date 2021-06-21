@@ -1321,6 +1321,22 @@ def _get_uniq_id(payment):
     return uniq_id
 
 
+def _str_to_int(value):
+    if isinstance(value, str):
+        value = int(value)
+    return value
+
+
+def _get_amount(geo_id):
+    m_data_qs = _filter_Model([{'geo_id': geo_id}], Model=MDatas)
+    m_data_qs = _filter_Model([{'property_id': 10101103, 'feature_config_id': 101, 'data_type_id': 101011}], initial_qs=m_data_qs)
+    m_data = m_data_qs.first()
+    if m_data.code_list_id and m_data == '10006':
+        # amount = _str_to_int(utils.get_config('POINT_PRICE'))
+        return 11300
+    return False
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1347,13 +1363,16 @@ def purchase_from_cart(request, payload):
         )
         pay_id = payment.id
         for data in datas:
-            amount = 0
             pdf_id = data['pdf_id']
 
             if pdf_id:
-                wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                amount = _get_amount(data['id'])
+                if not amount:
+                    wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                    amount = wms_layer.feature_price
+                    if not amount:
+                        amount = 0
 
-                amount = wms_layer.feature_price
                 total_amount += amount
 
                 PaymentPoint.objects.create(
