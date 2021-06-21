@@ -53,6 +53,33 @@
                             <a href="javascript:void();"><i class="icon-magnifier"></i></a>
                         </form>
                     </li>
+                    <li class="nav-item"> 
+                        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown" href="#">
+                            <span class="user-profile"><img src="{% static "assets/image/user.png" %}" class="img-circle" alt="user avatar"></img></span>
+                        </a>
+                        {% if user.is_authenticated %}
+                            <div class="dropdown show">
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
+                                  <a class="dropdown-item user-details" href="javaScript:void();">
+                                    <div class="media">
+                                            <div class="avatar"><img class="align-self-start mr-3" src="{% static "assets/image/user.png" %}" alt="user avatar"></img></div>
+                                            <div class="media-body">
+                                                {% if user.is_superuser %}
+                                                    <h6 class="mt-2 user-title">{{user.username}}</h6>
+                                                    <p class="user-subtitle">{{user.email}}</p>
+                                                {% else %}
+                                                    <h6 class="mt-2 user-title">{{user.last_name}}</h6>
+                                                    <p class="user-subtitle">{{user.first_name}}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                  </a>
+                                  <div class="dropdown-divider"></div>
+                                  <a class="dropdown-item text-dark" href="{% url "bundle:all" %}"><i class="icon-power mr-2"></i>ГАРАХ</a>
+                                </div>
+                              </div>
+                        {% endif %}
+                    </li>
                 </ul>
             </nav>
         </header>
