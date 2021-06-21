@@ -17,6 +17,7 @@ from backend.inspire.models import LThemes
 from backend.inspire.models import LPackages
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MGeoDatas
+from backend.org.models import Position
 from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
@@ -26,7 +27,7 @@ from govorg.backend.utils import (
     get_perm_list
 )
 
-from main.decorators import ajax_required
+from main.decorators import ajax_required, gov_required
 from main import utils
 from main.components import Datatable
 from django.views.decorators.cache import cache_page
@@ -294,4 +295,101 @@ def get_approve_and_revoke(request):
         'approve': True if approve else False,
         'revoke': True if revoke else False,
     }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@gov_required
+@login_required(login_url='/gov/perm/position/')
+def position_list(request, payload):
+    items = []
+    page = 1
+    total_page = 1
+    оруулах_талбарууд = ['id', 'name', 'org_id']
+
+    qs = Position.objects.filter(org=request.org)
+    if qs:
+        datatable = Datatable(
+            model=Position,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд
+        )
+        items, total_page = datatable.get()
+        page = payload.get('page')
+
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page
+    }
+
+    return JsonResponse(rsp)
+
+
+def _pos_name_check(qs_pos, name):
+    has_pos_name = False
+    for pos in qs_pos.all():
+        if pos.name == name:
+            has_pos_name = True
+    return has_pos_name
+
+
+@require_POST
+@ajax_required
+@gov_required
+def create(request, payload):
+    org = request.org
+    name = payload.get("name")
+    qs = Position.objects
+    qs_pos = qs.filter(org=org)
+    has_pos_name = _pos_name_check(qs_pos, name)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        Position.objects.create(
+            name=name,
+            org=org
+        )
+        rsp = {
+            'success': True,
+            'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+def _do_emp_have_pos(position, org):
+    employee = Employee.objects.filter(position=position, org=org).first()
+    if employee:
+        return True
+    else:
+        return False
+
+
+@require_GET
+@ajax_required
+@gov_required
+def remove(request, pk):
+    org = request.org
+    position = get_object_or_404(Position, id=pk)
+    has_emp_pos = _do_emp_have_pos(position, org)
+
+    if has_emp_pos:
+        rsp = {
+            'success': False,
+            'error': '"{position}" албан тушаалыг хэрэглэгчид оноосон байна!!!'.format(position=position.name),
+        }
+    else:
+        position.delete()
+        rsp = {
+            'success': True,
+            'data': "Амжилттай устгалаа"
+        }
+
     return JsonResponse(rsp)

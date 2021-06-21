@@ -1999,24 +1999,12 @@ def position_list(request, payload, pk):
     return JsonResponse(rsp)
 
 
-def _do_emp_have_pos(position, org):
-    employee = Employee.objects.filter(position=position, org=org).first()
-    if employee:
-        return True
-    else:
-        return False
-
-
 @require_GET
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def remove(request, pk):
-    user = request.user
-    org = utils.get_org_from_user(request.user)
-    if not org and not user.is_superuser:
-        raise Http404
-
     position = get_object_or_404(Position, id=pk)
-    has_emp_pos = _do_emp_have_pos(position, org)
+    has_emp_pos = position.employee_set.all()
 
     if has_emp_pos:
         rsp = {
@@ -2032,6 +2020,7 @@ def remove(request, pk):
 
     return JsonResponse(rsp)
 
+
 def _pos_name_check(qs_pos, name):
     has_pos_name = False
     for pos in qs_pos.all():
@@ -2043,11 +2032,10 @@ def _pos_name_check(qs_pos, name):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def create(request, payload):
+def create(request, payload, pk):
     name = payload.get("name")
-    org_id = payload.get('org_id')
     qs = Position.objects
-    qs_pos = qs.filter(org_id=org_id)
+    qs_pos = qs.filter(org_id=pk)
     has_pos_name = _pos_name_check(qs_pos, name)
 
     if has_pos_name:
@@ -2058,11 +2046,11 @@ def create(request, payload):
     else:
         Position.objects.create(
             name=name,
-            org_id=org_id
+            org_id=pk
         )
-    rsp = {
-        'success': True,
-        'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
-    }
+        rsp = {
+            'success': True,
+            'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
+        }
 
     return JsonResponse(rsp)

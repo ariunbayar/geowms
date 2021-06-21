@@ -16,7 +16,7 @@ export default class DedsanBvtets extends Component {
         return (
             <div>
                 <Switch>
-                    <Route path={"/back/дэд-сан-бүтэц/"} component={(props) => <List {...props} setModal={this.props.setModal} setNotif={this.props.setNotif}/>} />
+                    <Route path={"/back/дэд-сан-бүтэц/"} component={(props) => <List {...props}/>} />
                 </Switch>
             </div>
         )}

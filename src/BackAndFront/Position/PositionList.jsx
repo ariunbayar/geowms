@@ -29,19 +29,17 @@ class PositionList extends Component {
             icon: "",
             modal_status: 'closed',
 
-            // config values
-            жагсаалтын_холбоос: `/back/api/org/${props.match.params.id}/position/`,
+            жагсаалтын_холбоос: ``,
             нэмэх_товч: ``,
             custom_query: {},
-            prefix: ``,
+            back_link: ``,
         }
         this.handleRemove = this.handleRemove.bind(this)
-        this.handleAsk = this.handleAsk.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleConfig = this.handleConfig.bind(this)
+        this.handleAsk = this.handleAsk.bind(this)
     }
 
-    componentDidMount() {
+    UNSAFE_componentWillMount() {
         this.handleConfig()
     }
 
@@ -51,96 +49,80 @@ class PositionList extends Component {
             const id = this.props.match.params.id
             this.setState({
                 жагсаалтын_холбоос: `/back/api/org/${id}/position/`,
-                нэмэх_товч: `/back/байгууллага/түвшин/${level}/${id}/position/create/`,
                 custom_query: {'org_id': id},
-                prefix: `/gov/api/role/position/`,
+                нэмэх_товч: `/back/байгууллага/түвшин/${level}/${id}/position/create/`,
+                back_link: `/back/байгууллага/түвшин/${level}/${id}/position/`,
             })
         }
         else {
             this.setState({
                 жагсаалтын_холбоос: `/gov/api/role/position/`,
-                нэмэх_товч: `/gov/perm/position/add/`,
-                prefix: `/gov/api/role/position/`,
+                нэмэх_товч: `/gov/perm/position/create/`,
+                back_link: `/gov/api/role/position/`,
             })
         }
     }
 
-    handleAsk(values){
-        this.modalChange(
-            "fa fa-exclamation-circle",
-            null,
-            "warning",
-            "Албан тушаал устгах",
-            `Та "${values.name}" нэртэй албан тушаалыг устгахдаа итгэлтэй байна уу?`,
-            true,
-            "Үгүй",
-            "Тийм",
-            () => this.handleRemove(values),
-            null
-        )
+    handleAsk(values) {
+        var delete_link
+        if (this.props.is_backend) {
+            delete_link = `/back/api/org/${values.id}/position/remove/`
+        }
+        else {
+            delete_link = `/gov/api/role/position/${values.id}/remove/`
+        }
+        const modal = {
+            modal_status: "open",
+            modal_icon: "fa fa-exclamation-circle",
+            modal_bg: '',
+            icon_color: 'warning',
+            title: 'Албан тушаал устгах',
+            text: `Та "${values.name}" нэртэй албан тушаалыг устгах уу?`,
+            has_button: true,
+            actionNameBack: 'Үгүй',
+            actionNameDelete: 'Тийм',
+            modalAction: () => this.handleRemove(delete_link),
+            modalClose: null
+        }
+        global.MODAL(modal)
     }
 
-    handleModalOpen() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
-    }
-
-    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
-        this.setState(
-            {
-                modal_icon,
-                modal_bg,
-                icon_color,
-                title,
-                text,
-                has_button,
-                actionNameBack,
-                actionNameDelete,
-                modalAction,
-                modalClose,
-            },
-            () => this.handleModalOpen()
-        )
-    }
-
-    handleRemove(values) {
-        const { prefix } = this.state
-        var remove_link = prefix + values.id + "/" + "delete/"
-        service.getRequest(remove_link)
+    handleRemove(delete_link) {
+        service.getRequest(delete_link)
             .then(({success, data, error}) => {
                 if (success) {
                     this.setState({refresh: !this.state.refresh})
-                    this.modalChange(
-                        "fa fa-check-circle",
-                        null,
-                        "success",
-                        data,
-                        "",
-                        false,
-                        "",
-                        "",
-                        null,
-                        null
-                    )
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-check-circle",
+                        modal_bg: '',
+                        icon_color: 'success',
+                        title: data,
+                        text: '',
+                        has_button: false,
+                        actionNameBack: '',
+                        actionNameDelete: '',
+                        modalAction: null,
+                        modalClose: null
+                    }
+                    global.MODAL(modal)
                 }
                 else {
-                    this.modalChange(
-                        "fa fa-exclamation-circle",
-                        null,
-                        "danger",
-                        "Устгах боломжгүй",
-                        error,
-                        false,
-                        "",
-                        "",
-                        null,
-                        null
-                    )
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-times-circle",
+                        modal_bg: '',
+                        icon_color: 'danger',
+                        title: 'Алдаа гарлаа',
+                        text: error,
+                        has_button: false,
+                        actionNameBack: '',
+                        actionNameDelete: '',
+                        modalAction: null,
+                        modalClose: null
+                    }
+                    global.MODAL(modal)
                 }
-            })
-            .catch(() => {
-                this.props.history.goBack()
             })
     }
 
@@ -155,6 +137,7 @@ class PositionList extends Component {
             нэмэлт_талбарууд,
             body,
         } = this.state
+
 
         return (
             <div className={`${!this.props.is_backend && "card"}`}>

@@ -29,11 +29,11 @@ function index(props) {
             .setOverlapsFeature(feature_id, overlap_feature_id, state)
             .then(({ success, info }) => {
                 if(success) {
-                    props.setNotif('success', info, 'times')
+                    global.NOTIF('success', info, 'times')
                     getOverlapsFeatures(feature_id)
                 }
                 else{
-                    props.setNotif('danger', info, 'check')
+                    global.NOTIF('danger', info, 'check')
                 }
             })
     }

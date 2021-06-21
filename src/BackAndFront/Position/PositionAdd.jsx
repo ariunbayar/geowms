@@ -24,51 +24,76 @@ export class PositionAdd extends Component {
             },
             modal_status: "closed",
             is_backend: props.is_backend,
-            prefix: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/position/create/`,
+            // prefix: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/position/create/`,
+            org_id: props.match.params.id,
+            level: props.match.params.level,
+            link: ``,
+            back_link: ``,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.modalChange = this.modalChange.bind(this)
-        this.handleCongfig = this.handleCongfig.bind(this)
+        this.handleConfig = this.handleConfig.bind(this)
     }
 
-    componentDidMount() {
-        this.handleCongfig()
+    UNSAFE_componentWillMount() {
+        this.handleConfig()
     }
 
-    handleCongfig() {
+    handleConfig() {
         const { is_allow, is_backend } = this.props
-        const { level, id } = this.props.match.params
+        const { org_id, level } = this.state
+        var link
         if (is_backend) {
             this.setState({
-                prefix: `/back/байгууллага/түвшин/${level}/${id}/position/create/`,
+                link: `/back/api/org/${org_id}/position/create/`,
+                back_link: `/back/байгууллага/түвшин/${level}/${org_id}/position/`
             })
         }
         else {
             this.setState({
-                prefix: "/gov/api/role/position/create/",
+                link: "/gov/api/role/position/create/",
+                back_link: `/gov/perm/position/`
             })
         }
     }
 
     handleSubmit(form_values, { setSubmitting }) {
-        const { prefix, is_backend } = this.state
-        var go_list
-        if (is_backend) {
-            form_values["org_id"] = this.props.match.params.id
-            go_list = `/back/байгууллага/түвшин/${this.props.match.params.level}/${this.props.match.params.id}/position/`
-        }
-        else {
-            go_list = "/gov/perm/position/"
-        }
+        const { link } = this.state
         service
-            .postRequest(prefix, form_values)
+            .postRequest(link, form_values)
             .then(({success, data, error}) => {
                 if (success) {
-                    alert("success")
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-check-circle",
+                        modal_bg: '',
+                        icon_color: 'success',
+                        title: "Амжилттай хадгаллаа",
+                        text: data,
+                        has_button: false,
+                        actionNameBack: '',
+                        actionNameDelete: '',
+                        modalAction: null,
+                        modalClose: () => this.props.history.push(this.state.back_link)
+                    }
+                    global.MODAL(modal)
                 }
                 else {
-                    alert("else")
+                    const modal = {
+                        modal_status: "open",
+                        modal_icon: "fa fa-times-circle",
+                        modal_bg: '',
+                        icon_color: 'danger',
+                        title: 'Алдаа гарлаа',
+                        text: error,
+                        has_button: false,
+                        actionNameBack: '',
+                        actionNameDelete: '',
+                        modalAction: null,
+                        modalClose: null
+                    }
+                    global.MODAL(modal)
                 }
             })
         setSubmitting(false)

@@ -1,8 +1,8 @@
 import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 
-import PositionList from "@help_comp/Position/PositionList"
-import PositionAdd from "@help_comp/Position/PositionAdd"
+import PositionList from "@helpComp/Position/PositionList"
+import PositionAdd from "@helpComp/Position/PositionAdd"
 
 
 export default class Position extends Component {
@@ -32,18 +32,17 @@ export default class Position extends Component {
 
     render() {
         const { is_allow, is_backend } = this.state
-
         return (
             <Switch>
                 {is_allow
                     &&
                     <>
                         {/* gov */}
-                        <Route exact path="/gov/perm/position/" component={ (props) => <PositionList {...props} is_allow={is_allow} is_backend={is_backend} />}/>
+                        <Route exact path="/gov/perm/position/" component={ (props) => <PositionList {...props} is_allow={is_allow} is_backend={is_backend}/>}/>
                         <Route exact path="/gov/perm/position/create/" component={ (props) => <PositionAdd {...props} is_allow={is_allow} is_backend={is_backend} />}/>
 
                         {/* back */}
-                        <Route exact path="/back/байгууллага/түвшин/:level/:id/position/" component={ (props) => <PositionList {...props} is_allow={is_allow} is_backend={is_backend} />}/>
+                        <Route exact path="/back/байгууллага/түвшин/:level/:id/position/" component={ (props) => <PositionList {...props} is_allow={is_allow} is_backend={is_backend}/>}/>
                         <Route exact path="/back/байгууллага/түвшин/:level/:id/position/create/" component={ (props) => <PositionAdd {...props} is_allow={is_allow} is_backend={is_backend} />}/>
 
                     </>

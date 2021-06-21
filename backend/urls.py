@@ -147,6 +147,7 @@ urlpatterns = [
         path('send-mail/<int:pk>/', org_views.send_mail),
         path('<int:pk>/position/', org_views.position_list),
         path('<int:pk>/position/create/', org_views.create),
+        path('<int:pk>/position/remove/', org_views.remove),
     ], 'org'))),
 
     path('api/log/', include(([

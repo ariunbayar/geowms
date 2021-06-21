@@ -14,7 +14,6 @@ from govorg.backend.revoke_request import views as revoke_request_views
 from govorg.backend.secure import views as secure_views
 from govorg.backend.tseg import views as tseg_view
 from backend.another_database import pg_views
-from backend.org import views as back_org_views
 
 urlpatterns = [
     path('api/', include(([
@@ -47,12 +46,9 @@ urlpatterns = [
                 path('<int:pk>/delete/', role_views.delete),
             ], 'role'))),
             path('position/', include(([
-                # path('', back_org_views.position_list),
-                path('<int:pk>/delete/', back_org_views.remove),
-                path('create/', back_org_views.create),
-                # path('role-list/', role_views.role_list),
-                # path('<int:pk>/update/', role_views.update),
-                # path('<int:pk>/detail/', role_views.detail),
+                path('', org_views.position_list),
+                path('create/', org_views.create),
+                path('<int:pk>/remove/', org_views.remove),
             ], 'position'))),
         ], 'role'))),
 
