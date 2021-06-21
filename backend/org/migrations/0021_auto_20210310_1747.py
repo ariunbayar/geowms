@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
         migrations.RunPython(_delete_position_datas),
         migrations.AlterField(
             model_name='employee',
-            name='DefaultPosition',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='backend_org.Position'),
+            name='position',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='backend_org.DefaultPosition'),
         ),
     ]
