@@ -219,9 +219,9 @@ function getLayers(emp_perm_prefix) {
             .catch(reject)
     })
 }
-function qgisGetUrl() {
+function qgisGetUrl(fid) {
     const requestOptions = getGetOptions()
-    return fetch(`${prefix}/qgis-url/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/qgis-url/${fid}/`, requestOptions).then(handleResponse)
 }
 
 function apiGetUrl() {

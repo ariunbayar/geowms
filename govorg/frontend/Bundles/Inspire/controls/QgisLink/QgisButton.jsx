@@ -16,10 +16,10 @@ export class QgisButton extends Control {
         const element = this.element
         element.className = cssClasses
         const elementa = document.createElement('a')
+        elementa.setAttribute('role', 'button')
         elementa.setAttribute('data-toggle', 'tooltip')
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'WMS/WFS линк.')
-        elementa.setAttribute('href', '#')
         element.setAttribute('id', '⚙-toggle-qgis-id')
 
         const elementi = document.createElement('i')

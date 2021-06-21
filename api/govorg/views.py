@@ -62,7 +62,7 @@ def allowed_attbs(request, token, system, code):
 
 
 def _get_qgis_service_url(request, token):
-    url = reverse('api:service:qgis-proxy', args=[token])
+    url = reverse('api:qgis:qgis-proxy', args=[token])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
@@ -122,6 +122,7 @@ def proxy(request, base_url, token, pk=None):
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def json_proxy(request, base_url, token, code):
+    print("json")
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -368,7 +369,8 @@ def _get_request_content(base_url, request, geo_id, headers):
 
 @require_GET
 @get_conf_geoserver_base_url('ows')
-def qgis_proxy(request, base_url, token):
+def qgis_proxy(request, base_url, token, fid=''):
+    print("qig", fid)
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -399,7 +401,7 @@ def qgis_proxy(request, base_url, token):
         else:
             raise Exception()
 
-        service_url = _get_qgis_service_url(request, token)
+        service_url = _get_qgis_service_url(request, token, fid)
         service_type = request.GET.get('SERVICE')
         content = replace_src_url(content, base_url, service_url, service_type)
 
