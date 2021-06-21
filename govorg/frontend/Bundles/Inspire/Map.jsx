@@ -1134,7 +1134,6 @@ export default class BarilgaSuurinGazar extends Component{
 
     showQgisBtn(){
       this.setInActiveButtonStyle('qgis')
-      console.log(this.state.wms_url);
       this.controls.qgis.showUpload(true, this.closeQgisBtn, this.addNotif, this.state.wfs_url, this.state.wms_url)
     }
 
