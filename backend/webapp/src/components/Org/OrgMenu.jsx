@@ -68,7 +68,6 @@ export class OrgMenu extends Component {
         const { org_name, employee_count, allowed_geom, is_superuser } = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        const need_props = this.props.need_props
         return (
             <div>
                 <ul className="nav nav-tabs nav-tabs-dark-gray">
@@ -181,7 +180,7 @@ export class OrgMenu extends Component {
                         <Route
                             path="/back/байгууллага/түвшин/:level/:id/position/" component={Position}
                             component={(props) =>
-                                <Position {...props} is_superuser={is_superuser} need_props={need_props} />
+                                <Position {...props} is_superuser={is_superuser} />
                             }
                         />
                     </Switch>

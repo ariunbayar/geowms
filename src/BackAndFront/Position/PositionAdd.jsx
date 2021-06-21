@@ -24,15 +24,12 @@ export class PositionAdd extends Component {
             },
             modal_status: "closed",
             is_backend: props.is_backend,
-            // prefix: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/position/create/`,
             org_id: props.match.params.id,
             level: props.match.params.level,
             link: ``,
             back_link: ``,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.modalChange = this.modalChange.bind(this)
         this.handleConfig = this.handleConfig.bind(this)
     }
 
@@ -41,7 +38,7 @@ export class PositionAdd extends Component {
     }
 
     handleConfig() {
-        const { is_allow, is_backend } = this.props
+        const { is_backend } = this.props
         const { org_id, level } = this.state
         var link
         if (is_backend) {
@@ -97,30 +94,6 @@ export class PositionAdd extends Component {
                 }
             })
         setSubmitting(false)
-    }
-
-    handleModalOpen() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
-    }
-
-    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
-        this.setState(
-            {
-                modal_icon,
-                modal_bg,
-                icon_color,
-                title,
-                text,
-                has_button,
-                actionNameBack,
-                actionNameDelete,
-                modalAction,
-                modalClose,
-            },
-            () => this.handleModalOpen()
-        )
     }
 
     render() {

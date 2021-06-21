@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 from django.conf import settings
-import django
+
 
 class Org(models.Model):
     LEVEL_CHOICES = [

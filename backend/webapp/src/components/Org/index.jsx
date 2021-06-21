@@ -32,7 +32,6 @@ export default class Org extends Component {
 
 
     render() {
-        const need_props = this.props.need_props
         return (
             <div className="card">
                 <div className="card-body row">
@@ -46,7 +45,7 @@ export default class Org extends Component {
                                 }
                             />
                             <Route exact path="/back/байгууллага/түвшин/:level/:id/засах/" component={OrgAdd}/>
-                            <Route path="/back/байгууллага/түвшин/:level/:id/" component={ (props) => <OrgMenu {...props} need_props={need_props} />}/>
+                            <Route path="/back/байгууллага/түвшин/:level/:id/" component={ (props) => <OrgMenu {...props} />}/>
                         </Switch>
                     </div>
                 </div>
