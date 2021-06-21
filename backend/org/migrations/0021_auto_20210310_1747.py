@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
         Employee = apps.get_model('backend_org', 'Employee')
         Employee.objects.update(position=1)
 
+
     def _insert_datas(apps, schema_editor):
         DefaultPosition = apps.get_model('backend_org', 'DefaultPosition')
         item_list = [
@@ -28,6 +29,7 @@ class Migration(migrations.Migration):
             DefaultPosition.objects.create(
                 name=item
             )
+
 
     operations = [
         migrations.CreateModel(
