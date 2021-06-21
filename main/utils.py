@@ -47,6 +47,9 @@ from backend.another_database.models import AnotherDatabase
 import main.geoserver as geoserver
 
 
+LAYERPREFIX = 'gp_layer_'
+
+
 def resize_b64_to_sizes(src_b64, sizes):
 
     src_bytes = base64.b64decode(src_b64)
@@ -955,7 +958,7 @@ def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
 
 
 def check_view_name(view_name):
-    view_name = remove_text_from_str(view_name, 'gp_layer_')
+    view_name = remove_text_from_str(view_name, LAYERPREFIX)
     has_view_name = False
     with connections['default'].cursor() as cursor:
         sql = """
@@ -995,7 +998,7 @@ def get_inside_geoms_from_view(geo_json, view_name, properties=list()):
     return datas
 
 
-def remove_text_from_str(main_text, remove_text='gp_layer_'):
+def remove_text_from_str(main_text, remove_text=LAYERPREFIX):
     replaced_text = main_text
     if remove_text in main_text:
         replaced_text = main_text.replace(remove_text, '')
@@ -1626,6 +1629,10 @@ def get_colName_type(view_name, data):
     return geom_att, some_attributes
 
 
+def make_layer_name(view_name):
+    return LAYERPREFIX + view_name
+
+
 def check_gp_design():
     ws_name = 'gp_design'
     ds_name = ws_name
@@ -1658,7 +1665,7 @@ def check_gp_design():
             ds_name,
         )
 
-    layer_name = 'gp_layer_' + table_name
+    layer_name = make_layer_name(table_name)
     check_layer = geoserver.getDataStoreLayer(
         ws_name,
         ds_name,

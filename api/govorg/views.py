@@ -61,8 +61,8 @@ def allowed_attbs(request, token, system, code):
     return allowed_att
 
 
-def _get_qgis_service_url(request, token):
-    url = reverse('api:qgis:qgis-proxy', args=[token])
+def _get_qgis_service_url(request, token, fid):
+    url = reverse('api:qgis:qgis-proxy', args=[token, fid])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
@@ -122,7 +122,6 @@ def proxy(request, base_url, token, pk=None):
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def json_proxy(request, base_url, token, code):
-    print("json")
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -326,11 +325,13 @@ def qgis_submit(request, token):
     return JsonResponse({'success': True, 'msg': msg})
 
 
-def _get_layer_name(employee):
+def _get_layer_name(employee, fid):
+    allowed_layers = list()
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).values_list('feature_id', flat=True)
-    features = LFeatures.objects.filter(feature_id__in=feature_ids)
-    allowed_layers = ['gp_layer_' + utils.make_view_name(feature) for feature in features]
+    has_perm = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW, feature_id=fid)
+    if has_perm:
+        feature_qs = LFeatures.objects.filter(feature_id=fid)
+        allowed_layers = [utils.make_layer_name(utils.make_view_name(feature)) for feature in feature_qs]
     return allowed_layers
 
 
@@ -370,14 +371,13 @@ def _get_request_content(base_url, request, geo_id, headers):
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def qgis_proxy(request, base_url, token, fid=''):
-    print("qig", fid)
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     headers = {**BASE_HEADERS}
     employee = utils.geo_cache("qgis_employee", token, Employee.objects.filter(token=token).first(), 300)
-    allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee), 300)
-    if not employee:
+    allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee, fid), 300)
+    if not employee or not allowed_layers:
         raise Http404
 
     geo_id = employee.org.geo_id
