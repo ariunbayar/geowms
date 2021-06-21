@@ -141,7 +141,7 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
         filename = '{}-{}-{}.csv'.format(types, date_now, file_code)
     else:
         raise Http404
-
+    req_url = req_url + '&format_options=CHARSET:UTF-8'
     response = requests.get(req_url, request.GET, headers={**BASE_HEADERS}, timeout=5)
     content_type = response.headers.get('content-type')
     #TODO shape zip file tathad wfsrequest.txt gesen file tataj bgaa teriig exclude hiih
