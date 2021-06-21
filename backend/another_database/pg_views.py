@@ -37,7 +37,7 @@ from backend.inspire.models import (
 )
 
 
-SELECTCOUNT = 100
+SELECTCOUNT = 1000
 
 
 @require_GET
@@ -787,17 +787,35 @@ def _delete_datas_of_pg(unique_id, feature_id):
 def _get_count_of_table(cursor, table_name, has_range, start_data, data_type, field_name):
     start_data = _get_type_of_data(start_data, data_type)
     end_field = _get_type_of_data(has_range, data_type)
-    filter_data= ''
+    filter_data = ''
+    order_data = '''
+        group by {field_name}
+        order by {field_name} asc
+    '''.format(
+        field_name=field_name,
+    )
+
     if has_range:
         filter_data = '''
             where
             {start} <={field_name}  and {field_name}<={end}
-			group by {field_name}
-            order by {field_name} asc
+            {order_data}
         '''.format(
             field_name=field_name,
             start=start_data,
-            end=end_field
+            end=end_field,
+            order_data=order_data
+        )
+
+    if not has_range and start_data:
+        filter_data = '''
+            where
+            {start_data} <={field_name}
+            {order_data}
+        '''.format(
+            start_data=start_data,
+            field_name=field_name,
+            order_data=order_data
         )
 
     sql = '''
@@ -812,10 +830,12 @@ def _get_count_of_table(cursor, table_name, has_range, start_data, data_type, fi
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
-    if has_range:
+
+    if has_range or start_data:
         datas = len(datas)
     else:
         datas = datas[0]['count']
+
     return datas
 
 
@@ -858,7 +878,7 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_f
         table_geo_data=table_geo_data,
         filter_type=filter_type,
         pk_field_name=pk_field_name,
-        select_count=SELECTCOUNT,
+        select_count=SELECTCOUNT+1,
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
@@ -978,14 +998,24 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         else:
             count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
 
+        count = int(count)
         current_data_counts = 0
         current_geo_id = last_geo_id
+        i = 0
+        count_of_loop = count/SELECTCOUNT
+        count_of_odd = count%SELECTCOUNT
+        if count_of_odd > 0:
+            count_of_loop = int(count_of_loop) + 1
         while current_data_counts < int(count):
             m_datas_object = []
             geo_data_objs = []
             ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type, pk_field_max_range)
             start_data = ona_table_datas[-1][pk_field_name]
-            for ona_data in ona_table_datas[0:SELECTCOUNT-1]:
+            len_of_data = len(ona_table_datas)
+            limit_data_count = len_of_data-1
+            if count_of_loop == i:
+                limit_data_count = len_of_data
+            for ona_data in ona_table_datas[0:limit_data_count]:
                 current_geo_id = str_to_int(current_geo_id)
                 current_geo_id = current_geo_id + 1
                 new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
@@ -999,7 +1029,8 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
                 success_count = success_count + 1
             MGeoDatas.objects.bulk_create(geo_data_objs)
             MDatas.objects.bulk_create(m_datas_object)
-            current_data_counts = current_data_counts + SELECTCOUNT-1
+            current_data_counts = current_data_counts + limit_data_count
+            i += 1
     except Exception:
         failed_count += 1
         pass
