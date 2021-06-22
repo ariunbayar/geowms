@@ -360,7 +360,8 @@ def paginated_list(request, payload):
     rsp = {
         'items': items,
         'page': payload.get("page"),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
