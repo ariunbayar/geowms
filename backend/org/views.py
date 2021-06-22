@@ -2054,3 +2054,17 @@ def create(request, payload, pk):
         }
 
     return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_detail(request, pk):
+    datas = list()
+
+    rsp = {
+        "success" : True,
+        "datas": datas,
+    }
+
+    return JsonResponse(rsp)

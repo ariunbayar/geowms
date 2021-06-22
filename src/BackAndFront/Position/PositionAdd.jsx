@@ -3,8 +3,6 @@ import { Formik, Field, Form, ErrorMessage } from 'formik'
 import { object, string } from 'yup'
 
 import { service } from "./service"
-import BackButton from "@utils/Button/BackButton"
-import Modal from "@utils/Modal/Modal"
 
 
 export const validationSchema = object().shape({
@@ -22,7 +20,6 @@ export class PositionAdd extends Component {
             form_values: {
                 name: '',
             },
-            modal_status: "closed",
             is_backend: props.is_backend,
             org_id: props.match.params.id,
             level: props.match.params.level,
@@ -100,20 +97,19 @@ export class PositionAdd extends Component {
         const { form_values, is_backend } = this.state
 
         return (
-            <div className={`${!is_backend && "card" }`}>
-                <div className={`${!is_backend && "card-body" }`}>
+            <div className={`${!is_backend && "card"}`}>
+                <div className={`${!is_backend && "card-body"}`}>
                     <div className="row">
                         <Formik
                             enableReinitialize
-                            initialValues={ form_values }
-                            validationSchema={ validationSchema }
-                            onSubmit={ this.handleSubmit }
+                            initialValues={form_values}
+                            validationSchema={validationSchema}
+                            onSubmit={this.handleSubmit}
                         >
                         {({
                             errors,
                             isSubmitting,
                         }) => {
-                            const has_error = Object.keys(errors).length > 0
                             return (
                                 <Form className="col-12">
                                     <div>
@@ -145,20 +141,6 @@ export class PositionAdd extends Component {
                         </Formik>
                     </div>
                 </div>
-                <Modal
-                    modal_status={ this.state.modal_status }
-                    modal_icon={ this.state.modal_icon }
-                    modal_bg={ this.state.modal_bg }
-                    icon_color={ this.state.icon_color }
-                    title={ this.state.title }
-                    text={ this.state.text }
-                    has_button={ this.state.has_button }
-                    actionNameBack={ this.state.actionNameBack }
-                    actionNameDelete={ this.state.actionNameDelete }
-                    modalAction={ this.state.modalAction }
-                    modalClose={ this.state.modalClose }
-                />
-                <BackButton {...this.props} name={'Буцах'} navlink_url={"/gov/perm/position"}></BackButton>
             </div>
         )
     }

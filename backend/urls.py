@@ -148,6 +148,7 @@ urlpatterns = [
         path('<int:pk>/position/', org_views.position_list),
         path('<int:pk>/position/create/', org_views.create),
         path('<int:pk>/position/remove/', org_views.remove),
+        path('<int:pk>/position/detail/', org_views.pos_detail),
     ], 'org'))),
 
     path('api/log/', include(([

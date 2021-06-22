@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { PortalDataTable } from "@utils/DataTable/index"
-import Modal from "@utils/Modal/Modal"
 import { service } from "./service"
 
 class PositionList extends Component {
@@ -11,7 +10,7 @@ class PositionList extends Component {
         this.state={
             refresh: false,
             талбарууд: [
-                {'field': 'name', "title": 'Албан тушаал'},
+                {'field': 'name', "title": 'Албан тушаал',},
             ],
             хувьсах_талбарууд: [
                 {"field": "name", "text": ""},
@@ -25,9 +24,6 @@ class PositionList extends Component {
                     "width": "100px"
                 }
             ],
-            is_user: true,
-            icon: "",
-            modal_status: 'closed',
 
             жагсаалтын_холбоос: ``,
             нэмэх_товч: ``,
@@ -43,10 +39,14 @@ class PositionList extends Component {
         this.handleConfig()
     }
 
+    goLink(values) {
+        const { level, id } = this.props.match.params
+        this.props.history.push(`/back/байгууллага/түвшин/${level}/${id}/position/${values.id}/дэлгэрэнгүй/`)
+    }
+
     handleConfig() {
         if (this.props.is_backend) {
-            const level = this.props.match.params.level
-            const id = this.props.match.params.id
+            const { level, id } = this.props.match.params
             this.setState({
                 жагсаалтын_холбоос: `/back/api/org/${id}/position/`,
                 custom_query: {'org_id': id},
@@ -158,19 +158,6 @@ class PositionList extends Component {
                         />
                     </div>
                 </div>
-                <Modal
-                    modal_status={ this.state.modal_status }
-                    modal_icon={ this.state.modal_icon }
-                    modal_bg={ this.state.modal_bg }
-                    icon_color={ this.state.icon_color }
-                    title={ this.state.title }
-                    text={ this.state.text }
-                    has_button={ this.state.has_button }
-                    actionNameBack={ this.state.actionNameBack }
-                    actionNameDelete={ this.state.actionNameDelete }
-                    modalAction={ this.state.modalAction }
-                    modalClose={ this.state.modalClose }
-                />
             </div>
         )
     }
