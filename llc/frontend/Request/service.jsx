@@ -6,6 +6,7 @@ export const service = {
     sendRequest,
     removeRequest,
     getSearchItems,
+    getCount,
 }
 
 const prefix = '/llc/backend'
@@ -32,6 +33,14 @@ function getToolDatas(regis_number) {
         body: JSON.stringify({regis_number})
     }
     return fetch(`/llc/get_tool_datas/`, opts).then(handleResponse)
+}
+
+function getCount() {
+    const requestOptions = {
+        ...getGetOptions(),
+    }
+
+    return fetch(`${prefix}/get_count/`, requestOptions).then(handleResponse)
 }
 
 function sendRequest(id, mergejilten) {

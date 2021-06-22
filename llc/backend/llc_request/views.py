@@ -1,3 +1,5 @@
+from unicodedata import name
+from llc.backend import llc_request
 import os
 import zipfile
 import glob
@@ -642,3 +644,16 @@ def get_search_field(request):
         'success': True,
         'search_field': search_field,
     })
+
+
+@require_GET
+@ajax_required
+def get_count(request):
+    request_count = RequestFiles.objects.count()
+
+    return JsonResponse({
+        'success': True,
+        'request_count': request_count,
+    })
+
+
