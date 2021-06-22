@@ -240,6 +240,7 @@ def govorgList(request, payload, org_id):
     оруулах_талбарууд = ['id', 'name', 'token', 'created_at', 'updated_at', 'org_id', 'website']
     items = []
     total_page = 1
+    start_index = 1
 
     if qs:
         datatable = Datatable(
@@ -248,11 +249,12 @@ def govorgList(request, payload, org_id):
             оруулах_талбарууд=оруулах_талбарууд,
             initial_qs=qs
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get('page'),
         'total_page': total_page,
+        'start_index': start_index
     }
     return JsonResponse(rsp)
