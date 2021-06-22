@@ -179,6 +179,11 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
     if url_type not in urls:
         raise Http404
 
+    service_type = request.GET.get('SERVICE')
+
+    if url_type != service_type:
+        raise Http404
+
     get_url = {
         'wms': 'url',
         'wfs': 'url',
@@ -218,10 +223,11 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
     content_type = response.headers.get('content-type')
     content = response.content
 
-    if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
-        if request.GET.get('SERVICE') == 'WFS':
+    allow_requests = ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
+    if request.GET.get('REQUEST') in allow_requests:
+        if service_type == 'WFS':
             content = filter_layers_wfs(content, allowed_layers, properties)
-        elif request.GET.get('SERVICE') == 'WMS':
+        elif service_type == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
             raise Exception()

@@ -451,3 +451,4 @@ def geo_design_proxy(request, base_url, view_name):
     )
     content_type = rsp.headers.get('content-type')
     return HttpResponse(content, content_type=content_type)
+
