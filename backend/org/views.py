@@ -647,6 +647,7 @@ def org_list(request, payload, level):
     оруулах_талбарууд = ['id', 'name', 'level', 'num_employees', 'num_systems']
     items = []
     total_page = 1
+    start_index = 1
     qs = Org.objects.filter(level=level)
     if qs:
         qs = qs.annotate(num_employees=Count('employee', distinct=True))
@@ -658,12 +659,13 @@ def org_list(request, payload, level):
             payload=payload,
             оруулах_талбарууд=оруулах_талбарууд
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get('page'),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -837,12 +839,13 @@ def perm_get_list(request, payload):
         оруулах_талбарууд=оруулах_талбарууд
     )
 
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get('page'),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)

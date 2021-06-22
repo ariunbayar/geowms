@@ -88,12 +88,13 @@ def get_pg_table_list(request, payload, pk):
         initial_qs=initial_qs
     )
 
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get("page"),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -271,11 +272,15 @@ def save_table(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def table__detail(request, id, table_id):
+
+    store_field_config = dict()
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
     field_config = another_db_tb.field_config.replace("'", '"')
-    field_config_index = another_db_tb.field_config_index.replace("'", '"')
-    field_config = utils.json_load(field_config)
-    store_field_config = utils.json_load(field_config_index)
+    field_config_index = another_db_tb.field_config_index
+    if field_config_index:
+        field_config_index = field_config_index.replace("'", '"')
+        field_config = utils.json_load(field_config)
+        store_field_config = utils.json_load(field_config_index)
     feature = LFeatures.objects.filter(feature_code=another_db_tb.feature_code).first()
     package = LPackages.objects.filter(package_id=feature.package_id).first()
     form_datas = {
@@ -783,17 +788,35 @@ def _delete_datas_of_pg(unique_id, feature_id):
 def _get_count_of_table(cursor, table_name, has_range, start_data, data_type, field_name):
     start_data = _get_type_of_data(start_data, data_type)
     end_field = _get_type_of_data(has_range, data_type)
-    filter_data= ''
+    filter_data = ''
+    order_data = '''
+        group by {field_name}
+        order by {field_name} asc
+    '''.format(
+        field_name=field_name,
+    )
+
     if has_range:
         filter_data = '''
             where
             {start} <={field_name}  and {field_name}<={end}
-			group by {field_name}
-            order by {field_name} asc
+            {order_data}
         '''.format(
             field_name=field_name,
             start=start_data,
-            end=end_field
+            end=end_field,
+            order_data=order_data
+        )
+
+    if not has_range and start_data:
+        filter_data = '''
+            where
+            {start_data} <={field_name}
+            {order_data}
+        '''.format(
+            start_data=start_data,
+            field_name=field_name,
+            order_data=order_data
         )
 
     sql = '''
@@ -808,10 +831,12 @@ def _get_count_of_table(cursor, table_name, has_range, start_data, data_type, fi
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
-    if has_range:
+
+    if has_range or start_data:
         datas = len(datas)
     else:
         datas = datas[0]['count']
+
     return datas
 
 
@@ -854,7 +879,7 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_f
         table_geo_data=table_geo_data,
         filter_type=filter_type,
         pk_field_name=pk_field_name,
-        select_count=SELECTCOUNT,
+        select_count=SELECTCOUNT+1,
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
@@ -893,7 +918,7 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
                             mdata_value[value_type] = mdata_value[value_type][1:]
                             if '_' in mdata_value[value_type]:
                                 mdata_value[value_type] = mdata_value[value_type].split('_')[0]
-                        mdata_value[value_type] = int(mdata_value[value_type])
+                            mdata_value[value_type] = int(mdata_value[value_type])
                     elif value_type == "value_date":
 
                         if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
@@ -974,14 +999,24 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
         else:
             count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
 
+        count = int(count)
         current_data_counts = 0
         current_geo_id = last_geo_id
+        i = 0
+        count_of_loop = count/SELECTCOUNT
+        count_of_odd = count%SELECTCOUNT
+        if count_of_odd > 0:
+            count_of_loop = int(count_of_loop) + 1
         while current_data_counts < int(count):
             m_datas_object = []
             geo_data_objs = []
             ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type, pk_field_max_range)
             start_data = ona_table_datas[-1][pk_field_name]
-            for ona_data in ona_table_datas[0:SELECTCOUNT-1]:
+            len_of_data = len(ona_table_datas)
+            limit_data_count = len_of_data-1
+            if count_of_loop == i:
+                limit_data_count = len_of_data
+            for ona_data in ona_table_datas[0:limit_data_count]:
                 current_geo_id = str_to_int(current_geo_id)
                 current_geo_id = current_geo_id + 1
                 new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
@@ -995,7 +1030,8 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
                 success_count = success_count + 1
             MGeoDatas.objects.bulk_create(geo_data_objs)
             MDatas.objects.bulk_create(m_datas_object)
-            current_data_counts = current_data_counts + SELECTCOUNT-1
+            current_data_counts = current_data_counts + limit_data_count
+            i += 1
     except Exception:
         failed_count += 1
         pass

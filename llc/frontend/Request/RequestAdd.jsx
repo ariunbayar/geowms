@@ -236,7 +236,7 @@ export class RequestAdd extends Component {
 
     handlePassValues(success, info, is_description) {
         if(is_description) {
-             this.modalChange(
+            this.modalChange(
                 '',
                 'fa fa-info-circle',
                 'warning',

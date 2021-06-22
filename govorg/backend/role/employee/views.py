@@ -179,11 +179,12 @@ def list(request, payload):
         хувьсах_талбарууд=хувьсах_талбарууд,
         has_search=False,
     )
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get('page'),
         'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -923,12 +924,13 @@ def erguul_list(request, payload):
             оруулах_талбарууд=оруулах_талбарууд,
             хувьсах_талбарууд=хувьсах_талбарууд,
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
 
         rsp = {
             'items': items,
             'page': payload.get("page"),
             'total_page': total_page,
+            'start_index': start_index
         }
     else:
         rsp = {

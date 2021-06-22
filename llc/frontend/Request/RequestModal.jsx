@@ -32,8 +32,9 @@ class ActionClass extends Component {
 
         handleSubmit(){
             const {id} =this.props.values
+            const {mergejilten} = this.props
             this.props.loader(true)
-            service.sendRequest(id).then(({ success, info}) =>{
+            service.sendRequest(id, mergejilten).then(({ success, info}) =>{
                 if(success){
                     this.props.loader(false)
                     this.modalChange(
@@ -142,29 +143,35 @@ class SendModal extends Component{
             aimag_name: '',
             aimag_geom: [],
             selected_tools: [],
+            mergejilten: ''
         }
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
     componentDidMount(){
         const values = this.props.values
         const {id} = values.field
-        this.props.handleIsload(true)
-        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
+        service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
+                    files: form_field['file_path'],
+                    zahialagch: form_field['client_org'],
+                    project_name: form_field['project_name'],
+                    object_type: form_field['object_type'],
+                    object_count: form_field['object_quantum'],
+                    hurungu_oruulalt: form_field['investment_status'],
+                    selected_tools: form_field['selected_tools'],
                     vector_datas,
-                    files :form_field['file_path'],
-                    zahialagch :form_field['client_org'],
-                    project_name : form_field['project_name'],
-                    object_type : form_field['object_type'],
-                    object_count : form_field['object_quantum'],
-                    hurungu_oruulalt : form_field['investment_status'],
-                    selected_tools : form_field['selected_tools'],
                     aimag_name,
-                    aimag_geom
+                    aimag_geom,
+                    emp_fields: emp_fields
                 })
             }
         this.props.handleIsload(false)
         })
+    }
+
+    handleOnChange(e) {
+        this.setState({[e.target.name]: e.target.value})
     }
 
     render (){
@@ -180,6 +187,7 @@ class SendModal extends Component{
                         submitClass={ActionClass}
                         closeRequestMap={this.props.closeRequestMap}
                         info={this.props.values.info}
+                        handleOnChange={this.handleOnChange}
                     />
                     </div>
                 </div>

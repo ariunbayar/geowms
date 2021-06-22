@@ -41,11 +41,12 @@ def systemList(request, payload):
         payload=payload,
         оруулах_талбарууд=оруулах_талбарууд
     )
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get('page'),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)

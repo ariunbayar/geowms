@@ -252,15 +252,19 @@ def Edit_name(request, payload):
 
 
 def _check_select_type(field_name, model_name):
-    if '_id' not in field_name:
-        return False
-    field_name = field_name.split('_id')[0]
-    if field_name not in model_name:
-        return True
+    not_select_fields = ['package', 'feature']
+    if model_name not in not_select_fields:
+        if '_id' not in field_name:
+            return False
+        field_name = field_name.split('_id')[0]
+        if field_name not in model_name:
+            return True
+    return False
 
 
 def _get_option_datas(model_name, field_name):
     find_data = dict()
+    datas = list()
     if model_name == 'property':
         find_data['name'] = 'value_type_id'
         find_data['find'] = 'value_type'
@@ -286,7 +290,8 @@ def _get_option_datas(model_name, field_name):
     if field_name == 'top_code_list_id':
         find_data['find'] = 'code_list'
 
-    datas = _get_datas(find_data['find'])
+    if 'find' in find_data:
+        datas = _get_datas(find_data['find'])
     return datas
 
 

@@ -19,7 +19,6 @@ def all(request):
         geom = utils.get_geom(geo_id)
         if geom:
             geo_json = geom.json
-            print(geo_json)
 
     context_list = []
     bundles = Bundle.objects.all()

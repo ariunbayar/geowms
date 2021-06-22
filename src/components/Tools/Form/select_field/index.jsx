@@ -54,13 +54,13 @@ export default class SelectField extends Component {
             if (name_key){
                 row[opt_key].map((data, idx) => {
                     if(selection_value == data[option_key]){
-                        this.props.handleSelectField(state_name, row[opt_key])
+                        this.props.handleSelectField(state_name, row[opt_key], e)
                     }
                 })
             }
             else {
                 if (selection_value == row[option_key]){
-                    this.props.handleSelectField(state_name, row)
+                    this.props.handleSelectField(state_name, row, e)
                 }
             }
         })

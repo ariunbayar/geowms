@@ -73,8 +73,12 @@ export default class RequestDetail extends Component {
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
             file_name, info, state, desc_info,
-            aimag_name, aimag_geom, desc,
+            aimag_name, aimag_geom, desc, emp_fields, mergejilten
         } = this.props
+
+        var default_mergejilten = ''
+        if (mergejilten) default_mergejilten = mergejilten
+        else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0].mail}
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
@@ -170,7 +174,36 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
-                        {
+                            {
+                            info &&
+                                <div className="form-group col-md-12">
+                                    <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
+                                    <select
+                                        className="form-control"
+                                        name="mergejilten"
+                                        id="mergejilten"
+                                        onChange={(e) => {this.props.handleOnChange(e)}}
+                                        value={default_mergejilten}
+                                    >
+                                        <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
+                                    {
+                                        (emp_fields && emp_fields.length > 0)
+                                        ?
+                                                emp_fields.map((value, idx) => (
+                                                    <optgroup
+                                                        id={idx}
+                                                        label={value.org_name}
+                                                    >
+                                                        <option value={value.mail}>{value.first_name}</option>
+                                                    </optgroup>
+                                                ))
+                                            :
+                                                null
+                                    }
+                                    </select>
+                            </div>
+                            }
+                            {
                             desc_info
                             &&
                                 <div className="form-group col-md-12">
@@ -184,7 +217,7 @@ export default class RequestDetail extends Component {
                                         disabled={this.state.disabled}
                                     />
                                 </div>
-                        }
+                            }
                         <UsedTools
                             values={this.props}
                         />
@@ -204,7 +237,8 @@ export default class RequestDetail extends Component {
                                     >
                                         файл оруулах
                                     </label>
-                                    <input
+                                    <input type="file" accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
+                                     
                                         name="uploadDocument"
                                         type="file"
                                         id="choose-file"
@@ -227,6 +261,7 @@ export default class RequestDetail extends Component {
                                 valid_request = {document.getElementsByClassName('is-valid')}
                                 nationwide = {this.state.nationwide}
                                 values={this.props}
+                                mergejilten={default_mergejilten}
                                 loader={this.handleLoaderActive}
                             />
                     }
