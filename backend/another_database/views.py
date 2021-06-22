@@ -1,4 +1,6 @@
-from backend.inspire.models import LFeatures, LPackages, LThemes
+from pymongo import cursor
+from backend import another_database
+from backend.inspire.models import LFeatures, LPackages, LThemes, MDatas, MGeoDatas
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -8,7 +10,6 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
-from api.utils import replace_src_url
 from backend.payment.models import PaymentLayer
 from main.decorators import ajax_required
 from main.components import Datatable
@@ -244,14 +245,31 @@ def mssql_save(request, payload):
     return JsonResponse(rsp)
 
 
-@require_GET
+@require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def remove(request, pk):
-
+def remove(request, payload, pk):
+    state = payload.get('state')
     another_db = get_object_or_404(AnotherDatabase, pk=pk)
+    another_db_table = AnotherDatabaseTable.objects
+    another_db_table = another_db_table.filter(another_database=another_db)
+
+    if state == 'Export':
+        cursor_pg = utils.get_cursor_pg(pk)
+
+        for item in another_db_table:
+            utils.drop_table(item.table_name, cursor_pg)
+            item.delete()
+    else:
+
+        mdatas = MDatas.objects.filter(created_by=state)
+        mdatas.delete()
+
+        m_geo_datas = MGeoDatas.objects.filter(created_by=state)
+        m_geo_datas.delete()
+
+    another_db_table.delete()
     another_db.delete()
-    connection = utils.json_load(another_db.connection)
     rsp = {
         'success': True,
     }
@@ -757,19 +775,22 @@ def mssql_save(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def config_save(request, payload):
-
-    server = payload.get('pg_host')
-    port = payload.get('pg_port')
-    username = payload.get('pg_username')
-    password = payload.get('pg_password')
-    database = payload.get('pg_database')
-    schema = payload.get('pg_schema')
+    values = payload.get('values')
+    out_type = payload.get('out_type')
+    server = values.get('pg_host')
+    port = values.get('pg_port')
+    username = values.get('pg_username')
+    password = values.get('pg_password')
+    database = values.get('pg_database')
+    schema = values.get('pg_schema')
+    is_export = False
+    if out_type == 'true':
+        is_export = True
 
     db_type = AnotherDatabase.PgDB
-    name = payload.get('name')
-    definition = payload.get('definition')
-
-    pk = payload.get('id')
+    name = values.get('name')
+    definition = values.get('definition')
+    pk = values.get('id')
     check = check_pg_connection(server, database, port, username, password, schema)
     if check:
         connection = {
@@ -796,7 +817,7 @@ def config_save(request, payload):
             name=name,
             definition=definition,
             unique_id=unique_id,
-            is_export=True
+            is_export=is_export
         )
 
     rsp = {

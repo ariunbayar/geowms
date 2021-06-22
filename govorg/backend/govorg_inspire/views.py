@@ -196,18 +196,19 @@ def geom_type(request, pid, fid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_wms_layer(request, tid, pid, fid):
-    view_name_ob = ViewNames.objects.filter(feature_id=fid).first()
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+    view_name = utils.make_view_name(feature)
     employee = get_object_or_404(Employee, user=request.user)
     rsp = {
         'success': False,
         'url': '',
         'code': '',
     }
-    if view_name_ob:
+    if view_name:
         rsp = {
             'success': True,
-            'url': request.build_absolute_uri(reverse('api:service:qgis-proxy', args=[employee.token])),
-            'code': 'gp_layer_' + view_name_ob.view_name,
+            'url': request.build_absolute_uri(reverse('api:qgis:qgis-proxy', args=[employee.token, fid])),
+            'code': 'gp_layer_' + view_name,
         }
     return JsonResponse(rsp)
 
@@ -291,7 +292,7 @@ def delete(request, payload, pid, fid):
 
 
 def _code_list_display(property_id):
-    code_list_values = []
+    code_list_values = list()
     code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
     if code_list_configs:
         for code_list_config in code_list_configs:
@@ -338,54 +339,63 @@ def _get_type(value_type_id):
 
 def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid=None):
     properties = list()
-    pk = ''
-    value_text = ''
-    data_list = []
-    code_list_id = ''
-
     for l_property in qs_l_properties:
-        data = dict()
+        pk = ''
+        data = ''
+        code_lists = []
+        form = dict()
         value_type = _get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
         data_type_id = l_data_type.data_type_id
         property_id = l_property.property_id
-        for feature_config_id in feature_config_ids:
-            m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id=feature_config_id, data_type_id=data_type_id, property_id=property_id).first()
-            if m_datas:
-                pk = m_datas.id
-                value_text, data_list = _get_data_list_and_value_text(gid, m_datas.feature_config_id, data_type_id, property_id, value_type)
-                code_list_id = m_datas.code_list_id
-        data['pk'] = pk
-        data['data_type_id'] = data_type_id
-        data['property_id'] = property_id
-        data['property_name'] = l_property.property_name
-        data['property_code'] = l_property.property_code
-        data['property_definition'] = l_property.property_definition
-        data['value_type_id'] = l_property.value_type_id
-        data['value_type'] = value_type
-        value_text, data_list = _get_data_list_and_value_text(gid, fid, l_data_type.data_type_id, l_property.property_id, value_type)
-        data['data'] =  value_text
-        data['data_list'] =  data_list
-        data['roles'] =  _get_roles(request, fid, property_id)
-        data['code_list_id'] = code_list_id
-        properties.append(data)
+        value, data_list, has_value = _get_data_list_and_value(gid, feature_config_ids, data_type_id, property_id, value_type)
+        if has_value:
+            data = value
+            if data_list and not gid:
+                data = data_list[0]['code_list_id']
+            code_lists = data_list
+
+        form['pk'] = pk
+        form['data_type_id'] = data_type_id
+        form['property_id'] = property_id
+        form['property_name'] = l_property.property_name
+        form['property_code'] = l_property.property_code
+        form['property_definition'] = l_property.property_definition
+        form['value_type_id'] = l_property.value_type_id
+        form['value_type'] = value_type
+        form['data'] = data
+        form['data_list'] = code_lists
+        form['roles'] = _get_roles(request, fid, property_id)
+        if form['property_code'] != 'localId' or form['value_type_id'] != 'data-type':
+            properties.append(form)
     return properties
 
 
-def _get_data_list_and_value_text(gid, fid, data_type_id, property_id, value_type):
+def _get_data_list_and_value(gid, fcids, data_type_id, property_id, value_type):
     data_list = []
-    value_text = ''
-    m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id=fid, data_type_id=data_type_id, property_id=property_id).first()
-    if value_type == 'option':
-        data_list = _code_list_display(property_id)
-    elif value_type == 'text':
-        value_text = m_datas.value_text if m_datas else ''
-    elif value_type == 'number':
-        value_text = m_datas.value_number if m_datas else ''
+    value = ''
+    m_datas = ''
+    has_value = False
+    if gid:
+        m_datas = MDatas.objects.filter(geo_id=gid, feature_config_id__in=fcids, data_type_id=data_type_id, property_id=property_id).first()
+        if m_datas:
+            has_value = True
     else:
-        value_text = _datetime_display(m_datas.value_date if m_datas else '')
+        has_value = True
 
-    return value_text, data_list
+    if has_value:
+        if value_type == 'option':
+            data_list = _code_list_display(property_id)
+            if m_datas:
+                value = m_datas.code_list_id
+        elif value_type == 'text':
+            value = m_datas.value_text if m_datas else ''
+        elif value_type == 'number':
+            value = m_datas.value_number if m_datas else ''
+        else:
+            value = _datetime_display(m_datas.value_date if m_datas else '')
+
+    return value, data_list, has_value
 
 
 def _get_roles(request, fid, property_id):
@@ -415,19 +425,38 @@ def _get_data_types(qs_property_ids_of_feature, data_type_ids):
         data_types.append(data)
     return data_types
 
+def _get_user_perm(request, fid):
+    employee = get_object_or_404(Employee, user=request.user)
+    emp_perm = get_object_or_404(EmpPerm, employee=employee)
+    emp_perm = EmpPermInspire.objects.filter(
+        emp_perm=emp_perm,
+        feature_id=fid,
+        perm_kind=EmpPermInspire.PERM_VIEW
+    )
+    emp_perm = emp_perm.exclude(property_id__isnull=True)
+    property_list = list(emp_perm.values_list('property_id', flat=True))
+
+    return property_list
+
 
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detail(request, gid, fid, tid):
+    user_perm_property = _get_user_perm(request, fid)
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
     feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
     data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
-    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
+
+    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(
+        data_type_id__in=data_type_ids,
+        property_id__in=user_perm_property)
+
     property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
+    data_type_ids = list(qs_property_ids_of_feature.values_list('data_type_id', flat=True))
     qs_l_properties = LProperties.objects
-    qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature)
+    qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature).distinct('property_id')
 
     rsp = {
         'success': True,
@@ -442,19 +471,27 @@ def detail(request, gid, fid, tid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detailCreate(request, tid, pid, fid):
+
+    user_perm_property = _get_user_perm(request, fid)
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
     feature_config_ids = list(qs_feature_configs.values_list('feature_config_id', flat=True))
     data_type_ids = list(qs_feature_configs.values_list('data_type_id', flat=True))
-    qs_property_ids_of_feature = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
+    qs_property_ids_of_feature = LDataTypeConfigs.objects
+
+    qs_property_ids_of_feature = qs_property_ids_of_feature.filter(
+        data_type_id__in=data_type_ids,
+        property_id__in=user_perm_property)
+
     property_ids_of_feature = list(qs_property_ids_of_feature.values_list('property_id', flat=True))
+    data_type_ids = list(qs_property_ids_of_feature.values_list('data_type_id', flat=True))
     qs_l_properties = LProperties.objects
     qs_l_properties = qs_l_properties.filter(property_id__in=property_ids_of_feature)
 
     rsp = {
         'success': True,
         'datas': _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids),
-        'data_types':  _get_data_types(qs_property_ids_of_feature, data_type_ids),
+        'data_types': _get_data_types(qs_property_ids_of_feature, data_type_ids),
     }
     return JsonResponse(rsp)
 
@@ -743,19 +780,25 @@ def control_to_remove(request, payload):
     return JsonResponse(rsp)
 
 
-def _check_and_make_form_json(feature_id, values):
+def _check_and_make_form_json(feature_id, employee, values):
     form_json_list = list()
     code_list_values = ""
+    perm_prop_ids = list()
 
-    view_qs = ViewNames.objects
-    view_qs = view_qs.filter(feature_id=feature_id)
-    view = view_qs.first()
+    emp_perm = EmpPerm.objects.filter(employee=employee).first()
+    perm_qs = EmpPermInspire.objects
+    perm_qs = perm_qs.filter(emp_perm=emp_perm)
+    perm_qs = perm_qs.filter(feature_id=feature_id)
+    perm_qs = perm_qs.filter(perm_kind=EmpPermInspire.PERM_CREATE)
 
-    view_props = ViewProperties.objects.filter(view=view)
+    has_perm_geom = len(perm_qs.filter(geom=True)) > 0
+    if has_perm_geom:
+        perm_qs = perm_qs.filter(geom=False)
+        perm_prop_ids = perm_qs.values_list('property_id', flat=True)
 
-    for view_prop in view_props:
+    for perm_prop in perm_prop_ids:
         prop_qs = LProperties.objects
-        prop_qs = prop_qs.filter(property_id=view_prop.property_id)
+        prop_qs = prop_qs.filter(property_id=perm_prop)
         prop_qs = prop_qs.first()
 
         form_json = dict()
@@ -807,7 +850,8 @@ def _create_request(request_datas):
 def _make_request(values, request_values):
     form_json_list = _check_and_make_form_json(
         request_values['feature_id'],
-        values
+        request_values['employee'],
+        values,
     )
 
     request_datas = {
@@ -819,6 +863,9 @@ def _make_request(values, request_values):
         'kind': request_values['kind'],
         'form_json': form_json_list,
         'geo_json': request_values['geo_json'],
+        'order_at': request_values['order_at'],
+        'order_no': request_values['order_no'],
+        'group_id': request_values['group_id'],
     }
 
     success = _create_request(request_datas)
@@ -837,7 +884,7 @@ def _delete_file(for_delete_items, Sid=None):
             'geoportal_app',
             'datas',
             for_delete_items.get('file_type_name'),
-            for_delete_items.get('file_name')+'.*'
+            for_delete_items.get('uniq_name')+'.*'
         )
     )
     for filePath in fileList:
@@ -877,9 +924,9 @@ def _check_file_for_geom(form_file_name, uniq_name, ext):
     file_type_name = ''
     uniq_file_name = ''
 
-    if ext == 'shp':
-        exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
-    elif ext == 'gml':
+    # if ext == 'shp':
+    #     exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
+    if ext == 'gml':
         exts = ['.gml', '.gfs']
     elif ext == 'geojson':
         exts = ['.geojson', '.gfs']
@@ -922,6 +969,9 @@ def _check_perm(employee, feature_id, geo_json):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def file_upload_save_data(request, tid, pid, fid, ext):
+    geo_json_list = list()
+    data = MGeoDatas.objects.filter(feature_id=fid).first()
+    geom_type = GEOSGeometry(data.geo_data).geom_type
     employee = get_object_or_404(Employee, user=request.user)
     files = request.FILES.getlist('data')
     order_at = request.POST.get('order_at')
@@ -979,55 +1029,69 @@ def file_upload_save_data(request, tid, pid, fid, ext):
                     for val in layer:
                         values = dict()
                         for name in range(0, len(layer.fields)):
-                            field_name = val[name].name  # field name
-                            value = val.get(name)  # value ni
+                            geo_json = val.geom.json
+                            geo_type = utils.json_dumps(geo_json)
+                            geo_json_load = utils.json_load(geo_type)
+                            geo_type = geo_json_load['type']
+                            geo_json_list.append(geo_type)
 
-                            if name == 0:
+                        if all(geom_type in item for item in geo_json_list):
+                            for name in range(0, len(layer.fields)):
+                                field_name = val[name].name  # field name
+                                value = val.get(name)  # value ni
 
-                                # geo_id = _make_geo_id(feature_id)
-                                geo_json = val.geom.json  # goemetry json
+                                if name == 0:
 
-                                if geo_json:
-                                    success, info, request_kind = _check_perm(
-                                        employee,
-                                        feature_id,
-                                        geo_json
-                                    )
+                                    # geo_id = _make_geo_id(feature_id)
+                                    geo_json = val.geom.json  # goemetry json
 
-                                    if not success:
+                                    if geo_json:
+                                        success, info, request_kind = _check_perm(
+                                            employee,
+                                            feature_id,
+                                            geo_json
+                                        )
+
+                                        if not success:
+                                            _delete_file(for_delete_items, Sid)
+                                            rsp = {
+                                                'success': success,
+                                                'info': info,
+                                            }
+                                            return JsonResponse(rsp)
+
+                                    else:
                                         _delete_file(for_delete_items, Sid)
                                         rsp = {
-                                            'success': success,
-                                            'info': info,
+                                            'success': False,
+                                            'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
                                         }
                                         return JsonResponse(rsp)
 
-                                else:
-                                    _delete_file(for_delete_items, Sid)
-                                    rsp = {
-                                        'success': False,
-                                        'info': 'ямар нэгэн зурагдсан дата байхгүй байна'
-                                    }
-                                    return JsonResponse(rsp)
+                                values[field_name] = value
 
-                            values[field_name] = value
-
-                        request_values = {
-                            'theme_id': tid,
-                            'package_id': pid,
-                            'feature_id': fid,
-                            'employee': employee,
-                            'geo_json': geo_json,
-                            'kind': request_kind,
-                            'order_at': order_at,
-                            'order_no': order_no,
-                            'group_id': main_request_id,
-                        }
-                        success, info = _make_request(values, request_values)
-                        if not success:
+                            request_values = {
+                                'theme_id': tid,
+                                'package_id': pid,
+                                'feature_id': fid,
+                                'employee': employee,
+                                'geo_json': geo_json,
+                                'kind': request_kind,
+                                'order_at': order_at,
+                                'order_no': order_no,
+                                'group_id': main_request_id,
+                            }
+                            success, info = _make_request(values, request_values)
+                            if not success:
+                                _delete_file(for_delete_items, Sid)
+                                break
+                        else:
                             _delete_file(for_delete_items, Sid)
-                            break
-
+                            rsp = {
+                                'success': False,
+                                'info': "Геометр өгөгдлийн төрөл нь тухайн feature-ийн төрөлтэй таарахгүй байна!!!."
+                            }
+                            return JsonResponse(rsp)
                     rsp = {
                         'success': success,
                         'info': info
@@ -1044,13 +1108,14 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def get_qgis_url(request):
+def get_qgis_url(request, fid):
     emp = get_object_or_404(Employee, user=request.user)
     qgis_local_base_url = get_config('qgis_local_base_url')
+    url = '{qgis_local_base_url}/api/qgis/{token}/{fid}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token, fid=fid),
     rsp = {
         'success': True,
-        'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
-        'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+        'wms_url': url,
+        'wfs_url': url,
     }
     return JsonResponse(rsp)
 

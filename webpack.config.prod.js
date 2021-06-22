@@ -36,6 +36,8 @@ module.exports = {
 
         'govorg/frontend':
             hp('govorg/frontend/index.js'),
+        'llc/frontend':
+            hp('llc/frontend/index.js'),
     },
     output: {
         // options related to how webpack emits results
@@ -134,6 +136,10 @@ module.exports = {
         hhwp({
             chunks: ['govorg/frontend'],
             filename: path.resolve(__dirname, 'govorg/backend/org/templates/org/index.prod.html'),
+        }),
+        hhwp({
+            chunks: ['llc/frontend'],
+            filename: path.resolve(__dirname, 'llc/backend/llc_conf/templates/llc/index.prod.html'),
         }),
     ],
 }

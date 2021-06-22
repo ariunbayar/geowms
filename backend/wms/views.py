@@ -1,3 +1,5 @@
+import re
+from backend.inspire.models import LFeatures, LPackages, LProperties
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -5,22 +7,33 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
-from django.core.paginator import Paginator
-from django.contrib.postgres.search import SearchVector
 
 from api.utils import replace_src_url
 from backend.bundle.models import BundleLayer
 from backend.wmslayer.models import WMSLayer
+from backend.inspire.models import GovPerm
+from backend.inspire.models import GovPermInspire
 from backend.payment.models import PaymentLayer
+from backend.dedsanbutets.models import ViewNames, ViewProperties
+
 from main.decorators import ajax_required
 from main.components import Datatable
+from main import utils
 
 from .models import WMS
 from .forms import WMSForm
 
 
+def _display_property(prop):
+    property_detail = dict()
+    property_detail['prop_id'] = prop.property_id
+    property_detail['prop_name'] = prop.property_name
+    property_detail['prop_eng'] = prop.property_name_eng
+    property_detail['prop_code'] = prop.property_code
+    return property_detail
 
-def _get_wms_display(request, wms):
+
+def _wms_return_display(wms, request, layer_list):
     return {
         'id': wms.id,
         'name': wms.name,
@@ -28,18 +41,91 @@ def _get_wms_display(request, wms):
         'wmts_url': wms.cache_url if wms.cache_url else '',
         'is_active': wms.is_active,
         'layers': [ob.code for ob in wms.wmslayer_set.all()],
-        'layer_list': list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title')),
+        'layer_list': layer_list,
         'public_url': request.build_absolute_uri(reverse('backend:wms:proxy', args=[wms.pk])),
         'created_at': wms.created_at.strftime('%Y-%m-%d'),
     }
 
 
+def _get_wms_display(request, wms):
+    layer_list = list()
+    property_ids = list()
+    wms_layers = list(wms.wmslayer_set.all().values('id', 'code', 'name', 'title'))
+    for wms_layer in wms_layers:
+        properties = list()
+        prop_all = list()
+        if utils.LAYERPREFIX in wms_layer['code']:
+            layer_code = wms_layer['code'].split('gp_layer_')[1]
+            feature = utils.get_feature_from_layer_code(layer_code)
+            if feature:
+                prop_qs = LProperties.objects
+                v_prop_qs = ViewProperties.objects
+                v_prop_qs = v_prop_qs.filter(view__feature_id=feature.feature_id)
+                property_ids = list(v_prop_qs.values_list('property_id', flat=True))
+                prop_all = prop_qs.filter(property_id__in=property_ids)
+
+                for prop in prop_all:
+                    property_detail = _display_property(prop)
+                    properties.append(property_detail)
+
+        wms_layer_detail = {
+            **wms_layer,
+            'properties': properties
+        }
+        layer_list.append(wms_layer_detail)
+    return _wms_return_display(wms, request, layer_list)
+
+
+def _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id):
+    wms = WMS.objects.filter(id=wms_id).first()
+    layers = list()
+    for layer in layers_qs.filter(wms_id=wms_id).values():
+        view_name = utils.remove_text_from_str(layer['code'])
+        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(geom=False)
+        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(perm_kind=GovPermInspire.PERM_CREATE)
+        property_ids = list(gov_perm_inspire_qs.values_list('property_id', flat=True))
+        view_qs = ViewNames.objects.filter(view_name=view_name)
+        if not view_qs:
+            prop_all = list()
+        else:
+            view = view_qs.first()
+            open_datas = view.open_datas
+            prop_all = LProperties.objects.filter(property_code__in=utils.json_load(open_datas), property_id__in=property_ids)
+
+        properties = [_display_property(prop) for prop in prop_all]
+        wms_layer_detail = {
+            **layer,
+            'properties': properties
+        }
+        layers.append(wms_layer_detail)
+    return _wms_return_display(wms, request, layers)
+
+
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def all(request):
-    wms_list = [_get_wms_display(request, ob) for ob in WMS.objects.all()]
-    return JsonResponse({'wms_list': wms_list, })
+def all(request, org_id):
+
+    gov_perm = GovPerm.objects.filter(org_id=org_id).first()
+    gov_perm_inspire_qs = gov_perm.govperminspire_set
+    gov_perm_geom_qs = gov_perm_inspire_qs.filter(geom=True, perm_kind=GovPermInspire.PERM_CREATE)
+    feature_ids = gov_perm_geom_qs.values_list('feature_id', flat=True)
+    layer_codes = list()
+    for feature_id in feature_ids:
+        feature = LFeatures.objects.filter(feature_id=feature_id).first()
+        if feature:
+            layer_code = utils.make_layer_name(utils.make_view_name(feature))
+            layer_codes.append(layer_code)
+
+    layers_qs = WMSLayer.objects.filter(code__in=layer_codes)
+    ids = list(layers_qs.values_list('wms_id', flat=True))
+    wms_ids = sorted(set(ids))
+    wms_list = [
+        _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id)
+        for wms_id in wms_ids
+    ]
+
+    return JsonResponse({ 'wms_list': wms_list })
 
 
 @require_POST
@@ -86,10 +172,9 @@ def wms_layer_all(request, payload):
         _wms_layer_display(wms_layer)
         for wms_layer in wms_layers
     ]
-
     return JsonResponse({
         'layers_all': layers_all,
-    })
+        })
 
 
 @require_POST
@@ -163,7 +248,7 @@ def layerAdd(request, payload):
     if wms_layer:
         return JsonResponse({'success': False})
     else:
-        wmslayerimage = WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
+        WMSLayer.objects.create(name=layer_name, code=layer_code, wms=wms, title=layer_name, feature_price=0)
         return JsonResponse({'success': True})
 
 
@@ -207,28 +292,26 @@ def create(request, payload):
 def update(request, payload):
     pk = payload.get('id')
     wms = get_object_or_404(WMS, pk=pk)
-    layer_choices = payload.get('layer_choices')
     form = WMSForm(payload, instance=wms)
     is_active = payload.get('is_active')
     url_service = payload.get('url')
     wmts_url = payload.get('wmts_url')
-
     if wms:
         wms.cache_url = wmts_url or None
         wms.save()
 
     if is_active:
-        wms.is_active=True
+        wms.is_active = True
     else:
-        wms.is_active=False
+        wms.is_active = False
     if url_service == wms.url:
         if form.is_valid():
             with transaction.atomic():
                 form.save()
                 wms = form.instance
-            rsp = { 'success': True }
+            rsp = {'success': True}
         else:
-            rsp = { 'success': False }
+            rsp = {'success': False}
     else:
         if form.is_valid():
             layers = WMSLayer.objects.filter(wms=wms)
@@ -237,9 +320,9 @@ def update(request, payload):
                 BundleLayer.objects.filter(layer=layer).delete()
             layers.delete()
             form.save()
-            rsp = { 'success': True }
+            rsp = {'success': True}
         else:
-            rsp = { 'success': False }
+            rsp = {'success': False}
 
     return JsonResponse(rsp)
 
@@ -293,7 +376,6 @@ def _get_service_url(request, wms):
 @require_GET
 @user_passes_test(lambda u: u.is_superuser)
 def proxy(request, wms_id):
-
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -306,7 +388,9 @@ def proxy(request, wms_id):
 
     if request.GET.get('REQUEST') == 'GetCapabilities':
         service_url = _get_service_url(request, wms)
-        content = replace_src_url(content, wms.url, service_url)
+        rep_url = wms.url
+        service_type = request.GET.get('SERVICE')
+        content = replace_src_url(content, rep_url, service_url, service_type)
 
     content_type = rsp.headers.get('content-type')
 
@@ -358,12 +442,26 @@ def save_geo(request, payload):
     table = datas[0]['table']
 
     WMSLayer.objects.filter(wms_id=wms_id, code=code).update(
-        geodb_schema = schema,
-        geodb_table = table,
-        geodb_pk_field = pk_field,
-        geodb_export_field = export_field,
-        feature_price = price,
+        geodb_schema=schema,
+        geodb_table=table,
+        geodb_pk_field=pk_field,
+        geodb_export_field=export_field,
+        feature_price=price,
     )
+    rsp = {
+        'success': True
+    }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def remove_invalid_layers(request, payload, id):
+    layers = payload.get('invalid_layers')
+    wmslayer = WMSLayer.objects.filter(wms_id=id, code__in=layers)
+    wmslayer.delete()
+
     rsp = {
         'success': True
     }

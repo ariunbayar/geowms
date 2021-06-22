@@ -21,7 +21,7 @@ app_name = 'backend'
 urlpatterns = [
 
     path('wms/', include(([
-        path('all/', wms_views.all, name='all'),
+        path('all/<int:org_id>/', wms_views.all, name='all'),
         path('pagination/', wms_views.pagination, name='pagination'),
         path('create/', wms_views.create, name='create'),
         path('update/', wms_views.update, name='update'),
@@ -37,6 +37,7 @@ urlpatterns = [
         path('paginatedList/', wms_views.paginated_list, name='paginatedList'),
         path('get-geo/', wms_views.get_geo, name='get-geo'),
         path('save-geo/', wms_views.save_geo, name='save-geo'),
+        path('<int:id>/remove/invalid-layer/', wms_views.remove_invalid_layers, name='remove_invalid_layers'),
     ], 'wms'))),
 
     path('another-database/', include(([
@@ -69,13 +70,18 @@ urlpatterns = [
         path('pg/db-config-save/', geoserver_another_database.config_save),
         path('pg/get/<int:pk>/', pg_views.config_detail),
         path('pg/tables/<int:pk>/all/', pg_views.get_pg_table_list),
-        path('pg/<int:conn_id>/get-all-view-names/', pg_views.get_pg_table_names),
+        path('pg/get-all-view-names/', pg_views.get_pg_table_names),
         path('pg/get-fields/', pg_views.getFields),
         path('pg/save-table/', pg_views.save_table),
         path('pg/<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
         path('pg/<int:id>/refresh-table-data/', pg_views.refresh_datas, name='refresh-datas-pg'),
         path('pg/<int:id>/<int:table_id>/refresh-one-table/', pg_views.refresh_single_table, name='refresh_single_table'),
         path('pg/<int:id>/<int:table_id>/remove-table/', pg_views.remove_pg_table),
+        path('pg/<int:pk>/get-another-tables/', pg_views.get_ano_tables),
+        path('pg/<int:pk>/get_table_fields/', pg_views.get_table_fields),
+        path('pg/<int:id>/refresh-all-connection/', pg_views.refresh_all_conn),
+        path('pg/<int:id>/<int:table_id>/insert-single-table/', pg_views.insert_single_table, name='insert_single_table'),
+        path('pg/refresh-view/', pg_views.refresh_view),
     ], 'another-database'))),
 
 
@@ -138,6 +144,7 @@ urlpatterns = [
         path('<int:pk>/emp-gender-count/', org_views.emp_gender_count),
         path('<int:pk>/emp-age-count/', org_views.emp_age_count),
         path('get-all-org/', org_views.get_all_org),
+        path('send-mail/<int:pk>/', org_views.send_mail),
     ], 'org'))),
 
     path('api/log/', include(([
@@ -213,11 +220,11 @@ urlpatterns = [
         path('editName/', dedsan_butets.Edit_name),
         path('get-fields/', dedsan_butets.getFields),
         path('save/', dedsan_butets.save),
+        path('make-view/', dedsan_butets.make_view),
         path('property-fields/<int:fid>/', dedsan_butets.propertyFields),
         path('property-fields/save/', dedsan_butets.propertyFieldsSave),
         path('remove/', dedsan_butets.remove),
         path('erese/', dedsan_butets.erese),
-        path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
         path('overlaps-feature-get/<str:feature_id>/', dedsan_butets.feature_overlaps_get),
         path('overlaps-feature-set/', dedsan_butets.feature_overlaps_set),
     ], 'dedsan-butests'))),
@@ -232,6 +239,7 @@ urlpatterns = [
         path('get_group_cache_list/', geoserver_views.get_group_cache),
         path('create_group_cache/<str:group_name>/', geoserver_views.create_group_cache),
         path('update_geo_web_cache/', geoserver_views.update_geo_cache),
+        path('check_geoserver_wms/', geoserver_views.check_geoserver_wms),
         path('check-style-name/', geoserver_views.check_styles_name),
         path('style-data/', geoserver_views.get_style_data),
         path('create-style/', geoserver_views.create_style),

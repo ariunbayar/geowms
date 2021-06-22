@@ -13,6 +13,7 @@ from govorg.backend.meta_data import views as meta_data_views
 from govorg.backend.revoke_request import views as revoke_request_views
 from govorg.backend.secure import views as secure_views
 from govorg.backend.tseg import views as tseg_view
+from backend.another_database import pg_views
 
 urlpatterns = [
     path('api/', include(([
@@ -70,7 +71,7 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('send-data/<int:tid>/<int:pid>/<int:fid>/<str:ext>/', govorg_inspire_views.file_upload_save_data),
-            path('qgis-url/', govorg_inspire_views.get_qgis_url),
+            path('qgis-url/<int:fid>/', govorg_inspire_views.get_qgis_url),
             path('qpi-url/', govorg_inspire_views.get_api_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),
@@ -161,6 +162,20 @@ urlpatterns = [
             # path('revoke-search/', revoke_request_views.revoke_paginate),
             path('get_choices/', revoke_request_views.get_choices),
         ], 'revoke_request'))),
+
+        path('llc-request/', include(([
+            path('', org_request_views.get_llc_list),
+            path('reject/', org_request_views.llc_request_reject, name="reject"),
+            path('approve/<int:request_id>/', org_request_views.llc_request_approve),
+            path('dismiss/', org_request_views.llc_request_dismiss, name="dismiss"),
+            path('<int:conn_id>/get-all-view-names/', pg_views.get_pg_table_names),
+            path('<int:id>/<int:table_id>/table-detail/', pg_views.table__detail),
+            path('get-fields/', pg_views.getFields),
+            path('<int:id>/get-request-data/', org_request_views.get_request_data, name=' save_request'),
+            path('<int:id>/get-request-detail/', org_request_views.get_request_detail, name=' save_request'),
+            path('get-search-choices/', org_request_views.get_search_choices),
+            path('inspire-save/', org_request_views.inspire_save, name=' inspire_save'),
+        ], 'llc-request'))),
 
     ], 'back_org'))),
 

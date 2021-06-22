@@ -6,11 +6,13 @@ import re
 import unicodedata
 import importlib
 import zipfile
+from django import utils
 import pyproj
 import math
 import json
 import psycopg2
 import socket
+import shutil
 from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
@@ -43,6 +45,9 @@ from backend.inspire.models import LProperties, MGeoDatas
 
 from backend.another_database.models import AnotherDatabase
 import main.geoserver as geoserver
+
+
+LAYERPREFIX = 'gp_layer_'
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -242,14 +247,14 @@ def slugifyWord(word):
 
 def refreshMaterializedView(fid):
 
-    view_data = ViewNames.objects.filter(feature_id=fid).first()
-    if view_data:
-        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_data.view_name)
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    feature = LFeatures.objects.filter(feature_id=fid).first()
+    view_name = make_view_name(feature)
+    if view_name:
+        sql = """ REFRESH MATERIALIZED VIEW CONCURRENTLY public.{table_name} """.format(table_name=view_name)
         with connections['default'].cursor() as cursor:
             cursor.execute(sql)
             return True
-
-        return False
     else:
         return True
 
@@ -953,7 +958,7 @@ def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
 
 
 def check_view_name(view_name):
-    view_name = remove_text_from_str(view_name, 'gp_layer_')
+    view_name = remove_text_from_str(view_name, LAYERPREFIX)
     has_view_name = False
     with connections['default'].cursor() as cursor:
         sql = """
@@ -993,7 +998,7 @@ def get_inside_geoms_from_view(geo_json, view_name, properties=list()):
     return datas
 
 
-def remove_text_from_str(main_text, remove_text='gp_layer_'):
+def remove_text_from_str(main_text, remove_text=LAYERPREFIX):
     replaced_text = main_text
     if remove_text in main_text:
         replaced_text = main_text.replace(remove_text, '')
@@ -1140,7 +1145,7 @@ def json_load(data):
 
 
 def json_dumps(data):
-    if isinstance(data, dict):
+    if isinstance(data, dict) or isinstance(data, list):
         data = json.dumps(data, ensure_ascii=False)
     return data
 
@@ -1566,6 +1571,10 @@ def remove_file(file_path):
     os.remove(file_path)
 
 
+def remove_folder(folder_path):
+    shutil.rmtree(folder_path)
+
+
 def copy_image(img, plus):
 
     # get legends
@@ -1620,15 +1629,19 @@ def get_colName_type(view_name, data):
     return geom_att, some_attributes
 
 
+def make_layer_name(view_name):
+    return LAYERPREFIX + view_name
+
+
 def check_gp_design():
     ws_name = 'gp_design'
     ds_name = ws_name
-    table_name = 'geoserver_desing_view'
+    table_name = 'geoserver_design_view'
     design_space = geoserver.getWorkspace(ws_name)
 
     def _create_design_view():
         sql = '''
-                CREATE MATERIALIZED VIEW IF not EXISTS  geoserver_desing_view  as
+                CREATE MATERIALIZED VIEW IF not EXISTS geoserver_design_view  as
                 SELECT
                     ST_GeometryType(get_datas_of_m_geo_datas(feature_id)) as field_type,
                     get_datas_of_m_geo_datas(feature_id)  as geo_data, feature_id
@@ -1652,7 +1665,7 @@ def check_gp_design():
             ds_name,
         )
 
-    layer_name = 'gp_layer_' + table_name
+    layer_name = make_layer_name(table_name)
     check_layer = geoserver.getDataStoreLayer(
         ws_name,
         ds_name,
@@ -1805,20 +1818,92 @@ def check_nsdi_address(request):
     nsdi_check = False
     host_name = socket.gethostname()
     host_addr = socket.gethostbyname(host_name + ".local")
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     host = request.META.get('HTTP_HOST')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    host_name = socket.gethostname()
-    host_addr = socket.gethostbyname(host_name + ".local")
-    if not settings.DEBUG:
-        f = open("check_15_ip.txt", "w")
-        text = 'host_ip=' + host_addr + "\n"+ 'request_ip='+ip + 'host=' + host
-        f.write(text)
-        f.close()
-    if host_addr == '192.168.1.15' and ip == '127.0.0.1':
+    if host_addr == '192.168.10.15' and host == 'nsdi.gov.mn':
         nsdi_check = True
-
     return nsdi_check
+
+
+def drop_table(table_name, cursor, schema='public'):
+    detete_query = '''
+        DROP TABLE IF EXISTS {schema}.{table_name}
+    '''.format(
+        table_name=table_name,
+        schema=schema
+    )
+    cursor.execute(detete_query)
+
+
+def get_file_name(file_name):
+    return file_name.split('.')[0] if file_name.split('.') else file_name
+
+
+def has_materialized_view(view_name):
+    sql = '''
+        SELECT
+            *
+        FROM pg_matviews
+        WHERE
+            matviewname = '{view_name}';
+    '''.format(view_name=view_name)
+    with connections['default'].cursor() as cursor:
+        cursor.execute(sql)
+        if cursor.fetchone():
+            return True
+        return False
+
+
+def get_feature(shape_geometries):
+    features = []
+    geom_type = ''
+    for shape_geometry in shape_geometries:
+
+        single_geom = json_load(shape_geometry.geom_json)
+        geom_type = single_geom.get('type')
+        feature = {
+            "type": "Feature",
+            'geometry': single_geom,
+            'id': shape_geometry.id,
+            'properties': json_load(shape_geometry.form_json)
+        }
+        features.append(feature)
+    return features, geom_type
+
+
+def make_view_name(feature):
+    view_name = ''
+    if feature and feature.feature_code:
+        feature_code = feature.feature_code
+        feature_code = feature_code.split("-")
+        view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
+    return view_name
+
+
+def get_feature_from_layer_code(layer_code):
+    LFeatures = apps.get_model('backend_inspire', 'LFeatures')
+    layer_code = layer_code.split('_view')[0]
+    splited = layer_code.split('_')
+    code = splited.pop()
+    eng_name = "_".join(splited)
+    feature_qs = LFeatures.objects
+    feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
+    feature = feature_qs.first()
+    return feature
+
+
+def get_org_from_user(user, is_admin=True):
+    Employee = apps.get_model("backend_org", "Employee")
+    emp_qs = Employee.objects
+    emp_qs = emp_qs.filter(user=user)
+    if is_admin:
+        emp_qs = emp_qs.filter(is_admin=is_admin)
+    if not emp_qs:
+        return False
+    return emp_qs.first().org
+
+
+def get_today_datetime(is_string=False):
+    now = datetime.now()
+    if is_string:
+        return datetime_to_string(now)
+    return now

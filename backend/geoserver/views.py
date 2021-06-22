@@ -1,4 +1,6 @@
+from django.db.models import base
 import requests
+from requests.api import request
 from requests.auth import HTTPBasicAuth
 
 from xml.etree import ElementTree as etree
@@ -16,6 +18,7 @@ from geoportal_app.models import User
 from backend.wms.models import WMS
 from backend.wmslayer.models import WMSLayer
 from backend.bundle.models import BundleLayer
+from backend.govorg.models import GovOrgWMSLayer
 from django.views.decorators.csrf import csrf_exempt
 from main.utils import (
     dict_fetchall,
@@ -115,7 +118,7 @@ def remove_layer_group(request, payload):
 
     return JsonResponse({
         'success': True,
-        'info': 'Амжилттай утсгалаа'
+        'info': 'Амжилттай устгалаа'
     })
 
 
@@ -212,7 +215,7 @@ def create_layer_group(request, payload):
 
     group_values = payload.get('values')
     group_layers = payload.get('layer_list')
-    group_name = group_values.get('name')
+    group_name = payload.get('group_layer_name')
     group_title = group_values.get('title')
     group_state = payload.get('group_state')
     group_old_name = payload.get('old_name') or group_name
@@ -237,7 +240,7 @@ def create_layer_group(request, payload):
 
     geoserver.delete_layer_group(group_old_name)
 
-    rsp = geoserver.create_layer_group(group_values, group_layers)
+    rsp = geoserver.create_layer_group(group_values, group_name, group_layers)
     if rsp.status_code != 201:
         return JsonResponse({
             'success': False,
@@ -377,6 +380,46 @@ def create_group_cache(request, payload, group_name):
     })
 
 
+
+@require_GET
+@csrf_exempt
+def check_geoserver_wms(request):
+
+    BASE_HEADERS = {
+        'User-Agent': 'geo 1.0',
+    }
+    headers = {**BASE_HEADERS}
+    queryargs = {
+        'service': 'WMS',
+        'version': '1.0.0',
+        'request': 'GetCapabilities',
+    }
+
+    initial_qs = WMS.objects.all()
+
+    for qs in initial_qs:
+        base_url = qs.url
+        rsp = requests.get(base_url, queryargs, headers=headers, timeout=50, verify=False)
+        if rsp.status_code != 200:
+            wms_layer = WMSLayer.objects.filter(wms_id=qs.id)
+            if wms_layer:
+                for layer in wms_layer:
+                    bundle_layers = BundleLayer.objects.filter(layer_id=layer.id)
+
+                    if bundle_layers:
+                        bundle_layers.delete()
+
+                    system_layers = GovOrgWMSLayer.objects.filter(wms_layer_id=layer.id)
+
+                    if system_layers:
+                        system_layers.delete()
+
+                wms_layer.delete()
+            qs.delete()
+
+    return JsonResponse({'success': True})
+
+
 @require_GET
 @csrf_exempt
 def update_geo_cache(request):
@@ -410,7 +453,7 @@ def get_style_data(request, payload):
             SELECT
                 ST_AsGeoJSON(ST_Transform(geo_data,4326)) as geom
             FROM
-                geoserver_desing_view
+                geoserver_design_view
             where
                 ST_GeometryType(geo_data) like '%{geom_type}%'
             limit 1000
@@ -464,7 +507,6 @@ def create_style(request, payload):
     if info:
         return JsonResponse({'success': False, 'info': info})
 
-    
     rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
     if rsp.status_code == 201:
         return JsonResponse({
@@ -486,7 +528,6 @@ def _get_fill_stroke(data):
         rule_name = data.get('Name') or ''
         max_range = data.get('MaxScaleDenominator') or 0
         min_range = data.get('MinScaleDenominator') or 0
-        
 
         if data.get('RasterSymbolizer'):
             return [], '', True
@@ -689,7 +730,7 @@ def style_remove(request, payload):
     else:
         return JsonResponse({
             'success': True,
-            'info': 'Амжилттай утсгалаа'
+            'info': 'Амжилттай устгалаа'
         })
 
 
@@ -745,3 +786,4 @@ def get_ws_list(request):
     return JsonResponse({
         'work_space_list': work_space_list,
     })
+

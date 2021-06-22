@@ -167,7 +167,7 @@ export class PortalDataTable extends Component {
                                             </th>
                                         )}
                                         {(нэмэлт_талбарууд && нэмэлт_талбарууд.length >0 ) && нэмэлт_талбарууд.map((item, index) =>
-                                            <th key={index}>{item.title}</th>
+                                            <th className={`bg-${color}`} key={index}>{item.title}</th>
                                         )}
                                     </tr>
                                 </thead>

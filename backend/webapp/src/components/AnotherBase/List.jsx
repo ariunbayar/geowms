@@ -21,7 +21,7 @@ export default class List extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
-                    "title": 'Засах',
+                    "title": 'import',
                     "text": '', "icon":
                     'fa fa-table text-success',
                     "action": (values) => this.tableGoLink(values),
@@ -66,6 +66,8 @@ export default class List extends Component {
         this.handleMssql = this.handleMssql.bind(this)
         this.handleMongo = this.handleMongo.bind(this)
         this.modalChange = this.modalChange.bind(this)
+        this.handlePGRefreshData = this.handlePGRefreshData.bind(this)
+        this.refreshView = this.refreshView.bind(this)
 
     }
 
@@ -80,6 +82,39 @@ export default class List extends Component {
     handleRefreshData(values){
         if(values.db_type == 'MSSQL') this.handleMssql(values)
         else if(values.db_type == "MONGODB") this.handleMongo(values)
+        else if(values.db_type == "PgDB") this.handlePGRefreshData(values)
+    }
+
+    handlePGRefreshData(values) {
+        this.setState({is_loading: true})
+        service
+            .pg_config
+            .refreshData(values.id)
+            .then(({success, table_info}) => {
+                if (success) {
+                    this.setState({ is_loading: false })
+                    var table_res = table_info.join("\n")
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        'success',
+                        'Амжилттай',
+                        `${table_res}`,
+                        false,
+                        '',
+                        '',
+                        null,
+                        () => this.refreshView(values)
+                    )
+                }
+            })
+    }
+
+    refreshView(values){
+        service.pg_config.refreshView(values.id).then(({ success }) => {
+            if (success) {
+            }
+        })
     }
 
     handleMssql(values){
@@ -180,16 +215,18 @@ export default class List extends Component {
     tableGoLink(values){
         if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/tables/`)
         else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/list/`)
+        else if (values.db_type == 'PgDB') this.props.history.push(`/back/another-base/connection/pg/${values.id}/list/`)
     }
 
     goLink(values){
         if(values.db_type == 'MSSQL') this.props.history.push(`/back/another-base/connection/mssql/${values.id}/`)
         else if (values.db_type == 'MONGODB') this.props.history.push(`/back/another-base/connection/mongo/${values.id}/`)
+        else if (values.db_type == 'PgDB') this.props.history.push(`/back/db-export/connection/pg/${values.id}/`)
     }
 
     handleRemove() {
         const {values} = this.state
-        service.remove(values.id).then(({success}) => {
+        service.remove(values.id, values.unique_id).then(({success}) => {
             if (success) {
                 this.setState(
                     {refresh: !this.state.refresh},

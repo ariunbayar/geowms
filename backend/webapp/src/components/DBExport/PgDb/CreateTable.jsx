@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { service } from '../service';
 import BackButton from "@utils/Button/BackButton"
-import SelectField from './selectField'
+import SelectField from '@utils/Tools/Form/select_field'
 import Loader from "@utils/Loader"
 import Modal from "@utils/Modal/Modal"
 
@@ -80,9 +80,9 @@ export default class  PgForm extends Component {
         return seleted_datas
     }
 
-    handleChange(name, e) {
+    handleChange(name, selection) {
         const { packages, features } = this.state
-        const selected_value = e.target.value
+        const selected_value = selection.code
         var data_list = {}
         var seleted_datas = []
         var array = []
@@ -100,11 +100,13 @@ export default class  PgForm extends Component {
                 data_list['package_name'] = selected_value
                 seleted_datas = this.getArray(features, selected_value)
                 data_list['selected_features'] = seleted_datas
+                data_list['feature_name'] = ''
                 data_list['id_list'] = []
 
             }
             else {
                 data_list['feature_name'] = ''
+                data_list['id_list'] = []
             }
         }
         else {
@@ -123,7 +125,7 @@ export default class  PgForm extends Component {
         const { theme_name, feature_name, packages, features, table_name} = this.state
         if (pS.feature_name != feature_name) {
             if (feature_name) this.getFeatProperties(feature_name)
-            else this.setState({feature_name})
+            else this.setState({feature_name, id_list: []})
         }
 
         if (pS.packages != packages) {
@@ -228,7 +230,40 @@ export default class  PgForm extends Component {
                     </div>
                 </div>
                 <div className="form-row col-md-9 p-4 mx-1">
+                <SelectField
+                        state_name='theme'
+                        label="Theme"
+                        option_name = "name"
+                        option_key = "code"
+                        data_list={themes}
+                        default_value={theme_name}
+                        className={"col-md-4"}
+                        default_text={'theme-ийн нэр сонгоно уу'}
+                        handleSelectField={this.handleChange}
+                    />
                     <SelectField
+                        state_name='package'
+                        label="package"
+                        option_name = "name"
+                        option_key = "code"
+                        data_list={selected_packages}
+                        default_value={package_name}
+                        className={"col-md-4"}
+                        default_text={'package-ийн нэр сонгоно уу'}
+                        handleSelectField={this.handleChange}
+                    />
+                    <SelectField
+                        state_name='feature'
+                        label="feature"
+                        data_list={selected_features}
+                        option_name = "name"
+                        option_key = "code"
+                        default_value={feature_name}
+                        className={"col-md-4"}
+                        default_text={'feature-ийн нэр сонгоно уу'}
+                        handleSelectField={this.handleChange}
+                    />
+                    {/* <SelectField
                         title_name='theme'
                         data_list={themes}
                         defualt_value={theme_name}
@@ -245,7 +280,7 @@ export default class  PgForm extends Component {
                         data_list={selected_features}
                         defualt_value={feature_name}
                         setSelect={this.handleChange}
-                    />
+                    /> */}
                 </div>
                 {
                     feature_name &&
@@ -306,7 +341,7 @@ export default class  PgForm extends Component {
                                                                 <label
                                                                     htmlFor={property.property_name}
                                                                 >
-                                                            </label>
+                                                                </label>
                                                             </div>
                                                         </th>
                                                         <th>

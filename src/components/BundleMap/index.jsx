@@ -13,6 +13,8 @@ import { Point } from 'ol/geom'
 import { TileImage, TileWMS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
+import {Select} from 'ol/interaction'
+import {click} from 'ol/events/condition';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import ImageWMS from 'ol/source/ImageWMS';
@@ -71,6 +73,7 @@ export default class InspireMap extends Component {
             is_search_bar: props.is_search_bar || true,
             is_menu_bar: props.is_menu_bar || 'open',
             is_menu_bar_all: props.is_menu_bar_all || 'open',
+            has_popup: props.has_popup == undefined ? true : props.has_popup,
         }
 
         this.controls = {
@@ -83,7 +86,54 @@ export default class InspireMap extends Component {
             alertBox: new AlertRoot(), // this.controls.alertBox.showAlert(true, "....")
             popup: new PopUp(),
         }
-
+        this.layer_styles = {
+            'MultiPolygon': new Style({
+                stroke: new Stroke({
+                color: 'black',
+                width: 2,
+                }),
+                fill: new Fill({
+                color: 'rgba(162,174,187)',
+                }),
+            }),
+            'Polygon': new Style({
+                stroke: new Stroke({
+                color: 'black',
+                width: 2,
+                }),
+                fill: new Fill({
+                color: 'red',
+                }),
+            }),
+            'Point': new Style({
+                image: new CircleStyle({
+                radius: 5,
+                fill: new Fill({
+                    color: 'green',
+                }),
+                }),
+            }),
+            'LineString': new Style({
+                stroke: new Stroke({
+                color: 'blue',
+                width: 2,
+                }),
+            }),
+            'MultiLineString': new Style({
+                stroke: new Stroke({
+                color: 'green',
+                width: 2,
+                }),
+            }),
+            'MultiPoint': new Style({
+                image: new CircleStyle({
+                radius: 5,
+                fill: new Fill({
+                    color: '#F34213',
+                }),
+                }),
+            }),
+            };
         this.marker = this.initMarker()
 
         this.handleToggle = this.handleToggle.bind(this)
@@ -125,6 +175,7 @@ export default class InspireMap extends Component {
         this.getDetailOfPoint = this.getDetailOfPoint.bind(this)
         this.ChoosePopUp = this.ChoosePopUp.bind(this)
         this.updateParams = this.updateParams.bind(this)
+        this.featureFromVectorData = this.featureFromVectorData.bind(this)
     }
 
     initMarker() {
@@ -168,15 +219,18 @@ export default class InspireMap extends Component {
     }
 
     componentDidMount() {
-      service.getUser().then(({is_authenticated}) =>
-        {
-            this.setState({is_authenticated})
-        })
+        service
+            .getUser()
+            .then(({ is_authenticated }) => {
+                this.setState({is_authenticated})
+            })
 
         this.loadMapData()
+
         if (this.clicked_coordinate.length > 0) {
             this.controls.coordinateCopy.setCoordinate(this.clicked_coordinate)
         }
+
     }
 
     getFullName(feature) {
@@ -263,7 +317,10 @@ export default class InspireMap extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const { vector_source, form_datas, wms_list, center} = this.props
+        const {
+            vector_source, form_datas,
+            wms_list, center
+        } = this.props
         const { layer_one_tile } = this.state
         // if (prevState.coordinate_clicked !== this.state.coordinate_clicked) {
         //     this.controls.coordinateCopy.setCoordinate(this.state.coordinate_clicked)
@@ -300,7 +357,9 @@ export default class InspireMap extends Component {
         }
 
         if (vector_source !== prevState.vector_source) {
-            this.addVectorSource(vector_source)
+            if (vector_source && Object.keys(vector_source).length > 0) {
+                this.addVectorSource(vector_source)
+            }
         }
 
         if (form_datas !== prevState.form_datas) {
@@ -322,36 +381,69 @@ export default class InspireMap extends Component {
     }
 
     addVectorSource(vector_source) {
-
         const { projection, projection_display, form_datas} = this.state
-        if (Object.keys(vector_source).length > 0) {
+        var styles = this.layer_styles
+        const {aimag_geom} = this.props
+
+        if (this.map) {
             this.map.getLayers().forEach(layer => {
                 if (layer && layer.get('id') === 'aimag') {
-                  layer.getSource().clear();
+                    layer.getSource().clear();
                 }
             });
-
-            const features = new GeoJSON({
-                dataProjection: projection_display,
-                featureProjection: projection,
-            }).readFeatures(vector_source['features'])
-            const vectorSource = new VectorSource({
-                features: features
-            });
-            const vector_layer = new VectorLayer({
-                source: vectorSource,
-                style: new Style({
-                    stroke: new Stroke({
-                        color: 'rgba(100, 255, 0, 1)',
-                        width: 2
-                    }),
-                }),
-                id: 'aimag'
-            })
-            this.map.addLayer(vector_layer)
-            this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
         }
 
+        if (Object.keys(vector_source).length > 0) {
+                var nt_features = new GeoJSON({
+                    dataProjection: projection_display,
+                    featureProjection: projection
+                }).readFeatures(vector_source)
+
+                const vectorSource = new VectorSource({
+                        features: nt_features
+                })
+
+                const vector_layer = new VectorLayer({
+                    source: vectorSource,
+                    style: function (feature) {
+                        return styles[feature.getGeometry().getType()];
+                    },
+                    id: 'aimag'
+                })
+
+                if(aimag_geom && Object.keys(aimag_geom).length > 0) {
+                    var aimag_features = new GeoJSON({
+                        dataProjection: projection_display,
+                        featureProjection: projection
+                    }).readFeatures(aimag_geom)
+
+                    var vectorSourceAimag = new VectorSource({
+                            features: aimag_features
+                    })
+
+                    var aimag_layer = new VectorLayer({
+                        source: vectorSourceAimag,
+                        style: new Style({
+                            stroke: new Stroke({
+                            color: 'blue',
+                            width: 2,
+                            })
+                        })
+                    })
+                }
+
+                if (this.map) {
+                    if (aimag_geom && Object.keys(aimag_geom).length > 0) {
+                        this.map.addLayer(vector_layer)
+                        this.map.addLayer(aimag_layer)
+                        this.map.getView().fit(vectorSourceAimag.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    }
+                    else {
+                        this.map.addLayer(vector_layer)
+                        this.map.getView().fit(vectorSource.getExtent(),{ padding: [50, 50, 50, 50], duration: 2000 })
+                    }
+                }
+        }
     }
 
     loadWmsLayers(wms_list) {
@@ -476,7 +568,7 @@ export default class InspireMap extends Component {
     }
 
     handleMapDataLoaded(base_layer_list) {
-        const { center } = this.state
+        const { center, has_popup } = this.state
         var resolutions = [0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125, 0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125, 0.001373291015625, 6.866455078125E-4, 3.4332275390625E-4, 1.71661376953125E-4, 8.58306884765625E-5, 4.291534423828125E-5, 2.1457672119140625E-5, 1.0728836059570312E-5, 5.364418029785156E-6, 2.682209014892578E-6, 1.341104507446289E-6, 6.705522537231445E-7, 3.3527612686157227E-7];
         var gridNames = ['EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 'EPSG:4326:15', 'EPSG:4326:16', 'EPSG:4326:17', 'EPSG:4326:18', 'EPSG:4326:19', 'EPSG:4326:20', 'EPSG:4326:21'];
 
@@ -579,28 +671,33 @@ export default class InspireMap extends Component {
             name: maker_layer_name,
         })
         this.marker_layer = marker_layer
+
+        let buttons = [
+            new FullScreen(),
+            new MousePosition({
+                projection: this.state.projection_display,
+                coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
+                undefinedHTML: '',
+            }),
+            new СуурьДавхарга({layers: base_layer_controls}),
+            new ScaleLine(),
+            this.controls.modal,
+            this.controls.shopmodal,
+            this.controls.drawModal,
+            this.controls.coordinateCopy,
+            this.controls.sidebar,
+            this.controls.cart,
+            this.controls.alertBox,
+        ]
+
+        if (has_popup) {
+            buttons.push(this.controls.popup)
+        }
+
         const map = new Map({
             maxTilesLoading: 16,
             target: 'map',
-            controls: defaultControls().extend([
-                new FullScreen(),
-                new MousePosition({
-                    projection: this.state.projection_display,
-                    coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
-                    undefinedHTML: '',
-                }),
-                new СуурьДавхарга({layers: base_layer_controls}),
-                new ScaleLine(),
-                this.controls.modal,
-                this.controls.shopmodal,
-                this.controls.drawModal,
-                this.controls.coordinateCopy,
-                this.controls.sidebar,
-                this.controls.cart,
-                this.controls.alertBox,
-                this.controls.popup,
-
-            ]),
+            controls: defaultControls().extend(buttons),
             layers: [
                 ...base_layers,
                 vector_layer,
@@ -614,18 +711,17 @@ export default class InspireMap extends Component {
         })
 
         map.on('click', this.handleMapClick)
-
         this.map = map
 
         if (this.props.marker_layer) {this.map.addLayer(this.marker_layer)}
-        this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
+        if (has_popup) this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser, this.ChoosePopUp)
         this.getErguulLayer()
         this.setState({is_loading: false})
 
     }
 
     ChoosePopUp(values) {
-        const {PPContent} = this.props
+        const { PPContent } = this.props
         return (
                 <PPContent {...values}/>
         )
@@ -644,10 +740,9 @@ export default class InspireMap extends Component {
         const {form_datas} = this.state
         const projection = this.map.getView().getProjection()
         const map_coord = transformCoordinate(center, this.state.projection_display, projection)
-        var is_not_inspire = false
         const overlay = this.overlay
         overlay.setPosition(map_coord)
-        this.controls.popup.getData(true, form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+        // this.controls.popup.getData(true, form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
     }
 
     getElement(element) {
@@ -899,11 +994,15 @@ export default class InspireMap extends Component {
         this.is_empty = true
         this.sendFeatureInfo = []
         const overlay = this.overlay
-        overlay.setPosition(coordinate)
+        if (this.state.has_popup) overlay.setPosition(coordinate)
         // this.setState({ pay_modal_check: false })
-        if (this.props.form_datas) {
+        if (this.props.form_datas && this.state.has_popup) {
 
             this.controls.popup.getData(true, this.props.form_datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, this.is_empty, false, false, this.ChoosePopUp)
+        }
+
+        if (this.props.property_pp) {
+            this.featureFromVectorData(coordinate)
         }
 
         if (!this.props.featurefromUrl) {
@@ -912,6 +1011,25 @@ export default class InspireMap extends Component {
 
         this.sendFeatureInfo = []
         this.is_empty = true
+    }
+
+    featureFromVectorData(coordinate) {
+        var selectClick = new Select({
+            condition: click,
+        });
+        this.map.addInteraction(selectClick)
+        selectClick.on("select", event => this.featureSelected(event, coordinate));
+    }
+
+    featureSelected(event, coordinate){
+        const features = event.selected[0]
+        if(features) {
+            var prop = features.getProperties();
+            this.controls.popup.getData(true, prop, this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
+        }
+        else {
+            this.controls.popup.getData(true, {} , this.onClickCloser, this.setSourceInPopUp, null, this.is_empty, false, false, this.ChoosePopUp)
+        }
     }
 
     setSourceInPopUp(mode) {
@@ -1222,7 +1340,6 @@ export default class InspireMap extends Component {
     render() {
         const {is_loading, is_search_bar, is_menu_bar, is_menu_bar_all} = this.state
         const height = this.props.height ? this.props.height : '80vh'
-
         const Menu_comp = () => {
             return (
                 <div>
@@ -1265,7 +1382,7 @@ export default class InspireMap extends Component {
         const settings_component = () => {
             return(
                 <div>
-                    <button class="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i class="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
+                    <button className="btn gp-btn-primary" type="button" onClick={() => clearLocalData('ALL')}><i className="fa fa-trash mr-1"></i>Cache цэвэрлэх</button>
                 </div>
             )
         }

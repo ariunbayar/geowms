@@ -75,10 +75,10 @@ function getLayers(ws_name) {
     return fetch(`${prefix}/get_layers/`, opts).then(handleResponse)
 }
 
-function createLayerGroup(values, layer_list, group_state, old_name) {
+function createLayerGroup(values, group_layer_name, layer_list, group_state, old_name) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ values, layer_list, group_state, old_name}),
+        body: JSON.stringify({ values, group_layer_name, layer_list, group_state, old_name}),
     }
     return fetch(`${prefix}/create_layer_group/`, opts).then(handleResponse)
 }

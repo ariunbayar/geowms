@@ -155,8 +155,10 @@ class ModalComponent extends Component{
                                             </button>
                                         </>
                                         :
-                                        <button disabled={this.state.selected_type.length < 1} type="button" className="btn gp-btn-primary" onClick={this.handlePayment} >
+                                        // <button disabled={this.state.selected_type.length < 1} type="button" className="btn gp-btn-primary" onClick={this.handlePayment} >
+                                        <button disabled={false} type="button" className="btn gp-btn-primary" onClick={this.handlePayment} >
                                             Худалдаж авах
+                                            {/* Засвартай байгаа */}
                                         </button>
                                     }
                                 </div>

@@ -12,7 +12,7 @@ from backend.payment.models import PaymentPoint
 from backend.payment.models import PaymentPolygon
 from backend.payment.models import PaymentLayer
 from backend.wmslayer.models import WMSLayer
-from backend.inspire.models import LFeatures
+from backend.inspire.models import LFeatures, MGeoDatas
 from backend.inspire.models import LProperties
 from backend.inspire.models import MDatas
 from backend.inspire.models import LCodeLists
@@ -197,6 +197,13 @@ def _filter_Model(filters, Model=MDatas, initial_qs=[]):
     return initial_qs
 
 
+def _get_geom_from_geo_json(geo_json):
+    coordinates = geo_json['coordinates']
+    if 'Multi' in geo_json['type']:
+        coordinates = coordinates[0]
+    return coordinates
+
+
 def _get_tseg_detail(payment):
     points = list()
     pay_points = PaymentPoint.objects.filter(payment=payment)
@@ -219,6 +226,14 @@ def _get_tseg_detail(payment):
                             info['sum'] =  code.code_list_name
                     else:
                         info['aimag'] = code.code_list_name
+            else:
+                mgeo_qs = _filter_Model([{'geo_id': point_info['geo_id']}], Model=MGeoDatas)
+                mgeo = mgeo_qs.first()
+                geo_json = utils.json_load(mgeo.geo_data.json)
+                coordinates = _get_geom_from_geo_json(geo_json)
+                aimag, sum = utils.get_aimag_sum_from_point(coordinates[0], coordinates[1])
+                info['aimag'] = aimag
+                info['sum'] = sum
             info[key] = value
         info['amount'] = point.amount
         points.append(info)

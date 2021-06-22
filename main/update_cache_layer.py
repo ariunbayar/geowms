@@ -1,6 +1,13 @@
 from backend.inspire.models import MGeoDatas, LFeatures, LPackages, LThemes
 from backend.geoserver.models import WmtsCacheConfig
 from main import geoserver
+from main import utils
+
+def _make_view_name(feature):
+    feature_code = feature.feature_code
+    feature_code = feature_code.split("-")
+    view_name = utils.slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
+    return view_name
 
 
 def update_web_cache():
@@ -13,7 +20,7 @@ def update_web_cache():
                 l_package = LPackages.objects.filter(package_id=l_feature.package_id).first()
                 l_theme = LThemes.objects.filter(theme_id=l_package.theme_id).first().theme_code
                 ws_name = 'gp_' + l_theme
-                layer_name = 'gp_layer_' + l_feature.feature_name_eng.lower() + '_view'
+                layer_name = 'gp_layer_' + _make_view_name(l_feature)
                 srs = '4326'
                 wmts_config = geoserver.create_tilelayers_cache(
                     ws_name,

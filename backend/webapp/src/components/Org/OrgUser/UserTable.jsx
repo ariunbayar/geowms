@@ -1,9 +1,24 @@
 import React, { Component } from "react"
 import { PortalDataTable } from "@utils/DataTable/index"
+import Modal from '@utils/Modal/Modal'
+import { service } from '../service'
+import Loader from "@utils/Loader"
 
+function GetPassword(props) {
+    return (
+        <div className='p-0'>
+            <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={() => props.getPass(props.values)}
+            >
+                НУУЦ ҮГ СОЛИХ
+            </button>
+        </div>
+    )
+}
 
 export class UserTable extends Component {
-
 
     constructor(props) {
 
@@ -14,6 +29,7 @@ export class UserTable extends Component {
             жагсаалтын_холбоос: `/back/api/org/level-${props.match.params.level}/${props.match.params.id}/employeeList/`,
             нэмэх_товч: `/back/байгууллага/түвшин/${props.match.params.level}/${props.match.params.id}/хэрэглэгч/нэмэх/`,
             custom_query: {},
+            modal_status: 'closed',
             талбарууд: [
                 {'field': 'first_name', "title": 'Нэр', 'has_action': true},
                 {'field': 'email', "title": 'Цахим шуудан'},
@@ -30,10 +46,87 @@ export class UserTable extends Component {
                 {"field": "created_at",  "text": ""},
                 {"field": "updated_at",  "text": ""},
             ],
+            нэмэлт_талбарууд: [
+                {
+                    "title": '',
+                    'component': (values) => GetPassword(values),
+                    'props': {
+                        'getPass': (values) => this.getPass(values),
+                    }
+                }
+            ],
             is_user: true,
+            is_loading: false,
+            text: '',
             drop_name: 'Хэрэглэгч',
         }
+        this.getPass = this.getPass.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.modalOpen = this.modalOpen.bind(this)
         this.handleListChange = this.handleListChange.bind(this)
+        this.handleSendMail = this.handleSendMail.bind(this)
+    }
+
+    handleSendMail() {
+        this.setState({ is_loading: true, text: 'Нууц үг солих имэйл илгээгдэж байна. Түр хүлээнэ үү!' })
+        const { values } = this.state
+
+        service
+            .sendMail(values.id)
+            .then(({ success, info }) => {
+                if(success) {
+                    this.setState({ is_loading: false, text: '' })
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        "success",
+                        info,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null
+                    )
+                }
+            })
+    }
+
+    modalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, modal_bg, icon_color, title, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.modalOpen()
+        )
+    }
+
+    getPass(values) {
+        this.setState({ values })
+        this.modalChange(
+            'fa fa-exclamation-circle',
+            null,
+            'warning',
+            `Нууц үг солих имэйл илгээхдээ итгэлтэй байна уу?`,
+            true,
+            '',
+            'Тийм',
+            (values) => this.handleSendMail(values),
+            null
+        )
     }
 
     set_icon(value) {
@@ -59,15 +152,16 @@ export class UserTable extends Component {
             refresh,
             талбарууд,
             жагсаалтын_холбоос,
+            нэмэлт_талбарууд,
             хувьсах_талбарууд,
             custom_query,
             нэмэх_товч,
             is_user,
         } = this.state
-
         return (
             <div className="card">
                 <div className="card-body">
+                <Loader is_loading={this.state.is_loading} text={this.state.text}/>
                     <div className="d-flex flex-row-reverse mb-2">
                         <div className="dropdown-menu-right show">
                             <a className="btn-sm dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -86,6 +180,7 @@ export class UserTable extends Component {
                             color={'bg-dark'}
                             талбарууд={талбарууд}
                             жагсаалтын_холбоос={жагсаалтын_холбоос}
+                            нэмэлт_талбарууд={нэмэлт_талбарууд}
                             per_page={20}
                             уншиж_байх_үед_зурвас={"Хүсэлтүүд уншиж байна"}
                             хувьсах_талбарууд={хувьсах_талбарууд}
@@ -95,6 +190,18 @@ export class UserTable extends Component {
                         />
                     </div>
                 </div>
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
+                />
             </div>
         )
     }

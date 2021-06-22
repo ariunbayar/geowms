@@ -28,17 +28,14 @@ export default class Modal extends Component {
                 actionNameDelete ---> Тийм гэдэг утгыг солих
                 modalClose ---> x товч дарж modal хаахад хийж болох үйлдлүүд
                 modalAction ---> Тийм товч дарж хийж болох үйлдлүүд
-
         // import:
             import Modal from "@utils/Modal/Modal"
-
         // Modal open function:
             handleModalOpen() {
                 this.setState({ modal_status: 'open' }, () => {
                     this.setState({ modal_status: 'initial' })
                 })
             }
-
         // Modal default value function(Хэрэв has_button==false байвал ModalAlert горимоор ажиллана):
             modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
                 this.setState(
@@ -151,10 +148,18 @@ export default class Modal extends Component {
                             <div className="d-flex justify-content-center">
                                 <h5 >{ this.props.title && this.props.title }</h5>
                             </div>
-                            <div className="modal-body text-center text-wrap ml-2 mr-2 text-justify">
+                            <div className="modal-body text-wrap text-center ml-2 mr-2 ">
                                 {
                                     this.props.text &&
-                                        this.props.text
+                                    (
+                                        typeof(this.props.text) == 'string'
+                                        ?
+                                            <small className=''>{this.props.text}</small>
+                                        :
+                                            <this.props.text
+                                                {...this.props}
+                                            />
+                                    )
                                 }
                             </div>
                             {

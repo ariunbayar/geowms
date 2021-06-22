@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react"
 import { NavLink } from "react-router-dom"
 
 import { service } from "../service"
-import ModalAlert from "../../ModalAlert"
+import Modal from "@utils/Modal/Modal"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {validationSchema} from './validationSchema'
 import EmployeeMap from "./Employee_map/Map"
@@ -26,10 +26,10 @@ export class UserAdd extends Component {
                 register:'',
                 is_admin: false,
                 is_super: false,
-                re_password_mail: false,
                 phone_number: '',
-                state: '',
+                state: 1,
                 pro_class: '',
+                is_user: true,
             },
             aimag: [],
             sum: [],
@@ -64,19 +64,19 @@ export class UserAdd extends Component {
             states: [],
             pro_classes: [],
 
-            is_user: false,
+            modal_status: 'closed',
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
-        this.modalCloseTime = this.modalCloseTime.bind(this)
-        this.modalClose = this.modalClose.bind(this)
         this.getFeildValues = this.getFeildValues.bind(this)
         this.handleChange = this.handleChange.bind(this)
         this.getPoint = this.getPoint.bind(this)
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
         this.getSelectValue = this.getSelectValue.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.modalChange = this.modalChange.bind(this)
     }
 
     componentDidMount() {
@@ -169,9 +169,20 @@ export class UserAdd extends Component {
                     .employeeUpdate(org_emp, org_level, payload)
                     .then(({ success, errors }) => {
                         if (success) {
-                            this.setState({modal_alert_status: "open"})
-                            setStatus('saved')
-                            this.modalCloseTime()
+                            this.modalChange(
+                                'fa fa-check-circle',
+                                null,
+                                'success',
+                                'Амжилттай боллоо',
+                                ``,
+                                false,
+                                '',
+                                '',
+                                null,
+                                () => this.props.history.push(
+                                    `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${org_emp}/дэлгэрэнгүй/`
+                                )
+                            )
                         } else {
                             setErrors(errors)
                             this.setState({errors})
@@ -190,9 +201,20 @@ export class UserAdd extends Component {
                 .employeeAdd(org_level, org_id, payload)
                 .then(({ success, errors, employee }) => {
                     if (success) {
-                        this.setState({modal_alert_status: "open"})
-                        setStatus('saved')
-                        this.modalCloseTime(employee.user_id)
+                        this.modalChange(
+                            'fa fa-check-circle',
+                            null,
+                            'success',
+                            'Амжилттай боллоо',
+                            ``,
+                            false,
+                            '',
+                            '',
+                            null,
+                            () => this.props.history.push(
+                                `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${employee.user_id}/дэлгэрэнгүй/`
+                            )
+                        )
                     }
                     else{
                         setErrors(errors)
@@ -205,18 +227,6 @@ export class UserAdd extends Component {
                     setSubmitting(false)
                 })
         }
-    }
-
-    modalCloseTime(user_id) {
-        this.props.refreshCount()
-        setTimeout(() => this.modalClose(user_id), 2000)
-    }
-
-    modalClose(user_id) {
-        const { level, id, emp } = this.props.match.params
-        this.props.history.push(
-            `/back/байгууллага/түвшин/${level}/${id}/хэрэглэгч/${emp || user_id}/дэлгэрэнгүй/`
-        )
     }
 
     getGeomFromJson(geom_name, array) {
@@ -337,9 +347,35 @@ export class UserAdd extends Component {
         this.setState({ [field_id]: idx, ...obj })
     }
 
+    handleModalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
+        this.setState(
+            {
+                modal_icon,
+                modal_bg,
+                icon_color,
+                title,
+                text,
+                has_button,
+                actionNameBack,
+                actionNameDelete,
+                modalAction,
+                modalClose,
+            },
+            () => this.handleModalOpen()
+        )
+    }
+
     render() {
-        const { form_values, aimag, sum, horoo, aimag_id, sum_id, horoo_id, is_loading,
-            feature, street, apartment, door_number, point, errors, address_state
+        const { form_values, aimag, sum, horoo,
+            aimag_id, sum_id, horoo_id, is_loading,
+            feature, street, apartment, door_number,
+            point, errors, address_state, is_user
         } = this.state
 
         const { positions, states, pro_classes } = this.state
@@ -484,7 +520,6 @@ export class UserAdd extends Component {
                                                     style={{ fontSize: '0.8rem' }}
                                                     className={'custom-select ' + (errors.state ? 'is-invalid' : '')}
                                                 >
-                                                    <option value="">--- Ажилтаны төлөвийг сонгоно уу ---</option>
                                                     {
                                                         states.map((item, idx) =>
                                                             <option key={idx} value={item[0]}>{item[1]}</option>
@@ -511,22 +546,6 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
-                                        {
-                                            org_emp
-                                            &&
-                                                <div className="form-row">
-                                                    <div className="form-group col-12">
-                                                        <label htmlFor='id_re_password_mail'>Нууц үг солих e-mail илгээх</label>
-                                                        <Field
-                                                            className="ml-2"
-                                                            name='re_password_mail'
-                                                            id="id_re_password_mail"
-                                                            type="checkbox"
-                                                        />
-                                                        <ErrorMessage name="re_password_mail" component="div" className="invalid-feedback"/>
-                                                    </div>
-                                                </div>
-                                        }
                                         <div className='form-row'>
                                             <div className="form-group col-12">
                                                 <label htmlFor='id_is_admin'>Байгууллагын админ</label>
@@ -546,13 +565,12 @@ export class UserAdd extends Component {
                                                     id="id_is_user"
                                                     type="checkbox"
                                                 />
-                                                <ErrorMessage name="is_user" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
-                                        {org_level ==4 &&
+                                        {org_level == 4 &&
                                             <div className='form-row'>
                                                 <div className="form-group col-12">
-                                                    <label htmlFor='is_super'>Системийн админ</label>
+                                                    <label htmlFor='id_is_super'>Системийн админ</label>
                                                     <Field
                                                         className="ml-2"
                                                         name='is_super'
@@ -688,11 +706,18 @@ export class UserAdd extends Component {
                         />
                     </div>
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай хадгаллаа"
-                    model_type_icon="success"
+                <Modal
+                    modal_status={ this.state.modal_status }
+                    modal_icon={ this.state.modal_icon }
+                    modal_bg={ this.state.modal_bg }
+                    icon_color={ this.state.icon_color }
+                    title={ this.state.title }
+                    text={ this.state.text }
+                    has_button={ this.state.has_button }
+                    actionNameBack={ this.state.actionNameBack }
+                    actionNameDelete={ this.state.actionNameDelete }
+                    modalAction={ this.state.modalAction }
+                    modalClose={ this.state.modalClose }
                 />
             </div>
         )

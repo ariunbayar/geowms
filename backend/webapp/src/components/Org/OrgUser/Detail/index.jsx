@@ -77,6 +77,7 @@ export class Detail extends Component {
     }
 
     handleDelete() {
+        this.setState({status_delete: 'initial'})
         const { emp } = this.props.match.params
         this.setState({ status_delete: 'loading' })
         service.employeeRemove(emp).then(({ success }) => {

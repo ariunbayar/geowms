@@ -122,10 +122,10 @@ def login(request):
     if request.method == 'POST':
         email = request.POST.get('email', None)
         password = request.POST.get('password')
-        zurag = request.POST.get('zurag')
-        captcha = request.POST.get('captcha')
+        captcha_check = request.POST.get('captcha_check')
+        captcha_main = request.POST.get('captcha_main')
 
-        if zurag != captcha and not settings.DEBUG:
+        if captcha_main != captcha_check and not settings.DEBUG:
             messages.warning(request, 'Captcha буруу байна.')
             return redirect('secure:login')
 

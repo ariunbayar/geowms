@@ -1,4 +1,4 @@
-import {getGetOptions, getPostOptions, handleResponse} from '../../../helpers/service'
+import { getGetOptions, getPostOptions, handleResponse } from '../../../helpers/service'
 
 export const service = {
     create,
@@ -10,7 +10,6 @@ export const service = {
     setSystemAtt
 }
 
-
 function create(values) {
 
     const opts = {
@@ -20,7 +19,6 @@ function create(values) {
 
     return fetch(`/back/api/систем/үүсгэх/`, opts).then(handleResponse)
 }
-
 
 function update(values) {
 
@@ -32,7 +30,6 @@ function update(values) {
     return fetch(`/back/api/систем/${values.id}/хадгалах/`, opts).then(handleResponse)
 }
 
-
 function remove(id) {
     const opts = {
         ...getPostOptions(),
@@ -41,14 +38,12 @@ function remove(id) {
     return fetch(`/back/api/систем/${id}/устгах/`, opts).then(handleResponse)
 }
 
-
 function tokenRefresh(id) {
     const opts = {
         ...getPostOptions(),
     }
     return fetch(`/back/api/систем/${id}/refresh-token/`, opts).then(handleResponse)
 }
-
 
 function detail(id) {
     const opts = {
@@ -58,13 +53,12 @@ function detail(id) {
     return fetch(`/back/api/систем/${id}/дэлгэрэнгүй/`, opts).then(handleResponse)
 }
 
-
-function getWMSList() {
+function getWMSList(org_id) {
     const opts = {
         ...getGetOptions(),
     }
 
-    return fetch(`/back/wms/all/`, opts).then(handleResponse)
+    return fetch(`/back/wms/all/${org_id}/`, opts).then(handleResponse)
 }
 
 function setSystemAtt(array, pk) {

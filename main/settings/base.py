@@ -10,6 +10,7 @@ PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'geoportal_app/static/assets/pw
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 IS_TESTING = False
+USE_TZ = False
 
 AUTH_USER_MODEL = 'geoportal_app.User'
 
@@ -89,6 +90,11 @@ INSTALLED_APPS = [
     'govorg.backend.revoke_request.apps.RevokeRequestConfig',
     'govorg.backend.secure.apps.SecureConfig',
     'govorg.backend.tseg.apps.TsegConfig',
+
+    # LLC apps
+    'llc.backend.llc_conf.apps.LlcConfConfig',
+    'llc.backend.llc_request.apps.LlcRequestConfig',
+
 ]
 
 REST_FRAMEWORK = {

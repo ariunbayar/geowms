@@ -4,6 +4,7 @@ from django.db import models
 class ViewNames(models.Model):
     view_name = models.CharField(unique=True, max_length=250)
     feature_id = models.IntegerField()
+    open_datas = models.TextField(null=True, default=None)
     update_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

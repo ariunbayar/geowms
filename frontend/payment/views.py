@@ -10,6 +10,7 @@ import csv
 import PIL.Image as Image
 
 from datetime import date
+from django.db.models.base import Model
 from fpdf import FPDF
 from pyproj import Transformer
 
@@ -646,10 +647,11 @@ def _text_with_zuruunees_ondor_oloh(idx, point_infos, cell_height, table_col, pd
     for row in range(0, len(table_col)):
         if row != 0:
             cell_width = table_col[row]['width']
-            cell_text = str(point_infos[idx][table_col[row]['body_name']])
-            zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
-            if zuruu >= 1:
-                max_height = cell_height * (zuruu + 1)
+            if table_col[row]['body_name'] in point_infos[idx].keys():
+                cell_text = str(point_infos[idx][table_col[row]['body_name']])
+                zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
+                if zuruu >= 1:
+                    max_height = cell_height * (zuruu + 1)
     if max_height < cell_height:
         max_height = cell_height
     return max_height
@@ -731,13 +733,14 @@ def _create_lavlagaa_file(class_infos, path):
                 before_cell_width = table_col[row - 1]['width']
                 current_x = current_x + before_cell_width
                 pdf.set_xy(current_x, current_y)
-                cell_text = str(point_infos[idx][table_col[row]['body_name']])
+                if table_col[row]['body_name'] in point_infos[idx].keys():
+                    cell_text = str(point_infos[idx][table_col[row]['body_name']])
 
-                zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
-                if zuruu >= 1:
-                    pdf.multi_cell(cell_width, cell_height, cell_text, 1, 'C', False)
-                else:
-                    pdf.cell(cell_width, calc_cell_height, cell_text, 1, 0, 'C', False)
+                    zuruu = math.floor(pdf.get_string_width(cell_text) / cell_width)
+                    if zuruu >= 1:
+                        pdf.multi_cell(cell_width, cell_height, cell_text, 1, 'C', False)
+                    else:
+                        pdf.cell(cell_width, calc_cell_height, cell_text, 1, 0, 'C', False)
 
             if pdf.get_y() > end_y:
                 end_y = pdf.get_y()
@@ -959,7 +962,7 @@ def _make_property_code_value(mdata):
 
 
 def _class_name_bolon_orgoor_angilah(points, folder_name):
-    data, filter_value_type = utils.get_filter_dicts()
+    data, filter_value_type = utils.get_filter_dicts('pointid')
     values = list()
     tseg_pdfs = list()
 
@@ -967,10 +970,14 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
 
         filter_value = dict()
         geo_id = point.point_id
+        print(geo_id)
         mdata_geo_id_qs = _filter_Model([{'geo_id': geo_id}])
         value = point.pdf_id.zfill(4)
         filter_value[filter_value_type] = value
+        print(filter_value)
+        print(data)
         mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
+        print(mdata_qs)
         if not mdata_qs:
             value = point.pdf_id
             filter_value[filter_value_type] = value
@@ -980,13 +987,24 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
             mdata = mdata_qs.first()
 
         value = _make_property_code_value(mdata)
+        if 'aimag' not in value:
+            mgeo_qs = _filter_Model([{ 'geo_id': geo_id }], Model=MGeoDatas).first()
+            geojson = mgeo_qs.geo_data.json
+            geojson = utils.json_load(geojson)
+            type = geojson['type']
+            coordinates = geojson['coordinates']
+            if 'Multi' in type:
+                coordinates = coordinates[0]
+            aimag, sum = utils.get_aimag_sum_from_point(coordinates[0], coordinates[1])
+            value['aimag'] = aimag
+            value['sum'] = sum
         value['geo_id'] = geo_id
 
         for_angilah = ['CompanyName', 'Geodeticnetworkorderclass', 'Geodeticаlnetworktype']
         value = _check_undur(value)
 
         path = _create_folder_payment_id(folder_name, point.payment.id)
-        pdf_name = value['Pointid'] + ".pdf"
+        pdf_name = value['Pointname'] + ".pdf"
         src_file = os.path.join(path, pdf_name)
         pdf = createPdf(value)
         pdf.output(src_file, 'F')
@@ -1015,6 +1033,7 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
     return values, tseg_pdfs
 
 
+
 def _create_lavlagaa_infos(payment, folder_name):
     is_true = False
     points = PaymentPoint.objects.filter(payment=payment)
@@ -1030,6 +1049,10 @@ def _create_lavlagaa_infos(payment, folder_name):
             is_true = True
 
     return is_true
+
+# folder_name = 'tseg-personal-file'
+# payment = Payment.objects.filter(id=219).first()
+# _create_lavlagaa_infos(payment, folder_name)
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
@@ -1152,14 +1175,11 @@ def createPdf(values):
     pdf.cell(-50)
     pdf.cell(10, 8, '1.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
-    pdf.cell(43, 8, _check_none(values, 'Pointid'), 1, 0, 'C')
+    pdf.cell(43, 8, _check_none(values, 'Pointname'), 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
-    tseg_dugaar = values['Pointid']
-    if 'localId' in values:
-        tseg_dugaar = values['localId']
-    pdf.cell(43, 8, tseg_dugaar, 1, 0, 'C')
+    pdf.cell(43, 8,  _check_none(values, 'Pointid'), 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     pdf.cell(-188)
 
@@ -1178,7 +1198,7 @@ def createPdf(values):
 
     pdf.cell(10, 8, '5.', 1, 0, 'C')
     pdf.cell(84, 8, 'Байршил (Аймаг, сум, дүүрэг)', 1, 0, 'C')
-    pdf.cell(94, 8, values['aimag'] + ' ' + values['sum'], 1, 1, 'C')
+    pdf.cell(94, 8, _check_none(values, 'aimag') + ' ' + _check_none(values, 'sum'), 1, 1, 'C')
     pdf.ln(0)
 
     pdf.cell(10, 8, '6.', 1, 0, 'C')
@@ -1310,6 +1330,22 @@ def _get_uniq_id(payment):
     return uniq_id
 
 
+def _str_to_int(value):
+    if isinstance(value, str):
+        value = int(value)
+    return value
+
+
+def _get_amount(geo_id):
+    m_data_qs = _filter_Model([{'geo_id': geo_id}], Model=MDatas)
+    m_data_qs = _filter_Model([{'property_id': 10101103, 'feature_config_id': 101, 'data_type_id': 101011}], initial_qs=m_data_qs)
+    m_data = m_data_qs.first()
+    if m_data and m_data.code_list_id == 10006:
+        # amount = _str_to_int(utils.get_config('POINT_PRICE'))
+        return 11300
+    return False
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1334,15 +1370,21 @@ def purchase_from_cart(request, payload):
             message='Цэг худалдаж авах хүсэлт',
             code='',
         )
+        print(datas)
         pay_id = payment.id
         for data in datas:
-            amount = 0
             pdf_id = data['pdf_id']
+            if not pdf_id:
+                pdf_id = data['name']
 
             if pdf_id:
-                wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                amount = _get_amount(data['id'])
+                if not amount:
+                    wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                    amount = wms_layer.feature_price
+                    if not amount:
+                        amount = 0
 
-                amount = wms_layer.feature_price
                 total_amount += amount
 
                 PaymentPoint.objects.create(
@@ -1350,7 +1392,7 @@ def purchase_from_cart(request, payload):
                     point_id=data['id'],
                     point_name=data['name'],
                     amount=amount,
-                    pdf_id=data['pdf_id'],
+                    pdf_id=pdf_id,
                 )
 
         Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
@@ -1368,8 +1410,16 @@ def purchase_from_cart(request, payload):
 @login_required
 def download_pdf(request, pk, pdf_id):
     payment = get_object_or_404(Payment, user=request.user, id=pk, is_success=True)
-    point = get_object_or_404(PaymentPoint, payment=payment, pdf_id=pdf_id)
+    has_point = True
+    point = PaymentPoint.objects.filter(payment=payment, pdf_id=pdf_id)
+    if not point:
+        has_point = False
+        tseg = PaymentPoint.objects.filter(payment=payment, point_name=pdf_id)
+        if tseg:
+            has_point = True
     # generate the file
+    if not has_point:
+        raise Http404
     file_name = pdf_id + '.pdf'
     src_file = os.path.join(settings.FILES_ROOT, 'tseg-personal-file', str(payment.id), file_name)
     response = FileResponse(open(src_file, 'rb'), as_attachment=True, filename=file_name)
@@ -1515,7 +1565,7 @@ def check_button_ebable_pdf(request, payload):
 
 def _check_in_inspire(geo_id, pdf_id):
     mdatas_qs = _filter_Model([{'geo_id': geo_id}])
-    data, value_type = utils.get_filter_dicts()
+    data, value_type = utils.get_filter_dicts('pointname')
     search = dict()
     search[value_type] = pdf_id
     mdatas_qs = _filter_Model([data, search], initial_qs=mdatas_qs)

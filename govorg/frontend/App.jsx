@@ -3,6 +3,8 @@ import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import { service } from "./service"
 import MenuItem from "@utils/MenuItem"
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
+import { DisplayNotif } from '@utils/Notification'
+import DisplayModal from "@utils/Modal/DisplayModal"
 
 const InsPerms  = React.lazy(() => import('./Role/Role/GovPerms'));
 const Gov  = React.lazy(() => import('./Role/Gov/index'));
@@ -23,6 +25,7 @@ const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
+const LLCRequest = React.lazy(() => import("./LLCRequest"));
 
 const Tseg = React.lazy(() => import('./Bundles/TsegPersonal'));
 
@@ -37,12 +40,16 @@ export class App extends Component {
             emp_role: {},
             approve: false,
             revoke: false,
-            base_layer_list: []
+            base_layer_list: [],
+            setModal: null,
+            setNotif: null,
         }
         this.requestCount = this.requestCount.bind(this)
         this.getEmpRoles = this.getEmpRoles.bind(this)
         this.getApproveAndRevoke = this.getApproveAndRevoke.bind(this)
         this.getBaseLayer = this.getBaseLayer.bind(this)
+        this.getModalFunc = this.getModalFunc.bind(this)
+        this.getNotifFunc = this.getNotifFunc.bind(this)
     }
 
     componentDidMount() {
@@ -62,9 +69,9 @@ export class App extends Component {
 
     requestCount() {
         // service.component
-        service.getCount().then(({ success, count, revoke_count, info }) => {
+        service.getCount().then(({ success, count, revoke_count, llc_count, info }) => {
             if (success) {
-                this.setState({ request_count: count, revoke_count })
+                this.setState({ request_count: count, revoke_count, llc_count })
             } else {
                 // TODO
             }
@@ -86,12 +93,26 @@ export class App extends Component {
         })
     }
 
+    getModalFunc(setModal) {
+        this.setState({ setModal })
+    }
+
+    getNotifFunc(setNotif) {
+        this.setState({ setNotif })
+    }
+
     render() {
         const { org_role, employee, allowed_geom } = this.props.org
-        const { emp_role , approve, revoke, base_layer_list } = this.state
+        const { emp_role , approve, revoke, base_layer_list, setModal, setNotif } = this.state
         var point_perms = emp_role.point_perms
+        const need_props = {
+            setModal,
+            setNotif
+        }
         return (
             <BrowserRouter>
+                <DisplayModal getModalFunc={this.getModalFunc}/>
+                <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
                     <div className="brand-logo">
                         <a href="/">
@@ -102,16 +123,21 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Байгууллага">
                             <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
                                 {
                                     employee.is_admin
                                     &&
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
                                 }
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
+                                {
+                                    employee.is_admin &&
+                                        <>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                                        </>
+                                }
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
@@ -134,6 +160,7 @@ export class App extends Component {
                             >
                             </MenuItem>
                         }
+                        <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт" count={this.state.llc_count}></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                             <ul className="sidebar-submenu">
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>
@@ -201,50 +228,56 @@ export class App extends Component {
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/help/" text="Тусламж"></MenuItem>
                     </ul>
                 </div>
+                {
+                    setModal && setNotif
+                    ?
+                        <div className="clearfix">
+                            <div className="content-wrapper">
+                                <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
+                                    <Switch>
+                                        <Route path={"/gov/forms/"} component={Forms} />
+                                        <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
 
-                <div className="clearfix">
-                    <div className="content-wrapper">
-                        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачаалж байна."}/>}>
-                            <Switch>
-                                <Route path={"/gov/forms/"} component={Forms} />
-                                <Route path="/gov/tuuhen-ov/" component={TuuhenOv} />
+                                        <Route path={"/gov/tseg-personal/"} component={Tseg} />
 
-                                <Route path={"/gov/tseg-personal/"} component={Tseg} />
+                                        <Route path="/gov/system/" component={System} />
+                                        <Route path="/gov/revoke-request/" component={RevokeRequest} />
+                                        <Route path="/gov/llc-request/" component={LLCRequest} />
+                                        <Route path="/gov/meta/" component={Meta} />
 
-                                <Route path="/gov/system/" component={System} />
-                                <Route path="/gov/revoke-request/" component={RevokeRequest} />
-                                <Route path="/gov/meta/" component={Meta} />
+                                        <Route path="/gov/perm/region/" component={MapRegion} />
+                                        <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
+                                        <Route path="/gov/role/role/" component={Role} />
+                                        <Route
+                                            path="/gov/org/map/:tid/:pid/:fid/"
+                                            component=
+                                                {
+                                                    (props) => <Bundles {...props}
+                                                    base_layer_list={base_layer_list}
+                                                    employee={employee} refreshCount={() => this.requestCount()}
+                                                    org_geom = {allowed_geom}
+                                                />
+                                                }
+                                            />
 
-                                <Route path="/gov/perm/region/" component={MapRegion} />
-                                <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
-                                <Route path="/gov/role/role/" component={Role} />
-                                <Route
-                                    path="/gov/org/map/:tid/:pid/:fid/"
-                                    component=
-                                        {
-                                            (props) => <Bundles {...props}
-                                            base_layer_list={base_layer_list}
-                                            employee={employee} refreshCount={() => this.requestCount()}
-                                            org_geom = {allowed_geom}
-                                        />
-                                        }
-                                    />
-
-                                <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
-                                <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
-                                <Route path="/gov/zip-code/" component={ZipCode} />
-                                <Route path="/gov/org-request/" component={OrgRequest} />
-                                <Route path="/gov/history/" component={ChangeRequest} />
-                                <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
-                                <Route exact path="/gov/perm/org/" component={Gov} />
-                                <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} employee={employee} getEmpRoles={this.getEmpRoles}/>}/>
-                                <Route exact path="/gov/help/" component={Help} />
-                                <Route exact path="/gov/profile/" component={Profile} />
-                                <Route exact path="/gov/profile/password/" component={Password} />
-                            </Switch>
-                        </Suspense>
-                    </div>
-                </div>
+                                        <Route path="/gov/perm/addresses/" component={(props) => <Addresses {...props} employee={employee}/> } />
+                                        <Route path="/gov/perm/erguuleg/" component={(props) => <Addresses {...props} employee={employee}/> } />
+                                        <Route path="/gov/zip-code/" component={ZipCode} />
+                                        <Route path="/gov/org-request/" component={OrgRequest} />
+                                        <Route path="/gov/history/" component={ChangeRequest} />
+                                        <Route exact path="/gov/perm/" component={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                                        <Route exact path="/gov/perm/org/" component={Gov} />
+                                        <Route path="/gov/perm/employee/" component={(props) => <Employee {...props} org_roles={org_role} employee={employee} getEmpRoles={this.getEmpRoles}/>}/>
+                                        <Route exact path="/gov/help/" component={Help} />
+                                        <Route exact path="/gov/profile/" component={Profile} />
+                                        <Route exact path="/gov/profile/password/" component={Password} />
+                                    </Switch>
+                                </Suspense>
+                            </div>
+                        </div>
+                    :
+                        null
+                }
             </BrowserRouter>
         )
     }

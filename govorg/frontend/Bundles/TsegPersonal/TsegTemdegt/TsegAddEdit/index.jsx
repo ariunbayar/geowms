@@ -29,7 +29,6 @@ export default class TsegAdd extends Component {
         service
             .getFormFields()
             .then(({ success, fields }) => {
-                console.log(fields);
                 if (success) {
                     this.setState({ fields })
                 }
@@ -38,7 +37,6 @@ export default class TsegAdd extends Component {
 
     render() {
         const { fields, values } = this.state
-        console.log(values);
         return (
             <div className="card-body">
                 <h1>Nemeh bolon zasah</h1>

@@ -11,10 +11,10 @@ const pg_config = {
         return fetch(`${prefix}/pg/get/${pk}/`, requestOptions).then(handleResponse)
     },
 
-    save: function(values) {
+    save: function(values, out_type) {
         const opts = {
             ...getPostOptions(),
-            body: JSON.stringify(values),
+            body: JSON.stringify({values, out_type}),
         }
         return fetch(`${prefix}/pg/db-config-save/`, opts).then(handleResponse)
     },
@@ -23,7 +23,7 @@ const pg_config = {
         const opts = {
             ...getGetOptions(),
         }
-        return fetch(`${prefix}/pg/${connection_id}/get-all-view-names/`, opts).then(handleResponse)
+        return fetch(`${prefix}/pg/get-all-view-names/`, opts).then(handleResponse)
     },
 
     getProperties: function(feature_id) {
@@ -56,9 +56,10 @@ const pg_config = {
         return fetch(`${prefix}/pg/${id}/refresh-table-data/`, opts).then(handleResponse)
     },
 
-    removeTable: function(id, table_id) {
+    removeTable: function(id, table_id, is_insert) {
         const opts = {
-            ...getGetOptions(),
+            ...getPostOptions(),
+            body: JSON.stringify({ is_insert }),
         }
         return fetch(`${prefix}/pg/${id}/${table_id}/remove-table/`, opts).then(handleResponse)
     },
@@ -71,9 +72,10 @@ const pg_config = {
     },
 }
 
-function remove(pk) {
+function remove(pk, state) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({state}),
     }
     return fetch(`${prefix}/remove/${pk}/`, requestOptions).then(handleResponse)
 }
