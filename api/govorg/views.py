@@ -377,10 +377,11 @@ def _get_emp_perm_properties(token, fid):
     perms_prop = list()
     for perm in perms:
         perms_inspire = perm.empperminspire_set.filter(feature_id=fid)
-        geom_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_CREATE)
-        if geom_perms:
+        geom_rm_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_REMOVE)
+        geom_up_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_UPDATE)
+        if geom_up_perms and geom_rm_perms:
             perms_inspire = perms_inspire.filter(geom=False)
-            perms_inspire = perms_inspire.filter(perm_kind=EmpPermInspire.PERM_CREATE)
+            perms_inspire = perms_inspire.filter(perm_kind=EmpPermInspire.PERM_UPDATE)
             perm_property_ids = list(perms_inspire.values_list('property_id', flat=True))
             prop_qs = LProperties.objects
             prop_qs = prop_qs.filter(property_id__in=perm_property_ids)
