@@ -76,6 +76,7 @@ def _choice_kind_display(kind, item):
 @ajax_required
 def llc_request_list(request, payload):
     qs = RequestFiles.objects.all()
+    start_index = 1
     if qs:
         оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
         хувьсах_талбарууд = [
@@ -90,18 +91,20 @@ def llc_request_list(request, payload):
             оруулах_талбарууд=оруулах_талбарууд,
             хувьсах_талбарууд=хувьсах_талбарууд
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
 
         rsp = {
             'items': items,
             'page': payload.get('page'),
-            'total_page': total_page
+            'total_page': total_page,
+            'start_index': start_index
         }
     else:
         rsp = {
             'items': [],
             'page': payload.get('page'),
-            'total_page': 1
+            'total_page': 1,
+            'start_index': start_index
         }
 
     return JsonResponse(rsp)

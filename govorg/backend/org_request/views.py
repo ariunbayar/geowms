@@ -953,6 +953,7 @@ def get_llc_list(request, payload):
 
     qs = LLCRequest.objects
     qs = qs.filter(file__geo_id=org.geo_id)
+    start_index = 1
     if qs:
         оруулах_талбарууд = ['id', 'file_id', 'created_at', 'updated_at', 'kind', 'state', 'description']
         хувьсах_талбарууд = [
@@ -969,16 +970,18 @@ def get_llc_list(request, payload):
             оруулах_талбарууд=оруулах_талбарууд,
             хувьсах_талбарууд=хувьсах_талбарууд,
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
         rsp = {
             'items': items,
             'total_page': total_page,
+            'start_index': start_index
         }
     else:
         rsp = {
             'items': [],
             'page': payload.get("page"),
             'total_page': 1,
+            'start_index': start_index
         }
 
     return JsonResponse(rsp)
