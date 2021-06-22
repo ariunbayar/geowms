@@ -472,12 +472,6 @@ def propertyFieldsSave(request, payload):
     view_id = payload.get('view_id')
     values = payload.get('values')
     open_datas = payload.get('open_datas')
-    if not id_list:
-        rsp = {
-            'success': False,
-            'msg': 'Утга сонгоно уу.'
-        }
-        return JsonResponse(rsp)
 
     theme = get_object_or_404(LThemes, theme_id=tid)
     feature = get_object_or_404(LFeatures, feature_id=fid)
