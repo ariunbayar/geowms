@@ -15,6 +15,7 @@ export class OrgForm extends Component {
             modal_status: 'closed',
             modal_alert_status: 'closed',
             is_loading: false,
+            allowed_geom: props.allowed_geom,
         }
         this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
         this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
@@ -23,6 +24,12 @@ export class OrgForm extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.modalAlertClose = this.modalAlertClose.bind(this)
         this.handleHistoryPush = this.handleHistoryPush.bind(this)
+    }
+
+    componentDidUpdate(pP, Ps) {
+        if (pP.allowed_geom != this.props.allowed_geom) {
+            this.setState({allowed_geom: this.props.allowed_geom})
+        }
     }
 
     handleFormOpen() {
@@ -74,7 +81,7 @@ export class OrgForm extends Component {
     }
 
     render() {
-        const { allowed_geom } = this.props
+        const { allowed_geom } = this.state
         const { is_open, msg, is_loading, style } = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
