@@ -621,6 +621,7 @@ def org_list(request, payload, level):
     оруулах_талбарууд = ['id', 'name', 'level', 'num_employees', 'num_systems']
     items = []
     total_page = 1
+    start_index = 1
     qs = Org.objects.filter(level=level)
     if qs:
         qs = qs.annotate(num_employees=Count('employee', distinct=True))

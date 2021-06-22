@@ -240,6 +240,7 @@ def govorgList(request, payload, org_id):
     оруулах_талбарууд = ['id', 'name', 'token', 'created_at', 'updated_at', 'org_id', 'website']
     items = []
     total_page = 1
+    start_index = 1
 
     if qs:
         datatable = Datatable(

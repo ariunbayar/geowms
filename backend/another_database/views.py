@@ -45,6 +45,7 @@ def _get_out_type(out_type):
 def pagination(request, payload, out_type):
     items = []
     total_page = []
+    start_index = 1
     out_type = _get_out_type(out_type)
 
     def _get_data_type_name(data_type, item):
