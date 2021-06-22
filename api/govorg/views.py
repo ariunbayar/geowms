@@ -268,7 +268,7 @@ def _get_property_data(values):
 
 @require_POST
 @csrf_exempt
-def qgis_submit(request, token):
+def qgis_submit(request, token, fid):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
     employee = get_object_or_404(Employee, token=token)
