@@ -88,12 +88,13 @@ def get_pg_table_list(request, payload, pk):
         initial_qs=initial_qs
     )
 
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get("page"),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
