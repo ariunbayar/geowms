@@ -225,7 +225,6 @@ urlpatterns = [
         path('property-fields/save/', dedsan_butets.propertyFieldsSave),
         path('remove/', dedsan_butets.remove),
         path('erese/', dedsan_butets.erese),
-        path('getDatas/<str:name>/', dedsan_butets.Get_Datas),
         path('overlaps-feature-get/<str:feature_id>/', dedsan_butets.feature_overlaps_get),
         path('overlaps-feature-set/', dedsan_butets.feature_overlaps_set),
     ], 'dedsan-butests'))),

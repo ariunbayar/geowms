@@ -962,7 +962,7 @@ def _make_property_code_value(mdata):
 
 
 def _class_name_bolon_orgoor_angilah(points, folder_name):
-    data, filter_value_type = utils.get_filter_dicts('pointname')
+    data, filter_value_type = utils.get_filter_dicts('pointid')
     values = list()
     tseg_pdfs = list()
 
@@ -970,10 +970,14 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
 
         filter_value = dict()
         geo_id = point.point_id
+        print(geo_id)
         mdata_geo_id_qs = _filter_Model([{'geo_id': geo_id}])
         value = point.pdf_id.zfill(4)
         filter_value[filter_value_type] = value
+        print(filter_value)
+        print(data)
         mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
+        print(mdata_qs)
         if not mdata_qs:
             value = point.pdf_id
             filter_value[filter_value_type] = value
@@ -1029,6 +1033,7 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
     return values, tseg_pdfs
 
 
+
 def _create_lavlagaa_infos(payment, folder_name):
     is_true = False
     points = PaymentPoint.objects.filter(payment=payment)
@@ -1044,6 +1049,10 @@ def _create_lavlagaa_infos(payment, folder_name):
             is_true = True
 
     return is_true
+
+# folder_name = 'tseg-personal-file'
+# payment = Payment.objects.filter(id=219).first()
+# _create_lavlagaa_infos(payment, folder_name)
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
@@ -1166,14 +1175,11 @@ def createPdf(values):
     pdf.cell(-50)
     pdf.cell(10, 8, '1.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
-    pdf.cell(43, 8, _check_none(values, 'Pointid'), 1, 0, 'C')
+    pdf.cell(43, 8, _check_none(values, 'Pointname'), 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
-    tseg_dugaar = values['Pointid']
-    if 'localId' in values:
-        tseg_dugaar = values['localId']
-    pdf.cell(43, 8, tseg_dugaar, 1, 0, 'C')
+    pdf.cell(43, 8,  _check_none(values, 'Pointid'), 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     pdf.cell(-188)
 
@@ -1324,6 +1330,22 @@ def _get_uniq_id(payment):
     return uniq_id
 
 
+def _str_to_int(value):
+    if isinstance(value, str):
+        value = int(value)
+    return value
+
+
+def _get_amount(geo_id):
+    m_data_qs = _filter_Model([{'geo_id': geo_id}], Model=MDatas)
+    m_data_qs = _filter_Model([{'property_id': 10101103, 'feature_config_id': 101, 'data_type_id': 101011}], initial_qs=m_data_qs)
+    m_data = m_data_qs.first()
+    if m_data and m_data.code_list_id == 10006:
+        # amount = _str_to_int(utils.get_config('POINT_PRICE'))
+        return 11300
+    return False
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1348,15 +1370,21 @@ def purchase_from_cart(request, payload):
             message='Цэг худалдаж авах хүсэлт',
             code='',
         )
+        print(datas)
         pay_id = payment.id
         for data in datas:
-            amount = 0
             pdf_id = data['pdf_id']
+            if not pdf_id:
+                pdf_id = data['name']
 
             if pdf_id:
-                wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                amount = _get_amount(data['id'])
+                if not amount:
+                    wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                    amount = wms_layer.feature_price
+                    if not amount:
+                        amount = 0
 
-                amount = wms_layer.feature_price
                 total_amount += amount
 
                 PaymentPoint.objects.create(
@@ -1364,7 +1392,7 @@ def purchase_from_cart(request, payload):
                     point_id=data['id'],
                     point_name=data['name'],
                     amount=amount,
-                    pdf_id=data['pdf_id'],
+                    pdf_id=pdf_id,
                 )
 
         Payment.objects.filter(id=pay_id).update(total_amount=total_amount)

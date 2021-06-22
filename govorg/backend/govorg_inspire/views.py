@@ -207,7 +207,7 @@ def get_wms_layer(request, tid, pid, fid):
     if view_name:
         rsp = {
             'success': True,
-            'url': request.build_absolute_uri(reverse('api:service:qgis-proxy', args=[employee.token])),
+            'url': request.build_absolute_uri(reverse('api:qgis:qgis-proxy', args=[employee.token, fid])),
             'code': 'gp_layer_' + view_name,
         }
     return JsonResponse(rsp)
@@ -924,9 +924,9 @@ def _check_file_for_geom(form_file_name, uniq_name, ext):
     file_type_name = ''
     uniq_file_name = ''
 
-    if ext == 'shp':
-        exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
-    elif ext == 'gml':
+    # if ext == 'shp':
+    #     exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
+    if ext == 'gml':
         exts = ['.gml', '.gfs']
     elif ext == 'geojson':
         exts = ['.geojson', '.gfs']
@@ -1108,13 +1108,14 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def get_qgis_url(request):
+def get_qgis_url(request, fid):
     emp = get_object_or_404(Employee, user=request.user)
     qgis_local_base_url = get_config('qgis_local_base_url')
+    url = '{qgis_local_base_url}/api/qgis/{token}/{fid}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token, fid=fid),
     rsp = {
         'success': True,
-        'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
-        'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+        'wms_url': url,
+        'wfs_url': url,
     }
     return JsonResponse(rsp)
 

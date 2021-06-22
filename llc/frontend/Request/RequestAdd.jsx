@@ -71,7 +71,7 @@ class SubmitClass extends Component {
                     ?
                         <button
                             type="button"
-                            disabled={`${ !agreed_submit || !values.file_name ? true : ''}`}
+                            disabled={!agreed_submit || !values.file_name ? true : ''}
                             className={`btn btn-primary col-12 ${values.id > 0 ? "invisible" : "" }`}
                             onClick ={()=> this.handleSubmit()}
                         >
@@ -236,7 +236,7 @@ export class RequestAdd extends Component {
 
     handlePassValues(success, info, is_description) {
         if(is_description) {
-             this.modalChange(
+            this.modalChange(
                 '',
                 'fa fa-info-circle',
                 'warning',

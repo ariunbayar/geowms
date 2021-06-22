@@ -113,7 +113,7 @@ export class LLCSettings extends Component {
         const {id} = this.props.match.params
 
         service.getFilesDetal(id).then(async ({list_of_datas}) => {
-            const {themes, packages, features} = await service.getInspireTree()
+            const { themes, packages, features } = await service.getInspireTree()
             list_of_datas.map((list_of_data, idx) => {
                 if (list_of_data.theme.id) {
                     var selected_packages = this.getArray(packages, list_of_data.theme.id)

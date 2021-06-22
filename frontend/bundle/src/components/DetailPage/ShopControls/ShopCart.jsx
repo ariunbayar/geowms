@@ -242,11 +242,11 @@ export class Cart extends Component{
                         <button
                             className="btn gp-btn-primary pay-button my-4"
                             onClick={() => this.checkDataForPurchase()}
-                            // disabled={is_button}
-                            disabled={true}
+                            disabled={is_button}
+                            // disabled={true}
                         >
-                            Засвартай байгаа
-                            {/* Худалдаж авах */}
+                            {/* Засвартай байгаа */}
+                            Худалдаж авах
 
                         </button>
                     }

@@ -82,6 +82,7 @@ def _get_geom(geo_id, fid):
 def _get_org_request(ob, employee):
 
     geo_json = []
+    project_name = ''
     old_geo_data = []
     current_geo_json = []
     feature_name = LFeatures.objects.filter(feature_id=ob.feature_id).first().feature_name
@@ -106,7 +107,13 @@ def _get_org_request(ob, employee):
         geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
+    description = ob.description
+    if ob.llc_request_id:
+        project_name = _get_ann_and_project_name(ob.llc_request_id, [])
+        description = ob.llc_request.description
+
     return {
+        'description': description,
         'change_request_id': ob.id,
         'old_geo_id': ob.old_geo_id,
         'new_geo_id': ob.new_geo_id,
@@ -129,6 +136,7 @@ def _get_org_request(ob, employee):
         'org': employee.org.name,
         'order_no': ob.order_no,
         'order_at': ob.order_at.strftime('%Y-%m-%d') if ob.order_at else '',
+        'project_name': project_name
     }
 
 
@@ -136,16 +144,19 @@ def _get_org_request(ob, employee):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
-    org_request = []
+    org_request_list = list()
     employee = get_object_or_404(Employee, user=request.user)
-    org_request_list = ChangeRequest.objects.filter(employee_id=employee.id).order_by("-created_at")
+    org_request_qs = ChangeRequest.objects
+    org_request_qs = org_request_qs.exclude(form_json__isnull=True, geo_json__isnull=True, group_id__isnull=True)
+    org_request_qs = org_request_qs.filter(employee=employee)
+    org_request_qs = org_request_qs.order_by("-created_at")
 
-    if org_request_list:
-        org_request = [_get_org_request(ob, employee) for ob in org_request_list]
-        if org_request[0] != '':
+    if org_request_qs:
+        org_request_list = [_get_org_request(ob, employee) for ob in org_request_qs]
+        if org_request_list[0] != '':
             rsp = {
                 'success': True,
-                'org_request': org_request,
+                'org_request': org_request_list,
             }
         else:
             rsp = {
@@ -438,7 +449,6 @@ def _set_llc_request(llc_request_id, payload):
     llc_request_qs = LLCRequest.objects
     llc_request_qs = llc_request_qs.filter(id=llc_request_id)
     llc_request_qs.update(**llc_request_data)
-
     if action_type == 'revoke':
         llc_request = llc_request_qs.first()
 
@@ -475,6 +485,7 @@ def request_reject(request, payload):
                 break
             if action_type == 'reject':
                 _check_group_items(change_req_obj)
+                change_req_obj.description = payload.get("desc")
                 change_req_obj.state = ChangeRequest.STATE_REJECT
                 change_req_obj.group_id = None
                 change_req_obj.save()
@@ -1074,7 +1085,7 @@ def _reject_request(id, kind, state, text):
     reject_request.kind = kind
     reject_request.state = state
     reject_file.kind = kind
-    reject_file.state = RequestFiles.STATE_NEW
+    reject_file.state = state
     reject_file.description = text
     reject_request.save()
     reject_file.save()

@@ -52,7 +52,7 @@ export class ConfigureBundle extends Component {
         this.setState({geom_state_count})
     }
 
-    handleChange(name, e) {
+    handleChange(name, selection, e) {
         const {selected_values} = this.props
         this.props.model_action(name, e, selected_values)
     }
@@ -71,34 +71,48 @@ export class ConfigureBundle extends Component {
     render () {
         const { is_loading, themes, geom_state_count
         } = this.state
-        const {selected_values, selected_packages, selected_features} = this.props
-        const { theme, feature } = selected_values
+        const { selected_values, selected_packages, selected_features } = this.props
+        const { theme, feature, order_at, order_no } = selected_values
         var feature_data = selected_values.features[geom_state_count]
         return (
             <div className="col-md-12">
                 <div className="form-row col-md-12 p-4 mx-1">
                     <SelectField
-                        title_name='theme'
+                        state_name='theme'
+                        label="Theme"
+                        option_name = "name"
+                        option_key = "code"
                         data_list={themes}
-                        defualt_value={theme?.id || ''}
+                        default_value={theme?.id || ''}
+                        default_text={'theme-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
-                        title_name='package'
+                        state_name='package'
+                        label="package"
+                        option_name = "name"
+                        option_key = "code"
                         data_list={
                             selected_values.package?.list && selected_values.package?.list.length >0
                             ? selected_values.package?.list : selected_packages
                         }
-                        defualt_value={selected_values.package?.id || ''}
+                        default_value={selected_values.package?.id || ''}
+                        className={"col-md-4"}
+                        default_text={'package-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                     <SelectField
-                        title_name='feature'
+                        state_name='feature'
+                        label="feature"
+                        option_name = "name"
+                        option_key = "code"
                         data_list={
                             selected_values.feature?.list && selected_values.feature?.list.length >0
                             ? selected_values.feature?.list : selected_features
                         }
-                        defualt_value={feature?.id || ''}
+                        default_value={feature?.id || ''}
+                        className={"col-md-4"}
+                        default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
                 </div>
@@ -110,7 +124,7 @@ export class ConfigureBundle extends Component {
                             name='order_no'
                             type="text"
                             value={selected_values.order_no}
-                            onChange={(e) => {this.handleChange('order_no', e)}}
+                            onChange={(e) => {this.handleChange('order_no', [], e)}}
                         />
                     </div>
                     <div className="col-md-6 mb-2">
@@ -120,7 +134,7 @@ export class ConfigureBundle extends Component {
                             name='order_at'
                             type="date"
                             value={selected_values.order_at}
-                            onChange={(e) => {this.handleChange('order_at', e)}}
+                            onChange={(e) => {this.handleChange('order_at', [], e)}}
                         />
                     </div>
                 </div>

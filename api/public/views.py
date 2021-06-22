@@ -79,7 +79,8 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
         allowed_layers = utils.geo_cache("open_allowed_layers", '', _get_allowed_layers(), 300)
         content = filter_layers(content, allowed_layers)
         service_url = _get_service_url(request, bundle_id, wms, url_type)
-        content = replace_src_url(content, requests_url, service_url)
+        service_type = request.GET.get('SERVICE')
+        content = replace_src_url(content, requests_url, service_url, service_type)
 
     content_type = rsp.headers.get('content-type')
 
@@ -140,7 +141,7 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
         filename = '{}-{}-{}.csv'.format(types, date_now, file_code)
     else:
         raise Http404
-
+    req_url = req_url + '&format_options=CHARSET:UTF-8'
     response = requests.get(req_url, request.GET, headers={**BASE_HEADERS}, timeout=5)
     content_type = response.headers.get('content-type')
     #TODO shape zip file tathad wfsrequest.txt gesen file tataj bgaa teriig exclude hiih
@@ -207,7 +208,7 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
     request.GET['typeName'] = wms_layer_code
     request.GET['propertyName'] = properties
 
-    response = requests.get(url, request.GET, headers={**BASE_HEADERS}, timeout=5)
+    response = requests.get(url, request.GET, headers={**BASE_HEADERS}, timeout=5, verify=False)
     content_type = response.headers.get('content-type')
     content = response.content
 
