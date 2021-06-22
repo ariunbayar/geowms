@@ -17,11 +17,10 @@ export default class WMSLog extends Component {
             fields :[],
             талбарууд: [
                 {'field': 'qs_request', "title": 'qs_request'},
-                {'field': 'rsp_status', "title": 'rsp[_status'},
+                {'field': 'rsp_status', "title": 'rsp_status'},
                 {'field': 'rsp_size', "title": 'rsp_size'},
                 {'field': 'created_at', "title": 'Нэвтрэсэн огноо'},
                 {'field': 'system_id', "title": 'Системийн ID'},
-                {'field': 'wms_id', "title": 'WMS ID'},
                 {'field': 'qs_all', "title": 'qs_all'},
             ],
             cards: [
@@ -103,7 +102,6 @@ export default class WMSLog extends Component {
             жагсаалтын_холбоос,
             хувьсах_талбарууд,
         } = this.state
-
 
         return (
             <div className="card">
