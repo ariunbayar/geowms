@@ -371,6 +371,24 @@ def _get_request_content(base_url, request, geo_id, headers):
     return rsp, queryargs
 
 
+def _get_emp_perm_properties(token, fid):
+    emp = Employee.objects.filter(token=token).first()
+    perms = emp.empperm_set.all()
+    perms_prop = list()
+    for perm in perms:
+        perms_inspire = perm.empperminspire_set.filter(feature_id=fid)
+        geom_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_CREATE)
+        if geom_perms:
+            perms_inspire = perms_inspire.filter(geom=False)
+            perms_inspire = perms_inspire.filter(perm_kind=EmpPermInspire.PERM_CREATE)
+            perm_property_ids = list(perms_inspire.values_list('property_id', flat=True))
+            prop_qs = LProperties.objects
+            prop_qs = prop_qs.filter(property_id__in=perm_property_ids)
+            properties = list(prop_qs.values_list('property_code', flat=True))
+            perms_prop = perms_prop + properties
+    return perms_prop
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def qgis_proxy(request, base_url, token, fid=''):
@@ -396,9 +414,14 @@ def qgis_proxy(request, base_url, token, fid=''):
         content = rsp.content
         content = replace_src_url(content, 'featureMembers', 'Members', None)
 
+    allowed_props = utils.geo_cache("qgis_allowed_perms", token, _get_emp_perm_properties(token, fid), 300)
+    if not allowed_props:
+        raise Http404
+    allowed_props.insert(0, 'geo_data')
+
     if request.GET.get('REQUEST') != 'GetMap':
         if request.GET.get('SERVICE') == 'WFS':
-            content = filter_layers_wfs(content, allowed_layers)
+            content = filter_layers_wfs(content, allowed_layers, allowed_props)
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
@@ -451,4 +474,3 @@ def geo_design_proxy(request, base_url, view_name):
     )
     content_type = rsp.headers.get('content-type')
     return HttpResponse(content, content_type=content_type)
-
