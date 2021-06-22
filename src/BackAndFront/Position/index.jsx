@@ -40,10 +40,12 @@ export default class Position extends Component {
                         {/* gov */}
                         <Route exact path="/gov/perm/position/" component={ (props) => <PositionList {...props} is_backend={is_backend}/>}/>
                         <Route exact path="/gov/perm/position/create/" component={ (props) => <PositionAdd {...props} is_backend={is_backend} />}/>
+                        <Route exact path="/gov/perm/position/:pos_id/edit/" component={ (props) => <PositionAdd {...props} is_backend={is_backend} />}/>
 
                         {/* back */}
                         <Route exact path="/back/байгууллага/түвшин/:level/:id/position/" component={ (props) => <PositionList {...props} is_backend={is_backend}/>}/>
                         <Route exact path="/back/байгууллага/түвшин/:level/:id/position/create/" component={ (props) => <PositionAdd {...props} is_backend={is_backend} />}/>
+                        <Route exact path="/back/байгууллага/түвшин/:level/:id/position/:pos_id/edit/" component={ (props) => <PositionAdd {...props} is_backend={is_backend} />}/>
 
                     </>
                 }

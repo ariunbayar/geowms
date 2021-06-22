@@ -49,6 +49,8 @@ urlpatterns = [
                 path('', org_views.position_list),
                 path('create/', org_views.create),
                 path('<int:pk>/remove/', org_views.remove),
+                path('<int:pk>/edit/', org_views.update),
+                path('<int:pk>/detail/', org_views.detail),
             ], 'position'))),
         ], 'role'))),
 

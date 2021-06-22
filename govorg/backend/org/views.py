@@ -306,6 +306,7 @@ def position_list(request, payload):
     items = []
     page = 1
     total_page = 1
+    start_index= 1
     оруулах_талбарууд = ['id', 'name', 'org_id']
 
     qs = Position.objects.filter(org=request.org)
@@ -316,22 +317,27 @@ def position_list(request, payload):
             payload=payload,
             оруулах_талбарууд=оруулах_талбарууд
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
         page = payload.get('page')
 
     rsp = {
         'items': items,
         'page': page,
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index,
     }
 
     return JsonResponse(rsp)
 
 
-def _pos_name_check(qs_pos, name):
+def _pos_name_check(qs_pos, name, pos_id=None):
     has_pos_name = False
-    for pos in qs_pos.all():
-        if pos.name == name:
+    qs_pos = qs_pos.filter(name=name)
+    if qs_pos:
+        if pos_id:
+            if qs_pos.first().id != pos_id:
+                has_pos_name = True
+        else:
             has_pos_name = True
     return has_pos_name
 
@@ -378,7 +384,7 @@ def _do_emp_have_pos(position, org):
 def remove(request, pk):
     org = request.org
     position = get_object_or_404(Position, id=pk)
-    has_emp_pos = _do_emp_have_pos(position, org)
+    has_emp_pos = _do_emp_have_pos(position, org,)
 
     if has_emp_pos:
         rsp = {
@@ -391,5 +397,50 @@ def remove(request, pk):
             'success': True,
             'data': "Амжилттай устгалаа"
         }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@gov_required
+def update(request, payload, pk):
+    name = payload.get("name")
+    pos_id = int(payload.get("pos_id"))
+    qs = Position.objects
+    qs_pos = qs.filter(org_id=pk)
+    has_pos_name = _pos_name_check(qs_pos, name, pos_id)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        qs_pos.filter(
+            id=pos_id
+        ).update(
+            name=name
+        )
+        rsp = {
+            'success': True,
+            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@gov_required
+def detail(request, pk):
+    position = Position.objects.filter(id=pk)
+    datas = dict()
+    if position:
+        datas = position.values('id', 'name').first()
+    rsp = {
+        'success': True,
+        'datas': datas
+    }
 
     return JsonResponse(rsp)

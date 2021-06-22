@@ -17,12 +17,18 @@ class PositionList extends Component {
             ],
             нэмэлт_талбарууд: [
                 {
+                    "title": 'Засах',
+                    "text": '',
+                    "icon": 'fa fa-pencil-square-o text-success',
+                    "action": (values) => this.handleEdit(values),
+                },
+                {
                     "title": 'Устгах',
                     "text": '',
                     "icon": 'fa fa-trash-o text-danger',
                     "action": (values) => this.handleAsk(values),
                     "width": "100px"
-                }
+                },
             ],
 
             жагсаалтын_холбоос: ``,
@@ -39,9 +45,15 @@ class PositionList extends Component {
         this.handleConfig()
     }
 
-    goLink(values) {
+    handleEdit(values) {
         const { level, id } = this.props.match.params
-        this.props.history.push(`/back/байгууллага/түвшин/${level}/${id}/position/${values.id}/дэлгэрэнгүй/`)
+        const { is_backend } = this.props
+        if (is_backend) {
+            this.props.history.push(`/back/байгууллага/түвшин/${level}/${id}/position/${values.id}/edit/`)
+        }
+        else {
+            this.props.history.push(`/gov/perm/position/${values.id}/edit/`)
+        }
     }
 
     handleConfig() {
