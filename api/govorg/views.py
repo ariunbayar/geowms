@@ -44,65 +44,54 @@ def char_in_split(string):
         return string
 
 
-def allowed_attbs(request, token, system, code):
-    allowed_att = cache.get('allowed_att_{}_{}'.format(token, code))
-    if not allowed_att:
-        wms_layer = system.wms_layers.filter(code=code).first()
-        govorg_layer = GovOrgWMSLayer.objects.filter(wms_layer=wms_layer, govorg=system).first()
-        allowed_att = ''
-        if govorg_layer and govorg_layer.attributes:
-            govort_attributes = govorg_layer.attributes.replace("\'", "\"")
-            attributes = json.loads(govort_attributes)
-            for attribute in attributes:
-                allowed_att = allowed_att + attribute.lower() + ','
-            allowed_att = allowed_att[:-1]
-        cache.set('allowed_att_{}_{}'.format(token, code), allowed_att, 600)
-
-    return allowed_att
-
-
 def _get_qgis_service_url(request, token, fid):
     url = reverse('api:qgis:qgis-proxy', args=[token, fid])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
 
-def _get_perm_atts(system):
+def _get_perm_atts(system, code):
     access = system.govorgwmslayer_set.first()
-    return utils.json_load(access.attributes)
+    has_layer = False
+    if access.wms_layer.code == code:
+        has_layer = True
+    if has_layer:
+        access = system.govorgwmslayer_set.first()
+        atts = utils.json_load(access.attributes)
+        atts.insert(0, 'geo_data')
+        return atts
+    return False
 
 
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def proxy(request, base_url, token, pk=None):
+
+    access_attributes = list()
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     system = utils.geo_cache("system", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
-    # access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system), 300)
     allowed_layers = utils.geo_cache("allowed_layers", token, [layer.code for layer in system.wms_layers.all() if layer.wms.is_active], 300)
-    if request.GET.get('TYPENAMES'):
-        code = char_in_split(request.GET.get('TYPENAMES'))
-        allowed_att = allowed_attbs(request, token, system, code)
+    if request.GET.get('TYPENAMES') or request.GET.get('TYPENAME'):
+        code = char_in_split(request.GET.get('TYPENAME'))
+        access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system, code), 300)
+        if not access_attributes:
+            raise Http404
+
         queryargs = {
             **request.GET,
-            "propertyName": [allowed_att],
+            "propertyName": ",".join(access_attributes).lower(),
         }
-    # else:
-    #     queryargs = {
-    #         **request.GET,
-    #         'TYPENAMES': allowed_layers,
-    #         "propertyName": ",".join(access_attributes),
-    #     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
         if request.GET.get('SERVICE') == 'WFS':
-            content = filter_layers_wfs(content, allowed_layers)
+            content = filter_layers_wfs(content, allowed_layers, access_attributes)
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
@@ -143,18 +132,18 @@ def json_proxy(request, base_url, token, code):
 
     system = utils.geo_cache("system_json", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
 
-    allowed_att = allowed_attbs(request, token, system, code)
+    allowed_att = _get_perm_atts(system, code)
+    if not system:
+        raise Http404
 
-    # if not system:
-    #     raise Http404
     allowed_layers = [code]
     queryargs = {
         'service': 'WFS',
         'version': '1.0.0',
         'request': 'GetFeature',
         'typeName': code,
-        # 'outputFormat': 'application/json',
-        # "propertyName": [allowed_att]
+        'outputFormat': 'application/json',
+        "propertyName": ",".join(allowed_att).lower()
     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
