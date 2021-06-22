@@ -20,6 +20,8 @@ export class OpenLayerPage extends Component {
             layer_obj: {},
             wms_obj: {},
             is_loading: false,
+            selected_wms: {},
+            is_open: false,
         }
         this.setWms = this.setWms.bind(this)
         this.setBundle = this.setBundle.bind(this)
@@ -31,7 +33,7 @@ export class OpenLayerPage extends Component {
             is_loading: true,
         })
         setTimeout(() => {
-            this.setState({is_loading: false})
+            this.setState({ is_loading: false })
         }, 500);
     }
 
@@ -54,7 +56,7 @@ export class OpenLayerPage extends Component {
     }
 
     render() {
-        const { open_layer, bundle, layer_obj, is_loading } = this.state
+        const { open_layer, bundle, layer_obj, is_loading, selected_wms, is_open } = this.state
         return (
             <div className="col-md-12">
                 <Loader is_loading={is_loading}></Loader>
@@ -105,27 +107,38 @@ export class OpenLayerPage extends Component {
                             <div className="card-body">
                                 <div className="list-group">
                                     <div id="accordion1">
-                                        {bundle.wms_list && bundle.wms_list.map((wms, idx) =>
-                                            wms.layers.length > 0 &&
-                                            <ul className="list-group" key={idx}>
-                                                <li className="list-group-item"
-                                                    id={`${idx}`}
-                                                    data-toggle="collapse"
-                                                    data-target={`#collapse-${idx+1}`}
-                                                    aria-controls={`collapse-${idx+1}`}
-                                                    >
-                                                    <i className="icon expand-icon fa fa-plus" id={`${idx}`}></i>
-                                                    &nbsp;&nbsp;{wms.name}
-                                                </li>
-                                                <div id={`collapse-${idx+1}`} className="ml-3 collapse list-group" data-parent={`#accordion1`}>
-                                                    {wms.layers.map((layer, idx) =>
-                                                        <div key={idx} className={layer_obj.id == layer.id ? "list-group-item list-group-item-action active" : 'list-group-item list-group-item-action'} onClick={() => this.setWms(wms, layer)}>
-                                                            <a>{layer.name}</a>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </ul>
-                                        )
+                                        {
+                                            bundle.wms_list
+                                            &&
+                                                bundle.wms_list.map((wms, idx) =>
+                                                    wms.layers.length > 0
+                                                    &&
+                                                        <ul className="list-group" key={idx}>
+                                                            <li className={`list-group-item`}
+                                                                role="button"
+                                                                id={`${idx}`}
+                                                                data-toggle="collapse"
+                                                                data-target={`#collapse-${idx+1}`}
+                                                                aria-controls={`collapse-${idx+1}`}
+                                                                onClick={() => this.setState({ selected_wms: wms, is_open: !is_open })}
+                                                            >
+                                                                <i className={`icon expand-icon fa fa-${selected_wms.id == wms.id && is_open ? 'minus' : 'plus'}`} id={`${idx}`}></i>
+                                                                &nbsp;&nbsp;{wms.name}
+                                                            </li>
+                                                            <div id={`collapse-${idx+1}`} className="ml-3 collapse list-group" data-parent={`#accordion1`}>
+                                                                {wms.layers.map((layer, idx) =>
+                                                                    <div
+                                                                        key={idx}
+                                                                        role="button"
+                                                                        className={`list-group-item list-group-item-action ${layer_obj.id == layer.id ? 'active' : ''}`}
+                                                                        onClick={() => this.setWms(wms, layer)}
+                                                                    >
+                                                                        <a>{layer.name}</a>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </ul>
+                                                )
                                         }
                                     </div>
                                 </div>
