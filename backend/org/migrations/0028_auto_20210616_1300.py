@@ -4,8 +4,7 @@ from django.db import migrations
 from django.db import transaction
 
 
-def def_pos_remove(orgs, qs_pos):
-    def_org_id = 1
+def def_pos_remove(orgs, qs_pos, def_org_id):
     has_org = orgs.filter(id=def_org_id).first()
     if not has_org:
         qs_pos.filter(org_id=def_org_id).delete()
@@ -48,7 +47,7 @@ def authorize_org(apps, schema_editor):
         "Зөвлөх"
     ]
 
-    def_org_id = 1
+    def_org_id = Position.objects.first().org_id
     orgs = qs_org.all()
     with transaction.atomic():
         for org in orgs:
@@ -60,7 +59,7 @@ def authorize_org(apps, schema_editor):
                     )
         empower_emp(qs_pos, qs_emp)
 
-    def_pos_remove(orgs, qs_pos)
+    def_pos_remove(orgs, qs_pos, def_org_id)
 
 
 class Migration(migrations.Migration):
