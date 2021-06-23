@@ -48,10 +48,10 @@ export default class Attributes extends Component {
                                             >
                                                 <label>
                                                     <input type="checkbox"
-                                                        value={prop.prop_eng}
+                                                        value={prop.prop_code}
                                                         name={layer.id}
                                                         onChange={this.props.handlePropCheck}
-                                                        checked={this.props.handleCheck(layer.id, prop.prop_eng)}
+                                                        checked={this.props.handleCheck(layer.id, prop.prop_code)}
                                                     />
                                                     {} {prop.prop_name} ({prop.prop_eng})
                                                 </label>

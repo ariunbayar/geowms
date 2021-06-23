@@ -30,12 +30,13 @@ def login_list(request, payload):
         payload=payload,
         хувьсах_талбарууд=хувьсах_талбарууд,
     )
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get('page'),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -74,12 +75,13 @@ def page_list(request, payload):
         payload=payload,
         оруулах_талбарууд=оруулах_талбарууд
     )
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get('page'),
         'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -160,11 +162,12 @@ def crudList(request, payload):
         оруулах_талбарууд=оруулах_талбарууд,
         хувьсах_талбарууд=хувьсах_талбарууд
     )
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get('page'),
         'total_page': total_page,
+        'start_index': start_index
     }
     return JsonResponse(rsp)
 
@@ -220,21 +223,18 @@ def wms_log_list(request, payload):
     per_page = payload.get('perpage')
     wms_log_all_display = []
     sort_name = payload.get('sort_name')
+    start_index = 1
     if not sort_name:
         sort_name = 'id'
     logins = WMSLog.objects.annotate(search=SearchVector(
-        'qs_all',
         'qs_request',
         'rsp_status',
         'rsp_size',
         'created_at',
         'system_id',
-        'wms_id',
     )).filter(search__icontains=query).order_by(sort_name)
-
     total_items = Paginator(logins, per_page)
     items_page = total_items.page(page)
-
     for wms_log_all in items_page.object_list:
         wms_log_all_display.append({
             'qs_all': wms_log_all.qs_all,
@@ -243,7 +243,6 @@ def wms_log_list(request, payload):
             'rsp_size': wms_log_all.rsp_size,
             'created_at': wms_log_all.created_at,
             'system_id': wms_log_all.system_id,
-            'wms_id': wms_log_all.wms_id,
         })
 
     total_page = total_items.num_pages
@@ -252,6 +251,7 @@ def wms_log_list(request, payload):
         'items': wms_log_all_display,
         'page': page,
         'total_page': total_page,
+        'start_index': start_index
     }
     return JsonResponse(rsp)
 

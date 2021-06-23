@@ -44,32 +44,30 @@ def char_in_split(string):
         return string
 
 
-def allowed_attbs(request, token, system, code):
-    allowed_att = cache.get('allowed_att_{}_{}'.format(token, code))
-    if not allowed_att:
-        wms_layer = system.wms_layers.filter(code=code).first()
-        govorg_layer = GovOrgWMSLayer.objects.filter(wms_layer=wms_layer, govorg=system).first()
-        allowed_att = ''
-        if govorg_layer and govorg_layer.attributes:
-            govort_attributes = govorg_layer.attributes.replace("\'", "\"")
-            attributes = json.loads(govort_attributes)
-            for attribute in attributes:
-                allowed_att = allowed_att + attribute.lower() + ','
-            allowed_att = allowed_att[:-1]
-        cache.set('allowed_att_{}_{}'.format(token, code), allowed_att, 600)
-
-    return allowed_att
-
-
-def _get_qgis_service_url(request, token):
-    url = reverse('api:service:qgis-proxy', args=[token])
+def _get_qgis_service_url(request, token, fid):
+    url = reverse('api:qgis:qgis-proxy', args=[token, fid])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
+
+
+def _get_perm_atts(system, code):
+    access = system.govorgwmslayer_set.first()
+    has_layer = False
+    if access.wms_layer.code == code:
+        has_layer = True
+    if has_layer:
+        access = system.govorgwmslayer_set.first()
+        atts = utils.json_load(access.attributes)
+        atts.insert(0, 'geo_data')
+        return atts
+    return False
 
 
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def proxy(request, base_url, token, pk=None):
+
+    access_attributes = list()
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
@@ -77,12 +75,15 @@ def proxy(request, base_url, token, pk=None):
     headers = {**BASE_HEADERS}
     system = utils.geo_cache("system", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
     allowed_layers = utils.geo_cache("allowed_layers", token, [layer.code for layer in system.wms_layers.all() if layer.wms.is_active], 300)
-    if request.GET.get('TYPENAMES'):
-        code = char_in_split(request.GET.get('TYPENAMES'))
-        allowed_att = allowed_attbs(request, token, system, code)
+    if request.GET.get('TYPENAMES') or request.GET.get('TYPENAME'):
+        code = char_in_split(request.GET.get('TYPENAME'))
+        access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system, code), 300)
+        if not access_attributes:
+            raise Http404
+
         queryargs = {
             **request.GET,
-            "propertyName": [allowed_att],
+            "propertyName": ",".join(access_attributes).lower(),
         }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
@@ -90,7 +91,7 @@ def proxy(request, base_url, token, pk=None):
 
     if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
         if request.GET.get('SERVICE') == 'WFS':
-            content = filter_layers_wfs(content, allowed_layers)
+            content = filter_layers_wfs(content, allowed_layers, access_attributes)
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
@@ -99,7 +100,9 @@ def proxy(request, base_url, token, pk=None):
         service_type = request.GET.get('SERVICE')
         service_url = _get_service_url(request, token)
         content = replace_src_url(content, base_url, service_url, service_type)
+
     qs_request = queryargs.get('REQUEST', 'no request')
+
     WMSLog.objects.create(
         qs_all=dict(queryargs),
         qs_request=qs_request,
@@ -129,18 +132,18 @@ def json_proxy(request, base_url, token, code):
 
     system = utils.geo_cache("system_json", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
 
-    allowed_att = allowed_attbs(request, token, system, code)
+    allowed_att = _get_perm_atts(system, code)
+    if not system:
+        raise Http404
 
-    # if not system:
-    #     raise Http404
     allowed_layers = [code]
     queryargs = {
         'service': 'WFS',
         'version': '1.0.0',
         'request': 'GetFeature',
         'typeName': code,
-        # 'outputFormat': 'application/json',
-        # "propertyName": [allowed_att]
+        'outputFormat': 'application/json',
+        "propertyName": ",".join(allowed_att).lower()
     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
@@ -254,7 +257,7 @@ def _get_property_data(values):
 
 @require_POST
 @csrf_exempt
-def qgis_submit(request, token):
+def qgis_submit(request, token, fid):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
     employee = get_object_or_404(Employee, token=token)
@@ -321,15 +324,17 @@ def qgis_submit(request, token):
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    hoho = ChangeRequest.objects.bulk_create(objs)
+    ChangeRequest.objects.bulk_create(objs)
     return JsonResponse({'success': True, 'msg': msg})
 
 
-def _get_layer_name(employee):
+def _get_layer_name(employee, fid):
+    allowed_layers = list()
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
-    feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW).values_list('feature_id', flat=True)
-    features = LFeatures.objects.filter(feature_id__in=feature_ids)
-    allowed_layers = ['gp_layer_' + utils.make_view_name(feature) for feature in features]
+    has_perm = EmpPermInspire.objects.filter(emp_perm=emp_perm, geom=True, perm_kind=EmpPermInspire.PERM_VIEW, feature_id=fid)
+    if has_perm:
+        feature_qs = LFeatures.objects.filter(feature_id=fid)
+        allowed_layers = [utils.make_layer_name(utils.make_view_name(feature)) for feature in feature_qs]
     return allowed_layers
 
 
@@ -366,16 +371,35 @@ def _get_request_content(base_url, request, geo_id, headers):
     return rsp, queryargs
 
 
+def _get_emp_perm_properties(token, fid):
+    emp = Employee.objects.filter(token=token).first()
+    perms = emp.empperm_set.all()
+    perms_prop = list()
+    for perm in perms:
+        perms_inspire = perm.empperminspire_set.filter(feature_id=fid)
+        geom_rm_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_REMOVE)
+        geom_up_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_UPDATE)
+        if geom_up_perms and geom_rm_perms:
+            perms_inspire = perms_inspire.filter(geom=False)
+            perms_inspire = perms_inspire.filter(perm_kind=EmpPermInspire.PERM_UPDATE)
+            perm_property_ids = list(perms_inspire.values_list('property_id', flat=True))
+            prop_qs = LProperties.objects
+            prop_qs = prop_qs.filter(property_id__in=perm_property_ids)
+            properties = list(prop_qs.values_list('property_code', flat=True))
+            perms_prop = perms_prop + properties
+    return perms_prop
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
-def qgis_proxy(request, base_url, token):
+def qgis_proxy(request, base_url, token, fid=''):
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     headers = {**BASE_HEADERS}
     employee = utils.geo_cache("qgis_employee", token, Employee.objects.filter(token=token).first(), 300)
-    allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee), 300)
-    if not employee:
+    allowed_layers = utils.geo_cache("qgis_allowed_layer", token, _get_layer_name(employee, fid), 300)
+    if not employee or not allowed_layers:
         raise Http404
 
     geo_id = employee.org.geo_id
@@ -391,15 +415,20 @@ def qgis_proxy(request, base_url, token):
         content = rsp.content
         content = replace_src_url(content, 'featureMembers', 'Members', None)
 
+    allowed_props = utils.geo_cache("qgis_allowed_perms", token, _get_emp_perm_properties(token, fid), 300)
+    if not allowed_props:
+        raise Http404
+    allowed_props.insert(0, 'geo_data')
+
     if request.GET.get('REQUEST') != 'GetMap':
         if request.GET.get('SERVICE') == 'WFS':
-            content = filter_layers_wfs(content, allowed_layers)
+            content = filter_layers_wfs(content, allowed_layers, allowed_props)
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
             raise Exception()
 
-        service_url = _get_qgis_service_url(request, token)
+        service_url = _get_qgis_service_url(request, token, fid)
         service_type = request.GET.get('SERVICE')
         content = replace_src_url(content, base_url, service_url, service_type)
 
