@@ -176,12 +176,14 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
 
     urls = ['wms', 'wmts', 'wfs']
 
+    url_type = url_type.lower()
+
     if url_type not in urls:
         raise Http404
 
     service_type = request.GET.get('SERVICE')
 
-    if url_type != service_type:
+    if url_type != service_type.lower():
         raise Http404
 
     get_url = {
