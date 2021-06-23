@@ -2,6 +2,17 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from django.apps import apps
+
+
+def _check_org():
+    Org = apps.get_model('backend_org', 'Org')
+    Position = apps.get_model('backend_org', 'Position')
+    orgs = Org.objects.all()
+    if not orgs:
+        Position.objects.delete()
+        return 1
+    return orgs.first().id
 
 
 class Migration(migrations.Migration):
@@ -10,11 +21,14 @@ class Migration(migrations.Migration):
         ('backend_org', '0026_delete_nemawms'),
     ]
 
+    default = _check_org()
+
     operations = [
+        migrations.RenameModel('DefaultPosition', 'Position'),
         migrations.AddField(
             model_name='Position',
             name='org',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, to='backend_org.Org'),
+            field=models.ForeignKey(default=default, on_delete=django.db.models.deletion.PROTECT, to='backend_org.Org'),
         ),
         migrations.AlterModelTable(
             name='Position',
