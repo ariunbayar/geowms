@@ -611,9 +611,18 @@ def _create_mdatas(geo_id, feature_id, form, value):
     MDatas.objects.create(**value)
 
 
+def _check_m_datas(form, ids, geo_id):
+    filter_values = ids[0]
+    filter_values['geo_id'] = geo_id
+    filter_values['property_id'] = form['property_id']
+    qs = MDatas.objects.filter(**filter_values)
+    return qs
+
+
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
     for form in form_json:
+        ids = _get_ids(feature_id, form['property_id'])
         value = dict()
         data, value_type = _get_data_from_data(form)
         value[value_type] = data
@@ -625,8 +634,9 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
                 if not isinstance(value['value_date'], datetime.datetime):
                     if value['value_date']:
                         value['value_date'] = date_to_timezone(value['value_date'])
-            if form['pk']:
-                MDatas.objects.filter(pk=form['pk']).update(**value)
+            qs = _check_m_datas(form, ids, geo_id)
+            if qs:
+                qs.update(**value)
             else:
                 _create_mdatas(geo_id, feature_id, form, value)
     return True
@@ -834,7 +844,7 @@ def request_approve(request, payload):
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
                         qs_m_datas = MDatas.objects.filter(geo_id=old_geo_id)
-                        qs_m_datas.delete()
+                        # qs_m_datas.delete()
                         success = _request_to_m(request_datas)
                         _insert_data_another_table(request_datas, old_geo_id, 'update')
 
