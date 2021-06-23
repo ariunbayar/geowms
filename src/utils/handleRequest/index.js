@@ -1,3 +1,4 @@
+// import { handleResponse, getGetOptions, getPostOptions } from "@helpUtils/handleRequest" -- дууд
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {

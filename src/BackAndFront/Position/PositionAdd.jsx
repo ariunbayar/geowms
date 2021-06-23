@@ -10,8 +10,6 @@ export const validationSchema = object().shape({
         .max(250, '250-с илүүгүй урттай утга оруулна уу!')
         .required('Хоосон байна утга оруулна уу.'),
 })
-
-
 export class PositionAdd extends Component {
     constructor(props) {
         super(props)

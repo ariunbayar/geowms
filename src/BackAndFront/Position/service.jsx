@@ -1,4 +1,4 @@
-import { handleResponse, getGetOptions, getPostOptions } from "@helpComp/functions/service"
+import { handleResponse, getGetOptions, getPostOptions } from "@helpUtils/handleRequest"
 
 export const service = {
     getRequest,

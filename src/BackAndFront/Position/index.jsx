@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 
+import hah from "@helpUtils/functions"
 import PositionList from "@helpComp/Position/PositionList"
 import PositionAdd from "@helpComp/Position/PositionAdd"
 
@@ -16,6 +17,7 @@ export default class Position extends Component {
     }
 
     componentDidMount() {
+        console.log(hah.test());
         const { is_superuser, is_admin } = this.props
         var { is_backend, is_allow } = this.state
 

@@ -87,6 +87,7 @@ module.exports = {
            '@': path.resolve(__dirname, 'frontend/bundle/src/'),
            '@utils': path.resolve(__dirname, 'src/components/'),
            '@helpComp': path.resolve(__dirname, 'src/BackAndFront/'),
+           '@helpUtils': path.resolve(__dirname, 'src/utils/'),
         }
     },
     optimization: {
