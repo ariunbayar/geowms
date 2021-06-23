@@ -317,26 +317,6 @@ def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
 
-def _get_type(value_type_id):
-    if value_type_id == 'number':
-        value_type = 'number'
-    elif value_type_id == 'double':
-        value_type = 'number'
-    elif value_type_id == 'multi-text':
-        value_type = 'text'
-    elif value_type_id == 'text':
-        value_type = 'text'
-    elif value_type_id == 'date':
-        value_type = 'date'
-    elif value_type_id == 'link':
-        value_type = 'text'
-    elif value_type_id == 'boolean':
-        value_type = 'text'
-    else:
-        value_type = 'option'
-    return value_type
-
-
 def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid=None):
     properties = list()
     for l_property in qs_l_properties:
@@ -344,7 +324,7 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data = ''
         code_lists = []
         form = dict()
-        value_type = _get_type(l_property.value_type_id)
+        value_type = utils._get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
         data_type_id = l_data_type.data_type_id
         property_id = l_property.property_id

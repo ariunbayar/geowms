@@ -1907,3 +1907,19 @@ def get_today_datetime(is_string=False):
     if is_string:
         return datetime_to_string(now)
     return now
+
+
+def _get_type(value_type_id):
+    number_types = ['number', 'double']
+    text_types = ['text', 'multi_text', 'link', 'boolean']
+
+    if value_type_id in number_types:
+        value_type = 'number'
+    elif value_type_id in text_types:
+        value_type = 'text'
+    elif value_type_id == 'date':
+        value_type = 'date'
+    else:
+        value_type = 'option'
+
+    return value_type

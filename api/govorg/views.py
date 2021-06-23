@@ -15,12 +15,14 @@ from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrgWMSLayer, GovOrg as System
 from backend.inspire.models import (
     LCodeLists,
+    LFeatureConfigs,
     LPackages,
     LFeatures,
     EmpPerm,
     EmpPermInspire,
     LProperties,
-    LCodeListConfigs
+    LCodeListConfigs,
+    MDatas
 )
 from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
@@ -193,26 +195,6 @@ def _geojson_convert_3d_geojson(geojson):
         return geo_json['geo_json']
 
 
-def _get_type(value_type_id):
-    if value_type_id == 'number':
-        value_type = 'number'
-    elif value_type_id == 'double':
-        value_type = 'number'
-    elif value_type_id == 'multi-text':
-        value_type = 'text'
-    elif value_type_id == 'text':
-        value_type = 'text'
-    elif value_type_id == 'date':
-        value_type = 'date'
-    elif value_type_id == 'link':
-        value_type = 'text'
-    elif value_type_id == 'boolean':
-        value_type = 'text'
-    else:
-        value_type = 'option'
-    return value_type
-
-
 def _code_list_display(property_id):
     code_list_values = list()
     code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
@@ -235,22 +217,40 @@ def _code_list_display(property_id):
     return code_list_values
 
 
-def _get_property_data(values):
+def _get_data_from_mdatas(valid_type, query):
+    if valid_type == 'text':
+        return query.value_text
+    elif valid_type == 'option':
+         return query.code_list_id
+    elif valid_type == 'date':
+         return utils.datetime_to_string(query.value_date)
+    elif valid_type == 'number':
+         return query.value_number
+    else :
+        return ''
+
+
+def _get_property_data(values, employee, feature_id, geo_id):
     datas = []
+    property_perms = utils.get_emp_property_roles(employee, feature_id)
+    feature_config = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+    qs = MDatas.objects.filter(
+        feature_config_id__in=feature_config,
+        geo_id=geo_id
+        )
     for value in values:
         form = {}
         property = LProperties.objects.filter(property_code__iexact=value).first()
         if property:
             data_list = []
             value_type = property.value_type_id
-            valid_type = _get_type(value_type)
+            valid_type = utils._get_type(value_type)
             data = values[value]
             if data and valid_type == 'option':
                 code_list = LCodeLists.objects.filter(code_list_name__iexact=data).first()
                 if code_list:
                     data = code_list.code_list_id
                     data_list = _code_list_display(property.property_id)
-
             form['pk'] = ''
             form['property_id'] = property.property_id
             form['property_name'] = property.property_name
@@ -258,9 +258,18 @@ def _get_property_data(values):
             form['property_definition'] = property.property_definition
             form['value_type_id'] = value_type
             form['value_type'] = valid_type
-            form['data'] = data if data != 'NULL' else ''
             form['data_list'] = data_list
-            form['roles'] = {"PERM_VIEW": True, "PERM_CREATE": True, "PERM_REMOVE": False, "PERM_UPDATE": True, "PERM_APPROVE": True, "PERM_REVOKE": False}
+            for perm in property_perms[1]:
+                if perm['property_id'] == property.property_id:
+                    get_perm = perm['roles']
+                    if not get_perm["PERM_UPDATE"]:
+                        form['data'] = data if data != 'NULL' else ''
+                    else:
+                        query = qs.filter(property_id=perm['property_id']).first()
+                        if query:
+                            form['data'] = _get_data_from_mdatas(value_type, query)
+
+            form['roles'] = get_perm
             datas.append(form)
 
     return datas
@@ -288,8 +297,7 @@ def qgis_submit(request, token, fid):
         theme = LPackages.objects.filter(package_id=package.package_id).first()
         geo_json = _geojson_convert_3d_geojson(update_item['geom'])
         success, info = utils.has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
-        form_json = _get_property_data(update_item['att'])
-
+        form_json = _get_property_data(update_item['att'], employee, feature_id, geo_id)
         if success:
             objs.append(ChangeRequest(
                 old_geo_id=geo_id,
