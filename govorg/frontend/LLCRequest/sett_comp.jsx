@@ -3,6 +3,7 @@ import {service} from './service'
 import RequestModal from './requestModal'
 import {ConfigureBundle} from './configure_bundle'
 import Modal from "@utils/Modal/Modal"
+import BackButton from "@utils/Button/BackButton"
 
 export class LLCSettings extends Component {
 
@@ -228,7 +229,13 @@ export class LLCSettings extends Component {
                         />
                     </div>
                 </div>
+                <BackButton 
+                    {...this.props} 
+                    name={'Буцах'} 
+                    navlink_url={`/gov/llc-request/`}>
+                </BackButton>
             </div>
         )
     }
 }
+
