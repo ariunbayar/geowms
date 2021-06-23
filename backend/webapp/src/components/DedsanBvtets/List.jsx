@@ -114,7 +114,7 @@ export class List extends Component {
             modalAction: modalAction,
             modalClose: modalClose
         }
-        this.props.setModal(modal)
+        global.MODAL(modal)
         this.setState({ model_name, model_id, name, formLorR })
     }
 
@@ -282,7 +282,6 @@ export class List extends Component {
                                 <div>
                                     <a className="btn gp-outline-primary" onClick={() => this.done()}><i className="fa fa-angle-double-left"></i> Болсон</a>
                                     <Forms
-                                        setModal={this.props.setModal}
                                         model_name={model_name}
                                         model_id={model_id}
                                         refresh={() => this.getProperties(code)}
@@ -306,7 +305,6 @@ export class List extends Component {
                             this.state.form_is_laod
                             ?
                                 <SideBar
-                                    setNotif={this.props.setNotif}
                                     features={this.state.feature_lists}
                                     check={this.state.check}
                                     feature_id={this.state.feature_id}
@@ -317,7 +315,6 @@ export class List extends Component {
                                 />
                             :
                                 <Forms
-                                    setModal={this.props.setModal}
                                     model_name={model_name}
                                     model_id={model_id}
                                     refresh={this.getAll}

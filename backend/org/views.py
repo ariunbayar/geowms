@@ -1,5 +1,6 @@
 import os
 import io
+from django.http.response import Http404
 from geojson import FeatureCollection
 import PIL.Image as Image
 import datetime
@@ -34,7 +35,7 @@ from backend.inspire.models import EmpPermInspire
 from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
 from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
@@ -582,6 +583,29 @@ def org_add(request, payload, level):
                     updated_by=gov_role_inspire.updated_by,
                 ))
             GovPermInspire.objects.bulk_create(objs)
+
+        def_pos = [
+            "Байхгүй",
+            "Сайд",
+            "Дэд сайд",
+            "Төрийн нарийн бичгийн дарга",
+            "Дарга",
+            "Орлогч дарга",
+            "Тэргүүн дэд",
+            "Газрын дарга",
+            "Хэлтсийн дарга",
+            "Ахлах шинжээч",
+            "Шинжээч",
+            "Ахлах мэргэжилтэн",
+            "Мэргэжилтэн",
+            "Зөвлөх"
+        ]
+
+        for pos in def_pos:
+            Position.objects.create(
+                name=pos,
+                org=org
+            )
 
         return JsonResponse({'success': True})
 
@@ -1823,12 +1847,17 @@ def _get_choices(Model, field_name):
     return choices
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_select_values(request):
+@user_passes_test(lambda u: u.is_superuser)
+def get_select_values(request, payload):
+    org_id = payload.get('org_id')
+    if not org_id:
+        employee = get_object_or_404(Employee, user=request.user)
+        org_id = employee.org_id
 
-    qs = DefaultPosition.objects
-    qs = qs.all()
+    qs = Position.objects
+    qs = qs.filter(org_id=org_id)
     positions = list(qs.values())
 
     states = _get_choices(Employee, 'state')
@@ -1941,3 +1970,150 @@ def send_mail(request, pk):
     utils.send_approve_email(user, subject, text)
 
     return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def position_list(request, payload, pk):
+    items = []
+    page = 1
+    total_page = 1
+    start_index = 1
+    оруулах_талбарууд = ['id', 'name', 'org_id']
+
+    qs = Position.objects.filter(org_id=pk)
+    if qs:
+        datatable = Datatable(
+            model=Position,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд
+        )
+        items, total_page, start_index = datatable.get()
+        page = payload.get('page')
+
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+        "start_index": start_index
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_remove(request, pk):
+    position = get_object_or_404(Position, id=pk)
+    has_emp_pos = position.employee_set.all()
+
+    if has_emp_pos:
+        rsp = {
+            'success': False,
+            'error': '"{position}" албан тушаалыг хэрэглэгчид оноосон байна!!!'.format(position=position.name),
+        }
+    else:
+        position.delete()
+        rsp = {
+            'success': True,
+            'data': "Амжилттай устгалаа"
+        }
+
+    return JsonResponse(rsp)
+
+
+def _pos_name_or_id_check(qs_pos, name, pos_id=None):
+    has_pos_name = False
+    qs_pos = qs_pos.filter(name=name)
+    if qs_pos:
+        if pos_id:
+            if qs_pos.first().id != pos_id:
+                has_pos_name = True
+        else:
+            has_pos_name = True
+    return has_pos_name
+
+
+def _make_pos_data(datas, pk):
+    datas['org_id'] = pk
+    return datas
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_create(request, payload, pk):
+    name = payload.get("name")
+    datas = _make_pos_data(payload, pk)
+    qs = Position.objects
+    qs_pos = qs.filter(org_id=pk)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        qs.create(**datas)
+        rsp = {
+            'success': True,
+            'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+def _del_unneed_keys(obj):
+    del_keys = ['pos_id']
+    for key in del_keys:
+        del obj[key]
+
+    return obj
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_update(request, payload, pk):
+    name = payload.get("name")
+    pos_id = int(payload.get("pos_id"))
+    qs = Position.objects
+    qs_pos = qs.filter(org_id=pk)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name, pos_id)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        payload = _del_unneed_keys(payload)
+        qs_pos.filter(
+            id=pos_id
+        ).update(**payload)
+        rsp = {
+            'success': True,
+            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_detail(request, pk):
+    position = Position.objects.filter(id=pk)
+    if not position:
+        raise Http404
+    datas = position.values('id', 'name').first()
+    rsp = {
+        'success': True,
+        'datas': datas
+    }
+
+    return JsonResponse(rsp)

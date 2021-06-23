@@ -18,7 +18,7 @@ export default class SideBar extends Component {
                 {
                     features.length > 0
                     &&
-                        <OverLaps themes={list_all} feature_id={feature_id} setNotif={this.props.setNotif}/>
+                        <OverLaps themes={list_all} feature_id={feature_id}/>
                 }
                 <form>
                     <div className="table-responsive">

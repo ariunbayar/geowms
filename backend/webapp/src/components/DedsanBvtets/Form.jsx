@@ -61,7 +61,7 @@ export default class Forms extends Component {
             modalAction: action,
             modalClose: ""
         }
-        this.props.setModal(modal)
+        global.MODAL(modal)
     }
 
     connectedFields(value_obj, idx) {
