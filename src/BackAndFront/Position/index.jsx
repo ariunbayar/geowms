@@ -4,7 +4,6 @@ import { Switch, Route } from "react-router-dom"
 import PositionList from "@helpComp/Position/PositionList"
 import PositionAdd from "@helpComp/Position/PositionAdd"
 
-
 export default class Position extends Component {
 
     constructor(props) {
@@ -23,10 +22,10 @@ export default class Position extends Component {
         if (is_superuser) {
             is_allow = is_superuser
             is_backend = true
-            this.setState({is_backend: true, is_allow: is_superuser})
+            this.setState({ is_backend: true, is_allow: is_superuser })
         }
         else {
-            this.setState({is_backend: false, is_allow: is_admin})
+            this.setState({ is_backend: false, is_allow: is_admin })
         }
     }
 

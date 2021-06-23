@@ -47,10 +47,10 @@ urlpatterns = [
             ], 'role'))),
             path('position/', include(([
                 path('', org_views.position_list),
-                path('create/', org_views.create),
-                path('<int:pk>/remove/', org_views.remove),
-                path('<int:pk>/edit/', org_views.update),
-                path('<int:pk>/detail/', org_views.detail),
+                path('create/', org_views.pos_create),
+                path('<int:pk>/remove/', org_views.pos_remove),
+                path('<int:pk>/edit/', org_views.pos_update),
+                path('<int:pk>/detail/', org_views.pos_detail),
             ], 'position'))),
         ], 'role'))),
 

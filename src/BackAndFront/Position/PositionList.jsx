@@ -101,9 +101,9 @@ class PositionList extends Component {
 
     handleRemove(delete_link) {
         service.getRequest(delete_link)
-            .then(({success, data, error}) => {
+            .then(({ success, data, error }) => {
                 if (success) {
-                    this.setState({refresh: !this.state.refresh})
+                    this.setState({ refresh: !this.state.refresh })
                     const modal = {
                         modal_status: "open",
                         modal_icon: "fa fa-check-circle",
@@ -150,10 +150,9 @@ class PositionList extends Component {
             body,
         } = this.state
 
-
         return (
-            <div className={`${!this.props.is_backend && "card"}`}>
-                <div className={`${!this.props.is_backend && "card-body"}`}>
+            <div className={`${!this.props.is_backend ? "card" : ""}`}>
+                <div className={`${!this.props.is_backend ? "card-body" : ""}`}>
                     <div className="col-md-12">
                         <PortalDataTable
                             refresh={refresh}

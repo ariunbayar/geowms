@@ -26,7 +26,7 @@ export class OrgForm extends Component {
         this.handleHistoryPush = this.handleHistoryPush.bind(this)
     }
 
-    componentDidUpdate(pP, Ps) {
+    componentDidUpdate(pP, pS) {
         if (pP.allowed_geom != this.props.allowed_geom) {
             this.setState({allowed_geom: this.props.allowed_geom})
         }
