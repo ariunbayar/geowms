@@ -1909,7 +1909,7 @@ def get_today_datetime(is_string=False):
     return now
 
 
-def _get_type(value_type_id):
+def get_type(value_type_id):
     number_types = ['number', 'double']
     text_types = ['text', 'multi_text', 'link', 'boolean']
 

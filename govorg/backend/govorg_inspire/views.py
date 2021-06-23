@@ -324,7 +324,7 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data = ''
         code_lists = []
         form = dict()
-        value_type = utils._get_type(l_property.value_type_id)
+        value_type = utils.get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
         data_type_id = l_data_type.data_type_id
         property_id = l_property.property_id

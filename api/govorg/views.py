@@ -244,7 +244,7 @@ def _get_property_data(values, employee, feature_id, geo_id):
         if property:
             data_list = []
             value_type = property.value_type_id
-            valid_type = utils._get_type(value_type)
+            valid_type = utils.get_type(value_type)
             data = values[value]
             if data and valid_type == 'option':
                 code_list = LCodeLists.objects.filter(code_list_name__iexact=data).first()
