@@ -833,6 +833,8 @@ def request_approve(request, payload):
                             'form_json': form_json,
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
+                        qs_m_datas = MDatas.objects.filter(geo_id=old_geo_id)
+                        qs_m_datas.delete()
                         success = _request_to_m(request_datas)
                         _insert_data_another_table(request_datas, old_geo_id, 'update')
 
