@@ -428,7 +428,12 @@ def qgis_proxy(request, base_url, token, fid=''):
         raise Http404
     allowed_props.insert(0, 'geo_data')
 
-    if request.GET.get('REQUEST') != 'GetMap':
+    if request.GET.get('request'):
+        service_request = request.GET.get('request').lower()
+    elif request.GET.get('REQUEST'):
+        service_request = request.GET.get('REQUEST').lower()
+    unneed_requests = ['getmap', 'getlegendgraphic']
+    if service_request not in unneed_requests:
         if request.GET.get('SERVICE') == 'WFS':
             content = filter_layers_wfs(content, allowed_layers, allowed_props)
         elif request.GET.get('SERVICE') == 'WMS':
