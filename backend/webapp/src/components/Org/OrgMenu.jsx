@@ -195,8 +195,8 @@ function OrgTabs(props) {
                         activeClassName="active"
                         data-toggle="tab"
                     >
-                        <i className="fa fa-bar-chart" aria-hidden="true"/>
-                        <span className="hidden-xs">Албан тушаал</span>
+                        <i className="fa fa-shopping-bag" aria-hidden="true"/>
+                        <span className="hidden-xs"> Албан тушаал</span>
                     </NavLink>
                 </li>
             </ul>

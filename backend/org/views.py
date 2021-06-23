@@ -2067,6 +2067,14 @@ def pos_create(request, payload, pk):
     return JsonResponse(rsp)
 
 
+def _del_unneed_keys(obj):
+    del_keys = ['pos_id']
+    for key in del_keys:
+        del obj[key]
+
+    return obj
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -2083,6 +2091,7 @@ def pos_update(request, payload, pk):
             'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
         }
     else:
+        payload = _del_unneed_keys(payload)
         qs_pos.filter(
             id=pos_id
         ).update(**payload)
