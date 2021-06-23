@@ -288,16 +288,15 @@ export class Roles extends Component {
     }
 
     handleSubmit(){
-        this.setState({handle_save_is_laod: true})
-        const {level, id} = this.props.match.params
+        this.setState({ handle_save_is_laod: true })
+        const { level, id } = this.props.match.params
 
-        const {properties_perms} = this.state
-        service.saveGovRoles(level, id, properties_perms).then(({success}) =>{
+        const { properties_perms } = this.state
+        service.saveGovRoles(level, id, properties_perms).then(({ success }) =>{
             if(success){
-                this.handleRoles()
                 setTimeout(() => {
-                    this.setState({modal_alert_status: 'open'})
-                    this.setState({handle_save_is_laod: false})
+                    this.setState({ modal_alert_status: 'open' })
+                    this.setState({ handle_save_is_laod: false })
                 }, 1000);
             }
 
@@ -305,9 +304,8 @@ export class Roles extends Component {
     }
 
     modalClose(){
-        this.setState({modal_alert_status: 'closed'})
-        this.setState({handleSaveIsLoad:false})
-        this.handleRoles()
+        this.setState({ modal_alert_status: 'closed' })
+        this.setState({ handle_save_is_laod: false })
     }
 
     render() {
