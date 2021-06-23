@@ -10,6 +10,6 @@ export {
 
 //TODO энэ жишээ ийм маягаар явна
 function test(params) {
-    alert("dasdsa")
+    alert("it worked")
     return params
 }
