@@ -146,9 +146,9 @@ urlpatterns = [
         path('get-all-org/', org_views.get_all_org),
         path('send-mail/<int:pk>/', org_views.send_mail),
         path('<int:pk>/position/', org_views.position_list),
-        path('<int:pk>/position/create/', org_views.create),
-        path('<int:pk>/position/remove/', org_views.remove),
-        path('<int:pk>/position/edit/', org_views.update),
+        path('<int:pk>/position/create/', org_views.pos_create),
+        path('<int:pk>/position/remove/', org_views.pos_remove),
+        path('<int:pk>/position/edit/', org_views.pos_update),
         path('<int:pk>/position/detail/', org_views.pos_detail),
     ], 'org'))),
 

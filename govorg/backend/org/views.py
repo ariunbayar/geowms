@@ -6,6 +6,7 @@ from django.db.models import F
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.http.response import Http404
 
 from backend.org.models import Org, Employee
 from backend.inspire.models import GovPerm
@@ -330,7 +331,7 @@ def position_list(request, payload):
     return JsonResponse(rsp)
 
 
-def _pos_name_check(qs_pos, name, pos_id=None):
+def _pos_name_or_id_check(qs_pos, name, pos_id=None):
     has_pos_name = False
     qs_pos = qs_pos.filter(name=name)
     if qs_pos:
@@ -342,15 +343,20 @@ def _pos_name_check(qs_pos, name, pos_id=None):
     return has_pos_name
 
 
+def _make_pos_data(datas, pk):
+    datas['org_id'] = pk
+    return datas
+
+
 @require_POST
 @ajax_required
 @gov_required
-def create(request, payload):
+def pos_create(request, payload):
     org = request.org
     name = payload.get("name")
     qs = Position.objects
     qs_pos = qs.filter(org=org)
-    has_pos_name = _pos_name_check(qs_pos, name)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name)
 
     if has_pos_name:
         rsp = {
@@ -358,10 +364,8 @@ def create(request, payload):
             'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
         }
     else:
-        Position.objects.create(
-            name=name,
-            org=org
-        )
+        datas = _make_pos_data(payload, org.id)
+        Position.objects.create(**datas)
         rsp = {
             'success': True,
             'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
@@ -370,21 +374,13 @@ def create(request, payload):
     return JsonResponse(rsp)
 
 
-def _do_emp_have_pos(position, org):
-    employee = Employee.objects.filter(position=position, org=org).first()
-    if employee:
-        return True
-    else:
-        return False
-
 
 @require_GET
 @ajax_required
 @gov_required
-def remove(request, pk):
-    org = request.org
+def pos_remove(request, pk):
     position = get_object_or_404(Position, id=pk)
-    has_emp_pos = _do_emp_have_pos(position, org,)
+    has_emp_pos = position.employee_set.all()
 
     if has_emp_pos:
         rsp = {
@@ -401,15 +397,23 @@ def remove(request, pk):
     return JsonResponse(rsp)
 
 
+def _del_unneed_keys(obj):
+    del_keys = ['pos_id']
+    for key in del_keys:
+        del obj[key]
+
+    return obj
+
+
 @require_POST
 @ajax_required
 @gov_required
-def update(request, payload, pk):
+def pos_update(request, payload, pk):
     name = payload.get("name")
     pos_id = int(payload.get("pos_id"))
     qs = Position.objects
-    qs_pos = qs.filter(org_id=pk)
-    has_pos_name = _pos_name_check(qs_pos, name, pos_id)
+    qs_pos = qs.filter(org=request.org)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name, pos_id)
 
     if has_pos_name:
         rsp = {
@@ -417,11 +421,10 @@ def update(request, payload, pk):
             'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
         }
     else:
+        payload = _del_unneed_keys(payload)
         qs_pos.filter(
             id=pos_id
-        ).update(
-            name=name
-        )
+        ).update(**payload)
         rsp = {
             'success': True,
             'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
@@ -433,11 +436,11 @@ def update(request, payload, pk):
 @require_GET
 @ajax_required
 @gov_required
-def detail(request, pk):
-    position = Position.objects.filter(id=pk)
-    datas = dict()
-    if position:
-        datas = position.values('id', 'name').first()
+def pos_detail(request, pk):
+    position = Position.objects.filter(id=pk, org=request.org)
+    if not position:
+        raise Http404
+    datas = position.values('id', 'name').first()
     rsp = {
         'success': True,
         'datas': datas

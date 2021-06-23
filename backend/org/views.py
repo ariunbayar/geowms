@@ -1,6 +1,5 @@
 import os
 import io
-from django import http
 from django.http.response import Http404
 from geojson import FeatureCollection
 import PIL.Image as Image
@@ -18,7 +17,6 @@ from django.utils.timezone import localtime, now
 from django.views.decorators.http import require_GET, require_POST
 from django.conf import settings
 from django.forms.models import model_to_dict
-from requests.api import request
 
 from backend.govorg.models import GovOrg
 from backend.inspire.models import LDataTypeConfigs
@@ -1851,6 +1849,7 @@ def _get_choices(Model, field_name):
 
 @require_POST
 @ajax_required
+@user_passes_test(lambda u: u.is_superuser)
 def get_select_values(request, payload):
     org_id = payload.get('org_id')
     if not org_id:
@@ -2007,7 +2006,7 @@ def position_list(request, payload, pk):
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def remove(request, pk):
+def pos_remove(request, pk):
     position = get_object_or_404(Position, id=pk)
     has_emp_pos = position.employee_set.all()
 
@@ -2026,7 +2025,7 @@ def remove(request, pk):
     return JsonResponse(rsp)
 
 
-def _pos_name_check(qs_pos, name, pos_id=None):
+def _pos_name_or_id_check(qs_pos, name, pos_id=None):
     has_pos_name = False
     qs_pos = qs_pos.filter(name=name)
     if qs_pos:
@@ -2038,14 +2037,20 @@ def _pos_name_check(qs_pos, name, pos_id=None):
     return has_pos_name
 
 
+def _make_pos_data(datas, pk):
+    datas['org_id'] = pk
+    return datas
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def create(request, payload, pk):
+def pos_create(request, payload, pk):
     name = payload.get("name")
+    datas = _make_pos_data(payload, pk)
     qs = Position.objects
     qs_pos = qs.filter(org_id=pk)
-    has_pos_name = _pos_name_check(qs_pos, name)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name)
 
     if has_pos_name:
         rsp = {
@@ -2053,10 +2058,7 @@ def create(request, payload, pk):
             'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
         }
     else:
-        qs.create(
-            name=name,
-            org_id=pk
-        )
+        qs.create(**datas)
         rsp = {
             'success': True,
             'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
@@ -2068,12 +2070,12 @@ def create(request, payload, pk):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def update(request, payload, pk):
+def pos_update(request, payload, pk):
     name = payload.get("name")
     pos_id = int(payload.get("pos_id"))
     qs = Position.objects
     qs_pos = qs.filter(org_id=pk)
-    has_pos_name = _pos_name_check(qs_pos, name, pos_id)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name, pos_id)
 
     if has_pos_name:
         rsp = {
@@ -2083,9 +2085,7 @@ def update(request, payload, pk):
     else:
         qs_pos.filter(
             id=pos_id
-        ).update(
-            name=name
-        )
+        ).update(**payload)
         rsp = {
             'success': True,
             'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
@@ -2099,9 +2099,9 @@ def update(request, payload, pk):
 @user_passes_test(lambda u: u.is_superuser)
 def pos_detail(request, pk):
     position = Position.objects.filter(id=pk)
-    datas = dict()
-    if position:
-        datas = position.values('id', 'name').first()
+    if not position:
+        raise Http404
+    datas = position.values('id', 'name').first()
     rsp = {
         'success': True,
         'datas': datas

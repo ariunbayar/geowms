@@ -67,9 +67,9 @@ export class PositionAdd extends Component {
     handleDetail(detail_link) {
         service
             .getRequest(detail_link)
-            .then(({success, datas}) => {
+            .then(({ success, datas }) => {
                 if (success) {
-                    this.setState({form_values: {name:datas.name}})
+                    this.setState({ form_values: { name: datas.name } })
                 }
             })
     }
@@ -89,7 +89,7 @@ export class PositionAdd extends Component {
         }
         service
             .postRequest(link, form_values)
-            .then(({success, data, error}) => {
+            .then(({ success, data, error }) => {
                 if (success) {
                     const modal = {
                         modal_status: "open",
@@ -107,7 +107,7 @@ export class PositionAdd extends Component {
                     global.MODAL(modal)
                 }
                 else {
-                    setErrors({name: error})
+                    setErrors({ name: error })
                     const modal = {
                         modal_status: "open",
                         modal_icon: "fa fa-times-circle",
@@ -147,9 +147,9 @@ export class PositionAdd extends Component {
                             return (
                                 <Form className="col-12">
                                     <div className="form-group col-md-6">
-                                        <label htmlFor="name">Албан тушаал</label>
+                                        <label htmlFor="id_name">Албан тушаал</label>
                                         <Field
-                                            className={`form-control ${errors.name  ? "is-invalid": ''} `}
+                                            className={`form-control ${errors.name  ? "is-invalid": ''}`}
                                             name='name'
                                             id="id_name"
                                             type="text"
@@ -161,7 +161,7 @@ export class PositionAdd extends Component {
                                         <button type="submit" className="btn btn-primary waves-effect waves-light m-1" disabled={isSubmitting}>
                                             {isSubmitting && <i className="fa fa-spinner fa-spin"></i>}
                                             {isSubmitting && <a className="text-light">Шалгаж байна.</a>}
-                                            {!isSubmitting && 'Хадгалах' }
+                                            {!isSubmitting && 'Хадгалах'}
                                         </button>
                                     </div>
                                 </Form>
