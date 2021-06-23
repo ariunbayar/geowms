@@ -27,7 +27,7 @@ export class App extends Component {
     requestCount() {
         service.getCount().then(({ success, request_count }) => {
             if (success) {
-                this.setState({ request_count: request_count })
+                this.setState({ request_count })
             }
         })
     }

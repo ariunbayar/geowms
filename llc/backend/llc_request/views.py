@@ -92,12 +92,13 @@ def llc_request_list(request, payload):
             оруулах_талбарууд=оруулах_талбарууд,
             хувьсах_талбарууд=хувьсах_талбарууд
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
 
         rsp = {
             'items': items,
             'page': payload.get('page'),
-            'total_page': total_page
+            'total_page': total_page,
+            'start_index': start_index,
         }
     else:
         rsp = {
@@ -648,12 +649,13 @@ def get_search_field(request):
 
 @require_GET
 @ajax_required
+# @login_required(login_url='/llc/llc-request/')
 def get_count(request):
-    request_count = RequestFiles.objects.count()
-
+    # state_new = 1 ---> Шинэ
+    # state_send = 2 ---> Илгээсэн
+    states = [1, 2]
+    request_count = RequestFiles.objects.filter(state__in=states).count()
     return JsonResponse({
         'success': True,
         'request_count': request_count,
     })
-
-
