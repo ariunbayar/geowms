@@ -739,6 +739,10 @@ def _get_employee(employee, filter_from_user):
     return employee_detail
 
 
+def _get_start_index(per_page, page):
+    return (per_page * (page - 1)) + 1
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -797,6 +801,7 @@ def employee_list(request, payload, level, pk):
         'items': employees_display,
         'page': page,
         'total_page': total_page,
+        'start_index': _get_start_index(per_page, page),
     }
 
     return JsonResponse(rsp)
