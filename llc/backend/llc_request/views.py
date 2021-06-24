@@ -649,11 +649,9 @@ def get_search_field(request):
 
 @require_GET
 @ajax_required
-# @login_required(login_url='/llc/llc-request/')
 def get_count(request):
-    # state_new = 1 ---> Шинэ
-    # state_send = 2 ---> Илгээсэн
-    states = [1, 2]
+
+    states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
     request_count = RequestFiles.objects.filter(state__in=states).count()
     return JsonResponse({
         'success': True,
