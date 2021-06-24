@@ -9,7 +9,6 @@ import { ButtonDelete } from "./ButtonDelete"
 import { ButtonBack } from "./ButtonBack"
 import AddressMap from "./Map"
 
-
 export class Detail extends Component {
 
     constructor(props) {
@@ -46,14 +45,14 @@ export class Detail extends Component {
     }
 
     componentDidMount(){
-        this.fetchDetail()
         const pk = this.props.match.params.emp
-        this.getAddresses(pk)
+        Promise.all([
+            this.getAddresses(pk),
+            this.fetchDetail(pk),
+        ])
     }
 
-    fetchDetail() {
-
-        const pk = this.props.match.params.emp
+    fetchDetail(pk) {
 
         service
             .employeeDetail(pk)
@@ -78,9 +77,10 @@ export class Detail extends Component {
 
     handleDelete() {
         this.setState({status_delete: 'initial'})
-        const { emp } = this.props.match.params
+        const { emp, level } = this.props.match.params
         this.setState({ status_delete: 'loading' })
         service.employeeRemove(emp).then(({ success }) => {
+            global.refreshOrgCount(level)
             this.setState({ status_delete: success ? 'success' : 'fail' })
         })
     }

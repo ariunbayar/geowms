@@ -1,10 +1,8 @@
-import React, { Component } from "react"
+import React, { Component, Fragment } from "react"
 import {service} from "./service"
 import ModalAlert from "../../ModalAlert"
 import {TableHeadRole} from './TableHeadRole'
 import Loader from "@utils/Loader"
-
-
 export class Roles extends Component {
 
     constructor(props) {
@@ -314,15 +312,17 @@ export class Roles extends Component {
             <div className="row">
                 <Loader is_loading={role_is_load}/>
                 <div className="col-md-6">
-                    {handle_save_is_laod ?
-                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" style={{zIndex:"0"}}>
-                            <div className="spinner-border text-light" role="status">
-                                <span className="sr-only">Loading...</span>
-                            </div>
-                            <a className="text-light"> Шалгаж байна.</a>
-                        </a>
+                    {
+                        handle_save_is_laod
+                        ?
+                            <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" style={{zIndex:"0"}}>
+                                <div className="spinner-border text-light" role="status">
+                                    <span className="sr-only">Loading...</span>
+                                </div>
+                                <span className="text-light"> Шалгаж байна.</span>
+                            </a>
                         :
-                        <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" style={{zIndex:"0"}} onClick={this.handleSubmit}>Хадгалах</a>
+                            <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" style={{zIndex:"0"}} onClick={this.handleSubmit}>Хадгалах</a>
                     }
                     <div className="fixed-height-b">
                     {data.map((theme, theme_index) => (
@@ -479,25 +479,25 @@ export class Roles extends Component {
                                             <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.data_type_id == null && item.geom == true && item.disable == true).length > 0}  type="checkbox" id="perm_approve" name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "data_type_id": null, "property_id": null, "geom": true, "disable": false}, e.target.checked, 5)}/><label htmlFor="perm_approve"></label></td>
                                         </tr>
                                         {properties.map((data_type, idx) =>
-                                            <>
-                                            <tr>
-                                                <td rowSpan={data_type.properties.length + 1} className="vertical text-center align-middle text-wrap">
-                                                    <span className="text-center vertical align-middle">{data_type.name}</span><br/>
-                                                    <span className="text-center vertical align-middle">({data_type.code})</span>
-                                                </td>
-                                            </tr>
-                                            {data_type.properties.map((property, index) =>
-                                                <tr key={index}>
-                                                    <td>{property.name}</td>
-                                                    <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_view"+property.id+idx+index} name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 1)}/><label htmlFor={"perm_view"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_create"+property.id+idx+index} name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 2)}/><label htmlFor={"perm_create"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_remove"+property.id+idx+index} name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 3)}/><label htmlFor={"perm_remove"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_revoke"+property.id+idx+index} name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 4)}/><label htmlFor={"perm_revoke"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_review"+property.id+idx+index} name="perm_review" checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 6)}/><label htmlFor={"perm_review"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_approve"+property.id+idx+index} name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 5)}/><label htmlFor={"perm_approve"+property.id+idx+index}></label></td>
+                                            <Fragment key={idx}>
+                                                <tr>
+                                                    <td rowSpan={data_type.properties.length + 1} className="vertical text-center align-middle text-wrap">
+                                                        <span className="text-center vertical align-middle">{data_type.name}</span><br/>
+                                                        <span className="text-center vertical align-middle">({data_type.code})</span>
+                                                    </td>
                                                 </tr>
-                                            )}
-                                            </>
+                                                {data_type.properties.map((property, index) =>
+                                                    <tr key={index}>
+                                                        <td>{property.name}</td>
+                                                        <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_view"+property.id+idx+index} name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 1)}/><label htmlFor={"perm_view"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_create"+property.id+idx+index} name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 2)}/><label htmlFor={"perm_create"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_remove"+property.id+idx+index} name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 3)}/><label htmlFor={"perm_remove"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_revoke"+property.id+idx+index} name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 4)}/><label htmlFor={"perm_revoke"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_review"+property.id+idx+index} name="perm_review" checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 6)}/><label htmlFor={"perm_review"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input disabled={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false && item.disable == true).length > 0} type="checkbox" id={"perm_approve"+property.id+idx+index} name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false, "disable": false}, e.target.checked, 5)}/><label htmlFor={"perm_approve"+property.id+idx+index}></label></td>
+                                                    </tr>
+                                                )}
+                                            </Fragment>
                                         )}
                                     </tbody>
                                 </table>

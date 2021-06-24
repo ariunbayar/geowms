@@ -90,14 +90,14 @@ export default class Modal extends Component {
     handleOpen() {
         this.setState({modal_status: 'initial'})
         setTimeout(() => {
-            this.setState({modal_status: 'open'})
+            this.setState({ modal_status: 'open' })
         }, 0)
     }
 
     handleClose(callback) {
-        this.setState({modal_status: 'closing'})
+        this.setState({ modal_status: 'closing' })
         setTimeout(() => {
-            this.setState({modal_status: 'closed'})
+            this.setState({ modal_status: 'closed' })
             if (callback) {
                 callback()
             } else {
@@ -105,6 +105,17 @@ export default class Modal extends Component {
                 if (this.props.modalClose) {
                     this.props.modalClose()
                 }
+            }
+        }, 150)
+    }
+
+    modalClose() {
+        const { has_button } = this.props
+        this.setState({ modal_status: 'closing' })
+        setTimeout(() => {
+            this.setState({ modal_status: 'closed' })
+            if (!has_button && this.props.modalClose) {
+                this.props.modalClose()
             }
         }, 150)
     }
