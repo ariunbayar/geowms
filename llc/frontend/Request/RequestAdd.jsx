@@ -208,7 +208,7 @@ export class RequestAdd extends Component {
 
     validationForm (){
         var forms = document.getElementsByClassName('form-control')
-        for (var i = 1; i < forms.length; i++) {
+        for (var i = 0; i < forms.length; i++) {
             let form = forms[i]
             if(form.value == '') {
                 form.classList.add('is-invalid')
