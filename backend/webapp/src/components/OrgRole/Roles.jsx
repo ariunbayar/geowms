@@ -289,6 +289,7 @@ export class Roles extends Component {
         service.saveInspireRoles(id, properties_perms).then(({success}) =>{
             if(success){
                 this.handleRoles()
+                this.setState({ handle_save_is_laod: false })
                 const modal = {
                     modal_status: 'open',
                     modal_icon: `fa fa-check-circle`,
