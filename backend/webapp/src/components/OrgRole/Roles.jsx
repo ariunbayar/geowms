@@ -1,5 +1,7 @@
 import React, { Component } from "react"
+import {Switch, Route} from "react-router-dom"
 import {service} from "./service"
+import ModalAlert from "../ModalAlert"
 import {TableHeadRole} from './TableHeadRole'
 import Loader from "@utils/Loader"
 
@@ -19,6 +21,7 @@ export class Roles extends Component {
             properties: [],
             properties_perms: [],
             handle_save_is_laod: false,
+            modal_alert_status: "closed",
             role_is_load: false
         }
         this.handleRoles = this.handleRoles.bind(this)
@@ -289,24 +292,18 @@ export class Roles extends Component {
         service.saveInspireRoles(id, properties_perms).then(({success}) =>{
             if(success){
                 this.handleRoles()
-                this.setState({ handle_save_is_laod: false })
-                const modal = {
-                    modal_status: 'open',
-                    modal_icon: `fa fa-check-circle`,
-                    modal_bg: '',
-                    icon_color: 'success',
-                    title: 'Амжилттай хадгаллаа',
-                    text: '',
-                    has_button: false,
-                    actionNameBack: '',
-                    actionNameDelete: '',
-                    modalAction: '',
-                    modalClose: ""
-                }
-                global.MODAL(modal)
+                setTimeout(() => {
+                    this.setState({modal_alert_status: 'open'})
+                    this.setState({handle_save_is_laod: false})
+                }, 1000);
             }
 
         })
+    }
+    modalClose(){
+        this.setState({modal_alert_status: 'closed'})
+        this.setState({handleSaveIsLoad:false})
+        this.handleRoles()
     }
 
     render() {
@@ -509,6 +506,12 @@ export class Roles extends Component {
                 </div>
                 </div>
             <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}><i className="fa fa-chevron-left" aria-hidden="true"></i></a>
+            <ModalAlert
+                modalAction={() => this.modalClose()}
+                status={this.state.modal_alert_status}
+                title="Амжилттай хадгаллаа"
+                model_type_icon = "success"
+            />
            </div>
         )
 
