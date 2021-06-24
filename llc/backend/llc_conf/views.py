@@ -31,16 +31,29 @@ def llc_frontend(request):
 @require_POST
 @ajax_required
 def get_tool_datas(request, payload):
+    f = open("check function deer irj baigaa yu .txt", "w")
+    f.write('function deer irj baigaa eseh')
+    f.close()
+
     regis_number = payload.get('regis_number') or 2841134
     tool_datas = []
     token_url = 'http://bagaj.gazar.gov.mn/api/token?email=api@gazar.gov.mn&password=hXzWneQ3vf6fkaFY'
     rsp = requests.post(token_url, headers=HEADERS, verify=False)
+    f = open("token_response.txt", "w")
+    data = str(rsp.status_code) + "\n" + rsp.text
+    f.write(data)
+    f.close()
+
     if rsp.status_code == 200:
         access_token = rsp.json().get('access_token')
         bagaj_url = 'http://bagaj.gazar.gov.mn/api/holder?regnum={registration_number}&token={access_token}'.format(
             registration_number=regis_number, access_token=access_token
         )
         rsp_bagaj = requests.post(bagaj_url, headers=HEADERS, verify=False)
+        f = open("rsp_bagaj_responese.txt", "w")
+        data = str(rsp_bagaj.status_code) + "\n" + rsp_bagaj.text
+        f.write(data)
+        f.close()
         tool_datas = rsp_bagaj.json()
         tool_datas = json_load(tool_datas)
         for tool_data in tool_datas:

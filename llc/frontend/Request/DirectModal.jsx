@@ -75,7 +75,6 @@ export default class RequestDetail extends Component {
             file_name, info, state, desc_info,
             aimag_name, aimag_geom, desc, emp_fields, mergejilten
         } = this.props
-
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
         else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0].mail}
@@ -238,7 +237,6 @@ export default class RequestDetail extends Component {
                                         файл оруулах
                                     </label>
                                     <input type="file" accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
-                                     
                                         name="uploadDocument"
                                         type="file"
                                         id="choose-file"
