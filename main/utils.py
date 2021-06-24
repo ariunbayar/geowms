@@ -276,17 +276,25 @@ def _make_connection(from_email):
     return connection
 
 
-def _make_html(http_or_https, text, host_name, token):
+def _make_html(text, host_name, token):
+    protocol = 'https'
+    if settings.DEBUG:
+        protocol = 'http'
+
+    host = host_name
+    if protocol not in host_name:
+        host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
+
     html = """
             <!DOCTYPE html>
             <html>
                 <head></head>
                 <body>
                     <p>{text}</p>
-                    <a href="{http_or_https}://{host_name}/gov/secure/approve/{token}/">{http_or_https}://{host_name}/gov/secure/approve/{token}/</a>
+                    <a style="color: 'blue'" href="{host}/gov/secure/approve/{token}/">Энд дарна уу</a>
                 </body>
             </html>
-        """.format(text=text, http_or_https=http_or_https, host_name=host_name, token=token)
+        """.format(text=text, host=host, token=token)
 
     return html
 
@@ -309,10 +317,8 @@ def send_approve_email(user, subject=None, text=None):
         subject = 'Геопортал хэрэглэгч баталгаажуулах'
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
-    if host_name == 'localhost:8000' or host_name == '192.168.10.92':
-        html_message =  _make_html('http', text, host_name, token)
-    else:
-        html_message =  _make_html('https', text, host_name, token)
+
+    html_message = _make_html(text, host_name, token)
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
 
