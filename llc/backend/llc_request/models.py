@@ -110,12 +110,24 @@ class RequestForm(models.Model):
     class Meta:
         db_table = 'llc_request_form'
 
+    PROJECT_PROGRAM = 1
+    LOCAL_AREA = 2
+    STATE_FUND = 3
+    PERSONAL = 4
+
+
+    INVESTMENT_STATUS = (
+        (PROJECT_PROGRAM, 'ТӨСӨЛ, ХӨТӨЛБӨРИЙН'),
+        (LOCAL_AREA, 'ОРОН НУТГИЙН'),
+        (STATE_FUND, 'УЛСЫН ТӨСВИЙН'),
+        (PERSONAL, 'ХУВИЙН')
+    )
     file = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
     client_org = models.CharField(max_length=100, verbose_name='Нэр')
     project_name = models.CharField(max_length=100, verbose_name='Нэр')
     object_type = models.TextField()
     object_quantum = models.TextField()
-    investment_status = models.TextField()
+    investment_status = models.PositiveIntegerField(choices=INVESTMENT_STATUS, db_index=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
