@@ -380,11 +380,30 @@ def getFields(request, payload):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def propertyFields(request, fid):
+def propertyFields(request, tid, fid):
+    file_detail = dict()
+
+    theme = get_object_or_404(LThemes, theme_id=tid)
     feature = get_object_or_404(LFeatures, feature_id=fid)
+
     view_name = utils.make_view_name(feature)
     has_mat_view = utils.has_materialized_view(view_name)
     geom = MGeoDatas.objects.filter(feature_id=fid).first()
+
+    main_folder = 'feature-template'
+    theme_name = theme.theme_name_eng
+    feature_name = feature.feature_name_eng
+    file_path = os.path.join(settings.MEDIA_ROOT, main_folder, theme_name, feature_name)
+
+    if os.path.exists(file_path):
+        file = os.listdir(file_path)
+        if file:
+            file = file[0]
+            file_path = file_path + '/' + file
+            file_stat = os.stat(file_path)
+
+            file_detail['name'] = str(file)
+            file_detail['size'] = file_stat.st_size
 
     geom_type = ''
     if geom:
@@ -421,6 +440,7 @@ def propertyFields(request, fid):
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
             'geom_type': geom_type,
             'cache_values': cache_values,
+            'file': file_detail
         }
     else:
         rsp = {
@@ -431,6 +451,7 @@ def propertyFields(request, fid):
             'view': '',
             'geom_type': geom_type,
             'cache_values': cache_values,
+            'file': file_detail,
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
 
@@ -510,9 +531,11 @@ def propertyFieldsSave(request):
     tid = request.POST.get('tid')
     fid = request.POST.get('fid')
     view_id = request.POST.get('view_id')
-    values = request.POST.get('values')
-    open_datas = request.POST.get('open_datas')
+    view_id = utils.json_load(view_id)
 
+    values = request.POST.get('values')
+
+    open_datas = request.POST.get('open_datas')
     open_datas = open_datas.split(',')
 
     id_list = request.POST.get('id_list')

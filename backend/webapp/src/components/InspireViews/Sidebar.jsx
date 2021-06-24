@@ -69,7 +69,6 @@ export default class SideBar extends Component {
     handleSave() {
         const { fid, tid } = this.props
         const { id_list, view, tile_cache_check, zoom_start, open_datas, file } = this.state
-
         let values
         values = this.getValuesFromState()
 
@@ -78,15 +77,17 @@ export default class SideBar extends Component {
         form_datas.append('fid', fid)
         form_datas.append('tid', tid)
         form_datas.append('id_list', id_list)
-        form_datas.append('view_id', view.id)
         form_datas.append('open_datas', open_datas)
 
-        if (file && file.length > 0){
+        if (view){
+            form_datas.append('view_id', view.id)
+        }
+
+        if (file){
             form_datas.append('files', file, file.name)
         }
 
         form_datas.append('values',  JSON.stringify({values}))
-
         service
             .setPropertyFields(form_datas)
             .then(({ success, msg }) => {
@@ -154,6 +155,11 @@ export default class SideBar extends Component {
                 check_style: false,
                 tile_cache_check
             })
+        }
+
+        if(pP.file != this.props.file){
+            const file = this.props.file
+            this.setState({file})
         }
 
         if (pP.view?.view_name != this.props.view?.view_name){
@@ -321,7 +327,7 @@ export default class SideBar extends Component {
     }
 
     render() {
-        const { fields, fid, fname, has_view } = this.props
+        const { fields, fid, fname, has_view, file } = this.props
         const { is_loading, id_list, check_list, check_open, open_datas } = this.state
         const state = this.state
         return (

@@ -114,12 +114,13 @@ def _get_feature_coll(ob, changeset_list):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def getRoles(request, tid, fid):
-    main_folder = "bundles_template"
+    main_folder = "feature-template"
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
     theme = LThemes.objects.filter(theme_id=tid).first()
+    feature = LFeatures.objects.filter(feature_id=fid).first()
     perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
 
     for perm_kind in perm_kinds:
@@ -136,13 +137,19 @@ def getRoles(request, tid, fid):
         elif perm_kind == EmpPermInspire.PERM_REVOKE:
             inspire_roles['PERM_REVOKE'] = True
 
-    folder_name = theme.theme_name
-    path = os.path.join(settings.MEDIA_ROOT, main_folder, folder_name)
-    file_name = os.listdir(path)[0]
-    file_url = os.path.join(path, file_name)
-    file =file_url.split("geoportal_app")
+    theme_folder = theme.theme_name_eng
+    feature_folder = feature.feature_name_eng
+    path = os.path.join(settings.MEDIA_ROOT, main_folder, theme_folder, feature_folder)
+    if os.path.exists(path):
+        files = os.listdir(path)
+        if files:
+            file_name = files[0]
+            file_url = os.path.join(path, file_name)
+            file =file_url.split("geoportal_app")
+            inspire_roles['file_url'] = file[1]
+        else:
+            inspire_roles['file_url'] = ''
 
-    inspire_roles['file_url'] = file[1]
 
     rsp = {
         'roles': inspire_roles,

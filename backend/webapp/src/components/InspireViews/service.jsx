@@ -15,11 +15,11 @@ function getall() {
     return fetch(`${prefix}/all/`, opts).then(handleResponse)
 }
 
-function getPropertyFields(fid) {
+function getPropertyFields(tid, fid) {
     const opts = {
         ...getPostOptions(),
     }
-    return fetch(`${prefix}/property-fields/${fid}/`, opts).then(handleResponse)
+    return fetch(`${prefix}/property-fields/${tid}/${fid}/`, opts).then(handleResponse)
 }
 
 function setPropertyFields(form_datas){
