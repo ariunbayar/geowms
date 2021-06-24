@@ -62,9 +62,9 @@ export class Жагсаалт extends Component {
                             <a><i className="icon-magnifier"></i></a>
                         </div>
                     </div>
-                    <div className="row pt-4">
+                    <div className="pt-4">
                         {error500_length === 0 ?
-                            <h5>Хэрэглэгч бүртгэлгүй байна </h5>
+                            <h5 className="text-center">Мэдээлэл байхгүй байна</h5>
                             :
                             error500_list.map((values, index) =>
                                 <div className="col-lg-12" id="accordion1" key={index}>

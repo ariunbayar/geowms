@@ -160,9 +160,10 @@ function getErguul() {
     return fetch(`${prefix}/get-erguul/`, requestOptions).then(handleResponse)
 }
 
-function getSelectValue() {
+function getSelectValue(org_id) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({ org_id }),
     }
     return fetch(`/back/api/org/get-select-values/`, requestOptions).then(handleResponse)
 }

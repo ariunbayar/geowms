@@ -1,3 +1,5 @@
+from unicodedata import name
+from llc.backend import llc_request
 import os
 import zipfile
 import glob
@@ -23,7 +25,7 @@ from llc.backend.llc_request.models import (
     LLCRequest
 )
 from backend.token.utils import TokenGeneratorUserValidationEmail
-from backend.org.models import Employee, Org
+from backend.org.models import Employee, Org, Position
 from backend.org.models import Org
 from backend.inspire.models import (
     MDatas,
@@ -97,7 +99,7 @@ def llc_request_list(request, payload):
             'items': items,
             'page': payload.get('page'),
             'total_page': total_page,
-            'start_index': start_index
+            'start_index': start_index,
         }
     else:
         rsp = {
@@ -453,7 +455,8 @@ def get_request_data(request, id):
 def _get_employees(geo_id):
     emp_fields = list()
     get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
-    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=13)
+    position = Position.objects.filter(name='Мэргэжилтэн', org=get_org).first()
+    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position.id)
     for emp in get_employees:
         emp_detail = dict()
         get_name = User.objects.filter(pk=emp.user_id).first()
@@ -644,4 +647,16 @@ def get_search_field(request):
     return JsonResponse({
         'success': True,
         'search_field': search_field,
+    })
+
+
+@require_GET
+@ajax_required
+def get_count(request):
+
+    states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
+    request_count = RequestFiles.objects.filter(state__in=states).count()
+    return JsonResponse({
+        'success': True,
+        'request_count': request_count,
     })

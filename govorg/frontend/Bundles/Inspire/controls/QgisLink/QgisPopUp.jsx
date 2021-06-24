@@ -21,7 +21,7 @@ class QgisCmp extends Component {
         textField.select()
         document.execCommand('copy')
         textField.remove()
-        this.props.addNotif('success', 'Амжилттай хуулаа', 'times')
+        this.props.addNotif('success', 'Амжилттай хууллаа', 'times')
     }
 
     render() {
