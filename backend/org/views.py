@@ -1111,61 +1111,61 @@ def _get_feature_property_gov(feature_id, govRole):
 @user_passes_test(lambda u: u.is_superuser)
 def save_inspire_roles(request, payload, pk):
 
-    values = payload.get('values')
-    govRole = get_object_or_404(GovRole, pk=pk)
-    objs = []
-    gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=govRole)
-    govPerm = GovPerm.objects.filter(gov_role=govRole)
-    if gov_role_inspire_all:
-        for gov_role_inspire in gov_role_inspire_all:
-            check = True
-            for data in values:
-                if gov_role_inspire.perm_kind == data['perm_kind'] and gov_role_inspire.feature_id == data['feature_id'] and gov_role_inspire.data_type_id == data['data_type_id'] and gov_role_inspire.property_id == data['property_id']:
-                    check = False
-            if check:
-                GovRoleInspire.objects.filter(perm_kind=gov_role_inspire.perm_kind, feature_id=gov_role_inspire.feature_id, data_type_id=gov_role_inspire.data_type_id, property_id=gov_role_inspire.property_id).delete()
-    for data in values:
-        if gov_role_inspire_all:
-            check = True
-            for gov_role_inspire in gov_role_inspire_all:
-                if gov_role_inspire.perm_kind == data['perm_kind'] and gov_role_inspire.feature_id == data['feature_id'] and gov_role_inspire.data_type_id == data['data_type_id'] and gov_role_inspire.property_id == data['property_id']:
-                    check = False
-            if check:
-                govRoleInspire = GovRoleInspire.objects.create(
-                    gov_role=govRole,
-                    perm_kind=data['perm_kind'],
-                    feature_id=data['feature_id'],
-                    data_type_id=data['data_type_id'],
-                    property_id=data['property_id'],
-                    geom=data['geom'],
-                    created_by=request.user,
-                    updated_by=request.user,
-                )
-                if govPerm:
-                    for gov_perm in govPerm:
-                        GovPermInspire.objects.create(
-                            gov_role_inspire=govRoleInspire,
-                            gov_perm=gov_perm,
-                            perm_kind=data['perm_kind'],
-                            feature_id=data['feature_id'],
-                            data_type_id=data['data_type_id'],
-                            property_id=data['property_id'],
-                            geom=data['geom'],
-                            created_by=request.user,
-                            updated_by=request.user,
-                        )
-        else:
-            objs.append(GovRoleInspire(
-                gov_role=govRole,
-                perm_kind=data['perm_kind'],
-                feature_id=data['feature_id'],
-                data_type_id=data['data_type_id'],
-                property_id=data['property_id'],
-                geom=data['geom'],
-                created_by=request.user,
-                updated_by=request.user,
-            ))
-    GovRoleInspire.objects.bulk_create(objs)
+    # values = payload.get('values')
+    # govRole = get_object_or_404(GovRole, pk=pk)
+    # objs = []
+    # gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=govRole)
+    # govPerm = GovPerm.objects.filter(gov_role=govRole)
+    # if gov_role_inspire_all:
+    #     for gov_role_inspire in gov_role_inspire_all:
+    #         check = True
+    #         for data in values:
+    #             if gov_role_inspire.perm_kind == data['perm_kind'] and gov_role_inspire.feature_id == data['feature_id'] and gov_role_inspire.data_type_id == data['data_type_id'] and gov_role_inspire.property_id == data['property_id']:
+    #                 check = False
+    #         if check:
+    #             GovRoleInspire.objects.filter(perm_kind=gov_role_inspire.perm_kind, feature_id=gov_role_inspire.feature_id, data_type_id=gov_role_inspire.data_type_id, property_id=gov_role_inspire.property_id).delete()
+    # for data in values:
+    #     if gov_role_inspire_all:
+    #         check = True
+    #         for gov_role_inspire in gov_role_inspire_all:
+    #             if gov_role_inspire.perm_kind == data['perm_kind'] and gov_role_inspire.feature_id == data['feature_id'] and gov_role_inspire.data_type_id == data['data_type_id'] and gov_role_inspire.property_id == data['property_id']:
+    #                 check = False
+    #         if check:
+    #             govRoleInspire = GovRoleInspire.objects.create(
+    #                 gov_role=govRole,
+    #                 perm_kind=data['perm_kind'],
+    #                 feature_id=data['feature_id'],
+    #                 data_type_id=data['data_type_id'],
+    #                 property_id=data['property_id'],
+    #                 geom=data['geom'],
+    #                 created_by=request.user,
+    #                 updated_by=request.user,
+    #             )
+    #             if govPerm:
+    #                 for gov_perm in govPerm:
+    #                     GovPermInspire.objects.create(
+    #                         gov_role_inspire=govRoleInspire,
+    #                         gov_perm=gov_perm,
+    #                         perm_kind=data['perm_kind'],
+    #                         feature_id=data['feature_id'],
+    #                         data_type_id=data['data_type_id'],
+    #                         property_id=data['property_id'],
+    #                         geom=data['geom'],
+    #                         created_by=request.user,
+    #                         updated_by=request.user,
+    #                     )
+    #     else:
+    #         objs.append(GovRoleInspire(
+    #             gov_role=govRole,
+    #             perm_kind=data['perm_kind'],
+    #             feature_id=data['feature_id'],
+    #             data_type_id=data['data_type_id'],
+    #             property_id=data['property_id'],
+    #             geom=data['geom'],
+    #             created_by=request.user,
+    #             updated_by=request.user,
+    #         ))
+    # GovRoleInspire.objects.bulk_create(objs)
     rsp = {
         'success': True,
     }
