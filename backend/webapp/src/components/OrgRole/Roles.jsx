@@ -305,7 +305,6 @@ export class Roles extends Component {
         this.setState({handleSaveIsLoad:false})
         this.handleRoles()
     }
-
     render() {
         const {data, tid, pid, fid, properties, properties_perms, role_is_load} = this.state
         return (
