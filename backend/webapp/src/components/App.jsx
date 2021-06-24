@@ -1,4 +1,4 @@
-import React, {Component, Suspense} from "react";
+import React, { Component, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 
 import MenuItem from '@utils/MenuItem';
@@ -28,36 +28,13 @@ const AnotherBaseConfig = React.lazy(() => import('./AnotherBase'))
 const DBExport = React.lazy(() => import('./DBExport'))
 
 import {service} from './service';
-
-
 export default class App extends Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      user_count: 0,
-      gov_count: [],
     };
-    this.handleBoxOver = this.handleBoxOver.bind(this)
-    this.hanfleCounts = this.hanfleCounts.bind(this)
-  }
-
-  handleBoxOver (field){
-    this.setState({ [field]: true })
-  }
-
-  componentDidMount() {
-    this.hanfleCounts()
-  }
-
-  hanfleCounts(){
-    Promise.all([
-      service.userCount(),
-      service.govCount(),
-    ]).then(([{user_count}, {gov_count}]) => {
-      this.setState({user_count, gov_count})
-    })
   }
 
   getModalFunc(setModal) {
@@ -82,51 +59,7 @@ export default class App extends Component {
                     <h5 className="logo-text">ГЕОПОРТАЛ</h5>
                   </a>
                 </div>
-                <ul className="sidebar-menu ">
-                    <MenuItem icon="fa fa-history" url="/back/access/login/" text="Хандалт"></MenuItem>
-                    <MenuItem icon="fa fa-bank" url="/back/log/" text="Банк лог"></MenuItem>
-                    <MenuItem icon="fa fa-database" url="/back/дэд-сан/" text="Дэд сан">
-                        <ul className="sidebar-submenu">
-                            <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан/" text="Дэд сан"></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан-бүтэц/" text="Бүтэц"></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/inspire-views/" text="View"></MenuItem>
-                        </ul>
-                    </MenuItem>
-                    <MenuItem icon="fa fa-globe" url="/back/layer-groups/" text="Geoserver">
-                        <ul className="sidebar-submenu">
-                            <MenuItem icon="fa fa-circle-o" url="/back/gp-geoserver/layer-groups/" text="Layer-Group"></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/gp-geoserver/style/" text="Style"></MenuItem>
-                        </ul>
-                    </MenuItem>
-                    <MenuItem icon="zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
-                    <MenuItem icon="fa fa-users" url="/back/байгууллага/түвшин/" text="Байгууллага">
-                        <ul className="sidebar-submenu">
-                            <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/1/" text="1-р түвшин" count={this.state.gov_count.level1 != 0 ? this.state.gov_count.level1 : '0'}></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/2/" text="2-р түвшин" count={this.state.gov_count.level2 != 0 ? this.state.gov_count.level2 : '0'}></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/3/" text="3-р түвшин" count={this.state.gov_count.level3 != 0 ? this.state.gov_count.level3 : '0'}></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/4/" text="4-р түвшин" count={this.state.gov_count.level4 != 0 ? this.state.gov_count.level4 : '0'}></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/org-role/" text="Байгууллага эрх"></MenuItem>
-                        </ul>
-                    </MenuItem>
-                    <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
-                    <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч" count={this.state.user_count}></MenuItem>
-                    <MenuItem icon="fa fa-arrow-circle-o-down" url="/back/another-base/" text="Database IO">
-                      <ul className="sidebar-submenu">
-                          <MenuItem icon="fa fa-circle-o" url="/back/another-base/" text="Өгөгдөл оруулах"></MenuItem>
-                          <MenuItem icon="fa fa-circle-o" url="/back/db-export/" text="Өгөгдөл гаргах"></MenuItem>
-                      </ul>
-                    </MenuItem>
-                    <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо">
-                        <ul className="sidebar-submenu">
-                            <MenuItem icon="fa fa-circle-o" url="/back/gis/" text="GIS"></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="GeoServer"></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/тохиргоо/" text="Сайт параметр"></MenuItem>
-                            <MenuItem icon="fa fa-circle-o" url="/back/error500/" text="Error500"></MenuItem>
-
-                        </ul>
-                    </MenuItem>
-                </ul>
+                <TabBars />
               </div>
                 <div className="content-wrapper">
                   <Switch>
@@ -135,7 +68,7 @@ export default class App extends Component {
                     <Route path={"/back/org-role/"} component={OrgRole} />
                     <Route
                       path="/back/байгууллага/"
-                      component={(props) => <Org {...props} refreshCount={this.hanfleCounts} />}
+                      component={(props) => <Org {...props} refreshCount={this.handleCount} />}
                     />
                     <Route path={"/back/дэд-сан-бүтэц/"} component={(props) => <DedsanBvtets {...props} />} />
                     <Route path={"/back/inspire-views/"} component={InspireViews} />
@@ -163,4 +96,72 @@ export default class App extends Component {
         </div>
     );
   }
+}
+
+function TabBars(props) {
+
+  const [user_count, setUserCount] = useState(0)
+  const [gov_count, setGovCount] = useState([])
+
+  useEffect(() => {
+    handleCount()
+    global.handleCount = handleCount
+  }, [])
+
+  const handleCount = () => {
+    Promise.all([
+      service.userCount(),
+      service.govCount(),
+    ]).then(([{ user_count }, { gov_count }]) => {
+      setUserCount(user_count)
+      setGovCount(gov_count)
+    })
+  }
+
+  return (
+    <ul className="sidebar-menu ">
+      <MenuItem icon="fa fa-history" url="/back/access/login/" text="Хандалт"></MenuItem>
+      <MenuItem icon="fa fa-bank" url="/back/log/" text="Банк лог"></MenuItem>
+      <MenuItem icon="fa fa-database" url="/back/дэд-сан/" text="Дэд сан">
+          <ul className="sidebar-submenu">
+              <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан/" text="Дэд сан"></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/дэд-сан-бүтэц/" text="Бүтэц"></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/inspire-views/" text="View"></MenuItem>
+          </ul>
+      </MenuItem>
+      <MenuItem icon="fa fa-globe" url="/back/layer-groups/" text="Geoserver">
+          <ul className="sidebar-submenu">
+              <MenuItem icon="fa fa-circle-o" url="/back/gp-geoserver/layer-groups/" text="Layer-Group"></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/gp-geoserver/style/" text="Style"></MenuItem>
+          </ul>
+      </MenuItem>
+      <MenuItem icon="zmdi zmdi-image-alt" url="/back/wms/" text="WMS"></MenuItem>
+      <MenuItem icon="fa fa-users" url="/back/байгууллага/түвшин/" text="Байгууллага">
+          <ul className="sidebar-submenu">
+              <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/1/" text="1-р түвшин" count={gov_count.level1 != 0 ? gov_count.level1 : '0'}></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/2/" text="2-р түвшин" count={gov_count.level2 != 0 ? gov_count.level2 : '0'}></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/3/" text="3-р түвшин" count={gov_count.level3 != 0 ? gov_count.level3 : '0'}></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/байгууллага/түвшин/4/" text="4-р түвшин" count={gov_count.level4 != 0 ? gov_count.level4 : '0'}></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/org-role/" text="Байгууллага эрх"></MenuItem>
+          </ul>
+      </MenuItem>
+      <MenuItem icon="icon-layers" url="/back/суурь-давхарга/" text="Суурь давхрага"></MenuItem>
+      <MenuItem icon="fa fa-user" url="/back/user/" text="Хэрэглэгч" count={user_count}></MenuItem>
+      <MenuItem icon="fa fa-arrow-circle-o-down" url="/back/another-base/" text="Database IO">
+        <ul className="sidebar-submenu">
+            <MenuItem icon="fa fa-circle-o" url="/back/another-base/" text="Өгөгдөл оруулах"></MenuItem>
+            <MenuItem icon="fa fa-circle-o" url="/back/db-export/" text="Өгөгдөл гаргах"></MenuItem>
+        </ul>
+      </MenuItem>
+      <MenuItem icon="fa fa-cogs" url="/back/тохиргоо/" text="Тохиргоо">
+          <ul className="sidebar-submenu">
+              <MenuItem icon="fa fa-circle-o" url="/back/gis/" text="GIS"></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/dev/" text="Хөгжүүлэлт"></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/geoserver/layers/" text="GeoServer"></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/тохиргоо/" text="Сайт параметр"></MenuItem>
+              <MenuItem icon="fa fa-circle-o" url="/back/error500/" text="Error500"></MenuItem>
+          </ul>
+      </MenuItem>
+  </ul>
+  );
 }

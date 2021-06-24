@@ -1,11 +1,10 @@
-import React, { Component } from "react"
-import {Switch, Route} from "react-router-dom"
-import {service} from "./service"
-import ModalAlert from "../ModalAlert"
-import {TableHeadRole} from './TableHeadRole'
+import React, { Component, Fragment } from "react"
+
 import Loader from "@utils/Loader"
 
+import { TableHeadRole } from './TableHeadRole'
 
+import { service } from "./service"
 export class Roles extends Component {
 
     constructor(props) {
@@ -21,7 +20,6 @@ export class Roles extends Component {
             properties: [],
             properties_perms: [],
             handle_save_is_laod: false,
-            modal_alert_status: "closed",
             role_is_load: false
         }
         this.handleRoles = this.handleRoles.bind(this)
@@ -41,11 +39,15 @@ export class Roles extends Component {
     }
 
     handleRoles(){
-        this.setState({role_is_load: true})
+        this.setState({ role_is_load: true })
         const id = this.props.match.params.id
-        service.getInspireRoles(id).then(({success, data, roles}) => {
-            if(success) this.setState({data, properties_perms: roles, role_is_load: false})
-        })
+        service
+            .getInspireRoles(id)
+            .then(({ success, data, roles }) => {
+                if(success) {
+                    this.setState({ data, properties_perms: roles, role_is_load: false })
+                }
+            })
     }
 
     handleFeature(tid, tid_index, pid, pid_index, fid, fid_index, properties){
@@ -285,26 +287,41 @@ export class Roles extends Component {
     }
 
     handleSubmit(){
-        this.setState({handle_save_is_laod: true})
+        this.setState({ handle_save_is_laod: true, role_is_load: true })
         const id = this.props.match.params.id
 
-        const {properties_perms} = this.state
-        service.saveInspireRoles(id, properties_perms).then(({success}) =>{
-            if(success){
-                this.handleRoles()
-                setTimeout(() => {
-                    this.setState({modal_alert_status: 'open'})
-                    this.setState({handle_save_is_laod: false})
-                }, 1000);
-            }
+        const { properties_perms } = this.state
+        service
+            .saveInspireRoles(id, properties_perms)
+            .then(({ success }) => {
+                if(success) {
+                    this.setModal('Амжилттай хадгаллаа', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose())
+                    this.setState({ handle_save_is_laod: false, role_is_load: false })
+                }
+            })
+    }
 
-        })
+    setModal(title, text, icon_color, icon, has_button, action, close) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: icon,
+            modal_bg: '',
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            actionNameBack: 'Буцах',
+            actionNameDelete: '',
+            modalAction: action,
+            modalClose: close,
+        }
+        global.MODAL(modal)
     }
-    modalClose(){
-        this.setState({modal_alert_status: 'closed'})
-        this.setState({handleSaveIsLoad:false})
-        this.handleRoles()
+
+    modalClose() {
+        this.props.history.push(`/back/org-role/`)
     }
+
     render() {
         const {data, tid, pid, fid, properties, properties_perms, role_is_load} = this.state
         return (
@@ -316,7 +333,7 @@ export class Roles extends Component {
                             <div className="spinner-border text-light" role="status">
                                 <span className="sr-only">Loading...</span>
                             </div>
-                            <a className="text-light"> Шалгаж байна.</a>
+                            <span className="text-light"> Шалгаж байна.</span>
                         </a>
                         :
                         <a className="btn gp-btn-primary btn-block waves-effect waves-light text-white" style={{zIndex:"0"}} onClick={this.handleSubmit}>Хадгалах</a>
@@ -356,7 +373,7 @@ export class Roles extends Component {
                                                 <div className="">
                                                     {theme.packages.map((package_data, package_index) => (
                                                         (package_data.features.length > 0 &&
-                                                            <div id={`accordion-p-${package_index+1+package_data.id}`} key={package_index}>
+                                                            <div id={`accordion-p-${package_index+1+package_data.id}`} key={`${theme_index}-${package_index}`}>
                                                                 <div className="">
                                                                     <div className="">
                                                                         <div className="">
@@ -385,7 +402,7 @@ export class Roles extends Component {
                                                                     <div id={`collapse-p-${package_index+1+package_data.id}`} className="collapse" data-parent={`#accordion-p-${package_index+1+package_data.id}`}>
                                                                         <div className="">
                                                                         {package_data.features.map((feature_data, feature_index) => (
-                                                                            <div key={feature_index}>
+                                                                            <div key={`${theme_index}-${package_index}-${feature_index}`}>
                                                                                 <div className="">
                                                                                     <div className="collapsed">
                                                                                         <div className="text-primary collapsed">
@@ -476,25 +493,25 @@ export class Roles extends Component {
                                             <td className="icheck-primary"><input type="checkbox" id="perm_approve" name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.data_type_id == null && item.geom == true).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "data_type_id": null, "property_id": null, "geom": true}, e.target.checked, 5)}/><label htmlFor="perm_approve"></label></td>
                                         </tr>
                                         {properties.map((data_type, idx) =>
-                                            <>
-                                            <tr>
-                                                <td rowSpan={data_type.properties.length + 1} className="vertical text-center align-middle text-wrap">
-                                                    <span className="text-center vertical align-middle">{data_type.name}</span><br/>
-                                                    <span className="text-center vertical align-middle">({data_type.code})</span>
-                                                </td>
-                                            </tr>
-                                            {data_type.properties.map((property, index) =>
-                                                <tr key={index}>
-                                                    <td>{property.name}</td>
-                                                    <td className="icheck-primary"><input type="checkbox" id={"perm_view"+property.id+idx+index} name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 1, data_type.id)}/><label htmlFor={"perm_view"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input type="checkbox" id={"perm_create"+property.id+idx+index} name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 2, data_type.id)}/><label htmlFor={"perm_create"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input type="checkbox" id={"perm_remove"+property.id+idx+index} name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 3, data_type.id)}/><label htmlFor={"perm_remove"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input type="checkbox" id={"perm_update"+property.id+idx+index} name="perm_update" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 4, data_type.id)}/><label htmlFor={"perm_update"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input type="checkbox" id={"perm_revoke"+property.id+idx+index} name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 6, data_type.id)}/><label htmlFor={"perm_revoke"+property.id+idx+index}></label></td>
-                                                    <td className="icheck-primary"><input type="checkbox" id={"perm_approve"+property.id+idx+index} name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 5, data_type.id)}/><label htmlFor={"perm_approve"+property.id+idx+index}></label></td>
+                                            <Fragment key={`${idx}-p`}>
+                                                <tr>
+                                                    <td rowSpan={data_type.properties.length + 1} className="vertical text-center align-middle text-wrap">
+                                                        <span className="text-center vertical align-middle">{data_type.name}</span><br/>
+                                                        <span className="text-center vertical align-middle">({data_type.code})</span>
+                                                    </td>
                                                 </tr>
-                                            )}
-                                            </>
+                                                {data_type.properties.map((property, index) =>
+                                                    <tr key={`${property.id}-${idx}-${index}-key`}>
+                                                        <td>{property.name}</td>
+                                                        <td className="icheck-primary"><input type="checkbox" id={"perm_view"+property.id+idx+index} name="perm_view" checked={properties_perms.filter((item) => item.perm_kind == 1 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 1, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 1, data_type.id)}/><label htmlFor={"perm_view"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input type="checkbox" id={"perm_create"+property.id+idx+index} name="perm_create" checked={properties_perms.filter((item) => item.perm_kind == 2 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 2, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 2, data_type.id)}/><label htmlFor={"perm_create"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input type="checkbox" id={"perm_remove"+property.id+idx+index} name="perm_remove" checked={properties_perms.filter((item) => item.perm_kind == 3 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 3, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 3, data_type.id)}/><label htmlFor={"perm_remove"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input type="checkbox" id={"perm_update"+property.id+idx+index} name="perm_update" checked={properties_perms.filter((item) => item.perm_kind == 4 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 4, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 4, data_type.id)}/><label htmlFor={"perm_update"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input type="checkbox" id={"perm_revoke"+property.id+idx+index} name="perm_revoke" checked={properties_perms.filter((item) => item.perm_kind == 6 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 6, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 6, data_type.id)}/><label htmlFor={"perm_revoke"+property.id+idx+index}></label></td>
+                                                        <td className="icheck-primary"><input type="checkbox" id={"perm_approve"+property.id+idx+index} name="perm_approve"checked={properties_perms.filter((item) => item.perm_kind == 5 && item.feature_id == fid && item.data_type_id == data_type.id && item.property_id == property.id && item.geom == false).length > 0} onChange={(e) => this.handleChecked({"perm_kind": 5, "feature_id":fid, "data_type_id": data_type.id, "property_id": property.id, "geom": false}, e.target.checked, 5, data_type.id)}/><label htmlFor={"perm_approve"+property.id+idx+index}></label></td>
+                                                    </tr>
+                                                )}
+                                            </Fragment>
                                         )}
                                     </tbody>
                                 </table>
@@ -503,17 +520,9 @@ export class Roles extends Component {
                         </div>
                     </div>
                 </div>
-                </div>
+            </div>
             <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}><i className="fa fa-chevron-left" aria-hidden="true"></i></a>
-            <ModalAlert
-                modalAction={() => this.modalClose()}
-                status={this.state.modal_alert_status}
-                title="Амжилттай хадгаллаа"
-                model_type_icon = "success"
-            />
            </div>
         )
-
     }
-
 }

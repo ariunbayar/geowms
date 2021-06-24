@@ -1,10 +1,7 @@
 import React, { Component } from "react"
 
 import { PortalDataTable } from "@utils/DataTable/index"
-import Modal from "@utils/Modal/Modal"
 import {service} from './service'
-
-
 export class Жагсаалт extends Component {
 
 
@@ -41,7 +38,7 @@ export class Жагсаалт extends Component {
                     "title": 'Устгах',
                     "text": '',
                     "icon": 'fa fa-trash-o text-danger',
-                    "action": (values) => this.handleRemoveAction(values),
+                    "action": (values) => this.handleModalOpen(values),
                 }
             ],
 
@@ -50,25 +47,29 @@ export class Жагсаалт extends Component {
         }
 
         this.goLink = this.goLink.bind(this)
-        this.handleRemoveAction = this.handleRemoveAction.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleRemove = this.handleRemove.bind(this)
         this.goDetail = this.goDetail.bind(this)
-        this.modalChange = this.modalChange.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
     }
 
-    modalChange(modal_icon, icon_color, title, text, has_button) {
-        this.setState({
+    setModal(modal_icon, icon_color, title, text, has_button, action) {
+        const modal = {
+            modal_status: "open",
             modal_icon: modal_icon,
+            modal_bg: '',
             icon_color: icon_color,
             title: title,
             text: text,
             has_button: has_button,
-        })
+            actionNameBack: 'Буцах',
+            actionNameDelete: '',
+            modalAction: action,
+            modalClose: this.modalClose,
+        }
+        global.MODAL(modal)
     }
 
     goLink(values) {
-        const {org_level, org_id} = this.state
+        const { org_level, org_id } = this.state
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${values.id}/дэлгэрэнгүй/`)
     }
 
@@ -77,37 +78,27 @@ export class Жагсаалт extends Component {
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/${values.id}/засах/`)
     }
 
-    handleRemoveAction(values){
-        this.setState({values})
-        setTimeout(() => {
-            this.handleModalOpen(true)
-        }, 150)
-    }
-
-    handleModalOpen(has_button){
-        if (has_button) {
-            this.modalChange(
+    handleModalOpen(values){
+        if (values) {
+            this.setModal(
                 'fa fa-exclamation-circle',
                 "warning",
                 'Систем устгах',
-                `Та "${this.state.values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
-                true
+                `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+                true,
+                () => this.handleRemove(values),
             )
         }
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
     }
 
-    handleRemove() {
-        const {values} = this.state
-        service.remove(values.id).then(({success}) => {
+    handleRemove(values) {
+        service.remove(values.id).then(({ success }) => {
             if (success) {
+                global.refreshSystemCount()
+                this.setModal('fa fa-check-circle', "success", 'Амжилттай устгалаа', '', false)
                 this.setState({
                     refresh: !this.state.refresh
                 })
-                this.modalChange('fa fa-check-circle', "success", 'Амжилттай устгалаа', '', false)
-                this.handleModalOpen(false)
             }
         })
     }
@@ -140,15 +131,6 @@ export class Жагсаалт extends Component {
                         />
                     </div>
                 </div>
-                <Modal
-                    modal_status={this.state.modal_status}
-                    modal_icon={this.state.modal_icon}
-                    icon_color={this.state.icon_color}
-                    title={this.state.title}
-                    has_button={this.state.has_button}
-                    text={this.state.text}
-                    modalAction={this.handleRemove}
-                />
             </div>
         )
     }
