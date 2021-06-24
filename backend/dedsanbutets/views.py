@@ -1,3 +1,7 @@
+import os
+from re import template
+from django.conf import settings
+
 from django.db import connections
 from django.forms.models import model_to_dict
 from django.forms.utils import flatatt
@@ -436,9 +440,16 @@ def propertyFields(request, fid):
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def make_view(request, payload):
-    fid = payload.get('fid')
-    theme = get_object_or_404(LThemes, theme_id=payload.get('tid'))
+def make_view(request):
+
+    fid = request.POST.get('fid')
+    file = request.FILES['files'] if request.FILES else ''
+    values = request.POST.get('values')
+
+    values = utils.json_load(values)
+    values = values['values']
+
+    theme = get_object_or_404(LThemes, theme_id=request.POST.get('tid'))
     feature = get_object_or_404(LFeatures, feature_id=fid)
     property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(fid, False)
 
@@ -449,10 +460,13 @@ def make_view(request, payload):
     property_qs = property_qs.exclude(value_type_id='data-type')
     property_ids = list(property_qs.values_list("property_id", flat=True))
 
+    if file:
+        _import_feature_template(file, theme, feature)
+
     view_name = utils.make_view_name(feature)
     check = _create_view(list(property_ids), view_name, list(data_type_ids), list(feature_config_ids), fid)
     if check:
-        rsp = _create_geoserver_detail(view_name, theme, request.user.id, feature, payload.get('values'))
+        rsp = _create_geoserver_detail(view_name, theme, request.user.id, feature, values)
     rsp = {
         "success": check,
         "data": check
@@ -462,16 +476,50 @@ def make_view(request, payload):
     return JsonResponse(rsp)
 
 
+def _import_feature_template(file, theme, feature ):
+
+    main_folder = 'feature-template'
+    theme_name = theme.theme_name_eng
+    feature_name = feature.feature_name_eng
+    sub_folder = os.path.join(settings.MEDIA_ROOT, main_folder)
+    theme_folder = os.path.join(sub_folder, theme_name)
+    feature_folder = os.path.join(theme_folder, feature_name)
+
+    if file:
+        if not os.path.exists(theme_folder):
+            os.makedirs(theme_folder)
+            os.makedirs(feature_folder)
+            utils.save_file_to_storage(file, feature_folder, file.name)
+        else :
+            if not os.path.exists(feature_folder):
+                os.makedirs(feature_folder)
+                utils.save_file_to_storage(file, feature_folder, file.name)
+            else:
+                folder_list = os.listdir(feature_folder)
+                for item in folder_list:
+                    utils.remove_file(feature_folder + '/' + item)
+                utils.save_file_to_storage(file, feature_folder, file.name)
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
-def propertyFieldsSave(request, payload):
-    id_list = payload.get('id_list')
-    tid = payload.get('tid')
-    fid = payload.get('fid')
-    view_id = payload.get('view_id')
-    values = payload.get('values')
-    open_datas = payload.get('open_datas')
+def propertyFieldsSave(request):
+
+    file = request.FILES['files'] if request.FILES else ''
+    tid = request.POST.get('tid')
+    fid = request.POST.get('fid')
+    view_id = request.POST.get('view_id')
+    values = request.POST.get('values')
+    open_datas = request.POST.get('open_datas')
+
+    open_datas = open_datas.split(',')
+
+    id_list = request.POST.get('id_list')
+    id_list = id_list.split(',')
+
+    values = utils.json_load(values)
+    values = values['values']
 
     theme = get_object_or_404(LThemes, theme_id=tid)
     feature = get_object_or_404(LFeatures, feature_id=fid)
@@ -493,6 +541,9 @@ def propertyFieldsSave(request, payload):
         }
     )[0]
 
+    if file:
+        _import_feature_template(file, theme, feature)
+
     view_prop_qs = ViewProperties.objects
     view_prop_qs.filter(view=view).delete()
 
@@ -501,7 +552,7 @@ def propertyFieldsSave(request, payload):
 
     is_created = _check_geoserver_detail(table_name, theme)
     if values or not is_created:
-        rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, payload.get('values'))
+        rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, values)
     else:
         rsp = {
             "success": True,
@@ -691,11 +742,10 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
         srs = extends[0]['find_srid']
     else:
         srs = 4326
-
-    tile_cache_check = values.get('tile_cache_check')
-    cache_details = values.get('cache_values')
-    geom_type = values.get('geom_type')
-    style_name = values.get('style_name')
+    tile_cache_check = values['tile_cache_check']
+    cache_details = values['cache_values']
+    geom_type = values['geom_type']
+    style_name = values['style_name']
     layer_title = feature.feature_name
 
     if check_layer.status_code != 200:
@@ -774,6 +824,7 @@ def _create_geoserver_layer_detail(check_layer, table_name, ws_name, ds_name, la
 
 
 def _create_geoserver_detail(table_name, theme, user_id, feature, values):
+    
     layer_responce = []
     theme_code = theme.theme_code
     ws_name = 'gp_' + theme_code

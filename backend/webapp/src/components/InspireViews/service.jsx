@@ -22,18 +22,18 @@ function getPropertyFields(fid) {
     return fetch(`${prefix}/property-fields/${fid}/`, opts).then(handleResponse)
 }
 
-function setPropertyFields(fid, tid, id_list, view_id, values, open_datas){
+function setPropertyFields(form_datas){
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ fid, tid, id_list, view_id, values, open_datas }),
+        body: form_datas,
     }
     return fetch(`${prefix}/property-fields/save/`, opts).then(handleResponse)
 }
 
-function makeView(fid, tid, view_id, values) {
+function makeView(form_datas) {
     const opts = {
         ...getPostOptions(),
-        body: JSON.stringify({ fid, tid, view_id, values}),
+        body: form_datas
     }
     return fetch(`${prefix}/make-view/`, opts).then(handleResponse)
 }

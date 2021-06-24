@@ -4,6 +4,7 @@ import Loader from "@utils/Loader"
 import Modal from "@utils/Modal/Modal"
 import ChooseStyle from './ChooseStyle'
 import SetTileCache from './setTileCache'
+import ImportTemplate from './components/ImportTemplate'
 
 import './styles.css'
 import { service } from './service'
@@ -29,6 +30,7 @@ export default class SideBar extends Component {
             check_open: props.check_open,
             is_loading: false,
             invalid_feedback: false,
+            is_open: false,
 
             zoom_stop: 0,
             zoom_start: 0,
@@ -43,6 +45,7 @@ export default class SideBar extends Component {
         this.getValuesFromState = this.getValuesFromState.bind(this)
         this.makeView = this.makeView.bind(this)
         this.getStyleName = this.getStyleName.bind(this)
+        this.getFile = this.getFile.bind(this)
     }
 
     getTileCacheValue(field, value){
@@ -65,13 +68,27 @@ export default class SideBar extends Component {
 
     handleSave() {
         const { fid, tid } = this.props
-        const { id_list, view, tile_cache_check, zoom_start, open_datas } = this.state
+        const { id_list, view, tile_cache_check, zoom_start, open_datas, file } = this.state
 
         let values
         values = this.getValuesFromState()
 
+        const form_datas = new FormData()
+
+        form_datas.append('fid', fid)
+        form_datas.append('tid', tid)
+        form_datas.append('id_list', id_list)
+        form_datas.append('view_id', view.id)
+        form_datas.append('open_datas', open_datas)
+
+        if (file && file.length > 0){
+            form_datas.append('files', file, file.name)
+        }
+
+        form_datas.append('values',  JSON.stringify({values}))
+
         service
-            .setPropertyFields(fid, tid, id_list, view.id, values, open_datas)
+            .setPropertyFields(form_datas)
             .then(({ success, msg }) => {
                 if(success) {
                     this.props.getAll()
@@ -186,7 +203,11 @@ export default class SideBar extends Component {
         }
 
         if(pP.fid !== this.props.fid){
-            this.setState({ tile_cache_check: false })
+            this.setState({
+                tile_cache_check: false,
+                file: '',
+                is_open: false,
+            })
         }
 
         if(pP.cache_values !== this.props.cache_values) {
@@ -238,13 +259,21 @@ export default class SideBar extends Component {
     makeView() {
         const props = this.props
         const { fid, tid } = props
-        const { view, style_name } = this.state
-
+        const { view, style_name, file } = this.state
         const values = this.getValuesFromState()
+
+        const form_datas = new FormData()
+
+        form_datas.append('fid', fid)
+        form_datas.append('tid', tid)
+        form_datas.append('view_id', view.id)
+        form_datas.append('files', file, file.name)
+        form_datas.append('values',  JSON.stringify({values}))
+
         if(style_name) {
             this.setState({ save_is_load: true, is_loading: true, load_text: "View үүсгэж байна" })
             service
-                .makeView(fid, tid, view.id, values)
+                .makeView(form_datas)
                 .then(({ success, data, error}) => {
                     if(success) {
                         props.getProperties(props.fid, props.tid, props.fname, '')
@@ -286,6 +315,11 @@ export default class SideBar extends Component {
         )
     }
 
+    getFile(e){
+        const uploaded_file = e.target.files[0]
+        this.setState({ file: uploaded_file })
+    }
+
     render() {
         const { fields, fid, fname, has_view } = this.props
         const { is_loading, id_list, check_list, check_open, open_datas } = this.state
@@ -302,6 +336,7 @@ export default class SideBar extends Component {
                             fname
                             &&
                                 <div>
+                                    <ImportTemplate {...this.state} fid={fid} getFile={this.getFile}/>
                                     <SetTileCache {...this.state} getTileCacheValue={this.getTileCacheValue}/>
                                     <ChooseStyle {...this.props} {...this.state} getStyleName={this.getStyleName}/>
                                 </div>
@@ -455,3 +490,4 @@ export default class SideBar extends Component {
         )
     }
 }
+
