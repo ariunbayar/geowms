@@ -57,12 +57,36 @@ class RequestFilesShape(models.Model):
     class Meta:
         db_table = "llc_file_shapes"
 
+    STATE_NEW = 1
+    STATE_SENT = 2
+    STATE_SOLVED = 3
+
+    STATE_CHOICES = (
+        (STATE_NEW, 'ШИНЭ'),
+        (STATE_SENT, 'ИЛГЭЭСЭН'),
+        (STATE_SOLVED, 'ШИЙДВЭРЛЭГДСЭН'),
+    )
+
+    KIND_PENDING = 1
+    KIND_APPROVED = 2
+    KIND_DISMISS = 3
+    KIND_REVOKE = 4
+
+
+    KIND_CHOICES = (
+        (KIND_PENDING, 'ХҮЛЭЭГДЭЖ БУЙ'),
+        (KIND_APPROVED, 'БАТАЛГААЖСАН'),
+        (KIND_DISMISS, 'БУЦААГДСАН'),
+        (KIND_REVOKE, 'ЦУЦЛАСАН')
+    )
 
     files = models.ForeignKey(RequestFiles, on_delete=models.PROTECT, db_index=True)
     org = models.ForeignKey(Org, on_delete=models.PROTECT, db_index=True)
     theme_id = models.IntegerField(null=True)
     package_id = models.IntegerField(null=True)
     feature_id = models.IntegerField(null=True)
+    kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
+    state = models.PositiveIntegerField(choices=STATE_CHOICES, db_index=True, null=True)
     order_no = models.CharField(max_length=50, null=True)
     order_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
