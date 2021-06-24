@@ -35,6 +35,7 @@ def get_tool_datas(request, payload):
     tool_datas = []
     token_url = 'http://bagaj.gazar.gov.mn/api/token?email=api@gazar.gov.mn&password=hXzWneQ3vf6fkaFY'
     rsp = requests.post(token_url, headers=HEADERS, verify=False)
+
     if rsp.status_code == 200:
         access_token = rsp.json().get('access_token')
         bagaj_url = 'http://bagaj.gazar.gov.mn/api/holder?regnum={registration_number}&token={access_token}'.format(

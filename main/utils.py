@@ -291,7 +291,11 @@ def _make_html(http_or_https, text, host_name, token):
     return html
 
 
+<<<<<<< HEAD
 def send_approve_email(user, subject=None, text=None):
+=======
+def send_approve_email(user, subject=None, text=None, html_message=None):
+>>>>>>> 0f4f94eaa5b8dd7956abb7595b4debc42954c9e1
 
     if not user.email:
         return False
