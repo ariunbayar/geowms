@@ -31,6 +31,10 @@ def llc_frontend(request):
 @require_POST
 @ajax_required
 def get_tool_datas(request, payload):
+    f = open("check function deer irj baigaa yu .txt", "w")
+    f.write('function deer irj baigaa eseh')
+    f.close()
+
     regis_number = payload.get('regis_number') or 2841134
     tool_datas = []
     token_url = 'http://bagaj.gazar.gov.mn/api/token?email=api@gazar.gov.mn&password=hXzWneQ3vf6fkaFY'
