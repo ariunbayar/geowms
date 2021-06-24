@@ -914,7 +914,7 @@ def get_inspire_roles(request, pk):
     data = []
     roles = []
     govRole = get_object_or_404(GovRole, pk=pk)
-    for themes in LThemes.objects.all():
+    for themes in LThemes.objects.order_by('theme_id'):
         package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = _get_theme_packages_gov(themes.theme_id, govRole)
         data.append({
                 'id': themes.theme_id,
