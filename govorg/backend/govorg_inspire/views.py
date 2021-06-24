@@ -21,7 +21,7 @@ from django.contrib.gis.geos import MultiPolygon
 
 from backend.dedsanbutets.models import ViewNames
 from backend.dedsanbutets.models import ViewProperties
-from backend.inspire.models import EmpPerm
+from backend.inspire.models import EmpPerm, LThemes
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
 from backend.inspire.models import LCodeLists
@@ -113,12 +113,13 @@ def _get_feature_coll(ob, changeset_list):
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def getRoles(request, fid):
-
+def getRoles(request, tid, fid):
+    main_folder = "bundles_template"
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    theme = LThemes.objects.filter(theme_id=tid).first()
     perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
 
     for perm_kind in perm_kinds:
@@ -134,6 +135,15 @@ def getRoles(request, fid):
             inspire_roles['PERM_APPROVE'] = True
         elif perm_kind == EmpPermInspire.PERM_REVOKE:
             inspire_roles['PERM_REVOKE'] = True
+
+    folder_name = theme.theme_name
+    path = os.path.join(settings.MEDIA_ROOT, main_folder, folder_name)
+    file_name = os.listdir(path)[0]
+    file_url = os.path.join(path, file_name)
+    file =file_url.split("geoportal_app")
+
+    inspire_roles['file_url'] = file[1]
+
     rsp = {
         'roles': inspire_roles,
         'success': True
