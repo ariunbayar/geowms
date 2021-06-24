@@ -6,7 +6,6 @@ import re
 import unicodedata
 import importlib
 import zipfile
-from django import utils
 import pyproj
 import math
 import json
