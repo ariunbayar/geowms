@@ -1,3 +1,5 @@
+from unicodedata import name
+from llc.backend import llc_request
 import os
 import zipfile
 import glob
@@ -97,7 +99,7 @@ def llc_request_list(request, payload):
             'items': items,
             'page': payload.get('page'),
             'total_page': total_page,
-            'start_index': start_index
+            'start_index': start_index,
         }
     else:
         rsp = {
@@ -644,4 +646,16 @@ def get_search_field(request):
     return JsonResponse({
         'success': True,
         'search_field': search_field,
+    })
+
+
+@require_GET
+@ajax_required
+def get_count(request):
+
+    states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
+    request_count = RequestFiles.objects.filter(state__in=states).count()
+    return JsonResponse({
+        'success': True,
+        'request_count': request_count,
     })
