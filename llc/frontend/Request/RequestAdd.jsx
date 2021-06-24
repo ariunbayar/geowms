@@ -253,8 +253,8 @@ export class RequestAdd extends Component {
                     '',
                     'fa fa-check-circle',
                     'success',
+                    'Амжилттай',
                     info,
-                    '',
                     false,
                     "",
                     this.handleModalClose
@@ -265,8 +265,8 @@ export class RequestAdd extends Component {
                     '',
                     'fa fa-times-circle',
                     'danger',
+                    'Алдаа гарлаа',
                     info,
-                    '',
                     false,
                     "",
                     this.modalClose
