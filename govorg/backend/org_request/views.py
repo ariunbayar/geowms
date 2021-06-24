@@ -611,9 +611,18 @@ def _create_mdatas(geo_id, feature_id, form, value):
     MDatas.objects.create(**value)
 
 
+def _check_m_datas(form, ids, geo_id):
+    filter_values = ids[0]
+    filter_values['geo_id'] = geo_id
+    filter_values['property_id'] = form['property_id']
+    qs = MDatas.objects.filter(**filter_values)
+    return qs
+
+
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
     for form in form_json:
+        ids = _get_ids(feature_id, form['property_id'])
         value = dict()
         data, value_type = _get_data_from_data(form)
         value[value_type] = data
@@ -625,8 +634,9 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
                 if not isinstance(value['value_date'], datetime.datetime):
                     if value['value_date']:
                         value['value_date'] = date_to_timezone(value['value_date'])
-            if form['pk']:
-                MDatas.objects.filter(pk=form['pk']).update(**value)
+            qs = _check_m_datas(form, ids, geo_id)
+            if qs:
+                qs.update(**value)
             else:
                 _create_mdatas(geo_id, feature_id, form, value)
     return True
@@ -833,6 +843,8 @@ def request_approve(request, payload):
                             'form_json': form_json,
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
+                        qs_m_datas = MDatas.objects.filter(geo_id=old_geo_id)
+                        # qs_m_datas.delete()
                         success = _request_to_m(request_datas)
                         _insert_data_another_table(request_datas, old_geo_id, 'update')
 
@@ -953,6 +965,7 @@ def get_llc_list(request, payload):
 
     qs = LLCRequest.objects
     qs = qs.filter(file__geo_id=org.geo_id)
+    start_index = 1
     if qs:
         оруулах_талбарууд = ['id', 'file_id', 'created_at', 'updated_at', 'kind', 'state', 'description']
         хувьсах_талбарууд = [
@@ -969,16 +982,18 @@ def get_llc_list(request, payload):
             оруулах_талбарууд=оруулах_талбарууд,
             хувьсах_талбарууд=хувьсах_талбарууд,
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
         rsp = {
             'items': items,
             'total_page': total_page,
+            'start_index': start_index
         }
     else:
         rsp = {
             'items': [],
             'page': payload.get("page"),
             'total_page': 1,
+            'start_index': start_index
         }
 
     return JsonResponse(rsp)

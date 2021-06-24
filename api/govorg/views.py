@@ -15,12 +15,14 @@ from backend.dedsanbutets.models import ViewNames
 from backend.govorg.models import GovOrgWMSLayer, GovOrg as System
 from backend.inspire.models import (
     LCodeLists,
+    LFeatureConfigs,
     LPackages,
     LFeatures,
     EmpPerm,
     EmpPermInspire,
     LProperties,
-    LCodeListConfigs
+    LCodeListConfigs,
+    MDatas
 )
 from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
@@ -44,65 +46,54 @@ def char_in_split(string):
         return string
 
 
-def allowed_attbs(request, token, system, code):
-    allowed_att = cache.get('allowed_att_{}_{}'.format(token, code))
-    if not allowed_att:
-        wms_layer = system.wms_layers.filter(code=code).first()
-        govorg_layer = GovOrgWMSLayer.objects.filter(wms_layer=wms_layer, govorg=system).first()
-        allowed_att = ''
-        if govorg_layer and govorg_layer.attributes:
-            govort_attributes = govorg_layer.attributes.replace("\'", "\"")
-            attributes = json.loads(govort_attributes)
-            for attribute in attributes:
-                allowed_att = allowed_att + attribute.lower() + ','
-            allowed_att = allowed_att[:-1]
-        cache.set('allowed_att_{}_{}'.format(token, code), allowed_att, 600)
-
-    return allowed_att
-
-
 def _get_qgis_service_url(request, token, fid):
     url = reverse('api:qgis:qgis-proxy', args=[token, fid])
     absolute_url = request.build_absolute_uri(url)
     return absolute_url
 
 
-def _get_perm_atts(system):
+def _get_perm_atts(system, code):
     access = system.govorgwmslayer_set.first()
-    return utils.json_load(access.attributes)
+    has_layer = False
+    if access.wms_layer.code == code:
+        has_layer = True
+    if has_layer:
+        access = system.govorgwmslayer_set.first()
+        atts = utils.json_load(access.attributes)
+        atts.insert(0, 'geo_data')
+        return atts
+    return False
 
 
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def proxy(request, base_url, token, pk=None):
+
+    access_attributes = list()
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
     queryargs = request.GET
     headers = {**BASE_HEADERS}
     system = utils.geo_cache("system", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
-    # access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system), 300)
     allowed_layers = utils.geo_cache("allowed_layers", token, [layer.code for layer in system.wms_layers.all() if layer.wms.is_active], 300)
-    if request.GET.get('TYPENAMES'):
-        code = char_in_split(request.GET.get('TYPENAMES'))
-        allowed_att = allowed_attbs(request, token, system, code)
+    if request.GET.get('TYPENAMES') or request.GET.get('TYPENAME'):
+        code = char_in_split(request.GET.get('TYPENAME'))
+        access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system, code), 300)
+        if not access_attributes:
+            raise Http404
+
         queryargs = {
             **request.GET,
-            "propertyName": [allowed_att],
+            "propertyName": ",".join(access_attributes).lower(),
         }
-    # else:
-    #     queryargs = {
-    #         **request.GET,
-    #         'TYPENAMES': allowed_layers,
-    #         "propertyName": ",".join(access_attributes),
-    #     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetCapabilities' or request.GET.get('REQUEST') == 'DescribeFeatureType' or request.GET.get('REQUEST') == 'GetFeature':
         if request.GET.get('SERVICE') == 'WFS':
-            content = filter_layers_wfs(content, allowed_layers)
+            content = filter_layers_wfs(content, allowed_layers, access_attributes)
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:
@@ -143,18 +134,18 @@ def json_proxy(request, base_url, token, code):
 
     system = utils.geo_cache("system_json", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
 
-    allowed_att = allowed_attbs(request, token, system, code)
+    allowed_att = _get_perm_atts(system, code)
+    if not system:
+        raise Http404
 
-    # if not system:
-    #     raise Http404
     allowed_layers = [code]
     queryargs = {
         'service': 'WFS',
         'version': '1.0.0',
         'request': 'GetFeature',
         'typeName': code,
-        # 'outputFormat': 'application/json',
-        # "propertyName": [allowed_att]
+        'outputFormat': 'application/json',
+        "propertyName": ",".join(allowed_att).lower()
     }
 
     rsp = requests.get(base_url, queryargs, headers=headers, timeout=5, verify=False)
@@ -193,26 +184,6 @@ def _geojson_convert_3d_geojson(geojson):
         return geo_json['geo_json']
 
 
-def _get_type(value_type_id):
-    if value_type_id == 'number':
-        value_type = 'number'
-    elif value_type_id == 'double':
-        value_type = 'number'
-    elif value_type_id == 'multi-text':
-        value_type = 'text'
-    elif value_type_id == 'text':
-        value_type = 'text'
-    elif value_type_id == 'date':
-        value_type = 'date'
-    elif value_type_id == 'link':
-        value_type = 'text'
-    elif value_type_id == 'boolean':
-        value_type = 'text'
-    else:
-        value_type = 'option'
-    return value_type
-
-
 def _code_list_display(property_id):
     code_list_values = list()
     code_list_configs = LCodeListConfigs.objects.filter(property_id=property_id)
@@ -235,22 +206,40 @@ def _code_list_display(property_id):
     return code_list_values
 
 
-def _get_property_data(values):
+def _get_data_from_mdatas(valid_type, query):
+    if valid_type == 'text':
+        return query.value_text
+    elif valid_type == 'option':
+         return query.code_list_id
+    elif valid_type == 'date':
+         return utils.datetime_to_string(query.value_date)
+    elif valid_type == 'number':
+         return query.value_number
+    else :
+        return ''
+
+
+def _get_property_data(values, employee, feature_id, geo_id):
     datas = []
+    property_perms = utils.get_emp_property_roles(employee, feature_id)
+    feature_config = list(LFeatureConfigs.objects.filter(feature_id=feature_id).values_list('feature_config_id', flat=True))
+    qs = MDatas.objects.filter(
+        feature_config_id__in=feature_config,
+        geo_id=geo_id
+        )
     for value in values:
         form = {}
         property = LProperties.objects.filter(property_code__iexact=value).first()
         if property:
             data_list = []
             value_type = property.value_type_id
-            valid_type = _get_type(value_type)
+            valid_type = utils.get_type(value_type)
             data = values[value]
             if data and valid_type == 'option':
                 code_list = LCodeLists.objects.filter(code_list_name__iexact=data).first()
                 if code_list:
                     data = code_list.code_list_id
                     data_list = _code_list_display(property.property_id)
-
             form['pk'] = ''
             form['property_id'] = property.property_id
             form['property_name'] = property.property_name
@@ -258,9 +247,18 @@ def _get_property_data(values):
             form['property_definition'] = property.property_definition
             form['value_type_id'] = value_type
             form['value_type'] = valid_type
-            form['data'] = data if data != 'NULL' else ''
             form['data_list'] = data_list
-            form['roles'] = {"PERM_VIEW": True, "PERM_CREATE": True, "PERM_REMOVE": False, "PERM_UPDATE": True, "PERM_APPROVE": True, "PERM_REVOKE": False}
+            for perm in property_perms[1]:
+                if perm['property_id'] == property.property_id:
+                    get_perm = perm['roles']
+                    if not get_perm["PERM_UPDATE"]:
+                        form['data'] = data if data != 'NULL' else ''
+                    else:
+                        query = qs.filter(property_id=perm['property_id']).first()
+                        if query:
+                            form['data'] = _get_data_from_mdatas(value_type, query)
+
+            form['roles'] = get_perm
             datas.append(form)
 
     return datas
@@ -268,7 +266,7 @@ def _get_property_data(values):
 
 @require_POST
 @csrf_exempt
-def qgis_submit(request, token):
+def qgis_submit(request, token, fid):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
     employee = get_object_or_404(Employee, token=token)
@@ -288,8 +286,7 @@ def qgis_submit(request, token):
         theme = LPackages.objects.filter(package_id=package.package_id).first()
         geo_json = _geojson_convert_3d_geojson(update_item['geom'])
         success, info = utils.has_employee_perm(employee, feature_id, True, EmpPermInspire.PERM_UPDATE, geo_json)
-        form_json = _get_property_data(update_item['att'])
-
+        form_json = _get_property_data(update_item['att'], employee, feature_id, geo_id)
         if success:
             objs.append(ChangeRequest(
                 old_geo_id=geo_id,
@@ -382,6 +379,25 @@ def _get_request_content(base_url, request, geo_id, headers):
     return rsp, queryargs
 
 
+def _get_emp_perm_properties(token, fid):
+    emp = Employee.objects.filter(token=token).first()
+    perms = emp.empperm_set.all()
+    perms_prop = list()
+    for perm in perms:
+        perms_inspire = perm.empperminspire_set.filter(feature_id=fid)
+        geom_rm_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_REMOVE)
+        geom_up_perms = perms_inspire.filter(geom=True, perm_kind=EmpPermInspire.PERM_UPDATE)
+        if geom_up_perms and geom_rm_perms:
+            perms_inspire = perms_inspire.filter(geom=False)
+            perms_inspire = perms_inspire.filter(perm_kind=EmpPermInspire.PERM_UPDATE)
+            perm_property_ids = list(perms_inspire.values_list('property_id', flat=True))
+            prop_qs = LProperties.objects
+            prop_qs = prop_qs.filter(property_id__in=perm_property_ids)
+            properties = list(prop_qs.values_list('property_code', flat=True))
+            perms_prop = perms_prop + properties
+    return perms_prop
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def qgis_proxy(request, base_url, token, fid=''):
@@ -407,9 +423,19 @@ def qgis_proxy(request, base_url, token, fid=''):
         content = rsp.content
         content = replace_src_url(content, 'featureMembers', 'Members', None)
 
-    if request.GET.get('REQUEST') != 'GetMap':
+    allowed_props = utils.geo_cache("qgis_allowed_perms", token, _get_emp_perm_properties(token, fid), 300)
+    if not allowed_props:
+        raise Http404
+    allowed_props.insert(0, 'geo_data')
+
+    if request.GET.get('request'):
+        service_request = request.GET.get('request').lower()
+    elif request.GET.get('REQUEST'):
+        service_request = request.GET.get('REQUEST').lower()
+    unneed_requests = ['getmap', 'getlegendgraphic']
+    if service_request not in unneed_requests:
         if request.GET.get('SERVICE') == 'WFS':
-            content = filter_layers_wfs(content, allowed_layers)
+            content = filter_layers_wfs(content, allowed_layers, allowed_props)
         elif request.GET.get('SERVICE') == 'WMS':
             content = filter_layers(content, allowed_layers)
         else:

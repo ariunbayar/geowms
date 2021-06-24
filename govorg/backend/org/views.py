@@ -6,6 +6,7 @@ from django.db.models import F
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+from django.http.response import Http404
 
 from backend.org.models import Org, Employee
 from backend.inspire.models import GovPerm
@@ -17,6 +18,7 @@ from backend.inspire.models import LThemes
 from backend.inspire.models import LPackages
 from backend.inspire.models import LFeatures
 from backend.inspire.models import MGeoDatas
+from backend.org.models import Position
 from govorg.backend.utils import (
     get_package_features_data_display,
     get_theme_data_display,
@@ -26,7 +28,7 @@ from govorg.backend.utils import (
     get_perm_list
 )
 
-from main.decorators import ajax_required
+from main.decorators import ajax_required, gov_required
 from main import utils
 from main.components import Datatable
 from django.views.decorators.cache import cache_page
@@ -294,4 +296,154 @@ def get_approve_and_revoke(request):
         'approve': True if approve else False,
         'revoke': True if revoke else False,
     }
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@gov_required
+@login_required(login_url='/gov/perm/position/')
+def position_list(request, payload):
+    items = []
+    page = 1
+    total_page = 1
+    start_index= 1
+    оруулах_талбарууд = ['id', 'name', 'org_id']
+
+    qs = Position.objects.filter(org=request.org)
+    if qs:
+        datatable = Datatable(
+            model=Position,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд
+        )
+        items, total_page, start_index = datatable.get()
+        page = payload.get('page')
+
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+        'start_index': start_index,
+    }
+
+    return JsonResponse(rsp)
+
+
+def _pos_name_or_id_check(qs_pos, name, pos_id=None):
+    has_pos_name = False
+    qs_pos = qs_pos.filter(name=name)
+    if qs_pos:
+        if pos_id:
+            if qs_pos.first().id != pos_id:
+                has_pos_name = True
+        else:
+            has_pos_name = True
+    return has_pos_name
+
+
+def _make_pos_data(datas, pk):
+    datas['org_id'] = pk
+    return datas
+
+
+@require_POST
+@ajax_required
+@gov_required
+def pos_create(request, payload):
+    org = request.org
+    name = payload.get("name")
+    qs = Position.objects
+    qs_pos = qs.filter(org=org)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        datas = _make_pos_data(payload, org.id)
+        Position.objects.create(**datas)
+        rsp = {
+            'success': True,
+            'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+
+@require_GET
+@ajax_required
+@gov_required
+def pos_remove(request, pk):
+    position = get_object_or_404(Position, id=pk)
+    has_emp_pos = position.employee_set.all()
+
+    if has_emp_pos:
+        rsp = {
+            'success': False,
+            'error': '"{position}" албан тушаалыг хэрэглэгчид оноосон байна!!!'.format(position=position.name),
+        }
+    else:
+        position.delete()
+        rsp = {
+            'success': True,
+            'data': "Амжилттай устгалаа"
+        }
+
+    return JsonResponse(rsp)
+
+
+def _del_unneed_keys(obj):
+    del_keys = ['pos_id']
+    for key in del_keys:
+        del obj[key]
+
+    return obj
+
+
+@require_POST
+@ajax_required
+@gov_required
+def pos_update(request, payload, pk):
+    name = payload.get("name")
+    pos_id = int(payload.get("pos_id"))
+    qs = Position.objects
+    qs_pos = qs.filter(org=request.org)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name, pos_id)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        payload = _del_unneed_keys(payload)
+        qs_pos.filter(
+            id=pos_id
+        ).update(**payload)
+        rsp = {
+            'success': True,
+            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@gov_required
+def pos_detail(request, pk):
+    position = Position.objects.filter(id=pk, org=request.org)
+    if not position:
+        raise Http404
+    datas = position.values('id', 'name').first()
+    rsp = {
+        'success': True,
+        'datas': datas
+    }
+
     return JsonResponse(rsp)

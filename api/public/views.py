@@ -8,7 +8,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_GET
 
-from api.utils import filter_layers, replace_src_url
+from api.utils import filter_layers, replace_src_url, filter_layers_wfs
 from backend.bundle.models import Bundle
 from backend.wms.models import WMS
 from backend.inspire.models import LProperties
@@ -122,10 +122,10 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     if not view or not view.open_datas:
         raise Http404
 
-    open_properties = _get_property_names(view)
+    open_properties = _get_property_names(view, has_geo_data=True)
 
     base_geoserver_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}'.format(url=base_url, code=code)
-    base_geoserver_url = '{base_url}&propertyName=geo_data,{properties}'.format(base_url=base_geoserver_url, properties=open_properties)
+    base_geoserver_url = '{base_url}&propertyName={properties}'.format(base_url=base_geoserver_url, properties=open_properties)
 
     if types == 'json':
         req_url = '{base_url}&outputFormat=application%2Fjson'.format(base_url=base_geoserver_url)
@@ -151,12 +151,21 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     return response
 
 
-def _get_property_names(view):
+def _get_property_names(view, get_text=True, has_geo_data=False):
     open_properties = ''
     if view and view.open_datas:
         open_properties = utils.json_load(view.open_datas)
-        open_properties = ",".join(open_properties).lower()
+        if has_geo_data:
+            open_properties.insert(0, 'geo_data')
+        if get_text:
+            open_properties = ",".join(open_properties).lower()
     return open_properties
+
+
+def _get_open_layer_url(request, bundle_id, wms_id, layer_id, url_type):
+    url = reverse('api:open-layer:open_layer_proxy', args=[bundle_id, wms_id, layer_id, url_type])
+    absolute_url = request.build_absolute_uri(url)
+    return absolute_url
 
 
 @require_GET
@@ -167,7 +176,14 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
 
     urls = ['wms', 'wmts', 'wfs']
 
+    url_type = url_type.lower()
+
     if url_type not in urls:
+        raise Http404
+
+    service_type = request.GET.get('SERVICE')
+
+    if url_type != service_type.lower():
         raise Http404
 
     get_url = {
@@ -193,23 +209,32 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
 
     wms_layer_code = wms_layer.code
 
-    layer_code = wms_layer_code.replace('gp_layer_', '')
+    layer_code = utils.remove_text_from_str(wms_layer_code)
 
     view = ViewNames.objects.filter(view_name=layer_code).first()
     if not view or not view.open_datas:
         raise Http404
 
-    properties = _get_property_names(view)
+    allowed_layers = [layer_code]
+    properties = _get_property_names(view, get_text=False, has_geo_data=True)
 
     wms = wms_qs.values().first()
     url = wms[get_url[url_type]]
 
-    request.GET = request.GET.copy()
-    request.GET['typeName'] = wms_layer_code
-    request.GET['propertyName'] = properties
-
     response = requests.get(url, request.GET, headers={**BASE_HEADERS}, timeout=5, verify=False)
     content_type = response.headers.get('content-type')
     content = response.content
+
+    allow_requests = ['GetCapabilities', 'DescribeFeatureType', 'GetFeature']
+    if request.GET.get('REQUEST') in allow_requests:
+        if service_type == 'WFS':
+            content = filter_layers_wfs(content, allowed_layers, properties)
+        elif service_type == 'WMS':
+            content = filter_layers(content, allowed_layers)
+        else:
+            raise Exception()
+
+        service_url = _get_open_layer_url(request, bundle_id, wms_id, layer_id, url_type)
+        content = replace_src_url(content, url, service_url, url_type)
 
     return HttpResponse(content, content_type=content_type)

@@ -45,6 +45,13 @@ urlpatterns = [
                 path('<int:pk>/detail/', role_views.detail),
                 path('<int:pk>/delete/', role_views.delete),
             ], 'role'))),
+            path('position/', include(([
+                path('', org_views.position_list),
+                path('create/', org_views.pos_create),
+                path('<int:pk>/remove/', org_views.pos_remove),
+                path('<int:pk>/edit/', org_views.pos_update),
+                path('<int:pk>/detail/', org_views.pos_detail),
+            ], 'position'))),
         ], 'role'))),
 
         path('tseg/', include(([

@@ -38,13 +38,9 @@ export default class App extends Component {
     this.state = {
       user_count: 0,
       gov_count: [],
-      setModal: null,
-      setNotif: null,
     };
     this.handleBoxOver = this.handleBoxOver.bind(this)
     this.hanfleCounts = this.hanfleCounts.bind(this)
-    this.getModalFunc = this.getModalFunc.bind(this)
-    this.getNotifFunc = this.getNotifFunc.bind(this)
   }
 
   handleBoxOver (field){
@@ -65,19 +61,14 @@ export default class App extends Component {
   }
 
   getModalFunc(setModal) {
-    this.setState({ setModal })
+    global.MODAL = setModal
   }
 
   getNotifFunc(setNotif) {
-      this.setState({ setNotif })
+    global.NOTIF = setNotif
   }
 
   render() {
-      const { setModal, setNotif } = this.state
-      const need_props = {
-          setModal,
-          setNotif
-      }
       return (
         <div>
           <DisplayModal getModalFunc={this.getModalFunc}/>
@@ -137,42 +128,36 @@ export default class App extends Component {
                     </MenuItem>
                 </ul>
               </div>
-              {
-                setModal && setNotif
-                ?
-                  <div className="content-wrapper">
-                    <Switch>
-                      <Route path={"/back/wms/"} component={WMSPage} />
-                      <Route path={"/back/geoserver/"} component={Geoserver} />
-                      <Route path={"/back/org-role/"} component={OrgRole} />
-                      <Route
-                        path="/back/байгууллага/"
-                        component={(props) => <Org {...props} refreshCount={this.hanfleCounts} />}
-                      />
-                      <Route path={"/back/дэд-сан-бүтэц/"} component={(props) => <DedsanBvtets {...props} {...need_props} />} />
-                      <Route path={"/back/inspire-views/"} component={InspireViews} />
-                      <Route exact path={"/back/log/"} component={Log} />
-                      <Route path={"/back/access/"} component={Access} />
-                      <Route exact path={"/back/huulga/"} component={Huulga} />
-                      <Route
-                        path={"/back/суурь-давхарга/"}
-                        component={СуурьДавхаргаХуудас}
-                      />
-                      <Route exact path={"/back/dev/"} component={DevPage} />
-                      <Route path={"/back/user/"} component={UserPage} />
-                      <Route path={"/back/gis/"} component={Gis} />
-                      <Route path={"/back/тохиргоо/"} component={ConfigPage} />
-                      <Route path={"/back/error500/"} component={Error500} />
-                      <Route path={"/back/дэд-сан/"} component={BundlePage} />
-                      <Route path={"/back/gp-geoserver/layer-groups/"} component={GPGeoserver} />
-                      <Route path={"/back/gp-geoserver/style/"} component={GPGeoserver} />
-                      <Route path={"/back/another-base/"} component={AnotherBaseConfig} />
-                      <Route path={"/back/db-export/"} component={DBExport} />
-                    </Switch>
-                  </div>
-                :
-                  null
-              }
+                <div className="content-wrapper">
+                  <Switch>
+                    <Route path={"/back/wms/"} component={WMSPage} />
+                    <Route path={"/back/geoserver/"} component={Geoserver} />
+                    <Route path={"/back/org-role/"} component={OrgRole} />
+                    <Route
+                      path="/back/байгууллага/"
+                      component={(props) => <Org {...props} refreshCount={this.hanfleCounts} />}
+                    />
+                    <Route path={"/back/дэд-сан-бүтэц/"} component={(props) => <DedsanBvtets {...props} />} />
+                    <Route path={"/back/inspire-views/"} component={InspireViews} />
+                    <Route exact path={"/back/log/"} component={Log} />
+                    <Route path={"/back/access/"} component={Access} />
+                    <Route exact path={"/back/huulga/"} component={Huulga} />
+                    <Route
+                      path={"/back/суурь-давхарга/"}
+                      component={СуурьДавхаргаХуудас}
+                    />
+                    <Route exact path={"/back/dev/"} component={DevPage} />
+                    <Route path={"/back/user/"} component={UserPage} />
+                    <Route path={"/back/gis/"} component={Gis} />
+                    <Route path={"/back/тохиргоо/"} component={ConfigPage} />
+                    <Route path={"/back/error500/"} component={Error500} />
+                    <Route path={"/back/дэд-сан/"} component={BundlePage} />
+                    <Route path={"/back/gp-geoserver/layer-groups/"} component={GPGeoserver} />
+                    <Route path={"/back/gp-geoserver/style/"} component={GPGeoserver} />
+                    <Route path={"/back/another-base/"} component={AnotherBaseConfig} />
+                    <Route path={"/back/db-export/"} component={DBExport} />
+                  </Switch>
+                </div>
             </BrowserRouter>
           </Suspense>
         </div>

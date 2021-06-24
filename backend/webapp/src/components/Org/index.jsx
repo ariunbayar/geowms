@@ -45,7 +45,7 @@ export default class Org extends Component {
                                 }
                             />
                             <Route exact path="/back/байгууллага/түвшин/:level/:id/засах/" component={OrgAdd}/>
-                            <Route path="/back/байгууллага/түвшин/:level/:id/" component={OrgMenu}/>
+                            <Route path="/back/байгууллага/түвшин/:level/:id/" component={ (props) => <OrgMenu {...props} />}/>
                         </Switch>
                     </div>
                 </div>
