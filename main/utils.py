@@ -277,12 +277,11 @@ def _make_connection(from_email):
 
 def _make_html(text, host_name, token):
     protocol = 'https'
-    if settings.DEBUG:
+    not_secure_ips: ['192.168.10.92']
+    if settings.DEBUG or host_name in not_secure_ips:
         protocol = 'http'
 
-    host = host_name
-    if protocol not in host_name:
-        host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
+    host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
 
     html = """
             <!DOCTYPE html>
