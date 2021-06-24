@@ -277,7 +277,7 @@ def _make_connection(from_email):
 
 def _make_html(text, host_name, token):
     protocol = 'https'
-    not_secure_ips: ['192.168.10.92']
+    not_secure_ips = ['192.168.10.92']
     if settings.DEBUG or host_name in not_secure_ips:
         protocol = 'http'
 
