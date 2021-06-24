@@ -25,7 +25,7 @@ from llc.backend.llc_request.models import (
     LLCRequest
 )
 from backend.token.utils import TokenGeneratorUserValidationEmail
-from backend.org.models import Employee, Org
+from backend.org.models import Employee, Org, Position
 from backend.org.models import Org
 from backend.inspire.models import (
     MDatas,
@@ -455,7 +455,8 @@ def get_request_data(request, id):
 def _get_employees(geo_id):
     emp_fields = list()
     get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
-    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=13)
+    position = Position.objects.filter(name='Мэргэжилтэн', org=get_org).first()
+    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position.id)
     for emp in get_employees:
         emp_detail = dict()
         get_name = User.objects.filter(pk=emp.user_id).first()
