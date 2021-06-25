@@ -27,13 +27,18 @@ from geoportal_app.models import User
 from django.contrib.postgres.search import SearchVector
 
 
-def all(request):
-    context_list = []
+
+def check_llc_user(request):
     if request.user.is_authenticated:
         is_sso_user = User.objects.filter(username=request.user, is_sso=True)
         if is_sso_user:
             return render(request, 'llc/dan_user.html')
+        else:
+            return redirect(settings.LOGIN_REDIRECT_URL)
 
+
+def all(request):
+    context_list = []
 
     bundles = Bundle.objects.all()
     for bundle in bundles:

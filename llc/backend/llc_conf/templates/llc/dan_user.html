@@ -5,28 +5,28 @@
 <div class="col-md-12 llc-dan-container">
     <div class="container">
         <label class="col-md-12 text-center">
-            <h5 class="text-primary ">Нэвтрэх эрхийн төрлөө сонгоно уу</h5>
+            <h5 class="text-primary">Нэвтрэх эрхийн төрлөө сонгоно уу </h5>
         </label>
         <div class="col-md-12 d-flex justify-content-center">
             <div class="col-md-3 llc-dan-choice card d-flex align-items-center">
-                <div class="text-center">
+                <a class="text-center" href="{% url "bundle:all" %}">
                     <img srcset="{% static "assets/image/llc-login-dan.png" %}" style="height: 100px;">
                     <div class="col-md-12">
                         <label class="my-3 text-center">
                             <h6 class="text-primary">Иргэн</h6>
                         </label>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-md-3 llc-dan-choice card d-flex align-items-center">
-                <div class="text-center">
+                <a class="text-center" href="{% url "llc:frontend" %}">
                     <img srcset="{% static "assets/image/llc-login-dan.png" %}" style="height: 100px;">
                     <div class="col-md-12">
                         <label class="my-3 text-center">
                             <h6 class="text-primary">Байгууллага</h6>
                         </label>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
