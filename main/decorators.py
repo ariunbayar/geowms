@@ -170,3 +170,22 @@ def get_conf_geoserver(f):
     wrap.__name__ = f.__name__
 
     return wrap
+
+
+
+def llc_required(f):
+
+    def wrap(request, *args, **kwargs):
+
+        if request.user.is_authenticated:
+            User = apps.get_model('geoportal_app', 'User')
+            user = get_object_or_404(User, is_sso=True)
+            request.user = user
+            return f(request, *args, **kwargs)
+
+        raise Http404
+
+    wrap.__doc__ = f.__doc__
+    wrap.__name__ = f.__name__
+
+    return wrap

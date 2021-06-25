@@ -3,6 +3,7 @@ from datetime import datetime
 from django.shortcuts import render
 from django.http import JsonResponse
 from main.decorators import ajax_required
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
 
 from main.utils import (
@@ -15,6 +16,8 @@ HEADERS = {
     'Content-type': 'application/json',
 }
 
+
+@login_required(login_url='/secure/login-dan')
 def llc_frontend(request):
     token_url = 'https://license.gazar.gov.mn/api/engineer/001/%D1%82%D0%B880101475'
     rsp = requests.get(token_url, headers=HEADERS, verify=False)
