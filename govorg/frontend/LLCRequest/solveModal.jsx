@@ -216,6 +216,7 @@ export class DetailModalBody extends Component {
                         )
                     }
                 })
+            this.componentDidMount()
     }
 
     componentDidMount() {

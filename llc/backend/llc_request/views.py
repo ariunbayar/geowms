@@ -535,8 +535,10 @@ def get_file_shapes(request, id):
             'icon_state': True,
             'features': geoms,
             'order_no': shape_geometry.order_no,
-            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
-
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else '',
+            "state": utils.get_value_from_types(RequestFilesShape.STATE_CHOICES, shape_geometry.state),
+            "kind": utils.get_value_from_types(RequestFilesShape.KIND_CHOICES, shape_geometry.kind),
+            "description": shape_geometry.description,
         })
 
     return JsonResponse({

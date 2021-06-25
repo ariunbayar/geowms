@@ -33,32 +33,6 @@ export const downloadData = (values) => {
     )
 }
 
-export class GetDescription extends Component {
-    constructor(props){
-        super(props)
-        this.state = {
-        }
-    }
-
-    render() {
-        const { values } = this.props
-        return (
-            <div className='p-0'>
-                {
-                    values.description
-                    &&
-                        <a
-                            className="btn btn-primary btn-sm text-white text-capitalize"
-                            onClick={() => this.props.desModal(values)}
-                        >
-                            Тайлбар
-                        </a>
-                }
-            </div>
-        )
-    }
-}
-
 function ModalText(props) {
     return (
         <div className="text-center border border-warning rounded p-4 my-2">
@@ -118,13 +92,6 @@ export class LLCList extends Component {
                         'refreshData': () => this.refreshData(),
                     }
                 },
-                {
-                    "title": 'Тайлбар',
-                    'component': GetDescription,
-                    'props': {
-                        'desModal': (values) => this.desModal(values),
-                    }
-                }
             ],
             is_modal_request_open: false,
             custom_query: {},
@@ -132,9 +99,6 @@ export class LLCList extends Component {
         }
         this.handleSearch = this.handleSearch.bind(this)
         this.refreshData = this.refreshData.bind(this)
-        this.desModal = this.desModal.bind(this)
-        this.modalChange = this.modalChange.bind(this)
-        this.modalOpen = this.modalOpen.bind(this)
         this.handleDetail = this.handleDetail.bind(this)
     }
 
@@ -174,31 +138,6 @@ export class LLCList extends Component {
 
     handeUpdateAction(values) {
         this.props.history.push(`/gov/llc-request/${values.id}/configure-bundle/`)
-    }
-
-    modalOpen() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
-    }
-
-    modalChange(title, text, has_button, description) {
-        this.setState({
-            title: title,
-            text: text,
-            has_button: has_button,
-            description: description,
-        })
-        this.modalOpen()
-    }
-
-    desModal(values) {
-        this.modalChange(
-            'ТАЙЛБАР',
-            ModalText,
-            false,
-            values.description,
-        )
     }
 
     render() {

@@ -1942,3 +1942,12 @@ def get_type(value_type_id):
         value_type = 'option'
 
     return value_type
+
+
+def get_value_from_types(choices, value):
+    choices = list(choices)
+    for option in choices:
+        option = list(option)
+        if value == option[0]:
+            return option[1]
+    return ''
