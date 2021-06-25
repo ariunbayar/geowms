@@ -468,6 +468,7 @@ def _get_employees(geo_id):
         emp_detail['org_name'] = get_org.name
         emp_detail['first_name'] = get_name.first_name
         emp_detail['mail'] = get_name.email
+        emp_detail['user_id'] = get_name.id
         emp_fields.append(emp_detail)
     return emp_fields
 
@@ -565,10 +566,12 @@ def _send_to_information_email (email):
 @require_POST
 @ajax_required
 def send_request(request, payload, id):
-    email = payload.get('mergejilten')
+    user_id = payload.get('mergejilten')
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
-    employee = Employee.objects.filter(org__geo_id=org_obj, position_id=13).first()
+    employee = Employee.objects.filter(org__geo_id=org_obj, user_id=user_id).first()
+    email = employee.user.email
+
     if employee:
         LLCRequest.objects.create(
             file_id=id,
