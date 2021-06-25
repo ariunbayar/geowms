@@ -253,7 +253,7 @@ export class RequestAdd extends Component {
                     '',
                     'fa fa-check-circle',
                     'success',
-                    'Амжилттай хадгаллаа',
+                    'Амжилттай',
                     info,
                     false,
                     "",

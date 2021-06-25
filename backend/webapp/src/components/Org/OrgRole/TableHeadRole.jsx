@@ -24,28 +24,28 @@ export class TableHeadRole extends Component {
             <div className={(inspire == "theme" ? "role-card" : "role-table-card") + (mtop ? ' mb-0 mt-3' : '')}>
                 <div className={inspire == "theme" ? "role-card-body" : "role-table-card-body"}>
                     <div className="row">
-                        <div className="col-4 arrow-tree collapsed" style={{width:'100px', paddingLeft:tree}}>
+                        <div className="col-4 arrow-tree collapsed" style={{width:'100px', paddingLeft:tree}} role="button">
                             {inspire == 'feature' ?
-                            <a className="collapsed"
-                                data-toggle="collapse"
-                                aria-expanded="true"
-                                data-target={`#collapse${index}`}
-                                aria-controls={`collapse${index}`}
-                                onClick={this.props.handleFeature}
-                                scope="col text-wrap"
-                            >
-                                {name}
-                            </a>
+                                <a className="collapsed"
+                                    data-toggle="collapse"
+                                    aria-expanded="true"
+                                    data-target={`#collapse${index}`}
+                                    aria-controls={`collapse${index}`}
+                                    onClick={this.props.handleFeature}
+                                    scope="col text-wrap"
+                                >
+                                    {name}
+                                </a>
                             :
-                            <a className="collapsed"
-                                data-toggle="collapse"
-                                aria-expanded="true"
-                                data-target={`#collapse${index}`}
-                                aria-controls={`collapse${index}`}
-                                scope="col text-wrap"
-                            >
-                                {name}
-                            </a>
+                                <a className="collapsed"
+                                    data-toggle="collapse"
+                                    aria-expanded="true"
+                                    data-target={`#collapse${index}`}
+                                    aria-controls={`collapse${index}`}
+                                    scope="col text-wrap"
+                                >
+                                    {name}
+                                </a>
                             }
                         </div>
                         <div className="col-8">

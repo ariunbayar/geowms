@@ -273,7 +273,6 @@ def save_request(request):
     check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
-
     if check_data_of_file and not id:
         return JsonResponse({
             'success': False,
@@ -347,6 +346,7 @@ def save_request(request):
             if file_name != 'blob':
                 _create_shape_files(org_data, request_file, extract_path, datasource_exts)
 
+    hurungu_oruulalt = int(hurungu_oruulalt)
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:
         form_data.client_org = zahialagch

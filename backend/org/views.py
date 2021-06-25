@@ -506,6 +506,11 @@ def _org_validation(org_name, org_id):
     return errors
 
 
+def _delete_perms(perms_inspire):
+    perms_inspire.delete()
+    return 
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -529,33 +534,50 @@ def org_add(request, payload, level):
         org.geo_id = geo_id
         org.save()
         if int(role_id) > -1:
-            gov_perm_role_check = GovPerm.objects.filter(org=org).first()
-            if gov_perm_role_check.gov_role_id != role_id or not gov_perm_role_check.gov_role.id:
-                gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
-                GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
-                gov_perm = GovPerm.objects.filter(org_id=org_id).first()
-                GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
-                for gov_role_inspire in gov_role_inspire_all:
-                    objs.append(GovPermInspire(
-                        gov_role_inspire=gov_role_inspire,
-                        gov_perm=gov_perm,
-                        perm_kind=gov_role_inspire.perm_kind,
-                        feature_id=gov_role_inspire.feature_id,
-                        property_id=gov_role_inspire.property_id,
-                        data_type_id=gov_role_inspire.data_type_id,
-                        geom=gov_role_inspire.geom,
-                        created_by=gov_role_inspire.created_by,
-                        updated_by=gov_role_inspire.updated_by,
-                    ))
+            with transaction.atomic():
+                objs = list()
+                gov_role = org_role_filter
+                all_gov_role_perms = gov_role.govroleinspire_set.all()
+                gov_perm_qs = GovPerm.objects.filter(org=org_id)
+                gov_perm = gov_perm_qs.first()
+                has_role = gov_perm.gov_role
+                gov_perms_inspire = gov_perm.govperminspire_set
+                gov_perm_qs.update(gov_role_id=role_id)
+                if has_role:
+                    delete_ids = list()
+                    for role_perm in has_role.govroleinspire_set.all():
+                        gov_perm_role = role_perm.govperminspire_set.all()
+                        if gov_perm_role:
+                            for perm in gov_perm_role:
+                                delete_ids.append(perm.id)
+                        gov_perms_inspire.filter(id__in=delete_ids).delete()
+
+                for gov_role_inspire in all_gov_role_perms:
+                    has_perm = False
+                    if gov_perms_inspire:
+                        has_perm = gov_perms_inspire.filter(
+                            feature_id=gov_role_inspire.feature_id,
+                            perm_kind=gov_role_inspire.perm_kind,
+                            property_id=gov_role_inspire.property_id,
+                            data_type_id=gov_role_inspire.data_type_id,
+                            geom=gov_role_inspire.geom,
+                        )
+
+                    if not has_perm:
+                        objs.append(GovPermInspire(
+                            gov_role_inspire=gov_role_inspire,
+                            gov_perm=gov_perm,
+                            perm_kind=gov_role_inspire.perm_kind,
+                            feature_id=gov_role_inspire.feature_id,
+                            property_id=gov_role_inspire.property_id,
+                            data_type_id=gov_role_inspire.data_type_id,
+                            geom=gov_role_inspire.geom,
+                            created_by=gov_role_inspire.created_by,
+                            updated_by=gov_role_inspire.updated_by,
+                        ))
                 GovPermInspire.objects.bulk_create(objs)
             return JsonResponse({'success': True})
-        else:
-            gov_perm = GovPerm.objects.filter(org=org).first()
-            if gov_perm:
-                GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
-                GovPerm.objects.filter(org_id=org_id).update(gov_role=None)
-            return JsonResponse({'success': True})
-    # Байгууллага шинээр үүсгэх
+    # # Байгууллага шинээр үүсгэх
     else:
         gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
@@ -632,6 +654,7 @@ def org_remove(request, payload, level):
             org_govorg.save()
 
         org.orgrole_set.all().delete()
+        org.position_set.all().delete()
         org.delete()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
@@ -693,7 +716,8 @@ def detail(request, level, pk):
 
     return JsonResponse({
         'orgs': orgs_display,
-        'count': User.objects.filter(employee__org=org).count()
+        'count': org.employee_set.count(),
+        'pos_count': org.position_set.count(),
     })
 
 
@@ -890,7 +914,7 @@ def get_inspire_roles(request, pk):
     data = []
     roles = []
     govRole = get_object_or_404(GovRole, pk=pk)
-    for themes in LThemes.objects.all():
+    for themes in LThemes.objects.order_by('theme_id'):
         package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = _get_theme_packages_gov(themes.theme_id, govRole)
         data.append({
                 'id': themes.theme_id,
@@ -1170,9 +1194,8 @@ def save_inspire_roles(request, payload, pk):
         'success': True,
     }
     return JsonResponse(rsp)
+
 # baiguulgaa govperm
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -1181,7 +1204,7 @@ def get_gov_roles(request, level, pk):
     roles = []
     org = get_object_or_404(Org, pk=pk, level=level)
     gov_perm = GovPerm.objects.filter(org=org).first()
-    for themes in LThemes.objects.all():
+    for themes in LThemes.objects.order_by('theme_id'):
         package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = _get_theme_packages(themes.theme_id, gov_perm)
         data.append({
                 'id': themes.theme_id,

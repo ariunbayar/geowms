@@ -106,24 +106,27 @@ def _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id):
 @user_passes_test(lambda u: u.is_superuser)
 def all(request, org_id):
 
-    gov_perm = GovPerm.objects.filter(org_id=org_id).first()
-    gov_perm_inspire_qs = gov_perm.govperminspire_set
-    gov_perm_geom_qs = gov_perm_inspire_qs.filter(geom=True, perm_kind=GovPermInspire.PERM_CREATE)
-    feature_ids = gov_perm_geom_qs.values_list('feature_id', flat=True)
-    layer_codes = list()
-    for feature_id in feature_ids:
-        feature = LFeatures.objects.filter(feature_id=feature_id).first()
-        if feature:
-            layer_code = utils.make_layer_name(utils.make_view_name(feature))
-            layer_codes.append(layer_code)
+    wms_list = list()
 
-    layers_qs = WMSLayer.objects.filter(code__in=layer_codes)
-    ids = list(layers_qs.values_list('wms_id', flat=True))
-    wms_ids = sorted(set(ids))
-    wms_list = [
-        _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id)
-        for wms_id in wms_ids
-    ]
+    gov_perm = GovPerm.objects.filter(org_id=org_id).first()
+    if gov_perm:
+        gov_perm_inspire_qs = gov_perm.govperminspire_set
+        gov_perm_geom_qs = gov_perm_inspire_qs.filter(geom=True, perm_kind=GovPermInspire.PERM_CREATE)
+        feature_ids = gov_perm_geom_qs.values_list('feature_id', flat=True)
+        layer_codes = list()
+        for feature_id in feature_ids:
+            feature = LFeatures.objects.filter(feature_id=feature_id).first()
+            if feature:
+                layer_code = utils.make_layer_name(utils.make_view_name(feature))
+                layer_codes.append(layer_code)
+
+        layers_qs = WMSLayer.objects.filter(code__in=layer_codes)
+        ids = list(layers_qs.values_list('wms_id', flat=True))
+        wms_ids = sorted(set(ids))
+        wms_list = [
+            _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id)
+            for wms_id in wms_ids
+        ]
 
     return JsonResponse({ 'wms_list': wms_list })
 
@@ -138,7 +141,7 @@ def pagination(request, payload):
     return JsonResponse({
         'wms_list': wms_list,
         'len': WMS.objects.all().count()
-            })
+    })
 
 
 @require_GET
