@@ -251,8 +251,9 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
 
     service_type = request.GET.get('SERVICE')
 
-    if url_type != service_type.lower():
-        raise Http404
+    if service_type:
+        if url_type != service_type.lower():
+            raise Http404
 
     get_url = {
         'wms': 'url',
@@ -266,17 +267,13 @@ def open_layer_proxy(request, bundle_id, wms_id, layer_id, url_type='wms'):
     if not wms_qs:
         raise Http404
 
-    wms_layer = wms_qs.first().wmslayer_set.filter(
-                bundlelayer__bundle=bundle,
-                bundlelayer__role_id=Role.ROLE1,
-                bundlelayer__layer_id=layer_id
-            ).first()
+    wms_layer_qs = wms_qs.first().wmslayer_set.filter(id=layer_id)
 
-    if not wms_layer:
+    if not wms_layer_qs:
         raise Http404
 
+    wms_layer = wms_layer_qs.first()
     wms_layer_code = wms_layer.code
-
     layer_code = utils.remove_text_from_str(wms_layer_code)
 
     view = ViewNames.objects.filter(view_name=layer_code).first()

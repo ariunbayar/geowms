@@ -1,9 +1,14 @@
+
 from itertools import groupby
+
 from django.http.response import Http404
-from django.shortcuts import render, reverse
+from django.shortcuts import redirect, render, reverse
+
 from backend.dedsanbutets.models import ViewNames
-from backend.bundle.models import Bundle, BundleLayer
+from backend.wmslayer.models import WMSLayer
+from backend.inspire.models import LFeatures, LPackages, LThemes
 from backend.geoserver.models import WmtsCacheConfig
+
 from main import utils
 
 
@@ -19,66 +24,59 @@ def _get_geoserver_url(request, bundle, wms, layer, type):
     return absolute_url
 
 
-def wms_layers(request, bundle):
-
-    roles = {1}
+def _wms_layers(wms_layers, bundle, request, views):
 
     wms_list = []
-    qs_layers = bundle.layers.filter(bundlelayer__role_id__in=roles).order_by('wms__created_at', 'sort_order').distinct()
 
-    def _layer_to_display(bundle, wms, ob):
-        code = ob.code.replace('gp_layer_', '')
+    def _layer_to_display(wms, ob):
+
+        code = ob.code.replace(utils.LAYERPREFIX, '')
         zoom_start = 4
         zoom_stop = 21
-        bundle_layers = BundleLayer.objects.filter(
-                bundle=bundle,
-                layer_id=ob.id,
-                role_id__in=roles
-            )
-        view_obj = ViewNames.objects.filter(view_name=code).first()
-        if view_obj and utils.json_load(view_obj.open_datas):
-            feature_id = view_obj.feature_id
-            wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
-            if wmts_obj:
-                if wmts_obj.zoom_start < 4:
-                    zoom_start = 5
-                else:
-                    zoom_start = wmts_obj.zoom_start
-                if wmts_obj.zoom_stop < 13:
-                    zoom_stop = 21
-                else:
-                    zoom_stop = wmts_obj.zoom_stop
 
-            return {
-                    'id': ob.pk,
-                    'name': ob.name,
-                    'code': ob.code,
-                    'feature_price': ob.feature_price,
-                    'geodb_schema': ob.geodb_schema,
-                    'geodb_table': ob.geodb_table,
-                    'geodb_pk_field': ob.geodb_pk_field,
-                    'geodb_export_field': ob.geodb_export_field,
-                    'zoom_start': zoom_start,
-                    'zoom_stop': zoom_stop,
-                    'wms_url': _get_geoserver_url(request, bundle, wms, ob, 'wms'),
-                    'wfs_url': _get_geoserver_url(request, bundle, wms, ob, 'wfs'),
-                    'wmts_url': _get_geoserver_url(request, bundle, wms, ob, 'wmts'),
-                    'shape_file_url': _get_service_url(request, bundle, wms, ob, file_type='shape-zip'),
-                    'gml_url': _get_service_url(request, bundle, wms, ob, file_type='gml'),
-                    'geo_json_url': _get_service_url(request, bundle, wms, ob, file_type='json'),
-                    'csv_url': _get_service_url(request, bundle, wms, ob, file_type='csv'),
+        for view in views:
+            if view.view_name == code:
+                feature_id = view.feature_id
+                wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+                if wmts_obj:
+                    if wmts_obj.zoom_start < 4:
+                        zoom_start = 5
+                    else:
+                        zoom_start = wmts_obj.zoom_start
+                    if wmts_obj.zoom_stop < 13:
+                        zoom_stop = 21
+                    else:
+                        zoom_stop = wmts_obj.zoom_stop
 
-                    'defaultCheck': bundle_layers.values('defaultCheck')[0]['defaultCheck']
-                }
+                return {
+                        'id': ob.pk,
+                        'name': ob.name,
+                        'code': ob.code,
+                        'feature_price': ob.feature_price,
+                        'geodb_schema': ob.geodb_schema,
+                        'geodb_table': ob.geodb_table,
+                        'geodb_pk_field': ob.geodb_pk_field,
+                        'geodb_export_field': ob.geodb_export_field,
+                        'zoom_start': zoom_start,
+                        'zoom_stop': zoom_stop,
+                        'wms_url': _get_geoserver_url(request, bundle, wms, ob, 'wms'),
+                        'wfs_url': _get_geoserver_url(request, bundle, wms, ob, 'wfs'),
+                        'wmts_url': _get_geoserver_url(request, bundle, wms, ob, 'wmts'),
+                        'shape_file_url': _get_service_url(request, bundle, wms, ob, file_type='shape-zip'),
+                        'gml_url': _get_service_url(request, bundle, wms, ob, file_type='gml'),
+                        'geo_json_url': _get_service_url(request, bundle, wms, ob, file_type='json'),
+                        'csv_url': _get_service_url(request, bundle, wms, ob, file_type='csv'),
+                    }
         return
 
-    for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
+    for wms, layers in groupby(wms_layers, lambda ob: ob.wms):
         if wms.is_active:
             filter_layer = list()
             for layer in layers:
-                lyr = _layer_to_display(bundle, wms, layer)
+                lyr = _layer_to_display(wms, layer)
                 if lyr:
                     filter_layer.append(lyr)
+
             wms_data = {
                 'id': wms.id,
                 'name': wms.name,
@@ -92,23 +90,52 @@ def wms_layers(request, bundle):
 
 
 def index(request):
+
+    if not request.user.is_authenticated:
+        return redirect('secure:loginUser')
+
     if not request.user.is_sso:
         raise Http404
-    bundles = Bundle.objects.all().order_by('sort_order')
-    bundle_displays = []
-    for bundle in bundles:
-        wms_list = wms_layers(request, bundle)
-        if wms_list:
-            display = {
-                'id': bundle.id,
-                'name': bundle.ltheme.theme_name,
-                'icon': bundle.icon.url if bundle.icon else '',
-                'wms_list': wms_list
-            }
-            bundle_displays.append(display)
+
+    display_bundles = []
+    themes = LThemes.objects.order_by('theme_id')
+    for theme in themes:
+        wms_layers = list()
+        views = list()
+        packages = LPackages.objects.filter(theme_id=theme.theme_id)
+        for pack in packages:
+
+            features_qs = LFeatures.objects
+            features_qs = features_qs.filter(package_id=pack.package_id)
+            feature_ids = features_qs.values_list('feature_id', flat=True)
+
+            view_qs = ViewNames.objects
+            view_qs = view_qs.filter(feature_id__in=feature_ids)
+
+            for view in view_qs:
+                if utils.json_load(view.open_datas):
+                    layer_code = utils.LAYERPREFIX + view.view_name
+                    wms_layer_qs = WMSLayer.objects.filter(code=layer_code)
+                    if wms_layer_qs:
+                        wms_layer = wms_layer_qs.first()
+                        wms_layers.append(wms_layer)
+                        views.append(view)
+
+        if wms_layers:
+            bundle = theme.bundle
+            wms_list = _wms_layers(wms_layers, bundle, request, views)
+
+            if wms_list:
+                display = {
+                    'id': bundle.id,
+                    'name': theme.theme_name,
+                    'icon': bundle.icon.url if bundle.icon else '',
+                    'wms_list': wms_list
+                }
+                display_bundles.append(display)
 
     context = {
-        'bundles': bundle_displays,
+        'bundles': display_bundles,
     }
 
     return render(request, 'open_layer/index.html', context)
