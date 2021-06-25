@@ -9,6 +9,8 @@ import glob
 from datetime import timedelta
 import datetime
 
+from django.contrib.auth.decorators import login_required
+
 from django.db.backends.utils import logger
 from django.conf import settings
 from django.db import connections
@@ -42,7 +44,7 @@ from geoportal_app.models import User
 from geojson import FeatureCollection
 
 from main.components import Datatable
-from main.decorators import ajax_required
+from main.decorators import ajax_required, llc_required
 from main.utils import (
     json_dumps,
     json_load,
@@ -657,12 +659,14 @@ def get_search_field(request):
     })
 
 
-@require_POST
+@require_GET
 @ajax_required
-def get_count(request, payload):
-    company_name = payload.get('company_name')
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
+def get_count(request, content):
+    company_name = content.get('company_name')
     states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
-    request_count = RequestFiles.objects.filter(state__in=states, name__ixact=company_name).count()
+    request_count = RequestFiles.objects.filter(state__in=states, name__exact=company_name).count()
     return JsonResponse({
         'success': True,
         'request_count': request_count,

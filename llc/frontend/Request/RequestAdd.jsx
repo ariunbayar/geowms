@@ -17,7 +17,7 @@ class SubmitClass extends Component {
     }
 
     componentDidUpdate(pP, pS){
-        const { valid_request, values, company_register_number } = this.props
+        const { valid_request, values } = this.props
         if (valid_request.length == 5 ) {
             if(this.state.one_check)
                 this.setState({ agreed_submit: true, one_check: false })
@@ -26,10 +26,6 @@ class SubmitClass extends Component {
             if(values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
                 this.setState({ info_status: true })
         }
-
-        // if (pP.company_register_number != company_register_number) {
-        //     this.setState({ regis_number: company_register_number})
-        // }
     }
 
     handleSubmit() {
@@ -37,7 +33,7 @@ class SubmitClass extends Component {
             files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
-            selected_tools, id, file_state, company_name,
+            selected_tools, id, file_state,
         } = this.props.values
         var blob = []
 
@@ -58,7 +54,6 @@ class SubmitClass extends Component {
         form_datas.append('object_count', object_count)
         form_datas.append('hurungu_oruulalt', hurungu_oruulalt)
         form_datas.append('zahialagch', zahialagch)
-        form_datas.append('company_name', company_name)
         form_datas.append('ulsiin_hemjeend', this.props.nationwide ? this.props.nationwide: '' )
         form_datas.append('selected_tools', JSON.stringify({ selected_tools }))
 
@@ -132,8 +127,6 @@ export class RequestAdd extends Component {
             selected_tools: [],
             file_name:'',
             state: '',
-            regis_number: props.company_register_number,
-            company_name: props.company_name,
             file_state: false,
             aimag_name: '',
             aimag_geom: [],
@@ -181,9 +174,8 @@ export class RequestAdd extends Component {
     }
 
     getTools() {
-        const { regis_number } = this.state
         service
-            .getToolDatas(regis_number)
+            .getToolDatas()
             .then(({ tool_datas }) => {
                 this.setState({tool_datas})
             })

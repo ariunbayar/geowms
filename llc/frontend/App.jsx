@@ -25,8 +25,7 @@ export class App extends Component {
     }
 
     requestCount() {
-        const { company_name } = this.props.llc[0]
-        service.getCount(company_name).then(({ success, request_count }) => {
+        service.getCount().then(({ success, request_count }) => {
             if (success) {
                 this.setState({ request_count })
             }
@@ -56,7 +55,7 @@ export class App extends Component {
                         <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
                             <Switch>
                                 <Route path="/llc/map/" component={Map} />
-                                <Route path="/llc/llc-request/" component={() => <Request llc_detail={ llc } />}/>
+                                <Route path="/llc/llc-request/" component={Request}/>
                                 <Route path="/llc/history/" component={History} />
                             </Switch>
                         </Suspense>

@@ -18,26 +18,18 @@ HEADERS = {
     'Content-type': 'application/json',
 }
 
-
 @login_required(login_url='/secure/login/')
-def llc_frontend(request):
-    is_sso_user = get_object_or_404(User, username=request.user, is_sso=True)
-    register = is_sso_user.register
-    token_url = 'https://license.gazar.gov.mn/api/engineer/001/{register}'.format(
-        register=register
-    )
-    rsp = requests.get(token_url, headers=HEADERS, verify=False)
-    content = {}
-    if rsp.status_code == 200:
-        content['llc_detail'] = rsp.json()
-        content['company_name'] = content['llc_detail'][0]['company_name']
+@llc_required(lambda u: u)
+def llc_frontend(request, content):
     return render(request, 'llc/index.html', content)
 
 
-@require_POST
+@require_GET
 @ajax_required
-def get_tool_datas(request, payload):
-    regis_number = payload.get('regis_number') or 2841134
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
+def get_tool_datas(request, content):
+    regis_number = content.get('register_number')
     tool_datas = []
     token_url = 'http://192.168.10.54/api/token?email=api@gazar.gov.mn&password=hXzWneQ3vf6fkaFY'
     rsp = requests.post(token_url, headers=HEADERS, verify=False)
