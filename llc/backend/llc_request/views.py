@@ -231,6 +231,7 @@ def save_request(request):
     request_datas = request.POST
     id = request.POST.get('id') or None
     uploaded_file = request.FILES['files']
+    company_name = request.POST.get('company_name')
     project_name = request.POST.get('project_name')
     object_type = request.POST.get('object_type')
     object_count = request.POST.get('object_count')
@@ -336,7 +337,7 @@ def save_request(request):
 
         else:
             request_file = RequestFiles.objects.create(
-                name='UTILITY SOLUTION',
+                name=company_name,
                 kind=RequestFiles.KIND_NEW,
                 state=RequestFiles.STATE_NEW,
                 geo_id=org_data.geo_id if org_data else '',
@@ -658,12 +659,12 @@ def get_search_field(request):
     })
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_count(request):
-
+def get_count(request, payload):
+    company_name = payload.get('company_name')
     states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
-    request_count = RequestFiles.objects.filter(state__in=states).count()
+    request_count = RequestFiles.objects.filter(state__in=states, name__ixact=company_name).count()
     return JsonResponse({
         'success': True,
         'request_count': request_count,

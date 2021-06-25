@@ -31,7 +31,6 @@ def llc_frontend(request):
     if rsp.status_code == 200:
         content['llc_detail'] = rsp.json()
         content['company_name'] = content['llc_detail'][0]['company_name']
-
     return render(request, 'llc/index.html', content)
 
 

@@ -35,12 +35,12 @@ function getToolDatas(regis_number) {
     return fetch(`/llc/get_tool_datas/`, opts).then(handleResponse)
 }
 
-function getCount() {
-    const requestOptions = {
-        ...getGetOptions(),
+function getCount(company_name) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({company_name})
     }
-
-    return fetch(`${prefix}/get_count/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/get_count/`, opts).then(handleResponse)
 }
 
 function sendRequest(id, mergejilten) {

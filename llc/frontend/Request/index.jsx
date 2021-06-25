@@ -10,16 +10,17 @@ export default class Request extends Component {
     }
 
     render() {
+        var datas = this.props.llc_detail[0]
         return (
             <Switch>
                 <Route exact path="/llc/llc-request/" component={Detail} />
                 <Route
                     path="/llc/llc-request/хүсэлт-нэмэх/"
-                    component={RequestAdd}
+                    component={(props) => <RequestAdd {...props} {...datas}/>}
                 />
                 <Route
                     path="/llc/llc-request/:id/дэлгэрэнгүй/"
-                    component={(props) => <RequestAdd {...props} values={this.props} info={false}/>}
+                    component={(props) => <RequestAdd {...props} values={this.props} {...datas} info={false}/>}
                 />
             </Switch>
         )
