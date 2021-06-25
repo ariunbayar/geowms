@@ -33,6 +33,7 @@ export class App extends Component {
     }
 
     render() {
+        const { llc } = this.props
         const { request_count } = this.state
         return (
             <BrowserRouter>
