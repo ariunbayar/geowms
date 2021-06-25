@@ -1,4 +1,9 @@
+
+import zipfile
+from io import BytesIO
+
 from django.conf.urls import url
+
 from django.contrib.auth.decorators import login_required
 from backend.dedsanbutets.models import ViewNames
 from django.db.models import base
@@ -87,14 +92,63 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
     return HttpResponse(content, content_type=content_type)
 
 
+def _get_file_ext():
+    obj = {
+        'json': ['geojson', '&outputFormat=application%2Fjson'],
+        'gml': ['gml', 'outputFormat=GML3'],
+        'shape-zip': ['zip', '&outputFormat=SHAPE-ZIP'],
+        'csv': ['csv', '&outputFormat=csv']
+    }
+    return obj
+
+
+def generate_zip(files):
+    mem_zip = BytesIO()
+
+    with zipfile.ZipFile(mem_zip, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for f in files:
+            zf.writestr(f[0], f[1])
+
+    return mem_zip.getvalue()
+
+
+def _file_replace(content):
+    filebytes = BytesIO(content)
+    myzipfile = zipfile.ZipFile(filebytes)
+    files = []
+    for file in myzipfile.infolist():
+        file_items = []
+        if '.txt' not in file.filename:
+            buffer = myzipfile.read(file.filename)
+
+            file_items.append(file)
+            file_items.append(buffer)
+            files.append(file_items)
+
+    content = generate_zip(files)
+    return content
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
 
-    if not request.user.is_sso:
-        raise Http404
+    def _make_service_url():
+        url = reverse('api:service:file-download', args=[bundle_id, wms_id, layer_id, types])
+        absolute_url = request.build_absolute_uri(url)
+        return absolute_url
 
-    if request.GET.get('REQUEST') == 'GetCapabilities':
+    ext = 0
+    url_ext = 1
+
+    request_request = ''
+    if request.GET.get('REQUEST'):
+        request_request = request.GET.get('REQUEST')
+    elif request.GET.get('request'):
+        request_request = request.GET.get('request')
+    request_request = request_request.lower()
+
+    if request_request == 'getcapabilities':
         raise Http404
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
@@ -108,11 +162,19 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
 
     if not wms_layer:
         raise Http404
+
     code = wms_layer.code
 
     BASE_HEADERS = {
         'User-Agent': 'geo 1.0',
     }
+
+    file_ext_obj = _get_file_ext()
+    if types not in file_ext_obj.keys():
+        raise Http404
+
+    file_ext = file_ext_obj[types][ext]
+    url_ext = file_ext_obj[types][url_ext]
 
     view_name = code.replace('gp_layer_', '')
     file_code = view_name.replace('_view', '')
@@ -122,31 +184,37 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     if not view or not view.open_datas:
         raise Http404
 
-    open_properties = _get_property_names(view, has_geo_data=True)
+    open_properties = _get_property_names(view, has_geo_data=True, get_text=False)
+    properties = ",".join(open_properties).lower()
 
-    base_geoserver_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}'.format(url=base_url, code=code)
-    base_geoserver_url = '{base_url}&propertyName={properties}'.format(base_url=base_geoserver_url, properties=open_properties)
-
-    if types == 'json':
-        req_url = '{base_url}&outputFormat=application%2Fjson'.format(base_url=base_geoserver_url)
-        filename = '{}-{}-{}.geojson'.format(types, date_now, file_code)
-    elif types == 'gml':
-        req_url = '{base_url}'.format(base_url=base_geoserver_url)
-        filename = '{}-{}-{}.gml'.format(types, date_now, file_code)
-    elif types == 'shape-zip':
-        req_url = '{base_url}&outputFormat=SHAPE-ZIP'.format(base_url=base_geoserver_url)
-        filename = '{}-{}-{}.zip'.format(types, date_now, file_code)
-    elif types == 'csv':
-        req_url = '{base_url}&outputFormat=csv'.format(base_url=base_geoserver_url)
-        filename = '{}-{}-{}.csv'.format(types, date_now, file_code)
+    if request_request == 'describefeaturetype':
+        req_url = base_url
     else:
-        raise Http404
-    req_url = req_url + '&format_options=CHARSET:UTF-8'
+        base_geoserver_url = '{url}?service=WFS&version=1.0.0&request=GetFeature&typeName={code}'.format(url=base_url, code=code)
+        base_geoserver_url = '{base_url}&propertyName={properties}'.format(base_url=base_geoserver_url, properties=properties)
+
+        req_url = '{base_url}{format}'.format(base_url=base_geoserver_url, format=url_ext)
+        filename = '{}-{}-{}.{}'.format(types, date_now, file_code, file_ext)
+
+        req_url = req_url + '&format_options=CHARSET:UTF-8'
+
     response = requests.get(req_url, request.GET, headers={**BASE_HEADERS}, timeout=5)
+    content = response.content
+
+    if file_ext == 'gml' and request_request != 'describefeaturetype':
+        service_url = _make_service_url()
+        content = replace_src_url(content, base_url, service_url, 'wfs')
+
+    elif types == 'shape-zip' and request_request != 'describefeaturetype':
+        content = _file_replace(content)
+
+    elif request_request == 'describefeaturetype':
+        content = filter_layers_wfs(content, [code], open_properties)
+
     content_type = response.headers.get('content-type')
-    #TODO shape zip file tathad wfsrequest.txt gesen file tataj bgaa teriig exclude hiih
-    response = HttpResponse(response.content, content_type=content_type)
-    response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=filename)
+    response = HttpResponse(content, content_type=content_type)
+    if request_request != 'describefeaturetype':
+        response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=filename)
 
     return response
 
