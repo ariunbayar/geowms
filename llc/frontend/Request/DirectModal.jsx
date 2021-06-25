@@ -79,7 +79,7 @@ export default class RequestDetail extends Component {
         } = this.props
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
-        else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0].mail}
+        else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0].user_id}
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
@@ -195,7 +195,7 @@ export default class RequestDetail extends Component {
                                                         id={idx}
                                                         label={value.org_name}
                                                     >
-                                                        <option value={value.mail}>{value.first_name}</option>
+                                                        <option value={value.user_id}>{value.first_name}</option>
                                                     </optgroup>
                                                 ))
                                             :

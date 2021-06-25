@@ -115,15 +115,15 @@ def llc_request_list(request, payload):
 
 
 def _get_leve_2_geo_id(layer):
-    position_mergejilten = POSITION_MERGEJILTEN.first()
-    org_datas = Org.objects.filter(level=2, employee__position=position_mergejilten.id)
+    org_ids = list(POSITION_MERGEJILTEN.values_list('org_id', flat=True))
+    qs_org = Org.objects.filter(level=2, id__in=org_ids)
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
         geo_json = feature.geom.json
         break
     if geo_json:
-        for org_data in org_datas:
+        for org in qs_org:
             sql = '''
                 SELECT ST_AsText(st_force2d(ST_GeomFromGeoJSON('{geo_json}'))) As wkt
             '''.format(geo_json=geo_json)
@@ -141,11 +141,11 @@ def _get_leve_2_geo_id(layer):
             where geo_id='{geo_id}'
             '''.format(
                 geom=valid_geodata,
-                geo_id=org_data.geo_id
+                geo_id=org.geo_id
             )
             check_geom = get_sql_execute(sql_2, cursor, 'all')[0].get('check_geom')
             if check_geom:
-                data_of_range = org_data
+                data_of_range = org
                 break
     return data_of_range
 
@@ -466,6 +466,7 @@ def _get_employees(geo_id):
         emp_detail['org_name'] = get_org.name
         emp_detail['first_name'] = get_name.first_name
         emp_detail['mail'] = get_name.email
+        emp_detail['user_id'] = get_name.id
         emp_fields.append(emp_detail)
     return emp_fields
 
@@ -563,10 +564,12 @@ def _send_to_information_email (email):
 @require_POST
 @ajax_required
 def send_request(request, payload, id):
-    email = payload.get('mergejilten')
+    user_id = payload.get('mergejilten')
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
-    employee = Employee.objects.filter(org__geo_id=org_obj, position_id=13).first()
+    employee = Employee.objects.filter(org__geo_id=org_obj, user_id=user_id).first()
+    email = employee.user.email
+
     if employee:
         LLCRequest.objects.create(
             file_id=id,
