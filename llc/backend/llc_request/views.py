@@ -116,13 +116,14 @@ def llc_request_list(request, payload):
 
 def _get_leve_2_geo_id(layer):
     org_ids = list(POSITION_MERGEJILTEN.values_list('org_id', flat=True))
-    org_datas = Org.objects.filter(level=2, id__in=org_ids)
+    qs_org = Org.objects.filter(level=2, id__in=org_ids)
 
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
         geo_json = feature.geom.json
         break
+
     if geo_json:
         for org in qs_org:
             sql = '''
