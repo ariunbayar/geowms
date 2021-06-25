@@ -343,9 +343,10 @@ a.active .list-group-item{
 
 .llc-dan-choice {
   height: 40%;
-  padding: 23px;
+  padding-top: 23px;
+  padding-bottom: 23px;
   text-align: center;
   margin: 2px;
   float:left;
-  color: blue
+  color: blue;
 }
