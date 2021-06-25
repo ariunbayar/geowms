@@ -11,7 +11,7 @@ function ImportTemplate(props) {
     }, [props.file])
 
     const convertFileSize = (files) => {
-        if (files){
+        if (files && Object.keys(file).length>0){
             let file = files.size
             let divider = 1024
             file = file / divider
