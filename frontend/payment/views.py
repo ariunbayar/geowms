@@ -1639,10 +1639,12 @@ def get_popup_info(request, payload):
         viewproperty_ids, property_qs = _get_properties_qs(view_qs)
         properties = property_qs.values("property_code", "property_name", "value_type_id")
 
+        select_properties = geo_id_name + ",".join([prop_code['property_code'] for prop_code in properties])
+
         with connections['default'].cursor() as cursor:
             sql = """
                 SELECT
-                    {geo_id_name}, {properties}
+                    {select_properties}
                 FROM
                     {view_name}
                 WHERE (
@@ -1656,12 +1658,13 @@ def get_popup_info(request, payload):
                 )
             """.format(
                 view_name=view_name,
-                properties=",".join([prop_code['property_code'] for prop_code in properties]),
+                select_properties=select_properties,
                 x=coordinate[0],
                 y=coordinate[1],
                 radius=radius,
                 geo_id_name=geo_id_name,
             )
+            print(sql)
             cursor.execute(sql)
             results = [dict((cursor.description[i][0], value)
                 for i, value in enumerate(row)) for row in cursor.fetchall()[:5]]
