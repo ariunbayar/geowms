@@ -390,10 +390,7 @@ def propertyFields(request, tid, fid):
     has_mat_view = utils.has_materialized_view(view_name)
     geom = MGeoDatas.objects.filter(feature_id=fid).first()
 
-    main_folder = 'feature-template'
-    theme_name = theme.theme_name_eng
-    feature_name = feature.feature_name_eng
-    file_path = os.path.join(settings.MEDIA_ROOT, main_folder, theme_name, feature_name)
+    file_path = _import_feature_template(False, theme, feature, True )
 
     if os.path.exists(file_path):
         file = os.listdir(file_path)
@@ -482,7 +479,7 @@ def make_view(request):
     property_ids = list(property_qs.values_list("property_id", flat=True))
 
     if file:
-        _import_feature_template(file, theme, feature)
+        _import_feature_template(file, theme, feature, False)
 
     view_name = utils.make_view_name(feature)
     check = _create_view(list(property_ids), view_name, list(data_type_ids), list(feature_config_ids), fid)
@@ -497,7 +494,7 @@ def make_view(request):
     return JsonResponse(rsp)
 
 
-def _import_feature_template(file, theme, feature ):
+def _import_feature_template(file, theme, feature, get_options ):
 
     main_folder = 'feature-template'
     theme_name = theme.theme_name_eng
@@ -506,20 +503,23 @@ def _import_feature_template(file, theme, feature ):
     theme_folder = os.path.join(sub_folder, theme_name)
     feature_folder = os.path.join(theme_folder, feature_name)
 
-    if file:
-        if not os.path.exists(theme_folder):
-            os.makedirs(theme_folder)
-            os.makedirs(feature_folder)
-            utils.save_file_to_storage(file, feature_folder, file.name)
-        else :
+    if not get_options:
+        if file:
+            if not os.path.exists(theme_folder):
+                os.makedirs(theme_folder)
             if not os.path.exists(feature_folder):
-                os.makedirs(feature_folder)
-                utils.save_file_to_storage(file, feature_folder, file.name)
-            else:
-                folder_list = os.listdir(feature_folder)
-                for item in folder_list:
-                    utils.remove_file(feature_folder + '/' + item)
-                utils.save_file_to_storage(file, feature_folder, file.name)
+                    os.makedirs(feature_folder)
+
+            folder_list = os.listdir(feature_folder)
+
+            for item in folder_list:
+                utils.remove_file(feature_folder + '/' + item)
+
+            utils.save_file_to_storage(file, feature_folder, file.name)
+
+    else :
+        return feature_folder
+
 
 
 @require_POST
@@ -565,7 +565,7 @@ def propertyFieldsSave(request):
     )[0]
 
     if file:
-        _import_feature_template(file, theme, feature)
+        _import_feature_template(file, theme, feature, False)
 
     view_prop_qs = ViewProperties.objects
     view_prop_qs.filter(view=view).delete()
