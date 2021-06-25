@@ -32,7 +32,8 @@ from backend.inspire.models import (
     LCodeLists,
     LThemes,
     LFeatures,
-    LPackages
+    LPackages,
+    MGeoDatas
 )
 from geoportal_app.models import User
 
@@ -150,13 +151,18 @@ def _get_leve_2_geo_id(layer):
     return data_of_range
 
 
-def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
+def _create_shape_files(org_data, request_file, extract_path, datasource_exts, id):
+    file_shapes = RequestFilesShape.objects.filter(files=request_file).first()
     for name in glob.glob(os.path.join(extract_path, '*')):
         if [item for item in datasource_exts if item in name]:
             ds = DataSource(name)
-            request_shape = RequestFilesShape.objects.create(
-                files=request_file,
-                org=org_data
+            is_create_shape = _check_not_approved_shape(ds, request_file, file_shapes)
+            request_shape = RequestFilesShape.objects.update_or_create(
+                id=id,
+                defaults = {
+                    'files':request_file,
+                    'org': org_data
+                }
             )
             for layer in ds:
                 for feature in layer:
@@ -169,7 +175,7 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
                     for key, value in properties.items():
                         properties[key] = utils.datetime_to_string(value)
                     ShapeGeom.objects.create(
-                        shape=request_shape,
+                        shape=list(request_shape)[0],
                         geom_json=json_dumps(json_content),
                         form_json=json_dumps(properties)
                     )
@@ -177,6 +183,35 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
         elif '.zip' not in name:
             utils.remove_file(name)
 
+def _conv_geom(geojson):
+    geojson = utils.json_load(geojson)
+    return GEOSGeometry(utils.json_dumps(geojson), srid=4326)
+
+from django.contrib.gis.geos import GEOSGeometry
+# geojson = ShapeGeom.objects.first().geom_json
+# geojson2 = ShapeGeom.objects.last().geom_json
+# geojson = _conv_geom(geojson)
+# geojson2 = _conv_geom(geojson2)
+# eq = geojson.equals(geojson2)
+# print(eq)
+
+
+
+def _check_not_approved_shape(datasource, request_file, file_shapes):
+    print(file_shapes)
+    geoms = ShapeGeom.objects.filter(shape=file_shapes)
+    print(geoms)
+    geom = geoms.geom_json
+    geom = _conv_geom(geom)
+    for layer in datasource:
+        for feature in layer:
+            geo_json = feature.geom.json
+            json_content = json_load(geo_json)
+            json_content = _conv_geom(json_content)
+            submitted = json_content.equals(geom)
+            if submitted:
+                print("ahahah")
+                break
 
 def _validation_form(request_datas):
 
@@ -211,9 +246,6 @@ def _change_file_in_update(uploaded_file, current_file_name, check_data_of_file,
     check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
     save_file_path = os.path.join(check_folder, current_folder)
     folder_list = os.listdir(check_folder)
-    files = glob.glob(save_file_path + '/*')
-    lastest_file_path = max(files, key=os.path.getctime)
-    lastest_file = lastest_file_path.split(save_file_path + "/")[1]
 
     if current_folder in folder_list:
         get_files = os.listdir(check_folder + "/" + current_folder)
@@ -320,7 +352,7 @@ def save_request(request):
                     for shape in get_shapes:
                         geoms = ShapeGeom.objects.filter(shape=shape)
                         geoms.delete()
-                    get_shapes.delete()
+                    # get_shapes.delete()
 
             if not check_data_of_file:
                 if file_name != 'blob':
@@ -343,9 +375,8 @@ def save_request(request):
             )
             id = request_file.id
 
-            if file_name != 'blob':
-                _create_shape_files(org_data, request_file, extract_path, datasource_exts)
-
+        if file_name != 'blob':
+            _create_shape_files(org_data, request_file, extract_path, datasource_exts, id)
     hurungu_oruulalt = int(hurungu_oruulalt)
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:
