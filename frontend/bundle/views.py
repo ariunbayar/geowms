@@ -23,18 +23,31 @@ from main import utils
 from backend.geoserver.models import WmtsCacheConfig
 from backend.config.models import Config
 from geoportal_app.models import User
+import requests
 
 from django.contrib.postgres.search import SearchVector
 
+HEADERS = {
+    'accept': 'application/json',
+    'Content-type': 'application/json',
+}
 
 
 def check_llc_user(request):
     if request.user.is_authenticated:
-        is_sso_user = User.objects.filter(username=request.user, is_sso=True)
+        is_sso_user = User.objects.filter(username=request.user, is_sso=True).first()
         if is_sso_user:
-            return render(request, 'llc/dan_user.html')
-        else:
-            return redirect(settings.LOGIN_REDIRECT_URL)
+            register = is_sso_user.register
+            check_llc = 'https://license.gazar.gov.mn/api/engineer/001/{register}'.format(
+                register=register
+            )
+            rsp = requests.get(check_llc, headers=HEADERS, verify=False)
+            if rsp.status_code == 200:
+                content = rsp.json()
+                if content:
+                    return render(request, 'llc/dan_user.html')
+
+    return redirect(settings.LOGIN_REDIRECT_URL)
 
 
 def all(request):

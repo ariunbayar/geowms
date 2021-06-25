@@ -5,6 +5,8 @@ from django.http import JsonResponse
 from main.decorators import ajax_required, llc_required
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
+from django.shortcuts import get_object_or_404
+from geoportal_app.models import User
 
 from main.utils import (
     datetime_to_string,
@@ -19,16 +21,17 @@ HEADERS = {
 
 @login_required(login_url='/secure/login/')
 def llc_frontend(request):
-    token_url = 'https://license.gazar.gov.mn/api/engineer/001/%D1%82%D0%B880101475'
+    is_sso_user = get_object_or_404(User, username=request.user, is_sso=True)
+    register = is_sso_user.register
+    token_url = 'https://license.gazar.gov.mn/api/engineer/001/{register}'.format(
+        register=register
+    )
     rsp = requests.get(token_url, headers=HEADERS, verify=False)
-    content = []
+    content = {}
     if rsp.status_code == 200:
-        content = rsp.json()
-    context = {
-        'ann_name': content[0]['company_name'] if content else '',
-    }
+        content['llc_detail'] = rsp.json()
 
-    return render(request, 'llc/index.html', context)
+    return render(request, 'llc/index.html', content)
 
 
 @require_POST
