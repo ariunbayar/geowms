@@ -132,6 +132,12 @@ export class RequestAdd extends Component {
             aimag_geom: [],
             kind: '',
             state: '',
+            investment_status: [
+                {id:1, name: "Төсөл, хөтөлбөрийн"},
+                {id:2, name: "Орон нутгийн"},
+                {id:3, name: "Улсын төсвийн"},
+                {id:4, name: "Хувийн"},
+        ]
         }
 
         this.handleOnChange = this.handleOnChange.bind(this)
@@ -145,6 +151,7 @@ export class RequestAdd extends Component {
     }
 
     componentDidMount() {
+        console.log(this.state.investment_status);
         const { id } = this.props.match.params
         if (id) {
             this.setState({ is_loading: true })
@@ -158,7 +165,7 @@ export class RequestAdd extends Component {
                         project_name: form_field['project_name'],
                         object_type: form_field['object_type'],
                         object_count: form_field['object_quantum'],
-                        hurungu_oruulalt: form_field['investment_status'],
+                        // hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
                         file_name: form_field['file_name'],
                         state: form_field['state'],
