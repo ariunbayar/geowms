@@ -114,6 +114,7 @@ def _get_feature_coll(ob, changeset_list):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def getRoles(request, tid, fid):
+    file_detail = dict()
     main_folder = "feature-template"
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
@@ -146,9 +147,11 @@ def getRoles(request, tid, fid):
             file_name = files[0]
             file_url = os.path.join(path, file_name)
             file =file_url.split("geoportal_app")
-            inspire_roles['file_url'] = file[1]
+            file_detail['name'] = file_name
+            file_detail['url'] = file[1]
+            inspire_roles['file'] = file_detail
         else:
-            inspire_roles['file_url'] = ''
+            inspire_roles['file'] = ''
 
 
     rsp = {

@@ -10,18 +10,16 @@ export class DownloadTemplate extends Control {
             target: options.target,
         })
 
+
+        const file = options.file
         const cssClasses = '⚙-toggle-downtemp'
         const element = this.element
         element.className = cssClasses
         const elementa = document.createElement('a')
         elementa.setAttribute('data-toggle', 'tooltip')
         elementa.setAttribute('data-placement', 'right')
-        elementa.setAttribute('title', 'downtemp.')
-
-        if (options.file_url){
-            elementa.setAttribute('href', options.file_url)
-        }
-
+        elementa.setAttribute('href', file ? file.url : "")
+        elementa.setAttribute('title', file ? file.name : "Тemplate хоосон байна.")
         element.setAttribute('id', '⚙-toggle-downtemp-id')
 
         const elementi = document.createElement('i')

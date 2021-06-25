@@ -69,6 +69,7 @@ export default class SideBar extends Component {
     handleSave() {
         const { fid, tid } = this.props
         const { id_list, view, tile_cache_check, zoom_start, open_datas, file } = this.state
+        console.log(file);
         let values
         values = this.getValuesFromState()
 
@@ -83,7 +84,7 @@ export default class SideBar extends Component {
             form_datas.append('view_id', view.id)
         }
 
-        if (file){
+        if (file['name']){
             form_datas.append('files', file, file.name)
         }
 

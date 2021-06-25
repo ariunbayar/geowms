@@ -21,7 +21,6 @@ function ImportTemplate(props) {
     }
 
     const file = props.file
-    console.log(file);
     return(
         <div className="border mb-3 w-100  py-2 pl-3">
             <h5 className="text-uppercase text-center pt-2">
@@ -43,7 +42,7 @@ function ImportTemplate(props) {
                         </div>
                         <div className="col-md-5 d-flex flex-column ml-4">
                             <i> файлын нэр:&nbsp; &nbsp; {file ? file.name: ''} </i>
-                            <i className={kb_or_Mb == 'error' && 'text-danger'}> файлын хэмжээ: &nbsp;{file ? <span>{current_size} &nbsp; {kb_or_Mb}</span> : ''} </i>
+                            <i className={kb_or_Mb == 'error' && 'text-danger'}> файлын хэмжээ: &nbsp;{file && file['name'] ? <span>{current_size} &nbsp; {kb_or_Mb}</span> : ''} </i>
                         </div>
                     </div>
             }

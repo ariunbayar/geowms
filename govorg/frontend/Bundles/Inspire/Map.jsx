@@ -250,7 +250,7 @@ export default class BarilgaSuurinGazar extends Component{
       }
 
       if(roles.PERM_VIEW){
-        map.addControl(new DownloadTemplate({file_url: roles.file_url}))
+        map.addControl(new DownloadTemplate({file: roles.file}))
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
       }
       this.setState({ is_loading:false, roles})
