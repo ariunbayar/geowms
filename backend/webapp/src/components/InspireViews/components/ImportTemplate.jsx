@@ -11,7 +11,7 @@ function ImportTemplate(props) {
     }, [props.file])
 
     const convertFileSize = (files) => {
-        if (files){
+        if (files && Object.keys(file).length>0){
             let file = files.size
             let divider = 1024
             file = file / divider
@@ -21,7 +21,6 @@ function ImportTemplate(props) {
     }
 
     const file = props.file
-    console.log(file);
     return(
         <div className="border mb-3 w-100  py-2 pl-3">
             <h5 className="text-uppercase text-center pt-2">
