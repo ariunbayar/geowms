@@ -13,44 +13,15 @@ function ImportTemplate(props) {
     const convertFileSize = (files) => {
         if (files){
             let file = files.size
-            let set_file = files.size
-            let size_count = 0
-            var state = true
-            let divider = 1000
-            let div_file = 0
-
-            while(state){
-                 file = file / divider
-                 div_file = Math.floor(file)
-                 if(div_file == 0){
-                     state = false
-                     if (size_count == 0){
-                         SetSize(file)
-                         SetSymbol('B')
-                     }
-                     else if (size_count == 1){
-                         SetSymbol('KB')
-                     }
-                     else if (size_count == 2){
-                         SetSymbol('MB')
-                     }
-                     else{
-                         file = "Файлын хэмжээ их байна !!!"
-                         SetSymbol('error')
-                     }
-
-                     if( size_count != 0){
-                         SetSize(set_file / 1000*size_count)
-                     }
-                 }
-                 else {
-                     size_count = size_count + 1
-                 }
-            }
+            let divider = 1024
+            file = file / divider
+            SetSize(file.toFixed(3))
+            SetSymbol('KB')
         }
     }
 
     const file = props.file
+    console.log(file);
     return(
         <div className="border mb-3 w-100  py-2 pl-3">
             <h5 className="text-uppercase text-center pt-2">

@@ -17,7 +17,11 @@ export class DownloadTemplate extends Control {
         elementa.setAttribute('data-toggle', 'tooltip')
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', 'downtemp.')
-        elementa.setAttribute('href', options.file_url)
+
+        if (options.file_url){
+            elementa.setAttribute('href', options.file_url)
+        }
+
         element.setAttribute('id', '⚙-toggle-downtemp-id')
 
         const elementi = document.createElement('i')
