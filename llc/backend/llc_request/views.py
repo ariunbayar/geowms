@@ -115,15 +115,15 @@ def llc_request_list(request, payload):
 
 
 def _get_leve_2_geo_id(layer):
-    position_mergejilten = POSITION_MERGEJILTEN.first()
-    org_datas = Org.objects.filter(level=2, employee__position=position_mergejilten.id)
+    org_ids = list(POSITION_MERGEJILTEN.values_list('org_id', flat=True))
+    qs_org = Org.objects.filter(level=2, id__in=org_ids)
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
         geo_json = feature.geom.json
         break
     if geo_json:
-        for org_data in org_datas:
+        for org in qs_org:
             sql = '''
                 SELECT ST_AsText(st_force2d(ST_GeomFromGeoJSON('{geo_json}'))) As wkt
             '''.format(geo_json=geo_json)
@@ -141,11 +141,11 @@ def _get_leve_2_geo_id(layer):
             where geo_id='{geo_id}'
             '''.format(
                 geom=valid_geodata,
-                geo_id=org_data.geo_id
+                geo_id=org.geo_id
             )
             check_geom = get_sql_execute(sql_2, cursor, 'all')[0].get('check_geom')
             if check_geom:
-                data_of_range = org_data
+                data_of_range = org
                 break
     return data_of_range
 
