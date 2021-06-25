@@ -256,12 +256,15 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 
 
 @require_POST
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
 @ajax_required
-def save_request(request):
+def save_request(request, content):
+    company_name = content.get('company_name')
+
     request_datas = request.POST
     id = request.POST.get('id') or None
     uploaded_file = request.FILES['files']
-    company_name = request.POST.get('company_name')
     project_name = request.POST.get('project_name')
     object_type = request.POST.get('object_type')
     object_count = request.POST.get('object_count')
@@ -565,8 +568,10 @@ def _send_to_information_email (email):
 
 
 @require_POST
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
 @ajax_required
-def send_request(request, payload, id):
+def send_request(request, payload, content, id):
     user_id = payload.get('mergejilten')
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
