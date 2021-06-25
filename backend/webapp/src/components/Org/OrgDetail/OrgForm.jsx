@@ -114,7 +114,7 @@ export class OrgForm extends Component {
                                     </button>{' '}
                                     <button
                                         className="btn btn-danger waves-effect waves-light m-1"
-                                        onClick={this.handleModalDeleteOpen}
+                                        onClick={() => this.handleModalDeleteOpen()}
                                     >
                                         <i className="fa fa fa-trash-o"></i> Устгах
                                     </button>

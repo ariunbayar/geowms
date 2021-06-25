@@ -10,7 +10,7 @@ def _check_org():
     Position = apps.get_model('backend_org', 'Position')
     orgs = Org.objects.all()
     if not orgs:
-        Position.objects.delete()
+        Position.objects.all().delete()
         return 1
     return orgs.first().id
 
