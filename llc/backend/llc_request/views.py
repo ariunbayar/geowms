@@ -53,6 +53,8 @@ from main.utils import (
 from main import utils
 
 
+POSITION_MERGEJILTEN = Position.objects.filter(name='Мэргэжилтэн')
+
 # Create your views here.
 
 def _get_display_text(field, value):
@@ -113,7 +115,8 @@ def llc_request_list(request, payload):
 
 
 def _get_leve_2_geo_id(layer):
-    org_datas = Org.objects.filter(level=2, employee__position=13)
+    position_mergejilten = POSITION_MERGEJILTEN.first()
+    org_datas = Org.objects.filter(level=2, employee__position=position_mergejilten.id)
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
@@ -270,7 +273,6 @@ def save_request(request):
     check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
     check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
-
     if check_data_of_file and not id:
         return JsonResponse({
             'success': False,
@@ -344,6 +346,7 @@ def save_request(request):
             if file_name != 'blob':
                 _create_shape_files(org_data, request_file, extract_path, datasource_exts)
 
+    hurungu_oruulalt = int(hurungu_oruulalt)
     form_data = RequestForm.objects.filter(file_id=id).first()
     if form_data:
         form_data.client_org = zahialagch
@@ -455,8 +458,8 @@ def get_request_data(request, id):
 def _get_employees(geo_id):
     emp_fields = list()
     get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
-    position = Position.objects.filter(name='Мэргэжилтэн', org=get_org).first()
-    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position.id)
+    position_mergejilten = POSITION_MERGEJILTEN.filter(org=get_org).first()
+    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position_mergejilten.id)
     for emp in get_employees:
         emp_detail = dict()
         get_name = User.objects.filter(pk=emp.user_id).first()

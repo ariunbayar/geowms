@@ -228,9 +228,9 @@ export class OrgAdd extends Component {
 
     handleRefresh() {
         const org_level = this.props.match.params.level
-        this.props.refreshCount()
+        global.handleCount()
         setTimeout(() => {
-            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
+            this.props.history.push(`/back/байгууллага/түвшин/${org_level}/`)
         }, 150)
     }
 

@@ -2,7 +2,6 @@ import React, { Component } from "react"
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import TileLayer from 'ol/layer/Tile';
-import Tile from 'ol/layer/Tile'
 import {OSM, Vector as VectorSource, TileWMS} from 'ol/source'
 import View from 'ol/View';
 import GeoJSON from 'ol/format/GeoJSON';

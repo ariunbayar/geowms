@@ -1,11 +1,9 @@
 import React, { Component } from "react"
-import {Switch, Route, Link, NavLink} from "react-router-dom"
+import { Switch, Route } from "react-router-dom"
 
 import {OrgForm} from './OrgForm'
 import {OrgAdd} from './OrgAdd'
 import {OrgMenu} from './OrgMenu'
-
-
 export default class Org extends Component {
 
     constructor(props) {
@@ -18,19 +16,6 @@ export default class Org extends Component {
         }
     }
 
-    componentDidMount() {
-        if (this.props.location.pathname.endsWith('түвшин/')) {
-            this.props.history.push(this.default_url)
-        }
-    }
-
-    componentDidUpdate() {
-        if (this.props.location.pathname.endsWith('түвшин/')) {
-            this.props.history.push(this.default_url)
-        }
-    }
-
-
     render() {
         return (
             <div className="card">
@@ -38,14 +23,9 @@ export default class Org extends Component {
                     <div className="col-md-12">
                         <Switch>
                             <Route exact path="/back/байгууллага/түвшин/:level/" component={OrgForm}/>
-                            <Route
-                                path="/back/байгууллага/түвшин/:level/нэмэх/"
-                                component={(props) =>
-                                    <OrgAdd {...props} refreshCount={this.props.refreshCount}/>
-                                }
-                            />
+                            <Route exact path="/back/байгууллага/түвшин/:level/нэмэх/" component={OrgAdd}/>
                             <Route exact path="/back/байгууллага/түвшин/:level/:id/засах/" component={OrgAdd}/>
-                            <Route path="/back/байгууллага/түвшин/:level/:id/" component={ (props) => <OrgMenu {...props} />}/>
+                            <Route path="/back/байгууллага/түвшин/:level/:id/" component={OrgMenu}/>
                         </Switch>
                     </div>
                 </div>

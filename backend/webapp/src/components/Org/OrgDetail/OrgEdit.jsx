@@ -1,18 +1,17 @@
 import React, { Component, Fragment } from "react"
-import {service} from "../service"
-import ModalAlert from "../../ModalAlert"
-import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {validationSchema} from '../validationSchema'
+import { Formik, Field, Form, ErrorMessage } from 'formik'
+
 import Loader from "@utils/Loader"
 
+import { validationSchema } from '../validationSchema'
+
+import { service } from "../service"
 export class OrgEdit extends Component {
 
     constructor(props) {
         super(props)
 
         this.state = {
-            modal_alert_status: "closed",
-            timer: null,
             roles: [],
             secondOrders: [],
             secondOrder_value: -1,
@@ -31,7 +30,6 @@ export class OrgEdit extends Component {
                 org_role: '-1',
             }
         }
-
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleGetAll = this.handleGetAll.bind(this)
         this.modalClose = this.modalClose.bind(this)
@@ -39,6 +37,23 @@ export class OrgEdit extends Component {
         this.handle2ndOrderChange = this.handle2ndOrderChange.bind(this)
         this.handle3rdOrderChange = this.handle3rdOrderChange.bind(this)
         this.handle4thOrderChange = this.handle4thOrderChange.bind(this)
+    }
+
+    setModal(title, text, icon_color, icon, has_button, action, close) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: icon,
+            modal_bg: '',
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            actionNameBack: 'Буцах',
+            actionNameDelete: '',
+            modalAction: action,
+            modalClose: close,
+        }
+        global.MODAL(modal)
     }
 
     componentDidMount() {
@@ -71,7 +86,7 @@ export class OrgEdit extends Component {
     formOptions() {
         service.formOptions().then(({success, secondOrders, roles, firstOrder_geom}) => {
             if (success) {
-                this.setState({secondOrders, roles, firstOrder_geom, is_loading: false})
+                this.setState({ secondOrders, roles, firstOrder_geom, is_loading: false })
                 const geo_id = this.state.geo_id
                 if (geo_id) {
                     var find_text = ''
@@ -102,7 +117,6 @@ export class OrgEdit extends Component {
                 } else {
                     this.setState({geo_id: firstOrder_geom})
                 }
-                this.setState({disabled: false})
             }
         })
     }
@@ -176,22 +190,26 @@ export class OrgEdit extends Component {
             role_id: values.org_role,
             geo_id: geo_id,
         }
-        service.org_add(org_level, datas).then(({success, errors}) => {
+        this.setState({ is_loading: true })
+        service.org_add(org_level, datas).then(({ success, errors }) => {
             if (success) {
+                this.setModal('Амжилттай хадгаллаа', '', 'success', 'fa fa-check-circle', false, null, this.modalClose)
+                global.handleCount()
                 this.setState({
-                    modal_alert_status: "open",
                     form_values: {
                         org_level: values.org_level,
                         org_name: values.org_name,
                         org_role: values.org_role,
-                    }
+                    },
+                    is_loading: false,
                 })
+                this.props.getGeom()
                 setStatus('saved')
                 setSubmitting(false)
                 this.new_level = values.org_level
-                this.modalCloseTime(values.org_level)
             } else {
                 setErrors(errors)
+                this.setState({ is_loading: false })
                 setSubmitting(false)
             }
         })
@@ -200,22 +218,14 @@ export class OrgEdit extends Component {
     modalClose(){ //2 secondees omno modal dr daragdahad ajillah function
         this.props.FormClose()
         this.props.PushHistory(this.new_level)
-        clearTimeout(this.state.timer) //modalCloseTime dotorh setTimeOutiig arilgah function
-    }
-
-    modalCloseTime(org_level){
-        this.state.timer = setTimeout(() => {
-            this.props.FormClose()
-            this.props.PushHistory(org_level)
-        }, 2000)
     }
 
     render() {
-        const {form_values, roles, disabled} = this.state
+        const { form_values, roles } = this.state
         const org_id = this.props.id
-        const org_level = this.props.level
         return (
             <div>
+                <Loader is_loading={this.state.is_loading}/>
                 <Formik
                     enableReinitialize
                     initialValues={form_values}
@@ -226,11 +236,9 @@ export class OrgEdit extends Component {
                     errors,
                     isSubmitting,
                 }) => {
-                    const has_error = Object.keys(errors).length > 0
                     return (
                         <div>
                             <Form className="col-12">
-                                <Loader is_loading={this.state.is_loading}/>
                                 <div className="form-row">
                                     <div className="form-group col">
                                         <div className="position-relative has-icon-right">
@@ -329,23 +337,15 @@ export class OrgEdit extends Component {
                                     </tbody>
                                 </table>
                                 <div className="form-group">
-                                    <button type="submit" className="btn gp-btn-primary" style={{float: 'right'}} disabled={isSubmitting}>
+                                    <button type="submit" className="btn gp-btn-primary" style={{ float: 'right' }} disabled={isSubmitting}>
                                         Хадгалах
                                     </button>
                                 </div>
-                                <Loader is_loading={isSubmitting}/>
                             </Form>
                         </div>
                     )}}
                 </Formik>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title="Амжилттай хадгаллаа"
-                    model_type_icon = "success"
-                />
             </div>
         )
     }
-
 }

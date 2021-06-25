@@ -6,7 +6,6 @@ import re
 import unicodedata
 import importlib
 import zipfile
-from django import utils
 import pyproj
 import math
 import json
@@ -276,6 +275,28 @@ def _make_connection(from_email):
     return connection
 
 
+def _make_html(text, host_name, token):
+    protocol = 'https'
+    not_secure_ips = ['192.168.10.92']
+    if settings.DEBUG or host_name in not_secure_ips:
+        protocol = 'http'
+
+    host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
+
+    html = """
+            <!DOCTYPE html>
+            <html>
+                <head></head>
+                <body>
+                    <p>{text}</p>
+                    <a style="color: 'blue'" href="{host}/gov/secure/approve/{token}/">Энд дарна уу</a>
+                </body>
+            </html>
+        """.format(text=text, host=host, token=token)
+
+    return html
+
+
 def send_approve_email(user, subject=None, text=None):
 
     if not user.email:
@@ -294,14 +315,12 @@ def send_approve_email(user, subject=None, text=None):
         subject = 'Геопортал хэрэглэгч баталгаажуулах'
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
-    if host_name == 'localhost:8000':
-        msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
-    else:
-        msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+
+    html_message = _make_html(text, host_name, token)
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
 
-    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
+    send_mail(subject, text, from_email, to_email, connection=_make_connection(from_email), html_message=html_message)
 
     return True
 
