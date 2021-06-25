@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block content %}
+<!-- style="height: 70vh;" -->
+<div class="col-md-12 llc-dan-container">
+    <div class="container">
+        <label class="col-md-12 text-center">
+            <h5 class="text-primary ">Нэвтрэх эрхийн төрлөө сонгоно уу</h5>
+        </label>
+        <div class="col-md-12 d-flex justify-content-center">
+            <div class="col-md-4 llc-dan-choice card d-flex align-items-center">
+                <div class="text-center">
+                    <img srcset="{% static "assets/image/llc-login-dan.png" %}" style="height: 100px;">
+                    <div class="col-md-12">
+                        <label class="my-3 text-center">
+                            <small class="text-primary">Иргэн</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 llc-dan-choice card d-flex align-items-center">
+                <div class="text-center">
+                    <img srcset="{% static "assets/image/llc-login-dan.png" %}" style="height: 100px;">
+                    <div class="col-md-12">
+                        <label class="my-3 text-center">
+                            <small class="text-primary">Байгууллага</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

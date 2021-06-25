@@ -2,12 +2,13 @@
 
 
 import os
+import re
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from itertools import groupby
 
 from django.http import JsonResponse
-from django.shortcuts import render, reverse, get_object_or_404
+from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
 
@@ -21,12 +22,19 @@ from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfi
 from main import utils
 from backend.geoserver.models import WmtsCacheConfig
 from backend.config.models import Config
+from geoportal_app.models import User
 
 from django.contrib.postgres.search import SearchVector
 
 
 def all(request):
     context_list = []
+    if request.user.is_authenticated:
+        is_sso_user = User.objects.filter(username=request.user, is_sso=True)
+        if is_sso_user:
+            return render(request, 'llc/dan_user.html')
+
+
     bundles = Bundle.objects.all()
     for bundle in bundles:
         bundle_list = []
