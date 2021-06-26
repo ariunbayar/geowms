@@ -350,3 +350,7 @@ a.active .list-group-item{
   float:left;
   color: blue;
 }
+
+.llc-dan-choice:hover {
+  background-color: #edf2f7;
+}
