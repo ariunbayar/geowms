@@ -348,29 +348,43 @@ def _get_layer_name(employee, fid):
 
 def _get_cql_filter(geo_id):
     cql_data = utils.get_2d_data(geo_id)
-    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data=cql_data)
+    cql_filter = 'within(geo_data, {cql_data})'.format(cql_data=cql_data)
+    print(cql_filter)
+    f = open("demofile2.txt", "a")
+    f.write(cql_filter)
+    f.close()
     return cql_filter if cql_data else ''
 
 
 def _get_request_content(base_url, request, geo_id, headers):
     queryargs = request.GET
     if geo_id != utils.get_1stOrder_geo_id() and (request.GET.get('REQUEST') == 'GetMap' or request.GET.get('REQUEST') == 'GetFeature'):
-        cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
-        if request.GET.get('REQUEST') == 'GetMap':
-            queryargs = {
-                **request.GET,
-                'cql_filter': cql_filter
-            }
-        else:
-            queryargs = {
-                'service': 'WFS',
-                'request': 'GetFeature',
-                'version': '1.0.0',
-                'typeName': request.GET.get('TYPENAME'),
-                'srsName': 'EPSG:4326',
-                'outputFormat': 'gml3',
-                'cql_filter': cql_filter
-            }
+        # cql_filter = utils.geo_cache("gov_post_cql_filter", geo_id, _get_cql_filter(geo_id), 20000)
+        print(geo_id)
+        cql_filter =  _get_cql_filter(geo_id)
+        # if request.GET.get('REQUEST') == 'GetMap':
+        #     queryargs = {
+        #         **request.GET,
+        #         'cql_filter': cql_filter
+        #     }
+        # else:
+        #     # queryargs = {
+        #     #     **request.GET,
+        #     #     'cql_filter': cql_filter
+            # }
+        queryargs = {
+            # **request.GET,
+            'service': 'WFS',
+            'request': 'GetFeature',
+            'version': '1.0.0',
+            # 'typeName': request.GET.get('TYPENAMES'),
+            'typeNames': 'gp_bnd:gp_layer_administrativeunit_au_view',
+            'typeName': 'gp_bnd:gp_layer_administrativeunit_au_view',
+            'srsName': 'EPSG:4326',
+            'srs': 'EPSG:4326',
+            'outputFormat': 'gml3',
+            'cql_filter': cql_filter
+        }
         rsp = requests.post(base_url, queryargs,  headers=headers, timeout=300, verify=False)
     else:
         queryargs = request.GET
@@ -417,6 +431,7 @@ def qgis_proxy(request, base_url, token, fid=''):
     }
 
     rsp, queryargs = _get_request_content(base_url, request, geo_id, headers)
+    print(rsp.url)
     content = rsp.content
 
     if request.GET.get('REQUEST') == 'GetFeature':
