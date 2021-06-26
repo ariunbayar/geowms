@@ -424,7 +424,6 @@ export default class SolveModal extends Component {
         this.props.refreshData()
     }
 
-
     render() {
         const { is_modal_request_open, state, kind } = this.state
         return (

@@ -19,6 +19,7 @@ export const makeKindColor = (kind) => {
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
     else if (kind == "БУЦААГДСАН") color = 'text-danger'
     else if (kind == "ШИНЭ") color = 'text-primary'
+    else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
     return color
 }
 

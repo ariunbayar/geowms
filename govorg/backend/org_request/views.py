@@ -1,6 +1,6 @@
 import json
 import datetime
-from geojson import FeatureCollection, feature
+from geojson import FeatureCollection
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -13,17 +13,11 @@ from django.contrib.gis.geos import GEOSGeometry
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
-from backend.dedsanbutets.models import ViewNames
-from backend.dedsanbutets.models import ViewProperties
 from backend.org.models import Employee, Org
 from backend.inspire.models import (
-    LDataTypes,
     LThemes,
     LPackages,
     LFeatures,
-    LFeatureConfigs,
-    LDataTypeConfigs,
-    LCodeLists,
     LProperties,
     MGeoDatas,
     MDatas,
@@ -37,7 +31,7 @@ from llc.backend.llc_request.models import RequestForm
 from llc.backend.llc_request.models import RequestFilesShape
 from govorg.backend.org_request.models import ChangeRequest
 
-from main.decorators import ajax_required
+from main.decorators import ajax_required, gov_required
 from main.components import Datatable
 from main.inspire import GEoIdGenerator
 from main.utils import (
@@ -58,6 +52,41 @@ from main.utils import (
 )
 from main import utils
 
+
+REQUEST_SHAPE_NEW = {
+    'state': RequestFilesShape.STATE_NEW,
+    'kind': RequestFilesShape.KIND_PENDING,
+}
+
+REQUEST_SHAPE_SENT_GOV = {
+    'state': RequestFilesShape.STATE_SENT,
+    'kind': RequestFilesShape.KIND_PENDING,
+}
+
+REQUEST_SHAPE_APPROVED = {
+    'state': RequestFilesShape.STATE_SOLVED,
+    'kind': RequestFilesShape.KIND_APPROVED,
+}
+
+LLC_REQUEST_DISSMIS = {
+    'state': LLCRequest.STATE_NEW,
+    'kind': LLCRequest.KIND_DISMISS,
+}
+
+LLC_REQUEST_SENT_GOV = {
+    'state': LLCRequest.STATE_SENT,
+    'kind': LLCRequest.KIND_PENDING,
+}
+
+LLC_REQUEST_APPROVE = {
+    'state': LLCRequest.STATE_SOLVED,
+    'kind': LLCRequest.KIND_APPROVED,
+}
+
+LLC_REQUEST_REVOKE = {
+    'state': LLCRequest.STATE_SOLVED,
+    'kind': LLCRequest.KIND_REVOKE,
+}
 
 def _get_geom(geo_id, fid):
     cursor = connections['default'].cursor()
@@ -448,45 +477,51 @@ def _set_llc_request(llc_request_id, payload):
     desc = payload.get('desc')
     change_request_data = dict()
     llc_request_data = dict()
-
-    if action_type == 'dismiss':
-        change_request_data['kind'] = ChangeRequest.KIND_DISMISS
-        llc_request_data['kind'] = LLCRequest.KIND_DISMISS
-        llc_request_data['state'] = LLCRequest.STATE_NEW
-        info = 'Амжилттай буцаалаа'
-        state = RequestFilesShape.STATE_SOLVED
-        kind = RequestFilesShape.KIND_DISMISS
-
-    elif action_type == 'revoke':
-        change_request_data['kind'] = ChangeRequest.KIND_DISMISS
-        llc_request_data['kind'] = LLCRequest.KIND_REVOKE
-        llc_request_data['state'] = LLCRequest.STATE_SOLVED
-        info = 'Амжилттай цуцаллаа'
-        state = RequestFilesShape.STATE_SOLVED
-        kind = RequestFilesShape.KIND_REVOKE
-
-    change_request_data['state'] = ChangeRequest.STATE_REJECT
+    request_shape = dict()
 
     llc_changerequest_qs = ChangeRequest.objects
     llc_changerequest_qs = llc_changerequest_qs.filter(llc_request_id=llc_request_id)
+
+    if action_type == 'dismiss':
+        change_request_data['kind'] = ChangeRequest.KIND_DISMISS
+        llc_request_data['kind'] = LLC_REQUEST_DISSMIS['kind']
+        llc_request_data['state'] = LLC_REQUEST_DISSMIS['state']
+        info = 'Амжилттай буцаалаа'
+        request_shape['state'] = RequestFilesShape.STATE_NEW # TODO soligdoj magdgv
+        request_shape['kind'] = RequestFilesShape.KIND_DISMISS
+        llc_changerequest_qs = llc_changerequest_qs.filter(feature_id=feature_id)
+
+    elif action_type == 'revoke':
+        change_request_data['kind'] = ChangeRequest.KIND_REVOKE
+        llc_request_data = LLC_REQUEST_REVOKE
+        info = 'Амжилттай цуцаллаа'
+        request_shape['state'] = RequestFilesShape.STATE_SOLVED
+        request_shape['kind'] = RequestFilesShape.KIND_REVOKE
+
+    change_request_data['state'] = ChangeRequest.STATE_REJECT
     llc_changerequest_qs.update(**change_request_data)
 
-    llc_request_qs = LLCRequest.objects
-    llc_request_qs = llc_request_qs.filter(id=llc_request_id)
-    llc_request_qs.update(**llc_request_data)
     if action_type == 'revoke':
+        llc_request_qs = LLCRequest.objects
+        llc_request_qs = llc_request_qs.filter(id=llc_request_id)
         llc_request = llc_request_qs.first()
+
+        llc_request_qs.update(**llc_request_data)
 
         request_file_data = dict()
         request_file_data['kind'] = RequestFiles.KIND_REVOKE
         request_file_data['state'] = RequestFiles.STATE_SOLVED
         request_file_data['description'] = description or ''
-
         request_file = RequestFiles.objects.filter(id=llc_request.file.id)
         request_file.update(**request_file_data)
 
-    _cancel_prev_req(llc_changerequest_qs)
-    _change_choise_of_llc_req_files(llc_request_id, feature_id, state, kind, desc)
+        for req_file in request_file:
+            req_shape = RequestFilesShape.objects.filter(files=req_file)
+            req_shape.update(**request_shape)
+
+        _cancel_prev_req(llc_changerequest_qs)
+    else:
+        _change_choise_of_llc_req_files(llc_request_id, feature_id, request_shape['state'], request_shape['kind'], desc, llc_request_data['state'], llc_request_data['kind'])
 
     return info
 
@@ -676,7 +711,7 @@ def _create_empty_m_datas_values(feature_id, geo_id, form_json=[]):
                         value['data_type_id'] = l_feature_c.data_type_id
 
         filter_value_type = utils.get_prop_value_type(p.value_type_id)
-        value[filter_value_type] = ''
+        value[filter_value_type] = None
         value['created_by'] = 1
         value['modified_by'] = 1
         values.append(MDatas(**value))
@@ -854,7 +889,7 @@ def _insert_data_another_table(request_datas, geo_id, change_type):
             pass
 
 
-def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, description=''):
+def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, description, parent_state, parent_kind, is_approve=False):
     if llc_req_id:
         qs_req = LLCRequest.objects.filter(id=llc_req_id)
         if qs_req:
@@ -864,19 +899,33 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
             req_shapes_qs = req_shapes_qs.filter(files_id=file_id)
             qs = req_shapes_qs.filter(feature_id=feature_id)
             if qs:
-                llc_file_shape = qs.first()
-                llc_file_shape.state = state
-                llc_file_shape.kind = kind
-                llc_file_shape.description = description
-                llc_file_shape.save()
+                qs.update(
+                    state=state,
+                    kind=kind,
+                    description=description,
+                )
 
-                max_count = req_shapes_qs.count()
-                solved_req_shapes = req_shapes_qs.filter(kind=RequestFilesShape.KIND_APPROVED, state=RequestFilesShape.STATE_SOLVED).count()
+                count_qs = req_shapes_qs
+                if not is_approve:
+                    count_qs = count_qs.exclude(**REQUEST_SHAPE_APPROVED)
+
+                max_count = count_qs.count()
+                solved_req_shapes = req_shapes_qs.filter(kind=kind, state=state).count()
                 if max_count == solved_req_shapes:
-                    req.state = LLCRequest.STATE_SOLVED
-                    req.kind = LLCRequest.KIND_APPROVED
+                    req.state = parent_state
+                    req.kind = parent_kind
                     req.save()
-
+                    if is_approve:
+                        file = req.file
+                        file.state = RequestFiles.STATE_SOLVED
+                        file.kind = RequestFiles.KIND_APPROVED
+                        file.save()
+                elif is_approve:
+                    has_new_req_shape = count_qs.filter(**REQUEST_SHAPE_SENT_GOV)
+                    if not has_new_req_shape:
+                        req.state = LLC_REQUEST_DISSMIS['state']
+                        req.kind = LLC_REQUEST_DISSMIS['kind']
+                        req.save()
     return True
 
 
@@ -977,7 +1026,7 @@ def request_approve(request, payload):
                 _check_group_items(r_approve)
                 r_approve.group_id = None
                 r_approve.save()
-                _change_choise_of_llc_req_files(r_approve.llc_request_id, feature_id, RequestFilesShape.STATE_SOLVED, RequestFilesShape.KIND_APPROVED)
+                _change_choise_of_llc_req_files(r_approve.llc_request_id, feature_id, REQUEST_SHAPE_APPROVED['state'], REQUEST_SHAPE_APPROVED['kind'], '', LLC_REQUEST_APPROVE['state'], LLC_REQUEST_APPROVE['kind'], True)
             else:
                 rsp = {
                     'success': False,
@@ -1052,13 +1101,15 @@ def _get_ann_name(kind, item):
 
 @require_POST
 @ajax_required
+@gov_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-    org = Org.objects.filter(employee__user=request.user).first()
 
     qs = LLCRequest.objects
-    qs = qs.filter(file__geo_id=org.geo_id)
+    qs = qs.filter(file__geo_id=request.org.geo_id)
+
     start_index = 1
+
     if qs:
         оруулах_талбарууд = ['id', 'file_id', 'created_at', 'updated_at', 'kind', 'state']
         хувьсах_талбарууд = [
@@ -1112,9 +1163,14 @@ def _get_shape_datas(shape_geometry):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_request_data(request, id):
-    datas = []
-    llc_data = LLCRequest.objects.filter(pk=id).first()
-    shape_geometries = RequestFilesShape.objects.filter(files=llc_data.file)
+    datas = list()
+    llc_qs = LLCRequest.objects
+    llc_qs = llc_qs.filter(pk=id)
+    llc_data = llc_qs.first()
+
+    shape_geometries = RequestFilesShape.objects
+    shape_geometries = shape_geometries.filter(files=llc_data.file)
+    shape_geometries = shape_geometries.exclude(**REQUEST_SHAPE_APPROVED)
 
     for shape_geometry in shape_geometries:
         theme_name = ''
@@ -1218,7 +1274,7 @@ def llc_request_reject(request, payload):
 def llc_request_dismiss(request, payload):
     description = payload.get('description')
     id = payload.get('id')
-    _reject_request(id, LLCRequest.KIND_DISMISS,LLCRequest.STATE_SENT, description)
+    _reject_request(id, LLCRequest.KIND_DISMISS, LLCRequest.STATE_SENT, description)
 
     return JsonResponse({
         'success': True,
@@ -1227,6 +1283,7 @@ def llc_request_dismiss(request, payload):
 
 
 def _create_request(request_datas):
+    llc_req_id = request_datas['llc_request_id']
     change_request = dict()
     change_request['old_geo_id'] = None
     change_request['new_geo_id'] = None
@@ -1242,7 +1299,7 @@ def _create_request(request_datas):
     change_request['group_id'] = request_datas['group_id'] if 'group_id' in request_datas else None
     change_request['order_at'] = request_datas['order_at'] if 'order_at' in request_datas else None
     change_request['order_no'] = request_datas['order_no'] if 'order_no' in request_datas else None
-    change_request['llc_request_id'] = request_datas['llc_request_id']
+    change_request['llc_request_id'] = llc_req_id
     request = ChangeRequest(**change_request)
     request.save()
     return request.id
@@ -1296,12 +1353,13 @@ def _check_and_make_form_json(feature_id, values):
 @require_GET
 @ajax_required
 def llc_request_approve(request, request_id):
-    first_item = 0
+
     employee = get_object_or_404(Employee, user=request.user)
     llc_request = get_object_or_404(LLCRequest, id=request_id)
 
     request_file_shape_qs = RequestFilesShape.objects
     request_file_shapes = request_file_shape_qs.filter(files_id=llc_request.file.id)
+    request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
 
     if not request_file_shapes:
         rsp = {
@@ -1327,6 +1385,11 @@ def llc_request_approve(request, request_id):
 
         return item
 
+    has = ChangeRequest.objects.filter(llc_request_id=request_id)
+    if has:
+        #TODO huseltiin logiig enechee bichij boloh ym
+        has.delete()
+
     for file_shape in request_file_shapes.values():
         shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
         if len(shape_geoms) == 1:
@@ -1341,13 +1404,13 @@ def llc_request_approve(request, request_id):
                 item['group_id'] = root_id
                 _make_request_datas(item)
 
-    llc_request.state = LLCRequest.STATE_SENT
-    llc_request.kind = LLCRequest.KIND_PENDING
+    llc_request.state = LLC_REQUEST_SENT_GOV['state']
+    llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
     llc_request.save()
 
     for req_file_shape in request_file_shapes:
-        req_file_shape.state = RequestFilesShape.STATE_SENT
-        req_file_shape.kind = RequestFilesShape.KIND_PENDING
+        req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
+        req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
         req_file_shape.save()
 
     rsp = {
@@ -1375,8 +1438,8 @@ def inspire_save(request, payload):
         feature_id=feature_id,
         order_no=order_no,
         order_at=order_at or None,
-        state=RequestFilesShape.STATE_NEW,
-        kind=RequestFilesShape.KIND_PENDING,
+        state=REQUEST_SHAPE_NEW['state'],
+        kind=REQUEST_SHAPE_NEW['kind'],
     )
 
     return JsonResponse({
