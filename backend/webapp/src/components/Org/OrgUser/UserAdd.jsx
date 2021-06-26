@@ -218,11 +218,13 @@ export class UserAdd extends Component {
                         setErrors(errors)
                         this.setState({ errors })
                     }
+                    this.setState({ is_loading: false })
                     setSubmitting(false)
                     this.setState({ is_loading: false })
                 })
                 .catch((error) => {
                     this.setModal('Алдаа гарсан байна', '', 'danger', 'fa fa-times-circle', false, '', '')
+                    this.setState({ is_loading: false })
                     setSubmitting(false)
                     this.setState({ is_loading: false })
                 })

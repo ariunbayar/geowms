@@ -7,9 +7,11 @@ from main import utils
 def _delete_prev_files(file):
     main_folder = 'llc-request-files'
     file_path = file.file_path
-    delete_folder = str(file_path).split("/")[1]
-    delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
-    utils.remove_folder(delete_folder)
+    file_path = os.path.join(settings.MEDIA_ROOT, file_path.name)
+    if os.path.exists(file_path):
+        delete_folder = str(file_path).split("/")[1]
+        delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
+        utils.remove_folder(delete_folder)
 
 
 def remove_files(apps, schema_editor):
@@ -40,6 +42,7 @@ def remove_files(apps, schema_editor):
             if change_requests:
                 change_requests.delete()
             llc_request.delete()
+        
         _delete_prev_files(requestfile)
         requestfile.delete()
 

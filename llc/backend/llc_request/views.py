@@ -1,4 +1,7 @@
+from typing import Tuple
 from unicodedata import name
+
+from django.urls.conf import path
 from llc.backend import llc_request
 import os
 import zipfile
@@ -178,9 +181,23 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts):
             utils.remove_file(name)
 
 
-def _validation_form(request_datas):
+def _validation_request(request_datas, uploaded_file, check_data_of_file, id):
 
+    saved_ids = list()
     is_agreed = True
+    info = ''
+    file_name = uploaded_file.name
+    selected_tools = json_load(request_datas.get('selected_tools'))
+    selected_tools = selected_tools['selected_tools']
+
+    if file_name != 'blob' and id:
+        if not uploaded_file.name.endswith('.zip'):
+            info = 'Заавал zip файл оруулах ёстой.!!!'
+            return False, info
+
+    if check_data_of_file and not id:
+        info = 'Файл-ын нэр давхцаж байна !!!.'
+        return False, info
 
     if not request_datas.get('zahialagch'): is_agreed = False
     if not request_datas.get('project_name'): is_agreed = False
@@ -188,39 +205,50 @@ def _validation_form(request_datas):
     if not request_datas.get('object_count'): is_agreed = False
     if not request_datas.get('hurungu_oruulalt'): is_agreed = False
 
-    return is_agreed
+    if not is_agreed:
+        info = 'Форм дутуу бөглөгдсөн байна.!!!'
+        return is_agreed, info
 
+    if not selected_tools:
+        info = 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        return False, info
 
-def _tools_validation(get_tools):
-    saved_ids = list()
-
-    if not get_tools:
-        response = 'Ашигласан багажны мэдээлэл хоосон байна !!!'
-        return response
-
-    for tool in get_tools:
+    for tool in selected_tools:
         if tool['bagaj_dugaar'] in saved_ids:
-            response = 'Таны сонгосон багаж давхцаж байна.!!!'
-            return response
+            info = 'Таны сонгосон багаж давхцаж байна.!!!'
+            return False, info
         saved_ids.append(tool['bagaj_dugaar'])
 
+    return is_agreed, info
 
-def _change_file_in_update(uploaded_file, current_file_name, check_data_of_file, main_path, id):
 
-    current_folder = current_file_name.split('.')[0]
-    check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
-    save_file_path = os.path.join(check_folder, current_folder)
-    folder_list = os.listdir(check_folder)
-    files = glob.glob(save_file_path + '/*')
-    lastest_file_path = max(files, key=os.path.getctime)
-    lastest_file = lastest_file_path.split(save_file_path + "/")[1]
+def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, file_path, file_not_ext_name, ):
+    extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
 
-    if current_folder in folder_list:
-        get_files = os.listdir(check_folder + "/" + current_folder)
-        for file in get_files:
-            delete_file_path = os.path.join(check_folder, current_folder, file)
-            utils.remove_file(delete_file_path)
-        utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
+    if check_data_of_file and id:
+        current_folder = file_name.split('.')[0]
+        check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
+        save_file_path = os.path.join(check_folder, current_folder)
+        folder_list = os.listdir(check_folder)
+
+        if current_folder in folder_list:
+            get_files = os.listdir(check_folder + "/" + current_folder)
+            for file in get_files:
+                delete_file_path = os.path.join(check_folder, current_folder, file)
+                utils.remove_file(delete_file_path)
+            utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
+        check_data_of_file = False
+    else:
+        utils.save_file_to_storage(uploaded_file, file_path, file_name)
+
+    if not check_data_of_file or not id:
+        if file_name != 'blob':
+            extract_path = os.path.join(extract_path, file_not_ext_name)
+            file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
+            utils.unzip(file_path, extract_path)
+            utils.remove_file(file_path)
+
+        return True, extract_path
 
 
 @require_POST
@@ -236,81 +264,51 @@ def save_request(request):
     zahialagch = request.POST.get('zahialagch')
     ulsiin_hemjeend = request.POST.get('ulsiin_hemjeend')
     selected_tools = request.POST.get('selected_tools') or []
-    is_agreed = _validation_form(request_datas)
     main_path = 'llc-request-files'
     file_name = uploaded_file.name
     file_not_ext_name = utils.get_file_name(file_name)
     file_path = os.path.join(main_path, file_not_ext_name)
-    extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
-    if file_name != 'blob' and id:
-        if not uploaded_file.name.endswith('.zip'):
-            return JsonResponse({
-                'success': False,
-                'info': 'Заавал zip файл оруулах ёстой.!!!'
-            })
 
-    if not is_agreed:
-
-        return JsonResponse({
-            'success': False,
-            'info': 'Форм дутуу бөглөгдсөн байна.!!!'
-        })
+    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
+    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
 
     if id:
         id = json_load(id)
         id = id.get('id')
 
-    tool_validation = _tools_validation(get_tools)
-    if tool_validation:
+    is_agreed, info = _validation_request(request_datas, uploaded_file, check_data_of_file, id)
 
+    if not is_agreed:
         return JsonResponse({
             'success': False,
-            'info': tool_validation
+            'info': info
         })
 
-    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
-    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
+    is_file, extract_path = _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, file_path, file_not_ext_name)
 
-    if check_data_of_file and not id:
-        return JsonResponse({
-            'success': False,
-            'info': 'Файл-ын нэр давхцаж байна !!!.'
-        })
-
-    if check_data_of_file and id:
-        _change_file_in_update(uploaded_file, file_name, check_data_of_file, main_path, id)
-        check_data_of_file = False
-    else:
-        utils.save_file_to_storage(uploaded_file, file_path, file_name)
-
-    if not check_data_of_file or not id:
-        if file_name != 'blob':
-            extract_path = os.path.join(extract_path, file_not_ext_name)
-            file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
-            utils.unzip(file_path, extract_path)
-            utils.remove_file(file_path)
-
-            datasource_exts = ['.gml', '.geojson']
-            for name in glob.glob(os.path.join(extract_path, '*')):
-                for ext in datasource_exts:
-                    if ext in name:
-                        ds = DataSource(name)
-                        for layer in ds:
-                            if len(layer) >= 1:
-                                org_data = _get_leve_2_geo_id(layer)
-                                if not org_data:
-                                    return JsonResponse({
-                                        'success': False,
-                                        'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-                                    })
-                            else:
+    if is_file:
+        datasource_exts = ['.gml', '.geojson']
+        for name in glob.glob(os.path.join(extract_path, '*')):
+            for ext in datasource_exts:
+                if ext in name:
+                    ds = DataSource(name)
+                    for layer in ds:
+                        if len(layer) >= 1:
+                            org_data = _get_leve_2_geo_id(layer)
+                            if not org_data:
                                 utils.remove_folder(extract_path)
                                 return JsonResponse({
                                     'success': False,
-                                    'info': 'Файл хоосон байна !!!'
+                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
                                 })
+                        else:
+                            utils.remove_folder(extract_path)
+                            return JsonResponse({
+                                'success': False,
+                                'info': 'Файл хоосон байна !!!'
+                            })
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
