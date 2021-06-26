@@ -22,5 +22,5 @@ urlpatterns = [
         path('get_count/', llc_request_views.get_count, name='get_count'),
     ], 'llc_requests'))),
 
-    re_path('^.*', llc_views.llc_frontend, name='llc'),
+    re_path('^.*', llc_views.llc_frontend, name='frontend'),
 ]

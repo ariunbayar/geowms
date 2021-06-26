@@ -15,7 +15,7 @@ export default class Request extends Component {
                 <Route exact path="/llc/llc-request/" component={Detail} />
                 <Route
                     path="/llc/llc-request/хүсэлт-нэмэх/"
-                    component={RequestAdd}
+                    component={(props) => <RequestAdd {...props}/>}
                 />
                 <Route
                     path="/llc/llc-request/:id/дэлгэрэнгүй/"

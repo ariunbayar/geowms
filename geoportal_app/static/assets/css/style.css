@@ -330,5 +330,27 @@ a.active .list-group-item{
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #034ea2; 
+  background: #034ea2;
+}
+
+.llc-dan-container {
+  min-height: 65vh;
+  width: 80%;
+  margin: 0 auto;
+  padding: 100px;
+  position: relative;
+}
+
+.llc-dan-choice {
+  height: 40%;
+  padding-top: 23px;
+  padding-bottom: 23px;
+  text-align: center;
+  margin: 7px;
+  float:left;
+  color: blue;
+}
+
+.llc-dan-choice:hover {
+  background-color: #edf2f7;
 }

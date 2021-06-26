@@ -970,14 +970,10 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
 
         filter_value = dict()
         geo_id = point.point_id
-        print(geo_id)
         mdata_geo_id_qs = _filter_Model([{'geo_id': geo_id}])
         value = point.pdf_id.zfill(4)
         filter_value[filter_value_type] = value
-        print(filter_value)
-        print(data)
         mdata_qs = _filter_Model([data, filter_value], initial_qs=mdata_geo_id_qs)
-        print(mdata_qs)
         if not mdata_qs:
             value = point.pdf_id
             filter_value[filter_value_type] = value
@@ -1370,7 +1366,6 @@ def purchase_from_cart(request, payload):
             message='Цэг худалдаж авах хүсэлт',
             code='',
         )
-        print(datas)
         pay_id = payment.id
         for data in datas:
             pdf_id = data['pdf_id']
@@ -1664,7 +1659,6 @@ def get_popup_info(request, payload):
                 radius=radius,
                 geo_id_name=geo_id_name,
             )
-            print(sql)
             cursor.execute(sql)
             results = [dict((cursor.description[i][0], value)
                 for i, value in enumerate(row)) for row in cursor.fetchall()[:5]]

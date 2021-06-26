@@ -47,19 +47,21 @@ def authorize_org(apps, schema_editor):
         "Зөвлөх"
     ]
 
-    def_org_id = Position.objects.first().org_id
-    orgs = qs_org.all()
-    with transaction.atomic():
-        for org in orgs:
-            if org.id != def_org_id:
-                for pos in def_pos:
-                    qs_pos.create(
-                        name=pos,
-                        org=org
-                    )
-        empower_emp(qs_pos, qs_emp)
+    qs = Position.objects.first()
+    if qs:
+        def_org_id = qs.org_id
+        orgs = qs_org.all()
+        with transaction.atomic():
+            for org in orgs:
+                if org.id != def_org_id:
+                    for pos in def_pos:
+                        qs_pos.create(
+                            name=pos,
+                            org=org
+                        )
+            empower_emp(qs_pos, qs_emp)
 
-    def_pos_remove(orgs, qs_pos, def_org_id)
+        def_pos_remove(orgs, qs_pos, def_org_id)
 
 
 class Migration(migrations.Migration):

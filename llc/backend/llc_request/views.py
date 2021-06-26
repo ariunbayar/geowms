@@ -1,10 +1,15 @@
+from typing import Tuple
 from unicodedata import name
+
+from django.urls.conf import path
 from llc.backend import llc_request
 import os
 import zipfile
 import glob
 from datetime import timedelta
 import datetime
+
+from django.contrib.auth.decorators import login_required
 
 from django.db.backends.utils import logger
 from django.conf import settings
@@ -40,7 +45,7 @@ from geoportal_app.models import User
 from geojson import FeatureCollection
 
 from main.components import Datatable
-from main.decorators import ajax_required
+from main.decorators import ajax_required, llc_required
 from main.utils import (
     json_dumps,
     json_load,
@@ -118,11 +123,13 @@ def llc_request_list(request, payload):
 def _get_leve_2_geo_id(layer):
     org_ids = list(POSITION_MERGEJILTEN.values_list('org_id', flat=True))
     qs_org = Org.objects.filter(level=2, id__in=org_ids)
+
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
         geo_json = feature.geom.json
         break
+
     if geo_json:
         for org in qs_org:
             sql = '''
@@ -213,9 +220,23 @@ def _check_not_approved_shape(datasource, request_file, file_shapes):
                 print("ahahah")
                 break
 
-def _validation_form(request_datas):
+def _validation_request(request_datas, uploaded_file, check_data_of_file, id):
 
+    saved_ids = list()
     is_agreed = True
+    info = ''
+    file_name = uploaded_file.name
+    selected_tools = json_load(request_datas.get('selected_tools'))
+    selected_tools = selected_tools['selected_tools']
+
+    if file_name != 'blob' and id:
+        if not uploaded_file.name.endswith('.zip'):
+            info = 'Заавал zip файл оруулах ёстой.!!!'
+            return False, info
+
+    if check_data_of_file and not id:
+        info = 'Файл-ын нэр давхцаж байна !!!.'
+        return False, info
 
     if not request_datas.get('zahialagch'): is_agreed = False
     if not request_datas.get('project_name'): is_agreed = False
@@ -223,96 +244,38 @@ def _validation_form(request_datas):
     if not request_datas.get('object_count'): is_agreed = False
     if not request_datas.get('hurungu_oruulalt'): is_agreed = False
 
-    return is_agreed
+    if not is_agreed:
+        info = 'Форм дутуу бөглөгдсөн байна.!!!'
+        return is_agreed, info
 
+    if not selected_tools:
+        info = 'Ашигласан багажны мэдээлэл хоосон байна !!!'
+        return False, info
 
-def _tools_validation(get_tools):
-    saved_ids = list()
-
-    if not get_tools:
-        response = 'Ашигласан багажны мэдээлэл хоосон байна !!!'
-        return response
-
-    for tool in get_tools:
+    for tool in selected_tools:
         if tool['bagaj_dugaar'] in saved_ids:
-            response = 'Таны сонгосон багаж давхцаж байна.!!!'
-            return response
+            info = 'Таны сонгосон багаж давхцаж байна.!!!'
+            return False, info
         saved_ids.append(tool['bagaj_dugaar'])
 
-
-def _change_file_in_update(uploaded_file, current_file_name, check_data_of_file, main_path, id):
-
-    current_folder = current_file_name.split('.')[0]
-    check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
-    save_file_path = os.path.join(check_folder, current_folder)
-    folder_list = os.listdir(check_folder)
-
-    if current_folder in folder_list:
-        get_files = os.listdir(check_folder + "/" + current_folder)
-        for file in get_files:
-            delete_file_path = os.path.join(check_folder, current_folder, file)
-            utils.remove_file(delete_file_path)
-        utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
+    return is_agreed, info
 
 
-@require_POST
-@ajax_required
-def save_request(request):
-    request_datas = request.POST
-    id = request.POST.get('id') or None
-    uploaded_file = request.FILES['files']
-    project_name = request.POST.get('project_name')
-    object_type = request.POST.get('object_type')
-    object_count = request.POST.get('object_count')
-    hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
-    zahialagch = request.POST.get('zahialagch')
-    ulsiin_hemjeend = request.POST.get('ulsiin_hemjeend')
-    selected_tools = request.POST.get('selected_tools') or []
-    is_agreed = _validation_form(request_datas)
-    main_path = 'llc-request-files'
-    file_name = uploaded_file.name
-    file_not_ext_name = utils.get_file_name(file_name)
-    file_path = os.path.join(main_path, file_not_ext_name)
+def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, file_path, file_not_ext_name, ):
     extract_path = os.path.join(settings.MEDIA_ROOT, main_path)
-    selected_tools = json_load(selected_tools)
-    get_tools = selected_tools['selected_tools']
-    if file_name != 'blob' and id:
-        if not uploaded_file.name.endswith('.zip'):
-            return JsonResponse({
-                'success': False,
-                'info': 'Заавал zip файл оруулах ёстой.!!!'
-            })
-
-    if not is_agreed:
-
-        return JsonResponse({
-            'success': False,
-            'info': 'Форм дутуу бөглөгдсөн байна.!!!'
-        })
-
-    if id:
-        id = json_load(id)
-        id = id.get('id')
-
-    tool_validation = _tools_validation(get_tools)
-    if tool_validation:
-
-        return JsonResponse({
-            'success': False,
-            'info': tool_validation
-        })
-
-    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
-    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
-
-    if check_data_of_file and not id:
-        return JsonResponse({
-            'success': False,
-            'info': 'Файл-ын нэр давхцаж байна !!!.'
-        })
 
     if check_data_of_file and id:
-        _change_file_in_update(uploaded_file, file_name, check_data_of_file, main_path, id)
+        current_folder = file_name.split('.')[0]
+        check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
+        save_file_path = os.path.join(check_folder, current_folder)
+        folder_list = os.listdir(check_folder)
+
+        if current_folder in folder_list:
+            get_files = os.listdir(check_folder + "/" + current_folder)
+            for file in get_files:
+                delete_file_path = os.path.join(check_folder, current_folder, file)
+                utils.remove_file(delete_file_path)
+            utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
         check_data_of_file = False
     else:
         utils.save_file_to_storage(uploaded_file, file_path, file_name)
@@ -324,25 +287,71 @@ def save_request(request):
             utils.unzip(file_path, extract_path)
             utils.remove_file(file_path)
 
-            datasource_exts = ['.gml', '.geojson']
-            for name in glob.glob(os.path.join(extract_path, '*')):
-                for ext in datasource_exts:
-                    if ext in name:
-                        ds = DataSource(name)
-                        for layer in ds:
-                            if len(layer) >= 1:
-                                org_data = _get_leve_2_geo_id(layer)
-                                if not org_data:
-                                    return JsonResponse({
-                                        'success': False,
-                                        'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-                                    })
-                            else:
+        return True, extract_path
+
+
+@require_POST
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
+@ajax_required
+def save_request(request, content):
+    company_name = content.get('company_name')
+
+    request_datas = request.POST
+    id = request.POST.get('id') or None
+    uploaded_file = request.FILES['files']
+    project_name = request.POST.get('project_name')
+    object_type = request.POST.get('object_type')
+    object_count = request.POST.get('object_count')
+    hurungu_oruulalt = request.POST.get('hurungu_oruulalt')
+    zahialagch = request.POST.get('zahialagch')
+    ulsiin_hemjeend = request.POST.get('ulsiin_hemjeend')
+    selected_tools = request.POST.get('selected_tools') or []
+    main_path = 'llc-request-files'
+    file_name = uploaded_file.name
+    file_not_ext_name = utils.get_file_name(file_name)
+    file_path = os.path.join(main_path, file_not_ext_name)
+    selected_tools = json_load(selected_tools)
+    get_tools = selected_tools['selected_tools']
+
+    check_file_name = os.path.join(main_path, file_not_ext_name, str(uploaded_file))
+    check_data_of_file = RequestFiles.objects.filter(file_path=check_file_name).first()
+
+    if id:
+        id = json_load(id)
+        id = id.get('id')
+
+    is_agreed, info = _validation_request(request_datas, uploaded_file, check_data_of_file, id)
+
+    if not is_agreed:
+        return JsonResponse({
+            'success': False,
+            'info': info
+        })
+
+    is_file, extract_path = _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, file_path, file_not_ext_name)
+
+    if is_file:
+        datasource_exts = ['.gml', '.geojson']
+        for name in glob.glob(os.path.join(extract_path, '*')):
+            for ext in datasource_exts:
+                if ext in name:
+                    ds = DataSource(name)
+                    for layer in ds:
+                        if len(layer) >= 1:
+                            org_data = _get_leve_2_geo_id(layer)
+                            if not org_data:
                                 utils.remove_folder(extract_path)
                                 return JsonResponse({
                                     'success': False,
-                                    'info': 'Файл хоосон байна !!!'
+                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
                                 })
+                        else:
+                            utils.remove_folder(extract_path)
+                            return JsonResponse({
+                                'success': False,
+                                'info': 'Файл хоосон байна !!!'
+                            })
 
         if id:
             request_file = RequestFiles.objects.filter(pk=id).first()
@@ -366,7 +375,7 @@ def save_request(request):
 
         else:
             request_file = RequestFiles.objects.create(
-                name='UTILITY SOLUTION',
+                name=company_name,
                 kind=RequestFiles.KIND_NEW,
                 state=RequestFiles.STATE_NEW,
                 geo_id=org_data.geo_id if org_data else '',
@@ -593,8 +602,10 @@ def _send_to_information_email (email):
 
 
 @require_POST
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
 @ajax_required
-def send_request(request, payload, id):
+def send_request(request, payload, content, id):
     user_id = payload.get('mergejilten')
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
@@ -689,10 +700,12 @@ def get_search_field(request):
 
 @require_GET
 @ajax_required
-def get_count(request):
-
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
+def get_count(request, content):
+    company_name = content.get('company_name')
     states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
-    request_count = RequestFiles.objects.filter(state__in=states).count()
+    request_count = RequestFiles.objects.filter(state__in=states, name__exact=company_name).count()
     return JsonResponse({
         'success': True,
         'request_count': request_count,

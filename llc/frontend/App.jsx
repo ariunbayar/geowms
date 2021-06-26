@@ -33,6 +33,7 @@ export class App extends Component {
     }
 
     render() {
+        const { llc } = this.props
         const { request_count } = this.state
         return (
             <BrowserRouter>
@@ -54,7 +55,7 @@ export class App extends Component {
                         <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
                             <Switch>
                                 <Route path="/llc/map/" component={Map} />
-                                <Route path="/llc/llc-request/" component={Request} />
+                                <Route path="/llc/llc-request/" component={Request}/>
                                 <Route path="/llc/history/" component={History} />
                             </Switch>
                         </Suspense>
