@@ -67,7 +67,7 @@ def check_llc_user(user):
         )
         rsp = requests.get(check_llc, headers=HEADERS, verify=False)
         if rsp.status_code == 200:
-            if rsp.content:
+            if rsp.json():
                 return True
     return False
 
