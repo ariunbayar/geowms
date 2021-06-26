@@ -366,8 +366,10 @@ def _get_request_content(base_url, request, geo_id, headers):
                 'service': 'WFS',
                 'request': 'GetFeature',
                 'version': '1.0.0',
+                'typeNames': request.GET.get('TYPENAMES'),
                 'typeName': request.GET.get('TYPENAME'),
                 'srsName': 'EPSG:4326',
+                'srs': 'EPSG:4326',
                 'outputFormat': 'gml3',
                 'cql_filter': cql_filter
             }
