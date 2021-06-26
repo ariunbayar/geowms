@@ -153,9 +153,6 @@ def _get_leve_2_geo_id(layer):
 
 
 def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_name):
-    print("hoho")
-    print("hoho")
-    print("hoho", file_qs)
     remove_shape_ids = []
     shape_files = []
     if file_name != 'blob':
@@ -215,7 +212,7 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
                     if remove_shape_ids:
                         shape_of_geoms = ShapeGeom.objects.filter(shape_id__in=remove_shape_ids)
                         shape_of_geoms.delete()
-                        shape_files.delete()
+                        file_shapes.delete()
 
                     request_shape = RequestFilesShape.objects.create(
                         files=file_qs,
@@ -260,7 +257,6 @@ def _check_not_approved_shape(json_content, file_shapes):
     for shape_geom in shape_geoms:
 
         if submitted:
-            print("ahahah")
             break
 
 
@@ -340,6 +336,7 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 @ajax_required
 def save_request(request, content):
     request_file_data = {}
+    org_data = []
     company_name = content.get('company_name')
     main_path = 'llc-request-files'
 
@@ -403,7 +400,6 @@ def save_request(request, content):
         request_file_data['name'] = company_name
         request_file_data['kind'] = RequestFiles.KIND_NEW
         request_file_data['state'] = RequestFiles.STATE_NEW
-        request_file_data['geo_id'] = org_data.geo_id if org_data else ''
         request_file_data['tools'] = json_dumps(get_tools)
 
         if id:
@@ -417,7 +413,7 @@ def save_request(request, content):
 
         else:
             request_file_data['file_path'] = uploaded_file
-
+            request_file_data['geo_id'] = org_data.geo_id   
         qs_request_file = RequestFiles.objects.update_or_create(
             id=id,
             defaults=request_file_data
