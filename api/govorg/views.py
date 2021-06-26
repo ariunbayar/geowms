@@ -348,7 +348,6 @@ def _get_layer_name(employee, fid):
 
 def _get_cql_filter(geo_id):
     cql_data = utils.get_2d_data(geo_id)
-    # , 0.05, kilometers
     cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data=cql_data)
     return cql_filter if cql_data else ''
 
@@ -364,7 +363,6 @@ def _get_request_content(base_url, request, geo_id, headers):
             }
         else:
             queryargs = {
-                # **request.GET,
                 'service': 'WFS',
                 'request': 'GetFeature',
                 'version': '1.0.0',
