@@ -162,7 +162,7 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
-                        <div className="form-row col-md-12 ">
+                        <div className="form-group col-md-12 ">
                                 <SelectField
                                     state_name= "hurungu_oruulalt"
                                     label="Хөрөнгө оруулалтын байдал"
@@ -172,7 +172,7 @@ export default class RequestDetail extends Component {
                                     default_value={"Сонгоно уу"}
                                     className={"col-md-4"}
                                     default_text={"Сонгоно уу"}
-                                    handleSelectField={this.handleChange}
+                                    handleSelectField={this.handleOnChange}
                                 />
                              </div>
                                 {

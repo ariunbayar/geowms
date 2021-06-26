@@ -80,32 +80,32 @@ export default class SelectField extends Component {
                 <label id={title}>
                     {title}
                 </label>
-                <select
-                    value={state.selected_value ? state.selected_value : default_value}
-                    className={'form-control'}
-                    onChange={(e) => this.dataSelection(e)}
-                >
-                    <option value=''>---{default_text ? default_text : ''} ---</option>
-                    {
-                    name_key
-                    ?
-                        data_list.map((data, idx) =>
-                            <optgroup
-                                key={idx}
-                                label={ data[name_key] }
-                                value={default_value}
-                            >
-                            {
-                                    OptionComp (data[opt_key], option_key, option_name, option_text)
-                            }
-                            </optgroup>
-                        )
-                    :
-                        OptionComp (data_list, option_key, option_name, option_text)
-                }
-                </select>
+                    <select
+                        value={state.selected_value ? state.selected_value : default_value}
+                        className={'custom-select is-valid'}
+                        onChange={(e) => this.dataSelection(e)}
+                    >
+                        <option value=''>---{default_text ? default_text : ''} ---</option>
+                        {
+                        name_key
+                        ?
+                            data_list.map((data, idx) =>
+                                <optgroup
+                                    key={idx}
+                                    label={ data[name_key] }
+                                    value={default_value}
+                                >
+                                {
+                                        OptionComp (data[opt_key], option_key, option_name, option_text)
+                                }
+                                </optgroup>
+                            )
+                        :
+                            OptionComp (data_list, option_key, option_name, option_text)
+                    }
+                    </select>
+                </div>
 
-            </div>
         );
     }
 }
