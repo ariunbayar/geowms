@@ -37,6 +37,7 @@ class SubmitClass extends Component {
         } = this.props.values
         var blob = []
 
+
         if (id) {
             if (!file_state) {
                 const obj = files
@@ -126,7 +127,6 @@ export class RequestAdd extends Component {
             selected_tools: [],
             file_name:'',
             state: '',
-            regis_number: props.regis_number,
             file_state: false,
             aimag_name: '',
             aimag_geom: [],
@@ -174,9 +174,8 @@ export class RequestAdd extends Component {
     }
 
     getTools() {
-        const { regis_number } = this.state
         service
-            .getToolDatas(regis_number)
+            .getToolDatas()
             .then(({ tool_datas }) => {
                 this.setState({tool_datas})
             })

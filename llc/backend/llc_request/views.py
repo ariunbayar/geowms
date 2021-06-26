@@ -9,6 +9,8 @@ import glob
 from datetime import timedelta
 import datetime
 
+from django.contrib.auth.decorators import login_required
+
 from django.db.backends.utils import logger
 from django.conf import settings
 from django.db import connections
@@ -42,7 +44,7 @@ from geoportal_app.models import User
 from geojson import FeatureCollection
 
 from main.components import Datatable
-from main.decorators import ajax_required
+from main.decorators import ajax_required, llc_required
 from main.utils import (
     json_dumps,
     json_load,
@@ -120,11 +122,13 @@ def llc_request_list(request, payload):
 def _get_leve_2_geo_id(layer):
     org_ids = list(POSITION_MERGEJILTEN.values_list('org_id', flat=True))
     qs_org = Org.objects.filter(level=2, id__in=org_ids)
+
     cursor = connections['default'].cursor()
     data_of_range = []
     for feature in layer:
         geo_json = feature.geom.json
         break
+
     if geo_json:
         for org in qs_org:
             sql = '''
@@ -252,8 +256,12 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 
 
 @require_POST
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
 @ajax_required
-def save_request(request):
+def save_request(request, content):
+    company_name = content.get('company_name')
+
     request_datas = request.POST
     id = request.POST.get('id') or None
     uploaded_file = request.FILES['files']
@@ -332,7 +340,7 @@ def save_request(request):
 
         else:
             request_file = RequestFiles.objects.create(
-                name='UTILITY SOLUTION',
+                name=company_name,
                 kind=RequestFiles.KIND_NEW,
                 state=RequestFiles.STATE_NEW,
                 geo_id=org_data.geo_id if org_data else '',
@@ -560,8 +568,10 @@ def _send_to_information_email (email):
 
 
 @require_POST
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
 @ajax_required
-def send_request(request, payload, id):
+def send_request(request, payload, content, id):
     user_id = payload.get('mergejilten')
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
@@ -656,10 +666,12 @@ def get_search_field(request):
 
 @require_GET
 @ajax_required
-def get_count(request):
-
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
+def get_count(request, content):
+    company_name = content.get('company_name')
     states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
-    request_count = RequestFiles.objects.filter(state__in=states).count()
+    request_count = RequestFiles.objects.filter(state__in=states, name__exact=company_name).count()
     return JsonResponse({
         'success': True,
         'request_count': request_count,
