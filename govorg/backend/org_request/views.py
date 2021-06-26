@@ -647,7 +647,12 @@ def _check_m_datas(form, ids, geo_id):
     return qs
 
 
-def _create_empty_m_datas_values(feature_id, geo_id):
+def _create_empty_m_datas_values(feature_id, geo_id, form_json=[]):
+
+    form_property_ids = [
+        form['property_id']
+        for form in form_json
+    ]
 
     property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id, get_all=False)
     code_lists = [
@@ -655,6 +660,8 @@ def _create_empty_m_datas_values(feature_id, geo_id):
         for vt in utils.value_types()
         if vt['value_type'] == 'code_list_id'
     ][0]
+
+    property_qs = property_qs.exclude(property_id__in=form_property_ids)
     property_qs = property_qs.exclude(value_type_id__in=code_lists)
     values = list()
     for p in property_qs:
@@ -673,14 +680,13 @@ def _create_empty_m_datas_values(feature_id, geo_id):
         value['created_by'] = 1
         value['modified_by'] = 1
         values.append(MDatas(**value))
-    # MDatas.objects.bulk_create(values)
+    MDatas.objects.bulk_create(values)
 
 
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
-
-    if not form_json:
-        _create_empty_m_datas_values(feature_id, geo_id)
+    if approve_type == 'create':
+        _create_empty_m_datas_values(feature_id, geo_id, form_json)
 
     for form in form_json:
         ids = _get_ids(feature_id, form['property_id'])
