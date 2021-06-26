@@ -13,9 +13,7 @@ from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
 
-from main.decorators import ajax_required, llc_required
-from django.contrib.auth.decorators import login_required
-
+from main.decorators import ajax_required
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
