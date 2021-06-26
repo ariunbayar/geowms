@@ -2,31 +2,55 @@
 
 
 import os
+import re
+import requests
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from itertools import groupby
 
 from django.http import JsonResponse
-from django.shortcuts import render, reverse, get_object_or_404
+from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
 
 from main.decorators import ajax_required
-from backend.dedsanbutets.models import ViewNames
-
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
-from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, MGeoDatas, MDatas
+from backend.inspire.models import LThemes, LPackages, LFeatures, LFeatureConfigs, MDatas, MDatas
 from main import utils
 from backend.geoserver.models import WmtsCacheConfig
 from backend.config.models import Config
+from geoportal_app.models import User
 
 from django.contrib.postgres.search import SearchVector
+
+HEADERS = {
+    'accept': 'application/json',
+    'Content-type': 'application/json',
+}
+
+
+def check_llc_user(request):
+    if request.user.is_authenticated:
+        is_sso_user = User.objects.filter(username=request.user, is_sso=True).first()
+        if is_sso_user:
+            register = is_sso_user.register
+            check_llc = 'https://license.gazar.gov.mn/api/engineer/001/{register}'.format(
+                register=register
+            )
+            rsp = requests.get(check_llc, headers=HEADERS, verify=False)
+            if rsp.status_code == 200:
+                content = rsp.json()
+                if content:
+                    return render(request, 'llc/dan_user.html')
+
+    return redirect(settings.LOGIN_REDIRECT_URL)
 
 
 def all(request):
     context_list = []
+
     bundles = Bundle.objects.all()
     for bundle in bundles:
         bundle_list = []

@@ -9,9 +9,7 @@ def _delete_prev_files(file):
     file_path = file.file_path
     file_path = os.path.join(settings.MEDIA_ROOT, file_path.name)
     if os.path.exists(file_path):
-        delete_folder = str(file_path).split("/")[1]
-        delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
-        utils.remove_folder(delete_folder)
+        utils.remove_file(file_path)
 
 
 def remove_files(apps, schema_editor):

@@ -27,20 +27,18 @@ function handleRequestData(id) {
     return fetch(`${prefix}/${id}/get-request-data/`, opts).then(handleResponse)
 }
 
-function getToolDatas(regis_number) {
+function getToolDatas() {
     const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({regis_number})
+        ...getGetOptions(),
     }
     return fetch(`/llc/get_tool_datas/`, opts).then(handleResponse)
 }
 
 function getCount() {
-    const requestOptions = {
+    const opts = {
         ...getGetOptions(),
     }
-
-    return fetch(`${prefix}/get_count/`, requestOptions).then(handleResponse)
+    return fetch(`${prefix}/get_count/`, opts).then(handleResponse)
 }
 
 function sendRequest(id, mergejilten) {
