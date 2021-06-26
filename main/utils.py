@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFont
 from django.apps import apps
 from django.contrib.gis.db.models.functions import Transform
 from django.contrib.gis.geos import GEOSGeometry, Point
-from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString, Polygon
+from django.contrib.gis.geos import MultiPolygon, MultiPoint, MultiLineString
 from django.contrib.gis.measure import D
 from django.conf import settings
 from django.db import connections
