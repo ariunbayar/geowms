@@ -20,11 +20,12 @@ function test(params) {
 }
 
 function makeStateColor (state) {
-    let color
-    if (state == "ШИНЭ") color = 'text-success'
-    else if (state == "ИЛГЭЭСЭН") color = 'text-warning'
-    else if (state == "ШИЙДВЭРЛЭГДСЭН") color = 'text-primary'
-    return color
+    const obj = {
+        "ШИНЭ": 'text-success',
+        "ИЛГЭЭСЭН": 'text-warning',
+        "ШИЙДВЭРЛЭГДСЭН": 'text-primary',
+    }
+    return obj[state]
 }
 
 function makeKindColor (kind) {
@@ -34,5 +35,6 @@ function makeKindColor (kind) {
     else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
     else if (kind == "БУЦААГДСАН") color = 'text-danger'
     else if (kind == "ШИНЭ") color = 'text-primary'
+    else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
     return color
 }

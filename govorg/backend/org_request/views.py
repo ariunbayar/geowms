@@ -17,6 +17,7 @@ from backend.dedsanbutets.models import ViewNames
 from backend.dedsanbutets.models import ViewProperties
 from backend.org.models import Employee, Org
 from backend.inspire.models import (
+    LDataTypes,
     LThemes,
     LPackages,
     LFeatures,
@@ -52,7 +53,8 @@ from main.utils import (
     get_cursor_pg,
     convert_3d_with_srid,
     datetime_to_string,
-    get_feature
+    get_feature,
+    value_types
 )
 from main import utils
 
@@ -645,8 +647,41 @@ def _check_m_datas(form, ids, geo_id):
     return qs
 
 
+def _create_empty_m_datas_values(feature_id, geo_id):
+
+    property_qs, l_feature_c_qs, data_type_c_qs = utils.get_properties(feature_id, get_all=False)
+    code_lists = [
+        vt['value_names']
+        for vt in utils.value_types()
+        if vt['value_type'] == 'code_list_id'
+    ][0]
+    property_qs = property_qs.exclude(value_type_id__in=code_lists)
+    values = list()
+    for p in property_qs:
+        value = dict()
+        value['property_id'] = p.property_id
+        value['geo_id'] = geo_id
+        for data_type_c in data_type_c_qs:
+            if data_type_c.property_id == p.property_id:
+                for l_feature_c in l_feature_c_qs:
+                    if data_type_c.data_type_id == l_feature_c.data_type_id:
+                        value['feature_config_id'] = l_feature_c.feature_config_id
+                        value['data_type_id'] = l_feature_c.data_type_id
+
+        filter_value_type = utils.get_prop_value_type(p.value_type_id)
+        value[filter_value_type] = ''
+        value['created_by'] = 1
+        value['modified_by'] = 1
+        values.append(MDatas(**value))
+    # MDatas.objects.bulk_create(values)
+
+
 def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     form_json = json.loads(form_json)
+
+    if not form_json:
+        _create_empty_m_datas_values(feature_id, geo_id)
+
     for form in form_json:
         ids = _get_ids(feature_id, form['property_id'])
         value = dict()
@@ -819,13 +854,22 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
         if qs_req:
             req = qs_req.first()
             file_id = req.file_id
-            qs = RequestFilesShape.objects.filter(files_id=file_id, feature_id=feature_id)
+            req_shapes_qs = RequestFilesShape.objects
+            req_shapes_qs = req_shapes_qs.filter(files_id=file_id)
+            qs = req_shapes_qs.filter(feature_id=feature_id)
             if qs:
                 llc_file_shape = qs.first()
                 llc_file_shape.state = state
                 llc_file_shape.kind = kind
                 llc_file_shape.description = description
                 llc_file_shape.save()
+
+                max_count = req_shapes_qs.count()
+                solved_req_shapes = req_shapes_qs.filter(kind=RequestFilesShape.KIND_APPROVED, state=RequestFilesShape.STATE_SOLVED).count()
+                if max_count == solved_req_shapes:
+                    req.state = LLCRequest.STATE_SOLVED
+                    req.kind = LLCRequest.KIND_APPROVED
+                    req.save()
 
     return True
 
