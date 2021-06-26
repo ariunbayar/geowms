@@ -16,7 +16,6 @@ from backend.another_database.models import AnotherDatabaseTable
 from backend.org.models import Employee, Org
 from backend.inspire.models import (
     LThemes,
-    LPackages,
     LFeatures,
     LProperties,
     MGeoDatas,
@@ -1385,10 +1384,12 @@ def llc_request_approve(request, request_id):
 
         return item
 
-    has = ChangeRequest.objects.filter(llc_request_id=request_id)
-    if has:
+    has_req_qs = ChangeRequest.objects
+    has_req_qs = has_req_qs.filter(llc_request_id=request_id)
+    has_req_qs = has_req_qs.exclude(state=ChangeRequest.STATE_APPROVE)
+    if has_req_qs:
         #TODO huseltiin logiig enechee bichij boloh ym
-        has.delete()
+        has_req_qs.delete()
 
     for file_shape in request_file_shapes.values():
         shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
