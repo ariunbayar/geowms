@@ -151,7 +151,6 @@ export class RequestAdd extends Component {
     }
 
     componentDidMount() {
-        console.log(this.state.investment_status);
         const { id } = this.props.match.params
         if (id) {
             this.setState({ is_loading: true })
