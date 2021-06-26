@@ -1,24 +1,16 @@
-from typing import Tuple
-from unicodedata import name
 
-from django.urls.conf import path
-from llc.backend import llc_request
 import os
-import zipfile
 import glob
-from datetime import timedelta
-import datetime
+
+
+from django.conf import settings
+from django.db import connections
+from django.contrib.gis.geos import GEOSGeometry
 
 from django.contrib.auth.decorators import login_required
 
-from django.db.backends.utils import logger
-from django.conf import settings
-from django.db import connections
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.apps import apps
 from django.contrib.gis.gdal import DataSource
 from django.core.mail import send_mail, get_connection
 
@@ -29,7 +21,6 @@ from llc.backend.llc_request.models import (
     RequestForm,
     LLCRequest
 )
-from backend.token.utils import TokenGeneratorUserValidationEmail
 from backend.org.models import Employee, Org, Position
 from backend.org.models import Org
 from backend.inspire.models import (
@@ -38,7 +29,6 @@ from backend.inspire.models import (
     LThemes,
     LFeatures,
     LPackages,
-    MGeoDatas
 )
 from geoportal_app.models import User
 
@@ -50,7 +40,6 @@ from main.utils import (
     json_dumps,
     json_load,
     get_sql_execute,
-    send_email,
     get_config,
     get_geom,
     datetime_to_string,
@@ -190,17 +179,10 @@ def _create_shape_files(org_data, request_file, extract_path, datasource_exts, i
         elif '.zip' not in name:
             utils.remove_file(name)
 
+
 def _conv_geom(geojson):
     geojson = utils.json_load(geojson)
     return GEOSGeometry(utils.json_dumps(geojson), srid=4326)
-
-from django.contrib.gis.geos import GEOSGeometry
-# geojson = ShapeGeom.objects.first().geom_json
-# geojson2 = ShapeGeom.objects.last().geom_json
-# geojson = _conv_geom(geojson)
-# geojson2 = _conv_geom(geojson2)
-# eq = geojson.equals(geojson2)
-# print(eq)
 
 
 
