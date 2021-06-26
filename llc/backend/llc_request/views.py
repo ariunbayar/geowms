@@ -1,6 +1,7 @@
 
 import os
 import glob
+from unicodedata import name
 
 
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.auth.decorators import login_required
 
 from django.http import JsonResponse
+from django.http.response import StreamingHttpResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.gis.gdal import DataSource
 from django.core.mail import send_mail, get_connection
@@ -72,9 +74,12 @@ def _choice_kind_display(kind, item):
 
 
 @require_POST
+@login_required(login_url='/secure/login/')
+@llc_required(lambda u: u)
 @ajax_required
-def llc_request_list(request, payload):
-    qs = RequestFiles.objects.all()
+def llc_request_list(request, payload, content):
+    company_name = content.get('company_name')
+    qs = RequestFiles.objects.filter(name__exact=company_name)
     start_index = 1
     if qs:
         оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
@@ -147,60 +152,117 @@ def _get_leve_2_geo_id(layer):
     return data_of_range
 
 
-def _create_shape_files(org_data, request_file, extract_path, datasource_exts, id):
-    file_shapes = RequestFilesShape.objects.filter(files=request_file).first()
-    for name in glob.glob(os.path.join(extract_path, '*')):
-        if [item for item in datasource_exts if item in name]:
-            ds = DataSource(name)
-            is_create_shape = _check_not_approved_shape(ds, request_file, file_shapes)
-            request_shape = RequestFilesShape.objects.update_or_create(
-                id=id,
-                defaults = {
-                    'files':request_file,
-                    'org': org_data
-                }
-            )
-            for layer in ds:
-                for feature in layer:
-                    geo_json = feature.geom.json
-                    properties = dict()
-                    for field in layer.fields:
-                        properties[field] = feature.get(field)
-                    json_content = json_load(geo_json)
+def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_name):
+    print("hoho")
+    print("hoho")
+    print("hoho", file_qs)
+    remove_shape_ids = []
+    shape_files = []
+    if file_name != 'blob':
+        file_shapes = RequestFilesShape.objects.filter(files=file_qs)
+        if file_shapes:
+            if file_qs.kind == RequestFiles.KIND_DISMISS:
+                file_shapes = file_shapes.filter(state=RequestFilesShape.STATE_NEW, kind=RequestFilesShape.KIND_DISMISS)
 
-                    for key, value in properties.items():
-                        properties[key] = utils.datetime_to_string(value)
-                    ShapeGeom.objects.create(
-                        shape=list(request_shape)[0],
-                        geom_json=json_dumps(json_content),
-                        form_json=json_dumps(properties)
+            remove_shape_ids = list(file_shapes.values_list('id', flat=True))
+
+        for name in glob.glob(os.path.join(extract_path, '*')):
+            if [item for item in datasource_exts if item in name]:
+                ds = DataSource(name)
+                if file_qs.kind == RequestFiles.KIND_DISMISS:
+                    for file_shape in remove_shape_ids:
+                        valid_data_type = False
+                        shape_of_geoms = ShapeGeom.objects.filter(shape_id=file_shape)
+
+                        if shape_of_geoms:
+                            shape_of_geom = shape_of_geoms.first()
+                            wanted_data_type = shape_of_geom.geo_json
+                            wanted_data_type = json_load(wanted_data_type)
+                            wanted_data_type = wanted_data_type['type']
+
+                            for layer in ds:
+                                for feature in layer:
+                                    geo_json = feature.geom.json
+                                    current_geojson_type = geo_json['type']
+
+                                    if wanted_data_type == current_geojson_type:
+                                        valid_data_type = True
+                                    break
+
+                        if valid_data_type:
+                            shape_of_geoms.delete()
+                            for layer in ds:
+                                for feature in layer:
+                                    geo_json = feature.geom.json
+                                    current_geojson_type = geo_json['type']
+                                    properties = dict()
+                                    for field in layer.fields:
+                                        properties[field] = feature.get(field)
+
+                                    json_content = json_load(geo_json)
+
+                                    for key, value in properties.items():
+                                        properties[key] = utils.datetime_to_string(value)
+
+                                    ShapeGeom.objects.create(
+                                        shape_id=file_shape,
+                                        geom_json=json_dumps(json_content),
+                                        form_json=json_dumps(properties)
+                                    )
+                            break
+
+                else:
+                    if remove_shape_ids:
+                        shape_of_geoms = ShapeGeom.objects.filter(shape_id__in=remove_shape_ids)
+                        shape_of_geoms.delete()
+                        shape_files.delete()
+
+                    request_shape = RequestFilesShape.objects.create(
+                        files=file_qs,
+                        org=org_data
                     )
-            utils.remove_file(name)
-        elif '.zip' not in name:
-            utils.remove_file(name)
+                    for layer in ds:
+                        for feature in layer:
+                            geo_json = feature.geom.json
+                            properties = dict()
+                            for field in layer.fields:
+                                properties[field] = feature.get(field)
+                            json_content = json_load(geo_json)
+
+                            for key, value in properties.items():
+                                properties[key] = utils.datetime_to_string(value)
+
+                            ShapeGeom.objects.create(
+                                shape=request_shape,
+                                geom_json=json_dumps(json_content),
+                                form_json=json_dumps(properties)
+                            )
+
+                utils.remove_file(name)
+            elif '.zip' not in name:
+                utils.remove_file(name)
 
 
+# ENE 2-IIG UTILS-RUU ORUULAN
 def _conv_geom(geojson):
     geojson = utils.json_load(geojson)
     return GEOSGeometry(utils.json_dumps(geojson), srid=4326)
 
 
+def _check_not_approved_shape(json_content, file_shapes):
+    shape_geoms = ShapeGeom.objects.filter(shape=file_shapes)
+    geom = shape_geoms.geom_json
 
-def _check_not_approved_shape(datasource, request_file, file_shapes):
-    print(file_shapes)
-    geoms = ShapeGeom.objects.filter(shape=file_shapes)
-    print(geoms)
-    geom = geoms.geom_json
     geom = _conv_geom(geom)
-    for layer in datasource:
-        for feature in layer:
-            geo_json = feature.geom.json
-            json_content = json_load(geo_json)
-            json_content = _conv_geom(json_content)
-            submitted = json_content.equals(geom)
-            if submitted:
-                print("ahahah")
-                break
+
+    json_content = _conv_geom(json_content)
+    submitted = json_content.equals(geom)
+    for shape_geom in shape_geoms:
+
+        if submitted:
+            print("ahahah")
+            break
+
 
 def _validation_request(request_datas, uploaded_file, check_data_of_file, id):
 
@@ -277,7 +339,9 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 @llc_required(lambda u: u)
 @ajax_required
 def save_request(request, content):
+    request_file_data = {}
     company_name = content.get('company_name')
+    main_path = 'llc-request-files'
 
     request_datas = request.POST
     id = request.POST.get('id') or None
@@ -289,10 +353,11 @@ def save_request(request, content):
     zahialagch = request.POST.get('zahialagch')
     ulsiin_hemjeend = request.POST.get('ulsiin_hemjeend')
     selected_tools = request.POST.get('selected_tools') or []
-    main_path = 'llc-request-files'
+
     file_name = uploaded_file.name
     file_not_ext_name = utils.get_file_name(file_name)
     file_path = os.path.join(main_path, file_not_ext_name)
+
     selected_tools = json_load(selected_tools)
     get_tools = selected_tools['selected_tools']
 
@@ -335,58 +400,43 @@ def save_request(request, content):
                                 'info': 'Файл хоосон байна !!!'
                             })
 
-        if id:
-            request_file = RequestFiles.objects.filter(pk=id).first()
-            if file_name != 'blob':
-                get_shapes = RequestFilesShape.objects.filter(files=request_file)
-                if get_shapes:
-                    for shape in get_shapes:
-                        geoms = ShapeGeom.objects.filter(shape=shape)
-                        geoms.delete()
-                    # get_shapes.delete()
+        request_file_data['name'] = company_name
+        request_file_data['kind'] = RequestFiles.KIND_NEW
+        request_file_data['state'] = RequestFiles.STATE_NEW
+        request_file_data['geo_id'] = org_data.geo_id if org_data else ''
+        request_file_data['tools'] = json_dumps(get_tools)
 
+        if id:
             if not check_data_of_file:
                 if file_name != 'blob':
-                    request_file.geo_id = org_data.geo_id
-                    request_file.file_path = uploaded_file
+                    request_file_data['file_path'] = uploaded_file
+                    request_file_data['geo_id'] = org_data.geo_id
 
-            request_file.tools = json_dumps(get_tools)
             if ulsiin_hemjeend:
-                request_file.geo_id = ulsiin_hemjeend
-            request_file.save()
+                request_file_data['geo_id'] = ulsiin_hemjeend
 
         else:
-            request_file = RequestFiles.objects.create(
-                name=company_name,
-                kind=RequestFiles.KIND_NEW,
-                state=RequestFiles.STATE_NEW,
-                geo_id=org_data.geo_id if org_data else '',
-                file_path=uploaded_file,
-                tools=json_dumps(get_tools)
-            )
-            id = request_file.id
+            request_file_data['file_path'] = uploaded_file
 
-        if file_name != 'blob':
-            _create_shape_files(org_data, request_file, extract_path, datasource_exts, id)
-    hurungu_oruulalt = int(hurungu_oruulalt)
-    form_data = RequestForm.objects.filter(file_id=id).first()
-    if form_data:
-        form_data.client_org = zahialagch
-        form_data.project_name = project_name
-        form_data.object_type = object_type
-        form_data.object_quantum = object_count
-        form_data.investment_status = hurungu_oruulalt
-        form_data.save()
-
-    else:
-        RequestForm.objects.create(
-            client_org=zahialagch,
-            project_name=project_name,
-            object_type=object_type,
-            object_quantum=object_count,
-            investment_status=hurungu_oruulalt,
-            file_id=id
+        qs_request_file = RequestFiles.objects.update_or_create(
+            id=id,
+            defaults=request_file_data
         )
+
+        hurungu_oruulalt = int(hurungu_oruulalt)
+        file_qs = list(qs_request_file)[0]
+        RequestForm.objects.update_or_create(
+            file_id=file_qs.id,
+            defaults = {
+                'client_org': zahialagch,
+                'project_name': project_name,
+                'object_type': object_type,
+                'object_quantum': object_count,
+                'investment_status': hurungu_oruulalt,
+            }
+        )
+
+        _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_name)
 
     rsp = {
         'success': True,
