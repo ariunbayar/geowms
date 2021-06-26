@@ -18,7 +18,7 @@ urlpatterns = [
 
     path('', include(([
         path('', bundle_views.check_llc_user, name='check_llc_user'),
-        path('all/', bundle_views.all, name='all'),
+        path('home/', bundle_views.all, name='all'),
         path('api/aimag/', bundle_views.aimag, name='aimag'),
         path('api/sum/', bundle_views.sumfind, name='sum'),
         path('дэд-сан/<int:pk>/', bundle_views.detail, name='detail'),
