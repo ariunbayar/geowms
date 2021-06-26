@@ -165,7 +165,7 @@ export class RequestAdd extends Component {
                         project_name: form_field['project_name'],
                         object_type: form_field['object_type'],
                         object_count: form_field['object_quantum'],
-                        // hurungu_oruulalt: form_field['investment_status'],
+                        hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
                         file_name: form_field['file_name'],
                         state: form_field['state'],

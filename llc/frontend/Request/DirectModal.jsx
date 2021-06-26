@@ -162,19 +162,19 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
-                        <div className="form-row col-md-12">
-                            <SelectField
-                                state_name= "hurungu_oruulalt"
-                                label="Хөрөнгө оруулалтын байдал"
-                                option_name = "name"
-                                option_key = "code"
-                                data_list={investment_status}
-                                default_value={"Сонгоно уу"}
-                                className={"col-md-4"}
-                                default_text={'Сонгоно уу'}
-                                handleSelectField={this.handleChange}
-                            />
-                        </div>
+                        <div className="form-row col-md-12 ">
+                                <SelectField
+                                    state_name= "hurungu_oruulalt"
+                                    label="Хөрөнгө оруулалтын байдал"
+                                    option_name = "name"
+                                    option_key = "code"
+                                    data_list={investment_status}
+                                    default_value={"Сонгоно уу"}
+                                    className={"col-md-4"}
+                                    default_text={"Сонгоно уу"}
+                                    handleSelectField={this.handleChange}
+                                />
+                             </div>
                                 {
                             info &&
                                 <div className="form-group col-md-12">
