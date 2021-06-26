@@ -66,10 +66,6 @@ def check_llc_user(user):
             register=register
         )
         rsp = requests.get(check_llc, headers=HEADERS, verify=False)
-        data = str(rsp.status_code) + '\n' +rsp.text + str(register)
-        f = open("demofile4.txt", "w")
-        f.write(data)
-        f.close()
         if rsp.status_code == 200:
             if rsp.json():
                 return True
@@ -110,9 +106,6 @@ def oauth2(request):
                 user.roles.add(1)
             auth.login(request, user)
             has_llc = check_llc_user(user)
-            f = open("demofile3.txt", "w")
-            f.write(str(has_llc))
-            f.close()
             if has_llc:
                 return render(request, 'llc/dan_user.html')
 
