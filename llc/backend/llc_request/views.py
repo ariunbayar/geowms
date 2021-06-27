@@ -193,11 +193,31 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
                                     break
 
                         if valid_data_type:
+<<<<<<< Updated upstream
                             file_shape_id = shape_id
+=======
+                            file_shape_id = file_shape
+>>>>>>> Stashed changes
                             shape_of_geoms.delete()
                             break
 
                 else:
+<<<<<<< Updated upstream
+=======
+                    print('create_or_update')
+                    print('create_or_update')
+                    print('create_or_update')
+                    if remove_shape_ids:
+                        print("remove_shape_ids", remove_shape_ids)
+                        shape_of_geoms = ShapeGeom.objects.filter(shape_id__in=remove_shape_ids)
+                        print('eheh')
+                        print('eheh')
+                        print('eheh', shape_of_geoms)
+                        if shape_of_geoms:
+                            shape_of_geoms.delete()
+                        file_shapes.delete()
+
+>>>>>>> Stashed changes
                     request_shape = RequestFilesShape.objects.create(
                         files=file_qs,
                         org=org_data
@@ -220,6 +240,10 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
                             geom_json=json_dumps(json_content),
                             form_json=json_dumps(properties)
                         )
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
                 utils.remove_file(name)
             elif '.zip' not in name:
                 utils.remove_file(name)
