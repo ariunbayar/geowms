@@ -1396,10 +1396,19 @@ def get_mdata_value(feature_code, geo_id, is_display=False):
 
 
 def get_2d_data(geo_id):
+    mgeo_qs = MGeoDatas.objects.filter(geo_id=geo_id).first()
+    hex = mgeo_qs.geo_data.wkt
+    hex = hex.replace(' Z', '')
+    hex = hex.replace(' 0', '')
+    data = hex
+    return data
+
+
+def get_2d_data_using_pg(geo_id):
     cursor = connections['default'].cursor()
     sql = """
         SELECT
-            ST_AsText(ST_Transform(st_force2d(geo_data),4326)) as geom
+            ST_AsText(ST_Transform(st_force2d(geo_data), 4326)) as geom
         FROM
             m_geo_datas
         WHERE
