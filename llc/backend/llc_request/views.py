@@ -226,8 +226,7 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
                 utils.remove_file(name)
 
 
-# TODO neg shape dotor olon adilhan turultei
-# baih nuhtsuliig tootsoh
+# TODO neg shape dotor olon adilhan turultei baih nuhtsuliig tootsoh
 def _conv_geom(geojson):
     geojson = utils.json_load(geojson)
     return GEOSGeometry(utils.json_dumps(geojson), srid=4326)

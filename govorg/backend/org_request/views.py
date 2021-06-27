@@ -63,6 +63,11 @@ REQUEST_SHAPE_SENT_GOV = {
     'kind': RequestFilesShape.KIND_PENDING,
 }
 
+REQUEST_SHAPE_DISMISS_GOV = {
+    'state': RequestFilesShape.STATE_SENT,
+    'kind': RequestFilesShape.KIND_DISMISS,
+}
+
 REQUEST_SHAPE_APPROVED = {
     'state': RequestFilesShape.STATE_SOLVED,
     'kind': RequestFilesShape.KIND_APPROVED,
@@ -487,7 +492,7 @@ def _set_llc_request(llc_request_id, payload):
         llc_request_data['kind'] = LLC_REQUEST_DISSMIS['kind']
         llc_request_data['state'] = LLC_REQUEST_DISSMIS['state']
         info = 'Амжилттай буцаалаа'
-        request_shape['state'] = RequestFilesShape.STATE_NEW # TODO soligdoj magdgv
+        request_shape['state'] = RequestFilesShape.STATE_SENT # TODO soligdoj magdgv
         request_shape['kind'] = RequestFilesShape.KIND_DISMISS
         llc_changerequest_qs = llc_changerequest_qs.filter(feature_id=feature_id)
 
@@ -898,6 +903,10 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
             req_shapes_qs = RequestFilesShape.objects
             req_shapes_qs = req_shapes_qs.filter(files_id=file_id)
             qs = req_shapes_qs.filter(feature_id=feature_id)
+            print("hohoh")
+            print("hohoh")
+            print("hohoh", state)
+            print('hoho', kind)
             if qs:
                 qs.update(
                     state=state,
