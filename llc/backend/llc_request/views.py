@@ -463,7 +463,10 @@ def get_request_data(request, id):
     emp_fields = _get_employees(geo_id)
     if mdata_qs:
         if geo_id != '496':
-            mdata_qs = mdata_qs.filter(property_id=23).first()
+            property_id = 23
+            if settings.DEBUG:
+                property_id = 30101104
+            mdata_qs = mdata_qs.filter(property_id=property_id).first()
             code_list_id = mdata_qs.code_list_id
             code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
             aimag_name = code_list_data.code_list_name
