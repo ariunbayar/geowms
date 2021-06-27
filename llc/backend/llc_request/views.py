@@ -611,8 +611,10 @@ def get_file_shapes(request, id):
             'icon_state': True,
             'features': geoms,
             'order_no': shape_geometry.order_no,
-            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
-
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else '',
+            "state": utils.get_value_from_types(RequestFilesShape.STATE_CHOICES, shape_geometry.state),
+            "kind": utils.get_value_from_types(RequestFilesShape.KIND_CHOICES, shape_geometry.kind),
+            "description": shape_geometry.description,
         })
 
     return JsonResponse({
@@ -661,6 +663,13 @@ def send_request(request, payload, content, id):
             qs.state = RequestFiles.STATE_SENT
             qs.kind = RequestFiles.KIND_PENDING
             qs.save()
+
+            shape_of_files = RequestFilesShape.objects.filter(files=qs)
+            shape_of_files = shape_of_files.exclude(state=RequestFilesShape.STATE_SOLVED)
+            for shape_of_file in shape_of_files:
+                shape_of_file.state = RequestFilesShape.STATE_NEW
+                shape_of_file.kind = RequestFilesShape.KIND_PENDING
+                shape_of_file.save()
 
             return JsonResponse({
                 'success': True,

@@ -26,7 +26,7 @@ class ActionClass extends Component {
                 '',
                 true,
                 'Үгүй',
-                'Тиим',
+                'Тийм',
             )
         }
 
@@ -40,8 +40,8 @@ class ActionClass extends Component {
                     this.modalChange(
                         'fa fa-check-circle',
                         'success',
+                        'Амжилттай',
                         info,
-                        '',
                         false,
                         '',
                         '',
@@ -52,8 +52,8 @@ class ActionClass extends Component {
                     this.modalChange(
                         'fa fa-times-circle',
                         'danger',
+                        'Алдаа гарлаа',
                         info,
-                        '',
                         false,
                         '',
                         '',
