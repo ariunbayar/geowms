@@ -232,7 +232,7 @@ export default class RequestModal extends Component {
                 {
                     !invis
                     ?
-                        (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
+                        !(values.state == "ИЛГЭЭСЭН" && values.kind == 'ХҮЛЭЭГДЭЖ БУЙ')
                                 ?
                                     <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2`} onClick={this.openRequestModal}></a>
                                 :

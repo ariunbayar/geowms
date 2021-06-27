@@ -63,6 +63,11 @@ REQUEST_SHAPE_SENT_GOV = {
     'kind': RequestFilesShape.KIND_PENDING,
 }
 
+REQUEST_SHAPE_DISMISS_GOV = {
+    'state': RequestFilesShape.STATE_SENT,
+    'kind': RequestFilesShape.KIND_DISMISS,
+}
+
 REQUEST_SHAPE_APPROVED = {
     'state': RequestFilesShape.STATE_SOLVED,
     'kind': RequestFilesShape.KIND_APPROVED,
@@ -487,7 +492,7 @@ def _set_llc_request(llc_request_id, payload):
         llc_request_data['kind'] = LLC_REQUEST_DISSMIS['kind']
         llc_request_data['state'] = LLC_REQUEST_DISSMIS['state']
         info = 'Амжилттай буцаалаа'
-        request_shape['state'] = RequestFilesShape.STATE_NEW # TODO soligdoj magdgv
+        request_shape['state'] = RequestFilesShape.STATE_SENT # TODO soligdoj magdgv
         request_shape['kind'] = RequestFilesShape.KIND_DISMISS
         llc_changerequest_qs = llc_changerequest_qs.filter(feature_id=feature_id)
 
@@ -1250,18 +1255,19 @@ def _reject_request(id, kind, state, text):
     reject_request = LLCRequest.objects.filter(pk=id).first()
     reject_file = RequestFiles.objects.filter(id=reject_request.file.id).first()
 
+    if state == LLCRequest.KIND_DISMISS:
+        reject_file.state = RequestFiles.STATE_NEW
+        reject_file.kind = RequestFiles.KIND_DISMISS
+    else:
+        reject_file.kind = kind
+        reject_file.state = state
+
+    reject_file.save()
+
     reject_request.kind = kind
     reject_request.state = state
-    if state == LLCRequest.KIND_DISMISS:
-        reject_request.state = RequestFiles.STATE_NEW
-        reject_request.kind = RequestFiles.KIND_DISMISS
-
+    reject_request.description = text
     reject_request.save()
-
-    reject_file.kind = kind
-    reject_file.state = state
-    reject_file.description = text
-    reject_file.save()
 
 
 @require_POST

@@ -64,7 +64,7 @@ class SubmitClass extends Component {
     }
 
     render() {
-        const { values } = this.props
+        var { values } = this.props
         const { agreed_submit } = this.state
 
         return (
@@ -92,7 +92,7 @@ class SubmitClass extends Component {
                                 </i>
                             </p> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
-                                values.state != "ИЛГЭЭСЭН"
+                                !(values.state == "ИЛГЭЭСЭН" && values.kind == 'ХҮЛЭЭГДЭЖ БУЙ')
 
                                 ?
                                     <p
