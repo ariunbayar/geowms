@@ -903,10 +903,6 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
             req_shapes_qs = RequestFilesShape.objects
             req_shapes_qs = req_shapes_qs.filter(files_id=file_id)
             qs = req_shapes_qs.filter(feature_id=feature_id)
-            print("hohoh")
-            print("hohoh")
-            print("hohoh", state)
-            print('hoho', kind)
             if qs:
                 qs.update(
                     state=state,
