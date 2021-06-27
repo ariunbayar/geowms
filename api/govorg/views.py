@@ -277,9 +277,12 @@ def qgis_submit(request, token, fid):
     msg = []
     form_json = []
     for update_item in update_lists:
-        feature_id = update_item['att']['feature_id']
-        if update_item['att']['inspire_id']:
-            geo_id = update_item['att']['inspire_id']
+        print('=hoho')
+        print('=hoho')
+        print('=hoho', update_item)
+        feature_id = fid
+        if update_item['att']['localid']:
+            geo_id = update_item['att']['localid']
         else:
             geo_id = update_item['att']['geo_id']
         package = LFeatures.objects.filter(feature_id=feature_id).first()
@@ -332,7 +335,11 @@ def qgis_submit(request, token, fid):
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    ChangeRequest.objects.bulk_create(objs)
+    hoho = ChangeRequest.objects.bulk_create(objs)
+    print("hhaa")
+    print("hhaa")
+    print("hhaa")
+    print("hhaa", hoho)
     return JsonResponse({'success': True, 'msg': msg})
 
 
@@ -374,6 +381,9 @@ def _get_request_content(base_url, request, geo_id, headers):
                 'cql_filter': cql_filter
             }
         rsp = requests.post(base_url, queryargs,  headers=headers, timeout=300, verify=False)
+        print('hoh')
+        print('hoh')
+        print('hoh', rsp.status_code)
     else:
         queryargs = request.GET
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=300, verify=False)
@@ -434,6 +444,10 @@ def qgis_proxy(request, base_url, token, fid=''):
         service_request = request.GET.get('request').lower()
     elif request.GET.get('REQUEST'):
         service_request = request.GET.get('REQUEST').lower()
+
+    print('lhoh')
+    print('lhoh', rsp.status_code)
+    print('lhoh', service_request)
     unneed_requests = ['getmap', 'getlegendgraphic']
     if service_request not in unneed_requests:
         if request.GET.get('SERVICE') == 'WFS':

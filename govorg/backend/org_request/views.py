@@ -143,13 +143,10 @@ def _get_org_request(ob, employee):
         geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
 
-    description = ob.description
     if ob.llc_request_id:
         project_name = _get_ann_and_project_name(ob.llc_request_id, [])
-        description = ob.llc_request.description
 
     return {
-        'description': description,
         'change_request_id': ob.id,
         'old_geo_id': ob.old_geo_id,
         'new_geo_id': ob.new_geo_id,
