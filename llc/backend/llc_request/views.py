@@ -168,6 +168,7 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
         for name in glob.glob(os.path.join(extract_path, '*')):
             if [item for item in datasource_exts if item in name]:
                 ds = DataSource(name)
+                file_shape_id = ''
                 if file_qs.kind == RequestFiles.KIND_DISMISS:
                     for shape_id in remove_shape_ids:
                         valid_data_type = False
@@ -216,7 +217,6 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
                             geom_json=json_dumps(json_content),
                             form_json=json_dumps(properties)
                         )
-
                 utils.remove_file(name)
             elif '.zip' not in name:
                 utils.remove_file(name)
@@ -307,8 +307,13 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
             extract_path = os.path.join(extract_path, file_not_ext_name)
             file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
             utils.unzip(file_path, extract_path)
+            print("hoho")
+            print("hoho")
+            print("hoho", file_path)
             utils.remove_file(file_path)
-
+            print("after hoho")
+            print("after hoho")
+            print("after hoho")
         return True, extract_path
 
 
@@ -356,7 +361,6 @@ def save_request(request, content):
         })
 
     is_file, extract_path = _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, file_path, file_not_ext_name)
-
     if is_file:
         datasource_exts = ['.gml', '.geojson']
         for name in glob.glob(os.path.join(extract_path, '*')):
