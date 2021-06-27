@@ -266,6 +266,7 @@ export default class SideBar extends Component {
         const props = this.props
         const { fid, tid } = props
         const { view, style_name, file } = this.state
+
         const values = this.getValuesFromState()
 
         const form_datas = new FormData()
@@ -273,7 +274,9 @@ export default class SideBar extends Component {
         form_datas.append('fid', fid)
         form_datas.append('tid', tid)
         form_datas.append('view_id', view.id)
-        form_datas.append('files', file, file.name)
+        if (file) {
+            form_datas.append('files', file, file.name)
+        }
         form_datas.append('values',  JSON.stringify({values}))
 
         if(style_name) {

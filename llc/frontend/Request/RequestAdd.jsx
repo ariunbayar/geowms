@@ -134,12 +134,6 @@ export class RequestAdd extends Component {
             aimag_geom: [],
             kind: '',
             state: '',
-            investment_status: [
-                {id:1, name: "Төсөл, хөтөлбөрийн"},
-                {id:2, name: "Орон нутгийн"},
-                {id:3, name: "Улсын төсвийн"},
-                {id:4, name: "Хувийн"},
-            ]
         }
 
         this.handleOnChange = this.handleOnChange.bind(this)

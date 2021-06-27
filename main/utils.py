@@ -1471,6 +1471,16 @@ def geo_cache(key_name, key, qs, time):
     return qs
 
 
+# property ний value_type_id аас mdata ний value төрөлийг авах
+def get_prop_value_type(value_type_id):
+    filter_value_type = 'value_text'
+    for type in value_types():
+        if value_type_id in type['value_names']:
+            filter_value_type = type['value_type']
+            break
+    return filter_value_type
+
+
 # тухайн property г мдатагаас хайхад бэлэн маягаар гаргаж авах
 def get_filter_dicts(property_code='pointnumber', feature_code='gnp-gp-gp'):
     prop_qs = LProperties.objects
@@ -1481,11 +1491,7 @@ def get_filter_dicts(property_code='pointnumber', feature_code='gnp-gp-gp'):
     property_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature.feature_id)
     data = get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
 
-    for prop_dict in prop_qs.values():
-        for type in value_types():
-            if prop_dict['value_type_id'] in type['value_names']:
-                filter_value_type = type['value_type']
-                break
+    filter_value_type = get_prop_value_type(prop.value_type_id)
 
     return data, filter_value_type
 
@@ -1951,3 +1957,12 @@ def get_type(value_type_id):
         value_type = 'option'
 
     return value_type
+
+
+def get_value_from_types(choices, value):
+    choices = list(choices)
+    for option in choices:
+        option = list(option)
+        if value == option[0]:
+            return option[1]
+    return ''

@@ -34,7 +34,6 @@ from main.decorators import ajax_required
 import main.geoserver as geoserver
 from main import utils
 
-
 # Create your views here.
 def _get_features(package_id):
     feature_data = []

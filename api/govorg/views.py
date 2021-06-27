@@ -226,7 +226,7 @@ def _get_property_data(values, employee, feature_id, geo_id):
     qs = MDatas.objects.filter(
         feature_config_id__in=feature_config,
         geo_id=geo_id
-        )
+    )
     for value in values:
         form = {}
         property = LProperties.objects.filter(property_code__iexact=value).first()
