@@ -920,6 +920,7 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
                         file.state = RequestFiles.STATE_SOLVED
                         file.kind = RequestFiles.KIND_APPROVED
                         file.save()
+
                 elif is_approve:
                     has_new_req_shape = count_qs.filter(**REQUEST_SHAPE_SENT_GOV)
                     if not has_new_req_shape:
@@ -1245,14 +1246,21 @@ def get_request_detail(request, id):
 
 
 def _reject_request(id, kind, state, text):
+
     reject_request = LLCRequest.objects.filter(pk=id).first()
     reject_file = RequestFiles.objects.filter(id=reject_request.file.id).first()
+
     reject_request.kind = kind
     reject_request.state = state
+    if state == LLCRequest.KIND_DISMISS:
+        reject_request.state = RequestFiles.STATE_NEW
+        reject_request.kind = RequestFiles.KIND_DISMISS
+
+    reject_request.save()
+
     reject_file.kind = kind
     reject_file.state = state
     reject_file.description = text
-    reject_request.save()
     reject_file.save()
 
 
