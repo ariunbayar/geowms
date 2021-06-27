@@ -166,15 +166,15 @@ export default class RequestDetail extends Component {
                                 <SelectField
                                     state_name= "hurungu_oruulalt"
                                     label="Хөрөнгө оруулалтын байдал"
-                                    option_name = "name"
-                                    option_key = "code"
+                                    option_name="name"
+                                    option_key="id"
+                                    className="col-md-12 px-0 mx-0"
                                     data_list={investment_status}
-                                    default_value={"Сонгоно уу"}
-                                    className={"col-md-4"}
-                                    default_text={"Сонгоно уу"}
-                                    handleSelectField={this.handleOnChange}
+                                    default_value={hurungu_oruulalt}
+                                    default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
+                                    handleSelectField={this.props.handleOnChange}
                                 />
-                             </div>
+                            </div>
                                 {
                             info &&
                                 <div className="form-group col-md-12">
