@@ -21,7 +21,8 @@ from backend.inspire.models import (
     MGeoDatas,
     MDatas,
     EmpPermInspire,
-    EmpPerm
+    EmpPerm,
+    LPackages
 )
 from llc.backend.llc_request.models import RequestFiles
 from llc.backend.llc_request.models import LLCRequest
@@ -1439,8 +1440,6 @@ def inspire_save(request, payload):
         feature_id=feature_id,
         order_no=order_no,
         order_at=order_at or None,
-        state=REQUEST_SHAPE_NEW['state'],
-        kind=REQUEST_SHAPE_NEW['kind'],
     )
 
     return JsonResponse({

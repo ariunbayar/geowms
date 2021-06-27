@@ -594,6 +594,13 @@ def send_request(request, payload, content, id):
             qs.kind = RequestFiles.KIND_PENDING
             qs.save()
 
+            shape_of_files = RequestFilesShape.objects.filter(files=qs)
+            shape_of_files = shape_of_files.exclude(state=RequestFilesShape.STATE_SOLVED)
+            for shape_of_file in shape_of_files:
+                shape_of_file.state = RequestFilesShape.STATE_NEW
+                shape_of_file.kind = RequestFilesShape.KIND_PENDING
+                shape_of_file.save()
+
             return JsonResponse({
                 'success': True,
                 'info': 'Амжилттай илгээгдлээ.'
