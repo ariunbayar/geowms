@@ -310,13 +310,7 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
             extract_path = os.path.join(extract_path, file_not_ext_name)
             file_path = os.path.join(settings.MEDIA_ROOT, file_path, file_name)
             utils.unzip(file_path, extract_path)
-            print("hoho")
-            print("hoho")
-            print("hoho", file_path)
             utils.remove_file(file_path)
-            print("after hoho")
-            print("after hoho")
-            print("after hoho")
         return True, extract_path
 
 
