@@ -1,10 +1,8 @@
 from govorg.backend.org_request.models import ChangeRequest
-from typing import Tuple
-from unicodedata import name
 
 import os
 import glob
-from unicodedata import name
+from django.db.models import Count
 
 
 from django.conf import settings
@@ -118,8 +116,9 @@ def llc_request_list(request, payload, content):
 
 
 def _get_leve_2_geo_id(layer):
-    org_ids = list(POSITION_MERGEJILTEN.values_list('org_id', flat=True))
-    qs_org = Org.objects.filter(level=2, id__in=org_ids)
+    position_ids = list(POSITION_MERGEJILTEN.values_list('id', flat=True))
+    get_employees = list(Employee.objects.filter(position_id__in=position_ids).values_list('org_id', flat=True).annotate(dcount=Count('org_id')).order_by())
+    qs_org = Org.objects.filter(id__in=get_employees, level=2)
 
     cursor = connections['default'].cursor()
     data_of_range = []
