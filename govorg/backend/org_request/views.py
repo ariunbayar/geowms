@@ -1262,11 +1262,11 @@ def _reject_request(id, kind, state, text):
         reject_file.kind = kind
         reject_file.state = state
 
+    reject_file.description = text
     reject_file.save()
 
     reject_request.kind = kind
     reject_request.state = state
-    reject_request.description = text
     reject_request.save()
 
 
