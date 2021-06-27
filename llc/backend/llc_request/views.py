@@ -162,7 +162,6 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
                 file_shapes = file_shapes.filter(state=RequestFilesShape.STATE_NEW, kind=RequestFilesShape.KIND_DISMISS)
 
             remove_shape_ids = list(file_shapes.values_list('id', flat=True))
-
         for name in glob.glob(os.path.join(extract_path, '*')):
             if [item for item in datasource_exts if item in name]:
                 ds = DataSource(name)
@@ -378,7 +377,13 @@ def save_request(request, content):
     if is_file:
         datasource_exts = ['.gml', '.geojson']
         for name in glob.glob(os.path.join(extract_path, '*')):
+            print('lhoh')
+            print('lhoh')
+            print('lhoh', name)
             for ext in datasource_exts:
+                print('hoho')
+                print('hoho')
+                print('hoho', ext, name)
                 if ext in name:
                     ds = DataSource(name)
                     for layer in ds:
@@ -398,8 +403,6 @@ def save_request(request, content):
                             })
 
         request_file_data['name'] = company_name
-        request_file_data['kind'] = RequestFiles.KIND_NEW
-        request_file_data['state'] = RequestFiles.STATE_NEW
         request_file_data['tools'] = json_dumps(get_tools)
 
         if id:
@@ -412,8 +415,12 @@ def save_request(request, content):
                 request_file_data['geo_id'] = ulsiin_hemjeend
 
         else:
+            request_file_data['kind'] = RequestFiles.KIND_NEW
+            request_file_data['state'] = RequestFiles.STATE_NEW
             request_file_data['file_path'] = uploaded_file
-            request_file_data['geo_id'] = org_data.geo_id   
+            if org_data:
+                request_file_data['geo_id'] = org_data.geo_id
+
         qs_request_file = RequestFiles.objects.update_or_create(
             id=id,
             defaults=request_file_data
@@ -421,6 +428,7 @@ def save_request(request, content):
 
         hurungu_oruulalt = int(hurungu_oruulalt)
         file_qs = list(qs_request_file)[0]
+
         RequestForm.objects.update_or_create(
             file_id=file_qs.id,
             defaults = {
