@@ -18,7 +18,8 @@ class SubmitClass extends Component {
 
     componentDidUpdate(pP, pS){
         const { valid_request, values } = this.props
-        if (valid_request.length == 5 ) {
+        var forms = document.getElementsByClassName('form-control')
+        if (valid_request.length == forms.length ) {
             if(this.state.one_check)
                 this.setState({ agreed_submit: true, one_check: false })
         }
@@ -65,6 +66,7 @@ class SubmitClass extends Component {
     render() {
         const { values } = this.props
         const { agreed_submit } = this.state
+
         return (
             <Fragment>
                 {
@@ -119,7 +121,7 @@ export class RequestAdd extends Component {
             project_name: '',
             object_type: '',
             object_count: '',
-            hurungu_oruulalt: '',
+            hurungu_oruulalt: 1,
             zahialagch: '',
             modal_status:'closed',
             vector_datas: [],
@@ -132,6 +134,12 @@ export class RequestAdd extends Component {
             aimag_geom: [],
             kind: '',
             state: '',
+            investment_status: [
+                {id:1, name: "Төсөл, хөтөлбөрийн"},
+                {id:2, name: "Орон нутгийн"},
+                {id:3, name: "Улсын төсвийн"},
+                {id:4, name: "Хувийн"},
+            ]
         }
 
         this.handleOnChange = this.handleOnChange.bind(this)
@@ -185,20 +193,27 @@ export class RequestAdd extends Component {
         this.setState({ selected_tools })
     }
 
-    handleOnChange(e) {
-        var name = e.target.name
+    handleOnChange(e, selection) {
+        var name = ''
         var { file_name, file_state } = this.state
-        const { id } = this.props.match.params
-        var value = ''
-        if (name == 'files') {
-            if (id) {
-                file_state = true
+        if (!selection) {
+            name = e.target.name
+            const { id } = this.props.match.params
+            var value = ''
+            if (name == 'files') {
+                if (id) {
+                    file_state = true
+                }
+                value = e.target.files[0]
+                file_name = value.name
             }
-            value = e.target.files[0]
-            file_name = value.name
+            else {
+                value = e.target.value
+            }
         }
         else {
-            value = e.target.value
+            name = e
+            value = selection['id']
         }
 
         this.validationForm()
@@ -217,6 +232,7 @@ export class RequestAdd extends Component {
                 form.classList.add('is-valid')
             }
         }
+
     }
 
     handleModalClose() {

@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import Loader from "@utils/Loader"
+import SelectField from '@utils/Tools/Form/select_field'
 
 import {LLCMap} from '../LLCMap'
 import UsedTools from './select_tools'
@@ -73,7 +74,8 @@ export default class RequestDetail extends Component {
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
             file_name, info, state, desc_info,
-            aimag_name, aimag_geom, desc, emp_fields, mergejilten
+            aimag_name, aimag_geom, desc, emp_fields, mergejilten,
+            investment_status,
         } = this.props
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
@@ -160,20 +162,20 @@ export default class RequestDetail extends Component {
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
-                        <div className="form-group col-md-12">
-                            <label htmlFor='hurungu_oruulalt'> Хөрөнгө оруулалтын байдал </label>
-                            <textarea
-                                name='hurungu_oruulalt'
-                                rows="3"
-                                id="hurungu_oruulalt"
-                                className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
-                                value={hurungu_oruulalt}
-                                onChange={(e) => {this.props.handleOnChange(e)}}
-                            />
-                        </div>
-                            {
+                        <div className="form-group col-md-12 ">
+                                <SelectField
+                                    state_name= "hurungu_oruulalt"
+                                    label="Хөрөнгө оруулалтын байдал"
+                                    option_name="name"
+                                    option_key="id"
+                                    className="col-md-12 px-0 mx-0"
+                                    data_list={investment_status}
+                                    default_value={hurungu_oruulalt}
+                                    default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
+                                    handleSelectField={this.props.handleOnChange}
+                                />
+                            </div>
+                                {
                             info &&
                                 <div className="form-group col-md-12">
                                     <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
