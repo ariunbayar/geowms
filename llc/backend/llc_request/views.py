@@ -630,10 +630,14 @@ def send_request(request, payload, content, id):
     email = employee.user.email
 
     if employee:
-        LLCRequest.objects.create(
+        request_files = LLCRequest.objects.filter(file_id=id).first()
+        request_data = {}
+        request_data['state'] = LLCRequest.STATE_NEW
+        request_data['kind'] = LLCRequest.KIND_PENDING
+
+        LLCRequest.objects.update_or_create(
             file_id=id,
-            state=LLCRequest.STATE_NEW,
-            kind=LLCRequest.KIND_NEW,
+            defaults=request_data
         )
 
         success_mail = _send_to_information_email(email)
