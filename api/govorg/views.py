@@ -381,9 +381,6 @@ def _get_request_content(base_url, request, geo_id, headers):
                 'cql_filter': cql_filter
             }
         rsp = requests.post(base_url, queryargs,  headers=headers, timeout=300, verify=False)
-        print('hoh')
-        print('hoh')
-        print('hoh', rsp.status_code)
     else:
         queryargs = request.GET
         rsp = requests.get(base_url, queryargs, headers=headers, timeout=300, verify=False)
@@ -445,9 +442,6 @@ def qgis_proxy(request, base_url, token, fid=''):
     elif request.GET.get('REQUEST'):
         service_request = request.GET.get('REQUEST').lower()
 
-    print('lhoh')
-    print('lhoh', rsp.status_code)
-    print('lhoh', service_request)
     unneed_requests = ['getmap', 'getlegendgraphic']
     if service_request not in unneed_requests:
         if request.GET.get('SERVICE') == 'WFS':
