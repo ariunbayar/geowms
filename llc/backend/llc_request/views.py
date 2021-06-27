@@ -154,21 +154,24 @@ def _get_leve_2_geo_id(layer):
 
 def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_name):
     remove_shape_ids = []
-    shape_files = []
     if file_name != 'blob':
         file_shapes = RequestFilesShape.objects.filter(files=file_qs)
         if file_shapes:
             if file_qs.kind == RequestFiles.KIND_DISMISS:
-                file_shapes = file_shapes.filter(state=RequestFilesShape.STATE_NEW, kind=RequestFilesShape.KIND_DISMISS)
+                file_shapes = file_shapes.filter(state=RequestFilesShape.STATE_SENT, kind=RequestFilesShape.KIND_DISMISS)
+            else:
+                remove_shape_ids = list(file_shapes.values_list('id', flat=True))
+                shape_of_geoms = ShapeGeom.objects.filter(shape_id__in=remove_shape_ids)
+                shape_of_geoms.delete()
+                file_shapes.delete()
 
-            remove_shape_ids = list(file_shapes.values_list('id', flat=True))
         for name in glob.glob(os.path.join(extract_path, '*')):
             if [item for item in datasource_exts if item in name]:
                 ds = DataSource(name)
                 if file_qs.kind == RequestFiles.KIND_DISMISS:
-                    for file_shape in remove_shape_ids:
+                    for shape_id in remove_shape_ids:
                         valid_data_type = False
-                        shape_of_geoms = ShapeGeom.objects.filter(shape_id=file_shape)
+                        shape_of_geoms = ShapeGeom.objects.filter(shape_id=shape_id)
 
                         if shape_of_geoms:
                             shape_of_geom = shape_of_geoms.first()
@@ -186,53 +189,33 @@ def _create_shape_files(org_data, file_qs, extract_path, datasource_exts, file_n
                                     break
 
                         if valid_data_type:
+                            file_shape_id = shape_id
                             shape_of_geoms.delete()
-                            for layer in ds:
-                                for feature in layer:
-                                    geo_json = feature.geom.json
-                                    current_geojson_type = geo_json['type']
-                                    properties = dict()
-                                    for field in layer.fields:
-                                        properties[field] = feature.get(field)
-
-                                    json_content = json_load(geo_json)
-
-                                    for key, value in properties.items():
-                                        properties[key] = utils.datetime_to_string(value)
-
-                                    ShapeGeom.objects.create(
-                                        shape_id=file_shape,
-                                        geom_json=json_dumps(json_content),
-                                        form_json=json_dumps(properties)
-                                    )
                             break
 
                 else:
-                    if remove_shape_ids:
-                        shape_of_geoms = ShapeGeom.objects.filter(shape_id__in=remove_shape_ids)
-                        shape_of_geoms.delete()
-                        file_shapes.delete()
-
                     request_shape = RequestFilesShape.objects.create(
                         files=file_qs,
                         org=org_data
                     )
-                    for layer in ds:
-                        for feature in layer:
-                            geo_json = feature.geom.json
-                            properties = dict()
-                            for field in layer.fields:
-                                properties[field] = feature.get(field)
-                            json_content = json_load(geo_json)
+                    file_shape_id = request_shape.id
 
-                            for key, value in properties.items():
-                                properties[key] = utils.datetime_to_string(value)
+                for layer in ds:
+                    for feature in layer:
+                        geo_json = feature.geom.json
+                        properties = dict()
+                        for field in layer.fields:
+                            properties[field] = feature.get(field)
+                        json_content = json_load(geo_json)
 
-                            ShapeGeom.objects.create(
-                                shape=request_shape,
-                                geom_json=json_dumps(json_content),
-                                form_json=json_dumps(properties)
-                            )
+                        for key, value in properties.items():
+                            properties[key] = utils.datetime_to_string(value)
+
+                        ShapeGeom.objects.create(
+                            shape_id=file_shape_id,
+                            geom_json=json_dumps(json_content),
+                            form_json=json_dumps(properties)
+                        )
 
                 utils.remove_file(name)
             elif '.zip' not in name:
@@ -377,13 +360,7 @@ def save_request(request, content):
     if is_file:
         datasource_exts = ['.gml', '.geojson']
         for name in glob.glob(os.path.join(extract_path, '*')):
-            print('lhoh')
-            print('lhoh')
-            print('lhoh', name)
             for ext in datasource_exts:
-                print('hoho')
-                print('hoho')
-                print('hoho', ext, name)
                 if ext in name:
                     ds = DataSource(name)
                     for layer in ds:
