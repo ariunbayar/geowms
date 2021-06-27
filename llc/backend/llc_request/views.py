@@ -463,9 +463,9 @@ def get_request_data(request, id):
     emp_fields = _get_employees(geo_id)
     if mdata_qs:
         if geo_id != '496':
-            property_id = 23
+            property_id = 30101104
             if settings.DEBUG:
-                property_id = 30101104
+                property_id = 23
             mdata_qs = mdata_qs.filter(property_id=property_id).first()
             code_list_id = mdata_qs.code_list_id
             code_list_data = LCodeLists.objects.filter(code_list_id=code_list_id).first()
