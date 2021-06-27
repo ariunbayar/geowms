@@ -1,3 +1,4 @@
+from govorg.backend.org_request.models import ChangeRequest
 from typing import Tuple
 from unicodedata import name
 
@@ -634,6 +635,9 @@ def remove_request(request, id):
             form.delete()
 
         if lvl2_request:
+            requet_files = list(lvl2_request.values_list('id', flat=True))
+            change_requests = ChangeRequest.objects.filter(llc_request_id__in=requet_files)
+            change_requests.delete()
             lvl2_request.delete()
 
         initial_query.delete()
