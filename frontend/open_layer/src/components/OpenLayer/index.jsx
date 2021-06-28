@@ -65,17 +65,23 @@ export class OpenLayerPage extends Component {
                         <div className="card">
                             <div className="card-body">
                                 <div className="row">
-                                    <div id="owl-demo" className="owl-carousel owl-theme">
-                                        {
-                                            open_layer.map((bundle_obj, idx) =>
-                                                <div className="item" key={idx} onClick={() => this.setBundle(bundle_obj)}>
-                                                    <img src={bundle_obj.icon} className="ahha" style={{height: "80px"}}></img>
-                                                    <h6 className={bundle_obj.id == bundle.id ? 'text-primary' : ''}>{bundle_obj.name}</h6>
-                                                    {bundle_obj.id == bundle.id && <hr className="bg-primary"></hr>}
-                                                </div>
-                                            )
-                                        }
-                                    </div>
+                                    {
+                                        open_layer && open_layer.length > 0
+                                        ?
+                                            <div id="owl-demo" className="owl-carousel owl-theme">
+                                                open_layer.map((bundle_obj, idx) =>
+                                                    <div className="item" key={idx} onClick={() => this.setBundle(bundle_obj)}>
+                                                        <img src={bundle_obj.icon} className="ahha" style={{height: "80px"}}></img>
+                                                        <h6 className={bundle_obj.id == bundle.id ? 'text-primary' : ''}>{bundle_obj.name}</h6>
+                                                        {bundle_obj.id == bundle.id && <hr className="bg-primary"></hr>}
+                                                    </div>
+                                                )
+                                            </div>
+                                        :
+                                            <div className="col-12 text-center">
+                                                <h5>Нээлттэй өгөгдөл байхгүй байна</h5>
+                                            </div>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -108,7 +114,7 @@ export class OpenLayerPage extends Component {
                                 <div className="list-group">
                                     <div id="accordion1">
                                         {
-                                            bundle.wms_list
+                                            bundle?.wms_list
                                             &&
                                                 bundle.wms_list.map((wms, idx) =>
                                                     wms.layers.length > 0
