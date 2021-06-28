@@ -1223,9 +1223,9 @@ def get_request_data(request, id):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_request_detail(request, id):
-    company_name = RequestFiles.objects.filter(pk=id).first()
-    company_name = company_name.name
+
     llc_data = LLCRequest.objects.filter(pk=id).first()
+    company_name = llc_data.file.name
     features = []
     field = {}
     file_id = llc_data.file.id

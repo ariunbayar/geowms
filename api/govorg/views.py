@@ -277,9 +277,6 @@ def qgis_submit(request, token, fid):
     msg = []
     form_json = []
     for update_item in update_lists:
-        print('=hoho')
-        print('=hoho')
-        print('=hoho', update_item)
         feature_id = fid
         if update_item['att']['localid']:
             geo_id = update_item['att']['localid']
@@ -336,10 +333,6 @@ def qgis_submit(request, token, fid):
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
     hoho = ChangeRequest.objects.bulk_create(objs)
-    print("hhaa")
-    print("hhaa")
-    print("hhaa")
-    print("hhaa", hoho)
     return JsonResponse({'success': True, 'msg': msg})
 
 
