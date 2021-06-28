@@ -82,15 +82,13 @@ export default class RequestDetail extends Component {
             file_name, info, state, desc_info,
             aimag_name, aimag_geom, desc, emp_fields, mergejilten,
         } = this.props
-        var { investment_status } = this.state
+        var { investment_status, disabled } = this.state
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
         else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0]?.user_id || 'Байхгүй'}
-
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
-
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
@@ -128,8 +126,7 @@ export default class RequestDetail extends Component {
                                 name='zahialagch'
                                 id="zahialagch"
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={zahialagch}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -141,8 +138,7 @@ export default class RequestDetail extends Component {
                                 id="project_name"
                                 name='project_name'
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={project_name}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -154,8 +150,7 @@ export default class RequestDetail extends Component {
                                 name="object_type"
                                 id="object_type"
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={object_type}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -167,8 +162,7 @@ export default class RequestDetail extends Component {
                                 name="object_count"
                                 id="object_count"
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={object_count}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -184,10 +178,11 @@ export default class RequestDetail extends Component {
                                     default_value={hurungu_oruulalt}
                                     default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
                                     handleSelectField={this.props.handleOnChange}
+                                    disabled={disabled}
                                 />
                             </div>
                                 {
-                            info &&
+                            (info || disabled) &&
                                 <div className="form-group col-md-12">
                                     <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
                                     <select
@@ -196,8 +191,11 @@ export default class RequestDetail extends Component {
                                         id="mergejilten"
                                         onChange={(e) => {this.props.handleOnChange(e)}}
                                         value={default_mergejilten}
+                                        disabled={!info && disabled }
                                     >
-                                        <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
+                                        <option value=''>
+                                            {disabled ? mergejilten : " Илгээх мэргэжилтэнээ сонгоно уу"}
+                                        </option>
                                     {
                                         (emp_fields && emp_fields.length > 0)
                                         ?

@@ -460,7 +460,7 @@ def get_request_data(request, id):
     qs = qs.first()
     geo_id = qs.file.geo_id
     mdata_qs = MDatas.objects.filter(geo_id=geo_id)
-    emp_fields = _get_employees(geo_id)
+    emp_fields = _get_employees(geo_id, id)
     if mdata_qs:
         if geo_id != '496':
             property_id = 30101104
@@ -512,19 +512,31 @@ def get_request_data(request, id):
     })
 
 
-def _get_employees(geo_id):
+def _get_employees(geo_id, id):
+    request_file = RequestFiles.objects.filter(pk=id).first()
+    requested_employee = request_file.requested_employee
     emp_fields = list()
+    emp_detail = dict()
+    user_qs =User.objects
     get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
     position_mergejilten = POSITION_MERGEJILTEN.filter(org=get_org).first()
     get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position_mergejilten.id)
-    for emp in get_employees:
-        emp_detail = dict()
-        get_name = User.objects.filter(pk=emp.user_id).first()
-        emp_detail['org_name'] = get_org.name
-        emp_detail['first_name'] = get_name.first_name
-        emp_detail['mail'] = get_name.email
-        emp_detail['user_id'] = get_name.id
-        emp_fields.append(emp_detail)
+    if requested_employee:
+        user_id = requested_employee
+        get_name = user_qs.filter(pk=user_id).first()
+        org_name = get_org.name
+        first_name = get_name.first_name
+        emp_detail['org_name'] = org_name
+        emp_detail['first_name'] = org_name + '  --  ' + first_name
+        emp_fields = emp_detail
+    else:
+        for emp in get_employees:
+            get_name = user_qs.filter(pk=emp.user_id).first()
+            emp_detail['org_name'] = get_org.name
+            emp_detail['first_name'] = get_name.first_name
+            emp_detail['mail'] = get_name.email
+            emp_detail['user_id'] = get_name.id
+            emp_fields.append(emp_detail)
     return emp_fields
 
 
@@ -630,7 +642,6 @@ def send_request(request, payload, content, id):
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, user_id=user_id).first()
     email = employee.user.email
-
     if employee:
         request_files = LLCRequest.objects.filter(file_id=id).first()
         request_data = {}
@@ -643,10 +654,10 @@ def send_request(request, payload, content, id):
         )
 
         success_mail = _send_to_information_email(email)
-
         if success_mail:
             qs.state = RequestFiles.STATE_SENT
             qs.kind = RequestFiles.KIND_PENDING
+            qs.requested_employee = user_id
             qs.save()
 
             shape_of_files = RequestFilesShape.objects.filter(files=qs)

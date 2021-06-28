@@ -71,7 +71,7 @@ export default class SelectField extends Component {
         const { default_value, label,
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
-                option_text
+                option_text, disabled
         } = this.props
         const state = this.state
         let title = label ? label : ''
@@ -84,6 +84,7 @@ export default class SelectField extends Component {
                     value={state.selected_value ? state.selected_value : default_value}
                     className={`custom-select  ${! default_value && 'border-danger'}`}
                     onChange={(e) => this.dataSelection(e)}
+                    disabled={disabled}
                 >
                     <option value=''>---{default_text ? default_text : ''} ---</option>
                     {
