@@ -1,11 +1,14 @@
 import React, {Component, Fragment} from "react"
-import {service} from './service'
-import RequestModal from './requestModal'
-import {ConfigureBundle} from './configure_bundle'
+
+import { makeStateColor, makeKindColor } from "@helpUtils/functions"
 import Modal from "@utils/Modal/Modal"
 import BackButton from "@utils/Button/BackButton"
+
+import RequestModal from './requestModal'
+import {ConfigureBundle} from './configure_bundle'
 // govorg/frontend/LLCRequest/LLCList.jsx
-import { makeStateColor, makeKindColor } from "@helpUtils/functions"
+
+import {service} from './service'
 
 export class LLCSettings extends Component {
 
@@ -220,14 +223,15 @@ export class LLCSettings extends Component {
                                             </td>
                                             <td>
                                                 {
-                                                    value.icon_state ?
-                                                    <a className='gp-text-primary fa fa-pencil-square-o' onClick={(e) => this.handleProceed(value)}/>
+                                                    value.icon_state
+                                                    ?
+                                                        <a className="gp-text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
                                                     :
-                                                    <a className='gp-text-primary fa fa-floppy-o' onClick={(e) => this.Save(value, idx)}/>
+                                                        <a className='gp-text-primary fa fa-floppy-o' role="button" onClick={(e) => this.Save(value, idx)}/>
                                                 }
                                             </td>
                                             <td>
-                                                <a className='gp-text-primary fa fa-commenting' onClick={(e) => this.goLink(value)}/>
+                                                <a className='gp-text-primary fa fa-commenting' role="button" onClick={(e) => this.goLink(value)}/>
                                             </td>
                                         </tr>
                                         ): <tr><td>дата бүртгэлгүй байна</td></tr>
@@ -238,13 +242,13 @@ export class LLCSettings extends Component {
                         {
                             model_status
                             &&
-                            <RequestModal
-                                modalClose={this.closeModel}
-                                model_body={ConfigureBundle}
-                                model_action={this.modelAction}
-                                {...this.state}
-                                title={'Дэд сан тохируулах'}
-                            />
+                                <RequestModal
+                                    modalClose={this.closeModel}
+                                    model_body={ConfigureBundle}
+                                    model_action={this.modelAction}
+                                    {...this.state}
+                                    title={'Дэд сан тохируулах'}
+                                />
                         }
                         <Modal
                             modal_status={ this.state.modal_status }

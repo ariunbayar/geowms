@@ -1371,9 +1371,9 @@ def _check_and_make_form_json(feature_id, values):
 def _has_overlap(request_file_shapes):
     qs_fids = request_file_shapes.values('feature_id')
     qs_fids = qs_fids.annotate(fid_count=Count('feature_id')).order_by('feature_id')
-    for feature in qs_fids:
-        if 1 < feature['fid_count']:
-            return True
+    qs_fids = qs_fids.filter(fid_count__gt=1)
+    if qs_fids:
+        return True
     return False
 
 
