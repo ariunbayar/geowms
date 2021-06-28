@@ -35,6 +35,7 @@ export class LLCDetail extends Component {
             if (form_field) {
                     this.setState({
                         vector_datas,
+                        company_name :form_field['company_name'],
                         zahialagch :form_field['client_org'],
                         project_name : form_field['project_name'],
                         object_type : form_field['object_type'],
@@ -80,8 +81,9 @@ export class LLCDetail extends Component {
             aimag_name, zahialagch,
             project_name, object_type,
             object_count, hurungu_oruulalt,
-            vector_datas, selected_tools
-            , text,title, modal_status
+            vector_datas, selected_tools,
+            text,title, modal_status,
+            company_name
         } = this.state
         var is_disable = true
         return(
@@ -104,6 +106,16 @@ export class LLCDetail extends Component {
                                             />
                                         </div>
                                 }
+                                <div className="form-group col-md-12">
+                                    <label htmlFor=''>ААН нэр</label>
+                                    <input
+                                        type="text"
+                                        name='company_name'
+                                        className="form-control"
+                                        value={company_name}
+                                        disabled={is_disable}
+                                    />
+                                </div>
                                 <div className="form-group col-md-12">
                                     <label htmlFor=''>Захиалагч байгууллага</label>
                                     <input

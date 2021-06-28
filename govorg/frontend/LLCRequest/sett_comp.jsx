@@ -4,6 +4,8 @@ import RequestModal from './requestModal'
 import {ConfigureBundle} from './configure_bundle'
 import Modal from "@utils/Modal/Modal"
 import BackButton from "@utils/Button/BackButton"
+// govorg/frontend/LLCRequest/LLCList.jsx
+import { makeStateColor, makeKindColor } from "@helpUtils/functions"
 
 export class LLCSettings extends Component {
 
@@ -29,6 +31,7 @@ export class LLCSettings extends Component {
         this.Save = this.Save.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.goLink = this.goLink.bind(this)
     }
 
     getArray(data, selected_value) {
@@ -151,6 +154,23 @@ export class LLCSettings extends Component {
         this.handleModalOpen()
     }
 
+    goLink(values) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: "fa fa-commenting",
+            modal_bg: '',
+            icon_color: 'primary',
+            title: 'Тайлбар',
+            text: values.description,
+            has_button: false,
+            actionNameBack: '',
+            actionNameDelete: '',
+            modalAction: null,
+            modalClose: null,
+        }
+        global.MODAL(modal)
+    }
+
     render () {
         const { list_of_datas, model_status, selected_values, save_icon} = this.state
         return (
@@ -163,10 +183,13 @@ export class LLCSettings extends Component {
                                     <tr>
                                         <th scope="col"> № </th>
                                         <th scope="col">Төрөл</th>
+                                        <th scope="col">Төлөв</th>
+                                        <th scope="col">Өөрчлөлт</th>
                                         <th scope="col">THEME</th>
                                         <th scope="col">PACKAGE</th>
                                         <th scope="col">FEATURE</th>
                                         <th scope="col">дэд сан сонгох</th>
+                                        <th scope="col">Тайлбар</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,6 +202,12 @@ export class LLCSettings extends Component {
                                             </td>
                                             <td>
                                                 {value.geom_type}
+                                            </td>
+                                            <td className={`${makeStateColor(value.state)}`}>
+                                                {value.state}
+                                            </td>
+                                            <td className={`${makeKindColor(value.kind)}`}>
+                                                {value.kind}
                                             </td>
                                             <td>
                                                 {value.theme.name}
@@ -196,6 +225,9 @@ export class LLCSettings extends Component {
                                                     :
                                                     <a className='gp-text-primary fa fa-floppy-o' href="#"  onClick={(e) => this.Save(value, idx)}/>
                                                 }
+                                            </td>
+                                            <td>
+                                                <a className='gp-text-primary fa fa-commenting' href="#"  onClick={(e) => this.goLink(value)}/>
                                             </td>
                                         </tr>
                                         ): <tr><td>дата бүртгэлгүй байна</td></tr>
@@ -229,9 +261,9 @@ export class LLCSettings extends Component {
                         />
                     </div>
                 </div>
-                <BackButton 
-                    {...this.props} 
-                    name={'Буцах'} 
+                <BackButton
+                    {...this.props}
+                    name={'Буцах'}
                     navlink_url={`/gov/llc-request/`}>
                 </BackButton>
             </div>

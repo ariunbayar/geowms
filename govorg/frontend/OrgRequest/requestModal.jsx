@@ -177,7 +177,6 @@ export default class RequestModal extends Component {
                         "",
                         this.handleModalClose
                     )
-                    this.setState({ is_loading: false })
                 }
                 else {
                     this.modalChange(
@@ -191,20 +190,20 @@ export default class RequestModal extends Component {
                         this.handleModalClose
                     )
                 }
+                this.setState({ is_loading: false })
             })
             .catch((error) => {
-                if(error == 'Bad Request') {
-                    this.modalChange(
-                        '',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        'Алдаа гарлаа. Обьект олдсонгүй',
-                        '',
-                        false,
-                        "",
-                        this.handleModalClose
-                    )
-                }
+                this.modalChange(
+                    '',
+                    'fa fa-exclamation-circle',
+                    'warning',
+                    'Алдаа гарлаа. Обьект олдсонгүй',
+                    '',
+                    false,
+                    "",
+                    this.handleModalClose
+                )
+                this.setState({ is_loading: false })
             })
     }
 
@@ -223,7 +222,6 @@ export default class RequestModal extends Component {
                         "",
                         this.handleModalClose
                     )
-                    this.setState({ is_loading: false })
                 }
                 else {
                     this.modalChange(
@@ -237,21 +235,21 @@ export default class RequestModal extends Component {
                         this.handleModalClose
                     )
                 }
+                this.setState({ is_loading: false })
             })
             .catch((error) => {
-                if(error == 'Bad Request') {
-                    this.modalChange(
-                        '',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        'Алдаа гарлаа',
-                        '',
-                        false,
-                        "",
-                        this.handleModalClose
-                        )
-                    }
-                })
+                this.modalChange(
+                    '',
+                    'fa fa-exclamation-circle',
+                    'warning',
+                    'Алдаа гарлаа',
+                    '',
+                    false,
+                    "",
+                    this.handleModalClose
+                )
+                this.setState({ is_loading: false })
+            })
     }
 
     componentDidMount() {

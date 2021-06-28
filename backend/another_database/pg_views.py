@@ -103,7 +103,7 @@ def get_pg_table_list(request, payload, pk):
 @require_GET
 @ajax_required
 def get_pg_table_names(request):
-    themes = LThemes.objects.all()
+    themes = LThemes.objects.order_by('theme_id')
     l_themes = []
     l_packages = []
     l_features = []
@@ -114,7 +114,7 @@ def get_pg_table_names(request):
             'name': theme_name,
             'code': theme_id
         })
-        packages = LPackages.objects.filter(theme_id=theme.theme_id)
+        packages = LPackages.objects.filter(theme_id=theme.theme_id).order_by('package_id')
         for package in packages:
             package_id = package.package_id
             l_packages.append({
@@ -123,7 +123,7 @@ def get_pg_table_names(request):
                 'parent': theme_id
             })
 
-            features = LFeatures.objects.filter(package_id=package_id)
+            features = LFeatures.objects.filter(package_id=package_id).order_by('feature_id')
             for feat in features:
                 l_features.append({
                     'name': feat.feature_name,

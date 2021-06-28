@@ -18,7 +18,8 @@ class SubmitClass extends Component {
 
     componentDidUpdate(pP, pS){
         const { valid_request, values } = this.props
-        if (valid_request.length == 5 ) {
+        var forms = document.getElementsByClassName('form-control')
+        if (valid_request.length == forms.length ) {
             if(this.state.one_check)
                 this.setState({ agreed_submit: true, one_check: false })
         }
@@ -56,14 +57,14 @@ class SubmitClass extends Component {
         form_datas.append('zahialagch', zahialagch)
         form_datas.append('ulsiin_hemjeend', this.props.nationwide ? this.props.nationwide: '' )
         form_datas.append('selected_tools', JSON.stringify({ selected_tools }))
-
+        this.props.values.enableLoader(true)
         service.saveRequest(form_datas).then(({ success, info }) => {
             this.props.values.handlePassValues(success, info)
         })
     }
 
     render() {
-        const { values } = this.props
+        var { values } = this.props
         const { agreed_submit } = this.state
         return (
             <Fragment>
@@ -90,7 +91,7 @@ class SubmitClass extends Component {
                                 </i>
                             </p> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
-                                values.state != "ИЛГЭЭСЭН"
+                                !(values.state == "ИЛГЭЭСЭН" && values.kind == 'ХҮЛЭЭГДЭЖ БУЙ')
 
                                 ?
                                     <p
@@ -119,7 +120,7 @@ export class RequestAdd extends Component {
             project_name: '',
             object_type: '',
             object_count: '',
-            hurungu_oruulalt: '',
+            hurungu_oruulalt: 1,
             zahialagch: '',
             modal_status:'closed',
             vector_datas: [],
@@ -142,6 +143,7 @@ export class RequestAdd extends Component {
         this.handleModalClose = this.handleModalClose.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.enableLoader = this.enableLoader.bind(this)
     }
 
     componentDidMount() {
@@ -185,20 +187,27 @@ export class RequestAdd extends Component {
         this.setState({ selected_tools })
     }
 
-    handleOnChange(e) {
-        var name = e.target.name
+    handleOnChange(e, selection) {
+        var name = ''
         var { file_name, file_state } = this.state
-        const { id } = this.props.match.params
-        var value = ''
-        if (name == 'files') {
-            if (id) {
-                file_state = true
+        if (!selection) {
+            name = e.target.name
+            const { id } = this.props.match.params
+            var value = ''
+            if (name == 'files') {
+                if (id) {
+                    file_state = true
+                }
+                value = e.target.files[0]
+                file_name = value.name
             }
-            value = e.target.files[0]
-            file_name = value.name
+            else {
+                value = e.target.value
+            }
         }
         else {
-            value = e.target.value
+            name = e
+            value = selection['id']
         }
 
         this.validationForm()
@@ -217,6 +226,7 @@ export class RequestAdd extends Component {
                 form.classList.add('is-valid')
             }
         }
+
     }
 
     handleModalClose() {
@@ -234,6 +244,7 @@ export class RequestAdd extends Component {
     }
 
     handlePassValues(success, info, is_description) {
+        this.enableLoader(false)
         if(is_description) {
             this.modalChange(
                 '',
@@ -287,6 +298,9 @@ export class RequestAdd extends Component {
         })
         this.handleModalOpen()
     }
+    enableLoader(state){
+        this.setState({ is_loading: state })
+    }
 
     render (){
         const { id, info } = this.props.match.params
@@ -303,6 +317,7 @@ export class RequestAdd extends Component {
                         history={this.props.history}
                         info={info}
                         handleSelectModel={this.handleSelectModel}
+                        enableLoader={this.enableLoader}
                     />
                 </div>
                 <Modal

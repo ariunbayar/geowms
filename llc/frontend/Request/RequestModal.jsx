@@ -3,6 +3,7 @@ import { service } from "./service"
 import RequestDetail from './DirectModal'
 import ModelSendData from './send_request'
 import Modal from '@utils/Modal/Modal'
+import Loader from "@utils/Loader"
 
 class ActionClass extends Component {
     constructor(props) {
@@ -26,7 +27,7 @@ class ActionClass extends Component {
                 '',
                 true,
                 'Үгүй',
-                'Тиим',
+                'Тийм',
             )
         }
 
@@ -40,8 +41,8 @@ class ActionClass extends Component {
                     this.modalChange(
                         'fa fa-check-circle',
                         'success',
+                        'Амжилттай',
                         info,
-                        '',
                         false,
                         '',
                         '',
@@ -52,8 +53,8 @@ class ActionClass extends Component {
                     this.modalChange(
                         'fa fa-times-circle',
                         'danger',
+                        'Алдаа гарлаа',
                         info,
-                        '',
                         false,
                         '',
                         '',
@@ -143,13 +144,15 @@ class SendModal extends Component{
             aimag_name: '',
             aimag_geom: [],
             selected_tools: [],
-            mergejilten: ''
+            mergejilten: '',
+            is_loading: false
         }
         this.handleOnChange = this.handleOnChange.bind(this)
     }
     componentDidMount(){
         const values = this.props.values
         const {id} = values.field
+        this.setState({ is_loading: true })
         service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
@@ -163,7 +166,8 @@ class SendModal extends Component{
                     vector_datas,
                     aimag_name,
                     aimag_geom,
-                    emp_fields: emp_fields
+                    emp_fields: emp_fields,
+                    is_loading: false
                 })
             }
         this.props.handleIsload(false)
@@ -180,6 +184,7 @@ class SendModal extends Component{
         } = this.state
         return (
             <div className="col-md-12">
+                <Loader is_loading={this.state.is_loading}/>
                 <div className="row mt-2" style={{background:"white"}}>
                     <RequestDetail
                         id={id}
@@ -232,7 +237,7 @@ export default class RequestModal extends Component {
                 {
                     !invis
                     ?
-                        (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
+                        !(values.state == "ИЛГЭЭСЭН" && values.kind == 'ХҮЛЭЭГДЭЖ БУЙ')
                                 ?
                                     <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2`} onClick={this.openRequestModal}></a>
                                 :

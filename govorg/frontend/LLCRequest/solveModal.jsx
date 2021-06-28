@@ -320,6 +320,7 @@ class Form extends Component {
                         )
                     }
                 })
+            this.componentDidMount()
     }
 
     handleOpen() {
@@ -477,7 +478,6 @@ export default class SolveModal extends Component {
         this.setState({ is_modal_request_open: false })
         this.props.refreshData()
     }
-
 
     render() {
         const { is_modal_request_open, state, kind } = this.state

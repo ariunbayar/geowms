@@ -82,7 +82,7 @@ export default class SelectField extends Component {
                 </label>
                 <select
                     value={state.selected_value ? state.selected_value : default_value}
-                    className={'form-control'}
+                    className={`custom-select  ${! default_value && 'border-danger'}`}
                     onChange={(e) => this.dataSelection(e)}
                 >
                     <option value=''>---{default_text ? default_text : ''} ---</option>
@@ -104,8 +104,7 @@ export default class SelectField extends Component {
                         OptionComp (data_list, option_key, option_name, option_text)
                 }
                 </select>
-
-            </div>
+                </div>
         );
     }
 }

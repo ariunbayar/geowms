@@ -226,7 +226,7 @@ def _get_property_data(values, employee, feature_id, geo_id):
     qs = MDatas.objects.filter(
         feature_config_id__in=feature_config,
         geo_id=geo_id
-        )
+    )
     for value in values:
         form = {}
         property = LProperties.objects.filter(property_code__iexact=value).first()
@@ -277,9 +277,9 @@ def qgis_submit(request, token, fid):
     msg = []
     form_json = []
     for update_item in update_lists:
-        feature_id = update_item['att']['feature_id']
-        if update_item['att']['inspire_id']:
-            geo_id = update_item['att']['inspire_id']
+        feature_id = fid
+        if update_item['att']['localid']:
+            geo_id = update_item['att']['localid']
         else:
             geo_id = update_item['att']['geo_id']
         package = LFeatures.objects.filter(feature_id=feature_id).first()
@@ -332,7 +332,7 @@ def qgis_submit(request, token, fid):
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    ChangeRequest.objects.bulk_create(objs)
+    hoho = ChangeRequest.objects.bulk_create(objs)
     return JsonResponse({'success': True, 'msg': msg})
 
 
@@ -366,8 +366,10 @@ def _get_request_content(base_url, request, geo_id, headers):
                 'service': 'WFS',
                 'request': 'GetFeature',
                 'version': '1.0.0',
+                'typeNames': request.GET.get('TYPENAMES'),
                 'typeName': request.GET.get('TYPENAME'),
                 'srsName': 'EPSG:4326',
+                'srs': 'EPSG:4326',
                 'outputFormat': 'gml3',
                 'cql_filter': cql_filter
             }
@@ -432,6 +434,7 @@ def qgis_proxy(request, base_url, token, fid=''):
         service_request = request.GET.get('request').lower()
     elif request.GET.get('REQUEST'):
         service_request = request.GET.get('REQUEST').lower()
+
     unneed_requests = ['getmap', 'getlegendgraphic']
     if service_request not in unneed_requests:
         if request.GET.get('SERVICE') == 'WFS':

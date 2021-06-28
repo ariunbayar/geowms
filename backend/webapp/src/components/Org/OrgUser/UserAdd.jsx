@@ -190,7 +190,7 @@ export class UserAdd extends Component {
                     .employeeUpdate(org_emp, org_level, payload)
                     .then(({ success, errors }) => {
                         if (success) {
-                            this.setModal('Амжилттай боллоо', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(org_emp))
+                            this.setModal('Амжилттай', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(org_emp))
                         } else {
                             setErrors(errors)
                             this.setState({errors})
@@ -211,7 +211,7 @@ export class UserAdd extends Component {
                 .employeeAdd(org_level, org_id, payload)
                 .then(({ success, errors, employee }) => {
                     if (success) {
-                        this.setModal('Амжилттай боллоо', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(employee.user_id))
+                        this.setModal('Амжилттай', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(employee.user_id))
                         global.refreshOrgCount(org_level)
                     }
                     else{
@@ -220,11 +220,13 @@ export class UserAdd extends Component {
                     }
                     this.setState({ is_loading: false })
                     setSubmitting(false)
+                    this.setState({ is_loading: false })
                 })
                 .catch((error) => {
                     this.setModal('Алдаа гарсан байна', '', 'danger', 'fa fa-times-circle', false, '', '')
                     this.setState({ is_loading: false })
                     setSubmitting(false)
+                    this.setState({ is_loading: false })
                 })
         }
     }
