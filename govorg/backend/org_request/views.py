@@ -1223,6 +1223,8 @@ def get_request_data(request, id):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_request_detail(request, id):
+    company_name = RequestFiles.objects.filter(pk=id).first()
+    company_name = company_name.name
     llc_data = LLCRequest.objects.filter(pk=id).first()
     features = []
     field = {}
@@ -1240,6 +1242,7 @@ def get_request_detail(request, id):
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
         field['selected_tools'] = json_load(qs.file.tools)
+    field['company_name'] = company_name
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
