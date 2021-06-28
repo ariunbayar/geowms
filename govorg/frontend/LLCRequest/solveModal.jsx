@@ -281,13 +281,13 @@ class Form extends Component {
     handleRequestApprove(id){
         service
             .requestApprove(id)
-            .then(({ success, info }) => {
+            .then(({ success, data, error }) => {
                 if(success) {
                     this.modalChange(
                         '',
                         'fa fa-check-circle',
                         'success',
-                        info,
+                        data,
                         '',
                         false,
                         "",
@@ -299,8 +299,8 @@ class Form extends Component {
                         '',
                         'fa fa-times-circle',
                         'danger',
-                        info,
-                        '',
+                        'Алдаа гарлаа',
+                        error,
                         false,
                         "",
                         this.handleClose

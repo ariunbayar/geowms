@@ -994,8 +994,6 @@ def request_approve(request, payload):
                             'form_json': form_json,
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
-                        qs_m_datas = MDatas.objects.filter(geo_id=old_geo_id)
-                        # qs_m_datas.delete()
                         success = _request_to_m(request_datas)
                         _insert_data_another_table(request_datas, old_geo_id, 'update')
 
@@ -1370,6 +1368,15 @@ def _check_and_make_form_json(feature_id, values):
     return form_json_list
 
 
+def _has_overlap(request_file_shapes):
+    qs_fids = request_file_shapes.values('feature_id')
+    qs_fids = qs_fids.annotate(fid_count=Count('feature_id')).order_by('feature_id')
+    qs_fids = qs_fids.filter(fid_count__gt=1)
+    if qs_fids:
+        return True
+    return False
+
+
 @require_GET
 @ajax_required
 def llc_request_approve(request, request_id):
@@ -1384,7 +1391,15 @@ def llc_request_approve(request, request_id):
     if not request_file_shapes:
         rsp = {
             'success': False,
-            'info': 'Файл хоосон байна'
+            'error': 'Файл хоосон байна'
+        }
+        return JsonResponse(rsp)
+
+    has_overlap = _has_overlap(request_file_shapes)
+    if has_overlap:
+        rsp = {
+            'success': False,
+            'error': 'Файлуудын "feature" давхцаж байна!!!. Давхцах ёстой "feature" оруулах гэж байгаа бол нэг файл болгоно уу!!!'
         }
         return JsonResponse(rsp)
 
@@ -1437,7 +1452,7 @@ def llc_request_approve(request, request_id):
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хүсэлт үүслээ'
+        'data': 'Амжилттай хүсэлт үүслээ'
     }
     return JsonResponse(rsp)
 
