@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import Loader from "@utils/Loader"
 import SelectField from '@utils/Tools/Form/select_field'
-import FileUpload  from '@utils/Tools/FileUpload'
+import FileUpload from '@utils/Tools/FileUpload'
 
 import {LLCMap} from '../LLCMap'
 import UsedTools from './select_tools'
@@ -237,7 +237,7 @@ export default class RequestDetail extends Component {
                             !info
                             ?
                                 <div className="form-group col-md-12 ml-2">
-                                    <label htmlFor="">Орон зайн мэдээлэл</label>
+                                    <label >Орон зайн мэдээлэл</label>
                                     <FileUpload
                                         {...this.props}
                                         className="mt-2"

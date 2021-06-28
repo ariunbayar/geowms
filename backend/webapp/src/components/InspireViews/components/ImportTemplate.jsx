@@ -1,4 +1,4 @@
-import FileUpload  from '@utils/Tools/FileUpload'
+import FileUpload from '@utils/Tools/FileUpload'
 
 import React, { Component } from 'react'
 
