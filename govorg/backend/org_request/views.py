@@ -1240,7 +1240,7 @@ def get_request_detail(request, id):
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
-        field['investment_status'] = qs.investment_status
+        field['investment_status'] = utils.get_value_from_types(RequestForm.INVESTMENT_STATUS, qs.investment_status)
         field['selected_tools'] = json_load(qs.file.tools)
     field['company_name'] = company_name
 
