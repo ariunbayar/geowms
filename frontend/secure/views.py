@@ -68,7 +68,7 @@ def check_llc_user(user):
         rsp = requests.get(check_llc, headers=HEADERS, verify=False)
 
         f = open("demofile3.txt", "w")
-        data = str(rsp.status_code) + '\n' + str(rsp.text)
+        data = str(rsp.status_code) + str(rsp.text)
         f.write(data)
         f.close()
 
