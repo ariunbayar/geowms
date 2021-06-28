@@ -136,7 +136,6 @@ export class LLCSettings extends Component {
             list_of_datas[idx].icon_state = true
             this.setState({list_of_datas})
         })
-        this.componentDidMount()
     }
 
     handleModalOpen() {
