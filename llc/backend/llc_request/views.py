@@ -487,7 +487,9 @@ def get_request_data(request, id):
     }
 
     file_qs = qs.file.file_path
-    file_data['name'] = file_qs.name or ''
+    file_name = file_qs.name or ''
+    file_name = file_name.split('/')
+    file_data['name'] = file_name[2]
     file_data['size'] = file_qs.size or ''
 
     if qs:
