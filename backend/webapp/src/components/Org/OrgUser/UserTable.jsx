@@ -3,26 +3,25 @@ import { PortalDataTable } from "@utils/DataTable/index"
 import Modal from '@utils/Modal/Modal'
 import { service } from '../service'
 import Loader from "@utils/Loader"
-import { render } from "react-dom"
-
 
 function GetPassword(values) {
     const user_detail = values.values
     return(
           <div className='p-0'>
-              {user_detail.is_user &&
+            {
+                user_detail.is_user
+                &&
                     <button
                         type="button"
                         className="btn btn-outline-primary"
                         onClick={() => values.getPass(values.values)}
                     >
-                    НУУЦ ҮГ СОЛИХ
+                        НУУЦ ҮГ СОЛИХ
                     </button>
-              }
+            }
           </div>
         )
     }
-
 
 export class UserTable extends Component {
 
