@@ -198,9 +198,15 @@ def llc_required(f):
                     content['register_number'] = content['llc_detail'][0]['company_register_number']
                     args = [content, *args]
                     try:
+                        f = open("demofile3.txt", "w")
+                        f.write("aldaagvi")
+                        f.close()
+
                         return f(request, *args, **kwargs)
-                    except Http404:
-                        pass
+                    except Exception as e:
+                        f = open("demofile4.txt", "w")
+                        f.write(str(e))
+                        f.close()
             else:
                 return HttpResponse('Unauthorized', status=401)
         wrap.__doc__ = f.__doc__
