@@ -1,3 +1,5 @@
+from llc.backend.llc_request.models import RequestFiles
+from llc.backend.llc_request.views import llc_request_list
 import requests
 from datetime import datetime
 from django.shortcuts import render
@@ -50,4 +52,17 @@ def get_tool_datas(request, content):
 
     return JsonResponse({
         'tool_datas': tool_datas
+    })
+
+@require_GET
+@ajax_required
+@login_required(login_url='/secure/login')
+@llc_required(lambda u: u)
+def get_count(request, content):
+    company_name = content.get('company_name')
+    states = [RequestFiles.STATE_NEW, RequestFiles.STATE_SENT]
+    request_count = RequestFiles.objects.filter(state__in=states, name__exact=company_name).count()
+    return JsonResponse({
+        'success': True,
+        'request_count': request_count,
     })
