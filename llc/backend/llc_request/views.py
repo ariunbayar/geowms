@@ -9,10 +9,7 @@ from django.conf import settings
 from django.db import connections
 from django.contrib.gis.geos import GEOSGeometry
 
-from django.contrib.auth.decorators import login_required
-
 from django.http import JsonResponse
-from django.http.response import StreamingHttpResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.gis.gdal import DataSource
 from django.core.mail import send_mail, get_connection
@@ -75,10 +72,9 @@ def _choice_kind_display(kind, item):
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
-@llc_required(lambda u: u)
 @ajax_required
-def llc_request_list(request, payload, content):
+@llc_required(lambda u: u)
+def llc_request_list(request, content, payload):
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
     start_index = 1
@@ -291,18 +287,20 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 
     if check_data_of_file and id:
         current_folder = file_name.split('.')[0]
-        check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
-        save_file_path = os.path.join(check_folder, current_folder)
-        folder_list = os.listdir(check_folder)
+        save_file_path = os.path.join(extract_path, current_folder)
+        folder_list = os.listdir(extract_path)
 
         if current_folder in folder_list:
-            get_files = os.listdir(check_folder + "/" + current_folder)
+            get_files = os.listdir(extract_path + "/" + current_folder)
             for file in get_files:
-                delete_file_path = os.path.join(check_folder, current_folder, file)
+                delete_file_path = os.path.join(extract_path, current_folder, file)
                 utils.remove_file(delete_file_path)
             utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
         check_data_of_file = False
     else:
+        pre_file = RequestFiles.objects.filter(pk=id).first()
+        if pre_file:
+            _delete_prev_files(pre_file)
         utils.save_file_to_storage(uploaded_file, file_path, file_name)
 
     if not check_data_of_file or not id:
@@ -315,7 +313,6 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 @ajax_required
 def save_request(request, content):
@@ -384,10 +381,10 @@ def save_request(request, content):
         request_file_data['tools'] = json_dumps(get_tools)
 
         if id:
-            if not check_data_of_file:
-                if file_name != 'blob':
-                    request_file_data['file_path'] = uploaded_file
-                    request_file_data['geo_id'] = org_data.geo_id
+
+            if file_name != 'blob':
+                request_file_data['file_path'] = uploaded_file
+                request_file_data['geo_id'] = org_data.geo_id
 
             if ulsiin_hemjeend:
                 request_file_data['geo_id'] = ulsiin_hemjeend
@@ -621,7 +618,6 @@ def _send_to_information_email (email):
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 @ajax_required
 def send_request(request, payload, content, id):
@@ -733,7 +729,6 @@ def get_search_field(request):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_count(request, content):
     company_name = content.get('company_name')

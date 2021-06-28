@@ -184,25 +184,25 @@ def llc_required(f):
             }
 
             if request.user.is_authenticated:
-                User = apps.get_model('geoportal_app', 'User')
-                is_sso_user = get_object_or_404(User, username=request.user, is_sso=True)
-                register = is_sso_user.register
+                user_data = request.user
+                if not user_data.is_sso:
+                    raise Http404
+
+                register = user_data.register
                 token_url = 'https://license.gazar.gov.mn/api/engineer/001/{register}'.format(
                     register=register
                 )
                 rsp = requests.get(token_url, headers=HEADERS, verify=False)
                 content = {}
+
                 if rsp.status_code == 200:
                     content['llc_detail'] = rsp.json()
                     content['company_name'] = content['llc_detail'][0]['company_name']
                     content['register_number'] = content['llc_detail'][0]['company_register_number']
                     args = [content, *args]
-                    try:
-                        return f(request, *args, **kwargs)
-                    except Http404:
-                        return HttpResponseBadRequest('{"success": false}')
-
-            return HttpResponseBadRequest('{"success": false}')
+                    return f(request, *args, **kwargs)
+            else:
+                return HttpResponse('Unauthorized', status=401)
         wrap.__doc__ = f.__doc__
         wrap.__name__ = f.__name__
 

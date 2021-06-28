@@ -467,7 +467,12 @@ def _cancel_prev_req(llc_changerequest_qs):
     if llc_changerequest_qs:
         geo_ids = list(llc_changerequest_qs.values_list('new_geo_id', flat=True))
         MDatas.objects.filter(geo_id__in=geo_ids).delete()
-        MGeoDatas.objects.filter(geo_id__in=geo_ids).delete()
+        qs_m_geo_datas = MGeoDatas.objects.filter(geo_id__in=geo_ids)
+        qs_fids = qs_m_geo_datas.values('feature_id').annotate(fid_count=Count('feature_id')).order_by('feature_id')
+
+        for feature in qs_fids:
+            refreshMaterializedView(feature['feature_id'])
+        qs_m_geo_datas.delete()
         _new_geo_id_to_null(llc_changerequest_qs)
 
     return True
@@ -1222,7 +1227,9 @@ def get_request_data(request, id):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_request_detail(request, id):
+
     llc_data = LLCRequest.objects.filter(pk=id).first()
+    company_name = llc_data.file.name
     features = []
     field = {}
     file_id = llc_data.file.id
@@ -1239,6 +1246,7 @@ def get_request_detail(request, id):
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
         field['selected_tools'] = json_load(qs.file.tools)
+    field['company_name'] = company_name
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),

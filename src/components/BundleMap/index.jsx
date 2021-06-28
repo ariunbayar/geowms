@@ -89,51 +89,51 @@ export default class InspireMap extends Component {
         this.layer_styles = {
             'MultiPolygon': new Style({
                 stroke: new Stroke({
-                color: 'black',
-                width: 2,
+                    color: 'black',
+                    width: 2,
                 }),
                 fill: new Fill({
-                color: 'rgba(162,174,187)',
+                    color: 'rgba(162, 174, 187)',
                 }),
             }),
             'Polygon': new Style({
                 stroke: new Stroke({
-                color: 'black',
-                width: 2,
+                    color: 'black',
+                    width: 2,
                 }),
                 fill: new Fill({
-                color: 'red',
+                    color: 'red',
                 }),
             }),
             'Point': new Style({
                 image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: 'green',
-                }),
+                    radius: 5,
+                    fill: new Fill({
+                        color: 'green',
+                    }),
                 }),
             }),
             'LineString': new Style({
                 stroke: new Stroke({
-                color: 'blue',
-                width: 2,
+                    color: 'blue',
+                    width: 2,
                 }),
             }),
             'MultiLineString': new Style({
                 stroke: new Stroke({
-                color: 'green',
-                width: 2,
+                    color: 'green',
+                    width: 2,
                 }),
             }),
             'MultiPoint': new Style({
                 image: new CircleStyle({
-                radius: 5,
-                fill: new Fill({
-                    color: '#F34213',
-                }),
+                    radius: 5,
+                    fill: new Fill({
+                        color: '#F34213',
+                    }),
                 }),
             }),
-            };
+        };
         this.marker = this.initMarker()
 
         this.handleToggle = this.handleToggle.bind(this)

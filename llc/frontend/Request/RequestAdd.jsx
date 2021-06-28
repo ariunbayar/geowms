@@ -57,7 +57,7 @@ class SubmitClass extends Component {
         form_datas.append('zahialagch', zahialagch)
         form_datas.append('ulsiin_hemjeend', this.props.nationwide ? this.props.nationwide: '' )
         form_datas.append('selected_tools', JSON.stringify({ selected_tools }))
-
+        this.props.values.enableLoader(true)
         service.saveRequest(form_datas).then(({ success, info }) => {
             this.props.values.handlePassValues(success, info)
         })
@@ -66,7 +66,6 @@ class SubmitClass extends Component {
     render() {
         var { values } = this.props
         const { agreed_submit } = this.state
-
         return (
             <Fragment>
                 {
@@ -144,6 +143,7 @@ export class RequestAdd extends Component {
         this.handleModalClose = this.handleModalClose.bind(this)
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.enableLoader = this.enableLoader.bind(this)
     }
 
     componentDidMount() {
@@ -244,6 +244,7 @@ export class RequestAdd extends Component {
     }
 
     handlePassValues(success, info, is_description) {
+        this.enableLoader(false)
         if(is_description) {
             this.modalChange(
                 '',
@@ -297,6 +298,9 @@ export class RequestAdd extends Component {
         })
         this.handleModalOpen()
     }
+    enableLoader(state){
+        this.setState({ is_loading: state })
+    }
 
     render (){
         const { id, info } = this.props.match.params
@@ -313,6 +317,7 @@ export class RequestAdd extends Component {
                         history={this.props.history}
                         info={info}
                         handleSelectModel={this.handleSelectModel}
+                        enableLoader={this.enableLoader}
                     />
                 </div>
                 <Modal
