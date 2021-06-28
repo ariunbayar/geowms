@@ -466,8 +466,13 @@ def _cancel_prev_req(llc_changerequest_qs):
     if llc_changerequest_qs:
         geo_ids = list(llc_changerequest_qs.values_list('new_geo_id', flat=True))
         MDatas.objects.filter(geo_id__in=geo_ids).delete()
-        MGeoDatas.objects.filter(geo_id__in=geo_ids).delete()
+        qs_m_geo_datas = MGeoDatas.objects.filter(geo_id__in=geo_ids)
+        feature_id = qs_m_geo_datas.first().feature_id if qs_m_geo_datas.first() else None
+        qs_m_geo_datas.delete()
+
         _new_geo_id_to_null(llc_changerequest_qs)
+        if feature_id:
+            refreshMaterializedView(feature_id)
 
     return True
 
