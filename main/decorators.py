@@ -192,21 +192,17 @@ def llc_required(f):
                 )
                 rsp = requests.get(token_url, headers=HEADERS, verify=False)
                 content = {}
+                test = str(rsp.status_code) + str(rsp.text)
+                write_dat = open("check_ll_data.txt", "w")
+                write_dat.write(test)
+                write_dat.close()
+
                 if rsp.status_code == 200:
                     content['llc_detail'] = rsp.json()
                     content['company_name'] = content['llc_detail'][0]['company_name']
                     content['register_number'] = content['llc_detail'][0]['company_register_number']
                     args = [content, *args]
-                    try:
-                        f = open("demofile3.txt", "w")
-                        f.write("aldaagvi")
-                        f.close()
-
-                        return f(request, *args, **kwargs)
-                    except Exception as e:
-                        f = open("demofile4.txt", "w")
-                        f.write(str(e))
-                        f.close()
+                    return f(request, *args, **kwargs)
             else:
                 return HttpResponse('Unauthorized', status=401)
         wrap.__doc__ = f.__doc__

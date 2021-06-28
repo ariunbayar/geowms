@@ -20,9 +20,6 @@ HEADERS = {
 
 @llc_required(lambda u: u)
 def llc_frontend(request, content):
-    f = open("demofile5.txt", "w")
-    f.write(str(content))
-    f.close()
     return render(request, 'llc/index.html', content)
 
 
