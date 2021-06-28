@@ -10,6 +10,7 @@ from django.db import connections, transaction
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import GEOSGeometry
+from django.db.models import Count
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
@@ -466,7 +467,12 @@ def _cancel_prev_req(llc_changerequest_qs):
     if llc_changerequest_qs:
         geo_ids = list(llc_changerequest_qs.values_list('new_geo_id', flat=True))
         MDatas.objects.filter(geo_id__in=geo_ids).delete()
-        MGeoDatas.objects.filter(geo_id__in=geo_ids).delete()
+        qs_m_geo_datas = MGeoDatas.objects.filter(geo_id__in=geo_ids)
+        qs_fids = qs_m_geo_datas.values('feature_id').annotate(fid_count=Count('feature_id')).order_by('feature_id')
+
+        for feature in qs_fids:
+            refreshMaterializedView(feature['feature_id'])
+        qs_m_geo_datas.delete()
         _new_geo_id_to_null(llc_changerequest_qs)
 
     return True
