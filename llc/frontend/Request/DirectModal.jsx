@@ -194,7 +194,7 @@ export default class RequestDetail extends Component {
                                         disabled={!info && disabled }
                                     >
                                         <option value=''>
-                                            {disabled ? mergejilten : " Илгээх мэргэжилтэнээ сонгоно уу"}
+                                            {mergejilten ? mergejilten : " Илгээх мэргэжилтэнээ сонгоно уу"}
                                         </option>
                                     {
                                         (emp_fields && emp_fields.length > 0)
