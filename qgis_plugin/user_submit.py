@@ -229,7 +229,7 @@ class UserSubmit:
 
     def submit(self, data, layer_name):
         try:
-            rsp = requests.post(self.submit_url + 'qgis-submit/', data=data)
+            rsp = requests.post(self.submit_url + 'qgis-submit/', data=data, verify=False)
             if rsp.json():
                 check = rsp.json()
                 if check['success']:
