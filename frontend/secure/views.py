@@ -69,10 +69,6 @@ def check_llc_user(user):
 
         if rsp.status_code == 200:
             if rsp.json():
-                f = open("demofile4.txt", "w")
-                data = str(rsp.json())
-                f.write(data)
-                f.close()
                 return True
     return False
 
