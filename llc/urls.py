@@ -8,7 +8,7 @@ urlpatterns = [
     path('', include(([
         path('', llc_views.llc_frontend, name='frontend'),
         path('get_tool_datas/', llc_views.get_tool_datas, name='get_tool_datas'),
-        path('llc_frontend_test/', llc_views.llc_frontend_test, name='frontend')
+        path('llc_frontend_test/', llc_views.llc_frontend_test, name='test-llc')
     ], 'llc'))),
 
     path('backend/', include(([
