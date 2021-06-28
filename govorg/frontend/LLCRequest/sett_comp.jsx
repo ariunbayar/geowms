@@ -221,13 +221,13 @@ export class LLCSettings extends Component {
                                             <td>
                                                 {
                                                     value.icon_state ?
-                                                    <a className='gp-text-primary fa fa-pencil-square-o' href="#"  onClick={(e) => this.handleProceed(value)}/>
+                                                    <a className='gp-text-primary fa fa-pencil-square-o' onClick={(e) => this.handleProceed(value)}/>
                                                     :
-                                                    <a className='gp-text-primary fa fa-floppy-o' href="#"  onClick={(e) => this.Save(value, idx)}/>
+                                                    <a className='gp-text-primary fa fa-floppy-o' onClick={(e) => this.Save(value, idx)}/>
                                                 }
                                             </td>
                                             <td>
-                                                <a className='gp-text-primary fa fa-commenting' href="#"  onClick={(e) => this.goLink(value)}/>
+                                                <a className='gp-text-primary fa fa-commenting' onClick={(e) => this.goLink(value)}/>
                                             </td>
                                         </tr>
                                         ): <tr><td>дата бүртгэлгүй байна</td></tr>
