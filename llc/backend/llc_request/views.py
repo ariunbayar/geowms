@@ -9,10 +9,7 @@ from django.conf import settings
 from django.db import connections
 from django.contrib.gis.geos import GEOSGeometry
 
-from django.contrib.auth.decorators import login_required
-
 from django.http import JsonResponse
-from django.http.response import StreamingHttpResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.gis.gdal import DataSource
 from django.core.mail import send_mail, get_connection
@@ -75,10 +72,9 @@ def _choice_kind_display(kind, item):
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
-@llc_required(lambda u: u)
 @ajax_required
-def llc_request_list(request, payload, content):
+@llc_required(lambda u: u)
+def llc_request_list(request, content, payload):
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
     start_index = 1
@@ -317,7 +313,6 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 @ajax_required
 def save_request(request, content):
@@ -623,7 +618,6 @@ def _send_to_information_email (email):
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 @ajax_required
 def send_request(request, payload, content, id):
@@ -735,7 +729,6 @@ def get_search_field(request):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_count(request, content):
     company_name = content.get('company_name')

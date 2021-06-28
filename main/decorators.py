@@ -200,9 +200,9 @@ def llc_required(f):
                     try:
                         return f(request, *args, **kwargs)
                     except Http404:
-                        return HttpResponseBadRequest('{"success": false}')
-
-            return HttpResponseBadRequest('{"success": false}')
+                        pass
+            else:
+                return HttpResponse('Unauthorized', status=401)
         wrap.__doc__ = f.__doc__
         wrap.__name__ = f.__name__
 
