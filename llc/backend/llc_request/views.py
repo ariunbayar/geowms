@@ -291,18 +291,20 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 
     if check_data_of_file and id:
         current_folder = file_name.split('.')[0]
-        check_folder = os.path.join(settings.MEDIA_ROOT, main_path)
-        save_file_path = os.path.join(check_folder, current_folder)
-        folder_list = os.listdir(check_folder)
+        save_file_path = os.path.join(extract_path, current_folder)
+        folder_list = os.listdir(extract_path)
 
         if current_folder in folder_list:
-            get_files = os.listdir(check_folder + "/" + current_folder)
+            get_files = os.listdir(extract_path + "/" + current_folder)
             for file in get_files:
-                delete_file_path = os.path.join(check_folder, current_folder, file)
+                delete_file_path = os.path.join(extract_path, current_folder, file)
                 utils.remove_file(delete_file_path)
             utils.save_file_to_storage(uploaded_file, save_file_path, uploaded_file.name)
         check_data_of_file = False
     else:
+        pre_file = RequestFiles.objects.filter(pk=id).first()
+        if pre_file:
+            _delete_prev_files(pre_file)
         utils.save_file_to_storage(uploaded_file, file_path, file_name)
 
     if not check_data_of_file or not id:
@@ -384,10 +386,10 @@ def save_request(request, content):
         request_file_data['tools'] = json_dumps(get_tools)
 
         if id:
-            if not check_data_of_file:
-                if file_name != 'blob':
-                    request_file_data['file_path'] = uploaded_file
-                    request_file_data['geo_id'] = org_data.geo_id
+
+            if file_name != 'blob':
+                request_file_data['file_path'] = uploaded_file
+                request_file_data['geo_id'] = org_data.geo_id
 
             if ulsiin_hemjeend:
                 request_file_data['geo_id'] = ulsiin_hemjeend
