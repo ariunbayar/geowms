@@ -734,6 +734,7 @@ def _get_employee(employee, filter_from_user):
         position = emp_obj.position.name
         created_at = emp_obj.created_at.strftime('%Y-%m-%d')
         updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
+        is_user = employee.is_user
     else:
         user = User.objects.filter(pk=employee.user_id).first()
         id = user.id
@@ -746,6 +747,7 @@ def _get_employee(employee, filter_from_user):
         position = employee.position.name
         created_at = employee.created_at.strftime('%Y-%m-%d')
         updated_at = employee.updated_at.strftime('%Y-%m-%d')
+        is_user = user.is_user
 
     employee_detail = {
         'id': id,
@@ -757,7 +759,8 @@ def _get_employee(employee, filter_from_user):
         'is_admin': is_admin,
         'position': position,
         'created_at': created_at,
-        'updated_at': updated_at
+        'updated_at': updated_at,
+        "is_user": is_user
     }
 
     return employee_detail
