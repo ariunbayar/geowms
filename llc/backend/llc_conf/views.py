@@ -24,6 +24,14 @@ def llc_frontend(request, content):
     return render(request, 'llc/index.html', content)
 
 
+#llc-ийг шууд дуудаж үзэх
+def llc_frontend_test(request):
+    content = {
+        'dsfs': ''
+    }
+    return render(request, 'llc/dan_user.html', content)
+
+
 @require_GET
 @ajax_required
 @login_required(login_url='/secure/login/')
