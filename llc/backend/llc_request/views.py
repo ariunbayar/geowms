@@ -71,6 +71,14 @@ def _choice_kind_display(kind, item):
     return display_name
 
 
+def _name_display(id, items):
+    name = ''
+    request_form = RequestForm.objects.filter(file_id=id).first()
+    if request_form:
+        name = request_form.client_org
+    return name
+
+
 @require_POST
 @ajax_required
 @llc_required(lambda u: u)
@@ -82,7 +90,8 @@ def llc_request_list(request, content, payload):
         оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
         хувьсах_талбарууд = [
             {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
-            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"}
+            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
+            {'field': 'id', 'action': _name_display, "new_field": "client_org"}
         ]
 
         datatable = Datatable(
@@ -100,6 +109,7 @@ def llc_request_list(request, content, payload):
             'total_page': total_page,
             'start_index': start_index,
         }
+
     else:
         rsp = {
             'items': [],
