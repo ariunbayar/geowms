@@ -6,6 +6,7 @@ from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, Value
 from django.contrib.postgres.search import SearchVector
+from django.db.models import Count
 
 from geoportal_app.models import User
 from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
@@ -20,6 +21,7 @@ from backend.inspire.models import (
     EmpPerm,
     EmpRoleInspire,
     EmpPermInspire,
+    LFeatureConfigs,
     LFeatures,
     LPackages,
     LProperties,
@@ -320,6 +322,43 @@ def _get_point_for_db(coordinate):
     return point
 
 
+def _check_local_id(emp_perm, user):
+    emp_local_perms = []
+    emp_perm_inspire = emp_perm.empperminspire_set
+    geom_perm_inspire = emp_perm_inspire.filter(geom=True)
+    has_geom_qs = geom_perm_inspire.filter(perm_kind__in=[EmpPermInspire.PERM_UPDATE, EmpPermInspire.PERM_REMOVE])
+    if has_geom_qs:
+        property_local = LProperties.objects.filter(property_code__iexact='localId').first()
+        if property_local:
+            create_local_perms = [EmpPermInspire.PERM_VIEW, EmpPermInspire.PERM_UPDATE, EmpPermInspire.PERM_REMOVE]
+            has_geom_qs = has_geom_qs.annotate(f_count=Count('feature_id'))
+            property_id = property_local.property_id
+            for emp_perm_qs in has_geom_qs:
+                feature_id = emp_perm_qs.feature_id
+                gov_perm_inspire_id = emp_perm_qs.gov_perm_inspire.id
+                data_type_id = emp_perm_qs.data_type_id
+                emp_perm_inspire = emp_perm_inspire.filter(geom=False)
+                emp_perm_inspire = emp_perm_inspire.filter(property_id=property_id)
+                emp_perm_inspire = emp_perm_inspire.filter(feature_id=feature_id)
+                emp_perm_inspire = emp_perm_inspire.filter(data_type_id=data_type_id)
+                if not emp_perm_inspire:
+                    for perm_kind in create_local_perms:
+                        emp_perm_inspire_dict = dict()
+                        emp_perm_inspire_dict['gov_perm_inspire_id'] = gov_perm_inspire_id
+                        emp_perm_inspire_dict['emp_perm'] = emp_perm
+                        emp_perm_inspire_dict['perm_kind'] = perm_kind
+                        emp_perm_inspire_dict['feature_id'] = feature_id
+                        emp_perm_inspire_dict['data_type_id'] = data_type_id
+                        emp_perm_inspire_dict['property_id'] = property_id
+                        emp_perm_inspire_dict['geom'] = False
+                        emp_perm_inspire_dict['created_by'] = user
+                        emp_perm_inspire_dict['updated_by'] = user
+                        obj = EmpPermInspire(**emp_perm_inspire_dict)
+                        emp_local_perms.append(obj)
+    if emp_local_perms:
+        EmpPermInspire.objects.bulk_create(emp_local_perms)
+
+
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -327,7 +366,6 @@ def create(request, payload):
 
     user_detail = payload.get('user_detail')
     roles = payload.get('roles')
-
     address = payload.get('address')
     level_1 = address.get('level_1')
     level_2 = address.get('level_2')
@@ -389,10 +427,12 @@ def create(request, payload):
             for role in roles:
                 emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
                 obj_array.append(emp_perm_inspire)
+
             EmpPermInspire.objects.bulk_create(obj_array)
 
             if is_user:
                 utils.send_approve_email(user)
+            _check_local_id(emp_perm, user)
 
         rsp = {
             'success': True,
@@ -478,6 +518,7 @@ def update(request, payload, pk):
                     for perm in add_perms:
                         emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
                         obj_array.append(emp_perm_inspire)
+
                     EmpPermInspire.objects.bulk_create(obj_array)
 
                 address_qs = EmployeeAddress.objects
@@ -498,6 +539,8 @@ def update(request, payload, pk):
                 if is_user:
                     utils.send_approve_email(user)
 
+                _check_local_id(emp_perm, user)
+
             return JsonResponse({
                 'success': True,
                 'info': 'Амжилттай хадгаллаа'
@@ -507,6 +550,7 @@ def update(request, payload, pk):
                 'success': False,
                 'errors': {**form.errors, **errors},
             })
+
     return JsonResponse({
         'success': False,
         'info': 'Хадгалахад алдаа гарлаа'
