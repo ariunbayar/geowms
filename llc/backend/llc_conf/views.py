@@ -3,7 +3,6 @@ from datetime import datetime
 from django.shortcuts import render
 from django.http import JsonResponse
 from main.decorators import ajax_required, llc_required
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import get_object_or_404
 from geoportal_app.models import User
@@ -18,15 +17,22 @@ HEADERS = {
     'Content-type': 'application/json',
 }
 
-@login_required(login_url='/secure/login/')
+
 @llc_required(lambda u: u)
 def llc_frontend(request, content):
     return render(request, 'llc/index.html', content)
 
 
+#llc-ийг шууд дуудаж үзэх
+def llc_frontend_test(request):
+    content = {
+        'dsfs': ''
+    }
+    return render(request, 'llc/dan_user.html', content)
+
+
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_tool_datas(request, content):
     regis_number = content.get('register_number')
