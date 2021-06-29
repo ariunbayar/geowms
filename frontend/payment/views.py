@@ -1676,7 +1676,7 @@ def get_popup_info(request, payload):
         content = content.decode()
         content = utils.json_load(content)
         features = content['features']
-        for feature in features[:5]:
+        for feature in features:
             ps = feature['properties']
             ps['geo_id'] = ps['inspire_id']
             del ps['inspire_id']
