@@ -9,7 +9,8 @@ export const service = {
     getInspireTree,
     getChoices,
     Save,
-    getLLCDetail
+    getLLCDetail,
+    geomType
 }
 
 const prefix = '/gov/api/llc-request'
@@ -84,4 +85,12 @@ function Save(values) {
         body: JSON.stringify({ values }),
     }
     return fetch(`${prefix}/inspire-save/`, opts).then(handleResponse)
+}
+
+function geomType(select) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({ select }),
+    }
+    return fetch(`${prefix}/geom-type/`, opts).then(handleResponse)
 }

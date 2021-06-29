@@ -1495,3 +1495,24 @@ def get_search_choices(request):
         'success': True,
         'search_field': search_field,
     })
+
+
+@require_POST
+@ajax_required
+def geom_type(request, payload):
+    select = payload.get('select')
+    geom_type = {}
+    m_data = MGeoDatas.objects.filter(feature_id=select).first()
+    if m_data:
+        geom_type = m_data.geo_data.geom_type
+        if 'Multi' in geom_type:
+            rsp = {
+                'geom_type': geom_type
+            }
+        else:
+            multi_geom_type = 'Multi' + geom_type
+            rsp = {
+                'geom_type': multi_geom_type
+            }
+
+    return JsonResponse(rsp)

@@ -117,7 +117,7 @@ export default class RequestDetail extends Component {
                                             className={'form-control col-md-12 mb-3  ml-1'}
                                             type="text"
                                             disabled={true}
-                                            value={aimag_name}
+                                            value={aimag_name || ''}
                                         />
                                 </>
                         }
@@ -130,7 +130,7 @@ export default class RequestDetail extends Component {
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 disabled={this.props.disabled}
-                                value={zahialagch}
+                                value={zahialagch || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
@@ -143,7 +143,7 @@ export default class RequestDetail extends Component {
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 disabled={this.props.disabled}
-                                value={project_name}
+                                value={project_name || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
@@ -156,7 +156,7 @@ export default class RequestDetail extends Component {
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 disabled={this.props.disabled}
-                                value={object_type}
+                                value={object_type || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
@@ -169,22 +169,22 @@ export default class RequestDetail extends Component {
                                 className="form-control"
                                 disabled={this.state.disabled}
                                 disabled={this.props.disabled}
-                                value={object_count}
+                                value={object_count || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
                         <div className="form-group col-md-12 ">
-                                <SelectField
-                                    state_name= "hurungu_oruulalt"
-                                    label="Хөрөнгө оруулалтын байдал"
-                                    option_name="name"
-                                    option_key="id"
-                                    className="col-md-12 px-0 mx-0"
-                                    data_list={investment_status}
-                                    default_value={hurungu_oruulalt}
-                                    default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
-                                    handleSelectField={this.props.handleOnChange}
-                                />
+                            <SelectField
+                                state_name= "hurungu_oruulalt"
+                                label="Хөрөнгө оруулалтын байдал"
+                                option_name="name"
+                                option_key="id"
+                                className="col-md-12 px-0 mx-0"
+                                data_list={investment_status}
+                                default_value={hurungu_oruulalt}
+                                default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
+                                handleSelectField={this.props.handleOnChange}
+                            />
                             </div>
                                 {
                             info &&
@@ -214,8 +214,8 @@ export default class RequestDetail extends Component {
                                     }
                                     </select>
                             </div>
-                            }
-                            {
+                        }
+                        {
                             desc_info
                             &&
                                 <div className="form-group col-md-12">
@@ -225,11 +225,11 @@ export default class RequestDetail extends Component {
                                         name="description"
                                         id="description-id"
                                         className="form-control"
-                                        value={desc}
+                                        value={desc || ''}
                                         disabled={this.state.disabled}
                                     />
                                 </div>
-                            }
+                        }
                         <UsedTools
                             values={this.props}
                         />

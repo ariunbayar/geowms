@@ -80,7 +80,7 @@ export class LLCSettings extends Component {
                 list_of_datas[index_of_list]['feature'].list = []
             }
             else {
-                data_list['model_status'] = false
+                data_list['model_status'] = true
             }
 
             if (! selected_value) {
@@ -104,12 +104,12 @@ export class LLCSettings extends Component {
         this.setState({ ...data_list })
     }
 
-    getInspireTree(){
+    getInspireTree() {
         return service.getInspireTree()
     }
 
     handleProceed(values) {
-        this.setState({model_status: true, selected_values: values})
+        this.setState({ model_status: true, selected_values: values })
     }
 
     closeModel() {
@@ -119,7 +119,7 @@ export class LLCSettings extends Component {
     componentDidMount() {
         const {id} = this.props.match.params
 
-        service.getFilesDetal(id).then(async ({list_of_datas}) => {
+        service.getFilesDetal(id).then(async ({ list_of_datas }) => {
             const { themes, packages, features } = await service.getInspireTree()
             list_of_datas.map((list_of_data, idx) => {
                 if (list_of_data.theme.id) {
@@ -133,7 +133,7 @@ export class LLCSettings extends Component {
         })
     }
 
-    Save(value, idx){
+    Save(value, idx) {
         var list_of_datas = this.state.list_of_datas
         service.Save(value).then(({ success }) => {
             list_of_datas[idx].icon_state = true
@@ -174,8 +174,8 @@ export class LLCSettings extends Component {
         global.MODAL(modal)
     }
 
-    render () {
-        const { list_of_datas, model_status, selected_values, save_icon} = this.state
+    render() {
+        const { list_of_datas, model_status } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -225,9 +225,9 @@ export class LLCSettings extends Component {
                                                 {
                                                     value.icon_state
                                                     ?
-                                                        <a className="gp-text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
+                                                        <a className="text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
                                                     :
-                                                        <a className='gp-text-primary fa fa-floppy-o' role="button" onClick={(e) => this.Save(value, idx)}/>
+                                                        <a className='text-success fa fa-floppy-o' role="button" onClick={(e) => this.Save(value, idx)}/>
                                                 }
                                             </td>
                                             <td>
