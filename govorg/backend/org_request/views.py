@@ -1102,8 +1102,10 @@ def _get_kind(kind, item):
 
 def _get_file_name(kind, item):
     file = RequestFiles.objects.filter(id=item['file_id']).first()
-    if file :
-        return file.file_path.url
+    file_path = ''
+    if file.file_path:
+        file_path = file.file_path.url
+    return file_path
 
 
 def _get_ann_name(kind, item):
