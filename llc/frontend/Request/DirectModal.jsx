@@ -185,33 +185,24 @@ export default class RequestDetail extends Component {
                                 {
                             (info || disabled) &&
                                 <div className="form-group col-md-12">
-                                    <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
-                                    <select
-                                        className="form-control"
-                                        name="mergejilten"
-                                        id="mergejilten"
-                                        onChange={(e) => {this.props.handleOnChange(e)}}
-                                        value={default_mergejilten}
-                                        disabled={!info && disabled }
-                                    >
-                                        <option value=''>
-                                            {mergejilten ? mergejilten : " Илгээх мэргэжилтэнээ сонгоно уу"}
-                                        </option>
                                     {
-                                        (emp_fields && emp_fields.length > 0)
-                                        ?
-                                                emp_fields.map((value, idx) => (
-                                                    <optgroup
-                                                        id={idx}
-                                                        label={value.org_name}
-                                                    >
-                                                        <option value={value.user_id}>{value.first_name}</option>
-                                                    </optgroup>
-                                                ))
-                                            :
-                                                null
+                                        (emp_fields && emp_fields.length > 0) &&
+                                            <SelectField
+                                                state_name= "choose_proffessional"
+                                                label="Мэргэжилтэн сонгох"
+                                                name_key='org_name'
+                                                opt_key='employees'
+                                                option_name="first_name"
+                                                option_key="mail"
+                                                className="col-md-12 px-0 mx-0"
+                                                data_list={emp_fields}
+                                                display_mode={true}
+                                                option_name_2='mail'
+                                                default_value={default_mergejilten}
+                                                default_text={"----   Илгээх мэргэжилтэнээ сонгоно уу  ----"}
+                                                handleSelectField={this.props.handleOnChange}
+                                            />
                                     }
-                                    </select>
                             </div>
                             }
                             {

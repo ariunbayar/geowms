@@ -54,7 +54,7 @@ export default class SelectField extends Component {
             if (name_key){
                 row[opt_key].map((data, idx) => {
                     if(selection_value == data[option_key]){
-                        this.props.handleSelectField(state_name, row[opt_key], e)
+                        this.props.handleSelectField(state_name, data, e)
                     }
                 })
             }
@@ -71,7 +71,7 @@ export default class SelectField extends Component {
         const { default_value, label,
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
-                option_text, disabled
+                option_text, disabled, display_mode, option_name_2
         } = this.props
         const state = this.state
         let title = label ? label : ''
@@ -97,12 +97,12 @@ export default class SelectField extends Component {
                                 value={default_value}
                             >
                             {
-                                    OptionComp (data[opt_key], option_key, option_name, option_text)
+                                    OptionComp (data[opt_key], option_key, option_name,option_name_2, option_text, display_mode)
                             }
                             </optgroup>
                         )
                     :
-                        OptionComp (data_list, option_key, option_name, option_text)
+                        OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
                 }
                 </select>
                 </div>
@@ -111,7 +111,7 @@ export default class SelectField extends Component {
 }
 
 
-function OptionComp (options_data,  option_key, option_name, option_text){
+function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode){
     const options =
         (options_data && options_data.length >0)
         &&
@@ -122,7 +122,20 @@ function OptionComp (options_data,  option_key, option_name, option_text){
                     value={row[option_key]}
 
                 >
-                    {option_text ? row[option_text] : row[option_name]}
+                    {
+                        option_text
+
+                        ?
+                            row[option_text]
+
+                        :
+                            display_mode
+
+                            ?
+                                row[option_name] + "   (   " + row[option_key] + "   )   "
+                            :
+                                row[option_name]
+                    }
                 </option>
             )
     return options

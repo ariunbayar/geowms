@@ -497,12 +497,13 @@ def get_request_data(request, id):
 
     file_qs = qs.file.file_path
     file_name = file_qs.name or ''
-    file_name = file_name.split('/')
-    file_data['name'] = file_name[2]
-    file_data['size'] = file_qs.size or ''
+    if file_name:
+        file_name = file_name.split('/')
+        file_data['name'] = file_name[2]
+        file_data['size'] = file_qs.size or ''
 
     if qs:
-        file_name = str(qs.file.file_path).split('/')[1]
+        file_name = str(qs.file.file_path).split('/')[1] if qs.file.file_path else ''
         field['client_org'] = qs.client_org
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
@@ -525,21 +526,29 @@ def get_request_data(request, id):
         'aimag_geom': aimag_geom
     })
 
+
 def _get_employees(geo_id):
     emp_fields = list()
-    emp_detail = dict()
-    get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
-    position_mergejilten = POSITION_MERGEJILTEN.filter(org=get_org).first()
-    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position_mergejilten.id)
-    if get_employees:
-        for emp in get_employees:
-            get_name = User.objects.filter(pk=emp.user_id).first()
-            emp_detail['org_name'] = get_org.name
-            emp_detail['first_name'] = get_name.first_name
-            emp_detail['mail'] = get_name.email
-            emp_detail['user_id'] = get_name.id
-            emp_fields.append(emp_detail)
-        return emp_fields
+    employees = list()
+
+    get_org = Org.objects.filter(level=2, geo_id=geo_id)
+    for org in get_org:
+        emp_detail = dict()
+        emp_detail['org_name'] = org.name
+        position_mergejilten = POSITION_MERGEJILTEN.filter(org=org).first()
+        get_employees = Employee.objects.filter(org_id=org.id, position_id=position_mergejilten.id)
+        if get_employees:
+            for emp in get_employees:
+                detail = dict()
+                users = User.objects.filter(pk=emp.user_id).first()
+                detail['first_name'] = users.first_name
+                detail['mail'] = users.email
+                detail['user_id'] = users.id
+                employees.append(detail)
+            emp_detail['employees'] = employees
+        emp_fields.append(emp_detail)
+
+    return emp_fields
 
 
 def _get_shapes_geoms(shape_geometry):

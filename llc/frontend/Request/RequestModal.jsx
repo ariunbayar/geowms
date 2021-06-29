@@ -174,8 +174,8 @@ class SendModal extends Component{
         })
     }
 
-    handleOnChange(e) {
-        this.setState({[e.target.name]: e.target.value})
+    handleOnChange(state_name, selection, e) {
+        this.setState({mergejilten: selection.user_id})
     }
 
     render (){
