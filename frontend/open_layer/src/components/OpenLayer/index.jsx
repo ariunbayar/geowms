@@ -69,13 +69,15 @@ export class OpenLayerPage extends Component {
                                         open_layer && open_layer.length > 0
                                         ?
                                             <div id="owl-demo" className="owl-carousel owl-theme">
-                                                open_layer.map((bundle_obj, idx) =>
-                                                    <div className="item" key={idx} onClick={() => this.setBundle(bundle_obj)}>
-                                                        <img src={bundle_obj.icon} className="ahha" style={{height: "80px"}}></img>
-                                                        <h6 className={bundle_obj.id == bundle.id ? 'text-primary' : ''}>{bundle_obj.name}</h6>
-                                                        {bundle_obj.id == bundle.id && <hr className="bg-primary"></hr>}
-                                                    </div>
-                                                )
+                                                {
+                                                    open_layer.map((bundle_obj, idx) =>
+                                                        <div className="item" key={idx} onClick={() => this.setBundle(bundle_obj)}>
+                                                            <img src={bundle_obj.icon} className="ahha" style={{height: "80px"}}></img>
+                                                            <h6 className={bundle_obj.id == bundle.id ? 'text-primary' : ''}>{bundle_obj.name}</h6>
+                                                            {bundle_obj.id == bundle.id && <hr className="bg-primary"></hr>}
+                                                        </div>
+                                                    )
+                                                }
                                             </div>
                                         :
                                             <div className="col-12 text-center">
