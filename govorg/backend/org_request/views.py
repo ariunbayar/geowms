@@ -10,6 +10,7 @@ from django.db import connections, transaction
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import GEOSGeometry
+from django.db.models import Count
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
@@ -466,7 +467,12 @@ def _cancel_prev_req(llc_changerequest_qs):
     if llc_changerequest_qs:
         geo_ids = list(llc_changerequest_qs.values_list('new_geo_id', flat=True))
         MDatas.objects.filter(geo_id__in=geo_ids).delete()
-        MGeoDatas.objects.filter(geo_id__in=geo_ids).delete()
+        qs_m_geo_datas = MGeoDatas.objects.filter(geo_id__in=geo_ids)
+        qs_fids = qs_m_geo_datas.values('feature_id').annotate(fid_count=Count('feature_id')).order_by('feature_id')
+
+        for feature in qs_fids:
+            refreshMaterializedView(feature['feature_id'])
+        qs_m_geo_datas.delete()
         _new_geo_id_to_null(llc_changerequest_qs)
 
     return True
@@ -988,8 +994,6 @@ def request_approve(request, payload):
                             'form_json': form_json,
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
-                        qs_m_datas = MDatas.objects.filter(geo_id=old_geo_id)
-                        # qs_m_datas.delete()
                         success = _request_to_m(request_datas)
                         _insert_data_another_table(request_datas, old_geo_id, 'update')
 
@@ -1223,7 +1227,9 @@ def get_request_data(request, id):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_request_detail(request, id):
+
     llc_data = LLCRequest.objects.filter(pk=id).first()
+    company_name = llc_data.file.name
     features = []
     field = {}
     file_id = llc_data.file.id
@@ -1240,6 +1246,7 @@ def get_request_detail(request, id):
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
         field['selected_tools'] = json_load(qs.file.tools)
+    field['company_name'] = company_name
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -1361,21 +1368,36 @@ def _check_and_make_form_json(feature_id, values):
     return form_json_list
 
 
+def _has_overlap(request_file_shapes):
+    qs_fids = request_file_shapes.values('feature_id')
+    qs_fids = qs_fids.annotate(fid_count=Count('feature_id')).order_by('feature_id')
+    qs_fids = qs_fids.filter(fid_count__gt=1)
+    if qs_fids:
+        return True
+    return False
+
+
 @require_GET
 @ajax_required
 def llc_request_approve(request, request_id):
 
     employee = get_object_or_404(Employee, user=request.user)
     llc_request = get_object_or_404(LLCRequest, id=request_id)
-
-    request_file_shape_qs = RequestFilesShape.objects
-    request_file_shapes = request_file_shape_qs.filter(files_id=llc_request.file.id)
+    request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
 
     if not request_file_shapes:
         rsp = {
             'success': False,
-            'info': 'Файл хоосон байна'
+            'error': 'Файл хоосон байна'
+        }
+        return JsonResponse(rsp)
+
+    has_overlap = _has_overlap(request_file_shapes)
+    if has_overlap:
+        rsp = {
+            'success': False,
+            'error': 'Файлуудын "feature" давхцаж байна!!!. Давхцах ёстой "feature" оруулах гэж байгаа бол нэг файл болгоно уу!!!'
         }
         return JsonResponse(rsp)
 
@@ -1428,7 +1450,7 @@ def llc_request_approve(request, request_id):
 
     rsp = {
         'success': True,
-        'info': 'Амжилттай хүсэлт үүслээ'
+        'data': 'Амжилттай хүсэлт үүслээ'
     }
     return JsonResponse(rsp)
 

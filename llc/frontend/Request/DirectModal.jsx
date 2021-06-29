@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import Loader from "@utils/Loader"
 import SelectField from '@utils/Tools/Form/select_field'
+import FileUpload from '@utils/Tools/FileUpload'
 
 import {LLCMap} from '../LLCMap'
 import UsedTools from './select_tools'
@@ -79,8 +80,8 @@ export default class RequestDetail extends Component {
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             project_name, vector_datas, id,
-            file_name, info, state, desc_info,
-            aimag_name, aimag_geom, desc, emp_fields, mergejilten,
+            info, desc_info, mergejilten,
+            aimag_name, aimag_geom, desc, emp_fields,
         } = this.props
         var { investment_status, disabled } = this.state
         var default_mergejilten = ''
@@ -234,30 +235,15 @@ export default class RequestDetail extends Component {
                         {
                             !info
                             ?
-                                <div className={`form-group`}>
-                                    <label htmlFor='choose' className="col-md-12">Орон зайн мэдээлэл</label>
-                                    <label
-                                        htmlFor="choose-file"
-                                        id="choose"
-                                        className={`custom-file-upload col-md-6 text-center ${!file_name  ? "border-danger" : ''}`}
-                                        id="choose-file-label"
-                                        data-toggle="toolpit"
-                                        data-placement="top"
-                                        title={!file_name ? 'файл сонгогдоогүй байна ' : file_name}
-                                    >
-                                        файл оруулах
-                                    </label>
-                                    <input type="file" accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
-                                        name="uploadDocument"
-                                        type="file"
-                                        id="choose-file"
-                                        name='files'
-                                        onChange={(e) => this.props.handleOnChange(e)}
-                                        style={{display: 'none'}}
+                                <div className="form-group col-md-12 ml-2">
+                                    <label >Орон зайн мэдээлэл</label>
+                                    <FileUpload
+                                        {...this.props}
+                                        className="mt-2"
+                                        default_text="Файл оруулна уу"
+                                        getFile={this.props.handleOnChange}
+                                        accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                                     />
-                                    {
-                                        file_name && <small className="col-md-5 ml-2">{file_name}</small>
-                                    }
                                 </div>
                             :
                                 null

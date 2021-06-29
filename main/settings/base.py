@@ -117,6 +117,8 @@ JWT_AUTH = {
 
 USER_AGENTS_CACHE = 'default'
 
+SESSION_SAVE_EVERY_REQUEST = True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
