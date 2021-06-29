@@ -95,36 +95,36 @@ class ActionClass extends Component {
             const {url, is_loading } = this.state
             return (
                     <div className='row ml-2 my-4'>
-                            <p className="btn btn-secondary">
-                                <i
-                                    className="fa fa-angle-double-left"
-                                    onClick ={()=> values.closeRequestMap()}
+                        <p className="btn btn-secondary">
+                            <i
+                                className="fa fa-angle-double-left"
+                                onClick ={()=> values.closeRequestMap()}
 
-                                >
-                                    Буцах
-                                </i>
-                            </p>
-                            &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-
-                            <p
-                                className="btn btn-primary"
-                                onClick ={()=> this.handleModalOpen()}
                             >
-                                <i className="fa"> Хүсэлт илгээх</i>
-                            </p>
-                        <Modal
-                            modal_status={ this.state.modal_status }
-                            modal_icon={ this.state.modal_icon }
-                            modal_bg={ this.state.modal_bg }
-                            icon_color={ this.state.icon_color }
-                            title={ this.state.title }
-                            text={ this.state.text }
-                            has_button={ this.state.has_button }
-                            actionNameBack={ this.state.actionNameBack }
-                            actionNameDelete={ this.state.actionNameDelete }
-                            modalAction={ this.handleSubmit}
-                            modalClose={ this.modalClose}
-                        />
+                                Буцах
+                            </i>
+                        </p>
+                        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
+                        <p
+                            className="btn btn-primary"
+                            onClick ={()=> this.handleModalOpen()}
+                        >
+                            <i className="fa"> Хүсэлт илгээх</i>
+                        </p>
+                    <Modal
+                        modal_status={ this.state.modal_status }
+                        modal_icon={ this.state.modal_icon }
+                        modal_bg={ this.state.modal_bg }
+                        icon_color={ this.state.icon_color }
+                        title={ this.state.title }
+                        text={ this.state.text }
+                        has_button={ this.state.has_button }
+                        actionNameBack={ this.state.actionNameBack }
+                        actionNameDelete={ this.state.actionNameDelete }
+                        modalAction={ this.handleSubmit}
+                        modalClose={ this.modalClose}
+                    />
                     </div>
             )
         }
@@ -166,7 +166,7 @@ class SendModal extends Component{
                     vector_datas,
                     aimag_name,
                     aimag_geom,
-                    emp_fields: emp_fields,
+                    emp_fields,
                     is_loading: false
                 })
             }

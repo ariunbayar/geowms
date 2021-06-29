@@ -446,11 +446,15 @@ def get_request_data(request, id):
     features = []
     field = {}
     qs = RequestForm.objects.filter(file_id=id).first()
+    request_file = RequestFiles.objects.filter(pk=id).first()
+    requested_employee = request_file.requested_employee
+
     file_data = {
         'name': '',
         'size': '',
         'type': 'application/vnd.rar'
     }
+
     field = dict()
     aimag_name = ''
     aimag_geom = []
@@ -460,7 +464,7 @@ def get_request_data(request, id):
     qs = qs.first()
     geo_id = qs.file.geo_id
     mdata_qs = MDatas.objects.filter(geo_id=geo_id)
-    emp_fields = _get_employees(geo_id, id)
+    emp_fields = _get_employees(geo_id)
     if mdata_qs:
         if geo_id != '496':
             property_id = 30101104
@@ -502,6 +506,7 @@ def get_request_data(request, id):
         field['kind'] = qs.file.get_kind_display()
         field['desc'] = qs.file.description
         field['geo_id'] = qs.file.geo_id
+        field['selected_user'] = requested_employee
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -511,33 +516,21 @@ def get_request_data(request, id):
         'aimag_geom': aimag_geom
     })
 
-
-def _get_employees(geo_id, id):
-    request_file = RequestFiles.objects.filter(pk=id).first()
-    requested_employee = request_file.requested_employee
+def _get_employees(geo_id):
     emp_fields = list()
     emp_detail = dict()
-    user_qs =User.objects
     get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
     position_mergejilten = POSITION_MERGEJILTEN.filter(org=get_org).first()
     get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position_mergejilten.id)
-    if requested_employee:
-        user_id = requested_employee
-        get_name = user_qs.filter(pk=user_id).first()
-        org_name = get_org.name
-        first_name = get_name.first_name
-        emp_detail['org_name'] = org_name
-        emp_detail['first_name'] = org_name + '  --  ' + first_name
-        emp_fields = emp_detail
-    else:
+    if get_employees:
         for emp in get_employees:
-            get_name = user_qs.filter(pk=emp.user_id).first()
+            get_name = User.objects.filter(pk=emp.user_id).first()
             emp_detail['org_name'] = get_org.name
             emp_detail['first_name'] = get_name.first_name
             emp_detail['mail'] = get_name.email
             emp_detail['user_id'] = get_name.id
             emp_fields.append(emp_detail)
-    return emp_fields
+        return emp_fields
 
 
 def _get_shapes_geoms(shape_geometry):
