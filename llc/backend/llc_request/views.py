@@ -9,10 +9,7 @@ from django.conf import settings
 from django.db import connections
 from django.contrib.gis.geos import GEOSGeometry
 
-from django.contrib.auth.decorators import login_required
-
 from django.http import JsonResponse
-from django.http.response import StreamingHttpResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.gis.gdal import DataSource
 from django.core.mail import send_mail, get_connection
@@ -74,11 +71,18 @@ def _choice_kind_display(kind, item):
     return display_name
 
 
+def _name_display(id, items):
+    name = ''
+    request_form = RequestForm.objects.filter(file_id=id).first()
+    if request_form:
+        name = request_form.client_org
+    return name
+
+
 @require_POST
-@login_required(login_url='/secure/login/')
-@llc_required(lambda u: u)
 @ajax_required
-def llc_request_list(request, payload, content):
+@llc_required(lambda u: u)
+def llc_request_list(request, content, payload):
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
     start_index = 1
@@ -86,7 +90,8 @@ def llc_request_list(request, payload, content):
         оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
         хувьсах_талбарууд = [
             {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
-            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"}
+            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
+            {'field': 'id', 'action': _name_display, "new_field": "client_org"}
         ]
 
         datatable = Datatable(
@@ -104,6 +109,7 @@ def llc_request_list(request, payload, content):
             'total_page': total_page,
             'start_index': start_index,
         }
+
     else:
         rsp = {
             'items': [],
@@ -317,7 +323,6 @@ def _request_file(id, uploaded_file, check_data_of_file, file_name, main_path, f
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 @ajax_required
 def save_request(request, content):
@@ -487,7 +492,9 @@ def get_request_data(request, id):
     }
 
     file_qs = qs.file.file_path
-    file_data['name'] = file_qs.name or ''
+    file_name = file_qs.name or ''
+    file_name = file_name.split('/')
+    file_data['name'] = file_name[2]
     file_data['size'] = file_qs.size or ''
 
     if qs:
@@ -623,7 +630,6 @@ def _send_to_information_email (email):
 
 
 @require_POST
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 @ajax_required
 def send_request(request, payload, content, id):
@@ -735,7 +741,6 @@ def get_search_field(request):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_count(request, content):
     company_name = content.get('company_name')

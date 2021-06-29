@@ -117,7 +117,7 @@ JWT_AUTH = {
 
 USER_AGENTS_CACHE = 'default'
 
-SESSION_COOKIE_AGE = 300  # 5 мин
+SESSION_SAVE_EVERY_REQUEST = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,6 +1,7 @@
 import os
 import io
 import urllib.request
+import requests
 import uuid
 import json
 import math
@@ -52,6 +53,7 @@ from main import utils
 from zipfile import ZipFile
 
 from geojson import FeatureCollection
+
 
 def index(request):
 
@@ -1604,6 +1606,21 @@ def _radius_formula(radius):
     return radius
 
 
+def _get_geoserver_base_url():
+    conf_names = [
+        'geoserver_protocol',
+        'geoserver_host',
+        'geoserver_port',
+    ]
+    configs = utils.get_configs(conf_names)
+    base_url = '{protocol}://{host}:{port}'.format(
+        protocol=configs['geoserver_protocol'],
+        host=configs['geoserver_host'],
+        port=configs['geoserver_port'],
+    )
+    return base_url
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1613,12 +1630,7 @@ def get_popup_info(request, payload):
     radius = int(payload.get('scale_value'))
     radius = _radius_formula(radius)
 
-    value_type = None
-    property_name = None
-    property_code = None
     infos = list()
-    value_will_change_types = ['single-select', 'multi-select']
-
     views_qs = ViewNames.objects
     views_qs = views_qs.filter(
         view_name__in=[
@@ -1627,60 +1639,59 @@ def get_popup_info(request, payload):
         ]
     )
 
-    geo_id_name = 'geo_id'
+    base_url = _get_geoserver_base_url()
+    base_url = base_url + "/geoserver/wfs"
 
-    for view_qs in views_qs:
-        view_name = view_qs.view_name
-        viewproperty_ids, property_qs = _get_properties_qs(view_qs)
+    cql_filter = "dwithin(geo_data, Point({x} {y}), {radius}, meters)".format(x=coordinate[1], y=coordinate[0], radius=radius)
+    geo_id_name = 'inspire_id'
+    success_codes = [200]
+
+    for view in views_qs:
+        view_name = view.view_name
+
+        viewproperty_ids, property_qs = _get_properties_qs(view)
         properties = property_qs.values("property_code", "property_name", "value_type_id")
 
-        select_properties = geo_id_name + ",".join([prop_code['property_code'] for prop_code in properties])
+        select_properties = geo_id_name + "," + ",".join([prop_code['property_code'] for prop_code in properties])
+        if not properties:
+            select_properties = select_properties.replace(",", '')
 
-        with connections['default'].cursor() as cursor:
-            sql = """
-                SELECT
-                    {select_properties}
-                FROM
-                    {view_name}
-                WHERE (
-                    ST_DistanceSphere(
-                        geo_data,
-                        ST_SetSRID(
-                            ST_MakePoint({x}, {y})
-                        ,4326)
-                    )
-                    <= {radius}
-                )
-            """.format(
-                view_name=view_name,
-                select_properties=select_properties,
-                x=coordinate[0],
-                y=coordinate[1],
-                radius=radius,
-                geo_id_name=geo_id_name,
-            )
-            cursor.execute(sql)
-            results = [dict((cursor.description[i][0], value)
-                for i, value in enumerate(row)) for row in cursor.fetchall()[:5]]
+        headers = {
+            'User-Agent': 'geo 1.0'
+        }
 
-            for result in results:
-                datas = list()
-                datas.append('gp_layer_' + view_qs.view_name)
-                datas.append(list())
-                for key, value in result.items():
-                    if key == geo_id_name:
-                        datas[1].append([key, value, key])
-                    for prop in properties:
-                        if prop['property_code'].lower() == key and value:
-                            if prop['value_type_id'] in value_will_change_types:
-                                code_list_qs = LCodeLists.objects
-                                code_list_qs = code_list_qs.filter(code_list_name=value)
-                                if code_list_qs:
-                                    code_list = code_list_qs.first()
-                                    value = code_list.code_list_name
-                            datas[1].append([prop['property_name'], value, key])
-                if datas:
-                    infos.append(datas)
+        code = utils.LAYERPREFIX + view_name
+
+        base_geoserver_url = '{url}?service=WFS&version=2.0.0&request=GetFeature&typeName={code}'.format(url=base_url, code=code)
+        base_geoserver_url = '{base_url}&propertyName={properties}'.format(base_url=base_geoserver_url, properties=select_properties.lower())
+        base_geoserver_url = base_geoserver_url + '&' + 'CQL_FILTER={}'.format(cql_filter)
+        base_geoserver_url = base_geoserver_url + '&format_options=CHARSET:UTF-8'
+        base_geoserver_url = base_geoserver_url + "&outputFormat=application/json"
+        base_geoserver_url = base_geoserver_url + "&" + "srs=EPSG%3A4326"
+
+        rsp = requests.get(base_geoserver_url, headers=headers, timeout=300, verify=False)
+        content = rsp.content
+        if rsp.status_code not in success_codes:
+            continue
+
+        content = content.decode()
+        content = utils.json_load(content)
+        features = content['features']
+        for feature in features:
+            ps = feature['properties']
+            ps['geo_id'] = ps['inspire_id']
+            del ps['inspire_id']
+
+            datas = list()
+            datas.append(code)
+            datas.append(list())
+            for key, value in ps.items():
+                for prop in properties:
+                    if prop['property_code'].lower() == key and value:
+                        datas[1].append([prop['property_name'], value, key])
+            if datas:
+                infos.append(datas)
+
     rsp = {
         'datas': infos,
     }
