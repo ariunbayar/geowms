@@ -1644,7 +1644,7 @@ def get_popup_info(request, payload):
 
     cql_filter = "dwithin(geo_data, Point({x} {y}), {radius}, meters)".format(x=coordinate[1], y=coordinate[0], radius=radius)
     geo_id_name = 'inspire_id'
-    error_codes = [404, 400, 500]
+    success_codes = [200]
 
     for view in views_qs:
         view_name = view.view_name
@@ -1671,8 +1671,9 @@ def get_popup_info(request, payload):
 
         rsp = requests.get(base_geoserver_url, headers=headers, timeout=300, verify=False)
         content = rsp.content
-        if rsp.status_code in error_codes:
+        if rsp.status_code not in success_codes:
             continue
+
         content = content.decode()
         content = utils.json_load(content)
         features = content['features']
