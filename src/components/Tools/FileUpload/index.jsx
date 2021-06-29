@@ -26,19 +26,21 @@ function FileUpload(props) {
         }
     }
 
-    const { file, className, default_text } = props
+    const { file, className, default_text, accept } = props
     return(
         <div>
             {
                 <div className={`row ${className}`}>
                     <div className="custom-file col-md-6 my-auto ml-3">
                         <label className="custom-file-label" htmlFor="customFile"> {file? file.name : default_text}</label>
-                        <input type="file"
-                            id="customFile"
-                            className="custom-file-input"
+                        <input 
+                            type="file"
                             name='file'
+                            id="customFile"
                             style={{display: 'none'}}
+                            className="custom-file-input"
                             onChange={(e) => props.getFile(e)}
+                            accept={accept}
                         />
                     </div>
                     <div className="col-md-5 d-flex flex-column ml-4">

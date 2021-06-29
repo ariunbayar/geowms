@@ -243,6 +243,7 @@ export default class RequestDetail extends Component {
                                         className="mt-2"
                                         default_text="Файл оруулна уу"
                                         getFile={this.props.handleOnChange}
+                                        accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                                     />
                                 </div>
                             :
