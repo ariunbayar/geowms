@@ -429,7 +429,6 @@ def save_request(request, content):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_all_geo_json(request):
     features = []
@@ -443,7 +442,6 @@ def get_all_geo_json(request):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_request_data(request, id):
 
@@ -560,7 +558,6 @@ def _make_connection(from_email):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_file_shapes(request, id):
     list_of_datas = []
@@ -677,7 +674,6 @@ def send_request(request, payload, content, id):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def remove_request(request, id):
 
@@ -726,7 +722,6 @@ def _delete_prev_files(file):
 
 @require_GET
 @ajax_required
-@login_required(login_url='/secure/login/')
 @llc_required(lambda u: u)
 def get_search_field(request):
     search_field = dict()
