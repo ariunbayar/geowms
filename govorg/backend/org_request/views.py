@@ -1383,9 +1383,7 @@ def llc_request_approve(request, request_id):
 
     employee = get_object_or_404(Employee, user=request.user)
     llc_request = get_object_or_404(LLCRequest, id=request_id)
-
-    request_file_shape_qs = RequestFilesShape.objects
-    request_file_shapes = request_file_shape_qs.filter(files_id=llc_request.file.id)
+    request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
 
     if not request_file_shapes:

@@ -31,7 +31,7 @@ class SubmitClass extends Component {
 
     handleSubmit() {
         const {
-            files, project_name,
+            file, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             selected_tools, id, file_state,
@@ -41,14 +41,14 @@ class SubmitClass extends Component {
 
         if (id) {
             if (!file_state) {
-                const obj = files
+                const obj = file
                 blob = new Blob([JSON.stringify(obj, null, 2)], {type : 'application/vnd.rar'})
             }
-            else blob = files
+            else blob = file
         }
-        else blob = files
+        else blob = file
         const form_datas = new FormData()
-        form_datas.append('files', blob, files.name)
+        form_datas.append('files', blob, file.name)
         form_datas.append('id', JSON.stringify({ id }))
         form_datas.append('project_name', project_name)
         form_datas.append('object_type', object_type)
@@ -116,7 +116,7 @@ export class RequestAdd extends Component {
         super(props)
         this.list = []
         this.state = {
-            files: [],
+            file: '',
             project_name: '',
             object_type: '',
             object_count: '',
@@ -162,7 +162,7 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
-                        file_name: form_field['file_name'],
+                        file: form_field['file_path'],
                         state: form_field['state'],
                         kind: form_field['kind'],
                         desc: form_field['desc'],
@@ -194,7 +194,7 @@ export class RequestAdd extends Component {
             name = e.target.name
             const { id } = this.props.match.params
             var value = ''
-            if (name == 'files') {
+            if (name == 'file') {
                 if (id) {
                     file_state = true
                 }
@@ -209,7 +209,6 @@ export class RequestAdd extends Component {
             name = e
             value = selection['id']
         }
-
         this.validationForm()
         this.setState({ [name]: value, file_name, file_state })
     }
