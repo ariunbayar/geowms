@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 //     className="mt-2"                     //Main Component -д нэг div дотор дуудах учир зөвхөн тухайн div ямар байрлалтай байх style ийг өгнө
 //     default_text="Файл оруулна уу"       //Component анх дуудахад file input дээр гарч ирэх text
 //     getFile={this.props.handleOnChange}  //upload хийгдэх үед тухайн файлыг хадгалж авах функц жич: getFile гэсэн нэрээр заавал дамжуулах
+//     accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"         // ямар файлын төрөл авахыг заана.
 // />
 
 function FileUpload(props) {
