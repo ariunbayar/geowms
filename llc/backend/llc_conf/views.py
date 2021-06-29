@@ -1,5 +1,3 @@
-from llc.backend.llc_request.models import RequestFiles
-from llc.backend.llc_request.views import llc_request_list
 import requests
 from datetime import datetime
 from django.shortcuts import render
