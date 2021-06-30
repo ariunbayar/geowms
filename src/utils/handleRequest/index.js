@@ -30,13 +30,11 @@ export function handleResponse(response) {
             const status_code = response.status
             const text = (data && data.message) || response.statusText
 
-            if (!NOT_REJECT_ERROR_CODES.includes(status_code)) {
-                const error_obj = {
-                    'text': text,
-                    'code': status_code
-                }
-                return Promise.reject(error_obj)
+            const error_obj = {
+                'text': text,
+                'code': status_code
             }
+            return Promise.reject(error_obj)
         }
 
         return data
