@@ -337,7 +337,7 @@ a.active .list-group-item{
   min-height: 65vh;
   width: 80%;
   margin: 0 auto;
-  padding: 100px;
+  padding-top: 60px;
   position: relative;
 }
 
