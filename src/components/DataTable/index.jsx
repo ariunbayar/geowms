@@ -30,6 +30,7 @@ export class PortalDataTable extends Component {
             max_data: props.max_data || 'open',
             table_head_color: props.table_head_color || 'white',
             is_user: this.props.is_user,
+            start_index: 1,
         }
         this.paginate = this.paginate.bind(this)
         this.handleSearch=this.handleSearch.bind(this)
@@ -50,7 +51,7 @@ export class PortalDataTable extends Component {
         return service
             .list(жагсаалтын_холбоос, page, per_page, query, sort_name, custom_query, is_user)
             .then(page => {
-                this.setState({ items: page.items, items_length: page.items.length, уншиж_байгаа_эсэх: false })
+                this.setState({ items: page.items, items_length: page.items.length, уншиж_байгаа_эсэх: false, start_index: page.start_index })
                 return page
             })
     }
@@ -70,9 +71,6 @@ export class PortalDataTable extends Component {
         if(pp.refresh !== this.props.refresh){
             this.setState({ refresh: this.props.refresh })
         }
-        if(pp.custom_query !== this.props.custom_query){
-            this.setState({ custom_query: this.props.custom_query })
-        }
         if(pp.жагсаалтын_холбоос !== this.props.жагсаалтын_холбоос) {
             this.setState({ жагсаалтын_холбоос: this.props.жагсаалтын_холбоос })
         }
@@ -91,7 +89,7 @@ export class PortalDataTable extends Component {
         const { items, current_page, items_length, per_page,
             талбарууд, хоосон_байх_үед_зурвас, нэмэх_товч, уншиж_байх_үед_зурвас,
             уншиж_байгаа_эсэх, хувьсах_талбарууд, нэмэлт_талбарууд,
-            хайлт, color, max_data, table_head_color, is_user
+            хайлт, color, max_data, table_head_color, is_user, start_index
         } = this.state
         return (
             <div>
@@ -178,7 +176,7 @@ export class PortalDataTable extends Component {
                                                 <TableBody
                                                     талбарууд={талбарууд}
                                                     key={idx}
-                                                    idx={(current_page*per_page)-per_page+idx+1}
+                                                    idx={start_index + idx}
                                                     values={login}
                                                     хувьсах_талбарууд={хувьсах_талбарууд}
                                                     нэмэлт_талбарууд={нэмэлт_талбарууд}
@@ -193,7 +191,7 @@ export class PortalDataTable extends Component {
                         <Pagination
                             refresh={this.state.refresh}
                             current_page={current_page}
-                            custom_query={this.state.custom_query}
+                            custom_query={this.props.custom_query}
                             paginate={this.paginate}
                             query={this.state.query}
                             sort_name={this.state.sort_name}

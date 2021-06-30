@@ -3,6 +3,7 @@ import { service } from "./service"
 import RequestDetail from './DirectModal'
 import ModelSendData from './send_request'
 import Modal from '@utils/Modal/Modal'
+import Loader from "@utils/Loader"
 
 class ActionClass extends Component {
     constructor(props) {
@@ -26,21 +27,22 @@ class ActionClass extends Component {
                 '',
                 true,
                 'Үгүй',
-                'Тиим',
+                'Тийм',
             )
         }
 
         handleSubmit(){
             const {id} =this.props.values
+            const {mergejilten} = this.props
             this.props.loader(true)
-            service.sendRequest(id).then(({ success, info}) =>{
+            service.sendRequest(id, mergejilten).then(({ success, info}) =>{
                 if(success){
                     this.props.loader(false)
                     this.modalChange(
                         'fa fa-check-circle',
                         'success',
+                        'Амжилттай',
                         info,
-                        '',
                         false,
                         '',
                         '',
@@ -51,8 +53,8 @@ class ActionClass extends Component {
                     this.modalChange(
                         'fa fa-times-circle',
                         'danger',
+                        'Алдаа гарлаа',
                         info,
-                        '',
                         false,
                         '',
                         '',
@@ -142,29 +144,38 @@ class SendModal extends Component{
             aimag_name: '',
             aimag_geom: [],
             selected_tools: [],
+            mergejilten: '',
+            is_loading: false
         }
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
     componentDidMount(){
         const values = this.props.values
         const {id} = values.field
-        this.props.handleIsload(true)
-        service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom}) =>{
+        this.setState({ is_loading: true })
+        service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom}) =>{
             if (form_field){
                 this.setState({
+                    files: form_field['file_path'],
+                    zahialagch: form_field['client_org'],
+                    project_name: form_field['project_name'],
+                    object_type: form_field['object_type'],
+                    object_count: form_field['object_quantum'],
+                    hurungu_oruulalt: form_field['investment_status'],
+                    selected_tools: form_field['selected_tools'],
                     vector_datas,
-                    files :form_field['file_path'],
-                    zahialagch :form_field['client_org'],
-                    project_name : form_field['project_name'],
-                    object_type : form_field['object_type'],
-                    object_count : form_field['object_quantum'],
-                    hurungu_oruulalt : form_field['investment_status'],
-                    selected_tools : form_field['selected_tools'],
                     aimag_name,
-                    aimag_geom
+                    aimag_geom,
+                    emp_fields: emp_fields,
+                    is_loading: false
                 })
             }
         this.props.handleIsload(false)
         })
+    }
+
+    handleOnChange(e) {
+        this.setState({[e.target.name]: e.target.value})
     }
 
     render (){
@@ -173,6 +184,7 @@ class SendModal extends Component{
         } = this.state
         return (
             <div className="col-md-12">
+                <Loader is_loading={this.state.is_loading}/>
                 <div className="row mt-2" style={{background:"white"}}>
                     <RequestDetail
                         id={id}
@@ -180,6 +192,7 @@ class SendModal extends Component{
                         submitClass={ActionClass}
                         closeRequestMap={this.props.closeRequestMap}
                         info={this.props.values.info}
+                        handleOnChange={this.handleOnChange}
                     />
                     </div>
                 </div>
@@ -224,7 +237,7 @@ export default class RequestModal extends Component {
                 {
                     !invis
                     ?
-                        (state == 'ШИНЭ' && kind != 'ХҮЛЭЭГДЭЖ БУЙ')
+                        !(values.state == "ИЛГЭЭСЭН" && values.kind == 'ХҮЛЭЭГДЭЖ БУЙ')
                                 ?
                                     <a className={`fa fa-paper-plane-o text-primary mt-2 ml-2`} onClick={this.openRequestModal}></a>
                                 :

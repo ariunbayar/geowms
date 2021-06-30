@@ -37,6 +37,7 @@ import {ApiModal} from './controls/ApiLink/ApiPopUp'
 import {CoordList} from './controls/CoordinateList/CordList'
 import {SideBarBtn} from "./controls/SideBar/SideButton"
 import {Sidebar} from "./controls/SideBar/SideBarButton"
+import { DownloadTemplate } from './controls/DownloadTemplate/DownloadTemplate';
 import {Modal} from "@utils/MapModal/Modal"
 import { service } from './service'
 import Маягт from "./Маягт"
@@ -116,6 +117,7 @@ export default class BarilgaSuurinGazar extends Component{
         sidebar: new Sidebar(),
         metaList: new MetaList(),
         coordList: new CoordList(),
+        download_temp: new DownloadTemplate(),
       }
 
       this.modifyE = this.Modify()
@@ -178,28 +180,27 @@ export default class BarilgaSuurinGazar extends Component{
     componentDidMount(){
       const {pid, fid} = this.state
       Promise.all([
-        service.qgisGetUrl(),
+        service.qgisGetUrl(fid),
         service.apiGetUrl(),
-      ]).then(([{wms_url, wfs_url}, {api_links}]) => {
-        this.setState({wms_url, wfs_url, api_links})
+      ]).then(([{ wms_url, wfs_url }, { api_links }]) => {
+        this.setState({ wms_url, wfs_url, api_links })
       })
       this.geomType()
       this.loadMap()
     }
 
     geomType(){
-      const {pid, fid} = this.state
-      service.geomType(pid, fid).then(({type}) => {
+      const { pid, fid } = this.state
+      service.geomType(pid, fid).then(({ type }) => {
         this.setState({ type })
         this.loadRows()
       })
     }
 
     getRole(){
-      const fid = this.state.fid
-
+      const { tid, fid } = this.state
       service
-          .getRole(fid)
+          .getRole(tid, fid)
           .then(({ success, roles }) => {
               if(success){
                 this.loadControls(roles)
@@ -226,14 +227,16 @@ export default class BarilgaSuurinGazar extends Component{
       if(roles.PERM_CREATE || roles.PERM_UPDATE) {
         map.addControl(new SaveBtn({SaveBtn: this.FormButton}))
         map.addControl(new MetaBarButton({MetaButton: this.MetaButton}))
-        map.addControl(this.controls.upload)
         map.addControl(this.controls.qgis)
         map.addControl(this.controls.api)
         map.addControl(this.controls.metaList)
         map.addControl(this.controls.sidebar)
-        map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
         map.addControl(new QgisButton({showQgisBtn: this.showQgisBtn}))
         if(this.props.employee.is_admin) map.addControl(new ApiButton({showApiBtn: this.showApiBtn}))
+        if( roles.PERM_CREATE){
+          map.addControl(this.controls.upload)
+          map.addControl(new UploadButton({showUploadBtn: this.showUploadBtn}))
+        }
       }
       if(roles.PERM_REMOVE) map.addControl(new RemoveBarButton({RemoveButton: this.RemoveButton}))
       if(roles.PERM_REVOKE) map.addControl(new CancelBarButton({CancelButton: this.CancelButton}))
@@ -244,6 +247,11 @@ export default class BarilgaSuurinGazar extends Component{
         map.addControl(this.controls.coordList)
         map.addControl(new FormBarButton({FormButton: this.FormButton}))
         map.addControl(new ModifyBarButton({ModifyButton: this.ModifyButton}))
+      }
+
+      if(roles.PERM_VIEW){
+        map.addControl(new DownloadTemplate({file: roles.file}))
+        map.addControl(new FormBarButton({FormButton: this.FormButton}))
       }
       this.setState({ is_loading:false, roles})
     }
@@ -1126,7 +1134,6 @@ export default class BarilgaSuurinGazar extends Component{
         this.props.match.params.pid
       )
     }
-
 
     showQgisBtn(){
       this.setInActiveButtonStyle('qgis')

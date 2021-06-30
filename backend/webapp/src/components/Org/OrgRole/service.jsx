@@ -7,8 +7,6 @@ export const service ={
 
 const prefix = '/back/api/org'
 
-
-
 function getGovRoles(level, org_id){
     const requestOptions = {
         ...getGetOptions(),
@@ -16,10 +14,10 @@ function getGovRoles(level, org_id){
     return fetch(`${prefix}/level-${level}/${org_id}/gov-perm/`, requestOptions).then(handleResponse)
 }
 
-function saveGovRoles(level, org_id, values){
+function saveGovRoles(level, org_id, values) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({values}),
+        body: JSON.stringify({ values }),
     }
     return fetch(`${prefix}/level-${level}/${org_id}/gov-perm/save/`, requestOptions).then(handleResponse)
 }

@@ -1,81 +1,94 @@
 import React, { Component } from "react"
-import MapAllowedGeom from './MapAllowedGeom'
-import {OrgEdit} from './OrgEdit'
-import Modal from "../../Modal"
-import ModalAlert from "../../ModalAlert"
-import {service} from "../service"
 import Loader from "@utils/Loader"
 
+import { OrgEdit } from './OrgEdit'
+import MapAllowedGeom from './MapAllowedGeom'
+
+import { service } from "../service"
 export class OrgForm extends Component {
 
     constructor(props) {
         super(props)
-        this.state={
+        this.state = {
             is_open: false,
-            modal_status: 'closed',
-            modal_alert_status: 'closed',
             is_loading: false,
+            allowed_geom: props.allow_geom,
         }
-        this.handleModalDeleteOpen = this.handleModalDeleteOpen.bind(this)
-        this.handleModalDeleteClose = this.handleModalDeleteClose.bind(this)
         this.handleFormOpen = this.handleFormOpen.bind(this)
         this.handleUserDelete = this.handleUserDelete.bind(this)
         this.modalClose = this.modalClose.bind(this)
-        this.modalAlertClose = this.modalAlertClose.bind(this)
+        this.modalClose = this.modalClose.bind(this)
         this.handleHistoryPush = this.handleHistoryPush.bind(this)
+        this.getGeom = this.getGeom.bind(this)
+    }
+
+    getGeom() {
+        const level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+        service
+            .orgAll(level, org_id)
+            .then(({ orgs }) => {
+                orgs.map((org) => {
+                    this.setState({ allowed_geom: org.allowed_geom })
+                })
+            })
+    }
+
+    setModal(title, text, icon_color, icon, has_button, action, close) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: icon,
+            modal_bg: '',
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            actionNameBack: 'Буцах',
+            actionNameDelete: '',
+            modalAction: action,
+            modalClose: close,
+        }
+        global.MODAL(modal)
     }
 
     handleFormOpen() {
         this.setState({ is_open: !this.state.is_open })
     }
 
-    handleUserDelete(){
+    handleUserDelete() {
         const level = this.props.match.params.level
         const org_id = this.props.match.params.id
-        service.org_remove(level,org_id).then(({ success }) => {
-            if (success) {
-                this.setState({ msg: "Амжилттай устгалаа", style: 'success' })
-                this.setState({ modal_alert_status: 'open'})
+        service
+            .org_remove(level,org_id)
+            .then(({ success }) => {
                 this.setState({ is_loading: true })
-            }else{
-                this.setState({ msg: "Амжилтгүй боллоо", style: 'danger' })
-                this.setState({ modal_alert_status: 'open'})
-                alert('Алдаа гарлаа!')
-            }
-            this.modalAlertClose()
-        })
+                if (success) {
+                    this.setModal('Амжилттай устгалаа', '', 'success', 'fa fa-check-circle', false, null, this.modalClose)
+                }
+                else {
+                    this.setModal('Амжилтгүй боллоо', '', 'danger', 'fa fa-check-circle', false, null, this.modalClose)
+                }
+            })
     }
 
     handleModalDeleteOpen() {
-        this.setState({modal_status: 'open'})
-    }
-
-    handleModalDeleteClose() {
-        this.setState({modal_status: 'closed'})
+        this.setModal('Байгууллага устгах', 'Та байгууллагыг устгахдаа итгэлтэй байна уу?', 'warning', 'fa fa-exclamation-circle', true, this.handleUserDelete)
     }
 
     modalClose(){
-        this.handleUserDelete()
-        this.setState({modal_status: 'closed'})
-    }
-
-    modalAlertClose(){
         const org_level = this.props.match.params.level
-        this.state.timer = setTimeout(() => {
-            this.props.history.push( `/back/байгууллага/түвшин/${org_level}/`)
-            this.setState({modal_alert_status: "'closed'"})
-        }, 2000)
+        this.props.history.push(`/back/байгууллага/түвшин/${org_level}/`)
     }
 
     handleHistoryPush(org_level) {
         const org_id = this.props.match.params.id
         this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/detail/`)
-        this.props.refresh(org_level)
+        global.refreshOrgCount(org_level)
     }
 
     render() {
-        const { allowed_geom } = this.props
-        const { is_open, msg, is_loading, style } = this.state
+        const { allowed_geom } = this.state
+        const { is_open, is_loading } = this.state
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         return (
@@ -101,12 +114,13 @@ export class OrgForm extends Component {
                                     </button>{' '}
                                     <button
                                         className="btn btn-danger waves-effect waves-light m-1"
-                                        onClick={this.handleModalDeleteOpen}
+                                        onClick={() => this.handleModalDeleteOpen()}
                                     >
                                         <i className="fa fa fa-trash-o"></i> Устгах
                                     </button>
                                 </div>
-                        }<br/><br/>
+                        }
+                        <br/><br/>
                         {
                             is_open
                             ?
@@ -114,19 +128,12 @@ export class OrgForm extends Component {
                                     level={org_level}
                                     id={org_id}
                                     FormClose={this.handleFormOpen}
+                                    getGeom={this.getGeom}
                                     PushHistory={this.handleHistoryPush}
                                 />
                             :
                                 null
                         }
-                        <Modal
-                            modalAction={() => this.modalClose()}
-                            text={`Та байгууллагыг устгахдаа итгэлтэй байна уу?`}
-                            title="Байгууллага устгах"
-                            model_type_icon = "success"
-                            status={this.state.modal_status}
-                            modalClose={() => this.handleModalDeleteClose()}
-                        />
                     </div>
                     <div className="col-6">
                         { allowed_geom &&
@@ -134,12 +141,6 @@ export class OrgForm extends Component {
                         }
                     </div>
                 </div>
-                <ModalAlert
-                    title={msg}
-                    model_type_icon={style}
-                    status={this.state.modal_alert_status}
-                    modalAction={() => this.modalAlertClose()}
-                />
                 <Loader is_loading={is_loading}/>
             </div>
         )

@@ -2,30 +2,32 @@
 
 
 import os
+import re
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from itertools import groupby
 
 from django.http import JsonResponse
-from django.shortcuts import render, reverse, get_object_or_404
+from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from django.core.cache import cache
 
 from main.decorators import ajax_required
-from backend.dedsanbutets.models import ViewNames
-
 from backend.bundle.models import Bundle, BundleLayer
 from backend.wms.models import WMS
 from django.db import connections
-from backend.inspire.models import LThemes, LPackages, LFeatures, LDataTypeConfigs, LFeatureConfigs, MGeoDatas, MDatas
+from backend.inspire.models import LThemes, LPackages, LFeatures, LFeatureConfigs, MDatas, MDatas
 from main import utils
 from backend.geoserver.models import WmtsCacheConfig
+from backend.config.models import Config
+from geoportal_app.models import User
 
 from django.contrib.postgres.search import SearchVector
 
 
 def all(request):
     context_list = []
+
     bundles = Bundle.objects.all()
     for bundle in bundles:
         bundle_list = []
@@ -118,14 +120,18 @@ def wms_layers(request, pk):
             }
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
+        chache_url = ''
         if wms.is_active:
-            # `  if utils.check_nsdi_address(request):
-            #         url = wms.url
-            #         ws_name = url.split('/')[3]
-            #         # chache_url = 'http://{}/{ws_name}/gwc/service/wmts'.format(ws_name=ws_name)
-            #     else:`
-            url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
-            chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
+            url = wms.url
+            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in url or '192.168.10.15' in url):
+                ws_name = url.split('/')[3]
+                if wms.cache_url:
+                    chache_url = 'https://geo.nsdi.gov.mn/{ws_name}/gwc/service/wmts'.format(
+                        ws_name=ws_name,
+                    )
+            else:
+                url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
+                chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
             wms_data = {
                 'name': wms.name,

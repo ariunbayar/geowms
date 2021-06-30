@@ -1,12 +1,15 @@
 import json
+import requests
 from functools import wraps
 
 from django.apps import apps
 from django.conf import settings
+from django.shortcuts import redirect
 from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 import main.geoserver as geoserver
+
 from main import utils
 from django.core.cache import cache
 
@@ -170,3 +173,41 @@ def get_conf_geoserver(f):
     wrap.__name__ = f.__name__
 
     return wrap
+
+
+def llc_required(f):
+
+    def inner(f):
+
+        def wrap(request, *args, **kwargs):
+            HEADERS = {
+                'accept': 'application/json',
+                'Content-type': 'application/json',
+            }
+
+            if request.user.is_authenticated:
+                user_data = request.user
+                if not user_data.is_sso:
+                    raise Http404
+
+                register = user_data.register
+                token_url = 'https://license.gazar.gov.mn/api/engineer/001/{register}'.format(
+                    register=register
+                )
+                rsp = requests.get(token_url, headers=HEADERS, verify=False)
+                content = {}
+
+                if rsp.status_code == 200:
+                    content['llc_detail'] = rsp.json()
+                    content['company_name'] = content['llc_detail'][0]['company_name']
+                    content['register_number'] = content['llc_detail'][0]['company_register_number']
+                    args = [content, *args]
+                    return f(request, *args, **kwargs)
+            else:
+                return redirect(settings.LOGIN_REDIRECT_URL)
+        wrap.__doc__ = f.__doc__
+        wrap.__name__ = f.__name__
+
+        return wrap
+
+    return inner

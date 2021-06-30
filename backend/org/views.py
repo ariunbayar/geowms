@@ -1,5 +1,6 @@
 import os
 import io
+from django.http.response import Http404
 from geojson import FeatureCollection
 import PIL.Image as Image
 import datetime
@@ -31,9 +32,10 @@ from backend.inspire.models import EmpPerm
 from backend.inspire.models import GovRoleInspire
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPermInspire
+from backend.payment.models import Payment
 from backend.token.utils import TokenGeneratorEmployee
 from geoportal_app.models import User
-from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, DefaultPosition
+from .models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
 from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
@@ -222,7 +224,6 @@ def employee_update(request, payload, pk, level):
     is_super = values.get('is_super')
     pro_class = values.get('pro_class')
     phone_number = values.get('phone_number')
-    re_password_mail = values.get('re_password_mail')
     is_user = values.get('is_user')
     address = payload.get('address')
     level_1 = address.get('level_1')
@@ -265,11 +266,6 @@ def employee_update(request, payload, pk, level):
             else:
                 user.is_active = False
             user.save()
-
-            if re_password_mail:
-                subject = 'Геопортал нууц үг солих'
-                text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
-                utils.send_approve_email(user, subject, text)
 
             if pro_class:
                 pro_class = int(pro_class)
@@ -462,9 +458,12 @@ def _set_state(employee):
 def employee_remove(request, pk):
     user = get_object_or_404(User, id=pk)
     employee = get_object_or_404(Employee, user=user)
-    check = _set_state(employee)
-
-    return JsonResponse({'success': check})
+    user_log = Payment.objects.filter(user=user)
+    if user_log:
+        return JsonResponse({'success': False})
+    else:
+        check = _set_state(employee)
+        return JsonResponse({'success': check})
 
 
 def _remove_user(user, employee):
@@ -507,6 +506,11 @@ def _org_validation(org_name, org_id):
     return errors
 
 
+def _delete_perms(perms_inspire):
+    perms_inspire.delete()
+    return 
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -530,33 +534,50 @@ def org_add(request, payload, level):
         org.geo_id = geo_id
         org.save()
         if int(role_id) > -1:
-            gov_perm_role_check = GovPerm.objects.filter(org=org).first()
-            if gov_perm_role_check.gov_role_id != role_id or not gov_perm_role_check.gov_role.id:
-                gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
-                GovPerm.objects.filter(org_id=org_id).update(gov_role=org_role_filter)
-                gov_perm = GovPerm.objects.filter(org_id=org_id).first()
-                GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
-                for gov_role_inspire in gov_role_inspire_all:
-                    objs.append(GovPermInspire(
-                        gov_role_inspire=gov_role_inspire,
-                        gov_perm=gov_perm,
-                        perm_kind=gov_role_inspire.perm_kind,
-                        feature_id=gov_role_inspire.feature_id,
-                        property_id=gov_role_inspire.property_id,
-                        data_type_id=gov_role_inspire.data_type_id,
-                        geom=gov_role_inspire.geom,
-                        created_by=gov_role_inspire.created_by,
-                        updated_by=gov_role_inspire.updated_by,
-                    ))
+            with transaction.atomic():
+                objs = list()
+                gov_role = org_role_filter
+                all_gov_role_perms = gov_role.govroleinspire_set.all()
+                gov_perm_qs = GovPerm.objects.filter(org=org_id)
+                gov_perm = gov_perm_qs.first()
+                has_role = gov_perm.gov_role
+                gov_perms_inspire = gov_perm.govperminspire_set
+                gov_perm_qs.update(gov_role_id=role_id)
+                if has_role:
+                    delete_ids = list()
+                    for role_perm in has_role.govroleinspire_set.all():
+                        gov_perm_role = role_perm.govperminspire_set.all()
+                        if gov_perm_role:
+                            for perm in gov_perm_role:
+                                delete_ids.append(perm.id)
+                        gov_perms_inspire.filter(id__in=delete_ids).delete()
+
+                for gov_role_inspire in all_gov_role_perms:
+                    has_perm = False
+                    if gov_perms_inspire:
+                        has_perm = gov_perms_inspire.filter(
+                            feature_id=gov_role_inspire.feature_id,
+                            perm_kind=gov_role_inspire.perm_kind,
+                            property_id=gov_role_inspire.property_id,
+                            data_type_id=gov_role_inspire.data_type_id,
+                            geom=gov_role_inspire.geom,
+                        )
+
+                    if not has_perm:
+                        objs.append(GovPermInspire(
+                            gov_role_inspire=gov_role_inspire,
+                            gov_perm=gov_perm,
+                            perm_kind=gov_role_inspire.perm_kind,
+                            feature_id=gov_role_inspire.feature_id,
+                            property_id=gov_role_inspire.property_id,
+                            data_type_id=gov_role_inspire.data_type_id,
+                            geom=gov_role_inspire.geom,
+                            created_by=gov_role_inspire.created_by,
+                            updated_by=gov_role_inspire.updated_by,
+                        ))
                 GovPermInspire.objects.bulk_create(objs)
             return JsonResponse({'success': True})
-        else:
-            gov_perm = GovPerm.objects.filter(org=org).first()
-            if gov_perm:
-                GovPermInspire.objects.filter(gov_perm=gov_perm).delete()
-                GovPerm.objects.filter(org_id=org_id).update(gov_role=None)
-            return JsonResponse({'success': True})
-    # Байгууллага шинээр үүсгэх
+    # # Байгууллага шинээр үүсгэх
     else:
         gov_role_inspire_all = GovRoleInspire.objects.filter(gov_role=org_role_filter)
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
@@ -585,6 +606,29 @@ def org_add(request, payload, level):
                 ))
             GovPermInspire.objects.bulk_create(objs)
 
+        def_pos = [
+            "Байхгүй",
+            "Сайд",
+            "Дэд сайд",
+            "Төрийн нарийн бичгийн дарга",
+            "Дарга",
+            "Орлогч дарга",
+            "Тэргүүн дэд",
+            "Газрын дарга",
+            "Хэлтсийн дарга",
+            "Ахлах шинжээч",
+            "Шинжээч",
+            "Ахлах мэргэжилтэн",
+            "Мэргэжилтэн",
+            "Зөвлөх"
+        ]
+
+        for pos in def_pos:
+            Position.objects.create(
+                name=pos,
+                org=org
+            )
+
         return JsonResponse({'success': True})
 
 
@@ -610,6 +654,7 @@ def org_remove(request, payload, level):
             org_govorg.save()
 
         org.orgrole_set.all().delete()
+        org.position_set.all().delete()
         org.delete()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
@@ -623,6 +668,7 @@ def org_list(request, payload, level):
     оруулах_талбарууд = ['id', 'name', 'level', 'num_employees', 'num_systems']
     items = []
     total_page = 1
+    start_index = 1
     qs = Org.objects.filter(level=level)
     if qs:
         qs = qs.annotate(num_employees=Count('employee', distinct=True))
@@ -634,12 +680,13 @@ def org_list(request, payload, level):
             payload=payload,
             оруулах_талбарууд=оруулах_талбарууд
         )
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get('page'),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -669,7 +716,8 @@ def detail(request, level, pk):
 
     return JsonResponse({
         'orgs': orgs_display,
-        'count': User.objects.filter(employee__org=org).count()
+        'count': org.employee_set.count(),
+        'pos_count': org.position_set.count(),
     })
 
 
@@ -686,6 +734,7 @@ def _get_employee(employee, filter_from_user):
         position = emp_obj.position.name
         created_at = emp_obj.created_at.strftime('%Y-%m-%d')
         updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
+        is_user = employee.is_user
     else:
         user = User.objects.filter(pk=employee.user_id).first()
         id = user.id
@@ -698,6 +747,7 @@ def _get_employee(employee, filter_from_user):
         position = employee.position.name
         created_at = employee.created_at.strftime('%Y-%m-%d')
         updated_at = employee.updated_at.strftime('%Y-%m-%d')
+        is_user = user.is_user
 
     employee_detail = {
         'id': id,
@@ -709,10 +759,15 @@ def _get_employee(employee, filter_from_user):
         'is_admin': is_admin,
         'position': position,
         'created_at': created_at,
-        'updated_at': updated_at
+        'updated_at': updated_at,
+        "is_user": is_user
     }
 
     return employee_detail
+
+
+def _get_start_index(per_page, page):
+    return (per_page * (page - 1)) + 1
 
 
 @require_POST
@@ -773,6 +828,7 @@ def employee_list(request, payload, level, pk):
         'items': employees_display,
         'page': page,
         'total_page': total_page,
+        'start_index': _get_start_index(per_page, page),
     }
 
     return JsonResponse(rsp)
@@ -813,12 +869,13 @@ def perm_get_list(request, payload):
         оруулах_талбарууд=оруулах_талбарууд
     )
 
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get('page'),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -860,7 +917,7 @@ def get_inspire_roles(request, pk):
     data = []
     roles = []
     govRole = get_object_or_404(GovRole, pk=pk)
-    for themes in LThemes.objects.all():
+    for themes in LThemes.objects.order_by('theme_id'):
         package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = _get_theme_packages_gov(themes.theme_id, govRole)
         data.append({
                 'id': themes.theme_id,
@@ -1140,47 +1197,51 @@ def save_inspire_roles(request, payload, pk):
         'success': True,
     }
     return JsonResponse(rsp)
+
+
 # baiguulgaa govperm
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def get_gov_roles(request, level, pk):
-    data = []
-    roles = []
+
+    data = list()
+    roles = list()
+
     org = get_object_or_404(Org, pk=pk, level=level)
     gov_perm = GovPerm.objects.filter(org=org).first()
-    for themes in LThemes.objects.all():
+
+    for themes in LThemes.objects.order_by('theme_id'):
         package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = _get_theme_packages(themes.theme_id, gov_perm)
         data.append({
-                'id': themes.theme_id,
-                'code': themes.theme_code,
-                'name': themes.theme_name,
-                'packages': package_data,
-                'perm_all': t_perm_all,
-                'perm_view': t_perm_view,
-                'perm_create': t_perm_create,
-                'perm_remove': t_perm_remove,
-                'perm_update': t_perm_update,
-                'perm_approve': t_perm_approve,
-                'perm_revoke': t_perm_revoke,
-            })
+            'id': themes.theme_id,
+            'code': themes.theme_code,
+            'name': themes.theme_name,
+            'packages': package_data,
+            'perm_all': t_perm_all,
+            'perm_view': t_perm_view,
+            'perm_create': t_perm_create,
+            'perm_remove': t_perm_remove,
+            'perm_update': t_perm_update,
+            'perm_approve': t_perm_approve,
+            'perm_revoke': t_perm_revoke,
+        })
 
-    gov_perm_inspire_all = GovPermInspire.objects.filter(gov_perm=gov_perm)
-    if gov_perm_inspire_all:
-        for datas in gov_perm_inspire_all:
-            disable = False
-            if datas.gov_role_inspire:
-                disable = True
-            roles.append({
-                    'perm_kind': datas.perm_kind,
-                    'feature_id': datas.feature_id,
-                    'data_type_id': datas.data_type_id,
-                    'property_id': datas.property_id,
-                    'geom': datas.geom,
-                    'disable': disable,
-                })
+    gov_perm_inspire_all = gov_perm.govperminspire_set.all()
+    for datas in gov_perm_inspire_all:
+        disable = False
+        if datas.gov_role_inspire:
+            disable = True
+
+        roles.append({
+            'perm_kind': datas.perm_kind,
+            'feature_id': datas.feature_id,
+            'data_type_id': datas.data_type_id,
+            'property_id': datas.property_id,
+            'geom': datas.geom,
+            'disable': disable,
+        })
+
     return JsonResponse({
         'data': data,
         'roles': roles,
@@ -1201,18 +1262,18 @@ def _get_theme_packages(theme_id, gov_perm):
         t_perm_all = t_perm_all + 1
         features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = _get_package_features(package.package_id, gov_perm)
         package_data.append({
-                'id': package.package_id,
-                'code': package.package_code,
-                'name': package.package_name,
-                'features': features_all,
-                'perm_all': p_perm_all,
-                'perm_view': p_perm_view,
-                'perm_create': p_perm_create,
-                'perm_remove': p_perm_remove,
-                'perm_update': p_perm_update,
-                'perm_approve': p_perm_approve,
-                'perm_revoke': p_perm_revoke,
-            })
+            'id': package.package_id,
+            'code': package.package_code,
+            'name': package.package_name,
+            'features': features_all,
+            'perm_all': p_perm_all,
+            'perm_view': p_perm_view,
+            'perm_create': p_perm_create,
+            'perm_remove': p_perm_remove,
+            'perm_update': p_perm_update,
+            'perm_approve': p_perm_approve,
+            'perm_revoke': p_perm_revoke,
+        })
         if p_perm_all == p_perm_view and p_perm_all != 0:
             t_perm_view = t_perm_view + 1
         elif 0 < p_perm_view and p_perm_all != 0:
@@ -1257,8 +1318,9 @@ def _get_package_features(package_id, gov_perm):
     p_perm_update = 0
     p_perm_approve = 0
     p_perm_revoke = 0
+
     for feat in LFeatures.objects.filter(package_id=package_id):
-        data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke = _get_feature_property(feat.feature_id, gov_perm)
+        data_type_list, perm_all, perms = _get_feature_property(feat.feature_id, gov_perm)
         if not perm_all == 1:
             p_perm_all = p_perm_all + 1
             feat_values.append({
@@ -1267,15 +1329,23 @@ def _get_package_features(package_id, gov_perm):
                 'name':feat.feature_name,
                 'data_types': data_type_list,
                 'perm_all': perm_all,
-                'perm_view': perm_view,
-                'perm_create': perm_create,
-                'perm_remove': perm_remove,
-                'perm_update': perm_update,
-                'perm_approve': perm_approve,
-                'perm_revoke': perm_revoke,
+                'perm_view': perms['perm_view'],
+                'perm_create': perms['perm_create'],
+                'perm_remove': perms['perm_remove'],
+                'perm_update': perms['perm_update'],
+                'perm_approve': perms['perm_approve'],
+                'perm_revoke': perms['perm_revoke'],
             })
+            perm_view = perms['perm_view']
+            perm_create = perms['perm_create']
+            perm_remove = perms['perm_remove']
+            perm_update = perms['perm_update']
+            perm_approve = perms['perm_approve']
+            perm_revoke = perms['perm_revoke']
+
             if perm_all == perm_view and perm_all != 0:
                 p_perm_view = p_perm_view + 1
+
             elif 0 < perm_view and perm_all != 0 and perm_view < perm_all:
                 p_perm_view = p_perm_view + 0.5
             if perm_all == perm_create and perm_all != 0:
@@ -1307,79 +1377,88 @@ def _get_package_features(package_id, gov_perm):
 def _get_feature_property(feature_id, gov_perm):
     data_type_list = []
     perm_all = 1
-    perm_view = 0
-    perm_create = 0
-    perm_remove = 0
-    perm_update = 0
-    perm_approve = 0
-    perm_revoke = 0
-    data_types_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
 
-    for data_type_idx in data_types_ids:
-        data_type = LDataTypes.objects.filter(data_type_id=data_type_idx.data_type_id).first()
-        if data_type:
+    perms = {
+        'perm_view': 0,
+        'perm_create': 0,
+        'perm_remove': 0,
+        'perm_update': 0,
+        'perm_approve': 0,
+        'perm_revoke': 0,
+    }
+
+    perms_obj = {
+        GovPermInspire.PERM_VIEW: 'perm_view',
+        GovPermInspire.PERM_CREATE: 'perm_create',
+        GovPermInspire.PERM_REMOVE: 'perm_remove',
+        GovPermInspire.PERM_UPDATE: 'perm_update',
+        GovPermInspire.PERM_APPROVE: 'perm_approve',
+        GovPermInspire.PERM_REVOKE: 'perm_revoke',
+    }
+
+    feature_c_qs = LFeatureConfigs.objects.filter(feature_id=feature_id)
+    feature_c_qs = feature_c_qs.values('data_type_id', 'data_type_display_name')
+    inspire_perms = gov_perm.govperminspire_set.filter(feature_id=feature_id)
+
+    for feature_c in feature_c_qs:
+        ldata_type_c_qs = LDataTypeConfigs.objects
+        ldata_type_c_qs = ldata_type_c_qs.filter(data_type_id=feature_c['data_type_id'])
+        if ldata_type_c_qs:
+            gov_data_type_qs = inspire_perms.filter(data_type_id=feature_c['data_type_id'])
+
             data_type_obj = {
-                'id': data_type.data_type_id,
-                'code': data_type.data_type_code,
-                'name': data_type.data_type_name,
-                'definition': data_type.data_type_definition,
+                'id': feature_c['data_type_id'],
+                'name': feature_c['data_type_display_name'],
+                # 'code': feature_c['data_type_display_name'],
+                # 'definition': data_type.data_type_definition,
                 'properties': [],
             }
-            property_ids = LDataTypeConfigs.objects.filter(data_type_id=data_type.data_type_id).values_list('property_id', flat=True)
+
+            property_ids = ldata_type_c_qs.values_list('property_id', flat=True)
+
             qs_properties = LProperties.objects
             qs_properties = qs_properties.filter(property_id__in=property_ids)
-            qs_properties = qs_properties.exclude(property_code='localId')
-            qs_properties = qs_properties.exclude(value_type_id='data-type')
-            properties = qs_properties.values('property_id', 'property_code', 'property_name')
+            properties = qs_properties.values('property_id', 'property_code', 'property_name', 'value_type_id')
 
             for prop in properties:
-                perm_all = perm_all + 1
-                property_obj = {
-                    'id':prop['property_id'],
-                    'code':prop['property_code'],
-                    'name':prop['property_name'],
-                    'perm_all': 6,
-                    'perm_view': 0,
-                    'perm_create': 0,
-                    'perm_remove': 0,
-                    'perm_update': 0,
-                    'perm_approve': 0,
-                    'perm_revoke': 0,
-                }
+                if prop['property_code'].lower() != 'localid':
+                    if prop['value_type_id'] != 'data-type':
+                        perm_all = perm_all + 1
+                        property_obj = {
+                            'id': prop['property_id'],
+                            'code': prop['property_code'],
+                            'name': prop['property_name'],
+                            'perm_all': 6,
+                            'perm_view': 0,
+                            'perm_create': 0,
+                            'perm_remove': 0,
+                            'perm_update': 0,
+                            'perm_approve': 0,
+                            'perm_revoke': 0,
+                        }
 
-                if gov_perm:
-                    for gov_role_inspire in GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, data_type_id=data_type.data_type_id):
-                        if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
-                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_VIEW:
-                                perm_view = perm_view + 1
-                                property_obj['perm_view'] = property_obj['perm_view'] + 1
-                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_CREATE:
-                                perm_create = perm_create + 1
-                                property_obj['perm_create'] = property_obj['perm_create'] + 1
-                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_REMOVE:
-                                perm_remove = perm_remove + 1
-                                property_obj['perm_remove'] = property_obj['perm_remove'] + 1
-                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_UPDATE:
-                                perm_update = perm_update + 1
-                                property_obj['perm_update'] = property_obj['perm_update'] + 1
-                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_APPROVE:
-                                perm_approve = perm_approve + 1
-                                property_obj['perm_approve'] = property_obj['perm_approve'] + 1
-                            if gov_role_inspire.perm_kind == GovPermInspire.PERM_REVOKE:
-                                perm_revoke = perm_revoke + 1
-                                property_obj['perm_revoke'] = property_obj['perm_revoke'] + 1
-                    data_type_obj['properties'].append(property_obj)
+                        if gov_perm:
+                            for gov_role_inspire in gov_data_type_qs:
+                                if (prop['property_id'] == gov_role_inspire.property_id) and feature_id == gov_role_inspire.feature_id:
+                                    for perm_kind, perm_name in perms_obj.items():
+                                        if perm_kind == gov_role_inspire.perm_kind:
+                                            perms[perm_name] = perms[perm_name] + 1
+                                            property_obj[perm_name] = property_obj[perm_name] + 1
+
+                            data_type_obj['properties'].append(property_obj)
             data_type_list.append(data_type_obj)
 
-    if gov_perm:
-        perm_view = perm_view + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_VIEW).count()
-        perm_create = perm_create + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_CREATE).count()
-        perm_remove = perm_remove + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_REMOVE).count()
-        perm_update = perm_update + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_UPDATE).count()
-        perm_approve = perm_approve + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_APPROVE).count()
-        perm_revoke = perm_revoke + GovPermInspire.objects.filter(gov_perm=gov_perm, feature_id=feature_id, geom=True, property_id=None, perm_kind=GovPermInspire.PERM_REVOKE).count()
+    inspire_perms = inspire_perms.filter(geom=True, property_id=None)
+    if inspire_perms:
+        inspire_perms = inspire_perms.values('perm_kind')
+        inspire_perms = inspire_perms.annotate(perm_count=Count('perm_kind'))
 
-    return data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke
+        if gov_perm:
+            for inspire_perm in inspire_perms.values():
+                kind_name = perms_obj[inspire_perm['perm_kind']]
+                perms[kind_name] = perms[kind_name] + inspire_perm['perm_count']
+
+    return data_type_list, perm_all, perms
 
 
 @require_POST
@@ -1822,12 +1901,17 @@ def _get_choices(Model, field_name):
     return choices
 
 
-@require_GET
+@require_POST
 @ajax_required
-def get_select_values(request):
+@user_passes_test(lambda u: u.is_superuser)
+def get_select_values(request, payload):
+    org_id = payload.get('org_id')
+    if not org_id:
+        employee = get_object_or_404(Employee, user=request.user)
+        org_id = employee.org_id
 
-    qs = DefaultPosition.objects
-    qs = qs.all()
+    qs = Position.objects
+    qs = qs.filter(org_id=org_id)
     positions = list(qs.values())
 
     states = _get_choices(Employee, 'state')
@@ -1924,6 +2008,166 @@ def emp_age_count(request, pk):
     rsp = {
         'count_emps_age': count_emps_age,
         'emp_age': emp_ages,
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def send_mail(request, pk):
+    subject = 'Геопортал нууц үг солих'
+    text = 'Дараах холбоос дээр дарж нууц үгээ солино уу!'
+
+    user = get_object_or_404(User, pk=pk)
+    utils.send_approve_email(user, subject, text)
+
+    return JsonResponse({'success': True, 'info': 'Амжилттай илгээлээ.'})
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def position_list(request, payload, pk):
+    items = []
+    page = 1
+    total_page = 1
+    start_index = 1
+    оруулах_талбарууд = ['id', 'name', 'org_id']
+
+    qs = Position.objects.filter(org_id=pk)
+    if qs:
+        datatable = Datatable(
+            model=Position,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд
+        )
+        items, total_page, start_index = datatable.get()
+        page = payload.get('page')
+
+    rsp = {
+        'items': items,
+        'page': page,
+        'total_page': total_page,
+        "start_index": start_index
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_remove(request, pk):
+    position = get_object_or_404(Position, id=pk)
+    has_emp_pos = position.employee_set.all()
+
+    if has_emp_pos:
+        rsp = {
+            'success': False,
+            'error': '"{position}" албан тушаалыг хэрэглэгчид оноосон байна!!!'.format(position=position.name),
+        }
+    else:
+        position.delete()
+        rsp = {
+            'success': True,
+            'data': "Амжилттай устгалаа"
+        }
+
+    return JsonResponse(rsp)
+
+
+def _pos_name_or_id_check(qs_pos, name, pos_id=None):
+    has_pos_name = False
+    qs_pos = qs_pos.filter(name=name)
+    if qs_pos:
+        if pos_id:
+            if qs_pos.first().id != pos_id:
+                has_pos_name = True
+        else:
+            has_pos_name = True
+    return has_pos_name
+
+
+def _make_pos_data(datas, pk):
+    datas['org_id'] = pk
+    return datas
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_create(request, payload, pk):
+    name = payload.get("name")
+    datas = _make_pos_data(payload, pk)
+    qs = Position.objects
+    qs_pos = qs.filter(org_id=pk)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        qs.create(**datas)
+        rsp = {
+            'success': True,
+            'data': '"{name}" нэртэй албан тушаалыг амжилттай нэмлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+def _del_unneed_keys(obj):
+    del_keys = ['pos_id']
+    for key in del_keys:
+        del obj[key]
+
+    return obj
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_update(request, payload, pk):
+    name = payload.get("name")
+    pos_id = int(payload.get("pos_id"))
+    qs = Position.objects
+    qs_pos = qs.filter(org_id=pk)
+    has_pos_name = _pos_name_or_id_check(qs_pos, name, pos_id)
+
+    if has_pos_name:
+        rsp = {
+            'success': False,
+            'error': '"{name}" нэртэй албан тушаал байна!!!'.format(name=name)
+        }
+    else:
+        payload = _del_unneed_keys(payload)
+        qs_pos.filter(
+            id=pos_id
+        ).update(**payload)
+        rsp = {
+            'success': True,
+            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
+        }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def pos_detail(request, pk):
+    position = Position.objects.filter(id=pk)
+    if not position:
+        raise Http404
+    datas = position.values('id', 'name').first()
+    rsp = {
+        'success': True,
+        'datas': datas
     }
 
     return JsonResponse(rsp)

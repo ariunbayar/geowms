@@ -21,7 +21,7 @@ from django.contrib.gis.geos import MultiPolygon
 
 from backend.dedsanbutets.models import ViewNames
 from backend.dedsanbutets.models import ViewProperties
-from backend.inspire.models import EmpPerm
+from backend.inspire.models import EmpPerm, LThemes
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LCodeListConfigs
 from backend.inspire.models import LCodeLists
@@ -113,12 +113,15 @@ def _get_feature_coll(ob, changeset_list):
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def getRoles(request, fid):
-
+def getRoles(request, tid, fid):
+    file_detail = dict()
+    main_folder = "feature-template"
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
 
     employee = get_object_or_404(Employee, user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
+    theme = LThemes.objects.filter(theme_id=tid).first()
+    feature = LFeatures.objects.filter(feature_id=fid).first()
     perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=fid, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
 
     for perm_kind in perm_kinds:
@@ -134,6 +137,23 @@ def getRoles(request, fid):
             inspire_roles['PERM_APPROVE'] = True
         elif perm_kind == EmpPermInspire.PERM_REVOKE:
             inspire_roles['PERM_REVOKE'] = True
+
+    theme_folder = theme.theme_name_eng
+    feature_folder = feature.feature_name_eng
+    path = os.path.join(settings.MEDIA_ROOT, main_folder, theme_folder, feature_folder)
+    if os.path.exists(path):
+        files = os.listdir(path)
+        if files:
+            file_name = files[0]
+            file_url = os.path.join(path, file_name)
+            file =file_url.split("geoportal_app")
+            file_detail['name'] = file_name
+            file_detail['url'] = file[1]
+            inspire_roles['file'] = file_detail
+        else:
+            inspire_roles['file'] = ''
+
+
     rsp = {
         'roles': inspire_roles,
         'success': True
@@ -207,7 +227,7 @@ def get_wms_layer(request, tid, pid, fid):
     if view_name:
         rsp = {
             'success': True,
-            'url': request.build_absolute_uri(reverse('api:service:qgis-proxy', args=[employee.token])),
+            'url': request.build_absolute_uri(reverse('api:qgis:qgis-proxy', args=[employee.token, fid])),
             'code': 'gp_layer_' + view_name,
         }
     return JsonResponse(rsp)
@@ -317,26 +337,6 @@ def _datetime_display(dt):
     return dt.strftime('%Y-%m-%d') if dt else None
 
 
-def _get_type(value_type_id):
-    if value_type_id == 'number':
-        value_type = 'number'
-    elif value_type_id == 'double':
-        value_type = 'number'
-    elif value_type_id == 'multi-text':
-        value_type = 'text'
-    elif value_type_id == 'text':
-        value_type = 'text'
-    elif value_type_id == 'date':
-        value_type = 'date'
-    elif value_type_id == 'link':
-        value_type = 'text'
-    elif value_type_id == 'boolean':
-        value_type = 'text'
-    else:
-        value_type = 'option'
-    return value_type
-
-
 def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, feature_config_ids, gid=None):
     properties = list()
     for l_property in qs_l_properties:
@@ -344,7 +344,7 @@ def _get_properties(request, qs_l_properties, qs_property_ids_of_feature, fid, f
         data = ''
         code_lists = []
         form = dict()
-        value_type = _get_type(l_property.value_type_id)
+        value_type = utils.get_type(l_property.value_type_id)
         l_data_type = qs_property_ids_of_feature.filter(property_id=l_property.property_id).first()
         data_type_id = l_data_type.data_type_id
         property_id = l_property.property_id
@@ -443,7 +443,6 @@ def _get_user_perm(request, fid):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def detail(request, gid, fid, tid):
-
     user_perm_property = _get_user_perm(request, fid)
     qs_feature_configs = LFeatureConfigs.objects
     qs_feature_configs = qs_feature_configs.filter(feature_id=fid)
@@ -925,9 +924,9 @@ def _check_file_for_geom(form_file_name, uniq_name, ext):
     file_type_name = ''
     uniq_file_name = ''
 
-    if ext == 'shp':
-        exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
-    elif ext == 'gml':
+    # if ext == 'shp':
+    #     exts = ['.shx', '.shp', '.prj', '.dbf', '.cpg']
+    if ext == 'gml':
         exts = ['.gml', '.gfs']
     elif ext == 'geojson':
         exts = ['.geojson', '.gfs']
@@ -1109,13 +1108,14 @@ def file_upload_save_data(request, tid, pid, fid, ext):
 @require_GET
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
-def get_qgis_url(request):
+def get_qgis_url(request, fid):
     emp = get_object_or_404(Employee, user=request.user)
     qgis_local_base_url = get_config('qgis_local_base_url')
+    url = '{qgis_local_base_url}/api/qgis/{token}/{fid}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token, fid=fid),
     rsp = {
         'success': True,
-        'wms_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
-        'wfs_url': '{qgis_local_base_url}/api/service/{token}/'.format(qgis_local_base_url=qgis_local_base_url, token=emp.token),
+        'wms_url': url,
+        'wfs_url': url,
     }
     return JsonResponse(rsp)
 

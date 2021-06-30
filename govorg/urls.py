@@ -45,6 +45,13 @@ urlpatterns = [
                 path('<int:pk>/detail/', role_views.detail),
                 path('<int:pk>/delete/', role_views.delete),
             ], 'role'))),
+            path('position/', include(([
+                path('', org_views.position_list),
+                path('create/', org_views.pos_create),
+                path('<int:pk>/remove/', org_views.pos_remove),
+                path('<int:pk>/edit/', org_views.pos_update),
+                path('<int:pk>/detail/', org_views.pos_detail),
+            ], 'position'))),
         ], 'role'))),
 
         path('tseg/', include(([
@@ -58,7 +65,7 @@ urlpatterns = [
         ], 'system'))),
 
         path('inspire/', include(([
-            path('<int:fid>/getRoles/', govorg_inspire_views.getRoles),
+            path('<int:tid>/<int:fid>/getRoles/', govorg_inspire_views.getRoles),
             path('<int:tid>/<int:pid>/<int:fid>/get-wms-layer/', govorg_inspire_views.get_wms_layer),
             path('<int:pid>/<int:fid>/geom-type/', govorg_inspire_views.geom_type),
             path('<int:pid>/<int:fid>/add/', govorg_inspire_views.add),
@@ -71,7 +78,7 @@ urlpatterns = [
             path('<int:pid>/<int:fid>/remove/', govorg_inspire_views.delete),
             path('<int:fid>/geom-update/', govorg_inspire_views.updateGeom),
             path('send-data/<int:tid>/<int:pid>/<int:fid>/<str:ext>/', govorg_inspire_views.file_upload_save_data),
-            path('qgis-url/', govorg_inspire_views.get_qgis_url),
+            path('qgis-url/<int:fid>/', govorg_inspire_views.get_qgis_url),
             path('qpi-url/', govorg_inspire_views.get_api_url),
             path('control-to-approve/', govorg_inspire_views.control_to_approve),
             path('control-to-remove/', govorg_inspire_views.control_to_remove),

@@ -16,6 +16,7 @@ export class List extends Component {
             fid: null,
             tid: null,
             id_list: [],
+            open_datas: [],
             view_name: '',
             fname: null,
             prev_event: null,
@@ -32,7 +33,8 @@ export class List extends Component {
             cache_values: [],
             property_length:null,
             check_list: false,
-            has_view: false
+            has_view: false,
+            check_open: false,
         }
         this.getAll = this.getAll.bind(this)
         this.getProperties = this.getProperties.bind(this)
@@ -61,12 +63,13 @@ export class List extends Component {
 
     getProperties(fid, tid, fname, event) {
         var check_list = this.state.check_list
+        var check_open = this.state.check_open
         let property_length = 0
         if (event) this.activeView(event)
         this.setState({ fid, tid, fname, property_loading: true })
         service
-            .getPropertyFields(fid)
-            .then(({ success, fields, id_list, view, url, style_name, geom_type, cache_values }) => {
+            .getPropertyFields(tid, fid)
+            .then(({ success, fields, id_list, view, url, style_name, geom_type, cache_values, open_datas, file }) => {
                 if(success) {
                     fields.map((f_config, idx) =>
                         f_config.data_types.map((data_type, idx) =>
@@ -78,6 +81,7 @@ export class List extends Component {
                     )
 
                     if(property_length == id_list.length) { check_list = true }
+                    if(property_length == open_datas.length) { check_open = true }
                     this.setState({
                         fields,
                         id_list,
@@ -86,13 +90,16 @@ export class List extends Component {
                         check_list,
                         view_style_name: style_name,
                         geom_type,
+                        open_datas,
+                        check_open,
                         property_loading: false,
                         cache_values,
                         property_length: property_length,
                         has_view: success,
+                        file,
                     })
                 }
-                else this.setState({ property_loading: false, has_view: success, geom_type, view_style_name: '' })
+                else this.setState({ property_loading: false, has_view: success, geom_type, view_style_name: '', file})
             })
     }
 
@@ -249,8 +256,10 @@ export class List extends Component {
                     fname={this.state.fname}
                     tid={this.state.tid}
                     id_list={this.state.id_list}
+                    open_datas={this.state.open_datas}
                     property_length={this.state.property_length}
                     check_list={check_list}
+                    check_open={this.state.check_open}
                     view={this.state.view}
                     style_names={style_names}
                     url={url}
@@ -260,6 +269,7 @@ export class List extends Component {
                     property_loading={property_loading}
                     cache_values={cache_values}
                     has_view={this.state.has_view}
+                    file={this.state.file}
                 />
             </div>
         )

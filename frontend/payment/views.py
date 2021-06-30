@@ -1,6 +1,7 @@
 import os
 import io
 import urllib.request
+import requests
 import uuid
 import json
 import math
@@ -52,6 +53,7 @@ from main import utils
 from zipfile import ZipFile
 
 from geojson import FeatureCollection
+
 
 def index(request):
 
@@ -962,7 +964,7 @@ def _make_property_code_value(mdata):
 
 
 def _class_name_bolon_orgoor_angilah(points, folder_name):
-    data, filter_value_type = utils.get_filter_dicts('pointname')
+    data, filter_value_type = utils.get_filter_dicts('pointid')
     values = list()
     tseg_pdfs = list()
 
@@ -1029,6 +1031,7 @@ def _class_name_bolon_orgoor_angilah(points, folder_name):
     return values, tseg_pdfs
 
 
+
 def _create_lavlagaa_infos(payment, folder_name):
     is_true = False
     points = PaymentPoint.objects.filter(payment=payment)
@@ -1044,6 +1047,10 @@ def _create_lavlagaa_infos(payment, folder_name):
             is_true = True
 
     return is_true
+
+# folder_name = 'tseg-personal-file'
+# payment = Payment.objects.filter(id=219).first()
+# _create_lavlagaa_infos(payment, folder_name)
 
 
 def _create_pdf(download_type, payment_id, layer_code, infos, image_name, folder_name, orientation):
@@ -1166,14 +1173,11 @@ def createPdf(values):
     pdf.cell(-50)
     pdf.cell(10, 8, '1.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн нэр', 1, 0, 'C')
-    pdf.cell(43, 8, _check_none(values, 'Pointid'), 1, 0, 'C')
+    pdf.cell(43, 8, _check_none(values, 'Pointname'), 1, 0, 'C')
 
     pdf.cell(10, 8, '2.', 1, 0, 'C')
     pdf.cell(41, 8, 'Цэгийн дугаар', 1, 0, 'C')
-    tseg_dugaar = values['Pointid']
-    if 'localId' in values:
-        tseg_dugaar = values['localId']
-    pdf.cell(43, 8, tseg_dugaar, 1, 0, 'C')
+    pdf.cell(43, 8,  _check_none(values, 'Pointid'), 1, 0, 'C')
     pdf.cell(90, 8, " ", 0, 2, 'C')
     pdf.cell(-188)
 
@@ -1324,6 +1328,22 @@ def _get_uniq_id(payment):
     return uniq_id
 
 
+def _str_to_int(value):
+    if isinstance(value, str):
+        value = int(value)
+    return value
+
+
+def _get_amount(geo_id):
+    m_data_qs = _filter_Model([{'geo_id': geo_id}], Model=MDatas)
+    m_data_qs = _filter_Model([{'property_id': 10101103, 'feature_config_id': 101, 'data_type_id': 101011}], initial_qs=m_data_qs)
+    m_data = m_data_qs.first()
+    if m_data and m_data.code_list_id == 10006:
+        # amount = _str_to_int(utils.get_config('POINT_PRICE'))
+        return 11300
+    return False
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1350,13 +1370,18 @@ def purchase_from_cart(request, payload):
         )
         pay_id = payment.id
         for data in datas:
-            amount = 0
             pdf_id = data['pdf_id']
+            if not pdf_id:
+                pdf_id = data['name']
 
             if pdf_id:
-                wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                amount = _get_amount(data['id'])
+                if not amount:
+                    wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                    amount = wms_layer.feature_price
+                    if not amount:
+                        amount = 0
 
-                amount = wms_layer.feature_price
                 total_amount += amount
 
                 PaymentPoint.objects.create(
@@ -1364,7 +1389,7 @@ def purchase_from_cart(request, payload):
                     point_id=data['id'],
                     point_name=data['name'],
                     amount=amount,
-                    pdf_id=data['pdf_id'],
+                    pdf_id=pdf_id,
                 )
 
         Payment.objects.filter(id=pay_id).update(total_amount=total_amount)
@@ -1581,6 +1606,21 @@ def _radius_formula(radius):
     return radius
 
 
+def _get_geoserver_base_url():
+    conf_names = [
+        'geoserver_protocol',
+        'geoserver_host',
+        'geoserver_port',
+    ]
+    configs = utils.get_configs(conf_names)
+    base_url = '{protocol}://{host}:{port}'.format(
+        protocol=configs['geoserver_protocol'],
+        host=configs['geoserver_host'],
+        port=configs['geoserver_port'],
+    )
+    return base_url
+
+
 @require_POST
 @ajax_required
 @login_required
@@ -1590,12 +1630,7 @@ def get_popup_info(request, payload):
     radius = int(payload.get('scale_value'))
     radius = _radius_formula(radius)
 
-    value_type = None
-    property_name = None
-    property_code = None
     infos = list()
-    value_will_change_types = ['single-select', 'multi-select']
-
     views_qs = ViewNames.objects
     views_qs = views_qs.filter(
         view_name__in=[
@@ -1604,58 +1639,62 @@ def get_popup_info(request, payload):
         ]
     )
 
-    geo_id_name = 'geo_id'
+    base_url = _get_geoserver_base_url()
+    base_url = base_url + "/geoserver/wfs"
 
-    for view_qs in views_qs:
-        view_name = view_qs.view_name
-        viewproperty_ids, property_qs = _get_properties_qs(view_qs)
+    cql_filter = "dwithin(geo_data, Point({x} {y}), {radius}, meters)".format(x=coordinate[1], y=coordinate[0], radius=radius)
+    gs_geo_id = 'inspire_id'
+    geo_id = 'geo_id'
+    success_codes = [200]
+
+    for view in views_qs:
+        view_name = view.view_name
+
+        viewproperty_ids, property_qs = _get_properties_qs(view)
         properties = property_qs.values("property_code", "property_name", "value_type_id")
 
-        with connections['default'].cursor() as cursor:
-            sql = """
-                SELECT
-                    {geo_id_name}, {properties}
-                FROM
-                    {view_name}
-                WHERE (
-                    ST_DistanceSphere(
-                        geo_data,
-                        ST_SetSRID(
-                            ST_MakePoint({x}, {y})
-                        ,4326)
-                    )
-                    <= {radius}
-                )
-            """.format(
-                view_name=view_name,
-                properties=",".join([prop_code['property_code'] for prop_code in properties]),
-                x=coordinate[0],
-                y=coordinate[1],
-                radius=radius,
-                geo_id_name=geo_id_name,
-            )
-            cursor.execute(sql)
-            results = [dict((cursor.description[i][0], value)
-                for i, value in enumerate(row)) for row in cursor.fetchall()[:5]]
+        select_properties = gs_geo_id + "," + ",".join([prop_code['property_code'] for prop_code in properties])
+        if not properties:
+            select_properties = select_properties.replace(",", '')
 
-            for result in results:
-                datas = list()
-                datas.append('gp_layer_' + view_qs.view_name)
-                datas.append(list())
-                for key, value in result.items():
-                    if key == geo_id_name:
-                        datas[1].append([key, value, key])
-                    for prop in properties:
-                        if prop['property_code'].lower() == key and value:
-                            if prop['value_type_id'] in value_will_change_types:
-                                code_list_qs = LCodeLists.objects
-                                code_list_qs = code_list_qs.filter(code_list_name=value)
-                                if code_list_qs:
-                                    code_list = code_list_qs.first()
-                                    value = code_list.code_list_name
-                            datas[1].append([prop['property_name'], value, key])
-                if datas:
-                    infos.append(datas)
+        headers = {
+            'User-Agent': 'geo 1.0'
+        }
+
+        code = utils.LAYERPREFIX + view_name
+
+        base_geoserver_url = '{url}?service=WFS&version=2.0.0&request=GetFeature&typeName={code}'.format(url=base_url, code=code)
+        base_geoserver_url = '{base_url}&propertyName={properties}'.format(base_url=base_geoserver_url, properties=select_properties.lower())
+        base_geoserver_url = base_geoserver_url + '&' + 'CQL_FILTER={}'.format(cql_filter)
+        base_geoserver_url = base_geoserver_url + '&format_options=CHARSET:UTF-8'
+        base_geoserver_url = base_geoserver_url + "&outputFormat=application/json"
+        base_geoserver_url = base_geoserver_url + "&" + "srs=EPSG%3A4326"
+
+        rsp = requests.get(base_geoserver_url, headers=headers, timeout=300, verify=False)
+        content = rsp.content
+        if rsp.status_code not in success_codes:
+            continue
+
+        content = content.decode()
+        content = utils.json_load(content)
+        features = content['features']
+        for feature in features:
+            ps = feature['properties']
+            ps[geo_id] = ps[gs_geo_id]
+            del ps[gs_geo_id]
+
+            datas = list()
+            datas.append(code)
+            datas.append(list())
+            for key, value in ps.items():
+                if key == geo_id:
+                    datas[1].append([key, value, key])
+                for prop in properties:
+                    if prop['property_code'].lower() == key and value:
+                        datas[1].append([prop['property_name'], value, key])
+            if datas:
+                infos.append(datas)
+
     rsp = {
         'datas': infos,
     }

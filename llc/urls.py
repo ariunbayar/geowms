@@ -7,7 +7,8 @@ from llc.backend.llc_request import views as llc_request_views
 urlpatterns = [
     path('', include(([
         path('', llc_views.llc_frontend, name='frontend'),
-        path('get_tool_datas/', llc_views.get_tool_datas, name='get_tool_datas')
+        path('get_tool_datas/', llc_views.get_tool_datas, name='get_tool_datas'),
+        path('llc_frontend_test/', llc_views.llc_frontend_test, name='test-llc')
     ], 'llc'))),
 
     path('backend/', include(([
@@ -19,7 +20,8 @@ urlpatterns = [
         path('<int:id>/remove-request/', llc_request_views.remove_request, name=' remove_request'),
         path('<int:id>/get-request-data/', llc_request_views.get_request_data, name='get_request_data'),
         path('get-search-field/', llc_request_views.get_search_field, name='get_search_field'),
+        path('get_count/', llc_request_views.get_count, name='get_count'),
     ], 'llc_requests'))),
 
-    re_path('^.*', llc_views.llc_frontend, name='llc'),
+    re_path('^.*', llc_views.llc_frontend, name='frontend'),
 ]

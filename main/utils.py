@@ -6,7 +6,6 @@ import re
 import unicodedata
 import importlib
 import zipfile
-from django import utils
 import pyproj
 import math
 import json
@@ -45,6 +44,9 @@ from backend.inspire.models import LProperties, MGeoDatas
 
 from backend.another_database.models import AnotherDatabase
 import main.geoserver as geoserver
+
+
+LAYERPREFIX = 'gp_layer_'
 
 
 def resize_b64_to_sizes(src_b64, sizes):
@@ -273,6 +275,28 @@ def _make_connection(from_email):
     return connection
 
 
+def _make_html(text, host_name, token):
+    protocol = 'https'
+    not_secure_ips = ['192.168.10.92']
+    if settings.DEBUG or host_name in not_secure_ips:
+        protocol = 'http'
+
+    host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
+
+    html = """
+            <!DOCTYPE html>
+            <html>
+                <head></head>
+                <body>
+                    <p>{text}</p>
+                    <a style="color: 'blue'" href="{host}/gov/secure/approve/{token}/">Энд дарна уу</a>
+                </body>
+            </html>
+        """.format(text=text, host=host, token=token)
+
+    return html
+
+
 def send_approve_email(user, subject=None, text=None):
 
     if not user.email:
@@ -291,14 +315,12 @@ def send_approve_email(user, subject=None, text=None):
         subject = 'Геопортал хэрэглэгч баталгаажуулах'
     if not text:
         text = 'Дараах холбоос дээр дарж баталгаажуулна уу!'
-    if host_name == 'localhost:8000':
-        msg = '{text} http://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
-    else:
-        msg = '{text} https://{host_name}/gov/secure/approve/{token}/'.format(text=text, token=token, host_name=host_name)
+
+    html_message = _make_html(text, host_name, token)
     from_email = get_config('EMAIL_HOST_USER')
     to_email = [user.email]
 
-    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
+    send_mail(subject, text, from_email, to_email, connection=_make_connection(from_email), html_message=html_message)
 
     return True
 
@@ -955,7 +977,7 @@ def get_geom_for_filter_from_geometry(geometry, change_to_multi=False):
 
 
 def check_view_name(view_name):
-    view_name = remove_text_from_str(view_name, 'gp_layer_')
+    view_name = remove_text_from_str(view_name, LAYERPREFIX)
     has_view_name = False
     with connections['default'].cursor() as cursor:
         sql = """
@@ -995,7 +1017,7 @@ def get_inside_geoms_from_view(geo_json, view_name, properties=list()):
     return datas
 
 
-def remove_text_from_str(main_text, remove_text='gp_layer_'):
+def remove_text_from_str(main_text, remove_text=LAYERPREFIX):
     replaced_text = main_text
     if remove_text in main_text:
         replaced_text = main_text.replace(remove_text, '')
@@ -1374,10 +1396,19 @@ def get_mdata_value(feature_code, geo_id, is_display=False):
 
 
 def get_2d_data(geo_id):
+    mgeo_qs = MGeoDatas.objects.filter(geo_id=geo_id).first()
+    hex = mgeo_qs.geo_data.wkt
+    hex = hex.replace(' Z', '')
+    hex = hex.replace(' 0', '')
+    data = hex
+    return data
+
+
+def get_2d_data_using_pg(geo_id):
     cursor = connections['default'].cursor()
     sql = """
         SELECT
-            ST_AsText(ST_Transform(st_force2d(geo_data),4326)) as geom
+            ST_AsText(ST_Transform(st_force2d(geo_data), 4326)) as geom
         FROM
             m_geo_datas
         WHERE
@@ -1440,6 +1471,16 @@ def geo_cache(key_name, key, qs, time):
     return qs
 
 
+# property ний value_type_id аас mdata ний value төрөлийг авах
+def get_prop_value_type(value_type_id):
+    filter_value_type = 'value_text'
+    for type in value_types():
+        if value_type_id in type['value_names']:
+            filter_value_type = type['value_type']
+            break
+    return filter_value_type
+
+
 # тухайн property г мдатагаас хайхад бэлэн маягаар гаргаж авах
 def get_filter_dicts(property_code='pointnumber', feature_code='gnp-gp-gp'):
     prop_qs = LProperties.objects
@@ -1450,11 +1491,7 @@ def get_filter_dicts(property_code='pointnumber', feature_code='gnp-gp-gp'):
     property_qs, l_feature_c_qs, data_type_c_qs = get_properties(feature.feature_id)
     data = get_filter_field_with_value(property_qs, l_feature_c_qs, data_type_c_qs, prop.property_code)
 
-    for prop_dict in prop_qs.values():
-        for type in value_types():
-            if prop_dict['value_type_id'] in type['value_names']:
-                filter_value_type = type['value_type']
-                break
+    filter_value_type = get_prop_value_type(prop.value_type_id)
 
     return data, filter_value_type
 
@@ -1626,6 +1663,10 @@ def get_colName_type(view_name, data):
     return geom_att, some_attributes
 
 
+def make_layer_name(view_name):
+    return LAYERPREFIX + view_name
+
+
 def check_gp_design():
     ws_name = 'gp_design'
     ds_name = ws_name
@@ -1658,7 +1699,7 @@ def check_gp_design():
             ds_name,
         )
 
-    layer_name = 'gp_layer_' + table_name
+    layer_name = make_layer_name(table_name)
     check_layer = geoserver.getDataStoreLayer(
         ws_name,
         ds_name,
@@ -1864,9 +1905,11 @@ def get_feature(shape_geometries):
 
 
 def make_view_name(feature):
-    feature_code = feature.feature_code
-    feature_code = feature_code.split("-")
-    view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
+    view_name = ''
+    if feature and feature.feature_code:
+        feature_code = feature.feature_code
+        feature_code = feature_code.split("-")
+        view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
     return view_name
 
 
@@ -1880,3 +1923,46 @@ def get_feature_from_layer_code(layer_code):
     feature_qs = feature_qs.filter(feature_name_eng__iexact=eng_name, feature_code__endswith=code)
     feature = feature_qs.first()
     return feature
+
+
+def get_org_from_user(user, is_admin=True):
+    Employee = apps.get_model("backend_org", "Employee")
+    emp_qs = Employee.objects
+    emp_qs = emp_qs.filter(user=user)
+    if is_admin:
+        emp_qs = emp_qs.filter(is_admin=is_admin)
+    if not emp_qs:
+        return False
+    return emp_qs.first().org
+
+
+def get_today_datetime(is_string=False):
+    now = datetime.now()
+    if is_string:
+        return datetime_to_string(now)
+    return now
+
+
+def get_type(value_type_id):
+    number_types = ['number', 'double']
+    text_types = ['text', 'multi_text', 'link', 'boolean']
+
+    if value_type_id in number_types:
+        value_type = 'number'
+    elif value_type_id in text_types:
+        value_type = 'text'
+    elif value_type_id == 'date':
+        value_type = 'date'
+    else:
+        value_type = 'option'
+
+    return value_type
+
+
+def get_value_from_types(choices, value):
+    choices = list(choices)
+    for option in choices:
+        option = list(option)
+        if value == option[0]:
+            return option[1]
+    return ''

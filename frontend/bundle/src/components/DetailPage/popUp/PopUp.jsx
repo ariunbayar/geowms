@@ -37,7 +37,7 @@ class PopUpCmp extends Component {
         this.checkModeAndCode = this.checkModeAndCode.bind(this)
         this.openCartSide = this.openCartSide.bind(this)
         this.checkDataForPurchase = this.checkDataForPurchase.bind(this)
-        this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
+        // this.checkButtonEnableWithPdf = this.checkButtonEnableWithPdf.bind(this)
         this.checkButtonEnableWithId = this.checkButtonEnableWithId.bind(this)
     }
 
@@ -96,6 +96,8 @@ class PopUpCmp extends Component {
         let values
         let localid
         let geom_name
+        let is_enable = false
+        let check = 0
         this.click_count = 0
         if (datas.length > 0) {
             if (this.props.is_from_inspire) {
@@ -117,17 +119,25 @@ class PopUpCmp extends Component {
                     // this.checkButtonEnableWithPdf(value[1])
                 }
                 if (value[2] && value[2].toLowerCase() == 'pointname') {
-                    this.checkButtonEnableWithId(localid, value[1])
+                    check ++
+                    // this.checkButtonEnableWithId(localid, value[1])
                     this.setState({ name: value[1] })
                     geom_name = value[1]
                 }
+                if (value[2].toLowerCase() == 'pointid') {
+                    check ++
+                    this.setState({ pdf_id: value[1] })
+                }
             })
-            this.setNowData(number, datas, mode, code, geom_name)
+            if (check == 2) {
+                is_enable = true
+            }
+            this.setNowData(number, datas, mode, code, geom_name, is_enable)
             this.props.setSource(mode)
         }
     }
 
-    setNowData(number, datas, mode, code, geom_name) {
+    setNowData(number, datas, mode, code, geom_name, is_enable) {
         let data
         this.is_from_inspire = true
 
@@ -137,17 +147,17 @@ class PopUpCmp extends Component {
         if (code != "gp_layer_geodeticalpoint_gp_view") {
             this.is_from_inspire = false
         }
-        this.setState({ data, mode, datas, code, geom_name })
+        this.setState({ data, mode, datas, code, geom_name, is_enable })
     }
 
-    checkButtonEnableWithPdf(pdf_id){
-        service.checkButtonEnableWithPdf(pdf_id)
-            .then(({is_enable, success}) => {
-                if(success){
-                    this.setState({ is_enable, pdf_id })
-                }
-            })
-    }
+    // checkButtonEnableWithPdf(pdf_id){
+    //     service.checkButtonEnableWithPdf(pdf_id)
+    //         .then(({is_enable, success}) => {
+    //             if(success){
+    //                 this.setState({ is_enable, pdf_id })
+    //             }
+    //         })
+    // }
 
     checkButtonEnableWithId(geo_id, pdf_id){
         service.checkButtonEnableWithId(geo_id, pdf_id)
@@ -169,18 +179,20 @@ class PopUpCmp extends Component {
 
 
     checkDataForPurchase(){
-        this.setState({ is_purchase: true })
-        var data = [{ 'name': this.state.name,'id': this.state.id, 'code': this.state.code, 'geom_name': this.state.geom_name, 'pdf_id': this.state.pdf_id }]
-        if(this.state.data.length > 0){
-            service.purchaseFromCart(data)
-                .then(({success, msg, payment_id}) => {
-                    if(success){
-                        setTimeout(() => {
-                            this.setState({ data: [], is_purchase: false })
-                            window.location.href=`/payment/purchase/${payment_id}/`;
-                        }, 1000);
-                    }
-                }).catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
+        if (this.state.is_enable) {
+            this.setState({ is_purchase: true })
+            var data = [{ 'name': this.state.name,'id': this.state.id, 'code': this.state.code, 'geom_name': this.state.geom_name, 'pdf_id': this.state.pdf_id }]
+            if(this.state.data.length > 0){
+                service.purchaseFromCart(data)
+                    .then(({success, msg, payment_id}) => {
+                        if(success){
+                            setTimeout(() => {
+                                this.setState({ data: [], is_purchase: false })
+                                window.location.href=`/payment/purchase/${payment_id}/`;
+                            }, 1000);
+                        }
+                    }).catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
+            }
         }
     }
 
@@ -296,11 +308,17 @@ class PopUpCmp extends Component {
                                         <button
                                             className="btn btn-xs btn-primary mx-3"
                                             onClick={() => this.checkDataForPurchase()}
-                                            // disabled={is_enable ? "" : "disabled"}
-                                            disabled={true}
+                                            disabled={is_enable ? "" : "disabled"}
+                                            // disabled={true}
                                         >
-                                            {/* Худалдаж авах */}
-                                            Засвартай байгаа
+                                            {
+                                                is_enable
+                                                ?
+                                                    "Худалдаж авах"
+                                                :
+                                                    "Худалдаж авах боломжгүй"
+                                            }
+                                            {/* Засвартай байгаа */}
                                         </button>
                                         <button
                                             className="btn btn-xs btn-primary my-2 mx-3"

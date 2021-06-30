@@ -3,6 +3,8 @@ import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 import { service } from "./service"
 import MenuItem from "@utils/MenuItem"
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
+import { DisplayNotif } from '@utils/Notification'
+import DisplayModal from "@utils/Modal/DisplayModal"
 
 const InsPerms  = React.lazy(() => import('./Role/Role/GovPerms'));
 const Gov  = React.lazy(() => import('./Role/Gov/index'));
@@ -23,6 +25,7 @@ const ZipCode = React.lazy(() => import('./Bundles/Zipcode'));
 const Addresses = React.lazy(() => import('./Role/EmployeeAddress'));
 const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
+const Position = React.lazy(() => import('@helpComp/Position'));
 const LLCRequest = React.lazy(() => import("./LLCRequest"));
 
 const Tseg = React.lazy(() => import('./Bundles/TsegPersonal'));
@@ -38,12 +41,14 @@ export class App extends Component {
             emp_role: {},
             approve: false,
             revoke: false,
-            base_layer_list: []
+            base_layer_list: [],
         }
         this.requestCount = this.requestCount.bind(this)
         this.getEmpRoles = this.getEmpRoles.bind(this)
         this.getApproveAndRevoke = this.getApproveAndRevoke.bind(this)
         this.getBaseLayer = this.getBaseLayer.bind(this)
+        this.getModalFunc = this.getModalFunc.bind(this)
+        this.getNotifFunc = this.getNotifFunc.bind(this)
     }
 
     componentDidMount() {
@@ -87,12 +92,23 @@ export class App extends Component {
         })
     }
 
+    getModalFunc(setModal) {
+        global.MODAL = setModal
+    }
+
+    getNotifFunc(setNotif) {
+        global.NOTIF = setNotif
+    }
+
     render() {
         const { org_role, employee, allowed_geom } = this.props.org
         const { emp_role , approve, revoke, base_layer_list } = this.state
         var point_perms = emp_role.point_perms
+
         return (
             <BrowserRouter>
+                <DisplayModal getModalFunc={this.getModalFunc}/>
+                <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
                     <div className="brand-logo">
                         <a href="/">
@@ -103,16 +119,22 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Байгууллага">
                             <ul className="sidebar-submenu">
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
                                 {
                                     employee.is_admin
                                     &&
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                                        <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
                                 }
-                                    <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
+                                {
+                                    employee.is_admin &&
+                                        <>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/position/" text="Албан тушаал"></MenuItem>
+                                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                                        </>
+                                }
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
                             </ul>
                         </MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-link" url="/gov/system/" text="Систем"></MenuItem>
@@ -203,7 +225,6 @@ export class App extends Component {
                         <MenuItem icon="gp-text-primary zmdi zmdi-pin-help" url="/gov/help/" text="Тусламж"></MenuItem>
                     </ul>
                 </div>
-
                 <div className="clearfix">
                     <div className="content-wrapper">
                         <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
@@ -218,6 +239,7 @@ export class App extends Component {
                                 <Route path="/gov/llc-request/" component={LLCRequest} />
                                 <Route path="/gov/meta/" component={Meta} />
 
+                                <Route path="/gov/perm/position/" component={(props) => <Position {...props} is_admin={employee.is_admin} /> } />
                                 <Route path="/gov/perm/region/" component={MapRegion} />
                                 <Route path="/gov/perm/role/" component={(props) => <Role {...props} org_roles={org_role} employee={employee}/> } />
                                 <Route path="/gov/role/role/" component={Role} />

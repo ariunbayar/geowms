@@ -1,3 +1,4 @@
+import requests
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,12 @@ from backend.org.models import Employee
 
 from .form import RegisterForm, LoginForm
 from main import utils
+
+
+HEADERS = {
+    'accept': 'application/json',
+    'Content-type': 'application/json',
+}
 
 
 def get_client_ip(request):
@@ -52,6 +59,20 @@ def login_dan(request):
         return redirect(url)
 
 
+def check_llc_user(user):
+    if user:
+        register = user.register
+        check_llc = 'https://license.gazar.gov.mn/api/engineer/001/{register}'.format(
+            register=register
+        )
+        rsp = requests.get(check_llc, headers=HEADERS, verify=False)
+
+        if rsp.status_code == 200:
+            if rsp.json():
+                return True
+    return False
+
+
 def oauth2(request):
     geo_auth = GeoAuth(request)
 
@@ -84,11 +105,15 @@ def oauth2(request):
                     is_sso=True,
                 )
                 user.roles.add(1)
-
             auth.login(request, user)
+            has_llc = check_llc_user(user)
+            if has_llc:
+                return render(request, 'llc/dan_user.html')
+
             if request.user_agent.is_mobile:
                 return redirect(settings.LOGIN_REDIRECT_URL_MOBILE)
             else:
+
                 return redirect(settings.LOGIN_REDIRECT_URL)
 
     raise Http404
@@ -122,10 +147,10 @@ def login(request):
     if request.method == 'POST':
         email = request.POST.get('email', None)
         password = request.POST.get('password')
-        zurag = request.POST.get('zurag')
-        captcha = request.POST.get('captcha')
+        captcha_check = request.POST.get('captcha_check')
+        captcha_main = request.POST.get('captcha_main')
 
-        if zurag != captcha and not settings.DEBUG:
+        if captcha_main != captcha_check and not settings.DEBUG:
             messages.warning(request, 'Captcha буруу байна.')
             return redirect('secure:login')
 

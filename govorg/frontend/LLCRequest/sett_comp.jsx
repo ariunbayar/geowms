@@ -1,8 +1,14 @@
 import React, {Component, Fragment} from "react"
-import {service} from './service'
+
+import { makeStateColor, makeKindColor } from "@helpUtils/functions"
+import Modal from "@utils/Modal/Modal"
+import BackButton from "@utils/Button/BackButton"
+
 import RequestModal from './requestModal'
 import {ConfigureBundle} from './configure_bundle'
-import Modal from "@utils/Modal/Modal"
+// govorg/frontend/LLCRequest/LLCList.jsx
+
+import {service} from './service'
 
 export class LLCSettings extends Component {
 
@@ -28,6 +34,7 @@ export class LLCSettings extends Component {
         this.Save = this.Save.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.goLink = this.goLink.bind(this)
     }
 
     getArray(data, selected_value) {
@@ -113,7 +120,7 @@ export class LLCSettings extends Component {
         const {id} = this.props.match.params
 
         service.getFilesDetal(id).then(async ({list_of_datas}) => {
-            const {themes, packages, features} = await service.getInspireTree()
+            const { themes, packages, features } = await service.getInspireTree()
             list_of_datas.map((list_of_data, idx) => {
                 if (list_of_data.theme.id) {
                     var selected_packages = this.getArray(packages, list_of_data.theme.id)
@@ -150,6 +157,23 @@ export class LLCSettings extends Component {
         this.handleModalOpen()
     }
 
+    goLink(values) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: "fa fa-commenting",
+            modal_bg: '',
+            icon_color: 'primary',
+            title: 'Тайлбар',
+            text: values.description,
+            has_button: false,
+            actionNameBack: '',
+            actionNameDelete: '',
+            modalAction: null,
+            modalClose: null,
+        }
+        global.MODAL(modal)
+    }
+
     render () {
         const { list_of_datas, model_status, selected_values, save_icon} = this.state
         return (
@@ -162,10 +186,13 @@ export class LLCSettings extends Component {
                                     <tr>
                                         <th scope="col"> № </th>
                                         <th scope="col">Төрөл</th>
+                                        <th scope="col">Төлөв</th>
+                                        <th scope="col">Өөрчлөлт</th>
                                         <th scope="col">THEME</th>
                                         <th scope="col">PACKAGE</th>
                                         <th scope="col">FEATURE</th>
                                         <th scope="col">дэд сан сонгох</th>
+                                        <th scope="col">Тайлбар</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,6 +206,12 @@ export class LLCSettings extends Component {
                                             <td>
                                                 {value.geom_type}
                                             </td>
+                                            <td className={`${makeStateColor(value.state)}`}>
+                                                {value.state}
+                                            </td>
+                                            <td className={`${makeKindColor(value.kind)}`}>
+                                                {value.kind}
+                                            </td>
                                             <td>
                                                 {value.theme.name}
                                             </td>
@@ -190,11 +223,15 @@ export class LLCSettings extends Component {
                                             </td>
                                             <td>
                                                 {
-                                                    value.icon_state ?
-                                                    <a className='gp-text-primary fa fa-pencil-square-o' href="#"  onClick={(e) => this.handleProceed(value)}/>
+                                                    value.icon_state
+                                                    ?
+                                                        <a className="gp-text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
                                                     :
-                                                    <a className='gp-text-primary fa fa-floppy-o' href="#"  onClick={(e) => this.Save(value, idx)}/>
+                                                        <a className='gp-text-primary fa fa-floppy-o' role="button" onClick={(e) => this.Save(value, idx)}/>
                                                 }
+                                            </td>
+                                            <td>
+                                                <a className='gp-text-primary fa fa-commenting' role="button" onClick={(e) => this.goLink(value)}/>
                                             </td>
                                         </tr>
                                         ): <tr><td>дата бүртгэлгүй байна</td></tr>
@@ -205,13 +242,13 @@ export class LLCSettings extends Component {
                         {
                             model_status
                             &&
-                            <RequestModal
-                                modalClose={this.closeModel}
-                                model_body={ConfigureBundle}
-                                model_action={this.modelAction}
-                                {...this.state}
-                                title={'Дэд сан тохируулах'}
-                            />
+                                <RequestModal
+                                    modalClose={this.closeModel}
+                                    model_body={ConfigureBundle}
+                                    model_action={this.modelAction}
+                                    {...this.state}
+                                    title={'Дэд сан тохируулах'}
+                                />
                         }
                         <Modal
                             modal_status={ this.state.modal_status }
@@ -228,7 +265,13 @@ export class LLCSettings extends Component {
                         />
                     </div>
                 </div>
+                <BackButton
+                    {...this.props}
+                    name={'Буцах'}
+                    navlink_url={`/gov/llc-request/`}>
+                </BackButton>
             </div>
         )
     }
 }
+

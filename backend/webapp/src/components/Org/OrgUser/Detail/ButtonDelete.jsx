@@ -19,6 +19,7 @@ export class ButtonDelete extends Component {
             var status = this.props.status
             var modal_icon
             var icon_color
+            var title
             var text
             var modalClose
             if (status == 'success') {
@@ -30,15 +31,16 @@ export class ButtonDelete extends Component {
             if (status == 'fail') {
                 modal_icon = 'fa fa-times-circle'
                 icon_color = 'danger'
-                text = 'Устгахад алдаа гарлаа!'
+                title = 'Устгах боломжгүй хэрэглэгч байна!'
+                text = 'Хэрэглэгч худалдан авалт хийсэн байна.'
                 modalClose = null
             }
             this.modalChange(
                 modal_icon,
                 null,
                 icon_color,
+                title,
                 text,
-                '',
                 false,
                 '',
                 '',
@@ -79,7 +81,7 @@ export class ButtonDelete extends Component {
                 <span
                     onClick={() =>
                         this.modalChange(
-                            'fa fa-times-circle',
+                            'fa fa-exclamation-circle',
                             null,
                             'danger',
                             'Албан хаагчийг устгах',
@@ -97,17 +99,17 @@ export class ButtonDelete extends Component {
                 </span>
 
                 <Modal
-                    modal_status={ this.state.modal_status }
-                    modal_icon={ this.state.modal_icon }
-                    modal_bg={ this.state.modal_bg }
-                    icon_color={ this.state.icon_color }
-                    title={ this.state.title }
-                    text={ this.state.text }
-                    has_button={ this.state.has_button }
-                    actionNameBack={ this.state.actionNameBack }
-                    actionNameDelete={ this.state.actionNameDelete }
-                    modalAction={ this.state.modalAction }
-                    modalClose={ this.state.modalClose }
+                    modal_status={this.state.modal_status}
+                    modal_icon={this.state.modal_icon}
+                    modal_bg={this.state.modal_bg}
+                    icon_color={this.state.icon_color}
+                    title={this.state.title}
+                    text={this.state.text}
+                    has_button={this.state.has_button}
+                    actionNameBack={this.state.actionNameBack}
+                    actionNameDelete={this.state.actionNameDelete}
+                    modalAction={this.state.modalAction}
+                    modalClose={this.state.modalClose}
                 />
 
             </Fragment>

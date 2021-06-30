@@ -183,6 +183,17 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                     attribute_name=attribute_name[i]['column_name']
                 )
             attributes_hoho.insert(i, attributes)
+        elif attribute_name[i]['data_type'][:4] == 'doub':
+            attributes = '''
+                <attribute>
+                    <name>{attribute_name}</name>
+                    <nillable>true</nillable>
+                    <binding>java.lang.Double</binding>
+                </attribute>
+                '''.format(
+                    attribute_name=attribute_name[i]['column_name']
+                )
+            attributes_hoho.insert(i, attributes)
         elif attribute_name[i]['data_type'][:4] == 'inte':
             attributes = '''
                 <attribute>

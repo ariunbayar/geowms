@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
-from api.utils import replace_src_url
 from backend.payment.models import PaymentLayer
 from main.decorators import ajax_required
 from main.components import Datatable
@@ -46,6 +45,7 @@ def _get_out_type(out_type):
 def pagination(request, payload, out_type):
     items = []
     total_page = []
+    start_index = 1
     out_type = _get_out_type(out_type)
 
     def _get_data_type_name(data_type, item):
@@ -78,11 +78,12 @@ def pagination(request, payload, out_type):
             нэмэлт_талбарууд=нэмэлт_талбарууд
         )
 
-        items, total_page = datatable.get()
+        items, total_page, start_index = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get("page"),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -396,11 +397,12 @@ def mongo_tables_all(request, payload, pk):
         initial_qs=initial_qs
     )
 
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get("page"),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -495,11 +497,12 @@ def get_mssql_tables_list(request, payload, pk):
         initial_qs=initial_qs
     )
 
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
     rsp = {
         'items': items,
         'page': payload.get("page"),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)

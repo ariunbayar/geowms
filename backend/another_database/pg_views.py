@@ -1,18 +1,18 @@
 from geojson import feature
 from backend import another_database
 import datetime
+from django.utils import timezone
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos import Polygon, MultiPolygon, MultiPoint, MultiLineString
 from django.views.decorators.http import require_POST, require_GET
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.db import connections
 from django.shortcuts import get_object_or_404
 
 from backend.another_database.models import AnotherDatabase
 from backend.another_database.models import AnotherDatabaseTable
-from backend.dedsanbutets.models import ViewNames
 
 from main.components import Datatable
 from django.views.decorators.csrf import csrf_exempt
@@ -35,6 +35,9 @@ from backend.inspire.models import (
     MGeoDatas,
     MDatas
 )
+
+
+SELECTCOUNT = 1000
 
 
 @require_GET
@@ -85,12 +88,13 @@ def get_pg_table_list(request, payload, pk):
         initial_qs=initial_qs
     )
 
-    items, total_page = datatable.get()
+    items, total_page, start_index = datatable.get()
 
     rsp = {
         'items': items,
         'page': payload.get("page"),
-        'total_page': total_page
+        'total_page': total_page,
+        'start_index': start_index
     }
 
     return JsonResponse(rsp)
@@ -99,7 +103,7 @@ def get_pg_table_list(request, payload, pk):
 @require_GET
 @ajax_required
 def get_pg_table_names(request):
-    themes = LThemes.objects.all()
+    themes = LThemes.objects.order_by('theme_id')
     l_themes = []
     l_packages = []
     l_features = []
@@ -110,7 +114,7 @@ def get_pg_table_names(request):
             'name': theme_name,
             'code': theme_id
         })
-        packages = LPackages.objects.filter(theme_id=theme.theme_id)
+        packages = LPackages.objects.filter(theme_id=theme.theme_id).order_by('package_id')
         for package in packages:
             package_id = package.package_id
             l_packages.append({
@@ -119,7 +123,7 @@ def get_pg_table_names(request):
                 'parent': theme_id
             })
 
-            features = LFeatures.objects.filter(package_id=package_id)
+            features = LFeatures.objects.filter(package_id=package_id).order_by('feature_id')
             for feat in features:
                 l_features.append({
                     'name': feat.feature_name,
@@ -151,7 +155,7 @@ def _get_valid_data_type(value_type_id):
     elif value_type_id == 'boolean':
         value_type = 'bool'
     else:
-        value_type = 'inte'
+        value_type = 'char'
     return value_type
 
 
@@ -235,6 +239,8 @@ def save_table(request, payload):
     table_name = payload.get('table_name')
     id_list = payload.get('id_list')
     is_insert = payload.get('is_insert')
+    pk_field_configs = payload.get("pk_field_config")
+    pk_field_configs = utils.json_dumps(pk_field_configs)
     result = []
     cursor_pg = utils.get_cursor_pg(id)
 
@@ -252,7 +258,8 @@ def save_table(request, payload):
             'feature_code': feature_name.feature_code,
             'field_config': utils.json_dumps(id_list),
             'another_database': another_database,
-            'created_by': request.user
+            'created_by': request.user,
+            'field_config_index': pk_field_configs
         }
     )
     return JsonResponse({
@@ -265,18 +272,27 @@ def save_table(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def table__detail(request, id, table_id):
+
+    store_field_config = dict()
     another_db_tb = get_object_or_404(AnotherDatabaseTable, pk=table_id)
     field_config = another_db_tb.field_config.replace("'", '"')
-    field_config = utils.json_load(field_config)
+    field_config_index = another_db_tb.field_config_index
+    if field_config_index:
+        field_config_index = field_config_index.replace("'", '"')
+        field_config = utils.json_load(field_config)
+        store_field_config = utils.json_load(field_config_index)
     feature = LFeatures.objects.filter(feature_code=another_db_tb.feature_code).first()
     package = LPackages.objects.filter(package_id=feature.package_id).first()
-
     form_datas = {
         'id_list': field_config,
         'table_name': another_db_tb.table_name,
         'feature_name': feature.feature_id,
         'theme_name': package.theme_id,
-        'package_name': package.package_id
+        'package_name': package.package_id,
+        'pk_field_name': store_field_config.get('pk_field_name') or '',
+        'pk_start_index': store_field_config.get('pk_start_index') or '',
+        'pk_field_count': store_field_config.get('pk_field_count') or '',
+        'pk_field_max_range': store_field_config.get('pk_field_max_range') or '',
     }
 
     return JsonResponse({
@@ -711,10 +727,20 @@ def get_ano_tables(request, pk):
             ORDER BY table_name;
     '''
 
+    sql_views = '''
+        SELECT
+            relname as table_name
+        FROM
+            pg_class
+        WHERE
+            relkind = 'm'
+    '''
+
     table_names = utils.get_sql_execute(sql, cursor_pg, 'all')
+    view_names = utils.get_sql_execute(sql_views, cursor_pg, 'all')
 
     return JsonResponse({
-        'table_names': table_names
+        'table_names': table_names + view_names,
     })
 
 
@@ -734,7 +760,7 @@ def get_table_fields(request, payload, pk):
         attrelid = '{table_name}'::regclass AND    attnum > 0
         ORDER  BY attnum
     '''.format(
-        table_name = table_name,
+        table_name=table_name,
     )
 
     columns = utils.get_sql_execute(sql, cursor_pg, 'all')
@@ -759,56 +785,158 @@ def _delete_datas_of_pg(unique_id, feature_id):
         m_geo_datas.delete()
 
 
-def _get_ona_datas(cursor, table_name, columns, table_geo_data):
+def _get_count_of_table(cursor, table_name, has_range, start_data, data_type, field_name):
+    start_data = _get_type_of_data(start_data, data_type)
+    end_field = _get_type_of_data(has_range, data_type)
+    filter_data = ''
+    order_data = '''
+        group by {field_name}
+        order by {field_name} asc
+    '''.format(
+        field_name=field_name,
+    )
+
+    if has_range:
+        filter_data = '''
+            where
+            {start} <={field_name}  and {field_name}<={end}
+            {order_data}
+        '''.format(
+            field_name=field_name,
+            start=start_data,
+            end=end_field,
+            order_data=order_data
+        )
+
+    if not has_range and start_data:
+        filter_data = '''
+            where
+            {start_data} <={field_name}
+            {order_data}
+        '''.format(
+            start_data=start_data,
+            field_name=field_name,
+            order_data=order_data
+        )
+
     sql = '''
         select
-            {columns}
+            count(*) as count
         from
             public.{table_name}
+            {filter_data}
+    '''.format(
+        table_name=table_name,
+        filter_data = filter_data
+    )
+    cursor.execute(sql)
+    datas = list(utils.dict_fetchall(cursor))
+
+    if has_range or start_data:
+        datas = len(datas)
+    else:
+        datas = datas[0]['count']
+
+    return datas
+
+
+def _get_type_of_data(data, column_type):
+    type_in = ['inte', 'numb', 'nume', 'doub']
+    data_field = ''' '{}' '''.format(data)
+    if column_type[:4] in type_in:
+        data_field = int(data)
+    return data_field
+
+
+def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_field_name, pk_field_type, has_range):
+    start_field = _get_type_of_data(start_data, pk_field_type)
+    end_field = _get_type_of_data(has_range, pk_field_type)
+
+    filter_type = '''
+        {pk_field_name} >= {start_field}
+    '''.format(pk_field_name=pk_field_name, start_field=start_field)
+
+    if has_range:
+        filter_type = '''
+            {start_field} <={field_name}  and {field_name}<={end_field}
+
+        '''.format(
+            field_name=pk_field_name,
+            start_field=start_field,
+            end_field=end_field
+        )
+
+    sql = '''
+        SELECT
+            {pk_field_name},
+            {columns}
+        FROM public.{table_name}
+        WHERE {filter_type} ORDER BY {pk_field_name} ASC
+        limit {select_count}
     '''.format(
         table_name=table_name,
         columns=','.join(columns),
-        table_geo_data=table_geo_data
+        table_geo_data=table_geo_data,
+        filter_type=filter_type,
+        pk_field_name=pk_field_name,
+        select_count=SELECTCOUNT+1,
     )
     cursor.execute(sql)
     datas = list(utils.dict_fetchall(cursor))
     return datas
 
 
-def _insert_geo_data(ona_data, feature, table_geo_data, unique_id):
-
-    geo_data = _geojson_to_geom(ona_data[table_geo_data])
-    geom =utils.convert_3d_with_srid(geo_data)
-    new_geo_id = utils.GEoIdGenerator(feature.feature_id, feature.feature_code).get()
-
-    new_geo = MGeoDatas.objects.create(
+def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
+    geom = None
+    if ona_data[table_geo_data]:
+        geo_data = _geojson_to_geom(ona_data[table_geo_data])
+        geom =utils.convert_3d_with_srid(geo_data)
+    m_datas_object = MGeoDatas(
         geo_id=new_geo_id,
         geo_data=geom,
         feature_id=feature.feature_id,
         created_by=unique_id
     )
-    return new_geo.geo_id
+    return new_geo_id, m_datas_object
 
 
 def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
-
     property_ids = _get_row_to_list('property_id', columns, True)
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_id__in=property_ids)
     prop_codes = list(prop_qs.values_list('property_code', flat=True))
-
+    m_datas_object =  []
     for prop_code in prop_codes:
         data, value_type = utils.get_filter_dicts(prop_code, feature_code=feature.feature_code)
-        for prop_data in columns:
-            if data['property_id'] == prop_data['property_id']:
-                mdata_value = dict()
-                mdata_value[value_type] = ona_data[prop_data['table_field']]
-                MDatas.objects.create(
-                    geo_id=geo_id,
-                    **data,
-                    **mdata_value,
-                    created_by=unique_id
-                )
+        if data:
+            for prop_data in columns:
+                if data['property_id'] == prop_data['property_id']:
+                    mdata_value = dict()
+                    if value_type == "code_list_id":
+                        mdata_value[value_type] = ona_data[prop_data['table_field']]
+                        if str(mdata_value[value_type])[0] == '0':
+                            mdata_value[value_type] = mdata_value[value_type][1:]
+                            if '_' in mdata_value[value_type]:
+                                mdata_value[value_type] = mdata_value[value_type].split('_')[0]
+                            mdata_value[value_type] = int(mdata_value[value_type])
+                    elif value_type == "value_date":
+
+                        if not isinstance(ona_data[prop_data['table_field']], datetime.datetime) and ona_data[prop_data['table_field']]:
+                            mdata_value[value_type] = datetime.datetime.strptime(str(ona_data[prop_data['table_field']]), '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                        else:
+                            mdata_value[value_type] = None
+
+                    else:
+                        mdata_value[value_type] = ona_data[prop_data['table_field']]
+
+                    m_datas_object.append(MDatas(
+                        geo_id=geo_id,
+                        **data,
+                        **mdata_value,
+                        created_by=unique_id
+                    ))
+
+    return m_datas_object
 
 
 def _get_row_to_list(field_name, dict_data, table_field):
@@ -829,30 +957,86 @@ def _get_row_to_list(field_name, dict_data, table_field):
     return row_list
 
 
-def _insert_to_geo_db(ano_db, table_name, cursor, columns, feature):
+def str_to_int(geo_id):
+    return int(geo_id[-9:])
+
+
+def int_to_str(number):
+    return str(number).zfill(9)
+
+
+def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, feature):
     success_count = 0
-    total_count = 0
     failed_count = 0
     unique_id = ano_db.unique_id
+    pk_field_config = ano_db_table_pg.field_config_index
+    pk_field_config = utils.json_load(pk_field_config)
     feature_id = feature.feature_id
-    _delete_datas_of_pg(unique_id, feature_id)
+    # хуучин датаг утсгах хэсэг
+    # _delete_datas_of_pg(unique_id, feature_id)
 
     table_geo_data = list(
         filter(lambda x: x['property_id'] == 'geo_datas', columns)
     )[0]['table_field']
 
     table_fields = _get_row_to_list('table_field', columns, False)
-    ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data)
-    total_count = len(ona_table_datas)
-    for ona_data in ona_table_datas:
-        try:
-            geo_id = _insert_geo_data(ona_data, feature, table_geo_data, unique_id)
-            _insert_m_datas(ona_data, feature, geo_id, columns, unique_id)
-            success_count = success_count + 1
-        except Exception:
-            pass
 
-    return success_count, failed_count, total_count
+    last_geo_data = MGeoDatas.objects.filter(feature_id=feature_id).order_by('-created_on').first()
+
+    if last_geo_data:
+        last_geo_id = last_geo_data.geo_id
+    else:
+        last_geo_id = feature.feature_code + '__' +  int_to_str(1)
+
+    try:
+        start_data = pk_field_config.get('pk_start_index') or ""
+        pk_field_name = pk_field_config.get('pk_field_name') or ""
+        pk_field_type = pk_field_config.get('pk_field_type') or ""
+        count = pk_field_config.get('pk_field_count') or ''
+        pk_field_max_range = pk_field_config.get('pk_field_max_range') or ''
+        if count and int(count) >1:
+            count = count
+        else:
+            count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
+
+        count = int(count)
+        current_data_counts = 0
+        current_geo_id = last_geo_id
+        i = 0
+        count_of_loop = count/SELECTCOUNT
+        count_of_odd = count%SELECTCOUNT
+        if count_of_odd > 0:
+            count_of_loop = int(count_of_loop) + 1
+        while current_data_counts < int(count):
+            m_datas_object = []
+            geo_data_objs = []
+            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type, pk_field_max_range)
+            start_data = ona_table_datas[-1][pk_field_name]
+            len_of_data = len(ona_table_datas)
+            limit_data_count = len_of_data-1
+            if count_of_loop == i:
+                limit_data_count = len_of_data
+            for ona_data in ona_table_datas[0:limit_data_count]:
+                current_geo_id = str_to_int(current_geo_id)
+                current_geo_id = current_geo_id + 1
+                new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
+                current_geo_id = new_geo_id
+                geo_id, geo_data_obj = _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id)
+
+                geo_data_objs.append(geo_data_obj)
+
+                m_d_data = _insert_m_datas(ona_data, feature, new_geo_id, columns, unique_id)
+                m_datas_object = m_datas_object + m_d_data
+                success_count = success_count + 1
+            MGeoDatas.objects.bulk_create(geo_data_objs)
+            MDatas.objects.bulk_create(m_datas_object)
+            current_data_counts = current_data_counts + limit_data_count
+            i += 1
+    except Exception:
+        failed_count += 1
+        pass
+
+    return success_count, failed_count, count
 
 
 def _insert_single_table(ano_db, ano_db_table_pg, cursor):
@@ -862,7 +1046,7 @@ def _insert_single_table(ano_db, ano_db_table_pg, cursor):
     columns = utils.json_load(field_config)
     feature_code = ano_db_table_pg.feature_code
     feature = LFeatures.objects.filter(feature_code=feature_code).first()
-    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, table_name, cursor, columns, feature)
+    success_count, failed_count, total_count = _insert_to_geo_db(ano_db, ano_db_table_pg, table_name, cursor, columns, feature)
     table_info_text = '''
         {table_name} хүснэгт
         нийт {total_count} мөр дата-наас
@@ -947,12 +1131,13 @@ def refresh_view(request, payload):
 
     if table_id :
         ano_db_table_pg = initial_qs.filter(id=table_id).first()
-        _refresh_feature(ano_db_table_pg)
+        # _refresh_feature(ano_db_table_pg)
+
     else :
         ano_db_table_pg = initial_qs.filter(another_database_id=id)
 
-        for item in ano_db_table_pg:
-            _refresh_feature(item)
+        # for item in ano_db_table_pg:
+            # _refresh_feature(item)
 
     return JsonResponse({
         'success': True

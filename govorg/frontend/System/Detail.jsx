@@ -61,7 +61,7 @@ export class Detail extends Component {
         textField.select()
         document.execCommand('copy')
         textField.remove()
-        this.addNotif('success', 'Амжилттай хуулаа', 'times')
+        this.addNotif('success', 'Амжилттай хууллаа', 'times')
     }
 
     render() {

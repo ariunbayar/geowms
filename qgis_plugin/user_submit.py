@@ -229,7 +229,7 @@ class UserSubmit:
 
     def submit(self, data, layer_name):
         try:
-            rsp = requests.post(self.submit_url + 'qgis-submit/', data=data)
+            rsp = requests.post(self.submit_url + 'qgis-submit/', data=data, verify=False)
             if rsp.json():
                 check = rsp.json()
                 if check['success']:
@@ -252,7 +252,7 @@ class UserSubmit:
             match_result = re.search("(?P<url>https?://[^\s]+)", data_source_uri)
             if match_result:
                 wfs_url = match_result.group("url")[:-1]
-                if wfs_url.find('/api/service/') > 0 and wfs_url:
+                if wfs_url.find('/api/qgis/') > 0 and wfs_url:
                     self.submit_url = wfs_url
                     layer_name = layer_name + layer.name() + ', '
                     changed_geom = layer.editBuffer()

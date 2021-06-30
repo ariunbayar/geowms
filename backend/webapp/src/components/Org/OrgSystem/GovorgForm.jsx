@@ -2,9 +2,7 @@ import React, { Component } from "react"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
 import {service} from "./service"
 import {validationSchema} from './validationSchema'
-import ModalAlert from "../../ModalAlert"
 import Attributes from  './Attributes'
-
 export class GovorgForm extends Component {
 
     constructor(props) {
@@ -15,10 +13,7 @@ export class GovorgForm extends Component {
             govorg: {},
             wms_list: [],
             layers: [],
-            modal_alert_status: "closed",
             title: '',
-            model_type_icon: '',
-            timer: null,
             prop_arrow: false,
             accepted_props: []
         }
@@ -27,6 +22,7 @@ export class GovorgForm extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handlePropCheck = this.handlePropCheck.bind(this)
         this.handleCheck = this.handleCheck.bind(this)
+        this.modalClose = this.modalClose.bind(this)
     }
 
     componentDidMount() {
@@ -103,6 +99,23 @@ export class GovorgForm extends Component {
         this.setState({ layers, accepted_props })
     }
 
+    setModal(title, text, icon, has_button) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: icon,
+            modal_bg: '',
+            icon_color: '',
+            title: title,
+            text: text,
+            has_button: has_button,
+            actionNameBack: 'Буцах',
+            actionNameDelete: '',
+            modalAction: '',
+            modalClose: this.modalClose,
+        }
+        global.MODAL(modal)
+    }
+
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
         const org_id = this.props.match.params.id
         const data = {
@@ -121,12 +134,7 @@ export class GovorgForm extends Component {
                 if (success) {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.setState({
-                        modal_alert_status: "open",
-                        title: info,
-                        model_type_icon: 'success',
-                    })
-                    this.modalCloseTime()
+                    this.setModal(info, '', 'fa fa-check-circle text-success', false)
                 } else {
                     setErrors(errors)
                     setSubmitting(false)
@@ -137,28 +145,14 @@ export class GovorgForm extends Component {
                 if (success) {
                     setStatus('saved')
                     setSubmitting(false)
-                    this.setState({
-                        modal_alert_status: "open",
-                        title: info,
-                        model_type_icon: 'success',
-                    })
-                    this.props.refreshCount()
-                    this.modalCloseTime()
+                    global.refreshSystemCount()
+                    this.setModal(info, '', 'fa fa-check-circle text-success', false)
                 } else {
                     setErrors(errors)
                     setSubmitting(false)
                 }
             })
         }
-
-    }
-
-    modalCloseTime() {
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
-        this.state.timer = setTimeout(() => {
-            this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`)
-        }, 2000)
     }
 
     modalClose(){
@@ -281,12 +275,6 @@ export class GovorgForm extends Component {
                         }
                     </div>
                 </div>
-                <ModalAlert
-                    modalAction={() => this.modalClose()}
-                    status={this.state.modal_alert_status}
-                    title={this.state.title}
-                    model_type_icon = {this.state.model_type_icon}
-                />
             </div>
 
         )

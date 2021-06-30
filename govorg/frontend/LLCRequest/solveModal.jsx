@@ -1,37 +1,25 @@
 import React, { Component, useState } from "react"
 import RequestModal from './requestModal'
-import {LLCMap} from '../../../llc/frontend/LLCMap'
-import InspireField from './InspireField'
-import {service} from './service'
+
 import Modal from "@utils/Modal/Modal"
-import {LlcPPBody} from "./LlcPPBody"
-import { containsCoordinate } from "ol/extent"
+import Loader from '@utils/Loader'
+
+import InspireField from './InspireField'
+import { LLCMap } from '../../../llc/frontend/LLCMap'
+import { LlcPPBody } from "./LlcPPBody"
+
+import { service } from './service'
 
 export class DetailModalBody extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
-            status: "initial",
             is_loading: false,
-            action_type: '',
-            modal_status: "closed",
-            title: '',
-            has_button: false,
-            modalClose: null,
             datas: [],
             current_count: 0
         }
-
-        this.handleOpen = this.handleOpen.bind(this)
-        this.handleClose = this.handleClose.bind(this)
-        this.handleModalAction = this.handleModalAction.bind(this)
-        this.handleRequestApprove = this.handleRequestApprove.bind(this)
-        this.handleRequestDismiss = this.handleRequestDismiss.bind(this)
-        this.modalChange = this.modalChange.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.selectedFeature = this.selectedFeature.bind(this)
-        this.handleOnChange = this.handleOnChange.bind(this)
         this.changeCurrentData = this.changeCurrentData.bind(this)
     }
 
@@ -50,7 +38,128 @@ export class DetailModalBody extends Component {
             }
             else current_count = feature_count
         }
-        this.setState({current_count})
+        this.setState({ current_count })
+    }
+
+    componentDidMount() {
+        var id = this.props.id
+        service.handleRequestData(id).then(({ datas }) => {
+            if (datas) this.setState({ datas })
+        })
+    }
+
+    selectedFeature(e) {
+        const feature = e.selected[0]
+        if (feature) {
+            const { values } = this.props
+            const id = feature.getProperties()['id']
+            values.map((value, idx) => {
+                if (value.id == id) {
+                    this.setState({ form_json: value.form_json, selected_value: value })
+                }
+            })
+        }
+    }
+
+    render() {
+        const {
+            datas, current_count
+        } = this.state
+        var current_data = datas[current_count]
+        return(
+            <>
+                <div className="col-md-12">
+                    <div className="mx-1 px-4">
+                        <div className="col-md-12 pb-5 mt-2 fa-2x text-dark d-flex justify-content-between">
+                            <label
+                                className="col-6 fa fa-angle-double-left btn btn-outline-primary mr-1"
+                                disabled={!current_data && true}
+                                onClick={(e) => this.changeCurrentData(false)}
+                            >
+                            </label>
+                            <label
+                                className="col-6 fa fa-angle-double-right btn btn-outline-primary ml-1"
+                                disabled={!current_data && true}
+                                onClick={(e) => this.changeCurrentData(true)}
+                            >
+                            </label>
+                        </div>
+                            {
+                                current_data
+                                &&
+                                    <div className="col-md-12 pb-5 mt-2">
+                                        <div className="form-row">
+                                            <InspireField
+                                                title_name='theme'
+                                                defualt_value={current_data.theme?.name || ''}
+                                            />
+                                            <InspireField
+                                                title_name='package'
+                                                defualt_value={current_data.package?.name || ''}
+                                            />
+                                            <InspireField
+                                                title_name='feature'
+                                                defualt_value={current_data.feature?.name || ''}
+                                            />
+                                        </div>
+                                        <div className="col-md-12 pb-5 mt-2 px-0">
+                                            <div className="form-row d-flex justify-content-between">
+                                                <InspireField
+                                                    title_name='Тушаалын дугаар'
+                                                    defualt_value={current_data?.order_no || ''}
+                                                    className="my-2 col-md-6"
+                                                />
+                                                <InspireField
+                                                    title_name='Тушаал гарсан огноо'
+                                                    defualt_value={current_data?.order_at || ''}
+                                                    className="my-2 col-md-6"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-12 mx-0 px-0">
+                                            <Map
+                                                vector_datas={current_data?.features || []}
+                                                height={'60vh'}
+                                                PPComponent={LlcPPBody}
+                                            />
+                                        </div>
+                                    </div>
+                            }
+                    </div>
+                </div>
+                <div>
+                    <Form
+                        {...this.props}
+                        {...this.state}
+                        modalClose={this.props.modalClose}
+                    />
+                </div>
+            </>
+        )
+    }
+}
+
+class Form extends Component {
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            status: "initial",
+            action_type: '',
+            modal_status: "closed",
+            title: '',
+            has_button: false,
+            modalClose: null,
+        }
+
+        this.handleOpen = this.handleOpen.bind(this)
+        this.handleClose = this.handleClose.bind(this)
+        this.handleModalAction = this.handleModalAction.bind(this)
+        this.handleRequestApprove = this.handleRequestApprove.bind(this)
+        this.handleRequestDismiss = this.handleRequestDismiss.bind(this)
+        this.modalChange = this.modalChange.bind(this)
+        this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleOnChange = this.handleOnChange.bind(this)
     }
 
     handleOnChange(e) {
@@ -94,7 +203,6 @@ export class DetailModalBody extends Component {
                         "",
                         this.handleClose
                     )
-                    this.setState({ is_loading: false })
                 }
                 else {
                     this.modalChange(
@@ -108,20 +216,20 @@ export class DetailModalBody extends Component {
                         this.handleClose
                     )
                 }
+                this.setState({ is_loading: false })
             })
             .catch((error) => {
-                if(error == 'Bad Request') {
-                    this.modalChange(
-                        '',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        'Алдаа гарлаа. Объект олдсонгүй',
-                        '',
-                        false,
-                        "",
-                        this.handleClose
-                    )
-                }
+                this.modalChange(
+                    '',
+                    'fa fa-exclamation-circle',
+                    'warning',
+                    'Алдаа гарлаа. Объект олдсонгүй',
+                    '',
+                    false,
+                    "",
+                    this.handleClose
+                )
+                this.setState({ is_loading: false })
             })
     }
 
@@ -140,7 +248,6 @@ export class DetailModalBody extends Component {
                         "",
                         this.handleClose
                     )
-                    this.setState({ is_loading: false })
                 }
                 else {
                     this.modalChange(
@@ -154,76 +261,67 @@ export class DetailModalBody extends Component {
                         this.handleClose
                     )
                 }
+                this.setState({ is_loading: false })
             })
             .catch((error) => {
-                if(error == 'Bad Request') {
-                    this.modalChange(
-                        '',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        'Алдаа гарлаа. Объект олдсонгүй',
-                        '',
-                        false,
-                        "",
-                        this.handleClose
-                    )
-                }
+                this.modalChange(
+                    '',
+                    'fa fa-exclamation-circle',
+                    'warning',
+                    'Алдаа гарлаа. Объект олдсонгүй',
+                    '',
+                    false,
+                    "",
+                    this.handleClose
+                )
+                this.setState({ is_loading: false })
             })
     }
 
     handleRequestApprove(id){
         service
             .requestApprove(id)
-            .then(({ success, info }) => {
+            .then(({ success, data, error }) => {
                 if(success) {
                     this.modalChange(
                         '',
                         'fa fa-check-circle',
                         'success',
-                        info,
+                        data,
                         '',
                         false,
                         "",
                         this.handleClose
                     )
-                    this.setState({ is_loading: false })
                 }
                 else {
                     this.modalChange(
                         '',
                         'fa fa-times-circle',
                         'danger',
-                        info,
-                        '',
+                        'Алдаа гарлаа',
+                        error,
                         false,
                         "",
                         this.handleClose
                     )
                 }
+                this.setState({ is_loading: false })
             })
             .catch((error) => {
                 this.setState({ is_loading: false })
-                if(error == 'Bad Request') {
-                    this.modalChange(
-                        '',
-                        'fa fa-exclamation-circle',
-                        'warning',
-                        'Алдаа гарлаа.',
-                        '',
-                        false,
-                        "",
-                        this.handleClose
-                        )
-                    }
-                })
-    }
-
-    componentDidMount() {
-        if (this.state.status == "initial") this.handleOpen()
-        var id = this.props.id
-        service.handleRequestData(id).then(({ datas }) => {
-            if (datas) this.setState({datas})
-        })
+                this.modalChange(
+                    '',
+                    'fa fa-exclamation-circle',
+                    'warning',
+                    'Алдаа гарлаа.',
+                    '',
+                    false,
+                    "",
+                    this.handleClose
+                )
+                this.setState({ is_loading: false })
+            })
     }
 
     handleOpen() {
@@ -255,83 +353,10 @@ export class DetailModalBody extends Component {
         })
     }
 
-    selectedFeature(e) {
-        const feature = e.selected[0]
-        if (feature) {
-            const { values } = this.props
-            const id = feature.getProperties()['id']
-            values.map((value, idx) => {
-                if (value.id == id) {
-                    this.setState({ form_json: value.form_json, selected_value: value })
-                }
-            })
-        }
-    }
-
-
     render() {
-        const {
-            datas, current_count
-        } = this.state
-        var current_data = datas[current_count]
         return(
             <>
-                <div className="col-md-12">
-                    <div className="mx-1 px-4">
-                        <div className="col-md-12 pb-5 mt-2 fa-2x text-dark d-flex justify-content-between">
-                            <label
-                                className="col-6 fa fa-angle-double-left btn btn-outline-primary mr-1"
-                                disabled={!current_data && true}
-                                onClick={(e) => this.changeCurrentData(false)}
-                                ></label>
-                            <label
-                                className="col-6 fa fa-angle-double-right btn btn-outline-primary ml-1"
-                                disabled={!current_data && true}
-                                onClick={(e) => this.changeCurrentData(true)}></label>
-                        </div>
-                            {
-                                current_data
-                                &&
-                                <div className="col-md-12 pb-5 mt-2">
-                                    <div className="form-row">
-                                        <InspireField
-                                            title_name='theme'
-                                            defualt_value={current_data.theme?.name || ''}
-                                        />
-                                        <InspireField
-                                            title_name='package'
-                                            defualt_value={current_data.package?.name || ''}
-                                        />
-                                        <InspireField
-                                            title_name='feature'
-                                            defualt_value={current_data.feature?.name || ''}
-                                        />
-                                    </div>
-                                    <div className="col-md-12 pb-5 mt-2 px-0">
-                                        <div className="form-row d-flex justify-content-between">
-                                            <InspireField
-                                                title_name='Тушаалын дугаар'
-                                                defualt_value={current_data?.order_no || ''}
-                                                className="my-2 col-md-6"
-                                            />
-                                            <InspireField
-                                                title_name='Тушаал гарсан огноо'
-                                                defualt_value={current_data?.order_at || ''}
-                                                className="my-2 col-md-6"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="col-md-12 mx-0 px-0">
-                                        <LLCMap
-                                            vector_datas={current_data?.features || []}
-                                            height={'60vh'}
-                                            PPComponent={LlcPPBody}
-                                        />
-                                    </div>
-                                </div>
-                            }
-                    </div>
-                </div>
+                <Loader is_loading={this.state.is_loading}/>
                 <div className="row my-2 mr-1 float-right">
                     <button
                         type="button mr-2 ml-2"
@@ -400,6 +425,25 @@ export class DetailModalBody extends Component {
     }
 }
 
+class Map extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+        }
+    }
+
+    render() {
+        const { vector_datas, height, PPComponent } = this.props
+        return (
+            <LLCMap
+                vector_datas={vector_datas}
+                height={height}
+                PPComponent={PPComponent}
+            />
+        )
+    }
+}
+
 export default class SolveModal extends Component {
 
     constructor(props) {
@@ -422,7 +466,6 @@ export default class SolveModal extends Component {
         this.setState({ is_modal_request_open: false })
         this.props.refreshData()
     }
-
 
     render() {
         const { is_modal_request_open, state, kind } = this.state

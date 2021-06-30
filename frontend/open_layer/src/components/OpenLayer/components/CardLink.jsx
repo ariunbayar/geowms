@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 
 export default class CardLink extends Component {
 
@@ -27,34 +27,38 @@ export default class CardLink extends Component {
         const {isload} = this.state
         return (
             <>
-                {link ?
-                <a className="col-2 mt-3 col-md-2 col-xl-2" href={url}>
-                    <div className="card text-center border border-success">
-                        <div className="card-body">
-                            <h4 className="text-info">{name}</h4>
-                            <h6 className="text-mute">{name ? "Дарж татах" : "Хоосон байна"}</h6>
-                        </div>
-                    </div>
-                </a>
-                :
-                <div className="col-2 mt-3 col-md-2 col-xl-2" onClick={() => this.copyToClipboard(url)}>
-                    {isload ?
-                    <div className="card text-center border border-success">
-                        <div className="card-body">
-                            <h4 className="text-success">{name}</h4>
-                            <h6 className="fa fa-check text-success">Амжилттай хууллаа</h6>
-                        </div>
-                    </div>
+                {
+                    link
+                    ?
+                        <a className="col-2 mt-3 col-md-2 col-xl-2" href={url}>
+                            <div className="card text-center border border-success">
+                                <div className="card-body" role="button">
+                                    <h4 className="text-info">{name}</h4>
+                                    <h6 className="text-mute">{name ? "Дарж татах" : "Хоосон байна"}</h6>
+                                </div>
+                            </div>
+                        </a>
                     :
-                    <div className="card text-center border border-info">
-                        <div className="card-body">
-                            <h4 className="text-info">{name}</h4>
-                            <h6 className="text-mute">{name ? "Дарж хуулах" : "Хоосон байна"}</h6>
+                        <div className="col-2 mt-3 col-md-2 col-xl-2" onClick={() => this.copyToClipboard(url)}>
+                            {
+                                isload
+                                ?
+                                    <div className="card text-center border border-success">
+                                        <div className="card-body">
+                                            <h4 className="text-success">{name}</h4>
+                                            <h6 className="fa fa-check text-success">Амжилттай хууллаа</h6>
+                                        </div>
+                                    </div>
+                                :
+                                    <div className="card text-center border border-info" role="button">
+                                        <div className="card-body">
+                                            <h4 className="text-info">{name}</h4>
+                                            <h6 className="text-mute">{name ? "Дарж хуулах" : "Хоосон байна"}</h6>
+                                        </div>
+                                    </div>
+                            }
                         </div>
-                    </div>
-                    }
-                </div>
-            }
+                }
             </>
         )
     }

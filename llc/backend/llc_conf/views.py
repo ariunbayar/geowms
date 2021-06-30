@@ -2,40 +2,50 @@ import requests
 from datetime import datetime
 from django.shortcuts import render
 from django.http import JsonResponse
-from main.decorators import ajax_required
+from main.decorators import ajax_required, llc_required
 from django.views.decorators.http import require_GET, require_POST
+from django.shortcuts import get_object_or_404
+from geoportal_app.models import User
 
 from main.utils import (
     datetime_to_string,
     json_load
 )
 
+HEADERS = {
+    'accept': 'application/json',
+    'Content-type': 'application/json',
+}
 
-def llc_frontend(request):
-    context = {
-        'ann_name': 'Байгууллагын нэр байна',
+
+@llc_required(lambda u: u)
+def llc_frontend(request, content):
+    return render(request, 'llc/index.html', content)
+
+
+#llc-ийг шууд дуудаж үзэх
+def llc_frontend_test(request):
+    content = {
+        'dsfs': ''
     }
-    return render(request, 'llc/index.html', context)
+    return render(request, 'llc/dan_user.html', content)
 
 
-@require_POST
+@require_GET
 @ajax_required
-def get_tool_datas(request, payload):
-    regis_number = payload.get('regis_number') or 2841134
+@llc_required(lambda u: u)
+def get_tool_datas(request, content):
+    regis_number = content.get('register_number')
     tool_datas = []
-    HEADERS = {
-        'accept': 'application/json',
-        'Content-type': 'application/json',
-    }
+    token_url = 'http://192.168.10.54/api/token?email=api@gazar.gov.mn&password=hXzWneQ3vf6fkaFY'
+    rsp = requests.post(token_url, headers=HEADERS, verify=False)
 
-    token_url = 'http://bagaj.gazar.gov.mn/api/token?email=api@gazar.gov.mn&password=hXzWneQ3vf6fkaFY'
-    rsp = requests.post(token_url, headers=HEADERS)
     if rsp.status_code == 200:
         access_token = rsp.json().get('access_token')
-        bagaj_url = 'http://bagaj.gazar.gov.mn/api/holder?regnum={registration_number}&token={access_token}'.format(
+        bagaj_url = 'http://192.168.10.54/api/holder?regnum={registration_number}&token={access_token}'.format(
             registration_number=regis_number, access_token=access_token
         )
-        rsp_bagaj = requests.post(bagaj_url, headers=HEADERS)
+        rsp_bagaj = requests.post(bagaj_url, headers=HEADERS, verify=False)
         tool_datas = rsp_bagaj.json()
         tool_datas = json_load(tool_datas)
         for tool_data in tool_datas:

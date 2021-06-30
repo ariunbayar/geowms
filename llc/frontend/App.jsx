@@ -4,18 +4,37 @@ import { BrowserRouter, Switch, Route } from "react-router-dom";
 import MenuItem from "@utils/MenuItem"
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
 
+import { service } from "./Request/service"
+
 const Map = React.lazy(() => import("./Map"));
 const Request = React.lazy(() => import('./Request'));
+const History = React.lazy(() => import('./History'));
 
 export class App extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
+            request_count: 0,
         }
+    this.requestCount = this.requestCount.bind(this)
+    }
+
+    componentDidMount() {
+        this.requestCount()
+    }
+
+    requestCount() {
+        service.getCount().then(({ success, request_count }) => {
+            if (success) {
+                this.setState({ request_count })
+            }
+        })
     }
 
     render() {
+        const { llc } = this.props
+        const { request_count } = this.state
         return (
             <BrowserRouter>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -27,7 +46,8 @@ export class App extends Component {
                     </div>
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-database" url="/llc/map/" text="Map"></MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт" count={request_count}></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Өөрчлөлтийн түүх"></MenuItem>
                     </ul>
                 </div>
                 <div className="clearfix">
@@ -35,7 +55,8 @@ export class App extends Component {
                         <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
                             <Switch>
                                 <Route path="/llc/map/" component={Map} />
-                                <Route path="/llc/llc-request/" component={Request} />
+                                <Route path="/llc/llc-request/" component={Request}/>
+                                <Route path="/llc/history/" component={History} />
                             </Switch>
                         </Suspense>
                     </div>

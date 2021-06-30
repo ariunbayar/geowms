@@ -6,6 +6,7 @@ export const service = {
     sendRequest,
     removeRequest,
     getSearchItems,
+    getCount,
 }
 
 const prefix = '/llc/backend'
@@ -26,19 +27,28 @@ function handleRequestData(id) {
     return fetch(`${prefix}/${id}/get-request-data/`, opts).then(handleResponse)
 }
 
-function getToolDatas(regis_number) {
+function getToolDatas() {
     const opts = {
-        ...getPostOptions(),
-        body: JSON.stringify({regis_number})
+        ...getGetOptions(),
     }
     return fetch(`/llc/get_tool_datas/`, opts).then(handleResponse)
 }
 
-function sendRequest(id) {
+function getCount() {
     const opts = {
         ...getGetOptions(),
     }
+    return fetch(`${prefix}/get_count/`, opts).then(handleResponse)
+}
+
+function sendRequest(id, mergejilten) {
+    const opts = {
+        ...getPostOptions(),
+        body: JSON.stringify({mergejilten})
+    }
+
     return fetch(`${prefix}/${id}/send-request/`, opts).then(handleResponse)
+
 }
 
 function removeRequest(id) {

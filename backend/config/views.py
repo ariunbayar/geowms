@@ -106,14 +106,19 @@ def paginatedList(request, payload):
     if not sort_name:
         sort_name = '-created_at'
 
-    error500_list = Error500.objects.all().annotate(search=SearchVector(
-        'request_scheme',
-        'request_url',
-        'request_method',
-        'request_headers',
-        'description',
-        'created_at',)
-    ).filter(search__contains=query).order_by(sort_name)
+    error_qs = Error500.objects
+    if query:
+        error_qs = error_qs.annotate(search=SearchVector(
+            'request_scheme',
+            'request_url',
+            'request_method',
+            'request_headers',
+            'description',
+            'created_at',
+        )
+        ).filter(search__icontains=query)
+
+    error500_list = error_qs.order_by(sort_name)
 
     total_items = Paginator(error500_list, per_page)
     items_page = total_items.page(page)

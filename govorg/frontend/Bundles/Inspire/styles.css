@@ -295,7 +295,7 @@
 
 .⚙-toggle-qgis {
     padding: 2px 7px;
-    font-size: 15px;
+    font-size: 14px;
     left: 7px;
     background-color: rgba(0,60,136,0.5);
     position: absolute;
@@ -315,7 +315,7 @@
 
 .⚙-toggle-api {
     padding: 2px 7px;
-    font-size: 15px;
+    font-size: 14px;
     left: 79px;
     background-color: rgba(0,60,136,0.5);
     position: absolute;
@@ -330,6 +330,26 @@
 }
 
 .⚙-toggle-api:hover{
+    background-color: rgba(0,60,136,0.7);
+}
+
+.⚙-toggle-downtemp {
+    padding: 2px 7px;
+    font-size: 15px;
+    left: 151px;
+    background-color: rgba(0,60,136,0.5);
+    position: absolute;
+    border-radius: 3px;
+    width: 71px;
+    height: 25px;
+    top: 10px;
+}
+
+.⚙-toggle-downtemp:active{
+    background-color: rgba(0,60,136,0.7);
+}
+
+.⚙-toggle-downtemp:hover{
     background-color: rgba(0,60,136,0.7);
 }
 

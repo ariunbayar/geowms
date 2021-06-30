@@ -1,14 +1,12 @@
 import React, { Component, Fragment } from "react"
-import { NavLink } from "react-router-dom"
-
-import { service } from "../service"
-import Modal from "@utils/Modal/Modal"
 import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {validationSchema} from './validationSchema'
-import EmployeeMap from "./Employee_map/Map"
 
 import Loader from "@utils/Loader"
 
+import EmployeeMap from "./Employee_map/Map"
+import {validationSchema} from './validationSchema'
+
+import { service } from "../service"
 export class UserAdd extends Component {
 
     constructor(props) {
@@ -26,10 +24,10 @@ export class UserAdd extends Component {
                 register:'',
                 is_admin: false,
                 is_super: false,
-                re_password_mail: false,
                 phone_number: '',
                 state: 1,
                 pro_class: '',
+                is_user: true,
             },
             aimag: [],
             sum: [],
@@ -53,7 +51,6 @@ export class UserAdd extends Component {
             door_number: '',
             address_state: true,
 
-            modal_alert_status: "closed",
             is_loading: true,
 
             errors: '',
@@ -63,9 +60,6 @@ export class UserAdd extends Component {
             positions: [],
             states: [],
             pro_classes: [],
-
-            is_user: true,
-            modal_status: 'closed',
         }
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -76,13 +70,12 @@ export class UserAdd extends Component {
         this.getGeomFromJson = this.getGeomFromJson.bind(this)
         this.getGeom = this.getGeom.bind(this)
         this.getSelectValue = this.getSelectValue.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.modalChange = this.modalChange.bind(this)
     }
 
     componentDidMount() {
         const org_emp = this.props.match.params.emp
-        this.getSelectValue()
+        const org_id = this.props.match.params.id
+        this.getSelectValue(org_id)
         if(org_emp){
             this.handleGetAll(org_emp)
         }
@@ -91,9 +84,9 @@ export class UserAdd extends Component {
         }
     }
 
-    getSelectValue() {
+    getSelectValue(org_id) {
         service
-            .getSelectValue()
+            .getSelectValue(org_id)
             .then(({ success, positions, states, pro_classes }) => {
                 if (success) {
                     this.setState({ positions, states, pro_classes })
@@ -136,6 +129,30 @@ export class UserAdd extends Component {
             })
     }
 
+    setModal(title, text, icon_color, icon, has_button, action, close) {
+        const modal = {
+            modal_status: "open",
+            modal_icon: icon,
+            modal_bg: '',
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            actionNameBack: 'Буцах',
+            actionNameDelete: '',
+            modalAction: action,
+            modalClose: close,
+        }
+        global.MODAL(modal)
+    }
+
+    modalClose(org_emp) {
+        const org_level = this.props.match.params.level
+        const org_id = this.props.match.params.id
+
+        this.props.history.push(`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${org_emp}/дэлгэрэнгүй/`)
+    }
+
     handleSubmit(values, { setStatus, setSubmitting, setErrors }) {
 
         const org_level = this.props.match.params.level
@@ -159,39 +176,31 @@ export class UserAdd extends Component {
             'address': address,
         }
 
+        this.setState({ is_loading: true })
+
         if(org_emp){
             if(values.re_password !== values.password)
             {
                 setErrors({'re_password': 'Нууц үг адил биш байна.'})
                 setSubmitting(false)
+                this.setState({ is_loading: false })
             }
             else {
                 service
                     .employeeUpdate(org_emp, org_level, payload)
                     .then(({ success, errors }) => {
                         if (success) {
-                            this.modalChange(
-                                'fa fa-check-circle',
-                                null,
-                                'success',
-                                'Амжилттай боллоо',
-                                ``,
-                                false,
-                                '',
-                                '',
-                                null,
-                                () => this.props.history.push(
-                                    `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${org_emp}/дэлгэрэнгүй/`
-                                )
-                            )
+                            this.setModal('Амжилттай', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(org_emp))
                         } else {
                             setErrors(errors)
                             this.setState({errors})
                         }
                         setSubmitting(false)
+                        this.setState({ is_loading: false })
                     })
                     .catch((error) => {
-                        alert("Алдаа гарсан байна")
+                        this.setModal('Алдаа гарсан байна', '', 'danger', 'fa fa-times-circle', false, '', '')
+                        this.setState({ is_loading: false })
                         setSubmitting(false)
                     })
             }
@@ -202,30 +211,22 @@ export class UserAdd extends Component {
                 .employeeAdd(org_level, org_id, payload)
                 .then(({ success, errors, employee }) => {
                     if (success) {
-                        this.modalChange(
-                            'fa fa-check-circle',
-                            null,
-                            'success',
-                            'Амжилттай боллоо',
-                            ``,
-                            false,
-                            '',
-                            '',
-                            null,
-                            () => this.props.history.push(
-                                `/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/${employee.user_id}/дэлгэрэнгүй/`
-                            )
-                        )
+                        this.setModal('Амжилттай', '', 'success', 'fa fa-check-circle', false, '', () => this.modalClose(employee.user_id))
+                        global.refreshOrgCount(org_level)
                     }
                     else{
                         setErrors(errors)
-                        this.setState({errors})
+                        this.setState({ errors })
                     }
+                    this.setState({ is_loading: false })
                     setSubmitting(false)
+                    this.setState({ is_loading: false })
                 })
                 .catch((error) => {
-                    alert("Алдаа гарсан байна")
+                    this.setModal('Алдаа гарсан байна', '', 'danger', 'fa fa-times-circle', false, '', '')
+                    this.setState({ is_loading: false })
                     setSubmitting(false)
+                    this.setState({ is_loading: false })
                 })
         }
     }
@@ -346,30 +347,6 @@ export class UserAdd extends Component {
             this.getGeom(geo_id)
         }
         this.setState({ [field_id]: idx, ...obj })
-    }
-
-    handleModalOpen() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
-    }
-
-    modalChange(modal_icon, modal_bg, icon_color, title, text, has_button, actionNameBack, actionNameDelete, modalAction, modalClose) {
-        this.setState(
-            {
-                modal_icon,
-                modal_bg,
-                icon_color,
-                title,
-                text,
-                has_button,
-                actionNameBack,
-                actionNameDelete,
-                modalAction,
-                modalClose,
-            },
-            () => this.handleModalOpen()
-        )
     }
 
     render() {
@@ -547,22 +524,6 @@ export class UserAdd extends Component {
                                                 <ErrorMessage name="pro_class" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
-                                        {
-                                            org_emp
-                                            &&
-                                                <div className="form-row">
-                                                    <div className="form-group col-12">
-                                                        <label htmlFor='id_re_password_mail'>Нууц үг солих e-mail илгээх</label>
-                                                        <Field
-                                                            className="ml-2"
-                                                            name='re_password_mail'
-                                                            id="id_re_password_mail"
-                                                            type="checkbox"
-                                                        />
-                                                        <ErrorMessage name="re_password_mail" component="div" className="invalid-feedback"/>
-                                                    </div>
-                                                </div>
-                                        }
                                         <div className='form-row'>
                                             <div className="form-group col-12">
                                                 <label htmlFor='id_is_admin'>Байгууллагын админ</label>
@@ -576,17 +537,15 @@ export class UserAdd extends Component {
                                             </div>
                                             <div className="form-group col-12">
                                                 <label htmlFor='id_is_user'>хэрэглэгч</label>
-                                                <input
-                                                    onChange={(e) => this.setState({ is_user: e.target.checked })}
-                                                    name='is_user'
+                                                <Field
                                                     className="ml-2"
-                                                    type="checkbox"
+                                                    name='is_user'
                                                     id="id_is_user"
-                                                    checked={is_user}
+                                                    type="checkbox"
                                                 />
                                             </div>
                                         </div>
-                                        {org_level ==4 &&
+                                        {org_level == 4 &&
                                             <div className='form-row'>
                                                 <div className="form-group col-12">
                                                     <label htmlFor='id_is_super'>Системийн админ</label>
@@ -725,19 +684,6 @@ export class UserAdd extends Component {
                         />
                     </div>
                 </div>
-                <Modal
-                    modal_status={ this.state.modal_status }
-                    modal_icon={ this.state.modal_icon }
-                    modal_bg={ this.state.modal_bg }
-                    icon_color={ this.state.icon_color }
-                    title={ this.state.title }
-                    text={ this.state.text }
-                    has_button={ this.state.has_button }
-                    actionNameBack={ this.state.actionNameBack }
-                    actionNameDelete={ this.state.actionNameDelete }
-                    modalAction={ this.state.modalAction }
-                    modalClose={ this.state.modalClose }
-                />
             </div>
         )
     }

@@ -1,7 +1,5 @@
 import React, { Component } from "react"
 import { PortalDataTable } from "@utils/DataTable/index"
-
-
 export class List extends Component {
 
     constructor(props) {

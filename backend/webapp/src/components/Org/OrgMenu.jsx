@@ -1,5 +1,7 @@
-import React, { Component } from "react"
+import React, { Component, useState, useEffect } from "react"
 import {Switch , Route, Link, NavLink} from "react-router-dom"
+
+import Loader from "@utils/Loader"
 
 import {service} from './service'
 import {OrgForm} from './OrgDetail/OrgForm'
@@ -8,6 +10,7 @@ import {OrgUser} from './OrgUser'
 import {OrgRole} from './OrgRole'
 import {Addresses} from './OrgUsersAddress'
 import {Graph} from './OrgGraph'
+import Position from "@helpComp/Position"
 
 export class OrgMenu extends Component {
 
@@ -17,159 +20,167 @@ export class OrgMenu extends Component {
         this.state = {
             level: this.props.match.params.level,
             id: this.props.match.params.id,
+            prefix: '/back/байгууллага/түвшин',
             org_name: '',
-            allowed_geom: null,
             sistem_count: 0,
             employee_count: null,
+            is_superuser: true, // default value
+            allow_geom: null,
+            is_loading: true,
         }
-        this.getOrgName = this.getOrgName.bind(this)
-        this.handleSistemCount = this.handleSistemCount.bind(this)
-
+        this.getGeom = this.getGeom.bind(this)
     }
 
-    componentDidMount() {
-        Promise.all([
-            this.getOrgName(this.state.level),
-            this.handleSistemCount()
-        ])
-    }
-
-    componentDidUpdate(pP, Ps) {
-        if (pP.allowed_geom != this.props.allowed_geom) {
-            this.setState({allowed_geom: this.props.allowed_geom})
-        }
-    }
-
-    handleSistemCount(){
-        const id = this.props.match.params.id
-        service.sistemCount(id).then(({ count }) => {
-            this.setState({ sistem_count: count })
-        })
-    }
-
-    getOrgName(org_level){
-        const {id} = this.state
-        service.orgAll(org_level, id).then(({ orgs, count }) => {
-            if (orgs) {
-                orgs.map(org => this.setState({
-                    org_name: org.name,
-                    allowed_geom: org.allowed_geom,
-                }))
-                this.setState({
-                    employee_count: count
-                })
-            }
-        })
+    getGeom(allow_geom) {
+        this.setState({ allow_geom, is_loading: false })
     }
 
     render() {
-        const { org_name, employee_count, allowed_geom } = this.state
-        const org_level = this.props.match.params.level
-        const org_id = this.props.match.params.id
+        const { is_superuser, prefix, allow_geom, is_loading } = this.state
         return (
             <div>
-                <ul className="nav nav-tabs nav-tabs-dark-gray">
-
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/detail/`}
-                            className="nav-link"
-                            activeClassName="active"
-                            data-toggle="tab"
-                        >
-                            <i className="fa fa-th-large"></i>
-                            <span className="hidden-xs"></span>
-                        </NavLink>
-                    </li>
-
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/эрх/`}
-                            className="nav-link"
-                            activeClassName="active"
-                            data-toggle="tab"
-                        >
-                            <i className="fa fa-lock"></i>
-                            <span className="hidden-xs"> Эрх</span>
-                        </NavLink>
-                    </li>
-
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/хэрэглэгч/`}
-                            className="nav-link"
-                            activeClassName="active"
-                            data-toggle="tab"
-                        >
-                            <i className="icon-user"></i>
-                            <span className="hidden-xs"> Албан хаагчид</span>
-                            <small className="badge float-right badge-dark-primary ml-2">{ employee_count }</small>
-                        </NavLink>
-                    </li>
-
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/систем/`}
-                            className="nav-link"
-                            activeClassName="active"
-                            data-toggle="tab"
-                        >
-                            <i className="icon-envelope-open"></i>
-                            <span className="hidden-xs"> Систем</span>
-                            <small className="badge float-right badge-dark-primary ml-2">{this.state.sistem_count}</small>
-                        </NavLink>
-                    </li>
-
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/addresses/`}
-                            className="nav-link"
-                            activeClassName="active"
-                            data-toggle="tab"
-                        >
-                            <i className="fa fa-map-marker"></i>
-                            <span className="hidden-xs"> Ажилчдын хаяг</span>
-                        </NavLink>
-                    </li>
-
-                    <li className="nav-item gp-text-primary">
-                        <NavLink to={`/back/байгууллага/түвшин/${org_level}/${org_id}/graph/`}
-                            className="nav-link"
-                            activeClassName="active"
-                            data-toggle="tab"
-                        >
-                            <i className="fa fa-bar-chart" aria-hidden="true"/>
-                            <span className="hidden-xs"> График мэдээлэл</span>
-                        </NavLink>
-                    </li>
-                </ul>
+                <Loader is_loading={is_loading}/>
                 <div className="tab-content">
-                    <Switch>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/detail/" render={(routeProps) =>
-                            <OrgForm { ...routeProps } allowed_geom={ allowed_geom } refresh={ this.getOrgName }/>
-                        }/>
-                        <Route path="/back/байгууллага/түвшин/:level/:id/эрх/" component={OrgRole}/>
-                        <Route
-                            path="/back/байгууллага/түвшин/:level/:id/хэрэглэгч/"
-                            component={(props) =>
-                                <OrgUser {...props} refreshCount={this.getOrgName}/>
-                            }
-                        />
-                        <Route
-                            path="/back/байгууллага/түвшин/:level/:id/систем/" component={OrgSystem}
-                            component={(props) =>
-                                <OrgSystem {...props} refreshCount={this.handleSistemCount}/>
-                            }
-                        />
-                        <Route
-                            path="/back/байгууллага/түвшин/:level/:id/addresses/"
-                            component={Addresses}
-                        />
-                        <Route
-                            path="/back/байгууллага/түвшин/:level/:id/graph/"
-                            component={Graph}
-                        />
-                    </Switch>
+                    <OrgTabs {...this.props} {...this.state} setGeom={this.getGeom}/>
+                    {
+                        allow_geom
+                        ?
+                            <div>
+                                <Switch>
+                                    <Route path={`${prefix}/:level/:id/detail/`} render={(routeProps) => <OrgForm {...routeProps} allow_geom={allow_geom}/>}/>
+                                    <Route path={`${prefix}/:level/:id/эрх/`} component={OrgRole}/>
+                                    <Route path={`${prefix}/:level/:id/хэрэглэгч/`} component={OrgUser} />
+                                    <Route path={`${prefix}/:level/:id/систем/`} component={OrgSystem} />
+                                    <Route path={`${prefix}/:level/:id/addresses/`} component={Addresses}/>
+                                    <Route path={`${prefix}/:level/:id/graph/`} component={Graph} />
+                                    <Route path={`${prefix}/:level/:id/position/`}
+                                        render={(props) =>
+                                            <Position {...props} is_superuser={is_superuser} />
+                                        }
+                                    />
+                                </Switch>
+                            </div>
+                        :
+                            null
+                    }
                 </div>
-                <a className="geo-back-btn" id='geo-back-btn' onClick={this.props.history.goBack}>
-                    <small className="fa fa-chevron-circle-left"> {org_name}</small>
-                </a>
             </div>
         )
     }
+}
+
+function OrgTabs(props) {
+
+    const org_level = props.match.params.level
+    const org_id = props.match.params.id
+    const prefix = `${props.prefix}/${org_level}/${org_id}`
+
+    const [employee_count, setEmployeeCount] = useState(0)
+    const [org_name, setOrgName] = useState('')
+    const [system_count, setSystemCount] = useState(0)
+    const [pos_count, setPosCount] = useState(0)
+
+    const nav_bars = [
+        {
+            link: `${prefix}/detail/`,
+            icon: 'fa fa-th-large',
+            text: ''
+        },
+        {
+            link: `${prefix}/эрх/`,
+            icon: 'fa fa-lock',
+            text: 'Эрх'
+        },
+        {
+            link: `${prefix}/хэрэглэгч/`,
+            icon: 'icon-user',
+            text: 'Албан хаагчид',
+            count: employee_count,
+        },
+        {
+            link: `${prefix}/систем/`,
+            icon: 'icon-envelope-open',
+            text: 'Систем',
+            count: system_count,
+        },
+        {
+            link: `${prefix}/addresses/`,
+            icon: 'fa fa-map-marker',
+            text: 'Ажилчдын хаяг',
+        },
+        {
+            link: `${prefix}/graph/`,
+            icon: 'fa fa-bar-chart',
+            text: 'График мэдээлэл',
+        },
+        {
+            link: `${prefix}/position/`,
+            icon: 'fa fa-shopping-bag',
+            text: 'Албан тушаал',
+            count: pos_count,
+        },
+    ]
+
+    useEffect(() => {
+        Promise.all([
+            handleSistemCount(),
+            getOrgName(org_level),
+        ])
+        global.refreshOrgCount = getOrgName
+        global.refreshSystemCount = handleSistemCount
+    }, [])
+
+    const handleSistemCount = () => {
+        service
+            .sistemCount(org_id)
+            .then(({ count }) => {
+                setSystemCount(count)
+            })
+    }
+
+    const getOrgName = (org_level) => {
+        service
+            .orgAll(org_level, org_id)
+            .then(({ orgs, count, pos_count }) => {
+                if (orgs) {
+                    orgs.map(org => {
+                        setOrgName(org.name)
+                        props.setGeom(org.allowed_geom)
+                    })
+                    setEmployeeCount(count)
+                    setPosCount(pos_count)
+                }
+            })
+    }
+
+    return (
+        <div className="mb-3">
+            <ul className="nav nav-tabs nav-tabs-dark-gray">
+                {
+                    nav_bars.map((bar, idx) =>
+                        <li className="nav-item gp-text-primary" key={idx}>
+                            <NavLink to={bar.link}
+                                className="nav-link"
+                                activeClassName="active"
+                                data-toggle="tab"
+                            >
+                                <i className={bar.icon}></i>
+                                <span className="hidden-xs"> {bar.text}</span>
+                                {
+                                    bar?.count >= 0
+                                    ?
+                                        <small className="badge float-right badge-dark-primary ml-2">{bar.count}</small>
+                                    :
+                                        null
+                                }
+                            </NavLink>
+                        </li>
+                    )
+                }
+            </ul>
+            <a className="geo-back-btn" id='geo-back-btn' onClick={props.history.goBack}>
+                <small className="fa fa-chevron-circle-left"> {org_name}</small>
+            </a>
+        </div>
+    )
 }

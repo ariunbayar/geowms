@@ -24,6 +24,7 @@ export const service = {
     genderCount,
     ageCount,
     loadBaseLayers,
+    sendMail,
 }
 
 
@@ -161,9 +162,10 @@ function saveErguul(values, emp_id, point, photo, erguul_id) {
     return fetch(`${prefix}/save-erguul/`, requestOptions).then(handleResponse)
 }
 
-function getSelectValue() {
+function getSelectValue(org_id) {
     const requestOptions = {
-        ...getGetOptions(),
+        ...getPostOptions(),
+        body: JSON.stringify({ org_id }),
     }
     return fetch(`${prefix}/get-select-values/`, requestOptions).then(handleResponse)
 }
@@ -181,4 +183,12 @@ function ageCount(pk) {
 function loadBaseLayers() {
     const requestOptions = getGetOptions()
     return fetch('/суурь-давхарга/', requestOptions).then(handleResponse)
+}
+
+function sendMail(pk) {
+    const requestOptions = {
+        ...getPostOptions(),
+        body: JSON.stringify()
+    }
+    return fetch(`${prefix}/send-mail/${pk}/`, requestOptions).then(handleResponse)
 }
