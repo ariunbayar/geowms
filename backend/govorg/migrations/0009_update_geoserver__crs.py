@@ -6,7 +6,7 @@ from main.geoserver import getHeader, HEADERS, get_connection_conf
 def _update_layer(layer_name, url):
     BASE_URL, AUTH = getHeader()
     payload = '''
-            <featureType>
+        <featureType>
             <projectionPolicy>NONE</projectionPolicy>
             <nativeBoundingBox>
                <minx>87.5879287719727</minx>
