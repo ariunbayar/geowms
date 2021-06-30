@@ -939,71 +939,68 @@ def _create_view(ids, table_name, data_type_ids, feature_config_id, feature_id):
         value_type = _get_value_type_for_view(item.value_type_id)
         col = 'Max(Case When a.property_id = {property_id} Then {value_type} End) As {property_code}'.format(value_type=value_type, property_id=item.property_id, property_code=item.property_code)
         cols.append(col)
-    try:
-        query = '''
-            create MATERIALIZED VIEW public.{table_name} as
+    query = '''
+        create MATERIALIZED VIEW public.{table_name} as
+            select
+                a.geo_id,
+                a.geo_data,
+                a.geo_id as inspire_id,
+                a.geo_id as localid,
+                {cols},
+                a.feature_id,
+                a.created_on,
+                a.modified_on
+            from
+            (
                 select
                     a.geo_id,
-                    a.geo_data,
-                    a.geo_id as inspire_id,
-                    a.geo_id as localid,
-                    {cols},
-                    a.feature_id,
-                    a.created_on,
-                    a.modified_on
+                    a.property_id,
+                    mg.geo_data,
+                    mg.feature_id,
+                    mg.created_on,
+                    mg.modified_on,
+                    COALESCE(
+                            a.value_text::character varying(1000),
+                            case when a.code_list_id is null then null
+                            else (
+                                select code_list_name
+                                from l_code_lists
+                                where code_list_id=a.code_list_id
+                            ) end
+                        ) as value_text,
+                    a.value_number,
+                    a.value_date
                 from
-                (
-                    select
-                        a.geo_id,
-                        a.property_id,
-                        mg.geo_data,
-                        mg.feature_id,
-                        mg.created_on,
-                        mg.modified_on,
-                        COALESCE(
-                                a.value_text::character varying(1000),
-                                case when a.code_list_id is null then null
-                                else (
-                                    select code_list_name
-                                    from l_code_lists
-                                    where code_list_id=a.code_list_id
-                                ) end
-                            ) as value_text,
-                        a.value_number,
-						a.value_date
-                    from
-                        public.m_datas a
-                    inner join
-                        m_geo_datas mg
-                    on
-                        mg.geo_id = a.geo_id
-                    where
-                        a.property_id in ({properties}) and a.feature_config_id in ({feature_config_ids})
-                ) a
-                group by
-                    a.geo_id,
-                    a.geo_data,
-                    a.feature_id,
-                    a.created_on,
-                    a.modified_on
+                    public.m_datas a
+                inner join
+                    m_geo_datas mg
+                on
+                    mg.geo_id = a.geo_id
+                where
+                    a.property_id in ({properties}) and a.feature_config_id in ({feature_config_ids})
+            ) a
+            group by
+                a.geo_id,
+                a.geo_data,
+                a.feature_id,
+                a.created_on,
+                a.modified_on
 
-        '''.format(
-                table_name = table_name,
-                columns=', '.join(['ct.{}'.format(f) for f in fields]),
-                properties=', '.join(['{}'.format(f) for f in ids]),
-                data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
-                feature_config_ids=', '.join(['{}'.format(f) for f in feature_config_id]),
-                create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]),
-                feature_id=feature_id,
-                cols=',\n'.join(cols)
-            )
-        query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
-        with connections['default'].cursor() as cursor:
-            cursor.execute(query)
-            cursor.execute(query_index)
-        return True
-    except Exception as e:
-        return False
+    '''.format(
+            table_name = table_name,
+            columns=', '.join(['ct.{}'.format(f) for f in fields]),
+            properties=', '.join(['{}'.format(f) for f in ids]),
+            data_type_ids=', '.join(['{}'.format(f) for f in data_type_ids]),
+            feature_config_ids=', '.join(['{}'.format(f) for f in feature_config_id]),
+            create_columns=', '.join(['{} character varying(100)'.format(f) for f in fields]),
+            feature_id=feature_id,
+            cols=',\n'.join(cols)
+        )
+    query_index = ''' CREATE UNIQUE INDEX {table_name}_index ON {table_name}(geo_id) '''.format(table_name=table_name)
+    with connections['default'].cursor() as cursor:
+        cursor.execute(query)
+        cursor.execute(query_index)
+    return True
 
 
 def removeView(table_name):
