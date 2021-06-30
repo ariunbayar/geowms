@@ -529,11 +529,10 @@ def get_request_data(request, id):
 
 def _get_employees(geo_id):
     emp_fields = list()
-    employees = list()
-
     get_org = Org.objects.filter(level=2, geo_id=geo_id)
     for org in get_org:
         emp_detail = dict()
+        employees = list()
         emp_detail['org_name'] = org.name
         position_mergejilten = POSITION_MERGEJILTEN.filter(org=org).first()
         get_employees = Employee.objects.filter(org_id=org.id, position_id=position_mergejilten.id)
