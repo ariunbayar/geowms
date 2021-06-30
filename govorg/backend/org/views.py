@@ -73,7 +73,7 @@ def _org_role(org):
     property_of_feature = {}
     themes = []
     package_features = []
-    gov_perm = gov_perm = org.govperm_set.first()
+    gov_perm = org.govperm_set.first()
     property_ids_of_feature = {}
 
     if gov_perm:
