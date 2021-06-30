@@ -3,39 +3,28 @@ import { Map, View } from 'ol'
 
 import OSM from 'ol/source/OSM';
 import TileLayer from 'ol/layer/Tile';
-import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style'
+import { Fill, Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON';
-import {Vector as VectorSource} from 'ol/source';
-import {Vector as VectorLayer} from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+import { Vector as VectorLayer } from 'ol/layer';
 import 'ol/ol.css'
-import { service } from './service'
 
 export default class MapRegion extends Component {
 
     constructor(props) {
         super(props)
-
         this.state = {
             dataProjection: 'EPSG:4326',
             featureProjection: 'EPSG:3857',
+            allowed_geom: props.allowed_geom,
         }
 
         this.loadMap = this.loadMap.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
-        this.getRegion = this.getRegion.bind(this)
-
     }
 
     componentDidMount() {
         this.loadMap()
-    }
-
-    getRegion() {
-        service
-            .getRegion()
-            .then(({ allowed_geom }) => {
-                this.loadMapData(allowed_geom)
-            })
     }
 
     loadMap() {
@@ -52,7 +41,7 @@ export default class MapRegion extends Component {
           }),
         });
         this.map = map
-        this.getRegion()
+        this.loadMapData(this.state.allowed_geom)
     }
 
     loadMapData(GeoJson){
@@ -68,11 +57,13 @@ export default class MapRegion extends Component {
             }),
           }),
         };
+
         const geojsonObject =  GeoJson
         var features_new =  new GeoJSON().readFeatures(geojsonObject, {
             dataProjection: this.state.dataProjection,
             featureProjection: this.state.featureProjection,
         });
+
         const vectorSourceNew = new VectorSource({
             features: features_new
         });
@@ -83,6 +74,7 @@ export default class MapRegion extends Component {
             return styles_new[feature.getGeometry().getType()];
             }
         });
+
         this.map.addLayer(vectorLayerNew)
         this.map.getView().fit(features_new[0].getGeometry(),{ padding: [300, 300, 300, 300] })
     }
@@ -96,5 +88,4 @@ export default class MapRegion extends Component {
             </div>
         )
     }
-
 }

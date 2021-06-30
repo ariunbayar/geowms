@@ -1903,7 +1903,7 @@ def _get_choices(Model, field_name):
 
 @require_POST
 @ajax_required
-@user_passes_test(lambda u: u.is_superuser)
+@login_required
 def get_select_values(request, payload):
     org_id = payload.get('org_id')
     if not org_id:

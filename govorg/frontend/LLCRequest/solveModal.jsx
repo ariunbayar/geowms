@@ -203,6 +203,7 @@ class Form extends Component {
                         "",
                         this.handleClose
                     )
+                    global.refreshCount()
                 }
                 else {
                     this.modalChange(
@@ -248,6 +249,7 @@ class Form extends Component {
                         "",
                         this.handleClose
                     )
+                    global.refreshCount()
                 }
                 else {
                     this.modalChange(
@@ -293,6 +295,7 @@ class Form extends Component {
                         "",
                         this.handleClose
                     )
+                    global.refreshCount()
                 }
                 else {
                     this.modalChange(
