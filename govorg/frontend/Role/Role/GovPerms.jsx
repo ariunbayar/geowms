@@ -326,7 +326,7 @@ export default class InsPerms extends Component {
                     <div className="col ">
                         <div className="accordion my-0" id="accordion">
                                 {themes.length > 0 && themes.map((theme, t_idx) =>
-                                    <div className="role-bg-white-card">
+                                    <div className="role-bg-white-card" key={t_idx}>
                                         <div className={'mb-0 role-card ' + (theme.is_role ? is_role_border : theme.is_employee_perm ? is_emp_border : '')} key={t_idx}>
                                             <PermAcc
                                                 type="theme"
@@ -345,7 +345,7 @@ export default class InsPerms extends Component {
                                         prevTid !== theme.id && package_features.length > 0 &&
                                         package_features.map((pack, p_idx) =>
                                             pack.parent_id == theme.id &&
-                                            <div id={`acc-${t_idx}-theme`} className={(p_idx == 0 ? `collapse role-table-card mt-3 mb-0 ` : `collapse role-table-card mt-3 mb-0 `) + (pack.is_role ? is_role_border : pack.is_employee_perm ? is_emp_border : '')} key={p_idx}>
+                                            <div id={`acc-${t_idx}-theme`} className={(p_idx == 0 ? `collapse role-table-card mt-3 mb-0 ` : `collapse role-table-card mt-3 mb-0 `) + (pack.is_role ? is_role_border : pack.is_employee_perm ? is_emp_border : '')} key={t_idx.toString + p_idx.toString()}>
                                                 <PermAcc key={p_idx}
                                                     type="package"
                                                     id={pack.id}
@@ -363,7 +363,7 @@ export default class InsPerms extends Component {
                                                     <div className="">
                                                         <div className="accordion" id="accordion-3">
                                                             {pack.features.map((feature, f_idx) =>
-                                                            <div className={(feature.is_role ? is_role_border + border_left_right_none_bg : feature.is_employee_perm ? is_emp_border + border_left_right_none_bg : '')} key={f_idx}>
+                                                            <div className={(feature.is_role ? is_role_border + border_left_right_none_bg : feature.is_employee_perm ? is_emp_border + border_left_right_none_bg : '')} key={t_idx.toString() + p_idx.toString() + f_idx.toString()}>
                                                                 {feature.parent_id == pack.id &&
                                                                     <PermAcc
                                                                         type="feature"
@@ -433,7 +433,7 @@ export default class InsPerms extends Component {
                                             {perms.map((perm, perm_idx) =>
                                             Object.keys(property.roles).map((key, k_idx) =>
                                                 key == perm.eng_name &&
-                                                <PermChecks key={perm_idx}
+                                                <PermChecks key={pro_idx.toString() + perm_idx.toString()}
                                                     fid={fid}
                                                     all_check_value={perm.all_check_value}
                                                     id={property.id}

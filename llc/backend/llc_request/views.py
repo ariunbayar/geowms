@@ -71,6 +71,14 @@ def _choice_kind_display(kind, item):
     return display_name
 
 
+def _name_display(id, items):
+    name = ''
+    request_form = RequestForm.objects.filter(file_id=id).first()
+    if request_form:
+        name = request_form.client_org
+    return name
+
+
 @require_POST
 @ajax_required
 @llc_required(lambda u: u)
@@ -82,7 +90,8 @@ def llc_request_list(request, content, payload):
         оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
         хувьсах_талбарууд = [
             {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
-            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"}
+            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
+            {'field': 'id', 'action': _name_display, "new_field": "client_org"}
         ]
 
         datatable = Datatable(
@@ -100,6 +109,7 @@ def llc_request_list(request, content, payload):
             'total_page': total_page,
             'start_index': start_index,
         }
+
     else:
         rsp = {
             'items': [],
@@ -443,11 +453,15 @@ def get_request_data(request, id):
     features = []
     field = {}
     qs = RequestForm.objects.filter(file_id=id).first()
+    request_file = RequestFiles.objects.filter(pk=id).first()
+    requested_employee = request_file.requested_employee
+
     file_data = {
         'name': '',
         'size': '',
         'type': 'application/vnd.rar'
     }
+
     field = dict()
     aimag_name = ''
     aimag_geom = []
@@ -502,6 +516,7 @@ def get_request_data(request, id):
         field['kind'] = qs.file.get_kind_display()
         field['desc'] = qs.file.description
         field['geo_id'] = qs.file.geo_id
+        field['selected_user'] = requested_employee
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -514,17 +529,24 @@ def get_request_data(request, id):
 
 def _get_employees(geo_id):
     emp_fields = list()
-    get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
-    position_mergejilten = POSITION_MERGEJILTEN.filter(org=get_org).first()
-    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position_mergejilten.id)
-    for emp in get_employees:
+    get_org = Org.objects.filter(level=2, geo_id=geo_id)
+    for org in get_org:
         emp_detail = dict()
-        get_name = User.objects.filter(pk=emp.user_id).first()
-        emp_detail['org_name'] = get_org.name
-        emp_detail['first_name'] = get_name.first_name
-        emp_detail['mail'] = get_name.email
-        emp_detail['user_id'] = get_name.id
+        employees = list()
+        emp_detail['org_name'] = org.name
+        position_mergejilten = POSITION_MERGEJILTEN.filter(org=org).first()
+        get_employees = Employee.objects.filter(org_id=org.id, position_id=position_mergejilten.id)
+        if get_employees:
+            for emp in get_employees:
+                detail = dict()
+                users = User.objects.filter(pk=emp.user_id).first()
+                detail['first_name'] = users.first_name
+                detail['mail'] = users.email
+                detail['user_id'] = users.id
+                employees.append(detail)
+            emp_detail['employees'] = employees
         emp_fields.append(emp_detail)
+
     return emp_fields
 
 
@@ -629,7 +651,6 @@ def send_request(request, payload, content, id):
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, user_id=user_id).first()
     email = employee.user.email
-
     if employee:
         request_files = LLCRequest.objects.filter(file_id=id).first()
         request_data = {}
@@ -642,10 +663,10 @@ def send_request(request, payload, content, id):
         )
 
         success_mail = _send_to_information_email(email)
-
         if success_mail:
             qs.state = RequestFiles.STATE_SENT
             qs.kind = RequestFiles.KIND_PENDING
+            qs.requested_employee = user_id
             qs.save()
 
             shape_of_files = RequestFilesShape.objects.filter(files=qs)

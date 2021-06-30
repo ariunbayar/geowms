@@ -483,7 +483,8 @@ export class Roles extends Component {
                                                 <tr>
                                                     <td rowSpan={data_type.properties.length + 1} className="vertical text-center align-middle text-wrap">
                                                         <span className="text-center vertical align-middle">{data_type.name}</span><br/>
-                                                        <span className="text-center vertical align-middle">({data_type.code})</span>
+                                                        {/* <span className="text-center vertical align-middle">({data_type.code})</span> */}
+                                                        <span className="text-center vertical align-middle">({data_type.properties ? data_type.properties.length : 0})</span>
                                                     </td>
                                                 </tr>
                                                 {data_type.properties.map((property, index) =>

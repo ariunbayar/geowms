@@ -90,11 +90,12 @@ export default class RequestDetail extends Component {
             info, desc_info, mergejilten,
             aimag_name, aimag_geom, desc, emp_fields,
         } = this.props
-        var { investment_status, hide_file } = this.state
+        var { investment_status, hide_file, disabled } = this.state
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
-        else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0]?.user_id || 'Байхгүй'}
-
+        else if (emp_fields && 0 <= emp_fields.length) {
+            default_mergejilten = emp_fields[0].employees[0]?.user_id || 'Байхгүй'
+        }
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
@@ -135,8 +136,7 @@ export default class RequestDetail extends Component {
                                 name='zahialagch'
                                 id="zahialagch"
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={zahialagch}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -148,8 +148,7 @@ export default class RequestDetail extends Component {
                                 id="project_name"
                                 name='project_name'
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={project_name}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -161,8 +160,7 @@ export default class RequestDetail extends Component {
                                 name="object_type"
                                 id="object_type"
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={object_type}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -174,8 +172,7 @@ export default class RequestDetail extends Component {
                                 name="object_count"
                                 id="object_count"
                                 className="form-control"
-                                disabled={this.state.disabled}
-                                disabled={this.props.disabled}
+                                disabled={disabled}
                                 value={object_count}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
@@ -191,35 +188,31 @@ export default class RequestDetail extends Component {
                                     default_value={hurungu_oruulalt}
                                     default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
                                     handleSelectField={this.props.handleOnChange}
+                                    disabled={disabled}
                                 />
                             </div>
                                 {
-                            info &&
+                            (info || disabled) &&
                                 <div className="form-group col-md-12">
-                                    <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
-                                    <select
-                                        className="form-control"
-                                        name="mergejilten"
-                                        id="mergejilten"
-                                        onChange={(e) => {this.props.handleOnChange(e)}}
-                                        value={default_mergejilten}
-                                    >
-                                        <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
                                     {
-                                        (emp_fields && emp_fields.length > 0)
-                                        ?
-                                                emp_fields.map((value, idx) => (
-                                                    <optgroup
-                                                        id={idx}
-                                                        label={value.org_name}
-                                                    >
-                                                        <option value={value.user_id}>{value.first_name}</option>
-                                                    </optgroup>
-                                                ))
-                                            :
-                                                null
+                                        (emp_fields && emp_fields.length > 0) &&
+                                            <SelectField
+                                                display_mode={true}
+                                                name_key='org_name'
+                                                opt_key='employees'
+                                                option_name_2='mail'
+                                                option_key="user_id"
+                                                data_list={emp_fields}
+                                                option_name="first_name"
+                                                label="Мэргэжилтэн сонгох"
+                                                className="col-md-12 px-0 mx-0"
+                                                state_name= "choose_proffessional"
+                                                default_value={default_mergejilten}
+                                                disabled={(!info && disabled) && true}
+                                                handleSelectField={this.props.handleOnChange}
+                                                default_text={"----   Илгээх мэргэжилтэнээ сонгоно уу  ----"}
+                                            />
                                     }
-                                    </select>
                             </div>
                             }
                             {

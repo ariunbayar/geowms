@@ -34,7 +34,7 @@ function FileUpload(props) {
                 <div className={`row ${className}`}>
                     <div className="custom-file col-md-6 my-auto ml-3">
                         <label className="custom-file-label" htmlFor="customFile"> {file? file.name : default_text}</label>
-                        <input 
+                        <input
                             type="file"
                             name='file'
                             id="customFile"

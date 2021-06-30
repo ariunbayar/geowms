@@ -150,7 +150,7 @@ export class RequestAdd extends Component {
         const { id } = this.props.match.params
         if (id) {
             this.setState({ is_loading: true })
-            service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom }) =>{
+            service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) =>{
                 if (form_field) {
                     this.setState({
                         vector_datas,
@@ -167,6 +167,8 @@ export class RequestAdd extends Component {
                         kind: form_field['kind'],
                         desc: form_field['desc'],
                         geo_id: form_field['geo_id'],
+                        emp_fields,
+                        mergejilten: form_field['selected_user'],
                         is_loading: false,
                     })
                 }
