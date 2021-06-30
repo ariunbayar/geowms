@@ -71,7 +71,7 @@ export default class SelectField extends Component {
         const { default_value, label,
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
-                option_text, disabled, display_mode, option_name_2
+                option_text, disabled, option_name_2, display_mode,
         } = this.props
         const state = this.state
         let title = label ? label : ''
@@ -112,6 +112,8 @@ export default class SelectField extends Component {
 
 
 function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode){
+    var option_data = option_name
+    if (option_text) option_data = option_text
     const options =
         (options_data && options_data.length >0)
         &&
@@ -122,18 +124,12 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                     value={row[option_key]}
                 >
                     {
-                        option_text
+                        display_mode
 
                         ?
-                            row[option_text]
-
+                            row[option_data]  + "   (   " + row[option_name_2] + "   )   "
                         :
-                            display_mode
-
-                            ?
-                                row[option_name] + "   (   " + row[option_name_2] + "   )   "
-                            :
-                                row[option_name]
+                            row[option_data]
                     }
                 </option>
             )
