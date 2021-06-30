@@ -1,3 +1,4 @@
+from re import L
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, Http404
@@ -518,6 +519,10 @@ def update(request, payload, pk):
                     for perm in add_perms:
                         emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
                         obj_array.append(emp_perm_inspire)
+
+                    emp_inspire_perms = EmpPermInspire.objects.filter(emp_perm=emp_perm)
+                    if emp_inspire_perms:
+                        emp_inspire_perms.delete()
 
                     EmpPermInspire.objects.bulk_create(obj_array)
 
