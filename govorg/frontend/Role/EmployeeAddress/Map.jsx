@@ -1,8 +1,9 @@
 import React, { Component } from "react"
 import { Map, View, Feature } from 'ol'
 
-import { Vector as VectorSource, OSM } from 'ol/source'
+import { Vector as VectorSource, OSM, WMTS } from 'ol/source'
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer'
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import { Icon, Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style'
 import { format as coordinateFormat } from 'ol/coordinate';
