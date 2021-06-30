@@ -1,13 +1,11 @@
 from django.shortcuts import render, get_object_or_404
-from django.db.models import F, Count
+from django.db.models import F
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.http.response import Http404
 
 from backend.org.models import Org, Employee
-from backend.inspire.models import GovPerm
-from backend.inspire.models import GovPermInspire
 from backend.inspire.models import EmpPerm
 from backend.inspire.models import EmpPermInspire
 from backend.inspire.models import LProperties
@@ -215,19 +213,16 @@ def frontend(request):
     emp_perm_insp = emp_perm.empperminspire_set
     approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
     revoke = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_REVOKE).first()
-    org_role = _org_role(org)
 
     context = {
         'org': {
             "org_name": org.name.upper(),
             "org_level": org.level,
-            'org_role': org_role,
             'employee': {
                 'is_admin': employee.is_admin,
                 'username': employee.user.username,
                 'geo_id': org.geo_id or None
             },
-            'emp_role': _emp_role(org, request.user),
             'allowed_geom': geom.json if geom else None,
             'approve': True if approve else False,
             'revoke': True if revoke else False,
@@ -235,6 +230,24 @@ def frontend(request):
     }
 
     return render(request, 'org/index.html', context)
+
+
+@require_GET
+@ajax_required
+@gov_required
+@login_required(login_url='/gov/secure/login/')
+def get_perms(request):
+    data = dict()
+
+    org = request.org
+    data['org_role'] = _org_role(org)
+    data['emp_role'] = _emp_role(org, request.user)
+
+    rsp = {
+        'success': True,
+        'data': data
+    }
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -276,7 +289,7 @@ def position_list(request, payload):
     items = []
     page = 1
     total_page = 1
-    start_index= 1
+    start_index = 1
     оруулах_талбарууд = ['id', 'name', 'org_id']
 
     qs = Position.objects.filter(org=request.org)
@@ -341,7 +354,6 @@ def pos_create(request, payload):
         }
 
     return JsonResponse(rsp)
-
 
 
 @require_GET

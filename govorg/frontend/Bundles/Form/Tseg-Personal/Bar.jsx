@@ -23,9 +23,9 @@ export class Bar extends Component {
     getEmpRole() {
         service
         .getEmpRole()
-        .then(({ point_role_list }) => {
-            this.setState({ point_role_list })
-        })
+            .then(({ point_role_list }) => {
+                this.setState({ point_role_list })
+            })
     }
 
     render() {

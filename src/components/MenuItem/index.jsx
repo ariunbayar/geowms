@@ -9,7 +9,7 @@ class MenuItem extends Component {
         let is_match;
 
         if ('exact' in this.props) {
-            is_match = this.props.location.pathname.includes(path)
+            is_match = this.props.location.pathname === path
         } else {
             is_match = this.props.location.pathname.includes(path)
         }

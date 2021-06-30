@@ -1,6 +1,6 @@
 import React, { Component, Suspense, useState, useEffect } from 'react'
 import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
-import { service } from "./service"
+
 import MenuItem from "@utils/MenuItem"
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
 import { DisplayNotif } from '@utils/Notification'
@@ -27,8 +27,9 @@ const Help = React.lazy(() => import('./Help'));
 const Role = React.lazy(() => import('./Role'));
 const Position = React.lazy(() => import('@helpComp/Position'));
 const LLCRequest = React.lazy(() => import("./LLCRequest"));
-
 const Tseg = React.lazy(() => import('./Bundles/TsegPersonal'));
+
+import { service } from "./service"
 
 export class App extends Component {
 
@@ -39,23 +40,11 @@ export class App extends Component {
             name: props.org.name,
             map_list: [],
             base_layer_list: [],
+            org_role: [],
+            is_loading: true,
         }
-        this.getBaseLayer = this.getBaseLayer.bind(this)
         this.getModalFunc = this.getModalFunc.bind(this)
         this.getNotifFunc = this.getNotifFunc.bind(this)
-    }
-
-    componentDidMount() {
-        Promise.all([
-            this.getBaseLayer()
-        ])
-    }
-
-    getBaseLayer(){
-        service.loadBaseLayers()
-            .then(({ base_layer_list }) => {
-                this.setState({ base_layer_list })
-            })
     }
 
     getModalFunc(setModal) {
@@ -66,12 +55,17 @@ export class App extends Component {
         global.NOTIF = setNotif
     }
 
+    getStates(org_perms, base_layer_list) {
+        this.setState({ org_role: org_perms, base_layer_list, is_loading: false })
+    }
+
     render() {
-        const { org_role, employee, allowed_geom } = this.props.org
-        const { base_layer_list } = this.state
+        const { employee, allowed_geom } = this.props.org
+        const { base_layer_list, org_role, is_loading } = this.state
 
         return (
             <BrowserRouter>
+                <SuspenseLoader is_loading={is_loading} color={'#000'}/>
                 <DisplayModal getModalFunc={this.getModalFunc}/>
                 <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -81,13 +75,13 @@ export class App extends Component {
                             <h5 className="logo-text">ГЕОПОРТАЛ</h5>
                         </a>
                     </div>
-                    <TabBars {...this.props.org} {...this.state}/>
+                    <TabBars {...this.props.org} {...this.state} getStates={(...values) => this.getStates(...values)}/>
                 </div>
                 <div className="clearfix">
                     <div className="content-wrapper">
                         <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
                             {
-                                base_layer_list
+                                Object.keys(org_role).length > 0 && base_layer_list.length > 0
                                 ?
                                     <Switch>
                                         <Route path={"/gov/forms/"} component={Forms} />
@@ -120,7 +114,7 @@ export class App extends Component {
                                         <Route path="/gov/zip-code/" component={ZipCode} />
                                         <Route path="/gov/org-request/" component={OrgRequest} />
                                         <Route path="/gov/history/" component={ChangeRequest} />
-                                        <Route exact path="/gov/perm/" render={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                                        <Route exact path="/gov/perm/all/" render={(props) => <InsPerms {...props} org_roles={org_role}/>} />
                                         <Route exact path="/gov/perm/org/" component={Gov} />
                                         <Route path="/gov/perm/employee/" render={(props) => <Employee {...props} org_roles={org_role} employee={employee} />}/>
                                         <Route exact path="/gov/help/" component={Help} />
@@ -141,17 +135,30 @@ export class App extends Component {
 function TabBars(props) {
 
     const employee = props.employee
-    const emp_role = props.emp_role
-    const point_perms = emp_role.point_perms
     const { approve, revoke } = props
 
     const [request_count, setRequestCount] = useState(0)
     const [revoke_count, setRevokeCount] = useState(0)
     const [llc_count, setLLCCount] = useState(0)
+    const [point_perms, setPointPerms] = useState([])
+    const [emp_role, setEmpRole] = useState({})
+    const [org_roles, setOrgPerms] = useState([])
+    const [base_layer_list, setBaseLayer] = useState([])
 
     useEffect(() => {
-        requestCount()
-        global.requestCount = requestCount
+        if (Object.keys(org_roles).length > 0 && base_layer_list.length > 0) {
+            props.getStates(org_roles, base_layer_list)
+        }
+
+    }, [org_roles, base_layer_list])
+
+    useEffect(() => {
+        Promise.all([
+            requestCount(),
+            getPerms(),
+            getBaseLayer(),
+        ])
+        global.refreshCount = requestCount
     }, [])
 
     const requestCount = () => {
@@ -168,6 +175,22 @@ function TabBars(props) {
             })
     }
 
+    const getPerms = async () => {
+        const { success, data, error } = await service.getPerms()
+        if (success) {
+            setOrgPerms(data.org_role)
+            setEmpRole(data.emp_role)
+            setPointPerms(data.emp_role.point_perms)
+        }
+    }
+
+    const getBaseLayer = () => {
+        service.loadBaseLayers()
+            .then(({ base_layer_list }) => {
+                setBaseLayer(base_layer_list)
+            })
+    }
+
     return (
         <ul className="sidebar-menu do-nicescrol">
             <MenuItem icon="gp-text-primary fa fa-key" url="#" text="Байгууллага">
@@ -175,18 +198,23 @@ function TabBars(props) {
                     {
                         employee.is_admin
                         &&
-                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/" text="Эрхүүд"></MenuItem>
+                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/all/" text="Эрхүүд"></MenuItem>
                     }
                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/region/" text="Хамрах хүрээ"></MenuItem>
                     {
-                        employee.is_admin &&
+                        employee.is_admin
+                        &&
                             <>
                                 <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/position/" text="Албан тушаал"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/position/" text="Албан тушаал"></MenuItem>
                             </>
                     }
                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/employee/" text="Хэрэглэгч"></MenuItem>
+                    {
+                        employee.is_admin
+                        &&
+                            <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/addresses/" text={"Ажилчдын хаяг"}></MenuItem>
+                    }
                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/erguuleg/" text={"Эргүүлийн мэдээлэл"}></MenuItem>
                 </ul>
             </MenuItem>
@@ -230,7 +258,7 @@ function TabBars(props) {
                     }
                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/zip-code/" text="Зипкод"></MenuItem>
                     {
-                        Object.keys(emp_role).length > 0 && Object.keys(emp_role.themes).length > 0
+                        emp_role?.themes && Object.keys(emp_role.themes).length > 0
                         ?
                             emp_role.themes.map((theme, idx) =>
                                 <MenuItem
