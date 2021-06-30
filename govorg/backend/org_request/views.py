@@ -1291,6 +1291,7 @@ def _reject_request(id, kind, state, text):
     reject_request.state = state
     reject_request.save()
 
+
 def _remove_relative_folder(solved_request):
     main_folder = 'llc-request-files'
     remove_path = str(solved_request.file_path)
