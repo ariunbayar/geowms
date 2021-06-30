@@ -649,7 +649,9 @@ def _value_types():
 
 
 def _get_data_from_data(form):
+    value_type = ''
     data = form['data'] if form['data'] else None
+
     code_list_value_types = ['option', 'single-select', 'boolean']
     if form['value_type'] in code_list_value_types:
         value_type = 'code_list_id'
@@ -662,23 +664,31 @@ def _get_data_from_data(form):
                 if types['value_type'] == 'date' and data:
                     data = date_to_timezone(data)
 
-            value_type = types['value_type']
+                value_type = types['value_type']
+
+    if not value_type:
+        value_type = 'value_text'
+
     return data, value_type
 
 
 def _create_mdatas(geo_id, feature_id, form, value):
     ids = _get_ids(feature_id, form['property_id'])
+
     value['geo_id'] = geo_id
     value['feature_config_id'] = ids[0]['feature_config_id']
     value['data_type_id'] = ids[0]['data_type_id']
     value['property_id'] = form['property_id']
+
     if form["value_type"] == "option":
         if form["data"]:
             value['code_list_id'] = form ["data"]
+
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
             if value['value_date']:
                 value['value_date'] = date_to_timezone(value['value_date'])
+
     MDatas.objects.create(**value)
 
 
@@ -1244,7 +1254,7 @@ def get_request_detail(request, id):
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
-        field['investment_status'] = qs.investment_status
+        field['investment_status'] = utils.get_value_from_types(RequestForm.INVESTMENT_STATUS, qs.investment_status)
         field['selected_tools'] = json_load(qs.file.tools)
     field['company_name'] = company_name
 

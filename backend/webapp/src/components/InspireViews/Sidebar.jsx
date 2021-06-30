@@ -262,7 +262,7 @@ export default class SideBar extends Component {
         return values
     }
 
-    makeView() {
+    async makeView() {
         const props = this.props
         const { fid, tid } = props
         const { view, style_name, file } = this.state
@@ -281,17 +281,14 @@ export default class SideBar extends Component {
 
         if(style_name) {
             this.setState({ save_is_load: true, is_loading: true, load_text: "View үүсгэж байна" })
-            service
-                .makeView(form_datas)
-                .then(({ success, data, error}) => {
-                    if(success) {
-                        props.getProperties(props.fid, props.tid, props.fname, '')
-                    }
-                    else {
-                        alert(error)
-                    }
-                    this.setState({ is_loading: false, load_text: "", check_list: false, check_open: false })
-                })
+            const { success, data, error} = await service.makeView(form_datas)
+            if(success) {
+                props.getProperties(props.fid, props.tid, props.fname, '')
+            }
+            else {
+                alert(error)
+            }
+            this.setState({ is_loading: false, load_text: "", check_list: false, check_open: false })
         }
         else this.setState({ invalid_feedback: true })
     }

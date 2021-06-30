@@ -73,7 +73,7 @@ def _org_role(org):
     property_of_feature = {}
     themes = []
     package_features = []
-    gov_perm = gov_perm = org.govperm_set.first()
+    gov_perm = org.govperm_set.first()
     property_ids_of_feature = {}
 
     if gov_perm:
@@ -205,14 +205,18 @@ def _emp_role(org, user):
 # @cache_page(60 * 15)
 def frontend(request):
 
+    approve = False
+    revoke = False
+
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
 
     emp_perm = employee.empperm_set.first()
-    emp_perm_insp = emp_perm.empperminspire_set
-    approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
-    revoke = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_REVOKE).first()
+    if emp_perm:
+        emp_perm_insp = emp_perm.empperminspire_set
+        approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
+        revoke = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_REVOKE).first()
 
     context = {
         'org': {

@@ -65,7 +65,7 @@ export class App extends Component {
 
         return (
             <BrowserRouter>
-                <SuspenseLoader is_loading={is_loading} color={'#000'}/>
+                <SuspenseLoader is_loading={is_loading} color={'#000'} text="Эрхүүдийг уншиж байна."/>
                 <DisplayModal getModalFunc={this.getModalFunc}/>
                 <DisplayNotif getNotifFunc={this.getNotifFunc}/>
                 <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true">
@@ -288,7 +288,7 @@ function TabBars(props) {
                                                                             <MenuItem
                                                                                 key={idz}
                                                                                 icon="fa fa-circle-o gp-text-primary"
-                                                                                url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/map/`}
+                                                                                url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
                                                                                 text={feat.name}
                                                                                 count={feat.count}
                                                                             >
