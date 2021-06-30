@@ -39,7 +39,6 @@ export default class RequestDetail extends Component {
 
     componentDidUpdate(pP, pS) {
         const { state, geo_id } = this.props
-        console.log(state);
         if (pP.state != state) {
             if(state == "ИЛГЭЭСЭН") {
                 this.setState({ disabled: true })
@@ -99,7 +98,6 @@ export default class RequestDetail extends Component {
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
-        console.log(hide_file);
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
