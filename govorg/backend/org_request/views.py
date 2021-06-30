@@ -754,7 +754,9 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
 
 def _request_to_m(request_datas):
     geom = _geojson_to_geom(request_datas['geo_json'])
+    feature_count = MGeoDatas.objects.filter(feature_id=request_datas['feature_id']).count()
     success = True
+    is_modified = False
     if request_datas['form_json']:
         success = _create_mdatas_object(
             request_datas['form_json'], request_datas['feature_id'],
@@ -770,10 +772,14 @@ def _request_to_m(request_datas):
 
     elif request_datas['approve_type'] == 'update':
         request_datas['m_geo_datas_qs'].update(geo_data=geom)
-        check_wmts = WmtsCacheConfig.objects.filter(feature_id=request_datas['feature_id']).first()
-        if check_wmts:
-            check_wmts.is_modified = True
-            check_wmts.save()
+        is_modified = True
+
+    check_wmts = WmtsCacheConfig.objects.filter(feature_id=request_datas['feature_id']).first()
+    if check_wmts:
+        check_wmts.is_modified = True if is_modified else False
+        check_wmts.feature_count = feature_count
+        check_wmts.save()
+
     return success
 
 
