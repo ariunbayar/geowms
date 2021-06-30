@@ -128,25 +128,24 @@ export default class List extends Component {
         })
     }
 
-    refreshTable(){
+    async refreshTable(){
         const {values, id} = this.state
-        service.pg_config.insertSingleData(id, values.id).then(({success, table_info}) => {
-            if (success) {
-                this.setState({is_loading: false})
-                this.modalChange(
-                    'fa fa-check-circle',
-                    null,
-                    'success',
-                    'Амжилттай',
-                    `${table_info}`,
-                    false,
-                    '',
-                    '',
-                    null,
-                    () => this.refreshView(values)
-                )
-            }
-        })
+        const { success, table_info } = await service.pg_config.insertSingleData(id, values.id)
+        if (success) {
+            this.setState({is_loading: false})
+            this.modalChange(
+                'fa fa-check-circle',
+                null,
+                'success',
+                'Амжилттай',
+                `${table_info}`,
+                false,
+                '',
+                '',
+                null,
+                () => this.refreshView(values)
+            )
+        }
     }
 
     render() {
