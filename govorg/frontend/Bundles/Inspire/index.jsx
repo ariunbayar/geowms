@@ -13,9 +13,21 @@ export default class Bundles extends Component {
         }
     }
 
+    componentDidMount(){
+        const {tid, pid, fid} = this.props.match.params
+        this.props.history.push(`/gov/org/map/${tid}/${pid}/${fid}/map/`)
+    }
+
     componentDidUpdate(pP){
-        if(pP.org_geom !== this.props.org_geom) {
-            this.setState({ org_geom: this.props.org_geom })
+        if(pP.match.params.fid !== this.props.match.params.fid)
+        {
+            const {tid, pid, fid} = this.props.match.params
+            this.props.history.push(`/gov/org/map/${tid}/${pid}/${fid}/map/`)
+        }
+
+        if(pP.org_geom !== this.props.org_geom)
+        {
+            this.setState({org_geom: this.props.org_geom})
         }
     }
 
