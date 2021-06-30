@@ -37,12 +37,13 @@ export default class RequestDetail extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { state, geo_id } = this.props
+        const { state, geo_id, kind } = this.props
         if (pP.state != state) {
             if(state == "ИЛГЭЭСЭН") {
                 this.setState({ disabled: true })
             }
         }
+
         if(pP.geo_id !== geo_id){
             if( geo_id == '496'){
                 this.setState({ form_checked: true })
@@ -201,7 +202,7 @@ export default class RequestDetail extends Component {
                                                 className="col-md-12 px-0 mx-0"
                                                 state_name= "choose_proffessional"
                                                 default_value={default_mergejilten}
-                                                disabled={mergejilten && true}
+                                                disabled={(!info && disabled) && true}
                                                 handleSelectField={this.props.handleOnChange}
                                                 default_text={"----   Илгээх мэргэжилтэнээ сонгоно уу  ----"}
                                             />
