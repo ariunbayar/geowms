@@ -35,6 +35,7 @@ export class LLCSettings extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.goLink = this.goLink.bind(this)
+        this.handleSaveModal = this.handleSaveModal.bind(this)
     }
 
     getArray(data, selected_value) {
@@ -133,11 +134,61 @@ export class LLCSettings extends Component {
         })
     }
 
+    handleSaveModal(value, idx) {
+        const select = this.state.selected_values.feature?.id
+        const feature = this.state.selected_values.features
+        var get_type
+        feature.map((details, idx) =>
+            get_type = details.geometry.type
+        )
+        if(get_type.includes("Multi")) { get_type }
+        else {
+            const geoms_type = 'Multi'.concat('', get_type)
+            get_type = geoms_type
+        }
+        service.geomType(select).then(({ geom_type }) => {
+            this.setState({ geom_type })
+            if(geom_type !== get_type) {
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-exclamation-circle",
+                    modal_bg: '',
+                    icon_color: 'warning',
+                    title: 'Геометр төрөл зөрсөн байна!',
+                    text: `Хадгалахдаа итгэлтэй байна уу?`,
+                    has_button: true,
+                    actionNameBack: 'Үгүй',
+                    actionNameDelete: 'Тийм',
+                    modalAction: () => this.Save(value, idx),
+                    modalClose: null
+                }
+                global.MODAL(modal)
+            }
+            else {
+                this.Save(value, idx)
+            }
+        })
+    }
+
     Save(value, idx) {
         var list_of_datas = this.state.list_of_datas
         service.Save(value).then(({ success }) => {
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-check-circle",
+                modal_bg: '',
+                icon_color: 'success',
+                title: 'Амжилттай хадгаллаа',
+                text: '',
+                has_button: false,
+                actionNameBack: '',
+                actionNameDelete: '',
+                modalAction: null,
+                modalClose: null
+            }
+            global.MODAL(modal)
             list_of_datas[idx].icon_state = true
-            this.setState({list_of_datas})
+            this.setState({ list_of_datas })
         })
     }
 
@@ -147,7 +198,7 @@ export class LLCSettings extends Component {
         })
     }
 
-    modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
+    modalChange(modal_icon, icon_color, title, has_button) {
         this.setState({
             modal_icon,
             icon_color,
@@ -227,7 +278,7 @@ export class LLCSettings extends Component {
                                                     ?
                                                         <a className="text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
                                                     :
-                                                        <a className='text-success fa fa-floppy-o' role="button" onClick={(e) => this.Save(value, idx)}/>
+                                                        <a className='text-success fa fa-floppy-o' role="button" onClick={(e) => this.handleSaveModal(value, idx)}/>
                                                 }
                                             </td>
                                             <td>

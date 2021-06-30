@@ -12,6 +12,7 @@ export default class RequestModal extends Component {
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.handleAsk = this.handleAsk.bind(this)
     }
 
     componentDidMount() {
@@ -20,6 +21,23 @@ export default class RequestModal extends Component {
 
     handleOpen() {
         this.setState({ status: "open" })
+    }
+
+    handleAsk() {
+        const modal = {
+            modal_status: "open",
+            modal_icon: "fa fa-exclamation-circle",
+            modal_bg: '',
+            icon_color: 'warning',
+            title: 'Гарах',
+            text: `Гарахдаа итгэлтэй байна уу?`,
+            has_button: true,
+            actionNameBack: 'Үгүй',
+            actionNameDelete: 'Тийм',
+            modalAction: () => this.handleClose(),
+            modalClose: null
+        }
+        global.MODAL(modal)
     }
 
     handleClose() {
