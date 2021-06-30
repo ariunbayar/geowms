@@ -430,7 +430,7 @@ def save_request(request, content):
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
-def get_all_geo_json(request):
+def get_all_geo_json(request, content):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
@@ -443,7 +443,7 @@ def get_all_geo_json(request):
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
-def get_request_data(request, id):
+def get_request_data(request, content, id):
 
     features = []
     field = {}
@@ -559,7 +559,7 @@ def _make_connection(from_email):
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
-def get_file_shapes(request, id):
+def get_file_shapes(request, content, id):
     list_of_datas = []
 
     llc_data = LLCRequest.objects.filter(id=id).first()
@@ -675,7 +675,7 @@ def send_request(request, payload, content, id):
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
-def remove_request(request, id):
+def remove_request(request, content, id):
 
     initial_query = RequestFiles.objects.filter(pk=id).first()
     shapes = RequestFilesShape.objects.filter(files=initial_query.id)
@@ -723,7 +723,7 @@ def _delete_prev_files(file):
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
-def get_search_field(request):
+def get_search_field(request, content):
     search_field = dict()
     get_state = RequestFiles.STATE_CHOICES
     get_kind = RequestFiles.KIND_CHOICES
