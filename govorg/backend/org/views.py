@@ -1,8 +1,5 @@
-import json
-from django.db.models.expressions import Combinable
-
 from django.shortcuts import render, get_object_or_404
-from django.db.models import F
+from django.db.models import F, Count
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -33,10 +30,10 @@ from main import utils
 from main.components import Datatable
 from django.views.decorators.cache import cache_page
 
+
 def _get_properties_by_feature(initial_qs, feature_ids):
 
     qs = initial_qs
-    qs = qs.filter(feature_id__in=feature_ids)
     qs = qs.filter(property_id__isnull=False)
 
     qs_for_props = qs.values_list('property_id', flat=True)
@@ -54,10 +51,22 @@ def _get_properties_by_feature(initial_qs, feature_ids):
 
     for feature_id, property_id, perm_kind in item_pairs:
         feature_property_ids[feature_id].append({
-            "perm_kind":perm_kind, "prop_obj": properties[property_id]
+            "perm_kind": perm_kind,
+            "prop_obj": properties[property_id],
         })
 
     return feature_property_ids
+
+
+def _group_att(qs, att_name, exclude_null=True):
+    qs = qs.distinct(att_name)
+    if exclude_null:
+        exclude = dict()
+        exclude[att_name + "__isnull"] = True
+        qs = qs.exclude(**exclude)
+    qs = qs.order_by(att_name)
+    qs = qs.values_list(att_name, flat=True)
+    return qs
 
 
 def _org_role(org):
@@ -66,26 +75,28 @@ def _org_role(org):
     property_of_feature = {}
     themes = []
     package_features = []
-    gov_perm = GovPerm.objects.filter(org=org).first()
+    gov_perm = gov_perm = org.govperm_set.first()
     property_ids_of_feature = {}
 
     if gov_perm:
-        feature_ids = list(GovPermInspire.objects.filter(gov_perm=gov_perm.id).distinct('feature_id').exclude(feature_id__isnull=True).values_list('feature_id', flat=True))
+        gov_perm_inspire_qs = gov_perm.govperminspire_set
+        feature_ids = _group_att(gov_perm_inspire_qs, 'feature_id')
 
-        package_ids = list(LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True))
-        theme_ids = list(LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True))
+        features_qs = LFeatures.objects.filter(feature_id__in=feature_ids)
+        package_ids = _group_att(features_qs, 'package_id')
 
-        qs = GovPermInspire.objects.filter(gov_perm=gov_perm)
-        property_of_feature = _get_properties_by_feature(qs, feature_ids)
+        packages_qs = LPackages.objects.filter(package_id__in=package_ids)
+        theme_ids = _group_att(packages_qs, 'theme_id')
 
-        qs = GovPermInspire.objects.filter(feature_id__in=feature_ids, gov_perm=gov_perm)
-        perm_list_all = list(qs.values('geom', 'property_id', 'feature_id', ins_id=F('id'), kind=F('perm_kind')))
+        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(feature_id__in=feature_ids)
+        property_of_feature = _get_properties_by_feature(gov_perm_inspire_qs, feature_ids)
+        perm_list_all = list(gov_perm_inspire_qs.values('geom', 'property_id', 'feature_id', ins_id=F('id'), kind=F('perm_kind')))
 
         for feature_id, props in property_of_feature.items():
             # geom
             perm_list = get_perm_list(feature_id, None, True, perm_list_all)
             properties.append(
-                get_property_data_display2(perm_list, None, feature_id, True)
+                get_property_data_display2(perm_list, None, feature_id, geom=True)
             )
             property_perm_count = count_property_of_feature(props)
 
@@ -94,6 +105,7 @@ def _org_role(org):
                 property_perm_count[kind_name] = property_perm_count[kind_name] + 1
 
             property_ids_of_feature[feature_id] = property_perm_count
+
             # property давхардал арилгах
             check_list = []
             # properties
@@ -101,10 +113,9 @@ def _org_role(org):
                 if not prop['prop_obj'] in check_list:
                     perm_list = get_perm_list(feature_id, prop['prop_obj'].property_id, False, perm_list_all)
                     properties.append(
-                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, False)
+                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, geom=False)
                     )
                     check_list.append(prop['prop_obj'])
-
 
         def _get_package_features_data_display(package_id, feature_ids):
 
@@ -192,58 +203,6 @@ def _emp_role(org, user):
     }
 
 
-def _for_dashb_list():
-    return [
-        'batlagdsan_tohioldol_too',
-        'edgersen_humuus_too',
-        'emchlegdej_bui_humuus_too',
-        'nas_barsan_hunii_too',
-        'tusgaarlagdaj_bui_humuus_too',
-        'niit_eruul_mendiin_baiguullaga_too',
-        'emnelegiin_too',
-        'emiin_sangiin_too',
-        'shinjilgee_hiisen_too',
-        'vaccine_hiisen_too',
-    ]
-
-
-def _get_child(children, data):
-    childs = []
-    for child in children.values():
-        child_dict = dict()
-        child_dict['name'] = child['name']
-        child_dict['geo_id'] = child['geo_id']
-        for name in _for_dashb_list():
-            data[name] = child[name]
-        childs.append(child_dict)
-        data['children'] = childs
-    return data
-
-
-def _make_json_for_dashb(initial_qs, items, get_child=True):
-    datas = list()
-    for item in items.values():
-        data = dict()
-        parent_id = item['id']
-        data['name'] = item['name']
-        data['geo_id'] = item['geo_id']
-        for name in _for_dashb_list():
-            data[name] = item[name]
-        children = initial_qs.filter(parent_id=parent_id)
-        if children and get_child:
-            data['children'] = _make_json_for_dashb(initial_qs, children)
-            datas.append(data)
-        else:
-            datas.append(data)
-
-    return datas
-
-
-def _get_str_date(date, item):
-    date = utils._get_str_date(date)
-    return date
-
-
 @login_required(login_url='/gov/secure/login/')
 # @cache_page(60 * 15)
 def frontend(request):
@@ -251,17 +210,27 @@ def frontend(request):
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
+
+    emp_perm = employee.empperm_set.first()
+    emp_perm_insp = emp_perm.empperminspire_set
+    approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
+    revoke = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_REVOKE).first()
+    org_role = _org_role(org)
+
     context = {
         'org': {
             "org_name": org.name.upper(),
             "org_level": org.level,
-            'org_role': _org_role(org),
+            'org_role': org_role,
             'employee': {
                 'is_admin': employee.is_admin,
                 'username': employee.user.username,
                 'geo_id': org.geo_id or None
             },
+            'emp_role': _emp_role(org, request.user),
             'allowed_geom': geom.json if geom else None,
+            'approve': True if approve else False,
+            'revoke': True if revoke else False,
         },
     }
 

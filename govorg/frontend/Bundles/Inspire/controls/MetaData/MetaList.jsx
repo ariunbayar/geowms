@@ -144,9 +144,9 @@ class ListComponent extends Component {
             .createMeta(meta_data, geom_ids)
             .then(({success}) => {
                 if (success) {
-                    this.props.notif('success', "Амжилттай нэмлээ", 'check')
+                    global.NOTIF('success', "Амжилттай нэмлээ", 'check')
                 } else {
-                    this.props.notif('danger', "Амжилтгүй болсон", 'times')
+                    global.NOTIF('danger', "Амжилтгүй болсон", 'times')
                 }
             })
     }
@@ -175,9 +175,9 @@ class ListComponent extends Component {
                 .deleteMeta(found_it)
                 .then(({success}) => {
                     if (success) {
-                        this.props.notif('success', "Амжилттай устгасан", 'check')
+                        global.NOTIF('success', "Амжилттай устгасан", 'check')
                     } else {
-                        this.props.notif('danger', "Устгах явцад алдаа гарсан", 'times')
+                        global.NOTIF('danger', "Устгах явцад алдаа гарсан", 'times')
                     }
                 })
         }
@@ -339,9 +339,9 @@ export class MetaList extends Control {
         ReactDOM.hydrate(<ListComponent {...props}/>, this.element)
     }
 
-    showMetaList(islaod, name_list, modal, notif) {
+    showMetaList(islaod, name_list, modal) {
         this.toggleControl(islaod)
-        this.renderComponent({name_list, modal, notif})
+        this.renderComponent({ name_list, modal })
     }
 
 }

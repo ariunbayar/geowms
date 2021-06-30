@@ -26,7 +26,6 @@ export default class Маягт extends Component {
         this.setInitialValue = this.setInitial.bind(this)
         this.makeInitial = this.makeInitial.bind(this)
         this.validationSchema = validationSchema.bind(this)
-        this.addNotif = this.props.addNotif
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
@@ -36,16 +35,16 @@ export default class Маягт extends Component {
                     service.create(this.state.tid, this.state.pid, this.state.fid, values, this.props.geojson).then(({ success, info }) => {
                         if (success) {
                             this.setState({is_loading: true})
-                            this.props.requestRefreshCount()
-                            this.addNotif('success', info, 'check')
+                            global.refreshCount()
+                            global.NOTIF('success', info, 'check')
                         }
                         else {
-                            this.addNotif('danger', info, 'warning')
+                            global.NOTIF('danger', info, 'warning')
                         }
                     })
                 }
                 else {
-                    this.addNotif('danger', 'Зурагдсан геом өгөгдөл байхгүй байна', 'warning')
+                    global.NOTIF('danger', 'Зурагдсан геом өгөгдөл байхгүй байна', 'warning')
                 }
             }
             else if (modifyend_selected_feature_check || update_geom_from_list) {
@@ -61,8 +60,8 @@ export default class Маягт extends Component {
                 service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info}) => {
                     if (success) {
                         this.setState({is_loading: true})
-                        this.props.requestRefreshCount()
-                        this.addNotif('success', info, 'check')
+                        global.refreshCount()
+                        global.NOTIF('success', info, 'check')
                     }
                 })
             }
