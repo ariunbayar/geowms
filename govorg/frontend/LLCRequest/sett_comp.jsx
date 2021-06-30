@@ -1,6 +1,7 @@
 import React, {Component, Fragment} from "react"
 
 import { makeStateColor, makeKindColor } from "@helpUtils/functions"
+import utils from "@helpUtils/functions"
 import Modal from "@utils/Modal/Modal"
 import BackButton from "@utils/Button/BackButton"
 
@@ -25,7 +26,7 @@ export class LLCSettings extends Component {
             selected_packages: [],
             selected_features: [],
             modal_status: 'closed',
-            save_icon: false
+            save_icon: false,
         }
         this.handleProceed = this.handleProceed.bind(this)
         this.closeModel = this.closeModel.bind(this)
@@ -135,39 +136,40 @@ export class LLCSettings extends Component {
     }
 
     handleSaveModal(value, idx) {
-        const select = this.state.selected_values.feature?.id
-        const feature = this.state.selected_values.features
-        var get_type
-        feature.map((details, idx) =>
-            get_type = details.geometry.type
+        const { selected_values, geom_type } = this.state
+        const { features } = selected_values
+
+        var file_geom_type
+        features.map((details, idx) =>
+            file_geom_type = details.geometry.type
         )
-        if(get_type.includes("Multi")) { get_type }
-        else {
-            const geoms_type = 'Multi'.concat('', get_type)
-            get_type = geoms_type
+        file_geom_type = utils.checkMultiGeomTypeName(file_geom_type)
+
+        if(geom_type !== file_geom_type) {
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-exclamation-circle",
+                modal_bg: '',
+                icon_color: 'warning',
+                title: 'Геометр төрөл зөрсөн байна!',
+                text: `Хадгалахдаа итгэлтэй байна уу?`,
+                has_button: true,
+                actionNameBack: 'Үгүй',
+                actionNameDelete: 'Тийм',
+                modalAction: () => this.Save(value, idx),
+                modalClose: () => this.modalClose(idx)
+            }
+            global.MODAL(modal)
         }
-        service.geomType(select).then(({ geom_type }) => {
-            this.setState({ geom_type })
-            if(geom_type !== get_type) {
-                const modal = {
-                    modal_status: "open",
-                    modal_icon: "fa fa-exclamation-circle",
-                    modal_bg: '',
-                    icon_color: 'warning',
-                    title: 'Геометр төрөл зөрсөн байна!',
-                    text: `Хадгалахдаа итгэлтэй байна уу?`,
-                    has_button: true,
-                    actionNameBack: 'Үгүй',
-                    actionNameDelete: 'Тийм',
-                    modalAction: () => this.Save(value, idx),
-                    modalClose: null
-                }
-                global.MODAL(modal)
-            }
-            else {
-                this.Save(value, idx)
-            }
-        })
+        else {
+            this.Save(value, idx)
+        }
+    }
+
+    modalClose(idx) {
+        var { list_of_datas } = this.state
+        list_of_datas[idx].icon_state = true
+        this.setState({ list_of_datas })
     }
 
     Save(value, idx) {
@@ -223,6 +225,10 @@ export class LLCSettings extends Component {
             modalClose: null,
         }
         global.MODAL(modal)
+    }
+
+    getGeomType(geom_type) {
+        this.state['geom_type'] = geom_type
     }
 
     render() {
@@ -297,6 +303,7 @@ export class LLCSettings extends Component {
                                     modalClose={this.closeModel}
                                     model_body={ConfigureBundle}
                                     model_action={this.modelAction}
+                                    getGeomType={(...values) => this.getGeomType(...values)}
                                     {...this.state}
                                     title={'Дэд сан тохируулах'}
                                 />

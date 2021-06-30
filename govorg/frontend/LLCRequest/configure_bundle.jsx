@@ -1,6 +1,10 @@
 import React, { Component } from "react"
+
 import SelectField from '@utils/Tools/Form/select_field'
+import utils from "@helpUtils/functions"
+
 import { LLCMap } from '../../../llc/frontend/LLCMap'
+
 import { service } from './service'
 
 export class ConfigureBundle extends Component {
@@ -35,6 +39,11 @@ export class ConfigureBundle extends Component {
         this.changeGeom = this.changeGeom.bind(this)
     }
 
+    componentDidMount() {
+        // TODO анхны geom type шалгах
+        // const {selected_values} = this.props
+    }
+
     changeGeom(state) {
         let geom_state_count = this.state.geom_state_count
         var feature_count = this.props.selected_values.features.length - 1
@@ -60,6 +69,7 @@ export class ConfigureBundle extends Component {
         this.props.model_action(name, e, selected_values)
         service.geomType(select).then(({ geom_type }) => {
             if(geom_type) {
+                this.props.getGeomType(geom_type)
                 this.setState({ geom_type })
             }
         })
@@ -80,14 +90,10 @@ export class ConfigureBundle extends Component {
         const { themes, geom_state_count, geom_type } = this.state
         const { selected_values, selected_packages, selected_features } = this.props
         const { theme, feature } = selected_values
-        var feature_data = selected_values.features[geom_state_count]
-        var feat_data_type = feature_data.geometry.type
 
-        if(feat_data_type.includes("Multi")) { feat_data_type }
-        else {
-            const geoms_type = 'Multi'.concat('', feat_data_type)
-            feat_data_type = geoms_type
-        }
+        var feature_data = selected_values.features[geom_state_count]
+        var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)
+
         return (
             <div className="col-md-12">
                 <div className="form-row col-md-12 p-4 mx-1">

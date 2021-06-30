@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react"
 
+
 export default class RequestModal extends Component {
 
     constructor(props) {
@@ -12,7 +13,6 @@ export default class RequestModal extends Component {
         this.handleOpen = this.handleOpen.bind(this)
         this.handleClose = this.handleClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleAsk = this.handleAsk.bind(this)
     }
 
     componentDidMount() {
@@ -23,6 +23,8 @@ export default class RequestModal extends Component {
         this.setState({ status: "open" })
     }
 
+
+    // TODO x дараад гарах үед болж магад
     handleAsk() {
         const modal = {
             modal_status: "open",
