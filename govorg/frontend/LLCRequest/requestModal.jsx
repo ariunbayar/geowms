@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react"
 
+
 export default class RequestModal extends Component {
 
     constructor(props) {
@@ -20,6 +21,25 @@ export default class RequestModal extends Component {
 
     handleOpen() {
         this.setState({ status: "open" })
+    }
+
+
+    // TODO x дараад гарах үед болж магад
+    handleAsk() {
+        const modal = {
+            modal_status: "open",
+            modal_icon: "fa fa-exclamation-circle",
+            modal_bg: '',
+            icon_color: 'warning',
+            title: 'Гарах',
+            text: `Гарахдаа итгэлтэй байна уу?`,
+            has_button: true,
+            actionNameBack: 'Үгүй',
+            actionNameDelete: 'Тийм',
+            modalAction: () => this.handleClose(),
+            modalClose: null
+        }
+        global.MODAL(modal)
     }
 
     handleClose() {

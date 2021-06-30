@@ -3,6 +3,7 @@ export default {
     test,
     makeStateColor,
     makeKindColor,
+    checkMultiGeomTypeName,
 }
 
 // import { test } from "@helpUtils/functions" -- тухайн дуудах функээ л дуудах
@@ -10,7 +11,7 @@ export {
     test,
     makeStateColor,
     makeKindColor,
-
+    checkMultiGeomTypeName,
 }
 
 //TODO энэ жишээ ийм маягаар явна
@@ -37,4 +38,14 @@ function makeKindColor (kind) {
     else if (kind == "ШИНЭ") color = 'text-primary'
     else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
     return color
+}
+
+// geometr turul shalgaad Multi gesen bku bol nemj ugdug
+function checkMultiGeomTypeName(geom_type) {
+
+    if(geom_type.includes("Multi")) { geom_type }
+    else {
+        geom_type = 'Multi'.concat('', geom_type)
+    }
+    return geom_type
 }

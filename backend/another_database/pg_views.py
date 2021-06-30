@@ -131,7 +131,6 @@ def get_pg_table_names(request):
                     'parent': feat.package_id
                 })
 
-
     return JsonResponse({
         'themes': l_themes,
         'packages': l_packages,

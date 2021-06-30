@@ -39,7 +39,6 @@ export default class RequestDetail extends Component {
 
     componentDidUpdate(pP, pS) {
         const { state, geo_id } = this.props
-        console.log(state);
         if (pP.state != state) {
             if(state == "ИЛГЭЭСЭН") {
                 this.setState({ disabled: true })
@@ -99,7 +98,6 @@ export default class RequestDetail extends Component {
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
-        console.log(hide_file);
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
@@ -126,7 +124,7 @@ export default class RequestDetail extends Component {
                                             className={'form-control col-md-12 mb-3  ml-1'}
                                             type="text"
                                             disabled={true}
-                                            value={aimag_name}
+                                            value={aimag_name || ''}
                                         />
                                 </>
                         }
@@ -138,7 +136,8 @@ export default class RequestDetail extends Component {
                                 id="zahialagch"
                                 className="form-control"
                                 disabled={disabled}
-                                value={zahialagch}
+                                disabled={this.props.disabled}
+                                value={zahialagch || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
@@ -150,7 +149,8 @@ export default class RequestDetail extends Component {
                                 name='project_name'
                                 className="form-control"
                                 disabled={disabled}
-                                value={project_name}
+                                disabled={this.props.disabled}
+                                value={project_name || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
@@ -162,7 +162,8 @@ export default class RequestDetail extends Component {
                                 id="object_type"
                                 className="form-control"
                                 disabled={disabled}
-                                value={object_type}
+                                disabled={this.props.disabled}
+                                value={object_type || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
@@ -174,25 +175,26 @@ export default class RequestDetail extends Component {
                                 id="object_count"
                                 className="form-control"
                                 disabled={disabled}
-                                value={object_count}
+                                disabled={this.props.disabled}
+                                value={object_count || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
                             />
                         </div>
                         <div className="form-group col-md-12 ">
-                                <SelectField
-                                    state_name= "hurungu_oruulalt"
-                                    label="Хөрөнгө оруулалтын байдал"
-                                    option_name="name"
-                                    option_key="id"
-                                    className="col-md-12 px-0 mx-0"
-                                    data_list={investment_status}
-                                    default_value={hurungu_oruulalt}
-                                    default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
-                                    handleSelectField={this.props.handleOnChange}
-                                    disabled={disabled}
-                                />
-                            </div>
-                                {
+                            <SelectField
+                                state_name= "hurungu_oruulalt"
+                                label="Хөрөнгө оруулалтын байдал"
+                                option_name="name"
+                                option_key="id"
+                                className="col-md-12 px-0 mx-0"
+                                data_list={investment_status}
+                                default_value={hurungu_oruulalt}
+                                default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
+                                handleSelectField={this.props.handleOnChange}
+                                disabled={disabled}
+                            />
+                        </div>
+                        {
                             (info || disabled) &&
                                 <div className="form-group col-md-12">
                                     {
@@ -215,8 +217,8 @@ export default class RequestDetail extends Component {
                                             />
                                     }
                             </div>
-                            }
-                            {
+                        }
+                        {
                             desc_info
                             &&
                                 <div className="form-group col-md-12">
@@ -226,11 +228,11 @@ export default class RequestDetail extends Component {
                                         name="description"
                                         id="description-id"
                                         className="form-control"
-                                        value={desc}
+                                        value={desc || ''}
                                         disabled={this.state.disabled}
                                     />
                                 </div>
-                            }
+                        }
                         <UsedTools
                             values={this.props}
                         />

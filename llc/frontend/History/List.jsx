@@ -12,7 +12,7 @@ export class List extends Component {
             талбарууд: [
                 {'field': 'name', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
-                {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
+                {'field': 'kind', "title": 'Төрөл', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
             ],
