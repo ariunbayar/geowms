@@ -33,15 +33,15 @@ export class ConfigureBundle extends Component {
             selected_dt_list: [],
             data_type_list: [],
             geom_state_count: 0,
-            geom_type: ''
         }
         this.handleChange = this.handleChange.bind(this)
         this.changeGeom = this.changeGeom.bind(this)
+        this.getType = this.getType.bind(this)
     }
 
     componentDidMount() {
-        // TODO анхны geom type шалгах
-        // const {selected_values} = this.props
+        const { id } = this.props.selected_values.feature
+        this.getType(id)
     }
 
     changeGeom(state) {
@@ -64,10 +64,14 @@ export class ConfigureBundle extends Component {
     }
 
     handleChange(name, selection, e) {
-        const {selected_values} = this.props
+        const { selected_values } = this.props
         const select = selection.code
         this.props.model_action(name, e, selected_values)
-        service.geomType(select).then(({ geom_type }) => {
+        this.getType(select)
+    }
+
+    getType(selected_geom) {
+        service.geomType(selected_geom).then(({ geom_type }) => {
             if(geom_type) {
                 this.props.getGeomType(geom_type)
                 this.setState({ geom_type })
