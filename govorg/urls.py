@@ -182,6 +182,7 @@ urlpatterns = [
             path('<int:id>/get-request-detail/', org_request_views.get_request_detail, name=' save_request'),
             path('get-search-choices/', org_request_views.get_search_choices),
             path('inspire-save/', org_request_views.inspire_save, name=' inspire_save'),
+            path('geom-type/', org_request_views.geom_type, name=' geom_type'),
         ], 'llc-request'))),
 
     ], 'back_org'))),
