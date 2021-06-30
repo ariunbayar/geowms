@@ -48,8 +48,6 @@ class UploadCmp extends Component {
                                 pid={this.props.pid}
                                 tid={this.props.tid}
                                 func={this.props.func}
-                                refreshRequestCount={this.props.refreshRequestCount}
-                                notif={this.props.notif}
                             />
                         </div>
                     </div>
@@ -107,9 +105,9 @@ export class UploadBtn extends Control {
         ReactDOM.hydrate(<UploadCmp {...props}/>, this.element)
     }
 
-    showUpload(islaod, fid, func, refreshRequestCount, notif, tid, pid) {
+    showUpload(islaod, fid, func, tid, pid) {
         this.toggleControl(islaod)
-        this.renderComponent({fid, func, refreshRequestCount, notif, tid, pid})
+        this.renderComponent({ fid, func, tid, pid })
     }
 
 }

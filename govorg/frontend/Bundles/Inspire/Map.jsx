@@ -45,7 +45,6 @@ import {Mongolia_boundary} from './MongoliaBorder'
 import "./styles.css"
 import { BaseLayer } from './controls/BaseLayer'
 
-
 export default class BarilgaSuurinGazar extends Component{
 
     constructor(props){
@@ -122,7 +121,6 @@ export default class BarilgaSuurinGazar extends Component{
 
       this.modifyE = this.Modify()
       this.drawE = this.Draw()
-      this.addNotif = this.props.addNotif
 
       this.loadMap = this.loadMap.bind(this)
       this.loadData = this.loadData.bind(this)
@@ -218,7 +216,7 @@ export default class BarilgaSuurinGazar extends Component{
         else if(type.includes("Point") || type.includes("MultiPoint")) map.addControl(new PointBarButton({PointButton: this.PointButton}))
         else if(type.includes("Polygon") || type.includes("MultiPolygon")) map.addControl(new PolygonBarButton({PolygonButton: this.PolygonButton}))
         else {
-          this.addNotif('warning', type, 'times')
+          global.NOTIF('warning', type, 'times')
           map.addControl(new LineBarButton({LineButton: this.LineButton, 'null': true}))
           map.addControl(new PointBarButton(({PointButton: this.PointButton, 'null': true})))
           map.addControl(new PolygonBarButton(({PolygonButton: this.PolygonButton, 'null': true})))
@@ -449,7 +447,7 @@ export default class BarilgaSuurinGazar extends Component{
       if(this.drawE.getActive()){
         var check = this.xyCheckInMongolia(coordinate)
         if(!check){
-          this.addNotif('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
+          global.NOTIF('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
           this.drawE.setActive(false);
           this.onClickCloser()
           this.drawE.setActive(true);
@@ -552,7 +550,7 @@ export default class BarilgaSuurinGazar extends Component{
       {
         const { isMeta } = this.state
         if (!isMeta) {
-          if (this.state.modify_button_active) this.addNotif('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
+          if (this.state.modify_button_active) global.NOTIF('warning', 'CTRL+MOUSE зэрэг дарж байгаад зурж цэгийн мэдээллийг харж болно', 'exclamation')
           this.removeTurning()
           const featureID_list = this.state.featureID_list
           if (this.state.modify_button_active){
@@ -596,7 +594,7 @@ export default class BarilgaSuurinGazar extends Component{
       this.featuresForCollection.map((feat, idx) => {
         collection.push(feat)
       })
-      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta, this.addNotif)
+      this.controls.metaList.showMetaList(true, this.featureNames, this.callModalWithMeta)
     }
 
     getTypeFunction(feature) {
@@ -675,7 +673,7 @@ export default class BarilgaSuurinGazar extends Component{
       else {
         this.setState({ xChange: null, yChange: null})
         this.setState({ is_not_mongolia: true })
-        this.addNotif('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
+        global.NOTIF('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
       }
       this.onClickCloser()
     }
@@ -835,7 +833,7 @@ export default class BarilgaSuurinGazar extends Component{
         this.setState({drawed, selectedFeature_ID: null, null_form_isload: true})
       } else {
         this.setState({ is_not_mongolia: true })
-        this.addNotif('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
+        global.NOTIF('warning', 'Монгол улсын газар нутагт байх ёстой', 'exclamation')
       }
       this.onClickCloser()
     }
@@ -898,7 +896,7 @@ export default class BarilgaSuurinGazar extends Component{
       else
       {
         if(this.state.drawed) this.controls.modal.showModal(this.remove, true, "Тийм", `Шинээр үүссэн цэгийг устгах уу`, null, 'danger', "Үгүй")
-        else this.addNotif('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
+        else global.NOTIF('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
       }
     }
 
@@ -909,12 +907,12 @@ export default class BarilgaSuurinGazar extends Component{
       const selectedFeature_ID = this.state.selectedFeature_ID
       service.createDel(tid, pid, fid, selectedFeature_ID, values).then(({ success, info}) => {
         if (success) {
-          this.props.refreshCount()
-          this.addNotif('success', info, 'check')
+          global.refreshCount()
+          global.NOTIF('success', info, 'check')
           this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })
         }
       else{
-        this.addNotif('danger', info, 'warning')
+        global.NOTIF('danger', info, 'warning')
         this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })
       }
       })
@@ -936,7 +934,7 @@ export default class BarilgaSuurinGazar extends Component{
             var id = x.getProperties()['id']
             id == selectedFeature_ID && vector.getSource().removeFeature(x)
           })
-          this.addNotif('success', "Шинээр үүссэн мэдээллийг устгав.", 'check')
+          global.NOTIF('success', "Шинээр үүссэн мэдээллийг устгав.", 'check')
           this.setState({featureID_list: [], drawed: null})
         }
       }
@@ -965,7 +963,7 @@ export default class BarilgaSuurinGazar extends Component{
       else
       {
         if(this.state.drawed) this.controls.modal.showModal(() => this.setState({ togle_islaod: false }), true, "Тийм", `Шинээр үүссэн цэгийг цуцлах уу`, null, 'danger', "Үгүй")
-        else this.addNotif('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
+        else global.NOTIF('danger', "Хоосон байна идэвхжүүлнэ үү", 'times')
       }
     }
 
@@ -979,12 +977,12 @@ export default class BarilgaSuurinGazar extends Component{
 
       service.cancel(pid, fid, tid, selectedFeature_ID, parsed_geojson, form_values, number, order_at).then(({ success, info }) => {
         if (success) {
-          this.addNotif('success', info, 'check')
+          global.NOTIF('success', info, 'check')
           this.setState({ featureID_list: [], selectedFeature_ID: null, togle_islaod: true })
-          this.props.refreshCount()
+          global.refreshCount()
         }
         else {
-          this.addNotif('danger', info, 'times')
+          global.NOTIF('danger', info, 'times')
         }
       })
     }
@@ -1011,12 +1009,12 @@ export default class BarilgaSuurinGazar extends Component{
               )
           }
           else{
-            this.addNotif('warning', 'Өөрчлөлт алга байна.', 'exclamation')
+            global.NOTIF('warning', 'Өөрчлөлт алга байна.', 'exclamation')
           }
       }
       else{
         if(this.state.drawed) this.controls.modal.showModal(this.createGeom, true, "Тийм", "Мэдээллийг шинээр үүсгэх үү.", null, "warning", "Үгүй", this.resetDrawed)
-        else this.addNotif('warning', "Шинэ мэдээлэл алга байна.", 'exclamation')
+        else global.NOTIF('warning', "Шинэ мэдээлэл алга байна.", 'exclamation')
       }
     }
 
@@ -1036,17 +1034,17 @@ export default class BarilgaSuurinGazar extends Component{
         this.setState({ is_loading:true })
         service.createUpd(tid, pid, fid, values, datas, id).then(({success, info}) => {
           if(success){
-            this.addNotif('success', info, 'check')
-            this.props.refreshCount()
+            global.NOTIF('success', info, 'check')
+            global.refreshCount()
             this.setState({is_loading:false})
           }
           else {
-            this.addNotif('danger', info, 'times')
+            global.NOTIF('danger', info, 'times')
             this.setState({is_loading:false})
           }
         })
       } else {
-        this.addNotif('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
+        global.NOTIF('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
       }
     }
 
@@ -1058,7 +1056,7 @@ export default class BarilgaSuurinGazar extends Component{
         const datas = json.geometry
         this.setState({ is_loading: false, geojson: datas, togle_islaod: false})
       } else {
-        this.addNotif('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
+        global.NOTIF('warning', 'Монгол улсын газарт байгаа эсэхийг шалгана уу', 'exclamation')
       }
       this.is_save = true
     }
@@ -1129,21 +1127,21 @@ export default class BarilgaSuurinGazar extends Component{
       this.setState({ draw_is_active: false, remove_button_active: false, cancel_button_active: false  })
       this.controls.upload.showUpload(
         true, this.state.fid,
-        this.closeUploadBtn, this.props.refreshCount,
-        this.addNotif, this.props.match.params.tid,
+        this.closeUploadBtn,
+        this.props.match.params.tid,
         this.props.match.params.pid
       )
     }
 
     showQgisBtn(){
       this.setInActiveButtonStyle('qgis')
-      this.controls.qgis.showUpload(true, this.closeQgisBtn, this.addNotif, this.state.wfs_url, this.state.wms_url)
+      this.controls.qgis.showUpload(true, this.closeQgisBtn, global.NOTIF, this.state.wfs_url, this.state.wms_url)
     }
 
     showApiBtn(){
       this.setInActiveButtonStyle('api')
       const {create, remove, update, select, token_auth} = this.state.api_links
-      this.controls.api.showApi(true, this.closeApiBtn, this.addNotif, create, remove, update, select, token_auth)
+      this.controls.api.showApi(true, this.closeApiBtn, global.NOTIF, create, remove, update, select, token_auth)
     }
 
     closeQgisBtn(){
@@ -1389,7 +1387,7 @@ export default class BarilgaSuurinGazar extends Component{
         this.sendToShowList(data)
       }
       else {
-        this.addNotif('warning', 'Сонгосон геомоо идэвхжүүлэх ёстой', 'exclamation')
+        global.NOTIF('warning', 'Сонгосон геомоо идэвхжүүлэх ёстой', 'exclamation')
       }
     }
 
@@ -1526,9 +1524,7 @@ export default class BarilgaSuurinGazar extends Component{
                           gid={this.state.selectedFeature_ID}
                           togle_islaod={this.state.togle_islaod}
                           null_form_isload={this.state.null_form_isload}
-                          addNotif={this.addNotif}
                           SaveBtn={this.SaveBtn}
-                          requestRefreshCount={this.props.refreshCount}
                           modifyend_selected_feature_check={this.state.modifyend_selected_feature_check}
                           requestRemove={this.requestRemove}
                           requestCancel={this.requestCancel}

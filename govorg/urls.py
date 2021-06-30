@@ -196,6 +196,7 @@ urlpatterns = [
     path('', include(([
         path('', org_views.frontend, name='frontend'),
         path('emp-role/', org_views.emp_role, name='emp-role'),
+        path('get-perms/', org_views.get_perms),
         path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
     ], 'org'))),
 
