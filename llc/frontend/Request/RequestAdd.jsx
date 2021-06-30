@@ -12,6 +12,7 @@ class SubmitClass extends Component {
             url: "/llc/llc-request/",
             agreed_submit: false,
             one_check: true,
+            show_save_btn: true,
         }
         this.handleSubmit = this.handleSubmit.bind(this)
     }
@@ -23,9 +24,15 @@ class SubmitClass extends Component {
             if(this.state.one_check)
                 this.setState({ agreed_submit: true, one_check: false })
         }
+
         if(pP.values.kind !== values.kind) {
             if(values.kind == "БУЦААГДСАН" || values.kind == "ЦУЦЛАСАН")
                 this.setState({ info_status: true })
+        }
+
+        if(pP.values.state !== values.state) {
+            if(values.kind == "ИЛГЭЭСЭН" || values.kind == "ХҮЛЭЭГДЭЖ БУЙ" || values.state == 'ШИЙДВЭРЛЭГДСЭН')
+                this.setState({ show_save_btn: false })
         }
     }
 
@@ -65,7 +72,7 @@ class SubmitClass extends Component {
 
     render() {
         var { values } = this.props
-        const { agreed_submit } = this.state
+        const { agreed_submit, show_save_btn } = this.state
         return (
             <Fragment>
                 {
@@ -91,8 +98,7 @@ class SubmitClass extends Component {
                                 </i>
                             </p> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
-                                !(values.state == "ИЛГЭЭСЭН" && values.kind == 'ХҮЛЭЭГДЭЖ БУЙ')
-
+                                show_save_btn
                                 ?
                                     <p
                                         className="btn btn-primary"
@@ -150,7 +156,7 @@ export class RequestAdd extends Component {
         const { id } = this.props.match.params
         if (id) {
             this.setState({ is_loading: true })
-            service.handleRequestData(id).then(({ vector_datas, form_field, aimag_name, aimag_geom }) =>{
+            service.handleRequestData(id).then(({ vector_datas, form_field, emp_fields, aimag_name, aimag_geom }) =>{
                 if (form_field) {
                     this.setState({
                         vector_datas,
@@ -167,6 +173,8 @@ export class RequestAdd extends Component {
                         kind: form_field['kind'],
                         desc: form_field['desc'],
                         geo_id: form_field['geo_id'],
+                        emp_fields,
+                        mergejilten: form_field['selected_user'],
                         is_loading: false,
                     })
                 }

@@ -18,6 +18,7 @@ export default class RequestDetail extends Component {
             is_loading: false,
             nationwide: '',
             form_checked: false,
+            hide_file: false,
             investment_status: [
                 {id:1, name: "Төсөл, хөтөлбөрийн"},
                 {id:2, name: "Орон нутгийн"},
@@ -38,11 +39,17 @@ export default class RequestDetail extends Component {
 
     componentDidUpdate(pP, pS) {
         const { state, geo_id } = this.props
+        console.log(state);
         if (pP.state != state) {
             if(state == "ИЛГЭЭСЭН") {
                 this.setState({ disabled: true })
             }
+
+            else if (state == "ШИЙДВЭРЛЭГДСЭН") {
+                this.setState({ hide_file: true })
+            }
         }
+
         if(pP.geo_id !== geo_id){
             if( geo_id == '496'){
                 this.setState({ form_checked: true })
@@ -83,14 +90,16 @@ export default class RequestDetail extends Component {
             info, desc_info, mergejilten,
             aimag_name, aimag_geom, desc, emp_fields,
         } = this.props
-        var { investment_status } = this.state
+        var { investment_status, hide_file, disabled } = this.state
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
-        else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0]?.user_id || 'Байхгүй'}
-
+        else if (emp_fields && 0 <= emp_fields.length) {
+            default_mergejilten = emp_fields[0].employees[0]?.user_id || 'Байхгүй'
+        }
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
+        console.log(hide_file);
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
@@ -128,7 +137,7 @@ export default class RequestDetail extends Component {
                                 name='zahialagch'
                                 id="zahialagch"
                                 className="form-control"
-                                disabled={this.state.disabled}
+                                disabled={disabled}
                                 disabled={this.props.disabled}
                                 value={zahialagch || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
@@ -141,7 +150,7 @@ export default class RequestDetail extends Component {
                                 id="project_name"
                                 name='project_name'
                                 className="form-control"
-                                disabled={this.state.disabled}
+                                disabled={disabled}
                                 disabled={this.props.disabled}
                                 value={project_name || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
@@ -154,7 +163,7 @@ export default class RequestDetail extends Component {
                                 name="object_type"
                                 id="object_type"
                                 className="form-control"
-                                disabled={this.state.disabled}
+                                disabled={disabled}
                                 disabled={this.props.disabled}
                                 value={object_type || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
@@ -167,7 +176,7 @@ export default class RequestDetail extends Component {
                                 name="object_count"
                                 id="object_count"
                                 className="form-control"
-                                disabled={this.state.disabled}
+                                disabled={disabled}
                                 disabled={this.props.disabled}
                                 value={object_count || ''}
                                 onChange={(e) => {this.props.handleOnChange(e)}}
@@ -184,35 +193,31 @@ export default class RequestDetail extends Component {
                                 default_value={hurungu_oruulalt}
                                 default_text={"----   хөрөнгө оруулалтын байдлыг сонгоно уу  ----"}
                                 handleSelectField={this.props.handleOnChange}
+                                disabled={disabled}
                             />
-                            </div>
-                                {
-                            info &&
+                        </div>
+                        {
+                            (info || disabled) &&
                                 <div className="form-group col-md-12">
-                                    <label htmlFor='zahialagch' className="col-md-12 p-0" > Мэргэжилтэн сонгох</label>
-                                    <select
-                                        className="form-control"
-                                        name="mergejilten"
-                                        id="mergejilten"
-                                        onChange={(e) => {this.props.handleOnChange(e)}}
-                                        value={default_mergejilten}
-                                    >
-                                        <option value=''>Илгээх мэргэжилтэнээ сонгоно уу </option>
                                     {
-                                        (emp_fields && emp_fields.length > 0)
-                                        ?
-                                                emp_fields.map((value, idx) => (
-                                                    <optgroup
-                                                        id={idx}
-                                                        label={value.org_name}
-                                                    >
-                                                        <option value={value.user_id}>{value.first_name}</option>
-                                                    </optgroup>
-                                                ))
-                                            :
-                                                null
+                                        (emp_fields && emp_fields.length > 0) &&
+                                            <SelectField
+                                                display_mode={true}
+                                                name_key='org_name'
+                                                opt_key='employees'
+                                                option_name_2='mail'
+                                                option_key="user_id"
+                                                data_list={emp_fields}
+                                                option_name="first_name"
+                                                label="Мэргэжилтэн сонгох"
+                                                className="col-md-12 px-0 mx-0"
+                                                state_name= "choose_proffessional"
+                                                default_value={default_mergejilten}
+                                                disabled={(!info && disabled) && true}
+                                                handleSelectField={this.props.handleOnChange}
+                                                default_text={"----   Илгээх мэргэжилтэнээ сонгоно уу  ----"}
+                                            />
                                     }
-                                    </select>
                             </div>
                         }
                         {
@@ -234,7 +239,7 @@ export default class RequestDetail extends Component {
                             values={this.props}
                         />
                         {
-                            !info
+                            (!info && !hide_file)
                             ?
                                 <div className="form-group col-md-12 ml-2">
                                     <label >Орон зайн мэдээлэл</label>

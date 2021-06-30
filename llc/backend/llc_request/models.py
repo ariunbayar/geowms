@@ -48,6 +48,7 @@ class RequestFiles(models.Model):
     tools = models.TextField(default='')
     geo_id = models.CharField(max_length=100)
     file_path = models.FileField(upload_to=upload_file_path)
+    requested_employee = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

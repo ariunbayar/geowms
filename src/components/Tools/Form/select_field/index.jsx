@@ -54,7 +54,7 @@ export default class SelectField extends Component {
             if (name_key){
                 row[opt_key].map((data, idx) => {
                     if(selection_value == data[option_key]){
-                        this.props.handleSelectField(state_name, row[opt_key], e)
+                        this.props.handleSelectField(state_name, data, e)
                     }
                 })
             }
@@ -71,7 +71,7 @@ export default class SelectField extends Component {
         const { default_value, label,
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
-                option_text
+                option_text, disabled, option_name_2, display_mode,
         } = this.props
         const state = this.state
         let title = label ? label : ''
@@ -84,6 +84,7 @@ export default class SelectField extends Component {
                     value={state.selected_value ? state.selected_value : default_value}
                     className={`custom-select  ${! default_value && 'border-danger'}`}
                     onChange={(e) => this.dataSelection(e)}
+                    disabled={disabled}
                 >
                     <option value=''>---{default_text ? default_text : ''} ---</option>
                     {
@@ -96,12 +97,12 @@ export default class SelectField extends Component {
                                 value={default_value}
                             >
                             {
-                                    OptionComp (data[opt_key], option_key, option_name, option_text)
+                                    OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)
                             }
                             </optgroup>
                         )
                     :
-                        OptionComp (data_list, option_key, option_name, option_text)
+                        OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
                 }
                 </select>
                 </div>
@@ -110,7 +111,9 @@ export default class SelectField extends Component {
 }
 
 
-function OptionComp (options_data,  option_key, option_name, option_text){
+function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode){
+    var option_data = option_name
+    if (option_text) option_data = option_text
     const options =
         (options_data && options_data.length >0)
         &&
@@ -119,9 +122,15 @@ function OptionComp (options_data,  option_key, option_name, option_text){
                     key={idx}
                     name={row[option_name]}
                     value={row[option_key]}
-
                 >
-                    {option_text ? row[option_text] : row[option_name]}
+                    {
+                        display_mode
+
+                        ?
+                            row[option_data]  + "   (   " + row[option_name_2] + "   )   "
+                        :
+                            row[option_data]
+                    }
                 </option>
             )
     return options
