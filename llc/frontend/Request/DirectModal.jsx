@@ -86,7 +86,9 @@ export default class RequestDetail extends Component {
         var { investment_status, disabled } = this.state
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
-        else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0]?.user_id || 'Байхгүй'}
+        else if (emp_fields && 0 <= emp_fields.length) {
+            default_mergejilten = emp_fields[0].employees[0]?.user_id || 'Байхгүй'
+        }
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
@@ -188,19 +190,20 @@ export default class RequestDetail extends Component {
                                     {
                                         (emp_fields && emp_fields.length > 0) &&
                                             <SelectField
-                                                state_name= "choose_proffessional"
-                                                label="Мэргэжилтэн сонгох"
+                                                display_mode={true}
                                                 name_key='org_name'
                                                 opt_key='employees'
-                                                option_name="first_name"
-                                                option_key="mail"
-                                                className="col-md-12 px-0 mx-0"
-                                                data_list={emp_fields}
-                                                display_mode={true}
                                                 option_name_2='mail'
+                                                option_key="user_id"
+                                                data_list={emp_fields}
+                                                option_name="first_name"
+                                                label="Мэргэжилтэн сонгох"
+                                                className="col-md-12 px-0 mx-0"
+                                                state_name= "choose_proffessional"
                                                 default_value={default_mergejilten}
-                                                default_text={"----   Илгээх мэргэжилтэнээ сонгоно уу  ----"}
+                                                disabled={mergejilten && true}
                                                 handleSelectField={this.props.handleOnChange}
+                                                default_text={"----   Илгээх мэргэжилтэнээ сонгоно уу  ----"}
                                             />
                                     }
                             </div>

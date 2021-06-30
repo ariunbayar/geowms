@@ -168,7 +168,7 @@ export class RequestAdd extends Component {
                         desc: form_field['desc'],
                         geo_id: form_field['geo_id'],
                         emp_fields,
-                        mergejilten: form_field['user_id'],
+                        mergejilten: form_field['selected_user'],
                         is_loading: false,
                     })
                 }

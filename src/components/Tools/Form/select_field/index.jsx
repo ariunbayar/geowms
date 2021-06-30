@@ -97,7 +97,7 @@ export default class SelectField extends Component {
                                 value={default_value}
                             >
                             {
-                                    OptionComp (data[opt_key], option_key, option_name,option_name_2, option_text, display_mode)
+                                    OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)
                             }
                             </optgroup>
                         )
@@ -120,7 +120,6 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                     key={idx}
                     name={row[option_name]}
                     value={row[option_key]}
-
                 >
                     {
                         option_text
@@ -132,7 +131,7 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                             display_mode
 
                             ?
-                                row[option_name] + "   (   " + row[option_key] + "   )   "
+                                row[option_name] + "   (   " + row[option_name_2] + "   )   "
                             :
                                 row[option_name]
                     }
