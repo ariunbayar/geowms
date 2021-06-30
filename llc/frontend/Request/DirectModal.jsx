@@ -18,6 +18,7 @@ export default class RequestDetail extends Component {
             is_loading: false,
             nationwide: '',
             form_checked: false,
+            hide_file: false,
             investment_status: [
                 {id:1, name: "Төсөл, хөтөлбөрийн"},
                 {id:2, name: "Орон нутгийн"},
@@ -37,10 +38,15 @@ export default class RequestDetail extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { state, geo_id, kind } = this.props
+        const { state, geo_id } = this.props
+        console.log(state);
         if (pP.state != state) {
             if(state == "ИЛГЭЭСЭН") {
                 this.setState({ disabled: true })
+            }
+
+            else if (state == "ШИЙДВЭРЛЭГДСЭН") {
+                this.setState({ hide_file: true })
             }
         }
 
@@ -84,7 +90,7 @@ export default class RequestDetail extends Component {
             info, desc_info, mergejilten,
             aimag_name, aimag_geom, desc, emp_fields,
         } = this.props
-        var { investment_status, disabled } = this.state
+        var { investment_status, hide_file, disabled } = this.state
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
         else if (emp_fields && 0 <= emp_fields.length) {
@@ -93,6 +99,7 @@ export default class RequestDetail extends Component {
         if (info && hurungu_oruulalt) {
             investment_status = [ investment_status[hurungu_oruulalt-1] ]
         }
+        console.log(hide_file);
         return (
             <div className="row p-3">
                 <Loader is_loading= {this.state.is_loading} text={"Хүсэлт илгээж байна. Түр хүлээнэ үү !!!"}/>
@@ -228,7 +235,7 @@ export default class RequestDetail extends Component {
                             values={this.props}
                         />
                         {
-                            !info
+                            (!info && !hide_file)
                             ?
                                 <div className="form-group col-md-12 ml-2">
                                     <label >Орон зайн мэдээлэл</label>

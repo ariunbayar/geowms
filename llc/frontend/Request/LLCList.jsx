@@ -17,6 +17,7 @@ export class FileAndDesc extends Component {
 
     render() {
         const { values } = this.props
+        if (values.state == 'ШИЙДВЭРЛЭГДСЭН') var hidden = 'd-none'
         return (
             <div className='p-0'>
                 {
@@ -27,18 +28,20 @@ export class FileAndDesc extends Component {
                                 type="button"
                                 to={'/media/' + values.file_path}
                                 target="_blank"
-                                className="btn animated bounceIn text-light bg-danger"
-                                style={{
-                                    padding: 4,
-                                    backgroundColor: '#fd355е',
-                                    borderColor: '#fd355е',
-                                    borderRadius: '.25rem'
-                                }}
+                                className={`btn animated bounceIn text-light bg-danger ${hidden}`}
+                                style={
+                                    {
+                                        padding: 4,
+                                        backgroundColor: '#fd355е',
+                                        borderColor: '#fd355е',
+                                        borderRadius: '.25rem'
+                                    }
+                                }
                             >
                                 <i className="fa fa-download"> &nbsp; Татах</i>
-                            </NavLink> &nbsp; &nbsp;
+                            </NavLink>
                             <button
-                                className="btn border rounded animated bounceIn text-light"
+                                className={`btn border rounded animated bounceIn text-light ${!hidden && 'mx-1'}`}
                                 style={{
                                     padding: 4,
                                     backgroundColor: '#ff9700',
@@ -63,7 +66,7 @@ export class Detail extends Component {
         this.state = {
             refresh: false,
             талбарууд: [
-                {'field': 'client_org', "title": 'Захиалагч байгууллага'},
+                {'field': 'name', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},

@@ -498,13 +498,14 @@ def get_request_data(request, content, id):
     }
 
     file_qs = qs.file.file_path
-    file_name = file_qs.name or ''
-    file_name = file_name.split('/')
-    file_data['name'] = file_name[2]
-    file_data['size'] = file_qs.size or ''
+    if file_qs:
+        file_name = file_qs.name or ''
+        file_name = file_name.split('/')
+        file_data['name'] = file_name[2]
+        file_data['size'] = file_qs.size or ''
 
     if qs:
-        file_name = str(qs.file.file_path).split('/')[1]
+        file_name = str(qs.file.file_path).split('/')[1] if qs.file.file_path else ''
         field['client_org'] = qs.client_org
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
