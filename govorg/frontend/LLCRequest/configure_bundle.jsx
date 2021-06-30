@@ -70,13 +70,15 @@ export class ConfigureBundle extends Component {
         this.getType(select)
     }
 
-    getType(selected_geom) {
-        service.geomType(selected_geom).then(({ geom_type }) => {
-            if(geom_type) {
-                this.props.getGeomType(geom_type)
-                this.setState({ geom_type })
-            }
-        })
+    getType(selected_feature_id) {
+        service
+            .geomType(selected_feature_id)
+            .then(({ geom_type }) => {
+                if(geom_type) {
+                    this.props.getGeomType(geom_type)
+                    this.setState({ geom_type })
+                }
+            })
     }
 
     componentDidUpdate(pP, pS) {
@@ -90,13 +92,24 @@ export class ConfigureBundle extends Component {
         }
     }
 
+    checkValidType(feat_data_type, geom_type) {
+        if (geom_type) {
+            if (feat_data_type !== geom_type) {
+                return false
+            }
+        }
+        return true
+    }
+
     render() {
         const { themes, geom_state_count, geom_type } = this.state
         const { selected_values, selected_packages, selected_features } = this.props
         const { theme, feature } = selected_values
 
+
         var feature_data = selected_values.features[geom_state_count]
         var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)
+        const is_valid_type = this.checkValidType(feat_data_type, geom_type)
 
         return (
             <div className="col-md-12">
@@ -142,7 +155,7 @@ export class ConfigureBundle extends Component {
                     <div className="col-md-8"></div>
                     <div className="col-md-4">
                         {
-                            geom_type !== feat_data_type && feature?.id &&
+                            !is_valid_type && feature?.id &&
                                 <small className="text-danger">Төрөл таарахгүй байна!</small>
                         }
                     </div>
