@@ -1643,7 +1643,8 @@ def get_popup_info(request, payload):
     base_url = base_url + "/geoserver/wfs"
 
     cql_filter = "dwithin(geo_data, Point({x} {y}), {radius}, meters)".format(x=coordinate[1], y=coordinate[0], radius=radius)
-    geo_id_name = 'inspire_id'
+    gs_geo_id = 'inspire_id'
+    geo_id = 'geo_id'
     success_codes = [200]
 
     for view in views_qs:
@@ -1652,7 +1653,7 @@ def get_popup_info(request, payload):
         viewproperty_ids, property_qs = _get_properties_qs(view)
         properties = property_qs.values("property_code", "property_name", "value_type_id")
 
-        select_properties = geo_id_name + "," + ",".join([prop_code['property_code'] for prop_code in properties])
+        select_properties = gs_geo_id + "," + ",".join([prop_code['property_code'] for prop_code in properties])
         if not properties:
             select_properties = select_properties.replace(",", '')
 
@@ -1679,13 +1680,15 @@ def get_popup_info(request, payload):
         features = content['features']
         for feature in features:
             ps = feature['properties']
-            ps['geo_id'] = ps['inspire_id']
-            del ps['inspire_id']
+            ps[geo_id] = ps[gs_geo_id]
+            del ps[gs_geo_id]
 
             datas = list()
             datas.append(code)
             datas.append(list())
             for key, value in ps.items():
+                if key == geo_id:
+                    datas[1].append([key, value, key])
                 for prop in properties:
                     if prop['property_code'].lower() == key and value:
                         datas[1].append([prop['property_name'], value, key])

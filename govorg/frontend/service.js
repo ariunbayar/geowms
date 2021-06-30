@@ -12,16 +12,15 @@ export const service = {
     getEmpRoles,
     getApproveAndRevoke,
     loadBaseLayers,
-    getEmpRole,
+    getPerms,
 }
 
-function getEmpRole() {
+function getPerms() {
     const requestOptions = {
         ...getGetOptions(),
     }
-    return fetch('/gov/emp-role/tseg-roles/', requestOptions).then(handleResponse)
+    return fetch('/gov/get-perms/', requestOptions).then(handleResponse)
 }
-
 
 function loadBaseLayers() {
     const requestOptions = {

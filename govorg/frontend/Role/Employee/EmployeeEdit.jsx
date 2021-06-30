@@ -510,7 +510,6 @@ export class EmployeeEdit extends Component {
     }
 
     handleHistory() {
-        this.props.getEmpRoles
         this.props.history.push(this.state.prefix)
     }
 
