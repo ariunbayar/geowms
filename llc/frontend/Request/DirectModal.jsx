@@ -37,12 +37,19 @@ export default class RequestDetail extends Component {
     }
 
     componentDidUpdate(pP, pS) {
-        const { state, geo_id } = this.props
+        const { state, geo_id, kind } = this.props
         if (pP.state != state) {
             if(state == "ИЛГЭЭСЭН") {
                 this.setState({ disabled: true })
             }
         }
+
+        if (pP.kind != kind) {
+            if(kind == "ШИЙДВЭРЛЭГДСЭН") {
+                this.setState({ hide_file: true })
+            }
+        }
+
         if(pP.geo_id !== geo_id){
             if( geo_id == '496'){
                 this.setState({ form_checked: true })
@@ -83,7 +90,7 @@ export default class RequestDetail extends Component {
             info, desc_info, mergejilten,
             aimag_name, aimag_geom, desc, emp_fields,
         } = this.props
-        var { investment_status } = this.state
+        var { investment_status, hide_file } = this.state
         var default_mergejilten = ''
         if (mergejilten) default_mergejilten = mergejilten
         else if (emp_fields && 0 <= emp_fields.length) { default_mergejilten = emp_fields[0]?.user_id || 'Байхгүй'}
@@ -234,7 +241,7 @@ export default class RequestDetail extends Component {
                             values={this.props}
                         />
                         {
-                            !info
+                            !info && hide_file
                             ?
                                 <div className="form-group col-md-12 ml-2">
                                     <label >Орон зайн мэдээлэл</label>
