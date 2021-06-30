@@ -288,7 +288,7 @@ function TabBars(props) {
                                                                             <MenuItem
                                                                                 key={idz}
                                                                                 icon="fa fa-circle-o gp-text-primary"
-                                                                                url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/`}
+                                                                                url={`/gov/org/map/${theme.id}/${pack.id}/${feat.id}/map/`}
                                                                                 text={feat.name}
                                                                                 count={feat.count}
                                                                             >
