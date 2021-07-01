@@ -7,6 +7,20 @@ import { LLCMap } from '../../../llc/frontend/LLCMap'
 
 import { service } from './service'
 
+
+function ErrorMessage ({ field_name, errors }) {
+    return (
+        <div>
+            {errors &&
+                <small className={`${errors[field_name] ? 'text-danger' : ''}`}>
+                    {errors[field_name]}
+                </small>
+            }
+        </div>
+    )
+}
+
+
 export class ConfigureBundle extends Component {
 
     constructor(props) {
@@ -103,13 +117,14 @@ export class ConfigureBundle extends Component {
 
     render() {
         const { themes, geom_state_count, geom_type } = this.state
-        const { selected_values, selected_packages, selected_features } = this.props
+        const { selected_values, selected_packages, selected_features, errors } = this.props
         const { theme, feature } = selected_values
 
 
         var feature_data = selected_values.features[geom_state_count]
         var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)
         const is_valid_type = this.checkValidType(feat_data_type, geom_type)
+        console.log(errors);
 
         return (
             <div className="col-md-12">
@@ -123,6 +138,7 @@ export class ConfigureBundle extends Component {
                         default_value={theme?.id || ''}
                         default_text={'theme-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
+                        model_body={<ErrorMessage field_name={'theme_id'} errors={errors}/>}
                     />
                     <SelectField
                         state_name='package'
@@ -137,6 +153,7 @@ export class ConfigureBundle extends Component {
                         className={"col-md-4"}
                         default_text={'package-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
+                        model_body={<ErrorMessage field_name={'package_id'} errors={errors}/>}
                     />
                     <SelectField
                         state_name='feature'
@@ -151,6 +168,7 @@ export class ConfigureBundle extends Component {
                         className={"col-md-4"}
                         default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
+                        model_body={<ErrorMessage field_name={'feature_id'} errors={errors}/>}
                     />
                     <div className="col-md-8"></div>
                     <div className="col-md-4">
@@ -226,6 +244,11 @@ export class ConfigureBundle extends Component {
                     <div className="col-md-12 d-flex justify-content-between px-1">
                         <label className="col-md-6 fa fa-angle-double-left fa-2x text-dark btn btn-outline-primary mr-2" onClick={(e) => this.changeGeom(false)}></label>
                         <label className="col-md-6 fa fa-angle-double-right fa-2x text-dark btn btn-outline-primary" onClick={(e) => this.changeGeom(true)}></label>
+                    </div>
+                    <div className="row justify-content-center">
+                        <div className="col-6">
+                            <button type="button" className="btn btn-primary btn-block waves-effect waves-light m-1" onClick={this.props.handleSave}>Хадгалах</button>
+                        </div>
                     </div>
                 </div>
             </div>

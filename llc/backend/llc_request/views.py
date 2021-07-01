@@ -552,80 +552,17 @@ def _get_employees(geo_id):
     return emp_fields
 
 
-def _get_shapes_geoms(shape_geometry):
-    geo_datas = []
-    geom_type = ''
-    shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
-    geo_datas, geom_type = get_feature(shape_geoms)
-
-    return geo_datas, geom_type
-
-
-def str2bool(v):
-    return v.lower() in ("yes", "true", "t", "1", "True")
-
-
 def _make_connection(from_email):
     connection = get_connection(
         username=from_email,
         password=get_config('EMAIL_HOST_PASSWORD'),
         port=get_config('EMAIL_PORT'),
         host=get_config('EMAIL_HOST'),
-        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
+        use_tls=utils.str2bool(get_config('EMAIL_USE_TLS')),
         use_ssl=False,
         fail_silently=False,
     )
     return connection
-
-
-@require_GET
-@ajax_required
-@llc_required(lambda u: u)
-def get_file_shapes(request, content, id):
-    list_of_datas = []
-
-    llc_data = LLCRequest.objects.filter(id=id).first()
-    shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
-    for shape_geometry in shape_geometries:
-        geoms, geom_type = _get_shapes_geoms(shape_geometry)
-
-        theme_name = ''
-        feature_name = ''
-        package_name = ''
-        theme_id = shape_geometry.theme_id
-        feature_id = shape_geometry.feature_id
-        package_id = shape_geometry.package_id
-
-        if theme_id:
-            theme = LThemes.objects.filter(theme_id=theme_id).first()
-            theme_name = theme.theme_name
-
-        if package_id:
-            package = LPackages.objects.filter(package_id=package_id).first()
-            package_name = package.package_name
-
-        if feature_id:
-            feature = LFeatures.objects.filter(feature_id=feature_id).first()
-            feature_name = feature.feature_name
-
-        list_of_datas.append({
-            'id': shape_geometry.id,
-            'geom_type': geom_type,
-            'theme': {'id': theme_id, 'name': theme_name},
-            'feature': {'id': feature_id, 'name': feature_name},
-            'package': {'id': package_id, 'name': package_name},
-            'icon_state': True,
-            'features': geoms,
-            'order_no': shape_geometry.order_no,
-            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else '',
-            "state": utils.get_value_from_types(RequestFilesShape.STATE_CHOICES, shape_geometry.state),
-            "kind": utils.get_value_from_types(RequestFilesShape.KIND_CHOICES, shape_geometry.kind),
-            "description": shape_geometry.description,
-        })
-
-    return JsonResponse({
-        'list_of_datas': list_of_datas,
-    })
 
 
 def _send_to_information_email (email):

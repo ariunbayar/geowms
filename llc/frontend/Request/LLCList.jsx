@@ -150,7 +150,7 @@ export class Detail extends Component {
                 'fa fa-exclamation-circle',
                 "danger",
                 'Устгах боломжгүй',
-                `"Энэхүү хүсэлт ${values.kind == 'ЦУЦЛАСАН' ? values.kind : values.state} төлөвт байгаа тул устгах боломжгүй`,
+                `Энэхүү хүсэлт ${values.kind == 'ЦУЦЛАСАН' ? `"${values.kind}"` : `"${values.state}"`} төлөвт байгаа тул устгах боломжгүй`,
                 false
             )
         }

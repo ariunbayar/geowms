@@ -32,7 +32,9 @@ from llc.backend.llc_request.models import LLCRequest
 from llc.backend.llc_request.models import ShapeGeom
 from llc.backend.llc_request.models import RequestForm
 from llc.backend.llc_request.models import RequestFilesShape
+from llc.backend.llc_request.forms import RequestFilesShapeForm
 from govorg.backend.org_request.models import ChangeRequest
+from govorg.backend.org_request.forms import ChangeRequestForm
 
 from main.decorators import ajax_required, gov_required
 from main.components import Datatable
@@ -1344,6 +1346,10 @@ def _create_request(request_datas):
     change_request['order_at'] = request_datas['order_at'] if 'order_at' in request_datas else None
     change_request['order_no'] = request_datas['order_no'] if 'order_no' in request_datas else None
     change_request['llc_request_id'] = llc_req_id
+    form = ChangeRequestForm(change_request)
+    if not form.is_valid():
+        return False
+
     request = ChangeRequest(**change_request)
     request.save()
     return request.id
@@ -1411,6 +1417,7 @@ def llc_request_approve(request, request_id):
     llc_request = get_object_or_404(LLCRequest, id=request_id)
     request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
+    is_valid = True
 
     if not request_file_shapes:
         rsp = {
@@ -1451,34 +1458,56 @@ def llc_request_approve(request, request_id):
         #TODO huseltiin logiig enechee bichij boloh ym
         has_req_qs.delete()
 
-    for file_shape in request_file_shapes.values():
-        shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
-        if len(shape_geoms) == 1:
-            shape_geom = shape_geoms.first()
-            item = _make_datas(shape_geom, file_shape)
-            _make_request_datas(item)
-        else:
-            item = _make_datas(shape_geoms.first(), file_shape, True)
-            root_id = _make_request_datas(item)
-            for shape in shape_geoms:
-                item = _make_datas(shape, file_shape)
-                item['group_id'] = root_id
-                _make_request_datas(item)
+    with transaction.atomic():
+        for file_shape in request_file_shapes.values():
+            shape_geoms = ShapeGeom.objects.filter(shape_id=file_shape['id'])
+            if len(shape_geoms) == 1:
+                shape_geom = shape_geoms.first()
+                item = _make_datas(shape_geom, file_shape)
+                is_valid = _make_request_datas(item)
+            else:
+                item = _make_datas(shape_geoms.first(), file_shape, True)
+                root_id = _make_request_datas(item)
+                is_valid = root_id
+                if root_id:
+                    for shape in shape_geoms:
+                        item = _make_datas(shape, file_shape)
+                        item['group_id'] = root_id
+                        _make_request_datas(item)
 
-    llc_request.state = LLC_REQUEST_SENT_GOV['state']
-    llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
-    llc_request.save()
+            if not is_valid:
+                rsp = {
+                    'success': False,
+                    'error': 'Формыг гүйцэт бөглөнө үү!'
+                }
+                return JsonResponse(rsp)
 
-    for req_file_shape in request_file_shapes:
-        req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
-        req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
-        req_file_shape.save()
+        llc_request.state = LLC_REQUEST_SENT_GOV['state']
+        llc_request.kind = LLC_REQUEST_SENT_GOV['kind']
+        llc_request.save()
 
-    rsp = {
-        'success': True,
-        'data': 'Амжилттай хүсэлт үүслээ'
+        for req_file_shape in request_file_shapes:
+            req_file_shape.state = REQUEST_SHAPE_SENT_GOV['state']
+            req_file_shape.kind = REQUEST_SHAPE_SENT_GOV['kind']
+            req_file_shape.save()
+
+        rsp = {
+            'success': True,
+            'data': 'Амжилттай хүсэлт үүслээ'
+        }
+        return JsonResponse(rsp)
+
+
+def _make_form_values(datas):
+    values = {
+        "theme_id": datas.get('theme').get('id') or '',
+        "feature_id": datas.get('feature').get('id') or '',
+        "package_id": datas.get('package').get('id') or '',
+        "order_no": datas.get('order_no'),
+        "order_at": datas.get('order_at')
     }
-    return JsonResponse(rsp)
+
+    return values
 
 
 @require_POST
@@ -1493,17 +1522,28 @@ def inspire_save(request, payload):
     feature_id = values.get('feature').get('id') or None
     package_id = values.get('package').get('id') or None
 
-    RequestFilesShape.objects.filter(id=id).update(
-        theme_id=theme_id,
-        package_id=package_id,
-        feature_id=feature_id,
-        order_no=order_no,
-        order_at=order_at or None,
-    )
+    form_values = _make_form_values(values)
+    form = RequestFilesShapeForm(form_values)
 
-    return JsonResponse({
-        'success': True,
-    })
+    is_valid = form.is_valid()
+    if not is_valid:
+        rsp = {
+            "success": False,
+            "errors": form.errors
+        }
+    else:
+        RequestFilesShape.objects.filter(id=id).update(
+            theme_id=theme_id,
+            package_id=package_id,
+            feature_id=feature_id,
+            order_no=order_no,
+            order_at=order_at or None,
+        )
+        rsp = {
+            "success": True,
+        }
+
+    return JsonResponse(rsp)
 
 
 @require_GET
@@ -1541,3 +1581,61 @@ def geom_type(request, payload):
     }
 
     return JsonResponse(rsp)
+
+
+def _get_shapes_geoms(shape_geometry):
+    geo_datas = []
+    geom_type = ''
+    shape_geoms = ShapeGeom.objects.filter(shape_id=shape_geometry.id)
+    geo_datas, geom_type = get_feature(shape_geoms)
+
+    return geo_datas, geom_type
+
+
+@require_GET
+@ajax_required
+def get_file_shapes(request, id):
+    list_of_datas = []
+
+    llc_data = LLCRequest.objects.filter(id=id).first()
+    shape_geometries = RequestFilesShape.objects.filter(files_id=llc_data.file_id)
+    for shape_geometry in shape_geometries:
+        geoms, geom_type = _get_shapes_geoms(shape_geometry)
+
+        theme_name = ''
+        feature_name = ''
+        package_name = ''
+        theme_id = shape_geometry.theme_id
+        feature_id = shape_geometry.feature_id
+        package_id = shape_geometry.package_id
+
+        if theme_id:
+            theme = LThemes.objects.filter(theme_id=theme_id).first()
+            theme_name = theme.theme_name
+
+        if package_id:
+            package = LPackages.objects.filter(package_id=package_id).first()
+            package_name = package.package_name
+
+        if feature_id:
+            feature = LFeatures.objects.filter(feature_id=feature_id).first()
+            feature_name = feature.feature_name
+
+        list_of_datas.append({
+            'id': shape_geometry.id,
+            'geom_type': geom_type,
+            'theme': {'id': theme_id, 'name': theme_name},
+            'feature': {'id': feature_id, 'name': feature_name},
+            'package': {'id': package_id, 'name': package_name},
+            'icon_state': True,
+            'features': geoms,
+            'order_no': shape_geometry.order_no,
+            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else '',
+            "state": utils.get_value_from_types(RequestFilesShape.STATE_CHOICES, shape_geometry.state),
+            "kind": utils.get_value_from_types(RequestFilesShape.KIND_CHOICES, shape_geometry.kind),
+            "description": shape_geometry.description,
+        })
+
+    return JsonResponse({
+        'list_of_datas': list_of_datas,
+    })

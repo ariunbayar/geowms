@@ -758,7 +758,6 @@ def get_1stOrder_geo_id():
     return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
 
 
-
 def get_geoJson(data):
     data = json.loads(data)
     geom_type = data['type']
