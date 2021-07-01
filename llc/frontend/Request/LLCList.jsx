@@ -111,7 +111,6 @@ export class Detail extends Component {
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
         this.infoModal = this.infoModal.bind(this)
-
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
     }
