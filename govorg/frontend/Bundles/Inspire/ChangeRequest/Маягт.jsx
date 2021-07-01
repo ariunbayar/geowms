@@ -184,10 +184,10 @@ export default class Маягт extends Component {
                                                     <div className="col-md-9">
                                                         <Field
                                                             name="order_no"
-                                                            className='form-control'
+                                                            className={'form-control ' + (errors.order_no ? 'is-invalid' : '')}
                                                             placeholder="Тушаалын дугаар"
                                                         />
-                                                        <ErrorMessage name="order_no" component="span"/>
+                                                        <ErrorMessage  className="text-danger" name="order_no" component="span"/>
                                                     </div>
                                                 </div>
                                                 <div className="row my-3 ">
@@ -197,11 +197,11 @@ export default class Маягт extends Component {
                                                     <div className="col-md-9">
                                                         <Field
                                                             name="order_at"
-                                                            className='form-control'
+                                                            className={'form-control ' + (errors.order_at ? 'is-invalid' : '')}
                                                             placeholder="Тушаал гарсан огноо"
                                                             type="date"
                                                         />
-                                                        <ErrorMessage name="order_at" component="span"/>
+                                                        <ErrorMessage className="text-danger" name="order_at" component="span"/>
                                                     </div>
                                                 </div>
                                                 <div className="row">
