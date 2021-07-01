@@ -1,3 +1,5 @@
+from django.db.models import Count
+
 from backend.inspire.models import MGeoDatas, LFeatures, LPackages, LThemes
 from backend.geoserver.models import WmtsCacheConfig
 from main import geoserver
@@ -11,11 +13,26 @@ def _make_view_name(feature):
 
 
 def update_web_cache():
-    for cache_config in WmtsCacheConfig.objects.all():
+
+    feature_ids = list()
+
+    wmts_configs = WmtsCacheConfig.objects.all()
+    get_features = (MGeoDatas.objects
+        .values('feature_id')
+        .annotate(f_count=Count('feature_id'))
+    )
+
+    for feature in get_features:
+        feature_ids.append(feature['feature_id'])
+
+    for cache_config in wmts_configs:
         if cache_config.feature_id:
             feature_id = cache_config.feature_id
-            count_of_feature = MGeoDatas.objects.filter(feature_id=feature_id).count()
-            if count_of_feature != cache_config.feature_count or cache_config.is_modified:
+            if feature_id in feature_ids:
+                m_datas = list(get_features.filter(feature_id=feature_id))
+                m_data = m_datas[0]
+                f_count = m_data['f_count']
+            if f_count != cache_config.feature_count or cache_config.is_modified:
                 l_feature = LFeatures.objects.filter(feature_id=feature_id).first()
                 l_package = LPackages.objects.filter(package_id=l_feature.package_id).first()
                 l_theme = LThemes.objects.filter(theme_id=l_package.theme_id).first().theme_code
@@ -32,7 +49,14 @@ def update_web_cache():
                     'reseed',
                     cache_config.number_of_tasks_to_use
                 )
+                feature = LFeatures.objects.filter(feature_id=feature_id).first()
+                view_name = utils.make_view_name(feature)
+                has_view_name = utils.check_view_name(view_name)
+
+                if has_view_name:
+                    utils.refreshMaterializedView(feature_id)
+
                 if wmts_config.status_code == 200:
-                    cache_config.feature_count = count_of_feature
+                    cache_config.feature_count = f_count
                     cache_config.is_modified = False
                     cache_config.save()
