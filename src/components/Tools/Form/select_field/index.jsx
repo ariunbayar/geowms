@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+
 // <SelectField
 //     state_name='feature'
 //     data_list={selected_features}                       //сонголтын жагсаалт
@@ -11,10 +12,14 @@ import React, { Component } from 'react';
 //     default_text={'feature-ийн нэр сонгоно уу'}     // select input - ийг сонгоогүй үед харагдах анхны утга
 //     handleSelectField={this.handleChange}          // сонголт буцаах функц
 // />
+
 // Opthroup эсвэл option хэлбэрээр ашиглаж болно
 // Хэрэв Optgroup хэлбэрээр ашиглавал name_key, opt_key , option_name , option_key заавал байна
 // Option хэлбэрээр ашиглавал option_name , option_key заавал байна
+
+
 // --------------------------------------------------------
+
 {/* <SelectField
     state_name='package'
     option_name = "name"
@@ -25,8 +30,11 @@ import React, { Component } from 'react';
     default_text={'package-ийн нэр сонгоно уу'}
     handleSelectField={this.handleChange}
 /> */}
+
 // ----------------------------------------------------
+
 export default class SelectField extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -41,6 +49,7 @@ export default class SelectField extends Component {
                 state_name, name_key,
                 opt_key, option_key
         } = this.props
+
         data_list.map((row, idx) => {
             if (name_key){
                 row[opt_key].map((data, idx) => {
@@ -57,6 +66,7 @@ export default class SelectField extends Component {
         })
         this.setState({ selected_value: selection_value })
     }
+
     render() {
         const { default_value, label,
                 default_text, option_key, option_name,
@@ -115,6 +125,7 @@ function OptionComp (options_data,  option_key, option_name, option_name_2, opti
                 >
                     {
                         display_mode
+
                         ?
                             row[option_data]  + "   (   " + row[option_name_2] + "   )   "
                         :
