@@ -4,12 +4,14 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.search import SearchVector
 
-from main.decorators import ajax_required
 from geoportal_app.models import User
 from .models import Payment, PaymentPoint
 
-from django.contrib.postgres.search import SearchVector
+
+from main.decorators import ajax_required
+from main.utils import get_start_index
 
 
 @require_POST
@@ -48,35 +50,31 @@ def paymentList(request, payload):
         else:
             failed_date = None
         payment_all.append({
-            'id':payment.id,
-            'geo_unique_number':payment.geo_unique_number,
-            'bank_unique_number':payment.bank_unique_number,
-            'description':payment.description,
-            'total_amount':payment.total_amount,
-            'user':payment.user.username,
+            'id': payment.id,
+            'geo_unique_number': payment.geo_unique_number,
+            'bank_unique_number': payment.bank_unique_number,
+            'description': payment.description,
+            'total_amount': payment.total_amount,
+            'user': payment.user.username,
             'user_id': payment.user_id,
             'user_firstname': payment.user.first_name,
             'user_lastname': payment.user.last_name,
-            'is_success':payment.is_success,
-            'card_number':payment.card_number,
-            'message':payment.message,
-            'code':payment.code,
-            'created_at':created_date,
-            'success_at':success_date,
-            'failed_at':failed_date,
+            'is_success': payment.is_success,
+            'card_number': payment.card_number,
+            'message': payment.message,
+            'code': payment.code,
+            'created_at': created_date,
+            'success_at': success_date,
+            'failed_at': failed_date,
         })
     total_page = total_items.num_pages
     rsp = {
         'items': payment_all,
         'page': page,
         'total_page': total_page,
-        'start_index': _get_start_index(per_page, page),
+        'start_index': get_start_index(per_page, page),
     }
     return JsonResponse(rsp)
-
-
-def _get_start_index(per_page, page):
-    return (per_page * (page - 1)) + 1
 
 
 @require_POST
