@@ -385,7 +385,6 @@ def create_group_cache(request, payload, group_name):
     })
 
 
-
 @require_GET
 @csrf_exempt
 def check_geoserver_wms(request):

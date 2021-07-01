@@ -764,10 +764,9 @@ def _create_mdatas_object(form_json, feature_id, geo_id, approve_type):
     return True
 
 
-def _request_to_m(request_datas, check_wmts):
+def _request_to_m(request_datas):
     geom = _geojson_to_geom(request_datas['geo_json'])
     success = True
-    is_modified = False
     if request_datas['form_json']:
         success = _create_mdatas_object(
             request_datas['form_json'], request_datas['feature_id'],
@@ -783,10 +782,6 @@ def _request_to_m(request_datas, check_wmts):
 
     elif request_datas['approve_type'] == 'update':
         request_datas['m_geo_datas_qs'].update(geo_data=geom)
-        is_modified = True
-        if check_wmts:
-            check_wmts.is_modified = True if is_modified else False
-            check_wmts.save()
 
     return success
 
@@ -966,13 +961,12 @@ def request_approve(request, payload):
     feature_id = payload.get("feature_id")
     is_refresh = payload.get("ref_in_direct")
 
+    info = ''
     success = False
     new_geo_id = None
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
     requests_qs = ChangeRequest.objects
     requests_qs = requests_qs.filter(id__in=request_ids)
-    check_wmts = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
-    feature_count = MGeoDatas.objects.filter(feature_id=feature_id).count()
     with transaction.atomic():
         for r_approve in requests_qs:
             feature_id = r_approve.feature_id
@@ -1000,7 +994,7 @@ def request_approve(request, payload):
                     request_datas['feature_id'] = feature_id
                     request_datas['form_json'] = form_json
                     request_datas['m_geo_datas_qs'] = m_geo_datas_qs
-                    success = _request_to_m(request_datas, check_wmts)
+                    success = _request_to_m(request_datas)
                     if success and new_geo_id:
                         r_approve.new_geo_id = new_geo_id
                         _insert_data_another_table(request_datas, new_geo_id, 'create')
@@ -1015,7 +1009,7 @@ def request_approve(request, payload):
                             'form_json': form_json,
                             'm_geo_datas_qs': m_geo_datas_qs
                         }
-                        success = _request_to_m(request_datas, check_wmts)
+                        success = _request_to_m(request_datas)
                         _insert_data_another_table(request_datas, old_geo_id, 'update')
 
                     else:
@@ -1060,25 +1054,37 @@ def request_approve(request, payload):
                     'success': False,
                     'info': 'Танд баталгаажуулах эрх алга байна.'
                 }
+                return JsonResponse(rsp)
 
-        if is_refresh:
 
-            refreshMaterializedView(feature_id)
-            rsp = {
-            'success': True,
-            'info': 'Амжилттай баталгаажуулж дууслаа'
-            }
-
-        else:
-            check_wmts.feature_count = feature_count
-            check_wmts.save()
+            info = _refresh_view_direct_or_crontab(is_refresh, r_approve.kind, feature_id)
 
             rsp = {
             'success': True,
-            'info': 'Хүсэлтийг хүлээн авлаа'
+            'info': info
             }
 
     return JsonResponse(rsp)
+
+
+def _refresh_view_direct_or_crontab(is_refresh, approve_kind, feature_id):
+    check_wmts = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+    feature_count = MGeoDatas.objects.filter(feature_id=feature_id).count()
+    info = ''
+
+    if approve_kind == ChangeRequest.KIND_UPDATE:
+        check_wmts.is_modified = True
+
+    if is_refresh:
+        refreshMaterializedView(feature_id)
+        info = 'Амжилттай баталгаажуулж дууслаа'
+    else:
+        check_wmts.feature_count = feature_count
+        info = 'Хүсэлтийг хүлээн авлаа'
+
+    check_wmts.save()
+
+    return info
 
 
 @require_GET
