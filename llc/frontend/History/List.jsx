@@ -27,6 +27,13 @@ export class List extends Component {
                         "text": '',
                         "icon": 'fa fa-eye text-primary',
                         "action": (values) => this.handleUpdateAction(values),
+                    },
+                    {
+                      "title": 'Устгах',
+                      "text": '',
+                      "icon": 'fa fa-trash-o text-danger',
+
+                      "action": (values) => this.handleRemoveAction(values),
                     }
             ],
             state: '',
