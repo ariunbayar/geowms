@@ -481,6 +481,7 @@ def make_view(request):
         _import_feature_template(file, theme, feature, False)
 
     view_name = utils.make_view_name(feature)
+    # TODO ViewNames дээр view ийг feature id tai ni hamt hadgalaad uusgeh
     check = _create_view(list(property_ids), view_name, list(data_type_ids), list(feature_config_ids), fid)
     if check:
         rsp = _create_geoserver_detail(view_name, theme, request.user.id, feature, values)
