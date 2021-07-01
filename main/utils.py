@@ -1968,5 +1968,11 @@ def get_value_from_types(choices, value):
     return ''
 
 
+# dict ийг зөв форматаар хэвлэж хармаар санагдвал хэрэглэх
 def test_json_dumps(dct):
     return json.dumps(dct, skipkeys=True, allow_nan=True, indent=4, ensure_ascii=False)
+
+
+# datatable хэрэглээгүй тохиолдолд хүснэгтийн эхлэлийн тоог өгнө
+def get_start_index(per_page, page):
+    return (per_page * (page - 1)) + 1
