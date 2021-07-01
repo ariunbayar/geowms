@@ -9,7 +9,6 @@ class WmtsCacheConfig(models.Model):
         ordering = ('created_at',)
 
     feature_id = models.IntegerField(null=True)
-    feature_count = models.BigIntegerField(null=True)
     group_name = models.CharField(max_length=100, null=True)
     img_format = models.CharField(max_length=50, null=True)
     zoom_start = models.IntegerField(null=True)

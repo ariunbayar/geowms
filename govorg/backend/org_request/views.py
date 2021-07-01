@@ -1057,7 +1057,7 @@ def request_approve(request, payload):
                 return JsonResponse(rsp)
 
 
-            info = _refresh_view_direct_or_crontab(is_refresh, r_approve.kind, feature_id)
+            info = _refresh_view_direct_or_crontab(is_refresh, feature_id)
 
             rsp = {
             'success': True,
@@ -1067,22 +1067,18 @@ def request_approve(request, payload):
     return JsonResponse(rsp)
 
 
-def _refresh_view_direct_or_crontab(is_refresh, approve_kind, feature_id):
+def _refresh_view_direct_or_crontab(is_refresh, feature_id):
     check_wmts = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
-    feature_count = MGeoDatas.objects.filter(feature_id=feature_id).count()
-    info = ''
 
     if is_refresh:
         refreshMaterializedView(feature_id)
-
-        if approve_kind == ChangeRequest.KIND_UPDATE:
-            check_wmts.is_modified = True
-            check_wmts.feature_count = feature_count
-            check_wmts.save()
-            info = 'Амжилттай баталгаажуулж дууслаа'
+        info = 'Амжилттай баталгаажуулж дууслаа'
 
     else:
+        check_wmts.is_modified = True
+        check_wmts.save()
         info = 'Хүсэлтийг хүлээн авлаа'
+
     return info
 
 
