@@ -1,8 +1,10 @@
 import React, { Component } from "react"
-import {Formik, Field, Form, ErrorMessage} from 'formik'
-import {service} from "./service"
-import {validationSchema} from './validationSchema'
+import { Formik, Field, Form, ErrorMessage } from 'formik'
+
+import { validationSchema } from './validationSchema'
 import Attributes from  './Attributes'
+
+import { service } from "./service"
 export class GovorgForm extends Component {
 
     constructor(props) {
@@ -10,7 +12,10 @@ export class GovorgForm extends Component {
         super(props)
 
         this.state = {
-            govorg: {},
+            govorg: {
+                "name": "",
+                "website": "",
+            },
             wms_list: [],
             layers: [],
             title: '',
@@ -27,6 +32,7 @@ export class GovorgForm extends Component {
 
     componentDidMount() {
         const { system_id, id } = this.props.match.params
+        global.NOTIF('warning', 'Эрхтэй болон түүний давхарга нь үүссэн давхаргууд л харагдаж байгаа!', 'exclamation')
         service
             .getWMSList(id)
             .then(({ wms_list }) => {
@@ -37,7 +43,11 @@ export class GovorgForm extends Component {
             service
                 .detail(system_id)
                 .then(({ govorg }) => {
-                    this.setState(({ govorg, layers: govorg.layers, accepted_props: govorg.govorg_attributes }))
+                    this.setState(({
+                        govorg: govorg.detail,
+                        layers: govorg.detail.layers,
+                        accepted_props: govorg.govorg_attributes
+                    }))
                 })
         }
     }
@@ -130,28 +140,32 @@ export class GovorgForm extends Component {
 
         if(this.state.govorg.id) {
             data.id = this.state.govorg.id
-            service.update(data).then(({ success, info, errors }) => {
-                if (success) {
-                    setStatus('saved')
-                    setSubmitting(false)
-                    this.setModal(info, '', 'fa fa-check-circle text-success', false)
-                } else {
-                    setErrors(errors)
-                    setSubmitting(false)
-                }
-            })
+            service
+                .update(data)
+                .then(({ success, info, errors }) => {
+                    if (success) {
+                        setStatus('saved')
+                        setSubmitting(false)
+                        this.setModal(info, '', 'fa fa-check-circle text-success', false)
+                    } else {
+                        setErrors(errors)
+                        setSubmitting(false)
+                    }
+                })
         } else{
-            service.create(data).then(({ success, info, errors }) => {
-                if (success) {
-                    setStatus('saved')
-                    setSubmitting(false)
-                    global.refreshSystemCount()
-                    this.setModal(info, '', 'fa fa-check-circle text-success', false)
-                } else {
-                    setErrors(errors)
-                    setSubmitting(false)
-                }
-            })
+            service
+                .create(data)
+                .then(({ success, info, errors }) => {
+                    if (success) {
+                        setStatus('saved')
+                        setSubmitting(false)
+                        global.refreshSystemCount()
+                        this.setModal(info, '', 'fa fa-check-circle text-success', false)
+                    } else {
+                        setErrors(errors)
+                        setSubmitting(false)
+                    }
+                })
         }
     }
 
@@ -168,10 +182,7 @@ export class GovorgForm extends Component {
                     <div className="col-md-4">
                         <Formik
                             enableReinitialize
-                            initialValues={{
-                                name: this.state.govorg.name || '',
-                                website: this.state.govorg.website || '',
-                            }}
+                            initialValues={this.state.govorg}
                             validationSchema={validationSchema}
                             onSubmit={this.handleSubmit}
                         >

@@ -4,6 +4,7 @@ export default {
     makeStateColor,
     makeKindColor,
     checkMultiGeomTypeName,
+    copyToClipboard,
 }
 
 // import { test } from "@helpUtils/functions" -- тухайн дуудах функээ л дуудах
@@ -12,6 +13,7 @@ export {
     makeStateColor,
     makeKindColor,
     checkMultiGeomTypeName,
+    copyToClipboard,
 }
 
 //TODO энэ жишээ ийм маягаар явна
@@ -48,4 +50,16 @@ function checkMultiGeomTypeName(geom_type) {
         geom_type = 'Multi'.concat('', geom_type)
     }
     return geom_type
+}
+
+function copyToClipboard(text, notif_text='Амжилттай хууллаа') {
+    var textField = document.createElement('textarea')
+    textField.innerText = text
+    document.body.appendChild(textField)
+    textField.select()
+    document.execCommand('copy')
+    textField.remove()
+    if (global.NOTIF) {
+        global.NOTIF('success', notif_text, 'check')
+    }
 }

@@ -1,7 +1,7 @@
 from backend.org.models import Org
 from django.shortcuts import get_object_or_404, reverse
 from django.views.decorators.http import require_POST, require_GET
-from main.decorators import ajax_required
+from main.decorators import ajax_required, gov_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
@@ -30,10 +30,10 @@ def _get_govorg_display(govorg):
 
 @require_POST
 @ajax_required
+@gov_required
 @login_required(login_url='/gov/secure/login/')
 def systemList(request, payload):
-    org = Org.objects.filter(employee__user=request.user).first()
-    qs = GovOrg.objects.filter(org_id=org.id)
+    qs = request.org.govorg_set.all()
     оруулах_талбарууд = ['id', 'name', 'token', 'created_at']
     datatable = Datatable(
         model=GovOrg,
