@@ -233,6 +233,7 @@ def _rsp_validation(result, table_name, id_list):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def save_table(request, payload):
+    result = []
     table_id = payload.get('table_id')
     id = payload.get('id')
     feature_name = payload.get('feature_name')
@@ -241,25 +242,24 @@ def save_table(request, payload):
     is_insert = payload.get('is_insert')
     pk_field_configs = payload.get("pk_field_config")
     pk_field_configs = utils.json_dumps(pk_field_configs)
-    result = []
-    cursor_pg = utils.get_cursor_pg(id)
 
-    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
-    another_database = get_object_or_404(AnotherDatabase, pk=id)
-    ano_db_table = AnotherDatabaseTable.objects.filter(another_database=another_database)
-    table = ano_db_table.filter(pk=table_id).first()
-    if table:
-        table_unique_id = table.table_unique_id
+    cursor_pg = utils.get_cursor_pg(id)
 
     if not table_id and not is_insert:
         result = utils.check_table_name(cursor_pg, table_name)
 
     info = _rsp_validation(result, table_name, id_list)
-
     if info:
         return JsonResponse({'success': False, 'info': info})
 
-    if not table_id:
+    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
+    another_database = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table = AnotherDatabaseTable.objects.filter(another_database=another_database)
+    table = ano_db_table.filter(pk=table_id).first()
+
+    if table:
+        table_unique_id = table.table_unique_id
+    else:
         table_unique_id = get_unique_id(False, another_database)
 
     AnotherDatabaseTable.objects.update_or_create(
@@ -274,6 +274,7 @@ def save_table(request, payload):
             'table_unique_id': table_unique_id
         }
     )
+
     return JsonResponse({
         'success': True,
         'info': 'Амжилттай хадгалагдлаа'

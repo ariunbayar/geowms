@@ -124,7 +124,7 @@ def get_unique_id(is_db, ano_database):
         obj = AnotherDatabaseTable.objects.filter(another_database=ano_database).order_by('table_unique_id').first()
 
     if obj:
-        return obj.unique_name + -1 if is_db else obj.table_unique_id + -1
+        return obj.unique_id + -1 if is_db else obj.table_unique_id + -1
     else:
         return -1
 
