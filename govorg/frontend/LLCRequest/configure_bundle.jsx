@@ -141,6 +141,10 @@ export class ConfigureBundle extends Component {
                     <SelectField
                         state_name='feature'
                         label="feature"
+                        valid={
+                            !is_valid_type && feature?.id &&
+                                "Төрөл таарахгүй байна!"
+                        }
                         option_name = "name"
                         option_key = "code"
                         data_list={
@@ -152,13 +156,6 @@ export class ConfigureBundle extends Component {
                         default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
-                    <div className="col-md-8"></div>
-                    <div className="col-md-4">
-                        {
-                            !is_valid_type && feature?.id &&
-                                <small className="text-danger">Төрөл таарахгүй байна!</small>
-                        }
-                    </div>
                 </div>
                 <div className="col-md-12 d-flex justify-content-between">
                     <div className="col-md-6">
