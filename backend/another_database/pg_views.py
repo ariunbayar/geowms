@@ -1003,53 +1003,53 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
     else:
         last_geo_id = feature.feature_code + '__' +  int_to_str(1)
 
-    # try:
-    start_data = pk_field_config.get('pk_start_index') or ""
-    pk_field_name = pk_field_config.get('pk_field_name') or ""
-    pk_field_type = pk_field_config.get('pk_field_type') or ""
-    count = pk_field_config.get('pk_field_count') or ''
-    pk_field_max_range = pk_field_config.get('pk_field_max_range') or ''
-    if count and int(count) >1:
-        count = count
-    else:
-        count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
+    try:
+        start_data = pk_field_config.get('pk_start_index') or ""
+        pk_field_name = pk_field_config.get('pk_field_name') or ""
+        pk_field_type = pk_field_config.get('pk_field_type') or ""
+        count = pk_field_config.get('pk_field_count') or ''
+        pk_field_max_range = pk_field_config.get('pk_field_max_range') or ''
+        if count and int(count) >1:
+            count = count
+        else:
+            count = _get_count_of_table(cursor, table_name, pk_field_max_range, start_data, pk_field_type, pk_field_name)
 
-    count = int(count)
-    current_data_counts = 0
-    current_geo_id = last_geo_id
-    i = 0
-    count_of_loop = count/SELECTCOUNT
-    count_of_odd = count%SELECTCOUNT
-    if count_of_odd > 0:
-        count_of_loop = int(count_of_loop) + 1
-    while current_data_counts < int(count):
-        m_datas_object = []
-        geo_data_objs = []
-        ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type, pk_field_max_range)
-        start_data = ona_table_datas[-1][pk_field_name]
-        len_of_data = len(ona_table_datas)
-        limit_data_count = len_of_data-1
-        if count_of_loop == i:
-            limit_data_count = len_of_data
-        for ona_data in ona_table_datas[0:limit_data_count]:
-            current_geo_id = str_to_int(current_geo_id)
-            current_geo_id = current_geo_id + 1
-            new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
-            current_geo_id = new_geo_id
-            geo_id, geo_data_obj = _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id, table_unique_id)
+        count = int(count)
+        current_data_counts = 0
+        current_geo_id = last_geo_id
+        i = 0
+        count_of_loop = count/SELECTCOUNT
+        count_of_odd = count%SELECTCOUNT
+        if count_of_odd > 0:
+            count_of_loop = int(count_of_loop) + 1
+        while current_data_counts < int(count):
+            m_datas_object = []
+            geo_data_objs = []
+            ona_table_datas = _get_ona_datas(cursor, table_name, table_fields, table_geo_data, start_data, pk_field_name, pk_field_type, pk_field_max_range)
+            start_data = ona_table_datas[-1][pk_field_name]
+            len_of_data = len(ona_table_datas)
+            limit_data_count = len_of_data-1
+            if count_of_loop == i:
+                limit_data_count = len_of_data
+            for ona_data in ona_table_datas[0:limit_data_count]:
+                current_geo_id = str_to_int(current_geo_id)
+                current_geo_id = current_geo_id + 1
+                new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
+                current_geo_id = new_geo_id
+                geo_id, geo_data_obj = _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id, table_unique_id)
 
-            geo_data_objs.append(geo_data_obj)
+                geo_data_objs.append(geo_data_obj)
 
-            m_d_data = _insert_m_datas(ona_data, feature, new_geo_id, columns, unique_id, table_unique_id)
-            m_datas_object = m_datas_object + m_d_data
-            success_count = success_count + 1
-        MGeoDatas.objects.bulk_create(geo_data_objs)
-        MDatas.objects.bulk_create(m_datas_object)
-        current_data_counts = current_data_counts + limit_data_count
-        i += 1
-    # except Exception:
-    #     failed_count += 1
-    #     pass
+                m_d_data = _insert_m_datas(ona_data, feature, new_geo_id, columns, unique_id, table_unique_id)
+                m_datas_object = m_datas_object + m_d_data
+                success_count = success_count + 1
+            MGeoDatas.objects.bulk_create(geo_data_objs)
+            MDatas.objects.bulk_create(m_datas_object)
+            current_data_counts = current_data_counts + limit_data_count
+            i += 1
+    except Exception:
+        failed_count += 1
+        pass
 
     return success_count, failed_count, count
 
