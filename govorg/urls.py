@@ -182,6 +182,7 @@ urlpatterns = [
             path('<int:id>/get-request-detail/', org_request_views.get_request_detail, name=' save_request'),
             path('get-search-choices/', org_request_views.get_search_choices),
             path('inspire-save/', org_request_views.inspire_save, name=' inspire_save'),
+            path('geom-type/', org_request_views.geom_type, name=' geom_type'),
         ], 'llc-request'))),
 
     ], 'back_org'))),
@@ -195,6 +196,7 @@ urlpatterns = [
     path('', include(([
         path('', org_views.frontend, name='frontend'),
         path('emp-role/', org_views.emp_role, name='emp-role'),
+        path('get-perms/', org_views.get_perms),
         path('get_approve_and_revoke/', org_views.get_approve_and_revoke),
     ], 'org'))),
 

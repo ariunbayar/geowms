@@ -26,26 +26,26 @@ export default class Маягт extends Component {
         this.setInitialValue = this.setInitial.bind(this)
         this.makeInitial = this.makeInitial.bind(this)
         this.validationSchema = validationSchema.bind(this)
-        this.addNotif = this.props.addNotif
     }
 
     onSubmit(values, { setStatus, setSubmitting }) {
         const { gid, null_form_isload, modifyend_selected_feature_check, remove_button_active, update_geom_from_list, cancel_button_active } = this.props
             if(null_form_isload){
                 if (this.props.geojson != {}) {
+                    this.setState({ is_loading: true })
                     service.create(this.state.tid, this.state.pid, this.state.fid, values, this.props.geojson).then(({ success, info }) => {
                         if (success) {
-                            this.setState({is_loading: true})
-                            this.props.requestRefreshCount()
-                            this.addNotif('success', info, 'check')
+                            this.setState({ is_loading: false })
+                            global.refreshCount()
+                            global.NOTIF('success', info, 'check')
                         }
                         else {
-                            this.addNotif('danger', info, 'warning')
+                            global.NOTIF('danger', info, 'warning')
                         }
                     })
                 }
                 else {
-                    this.addNotif('danger', 'Зурагдсан геом өгөгдөл байхгүй байна', 'warning')
+                    global.NOTIF('danger', 'Зурагдсан геом өгөгдөл байхгүй байна', 'warning')
                 }
             }
             else if (modifyend_selected_feature_check || update_geom_from_list) {
@@ -58,11 +58,12 @@ export default class Маягт extends Component {
                 this.props.requestCancel(values.order_at, values.order_no, values.form_values)
             }
             else {
+                this.setState({ is_loading: true })
                 service.createUpd(this.state.tid, this.state.pid, this.state.fid, values, null, gid).then(({ success, info}) => {
                     if (success) {
-                        this.setState({is_loading: true})
-                        this.props.requestRefreshCount()
-                        this.addNotif('success', info, 'check')
+                        this.setState({ is_loading: false })
+                        global.refreshCount()
+                        global.NOTIF('success', info, 'check')
                     }
                 })
             }
@@ -137,11 +138,11 @@ export default class Маягт extends Component {
             if(!this.props.togle_islaod)
             {
                 if(this.props.null_form_isload){
-                    this.setState({is_loading:true})
+                    this.setState({ is_loading: true })
                 }
                 else{
+                    this.setState({ is_loading: true })
                     this.handleUpdate(gid)
-                    this.setState({is_loading:true})
                 }
             }
         }
@@ -233,13 +234,13 @@ export default class Маягт extends Component {
                             <div>
                                 {
                                     data_types.map((data_type, idx) =>
-                                        <>
-                                        <h5 key={idx} className="text-center border-bottom">{data_type['data_type_name']}</h5>
+                                        <Fragment key={idx}>
+                                            <h5 className="text-center border-bottom">{data_type['data_type_name']}</h5>
                                             {
                                                 form_values.map((friend, index) => (
                                                     data_type['property_ids'].includes(friend.property_id) &&
                                                         data_type['data_type_id'] == friend.data_type_id &&
-                                                        <div key={index} className="row my-3 ">
+                                                        <div key={idx.toString() + index.toString()} className="row my-3 ">
                                                             <div className="col-md-3">
                                                                 <label className="col-form-label">{friend.property_name ? friend.property_name : ''}</label>
                                                             </div>
@@ -296,7 +297,7 @@ export default class Маягт extends Component {
                                                         </div>
                                                     ))
                                             }
-                                        </>
+                                        </Fragment>
                                     )
                                 }
                                 <div className="row my-3 ">

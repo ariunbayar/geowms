@@ -1,6 +1,7 @@
 import React, {Component, Fragment} from "react"
 
 import { makeStateColor, makeKindColor } from "@helpUtils/functions"
+import utils from "@helpUtils/functions"
 import Modal from "@utils/Modal/Modal"
 import BackButton from "@utils/Button/BackButton"
 
@@ -25,7 +26,7 @@ export class LLCSettings extends Component {
             selected_packages: [],
             selected_features: [],
             modal_status: 'closed',
-            save_icon: false
+            save_icon: false,
         }
         this.handleProceed = this.handleProceed.bind(this)
         this.closeModel = this.closeModel.bind(this)
@@ -35,6 +36,7 @@ export class LLCSettings extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.goLink = this.goLink.bind(this)
+        this.handleSaveModal = this.handleSaveModal.bind(this)
     }
 
     getArray(data, selected_value) {
@@ -80,7 +82,7 @@ export class LLCSettings extends Component {
                 list_of_datas[index_of_list]['feature'].list = []
             }
             else {
-                data_list['model_status'] = false
+                data_list['model_status'] = true
             }
 
             if (! selected_value) {
@@ -104,12 +106,12 @@ export class LLCSettings extends Component {
         this.setState({ ...data_list })
     }
 
-    getInspireTree(){
+    getInspireTree() {
         return service.getInspireTree()
     }
 
     handleProceed(values) {
-        this.setState({model_status: true, selected_values: values})
+        this.setState({ model_status: true, selected_values: values })
     }
 
     closeModel() {
@@ -119,7 +121,7 @@ export class LLCSettings extends Component {
     componentDidMount() {
         const {id} = this.props.match.params
 
-        service.getFilesDetal(id).then(async ({list_of_datas}) => {
+        service.getFilesDetal(id).then(async ({ list_of_datas }) => {
             const { themes, packages, features } = await service.getInspireTree()
             list_of_datas.map((list_of_data, idx) => {
                 if (list_of_data.theme.id) {
@@ -133,11 +135,62 @@ export class LLCSettings extends Component {
         })
     }
 
-    Save(value, idx){
+    handleSaveModal(value, idx) {
+        const { selected_values, geom_type } = this.state
+        const { features } = selected_values
+
+        var file_geom_type
+        features.map((details, idx) =>
+            file_geom_type = details.geometry.type
+        )
+        file_geom_type = utils.checkMultiGeomTypeName(file_geom_type)
+
+        if(geom_type !== file_geom_type) {
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-exclamation-circle",
+                modal_bg: '',
+                icon_color: 'warning',
+                title: 'Геометр төрөл зөрсөн байна!',
+                text: `Хадгалахдаа итгэлтэй байна уу?`,
+                has_button: true,
+                actionNameBack: 'Үгүй',
+                actionNameDelete: 'Тийм',
+                modalAction: () => this.Save(value, idx),
+                modalClose: () => this.modalClose(idx)
+            }
+            global.MODAL(modal)
+        }
+        else {
+            this.Save(value, idx)
+        }
+    }
+
+    modalClose(idx) {
+        var { list_of_datas } = this.state
+        list_of_datas[idx].icon_state = true
+        this.setState({ list_of_datas })
+    }
+
+    Save(value, idx) {
         var list_of_datas = this.state.list_of_datas
         service.Save(value).then(({ success }) => {
+            const modal = {
+                modal_status: "open",
+                modal_icon: "fa fa-check-circle",
+                modal_bg: '',
+                icon_color: 'success',
+                title: 'Амжилттай хадгаллаа',
+                text: '',
+                has_button: false,
+                actionNameBack: '',
+                actionNameDelete: '',
+                modalAction: null,
+                modalClose: null
+            }
+            global.MODAL(modal)
             list_of_datas[idx].icon_state = true
-            this.setState({list_of_datas})
+            this.setState({ list_of_datas })
         })
     }
 
@@ -147,7 +200,7 @@ export class LLCSettings extends Component {
         })
     }
 
-    modalChange(action_type, modal_icon, icon_color, title, text, has_button, action_name, modalClose) {
+    modalChange(modal_icon, icon_color, title, has_button) {
         this.setState({
             modal_icon,
             icon_color,
@@ -174,8 +227,12 @@ export class LLCSettings extends Component {
         global.MODAL(modal)
     }
 
-    render () {
-        const { list_of_datas, model_status, selected_values, save_icon} = this.state
+    getGeomType(geom_type) {
+        this.state['geom_type'] = geom_type
+    }
+
+    render() {
+        const { list_of_datas, model_status } = this.state
         return (
             <div className="card">
                 <div className="card-body">
@@ -225,9 +282,9 @@ export class LLCSettings extends Component {
                                                 {
                                                     value.icon_state
                                                     ?
-                                                        <a className="gp-text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
+                                                        <a className="text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
                                                     :
-                                                        <a className='gp-text-primary fa fa-floppy-o' role="button" onClick={(e) => this.Save(value, idx)}/>
+                                                        <a className='text-success fa fa-floppy-o' role="button" onClick={(e) => this.handleSaveModal(value, idx)}/>
                                                 }
                                             </td>
                                             <td>
@@ -246,6 +303,7 @@ export class LLCSettings extends Component {
                                     modalClose={this.closeModel}
                                     model_body={ConfigureBundle}
                                     model_action={this.modelAction}
+                                    getGeomType={(...values) => this.getGeomType(...values)}
                                     {...this.state}
                                     title={'Дэд сан тохируулах'}
                                 />

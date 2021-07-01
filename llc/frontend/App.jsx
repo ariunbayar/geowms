@@ -47,7 +47,7 @@ export class App extends Component {
                     <ul className="sidebar-menu do-nicescrol">
                         <MenuItem icon="gp-text-primary fa fa-database" url="/llc/map/" text="Map"></MenuItem>
                         <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт" count={request_count}></MenuItem>
-                        <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Өөрчлөлтийн түүх"></MenuItem>
+                        <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Шийдвэрлэгдсэн хүсэлт"></MenuItem>
                     </ul>
                 </div>
                 <div className="clearfix">

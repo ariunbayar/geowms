@@ -1,6 +1,11 @@
-import React, {Component, Fragment} from "react"
+import React, { Component } from "react"
+
 import SelectField from '@utils/Tools/Form/select_field'
-import {LLCMap} from '../../../llc/frontend/LLCMap'
+import utils from "@helpUtils/functions"
+
+import { LLCMap } from '../../../llc/frontend/LLCMap'
+
+import { service } from './service'
 
 export class ConfigureBundle extends Component {
 
@@ -31,9 +36,15 @@ export class ConfigureBundle extends Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.changeGeom = this.changeGeom.bind(this)
+        this.getType = this.getType.bind(this)
     }
 
-    changeGeom(state){
+    componentDidMount() {
+        const { id } = this.props.selected_values.feature
+        this.getType(id)
+    }
+
+    changeGeom(state) {
         let geom_state_count = this.state.geom_state_count
         var feature_count = this.props.selected_values.features.length - 1
 
@@ -49,12 +60,25 @@ export class ConfigureBundle extends Component {
             }
             else geom_state_count = feature_count
         }
-        this.setState({geom_state_count})
+        this.setState({ geom_state_count })
     }
 
     handleChange(name, selection, e) {
-        const {selected_values} = this.props
+        const { selected_values } = this.props
+        const select = selection.code
         this.props.model_action(name, e, selected_values)
+        this.getType(select)
+    }
+
+    getType(selected_feature_id) {
+        service
+            .geomType(selected_feature_id)
+            .then(({ geom_type }) => {
+                if(geom_type) {
+                    this.props.getGeomType(geom_type)
+                    this.setState({ geom_type })
+                }
+            })
     }
 
     componentDidUpdate(pP, pS) {
@@ -68,12 +92,25 @@ export class ConfigureBundle extends Component {
         }
     }
 
-    render () {
-        const { is_loading, themes, geom_state_count
-        } = this.state
+    checkValidType(feat_data_type, geom_type) {
+        if (geom_type) {
+            if (feat_data_type !== geom_type) {
+                return false
+            }
+        }
+        return true
+    }
+
+    render() {
+        const { themes, geom_state_count, geom_type } = this.state
         const { selected_values, selected_packages, selected_features } = this.props
-        const { theme, feature, order_at, order_no } = selected_values
+        const { theme, feature } = selected_values
+
+
         var feature_data = selected_values.features[geom_state_count]
+        var feat_data_type = utils.checkMultiGeomTypeName(feature_data.geometry.type)
+        const is_valid_type = this.checkValidType(feat_data_type, geom_type)
+
         return (
             <div className="col-md-12">
                 <div className="form-row col-md-12 p-4 mx-1">
@@ -93,7 +130,7 @@ export class ConfigureBundle extends Component {
                         option_name = "name"
                         option_key = "code"
                         data_list={
-                            selected_values.package?.list && selected_values.package?.list.length >0
+                            selected_values.package?.list && selected_values.package?.list.length > 0
                             ? selected_values.package?.list : selected_packages
                         }
                         default_value={selected_values.package?.id || ''}
@@ -107,7 +144,7 @@ export class ConfigureBundle extends Component {
                         option_name = "name"
                         option_key = "code"
                         data_list={
-                            selected_values.feature?.list && selected_values.feature?.list.length >0
+                            selected_values.feature?.list && selected_values.feature?.list.length > 0
                             ? selected_values.feature?.list : selected_features
                         }
                         default_value={feature?.id || ''}
@@ -115,6 +152,13 @@ export class ConfigureBundle extends Component {
                         default_text={'feature-ийн нэр сонгоно уу'}
                         handleSelectField={this.handleChange}
                     />
+                    <div className="col-md-8"></div>
+                    <div className="col-md-4">
+                        {
+                            !is_valid_type && feature?.id &&
+                                <small className="text-danger">Төрөл таарахгүй байна!</small>
+                        }
+                    </div>
                 </div>
                 <div className="col-md-12 d-flex justify-content-between">
                     <div className="col-md-6">
@@ -123,7 +167,7 @@ export class ConfigureBundle extends Component {
                             className={'form-control ' + (!selected_values.order_no && 'is-invalid')}
                             name='order_no'
                             type="text"
-                            value={selected_values.order_no}
+                            value={selected_values.order_no || ''}
                             onChange={(e) => {this.handleChange('order_no', [], e)}}
                         />
                     </div>
@@ -133,7 +177,7 @@ export class ConfigureBundle extends Component {
                             className={'form-control ' + (!selected_values.order_at && 'is-invalid')}
                             name='order_at'
                             type="date"
-                            value={selected_values.order_at}
+                            value={selected_values.order_at || ''}
                             onChange={(e) => {this.handleChange('order_at', [], e)}}
                         />
                     </div>
@@ -144,7 +188,7 @@ export class ConfigureBundle extends Component {
                         &&
                         <div className="col-md-12 pb-5 mt-2 px-0 mx-0 d-flex justify-content-between">
                             <div className="col-md-6">
-                                <div className="overflow-auto" style={{maxHeight: '60vh'}}>
+                                <div className="overflow-auto" style={{maxHeight: '50vh'}}>
                                     <table className="table">
                                         <thead>
                                             <tr>
@@ -174,7 +218,7 @@ export class ConfigureBundle extends Component {
                             <div className="col-md-6 d-inline-block">
                                 <LLCMap
                                     vector_datas={feature_data?.geometry || []}
-                                    height={'60vh'}
+                                    height={'50vh'}
                                 />
                             </div>
                         </div>

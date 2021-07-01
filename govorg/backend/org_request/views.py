@@ -1,4 +1,4 @@
-from backend import log
+import os
 import json
 import datetime
 from geojson import FeatureCollection
@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.gis.geos import GEOSGeometry
 from django.db.models import Count
+from django.conf import settings
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
@@ -650,7 +651,9 @@ def _value_types():
 
 
 def _get_data_from_data(form):
+    value_type = ''
     data = form['data'] if form['data'] else None
+
     code_list_value_types = ['option', 'single-select', 'boolean']
     if form['value_type'] in code_list_value_types:
         value_type = 'code_list_id'
@@ -663,23 +666,31 @@ def _get_data_from_data(form):
                 if types['value_type'] == 'date' and data:
                     data = date_to_timezone(data)
 
-            value_type = types['value_type']
+                value_type = types['value_type']
+
+    if not value_type:
+        value_type = 'value_text'
+
     return data, value_type
 
 
 def _create_mdatas(geo_id, feature_id, form, value):
     ids = _get_ids(feature_id, form['property_id'])
+
     value['geo_id'] = geo_id
     value['feature_config_id'] = ids[0]['feature_config_id']
     value['data_type_id'] = ids[0]['data_type_id']
     value['property_id'] = form['property_id']
+
     if form["value_type"] == "option":
         if form["data"]:
             value['code_list_id'] = form ["data"]
+
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
             if value['value_date']:
                 value['value_date'] = date_to_timezone(value['value_date'])
+
     MDatas.objects.create(**value)
 
 
@@ -928,8 +939,10 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
                     req.save()
                     if is_approve:
                         file = req.file
+                        _remove_relative_folder(file)
                         file.state = RequestFiles.STATE_SOLVED
                         file.kind = RequestFiles.KIND_APPROVED
+                        file.file_path = ''
                         file.save()
 
                 elif is_approve:
@@ -1117,7 +1130,10 @@ def _get_kind(kind, item):
 
 def _get_file_name(kind, item):
     file = RequestFiles.objects.filter(id=item['file_id']).first()
-    return file.file_path.url
+    file_path = ''
+    if file.file_path:
+        file_path = file.file_path.url
+    return file_path
 
 
 def _get_ann_name(kind, item):
@@ -1263,7 +1279,7 @@ def get_request_detail(request, id):
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
-        field['investment_status'] = qs.investment_status
+        field['investment_status'] = utils.get_value_from_types(RequestForm.INVESTMENT_STATUS, qs.investment_status)
         field['selected_tools'] = json_load(qs.file.tools)
     field['company_name'] = company_name
 
@@ -1274,16 +1290,17 @@ def get_request_detail(request, id):
 
 
 def _reject_request(id, kind, state, text):
-
     reject_request = LLCRequest.objects.filter(pk=id).first()
     reject_file = RequestFiles.objects.filter(id=reject_request.file.id).first()
 
-    if state == LLCRequest.KIND_DISMISS:
+    if kind == LLCRequest.KIND_DISMISS:
         reject_file.state = RequestFiles.STATE_NEW
         reject_file.kind = RequestFiles.KIND_DISMISS
     else:
         reject_file.kind = kind
         reject_file.state = state
+        _remove_relative_folder(reject_file)
+        reject_file.file_path = None
 
     reject_file.description = text
     reject_file.save()
@@ -1291,6 +1308,14 @@ def _reject_request(id, kind, state, text):
     reject_request.kind = kind
     reject_request.state = state
     reject_request.save()
+
+
+def _remove_relative_folder(solved_request):
+    main_folder = 'llc-request-files'
+    remove_path = str(solved_request.file_path)
+    remove_path = remove_path.split("/")
+    delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, remove_path[1])
+    utils.remove_folder(delete_folder)
 
 
 @require_POST
@@ -1512,3 +1537,25 @@ def get_search_choices(request):
         'success': True,
         'search_field': search_field,
     })
+
+
+@require_POST
+@ajax_required
+def geom_type(request, payload):
+    selected_feature_id = payload.get('select')
+    geom_type = {}
+    multi_geom_type = ''
+    if selected_feature_id:
+        m_data = MGeoDatas.objects.filter(feature_id=selected_feature_id).first()
+        if m_data:
+            geom_type = m_data.geo_data.geom_type
+            if 'Multi' in geom_type:
+                multi_geom_type = geom_type
+            else:
+                multi_geom_type = 'Multi' + geom_type
+
+    rsp = {
+        'geom_type': multi_geom_type
+    }
+
+    return JsonResponse(rsp)

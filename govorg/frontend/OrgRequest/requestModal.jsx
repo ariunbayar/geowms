@@ -186,6 +186,7 @@ export default class RequestModal extends Component {
                         "",
                         this.handleModalClose
                     )
+                    global.refreshCount()
                 }
                 else {
                     this.modalChange(
@@ -231,6 +232,7 @@ export default class RequestModal extends Component {
                         "",
                         this.handleModalClose
                     )
+                    global.refreshCount()
                 }
                 else {
                     this.modalChange(

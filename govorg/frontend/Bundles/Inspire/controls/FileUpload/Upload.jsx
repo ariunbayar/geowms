@@ -50,7 +50,7 @@ export class Upload extends Component {
                     // const type = files[i].name.split('.')
                     // const urt = type.length - 1
                     // if(type[urt] == 'shp'){
-                    //     this.props.notif('warning', `.shx төрлийн файл хамт байх ёстойг анхаарна уу`, 'info')
+                    //     global.NOTIF('warning', `.shx төрлийн файл хамт байх ёстойг анхаарна уу`, 'info')
                     // }
                 }
                 else if(check == false)
@@ -69,7 +69,7 @@ export class Upload extends Component {
                 this.setState({ files: files })
             }
             else {
-                this.props.notif('danger', `өөр төрлийн файл орсон байна. Зөвхөн ${name == 'gml' ? ' .gml болон .gfs' : name == 'geojson' ? ' .geojson болон .gfs' :
+                global.NOTIF('danger', `өөр төрлийн файл орсон байна. Зөвхөн ${name == 'gml' ? ' .gml болон .gfs' : name == 'geojson' ? ' .geojson болон .gfs' :
                 // name == 'shp' ? ' .shp, .shx, .prj, .dbf болон .cpg' :
                  'буруу'} байна.`, 'info')
                 file_value.value = ''
@@ -139,7 +139,7 @@ export class Upload extends Component {
                 .then(({ success, info, errors }) => {
                     if (success) {
                         alert(info)
-                        this.props.refreshRequestCount()
+                        global.refreshCount()
                         this.setState({ btn_upload_is_laod: false, files: [], not_cancel: false })
                         this.cancel()
                         this.props.func()

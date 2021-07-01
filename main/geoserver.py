@@ -298,28 +298,21 @@ def create_layer(workspace_name, datastore_name, layer_name, layer_title, view_n
                 attributes_hoho.insert(i, attributes)
 
     payload = '''
-            <featureType>
+        <featureType>
             <name>{layer_name}</name>
             <nativeName>{view_name}</nativeName>
             <title>{layer_title}</title>
             <srs>EPSG:{srs}</srs>
             <projectionPolicy>NONE</projectionPolicy>
             <nativeBoundingBox>
-                <minx>87.5879287719727</minx>
-                <maxx>119.325157165527</maxx>
-                <miny>42.4366416931152</miny>
-                <maxy>51.6822853088379</maxy>
+                <minx>87.7345511840002</minx>
+                <maxx>119.931528</maxx>
+                <miny>41.5818329990002</miny>
+                <maxy>52.1483550000002</maxy>
                 <crs>EPSG:{srs}</crs>
             </nativeBoundingBox>
-            <latLonBoundingBox>
-                <minx>86.79183671813367</minx>
-                <maxx>121.53460495691678</maxx>
-                <miny>40.536698947344</miny>
-                <maxy>52.35583356992716</maxy>
-                <crs>EPSG:{srs}</crs>
-            </latLonBoundingBox>
             <attributes>
-            {attributes}
+                {attributes}
             </attributes>
         </featureType>
         '''.format(

@@ -436,7 +436,8 @@ def save_request(request, content):
 
 @require_GET
 @ajax_required
-def get_all_geo_json(request):
+@llc_required(lambda u: u)
+def get_all_geo_json(request, content):
     features = []
 
     shape_geometries = ShapeGeom.objects.all()
@@ -448,16 +449,21 @@ def get_all_geo_json(request):
 
 @require_GET
 @ajax_required
-def get_request_data(request, id):
+@llc_required(lambda u: u)
+def get_request_data(request, content, id):
 
     features = []
     field = {}
     qs = RequestForm.objects.filter(file_id=id).first()
+    request_file = RequestFiles.objects.filter(pk=id).first()
+    requested_employee = request_file.requested_employee
+
     file_data = {
         'name': '',
         'size': '',
         'type': 'application/vnd.rar'
     }
+
     field = dict()
     aimag_name = ''
     aimag_geom = []
@@ -492,13 +498,14 @@ def get_request_data(request, id):
     }
 
     file_qs = qs.file.file_path
-    file_name = file_qs.name or ''
-    file_name = file_name.split('/')
-    file_data['name'] = file_name[2]
-    file_data['size'] = file_qs.size or ''
+    if file_qs:
+        file_name = file_qs.name or ''
+        file_name = file_name.split('/')
+        file_data['name'] = file_name[2]
+        file_data['size'] = file_qs.size or ''
 
     if qs:
-        file_name = str(qs.file.file_path).split('/')[1]
+        file_name = str(qs.file.file_path).split('/')[1] if qs.file.file_path else ''
         field['client_org'] = qs.client_org
         field['project_name'] = qs.project_name
         field['object_type'] = qs.object_type
@@ -511,6 +518,7 @@ def get_request_data(request, id):
         field['kind'] = qs.file.get_kind_display()
         field['desc'] = qs.file.description
         field['geo_id'] = qs.file.geo_id
+        field['selected_user'] = requested_employee
 
     return JsonResponse({
         'vector_datas': FeatureCollection(features),
@@ -523,17 +531,24 @@ def get_request_data(request, id):
 
 def _get_employees(geo_id):
     emp_fields = list()
-    get_org = Org.objects.filter(level=2, geo_id=geo_id).first()
-    position_mergejilten = POSITION_MERGEJILTEN.filter(org=get_org).first()
-    get_employees = Employee.objects.filter(org_id=get_org.id, position_id=position_mergejilten.id)
-    for emp in get_employees:
+    get_org = Org.objects.filter(level=2, geo_id=geo_id)
+    for org in get_org:
         emp_detail = dict()
-        get_name = User.objects.filter(pk=emp.user_id).first()
-        emp_detail['org_name'] = get_org.name
-        emp_detail['first_name'] = get_name.first_name
-        emp_detail['mail'] = get_name.email
-        emp_detail['user_id'] = get_name.id
+        employees = list()
+        emp_detail['org_name'] = org.name
+        position_mergejilten = POSITION_MERGEJILTEN.filter(org=org).first()
+        get_employees = Employee.objects.filter(org_id=org.id, position_id=position_mergejilten.id)
+        if get_employees:
+            for emp in get_employees:
+                detail = dict()
+                users = User.objects.filter(pk=emp.user_id).first()
+                detail['first_name'] = users.first_name
+                detail['mail'] = users.email
+                detail['user_id'] = users.id
+                employees.append(detail)
+            emp_detail['employees'] = employees
         emp_fields.append(emp_detail)
+
     return emp_fields
 
 
@@ -565,7 +580,8 @@ def _make_connection(from_email):
 
 @require_GET
 @ajax_required
-def get_file_shapes(request, id):
+@llc_required(lambda u: u)
+def get_file_shapes(request, content, id):
     list_of_datas = []
 
     llc_data = LLCRequest.objects.filter(id=id).first()
@@ -638,7 +654,6 @@ def send_request(request, payload, content, id):
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, user_id=user_id).first()
     email = employee.user.email
-
     if employee:
         request_files = LLCRequest.objects.filter(file_id=id).first()
         request_data = {}
@@ -651,10 +666,10 @@ def send_request(request, payload, content, id):
         )
 
         success_mail = _send_to_information_email(email)
-
         if success_mail:
             qs.state = RequestFiles.STATE_SENT
             qs.kind = RequestFiles.KIND_PENDING
+            qs.requested_employee = user_id
             qs.save()
 
             shape_of_files = RequestFilesShape.objects.filter(files=qs)
@@ -679,7 +694,8 @@ def send_request(request, payload, content, id):
 
 @require_GET
 @ajax_required
-def remove_request(request, id):
+@llc_required(lambda u: u)
+def remove_request(request, content, id):
 
     initial_query = RequestFiles.objects.filter(pk=id).first()
     shapes = RequestFilesShape.objects.filter(files=initial_query.id)
@@ -726,7 +742,8 @@ def _delete_prev_files(file):
 
 @require_GET
 @ajax_required
-def get_search_field(request):
+@llc_required(lambda u: u)
+def get_search_field(request, content):
     search_field = dict()
     get_state = RequestFiles.STATE_CHOICES
     get_kind = RequestFiles.KIND_CHOICES

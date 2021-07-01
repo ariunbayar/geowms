@@ -95,7 +95,7 @@ def proxy(request, bundle_id, wms_id, url_type='wms'):
 def _get_file_ext():
     obj = {
         'json': ['geojson', '&outputFormat=application%2Fjson'],
-        'gml': ['gml', 'outputFormat=GML3'],
+        'gml': ['gml', '&outputFormat=GML3'],
         'shape-zip': ['zip', '&outputFormat=SHAPE-ZIP'],
         'csv': ['csv', '&outputFormat=csv']
     }
@@ -154,15 +154,12 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     wms = get_object_or_404(WMS, pk=wms_id)
 
-    wms_layer = wms.wmslayer_set.filter(
-                    bundlelayer__bundle=bundle,
-                    bundlelayer__role_id=Role.ROLE1,
-                    bundlelayer__layer_id=layer_id
-                ).first()
+    wms_layer_qs = wms.wmslayer_set.filter(id=layer_id)
 
-    if not wms_layer:
+    if not wms_layer_qs:
         raise Http404
 
+    wms_layer = wms_layer_qs.first()
     code = wms_layer.code
 
     BASE_HEADERS = {
@@ -176,7 +173,7 @@ def file_download(request, base_url, bundle_id, wms_id, layer_id, types):
     file_ext = file_ext_obj[types][ext]
     url_ext = file_ext_obj[types][url_ext]
 
-    view_name = code.replace('gp_layer_', '')
+    view_name = utils.remove_text_from_str(code)
     file_code = view_name.replace('_view', '')
     date_now = str(localtime(now()).strftime("%Y-%m-%d_%H-%M"))
 

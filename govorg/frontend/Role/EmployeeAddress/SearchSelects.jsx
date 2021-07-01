@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { Component, Fragment } from "react"
 import {service} from '../Employee/service'
 import './style.css'
 
@@ -191,9 +191,9 @@ export default class SearchSelects extends Component {
                                         <button className="dropdown-item py-1" value={'this_org'} onClick={(e) => this.handleChoose('this_org', e.target.value)}>Энэ байгууллага</button>
                                         {
                                             levels.map((level, id) =>
-                                                <>
+                                                <Fragment key={id}>
                                                     <div className="dropdown-divider"></div>
-                                                    <button key={id} className="dropdown-item py-1" value={level} onClick={(e) => this.handleChoose('level', e.target.value)}>Түвшин-{level}</button>
+                                                    <button className="dropdown-item py-1" value={level} onClick={(e) => this.handleChoose('level', e.target.value)}>Түвшин-{level}</button>
                                                     <ul className="mb-1">
                                                         {
                                                             org_list.map((data, idx) =>
@@ -202,7 +202,7 @@ export default class SearchSelects extends Component {
                                                             )
                                                         }
                                                     </ul>
-                                                </>
+                                                </Fragment>
                                             )
                                         }
                                     </>

@@ -1,4 +1,7 @@
 // import { handleResponse, getGetOptions, getPostOptions } from "@helpUtils/handleRequest" -- дууд
+
+const NOT_REJECT_ERROR_CODES = [504]
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -23,8 +26,15 @@ export function handleResponse(response) {
                 // TODO auto logout if 401 Unauthorized or 403 Forbidden response returned from api
                 location.reload(true)
             }
-            const error = (data && data.message) || response.statusText
-            return Promise.reject(error)
+
+            const status_code = response.status
+            const text = (data && data.message) || response.statusText
+
+            const error_obj = {
+                'text': text,
+                'code': status_code
+            }
+            return Promise.reject(error_obj)
         }
 
         return data
