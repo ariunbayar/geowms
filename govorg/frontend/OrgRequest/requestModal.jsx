@@ -1,5 +1,6 @@
 import React, { Component, Fragment, useState } from "react"
 import RequestMap from './Map/Map'
+import RefreshView from './components/RefreshView'
 
 import Modal from "@utils/Modal/Modal"
 import Loader from "@utils/Loader/index"
@@ -107,6 +108,7 @@ export default class RequestModal extends Component {
             action_name: '',
             modalClose: null,
             desc: '',
+            ref_in_direct: true,
 
             values: props.values,
         }
@@ -119,6 +121,7 @@ export default class RequestModal extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.getDesc = this.getDesc.bind(this)
+        this.getRefViewStatus = this.getRefViewStatus.bind(this)
         this.cancelWarningRequest = this.cancelWarningRequest.bind(this)
     }
 
@@ -146,9 +149,17 @@ export default class RequestModal extends Component {
         return {ids, feature_id}
     }
 
-    handleModalAction() {
-        const { selected_value, values, desc, action_type } = this.state
+    getRefViewStatus(state, e){
+        if (state == 'Direct'){
+            this.setState({ref_in_direct: e.target.checked})
+        }
+        else{
+            this.setState({ref_in_direct: false})
+        }
+    }
 
+    handleModalAction(){
+        const { selected_value, values, desc, action_type, ref_in_direct } = this.state
         const {ids, feature_id} = this.getRequestIds(selected_value, values)
         this.setState({ is_loading: true })
 
@@ -158,7 +169,7 @@ export default class RequestModal extends Component {
             this.handleRequestReject(ids, feature_id, desc, action_type)
         }
         if(action_type == 'approve') {
-            this.handleRequestApprove(ids, feature_id)
+            this.handleRequestApprove(ids, feature_id, ref_in_direct)
         }
     }
 
@@ -208,9 +219,9 @@ export default class RequestModal extends Component {
             })
     }
 
-    handleRequestApprove(ids, feature_id){
+    handleRequestApprove(ids, feature_id, ref_in_direct){
         service
-            .requestApprove(ids, feature_id)
+            .requestApprove(ids, feature_id, ref_in_direct)
             .then(({ success, info }) => {
                 if(success) {
                     this.modalChange(
@@ -466,18 +477,7 @@ export default class RequestModal extends Component {
                                                     'fa fa-exclamation-circle',
                                                     'warning',
                                                     "Тохиргоог зөвшөөрөх",
-                                                    `Та ${
-                                                        values.length == 1
-                                                            ?
-                                                                get_modal_text(values[0].kind)
-                                                            :
-                                                        values.length > 1
-                                                            ?
-                                                                `сонгосон ${values.length} геометр өгөгдлөө`
-                                                            :
-                                                            null
-                                                    }
-                                                    зөвшөөрөхдөө итгэлтэй байна уу?`,
+                                                    RefreshView,
                                                     true,
                                                     "зөвшөөрөх",
                                                     null
@@ -503,6 +503,9 @@ export default class RequestModal extends Component {
                         actionNameDelete={this.state.action_name}
                         modalClose={this.state.modalClose}
                         getDesc={this.getDesc}
+                        getRefViewStatus={this.getRefViewStatus}
+                        values = {values}
+                        ref_in_direct={this.state.ref_in_direct}
                     />
                 </div>
                 <div className={classNameBackdrop}></div>
@@ -540,3 +543,4 @@ function DescInput(props) {
         </div>
     )
 }
+
