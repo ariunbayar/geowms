@@ -110,7 +110,6 @@ export class Detail extends Component {
         this.refreshData = this.refreshData.bind(this)
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
         this.handleRemove = this.handleRemove.bind(this)
-        this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.infoModal = this.infoModal.bind(this)
 
         this.modalChange = this.modalChange.bind(this)
@@ -130,10 +129,6 @@ export class Detail extends Component {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
     }
 
-    handleRemoveAction(values){
-        this.setState({ values })
-        this.handleModalOpen(values)
-    }
 
     handleModalOpen(values){
         let not_rm_kind = 'ЦУЦЛАСАН'
