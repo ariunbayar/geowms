@@ -1969,4 +1969,4 @@ def get_value_from_types(choices, value):
 
 
 def test_json_dumps(dct):
-    return json.dumps(dct, skipkeys=True, allow_nan=True, indent=4)
+    return json.dumps(dct, skipkeys=True, allow_nan=True, indent=4, ensure_ascii=False)

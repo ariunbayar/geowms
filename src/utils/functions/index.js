@@ -52,6 +52,7 @@ function checkMultiGeomTypeName(geom_type) {
     return geom_type
 }
 
+// хуулах text ээ өгөөд тэр text ийг copy нд нь оруулж өгнө
 function copyToClipboard(text, notif_text='Амжилттай хууллаа') {
     var textField = document.createElement('textarea')
     textField.innerText = text

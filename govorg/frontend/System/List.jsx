@@ -1,7 +1,7 @@
 
 import React, { Component } from "react";
-import { PortalDataTable } from "@utils/DataTable/index"
 
+import { PortalDataTable } from "@utils/DataTable/index"
 
 export class List extends Component {
 
@@ -17,12 +17,12 @@ export class List extends Component {
                 {'field': 'created_at', "title": 'Огноо'},
             ],
             хувьсах_талбарууд: [
-                {"field": "name", "action": (values) => this.go_link(values)},
+                {"field": "name", "action": (values) => this.goLink(values)},
             ],
         }
     }
 
-    go_link(values){
+    goLink(values){
         this.props.history.push(`/gov/system/${values.id}/дэлгэрэнгүй/`)
     }
 
