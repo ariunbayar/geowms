@@ -307,7 +307,7 @@ export default class Маягт extends Component {
                                     <div className="col-md-9">
                                       <Field
                                           name="order_no"
-                                          className='form-control'
+                                          className={'form-control ' + (errors.order_at ? 'is-invalid' : '')}
                                           placeholder="Тушаалын дугаар"
                                       />
                                       <ErrorMessage className="text-danger" name="order_no" component="span"/>
@@ -320,7 +320,7 @@ export default class Маягт extends Component {
                                     <div className="col-md-9">
                                       <Field
                                           name="order_at"
-                                          className='form-control'
+                                          className={'form-control ' + (errors.order_at ? 'is-invalid' : '')}
                                           placeholder="Тушаал гарсан огноо"
                                           type="date"
                                       />

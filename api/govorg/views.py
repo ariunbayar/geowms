@@ -227,9 +227,14 @@ def _get_property_data(values, employee, feature_id, geo_id):
         feature_config_id__in=feature_config,
         geo_id=geo_id
     )
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.exclude(property_code__iexact='localId')
+
     for value in values:
         form = {}
-        property = LProperties.objects.filter(property_code__iexact=value).first()
+        property = property_qs.filter(property_code__iexact=value)
+        property = property.first()
         if property:
             data_list = []
             value_type = property.value_type_id
