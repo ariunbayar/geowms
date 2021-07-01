@@ -121,6 +121,51 @@ def llc_request_list(request, content, payload):
     return JsonResponse(rsp)
 
 
+@require_POST
+@ajax_required
+@llc_required(lambda u: u)
+def llc_request_history_list(request, content, payload):
+    company_name = content.get('company_name')
+    qs = RequestFiles.objects.filter(name__exact=company_name)
+    qs = RequestFiles.objects.filter(state=RequestFiles.STATE_SOLVED)
+
+    start_index = 1
+    if qs:
+        оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
+        хувьсах_талбарууд = [
+            {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
+            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
+            {'field': 'id', 'action': _name_display, "new_field": "client_org"}
+        ]
+
+        datatable = Datatable(
+            model=RequestFiles,
+            initial_qs=qs,
+            payload=payload,
+            оруулах_талбарууд=оруулах_талбарууд,
+            хувьсах_талбарууд=хувьсах_талбарууд
+        )
+        items, total_page, start_index = datatable.get()
+
+        rsp = {
+            'items': items,
+            'page': payload.get('page'),
+            'total_page': total_page,
+            'start_index': start_index,
+        }
+
+    else:
+        rsp = {
+            'items': [],
+            'page': payload.get('page'),
+            'total_page': 1,
+            'start_index': start_index
+        }
+
+    return JsonResponse(rsp)
+
+
+
 def _get_leve_2_geo_id(layer):
     position_ids = list(POSITION_MERGEJILTEN.values_list('id', flat=True))
     get_employees = list(Employee.objects.filter(position_id__in=position_ids).values_list('org_id', flat=True).annotate(dcount=Count('org_id')).order_by())

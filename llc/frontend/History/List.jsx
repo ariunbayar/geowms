@@ -16,7 +16,7 @@ export class List extends Component {
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
             ],
-            жагсаалтын_холбоос: '/llc/backend/llc-request-list/',
+            жагсаалтын_холбоос: '/llc/backend/llc-request-history-list/',
             хувьсах_талбарууд: [
                 {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
                 {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
@@ -29,11 +29,11 @@ export class List extends Component {
                         "action": (values) => this.handleUpdateAction(values),
                     },
                     {
-                      "title": 'Устгах',
-                      "text": '',
-                      "icon": 'fa fa-trash-o text-danger',
+                        "title": 'Устгах',
+                        "text": '',
+                        "icon": 'fa fa-trash-o text-danger',
 
-                      "action": (values) => this.handleRemoveAction(values),
+                        "action": (values) => this.handleRemoveAction(values),
                     }
             ],
             state: '',
