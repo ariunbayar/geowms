@@ -70,14 +70,13 @@ export default class SelectField extends Component {
     }
 
     render() {
-        const { default_value, label, valid,
+        const { default_value, label, errors, state_name,
                 default_text, option_key, option_name,
                 opt_key, name_key, className, data_list,
                 option_text, disabled, option_name_2, display_mode,
         } = this.props
         const state = this.state
         let title = label ? label : ''
-        let is_invalid = valid ? valid : ''
         return (
             <div className={`form-group ${className ? className : "col-md-4"}`} >
                 <label id={title}>
@@ -106,9 +105,19 @@ export default class SelectField extends Component {
                             OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
                     }
                 </select>
-                <small id={is_invalid} className="text-danger">
-                    {is_invalid}
-                </small>
+                {
+                    errors.map((row) =>
+                        row['field_name'] === state_name
+                        &&
+                            row['errors'].map((error, idx) =>
+                                <div key={idx} className='form-group-row'>
+                                    <small className="text-danger">
+                                        {error}
+                                    </small>
+                                </div>
+                            )
+                    )
+                }
             </div>
         );
     }

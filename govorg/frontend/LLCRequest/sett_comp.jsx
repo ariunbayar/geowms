@@ -166,8 +166,21 @@ export class LLCSettings extends Component {
         const { selected_values } = this.state
         service.Save(selected_values).then(({ success, errors }) => {
             if (success) {
-                list_of_datas[idx].icon_state = true
-                this.setState({list_of_datas})
+                this.closeModel()
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-check-circle",
+                    modal_bg: '',
+                    icon_color: 'success',
+                    title: 'Амжилттай хадгаллаа',
+                    text: '',
+                    has_button: false,
+                    actionNameBack: '',
+                    actionNameDelete: '',
+                    modalAction: null,
+                    modalClose: null
+                }
+                global.MODAL(modal)
             }
             else {
                 this.setState({ errors })
