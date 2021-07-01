@@ -108,6 +108,7 @@ export default class RequestModal extends Component {
             action_name: '',
             modalClose: null,
             desc: '',
+            ref_in_direct: true,
 
             values: props.values,
         }
@@ -504,6 +505,7 @@ export default class RequestModal extends Component {
                         getDesc={this.getDesc}
                         getRefViewStatus={this.getRefViewStatus}
                         values = {values}
+                        ref_in_direct={this.state.ref_in_direct}
                     />
                 </div>
                 <div className={classNameBackdrop}></div>

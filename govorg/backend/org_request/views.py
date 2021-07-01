@@ -1074,16 +1074,15 @@ def _refresh_view_direct_or_crontab(is_refresh, approve_kind, feature_id):
 
     if is_refresh:
         refreshMaterializedView(feature_id)
-        info = 'Амжилттай баталгаажуулж дууслаа'
-    else:
+
         if approve_kind == ChangeRequest.KIND_UPDATE:
             check_wmts.is_modified = True
+            check_wmts.feature_count = feature_count
+            check_wmts.save()
+            info = 'Амжилттай баталгаажуулж дууслаа'
 
-        check_wmts.feature_count = feature_count
+    else:
         info = 'Хүсэлтийг хүлээн авлаа'
-
-    check_wmts.save()
-
     return info
 
 
