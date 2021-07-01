@@ -29,7 +29,6 @@ export default class SideBar extends Component {
             check_list: props.check_list,
             check_open: props.check_open,
             is_loading: false,
-            invalid_feedback: false,
             is_open: false,
 
             zoom_stop: 0,
@@ -86,7 +85,6 @@ export default class SideBar extends Component {
         if (file['name']){
             form_datas.append('files', file, file.name)
         }
-
         form_datas.append('values',  JSON.stringify({values}))
         service
             .setPropertyFields(form_datas)
@@ -281,16 +279,42 @@ export default class SideBar extends Component {
 
         if(style_name) {
             this.setState({ save_is_load: true, is_loading: true, load_text: "View үүсгэж байна" })
-            const { success, data, error} = await service.makeView(form_datas)
-            if(success) {
-                props.getProperties(props.fid, props.tid, props.fname, '')
-            }
-            else {
-                alert(error)
-            }
-            this.setState({ is_loading: false, load_text: "", check_list: false, check_open: false })
+            service.makeView(form_datas)
+                .then(({ success, data, error }) => {
+                    if(success) {
+                        props.getProperties(props.fid, props.tid, props.fname, '')
+                    }
+                    else {
+                        this.modalChange(
+                            'fa fa-check-circle',
+                            null,
+                            'danger',
+                            `${error}`,
+                            false,
+                            '',
+                            '',
+                            null,
+                            null,
+                        )
+                    }
+                })
+                .catch((error) => {
+                    this.modalChange(
+                        'fa fa-check-circle',
+                        null,
+                        'danger',
+                        `View үүсэх явцад алдаа гарсан байна`,
+                        false,
+                        '',
+                        '',
+                        null,
+                        null,
+                    )
+                })
+                .finally (() => {
+                    this.setState({ is_loading: false, load_text: "", check_list: false, check_open: false })
+                })
         }
-        else this.setState({ invalid_feedback: true })
     }
 
     getStyleName(style_name) {
