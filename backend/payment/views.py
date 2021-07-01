@@ -70,8 +70,13 @@ def paymentList(request, payload):
         'items': payment_all,
         'page': page,
         'total_page': total_page,
+        'start_index': _get_start_index(per_page, page),
     }
     return JsonResponse(rsp)
+
+
+def _get_start_index(per_page, page):
+    return (per_page * (page - 1)) + 1
 
 
 @require_POST

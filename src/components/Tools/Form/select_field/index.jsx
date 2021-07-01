@@ -43,7 +43,7 @@ export default class SelectField extends Component {
         this.dataSelection = this.dataSelection.bind(this)
     }
 
-    dataSelection(e){
+    dataSelection(e) {
         const selection_value = e.target.value
         const { data_list,
                 state_name, name_key,
@@ -88,30 +88,30 @@ export default class SelectField extends Component {
                 >
                     <option value=''>---{default_text ? default_text : ''} ---</option>
                     {
-                    name_key
-                    ?
-                        data_list.map((data, idx) =>
-                            <optgroup
-                                key={idx}
-                                label={ data[name_key] }
-                                value={default_value}
-                            >
-                            {
-                                    OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)
-                            }
-                            </optgroup>
-                        )
-                    :
-                        OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
-                }
+                        name_key
+                        ?
+                            data_list.map((data, idx) =>
+                                <optgroup
+                                    key={idx}
+                                    label={data[name_key]}
+                                    value={default_value}
+                                >
+                                    {
+                                        OptionComp (data[opt_key], option_key, option_name, option_name_2, option_text, display_mode)
+                                    }
+                                </optgroup>
+                            )
+                        :
+                            OptionComp (data_list, option_key, option_name, option_name_2, option_text, display_mode)
+                    }
                 </select>
-                </div>
+            </div>
         );
     }
 }
 
 
-function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode){
+function OptionComp (options_data,  option_key, option_name, option_name_2, option_text, display_mode) {
     var option_data = option_name
     if (option_text) option_data = option_text
     const options =
