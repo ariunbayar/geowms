@@ -402,7 +402,6 @@ class GovRoleInspire(models.Model):
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+', null=True)
 
 
-
 class GovPermInspire(models.Model):
     class Meta:
         db_table = 'perm_gov_perm_inspire'

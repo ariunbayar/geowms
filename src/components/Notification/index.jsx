@@ -58,7 +58,7 @@ export class Notif extends Component {
     render() {
         const {arr} = this.state
         return (
-            <div className="position-fixed bg-transparent col-md-2" style={{zIndex: 1030, top:0, right:0}}>
+            <div className="position-fixed bg-transparent col-md-4 col-12" style={{zIndex: 1030, top:0, right:0}}>
                 <ul className="bg-transparent">
                     {this.total}
                 </ul>
@@ -82,14 +82,14 @@ export class DisplayNotif extends Component {
         this.props.getNotifFunc(this.addNotif)
     }
 
-    addNotif(style, msg, icon) {
+    addNotif(style, msg, icon, time_limit=3000) {
         this.too ++
         this.setState({ show: true, style, msg, icon })
         const time = setInterval(() => {
             this.too --
             this.setState({ show: true })
             clearInterval(time)
-        }, 3000);
+        }, time_limit);
     }
 
     render() {

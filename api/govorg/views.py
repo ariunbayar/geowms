@@ -65,6 +65,17 @@ def _get_perm_atts(system, code):
     return False
 
 
+def _get_char(request):
+    char = ''
+    keys = ['TYPENAME', 'TYPENAMES']
+    for key in keys:
+        char = request.get(key)
+        if char:
+            break
+
+    return char
+
+
 @require_GET
 @get_conf_geoserver_base_url('ows')
 def proxy(request, base_url, token, pk=None):
@@ -75,10 +86,13 @@ def proxy(request, base_url, token, pk=None):
     }
     queryargs = request.GET
     headers = {**BASE_HEADERS}
+
     system = utils.geo_cache("system", token, get_object_or_404(System, token=token, deleted_by__isnull=True), 300)
     allowed_layers = utils.geo_cache("allowed_layers", token, [layer.code for layer in system.wms_layers.all() if layer.wms.is_active], 300)
+
     if request.GET.get('TYPENAMES') or request.GET.get('TYPENAME'):
-        code = char_in_split(request.GET.get('TYPENAME'))
+        char = _get_char(request.GET)
+        code = char_in_split(char)
         access_attributes = utils.geo_cache("system_access_attributes", token, _get_perm_atts(system, code), 300)
         if not access_attributes:
             raise Http404
@@ -101,6 +115,7 @@ def proxy(request, base_url, token, pk=None):
 
         service_type = request.GET.get('SERVICE')
         service_url = _get_service_url(request, token)
+        # TODO байгууллагын хамрах хүрээгээр гаргах
         content = replace_src_url(content, base_url, service_url, service_type)
 
     qs_request = queryargs.get('REQUEST', 'no request')
@@ -227,9 +242,14 @@ def _get_property_data(values, employee, feature_id, geo_id):
         feature_config_id__in=feature_config,
         geo_id=geo_id
     )
+
+    property_qs = LProperties.objects
+    property_qs = property_qs.exclude(property_code__iexact='localId')
+
     for value in values:
         form = {}
-        property = LProperties.objects.filter(property_code__iexact=value).first()
+        property = property_qs.filter(property_code__iexact=value)
+        property = property.first()
         if property:
             data_list = []
             value_type = property.value_type_id

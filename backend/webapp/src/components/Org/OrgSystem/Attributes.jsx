@@ -23,7 +23,7 @@ export default class Attributes extends Component {
                     {} {layer.title} ({layer.code})
                 </label>
                 {
-                    layer.properties.length > 0
+                    layer.data_types.length > 0
                     &&
                         layers.indexOf(layer.id) > -1
                         &&
@@ -41,20 +41,27 @@ export default class Attributes extends Component {
                                 {
                                     prop_arrow
                                     &&
-                                        layer.properties.map((prop, idy) =>
+                                        layer.data_types.map((data_type, idy) =>
                                             <div
                                                 key={idy}
                                                 className="ml-4 pl-2"
                                             >
-                                                <label>
-                                                    <input type="checkbox"
-                                                        value={prop.prop_code}
-                                                        name={layer.id}
-                                                        onChange={this.props.handlePropCheck}
-                                                        checked={this.props.handleCheck(layer.id, prop.prop_code)}
-                                                    />
-                                                    {} {prop.prop_name} ({prop.prop_eng})
-                                                </label>
+                                                <b> {data_type.data_type_display_name} ({data_type.properties.length}) </b>
+                                                {
+                                                    data_type.properties.map((prop, pidx) =>
+                                                        <div key={pidx}>
+                                                            <label>
+                                                                <input type="checkbox"
+                                                                    value={prop.prop_code}
+                                                                    name={layer.id}
+                                                                    onChange={this.props.handlePropCheck}
+                                                                    checked={this.props.handleCheck(layer.id, prop.prop_code)}
+                                                                />
+                                                                {} {prop.prop_name} ({prop.prop_eng})
+                                                            </label>
+                                                        </div>
+                                                    )
+                                                }
                                             </div>
                                         )
                                 }

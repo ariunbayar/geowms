@@ -1,5 +1,5 @@
 import re
-from backend.inspire.models import LFeatures, LPackages, LProperties
+from backend.inspire.models import LDataTypeConfigs, LFeatureConfigs, LFeatures, LPackages, LProperties
 import requests
 from django.http import HttpResponse
 from django.contrib.auth.decorators import user_passes_test
@@ -76,26 +76,51 @@ def _get_wms_display(request, wms):
     return _wms_return_display(wms, request, layer_list)
 
 
-def _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id):
+def _get_feature_id_from_layers(layers_with_fid, layer_code):
+    for code, fid in layers_with_fid:
+        if code == layer_code:
+            return fid
+    return False
+
+
+def _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id, layers_with_fid):
+
     wms = WMS.objects.filter(id=wms_id).first()
     layers = list()
     for layer in layers_qs.filter(wms_id=wms_id).values():
-        view_name = utils.remove_text_from_str(layer['code'])
-        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(geom=False)
-        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(perm_kind=GovPermInspire.PERM_CREATE)
-        property_ids = list(gov_perm_inspire_qs.values_list('property_id', flat=True))
-        view_qs = ViewNames.objects.filter(view_name=view_name)
-        if not view_qs:
-            prop_all = list()
-        else:
-            view = view_qs.first()
-            open_datas = view.open_datas
-            prop_all = LProperties.objects.filter(property_code__in=utils.json_load(open_datas), property_id__in=property_ids)
+        data_types = list()
+        feature_id = _get_feature_id_from_layers(layers_with_fid, layer['code'])
+        if not feature_id:
+            continue
 
-        properties = [_display_property(prop) for prop in prop_all]
+        filtered_perms = gov_perm_inspire_qs.filter(feature_id=feature_id)
+        data_type_qs = filtered_perms.distinct('data_type_id')
+        data_type_ids = list(data_type_qs.values_list('data_type_id', flat=True))
+        for data_type_id in data_type_ids:
+            data_type = dict()
+
+            feature_c_qs = LFeatureConfigs.objects
+            feature_c_qs = feature_c_qs.filter(feature_id=feature_id)
+            feature_c_qs = feature_c_qs.filter(data_type_id=data_type_id)
+            feature_c = feature_c_qs.first()
+
+            if not feature_c:
+                continue
+
+            data_type['data_type_display_name'] = feature_c.data_type_display_name
+            filtered_perms = gov_perm_inspire_qs.filter(data_type_id=data_type_id)
+
+            property_ids = list(filtered_perms.values_list('property_id', flat=True))
+            prop_all = LProperties.objects.filter(property_id__in=property_ids)
+
+            properties = [_display_property(prop) for prop in prop_all]
+            data_type['properties'] = properties
+            if properties:
+                data_types.append(data_type)
+
         wms_layer_detail = {
             **layer,
-            'properties': properties
+            'data_types': data_types
         }
         layers.append(wms_layer_detail)
     return _wms_return_display(wms, request, layers)
@@ -112,19 +137,24 @@ def all(request, org_id):
     if gov_perm:
         gov_perm_inspire_qs = gov_perm.govperminspire_set
         gov_perm_geom_qs = gov_perm_inspire_qs.filter(geom=True, perm_kind=GovPermInspire.PERM_CREATE)
-        feature_ids = gov_perm_geom_qs.values_list('feature_id', flat=True)
-        layer_codes = list()
+        feature_ids = list(gov_perm_geom_qs.values_list('feature_id', flat=True))
+        layers = list()
+        feature_ids.sort()
         for feature_id in feature_ids:
             feature = LFeatures.objects.filter(feature_id=feature_id).first()
             if feature:
                 layer_code = utils.make_layer_name(utils.make_view_name(feature))
-                layer_codes.append(layer_code)
+                layers.append([layer_code, feature_id])
 
+        layer_codes = [code for code, f_id in layers]
         layers_qs = WMSLayer.objects.filter(code__in=layer_codes)
         ids = list(layers_qs.values_list('wms_id', flat=True))
         wms_ids = sorted(set(ids))
+        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(geom=False)
+        gov_perm_inspire_qs = gov_perm_inspire_qs.filter(perm_kind=GovPermInspire.PERM_CREATE)
+
         wms_list = [
-            _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id)
+            _get_system_layers(request, gov_perm_inspire_qs, layers_qs, wms_id, layers)
             for wms_id in wms_ids
         ]
 
