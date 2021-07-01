@@ -1072,13 +1072,13 @@ def _refresh_view_direct_or_crontab(is_refresh, approve_kind, feature_id):
     feature_count = MGeoDatas.objects.filter(feature_id=feature_id).count()
     info = ''
 
-    if approve_kind == ChangeRequest.KIND_UPDATE:
-        check_wmts.is_modified = True
-
     if is_refresh:
         refreshMaterializedView(feature_id)
         info = 'Амжилттай баталгаажуулж дууслаа'
     else:
+        if approve_kind == ChangeRequest.KIND_UPDATE:
+            check_wmts.is_modified = True
+
         check_wmts.feature_count = feature_count
         info = 'Хүсэлтийг хүлээн авлаа'
 
