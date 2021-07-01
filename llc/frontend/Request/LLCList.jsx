@@ -94,14 +94,7 @@ export class Detail extends Component {
                         }
                     },
                     {
-                        "title": 'Устгах',
-                        "text": '',
-                        "icon": 'fa fa-trash-o text-danger',
-
-                        "action": (values) => this.handleRemoveAction(values),
-                    },
-                    {
-                        "title": '',
+                        "title": 'Тайлбар',
                         'component': FileAndDesc,
                         'props': {
                             'infoModal': (values) => this.infoModal(values),
