@@ -66,7 +66,7 @@ export class Detail extends Component {
         this.state = {
             refresh: false,
             талбарууд: [
-                {'field': 'name', "title": 'Захиалагч байгууллага'},
+                {'field': 'client_org', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
