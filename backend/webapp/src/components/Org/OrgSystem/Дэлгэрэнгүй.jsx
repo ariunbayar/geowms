@@ -1,18 +1,13 @@
 import React, { Component } from 'react'
-import {NavLink} from 'react-router-dom'
-import {Notif} from '@utils/Notification'
+
 import Loader from "@utils/Loader"
+import utils from "@helpUtils/functions"
 import {service} from './service'
-import Modal from "../../Modal"
-import BackButton from "@utils/Button/BackButton"
-import Attributes from './Attributes'
-import { containsCoordinate } from 'ol/extent'
 
 export class Дэлгэрэнгүй extends Component {
 
     constructor(props) {
         super(props)
-        this.too = 0;
 
         this.state = {
             govorg: {
@@ -29,21 +24,9 @@ export class Дэлгэрэнгүй extends Component {
             modal_status: 'closed',
         }
         this.copyToClipboard = this.copyToClipboard.bind(this)
-        this.addNotif = this.addNotif.bind(this)
         this.loadDetail = this.loadDetail.bind(this)
         this.handleTokenRefresh = this.handleTokenRefresh.bind(this)
         this.handleModalActionOpen = this.handleModalActionOpen.bind(this)
-        this.handleModalActionClose = this.handleModalActionClose.bind(this)
-    }
-
-    addNotif(style, msg, icon){
-        this.too ++
-        this.setState({ show: true, style: style, msg: msg, icon: icon })
-        const time = setInterval(() => {
-            this.too --
-            this.setState({ show: true })
-            clearInterval(time)
-        }, 2000);
     }
 
     componentDidMount() {
@@ -56,6 +39,7 @@ export class Дэлгэрэнгүй extends Component {
             .detail(this.props.match.params.system_id)
             .then(({govorg, public_url, private_url}) => {
                 this.setState({
+                    govorg: govorg.detail,
                     govorg_wms_list: govorg.wms_list,
                     public_url,
                     private_url,
@@ -71,30 +55,33 @@ export class Дэлгэрэнгүй extends Component {
         service.tokenRefresh(system_id).then(({ success }) => {
             if (success) {
                 this.loadDetail(() => {
-                    this.addNotif('success', 'Токенийг амжилттай шинэчиллээ', 'check')
+                    global.NOTIF('success', 'Токенийг амжилттай шинэчиллээ', 'check')
                 })
             } else {
-                this.addNotif('danger', 'Алдаа гарлаа!', 'times')
+                global.NOTIF('danger', 'Алдаа гарлаа!', 'times')
             }
         })
     }
 
-    copyToClipboard(url){
-        var textField = document.createElement('textarea')
-        textField.innerText = url
-        document.body.appendChild(textField)
-        textField.select()
-        document.execCommand('copy')
-        textField.remove()
-        this.addNotif('success', 'Амжилттай хууллаа', 'times')
+    copyToClipboard(url) {
+        utils.copyToClipboard(url)
     }
 
     handleModalActionOpen(){
-        this.setState({modal_status: 'open'})
-    }
-
-    handleModalActionClose(){
-        this.setState({modal_status: 'closed'})
+        const modal = {
+            modal_status: "open",
+            modal_icon: "fa fa-exclamation-triangle",
+            modal_bg: '',
+            icon_color: 'warning',
+            title: 'Токен шинэчлэх',
+            text: 'Токенийг шинэчилсэнээр уг URL-ээр одоо ашиглаж байгаа газрууд ажиллахгүй болохыг анхаарна уу!',
+            has_button: true,
+            actionNameBack: 'Буцах',
+            actionNameDelete: 'Шинэчлэх',
+            modalAction: () => this.handleTokenRefresh(),
+            modalClose: null,
+        }
+        global.MODAL(modal)
     }
 
     render() {
@@ -103,6 +90,7 @@ export class Дэлгэрэнгүй extends Component {
         const org_level = this.props.match.params.level
         const org_id = this.props.match.params.id
         const {is_state} = this.state
+
         return (
             <div className="my-4">
                 <div className="row">
@@ -124,72 +112,68 @@ export class Дэлгэрэнгүй extends Component {
                                 </div>
                             </div>
                         </form>
-
                         {website && <p><strong>Вебсайт</strong>: {website} </p>}
                     </div>
-                    <div className="col-md-9 pr-0 pl-0">
-                        <ul className="nav nav-tabs nav-tabs-dark-gray col-12">
-                            <li className="nav-item gp-text-primary">
-                                <a onClick={() => this.setState({is_state:false})} className="nav-link active" data-toggle="tab" href="#tabe-4"><i className="icon-home"></i> <span className="hidden-xs">Интернэт сүлжээ</span></a>
-                            </li>
-                            <li className="nav-item gp-text-primary">
-                                <a onClick={() => this.setState({is_state:true})} className="nav-link" data-toggle="tab" href="#tabe-4"><i className="icon-home"></i> <span className="hidden-xs">Төрийн сүлжээ</span></a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="col-md-9 border-top-0 border border-secondary">
-                        <div className="col-md-12 mt-3 mb-3">
-                            {is_state ?
-                            <div className="input-group mt-2">
-                                <input type="text" className="form-control col-9" disabled value={this.state.private_url}/>
-                                <span className="input-group-btn">
-                                <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.private_url)}>
-                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
-                                </button>
-                                </span>
-                            </div>:
-                            <div className="input-group mt-2">
-                                <input type="text" className="form-control col-9" disabled value={this.state.public_url}/>
-                                <span className="input-group-btn">
-                                <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
-                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
-                                </button>
-                                </span>
-                            </div>
-                            }
+
+                    <div className="col-md-12">
+                        <div className="col-md-9 pr-0 pl-0">
+                            <ul className="nav nav-tabs nav-tabs-dark-gray col-12">
+                                <li className="nav-item gp-text-primary">
+                                    <a onClick={() => this.setState({is_state:false})} className="nav-link active" data-toggle="tab" href="#tabe-4"><i className="icon-home"></i> <span className="hidden-xs">Интернэт сүлжээ</span></a>
+                                </li>
+                                <li className="nav-item gp-text-primary">
+                                    <a onClick={() => this.setState({is_state:true})} className="nav-link" data-toggle="tab" href="#tabe-4"><i className="icon-home"></i> <span className="hidden-xs">Төрийн сүлжээ</span></a>
+                                </li>
+                            </ul>
                         </div>
-                        {this.state.govorg_wms_list.map((wms) =>
-                            <div className="col-md-12 mt-3 mb-3 ml-3" key={wms.id}>
-                                <h5> {wms.name} </h5>
-                                <ul>
-                                    {wms.layers.map((layer, idx) =>
-                                        <li key={idx} id="accordion1">
-                                            GeoJSON: {layer.title} ({layer.code})
-                                            <div className="input-group mt-2">
-                                                <input type="text" className="form-control col-7" disabled value={`${is_state ? layer.json_private_url : layer.json_public_url}`}/>
-                                                <span className="input-group-btn">
-                                                    <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(is_state ? layer.json_private_url : layer.json_public_url)}>
-                                                        <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
-                                                    </button>
-                                                </span>
-                                            </div>
-                                        </li>
-                                    )}
-                                </ul>
+                        <div className="col-md-9 border-top-0 border border-secondary">
+                            <div className="col-md-12 mb-3 pt-3">
+                                {
+                                    is_state
+                                    ?
+                                        <div className="input-group pt-2">
+                                            <input type="text" className="form-control col-9" disabled value={this.state.private_url}/>
+                                            <span className="input-group-btn">
+                                                <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.private_url)}>
+                                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                                </button>
+                                            </span>
+                                        </div>
+                                    :
+                                        <div className="input-group pt-2">
+                                            <input type="text" className="form-control col-9" disabled value={this.state.public_url}/>
+                                            <span className="input-group-btn">
+                                                <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(this.state.public_url)}>
+                                                    <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                                </button>
+                                            </span>
+                                        </div>
+                                }
                             </div>
-                        )}
+                            {this.state.govorg_wms_list.map((wms) =>
+                                <div className="col-md-12 mt-3 mb-3 ml-3" key={wms.id}>
+                                    <h5> {wms.name} </h5>
+                                    <ul>
+                                        {wms.layers.map((layer, idx) =>
+                                            <li key={idx} id="accordion1">
+                                                GeoJSON: {layer.title} ({layer.code})
+                                                <div className="input-group mt-2">
+                                                    <input type="text" className="form-control col-7" disabled value={`${is_state ? layer.json_private_url : layer.json_public_url}`}/>
+                                                    <span className="input-group-btn">
+                                                        <button className="btn btn-outline-primary ml-1" type="button" onClick={() => this.copyToClipboard(is_state ? layer.json_private_url : layer.json_public_url)}>
+                                                            <i className="fa fa-clone" aria-hidden="true"></i> Хуулах
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
                     </div>
+
                 </div>
-                <Modal
-                    text="Токенийг шинэчилсэнээр уг URL-ээр одоо ашиглаж байгаа газрууд ажиллахгүй болохыг анхаарна уу!"
-                    title="Токен шинэчлэх"
-                    model_type_icon = "success"
-                    status={this.state.modal_status}
-                    modalClose={this.handleModalActionClose}
-                    modalAction={() => this.handleTokenRefresh()}
-                    actionName='Шинэчлэх'
-                />
-                <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
             </div>
         )
 

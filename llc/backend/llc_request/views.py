@@ -47,7 +47,6 @@ from main.utils import (
 )
 from main import utils
 
-
 POSITION_MERGEJILTEN = Position.objects.filter(name='Мэргэжилтэн')
 
 # Create your views here.
@@ -85,6 +84,8 @@ def _name_display(id, items):
 def llc_request_list(request, content, payload):
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
+    qs = RequestFiles.objects.exclude(state=RequestFiles.STATE_SOLVED)
+
     start_index = 1
     if qs:
         оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']

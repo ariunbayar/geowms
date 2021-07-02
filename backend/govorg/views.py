@@ -72,7 +72,8 @@ def хадгалах(request, payload, pk=None):
 
     if form.is_valid() and not errors:
         with transaction.atomic():
-            form.instance.token = TokenGeneratorSystem().get()
+            if not pk:
+                form.instance.token = TokenGeneratorSystem().get()
             form.instance.website = payload['website']
             system = form.save()
 
@@ -163,8 +164,9 @@ def _get_govorg_detail_display(request, govorg):
             'layers': wms_layers
         }
         wms_detail_list.append(wms_detail)
+
     return {
-        **_get_govorg_display(govorg),
+        'detail': _get_govorg_display(govorg),
         'wms_list': wms_detail_list,
         'govorg_attributes': govorg_layer_detail
     }

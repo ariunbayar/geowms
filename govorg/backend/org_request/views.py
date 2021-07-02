@@ -784,10 +784,7 @@ def _request_to_m(request_datas):
 
     elif request_datas['approve_type'] == 'update':
         request_datas['m_geo_datas_qs'].update(geo_data=geom)
-        check_wmts = WmtsCacheConfig.objects.filter(feature_id=request_datas['feature_id']).first()
-        if check_wmts:
-            check_wmts.is_modified = True
-            check_wmts.save()
+
     return success
 
 
@@ -961,8 +958,12 @@ def request_approve(request, payload):
 
     employee = get_object_or_404(Employee, user=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
+
     request_ids = payload.get("ids")
     feature_id = payload.get("feature_id")
+    is_refresh = payload.get("ref_in_direct")
+
+    info = ''
     success = False
     new_geo_id = None
     feature_obj = get_object_or_404(LFeatures, feature_id=feature_id)
@@ -1055,14 +1056,32 @@ def request_approve(request, payload):
                     'success': False,
                     'info': 'Танд баталгаажуулах эрх алга байна.'
                 }
+                return JsonResponse(rsp)
 
-        refreshMaterializedView(feature_id)
-        rsp = {
+
+            info = _refresh_view_direct_or_crontab(is_refresh, feature_id)
+
+            rsp = {
             'success': True,
-            'info': 'Амжилттай баталгаажуулж дууслаа'
-        }
+            'info': info
+            }
 
     return JsonResponse(rsp)
+
+
+def _refresh_view_direct_or_crontab(is_refresh, feature_id):
+    check_wmts = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
+
+    if is_refresh:
+        refreshMaterializedView(feature_id)
+        info = 'Амжилттай баталгаажуулж дууслаа'
+
+    else:
+        check_wmts.is_modified = True
+        check_wmts.save()
+        info = 'Хүсэлтийг хүлээн авлаа'
+
+    return info
 
 
 @require_GET

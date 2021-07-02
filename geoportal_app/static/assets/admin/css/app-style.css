@@ -376,12 +376,12 @@ hr {
    -webkit-transition: all 0.3s ease;
    -moz-transition: all 0.3s ease;
    -o-transition: all 0.3s ease;
-   transition: all 0.3s ease; 
+   transition: all 0.3s ease;
 }
 
 .toggled .geo-back-btn-toggled {
    left: 60px;
-   transition: all 0.3s ease; 
+   transition: all 0.3s ease;
  }
 
 .geo-back-btn {
@@ -391,13 +391,15 @@ hr {
     top: 12px;
     font-size: 23px;
     z-index: 1001;
-    transition: all 0.3s ease; 
+    transition: all 0.3s ease;
     background-color: white;
+    cursor: pointer;
 }
 .geo-back-btn i:hover{
     color: #034ea2;
-    box-shadow: 13px 13px 40px 0px rgba(73, 220, 251, 0.32);
+    text-shadow: 0 0 10px rgba(73, 220, 251, 0.32);
 }
+
 .toggle-menu-map i {
     margin-left: 280px;
     font-size: 14px;
