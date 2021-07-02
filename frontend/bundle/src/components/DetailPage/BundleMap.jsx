@@ -342,27 +342,34 @@ export default class BundleMap extends Component {
         const scale_line = new ScaleLine()
         this.scale_line = scale_line
 
+        const buttons = [
+            new FullScreen(),
+            new MousePosition({
+                projection: this.state.projection_display,
+                coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
+                undefinedHTML: '',
+            }),
+            new СуурьДавхарга({layers: base_layer_controls}),
+            scale_line,
+            this.controls.modal,
+            this.controls.shopmodal,
+            this.controls.coordinateCopy,
+            this.controls.cart,
+            this.controls.alertBox,
+            this.controls.popup,
+        ]
+
+        if (this.state.bundle.can_draw) {
+            buttons.push(
+                new DrawButton({ toggleDraw: this.toggleDraw }),
+                this.controls.drawModal,
+            )
+        }
+
         const map = new Map({
             maxTilesLoading: 16,
             target: 'map',
-            controls: defaultControls().extend([
-                new FullScreen(),
-                new MousePosition({
-                    projection: this.state.projection_display,
-                    coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
-                    undefinedHTML: '',
-                }),
-                new СуурьДавхарга({layers: base_layer_controls}),
-                new DrawButton({toggleDraw: this.toggleDraw}),
-                scale_line,
-                this.controls.modal,
-                this.controls.shopmodal,
-                this.controls.drawModal,
-                this.controls.coordinateCopy,
-                this.controls.cart,
-                this.controls.alertBox,
-                this.controls.popup,
-            ]),
+            controls: defaultControls().extend(buttons),
             layers: [
                 ...base_layers,
                 ...map_wms_list.reduce((acc_main, wms) =>
@@ -963,7 +970,7 @@ export default class BundleMap extends Component {
               return map_coord
         })
         return geom
-      }
+    }
 
     toggleDrawed(event){
         this.feature_info_list = []
