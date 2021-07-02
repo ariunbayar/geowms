@@ -85,38 +85,8 @@ def llc_request_list(request, content, payload, action):
     action_type = utils.str2bool(action)
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
-<<<<<<< HEAD
-    qs = RequestFiles.objects.exclude(state=RequestFiles.STATE_SOLVED)
-
-    start_index = 1
-    if qs:
-        оруулах_талбарууд = ['id', 'name', 'kind', 'state',  'created_at', 'updated_at', 'file_path', 'description']
-        хувьсах_талбарууд = [
-            {'field': 'state', 'action': _choice_state_display, "new_field": "state"},
-            {'field': 'kind', 'action': _choice_kind_display, "new_field": "kind"},
-            {'field': 'id', 'action': _name_display, "new_field": "client_org"}
-        ]
-
-        datatable = Datatable(
-            model=RequestFiles,
-            initial_qs=qs,
-            payload=payload,
-            оруулах_талбарууд=оруулах_талбарууд,
-            хувьсах_талбарууд=хувьсах_талбарууд
-        )
-        items, total_page, start_index = datatable.get()
-
-        rsp = {
-            'items': items,
-            'page': payload.get('page'),
-            'total_page': total_page,
-            'start_index': start_index,
-        }
-
-=======
     if action_type:
         qs = qs.exclude(state=RequestFiles.STATE_SOLVED)
->>>>>>> 85f7a521abc3e6353936c20732cff809ed5327e5
     else:
         qs = qs.filter(state=RequestFiles.STATE_SOLVED)
 

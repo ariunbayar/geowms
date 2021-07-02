@@ -17,7 +17,6 @@ export class List extends Component {
                 {'field': 'kind', "title": 'Төрөл', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
-
             ],
             жагсаалтын_холбоос: `/llc/backend/${false}/llc-request-list/`,
             хувьсах_талбарууд: [
@@ -51,7 +50,6 @@ export class List extends Component {
         this.handleRemove = this.handleRemove.bind(this)
         this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.infoModal = this.infoModal.bind(this)
-
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
     }
@@ -79,7 +77,7 @@ export class List extends Component {
                 'fa fa-exclamation-circle',
                 "warning",
                 'Тохиргоог устгах',
-                `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+                `Та "${values.client_org}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
                 true
             )
         }
