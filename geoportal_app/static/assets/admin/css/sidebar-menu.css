@@ -185,3 +185,11 @@
 .sidebar-menu-rtl .sidebar-submenu>li.active>a, .sidebar-menu-rtl .sidebar-submenu>li>a:hover {
 	color: #fff;
 }
+
+.r-0 {
+	right: 0
+}
+
+.t-0 {
+	top: 0
+}
