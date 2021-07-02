@@ -16,8 +16,8 @@ function saveRequest(form_datas) {
         ...getPostOptions(),
         body: form_datas
     }
-
     return fetch(`${prefix}/save-request/`, opts).then(handleResponse)
+
 }
 
 function handleRequestData(id) {

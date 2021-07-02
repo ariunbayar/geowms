@@ -81,10 +81,14 @@ def _name_display(id, items):
 @require_POST
 @ajax_required
 @llc_required(lambda u: u)
-def llc_request_list(request, content, payload):
+def llc_request_list(request, content, payload, action):
+    action_type = utils.str2bool(action)
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
-    qs = RequestFiles.objects.exclude(state=RequestFiles.STATE_SOLVED)
+    if action_type:
+        qs = qs.exclude(state=RequestFiles.STATE_SOLVED)
+    else:
+        qs = qs.filter(state=RequestFiles.STATE_SOLVED)
 
     start_index = 1
     if qs:
@@ -704,9 +708,10 @@ def remove_request(request, content, id):
 def _delete_prev_files(file):
     main_folder = 'llc-request-files'
     file_path = file.file_path
-    delete_folder = str(file_path).split("/")[1]
-    delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
-    utils.remove_folder(delete_folder)
+    if file_path:
+        delete_folder = str(file_path).split("/")[1]
+        delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
+        utils.remove_folder(delete_folder)
 
 
 @require_GET
