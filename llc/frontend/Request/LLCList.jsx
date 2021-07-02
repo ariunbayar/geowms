@@ -73,7 +73,7 @@ export class Detail extends Component {
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
 
             ],
-            жагсаалтын_холбоос: '/llc/backend/llc-request-list/',
+            жагсаалтын_холбоос: `/llc/backend/${true}/llc-request-list/`,
             хувьсах_талбарууд: [
                 {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
                 {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},

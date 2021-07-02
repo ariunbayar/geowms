@@ -16,7 +16,7 @@ export class List extends Component {
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
             ],
-            жагсаалтын_холбоос: '/llc/backend/llc-request-history-list/',
+            жагсаалтын_холбоос: `/llc/backend/${false}/llc-request-list/`,
             хувьсах_талбарууд: [
                 {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
                 {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
