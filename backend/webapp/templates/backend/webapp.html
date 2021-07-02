@@ -3,6 +3,7 @@
 {% block content %}
 
 <div class="content" id="webapp"></div>
+{{ user | json_script:"user-data" }}
 
 {% endblock %}
 

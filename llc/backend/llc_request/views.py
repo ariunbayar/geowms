@@ -81,10 +81,14 @@ def _name_display(id, items):
 @require_POST
 @ajax_required
 @llc_required(lambda u: u)
-def llc_request_list(request, content, payload):
+def llc_request_list(request, content, payload, action):
+    action_type = utils.str2bool(action)
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
-    qs = RequestFiles.objects.exclude(state=RequestFiles.STATE_SOLVED)
+    if action_type:
+        qs = qs.exclude(state=RequestFiles.STATE_SOLVED)
+    else:
+        qs = qs.filter(state=RequestFiles.STATE_SOLVED)
 
     start_index = 1
     if qs:
@@ -562,27 +566,9 @@ def _get_shapes_geoms(shape_geometry):
     return geo_datas, geom_type
 
 
-def str2bool(v):
-    return v.lower() in ("yes", "true", "t", "1", "True")
-
-
-def _make_connection(from_email):
-    connection = get_connection(
-        username=from_email,
-        password=get_config('EMAIL_HOST_PASSWORD'),
-        port=get_config('EMAIL_PORT'),
-        host=get_config('EMAIL_HOST'),
-        use_tls=str2bool(get_config('EMAIL_USE_TLS')),
-        use_ssl=False,
-        fail_silently=False,
-    )
-    return connection
-
-
 @require_GET
 @ajax_required
-@llc_required(lambda u: u)
-def get_file_shapes(request, content, id):
+def get_file_shapes(request, id):
     list_of_datas = []
 
     llc_data = LLCRequest.objects.filter(id=id).first()
@@ -629,23 +615,6 @@ def get_file_shapes(request, content, id):
     })
 
 
-def _send_to_information_email (email):
-
-    host_name = get_config('EMAIL_HOST_NAME')
-    subject = 'Хүсэлт'
-    text = 'Дараах холбоос дээр дарж хүсэлтийг шалгана уу!'
-    if host_name == 'localhost:8000':
-        msg = '{text} http://{host_name}/gov/llc-request/'.format(text=text, host_name=host_name)
-    else:
-        msg = '{text} https://{host_name}/gov/llc-request/'.format(text=text, host_name=host_name)
-
-    from_email = get_config('EMAIL_HOST_USER')
-    to_email = [email]
-    send_mail(subject, msg, from_email, to_email, connection=_make_connection(from_email))
-
-    return True
-
-
 @require_POST
 @llc_required(lambda u: u)
 @ajax_required
@@ -654,9 +623,8 @@ def send_request(request, payload, content, id):
     qs = RequestFiles.objects.filter(pk=id).first()
     org_obj = qs.geo_id
     employee = Employee.objects.filter(org__geo_id=org_obj, user_id=user_id).first()
-    email = employee.user.email
+    user = employee.user
     if employee:
-        request_files = LLCRequest.objects.filter(file_id=id).first()
         request_data = {}
         request_data['state'] = LLCRequest.STATE_NEW
         request_data['kind'] = LLCRequest.KIND_PENDING
@@ -666,7 +634,10 @@ def send_request(request, payload, content, id):
             defaults=request_data
         )
 
-        success_mail = _send_to_information_email(email)
+        subject = 'Аж ахуйн нэгжийн хүсэлт'
+        text = 'Дараах холбоос дээр дарж шийдвэрлэнэ уу!'
+        href = '/gov/llc-request/'
+        success_mail = utils.send_approve_email(user, subject, text, href)
         if success_mail:
             qs.state = RequestFiles.STATE_SENT
             qs.kind = RequestFiles.KIND_PENDING
@@ -736,9 +707,10 @@ def remove_request(request, content, id):
 def _delete_prev_files(file):
     main_folder = 'llc-request-files'
     file_path = file.file_path
-    delete_folder = str(file_path).split("/")[1]
-    delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
-    utils.remove_folder(delete_folder)
+    if file_path:
+        delete_folder = str(file_path).split("/")[1]
+        delete_folder = os.path.join(settings.MEDIA_ROOT, main_folder, delete_folder)
+        utils.remove_folder(delete_folder)
 
 
 @require_GET
