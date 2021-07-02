@@ -37,7 +37,6 @@ export class LLCSettings extends Component {
         this.modalChange = this.modalChange.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.goLink = this.goLink.bind(this)
-        this.handleSaveModal = this.handleSaveModal.bind(this)
     }
 
     getArray(data, selected_value) {
@@ -68,6 +67,8 @@ export class LLCSettings extends Component {
             if ( name == 'theme' ) {
                 seleted_datas = this.getArray(packages, selected_value)
                 data_list['selected_packages'] = seleted_datas
+                list_of_datas[index_of_list]['package']['name'] = ''
+                list_of_datas[index_of_list]['package']['id'] = ''
                 list_of_datas[index_of_list]['feature']['name'] = ''
                 list_of_datas[index_of_list]['feature']['id'] = ''
                 data_list['selected_features'] = []
@@ -129,37 +130,6 @@ export class LLCSettings extends Component {
             })
             this.setState({list_of_datas, themes, packages, features})
         })
-    }
-
-    handleSaveModal(value, idx) {
-        const { selected_values, geom_type } = this.state
-        const { features } = selected_values
-
-        var file_geom_type
-        features.map((details, idx) =>
-            file_geom_type = details.geometry.type
-        )
-        file_geom_type = utils.checkMultiGeomTypeName(file_geom_type)
-
-        if(geom_type !== file_geom_type) {
-            const modal = {
-                modal_status: "open",
-                modal_icon: "fa fa-exclamation-circle",
-                modal_bg: '',
-                icon_color: 'warning',
-                title: 'Геометр төрөл зөрсөн байна!',
-                text: `Хадгалахдаа итгэлтэй байна уу?`,
-                has_button: true,
-                actionNameBack: 'Үгүй',
-                actionNameDelete: 'Тийм',
-                modalAction: () => this.handleSave(),
-                modalClose: null
-            }
-            global.MODAL(modal)
-        }
-        else {
-            this.handleSave()
-        }
     }
 
     handleSave() {
@@ -274,11 +244,7 @@ export class LLCSettings extends Component {
                                             </td>
                                             <td>
                                                 {
-                                                    value.icon_state
-                                                    ?
-                                                        <a className="text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
-                                                    :
-                                                        <a className='text-success fa fa-floppy-o' role="button" onClick={(e) => this.handleSaveModal(value, idx)}/>
+                                                    <a className="text-primary fa fa-pencil-square-o" role="button" onClick={(e) => this.handleProceed(value)}/>
                                                 }
                                             </td>
                                             <td>

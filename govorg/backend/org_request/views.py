@@ -1627,7 +1627,6 @@ def get_file_shapes(request, id):
             'theme': {'id': theme_id, 'name': theme_name},
             'feature': {'id': feature_id, 'name': feature_name},
             'package': {'id': package_id, 'name': package_name},
-            'icon_state': True,
             'features': geoms,
             'order_no': shape_geometry.order_no,
             'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else '',
