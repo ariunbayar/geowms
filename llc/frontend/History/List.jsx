@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 
 import { PortalDataTable } from '@utils/DataTable/index'
+import Modal from '@utils/Modal/Modal'
 import { service } from "../Request/service";
 import { makeStateColor, makeKindColor } from '../helpers/functions'
 
@@ -9,12 +10,14 @@ export class List extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            refresh: false,
             талбарууд: [
                 {'field': 'client_org', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Төрөл', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
+
             ],
             жагсаалтын_холбоос: '/llc/backend/llc-request-history-list/',
             хувьсах_талбарууд: [
@@ -38,12 +41,19 @@ export class List extends Component {
             ],
             state: '',
             kind: '',
+            modal_status: 'closed',
             refresh: false,
             choices: [],
         }
         this.refreshData = this.refreshData.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
+        this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.infoModal = this.infoModal.bind(this)
+
+        this.modalChange = this.modalChange.bind(this)
+        this.modalOpen = this.modalOpen.bind(this)
     }
 
     componentDidMount(){
@@ -57,6 +67,66 @@ export class List extends Component {
 
     handleUpdateAction(values) {
         this.props.history.push(`/llc/history/${values.id}/дэлгэрэнгүй/`)
+    }
+
+    handleRemoveAction(values){
+        this.setState({ values })
+        this.handleModalOpen(values)
+    }
+
+    handleModalOpen(values){
+            this.modalChange(
+                'fa fa-exclamation-circle',
+                "warning",
+                'Тохиргоог устгах',
+                `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
+                true
+            )
+        }
+
+    modalChange(modal_icon, icon_color, title, text, has_button, description) {
+        this.setState({
+            modal_icon: modal_icon,
+            icon_color: icon_color,
+            title: title,
+            text: text,
+            has_button: has_button,
+            description: description,
+        })
+        this.modalOpen()
+    }
+
+
+    modalOpen() {
+        this.setState({ modal_status: 'open' }, () => {
+            this.setState({ modal_status: 'initial' })
+        })
+    }
+
+    handleRemove() {
+        const { id } = this.state.values
+        service.removeRequest(id).then(({ success, info }) => {
+            if(success) {
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "success",
+                    info,
+                    '',
+                    false
+                )
+                this.refreshData()
+            }
+            else {
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "danger",
+                    info,
+                    '',
+                    false
+                )
+                this.refreshData()
+            }
+        })
     }
 
     refreshData() {
@@ -77,6 +147,17 @@ export class List extends Component {
             if (this.state.state) custom_query['state'] = this.state.state
         }
         this.setState({ custom_query, [field]: value })
+    }
+
+    infoModal(values) {
+        this.modalChange(
+            'fa fa-info-circle',
+            "warning",
+            'Тайлбар',
+            ModalText,
+            false,
+            values.description,
+        )
     }
 
     render() {
@@ -143,6 +224,17 @@ export class List extends Component {
                             />
                         </div>
                     </div>
+                    <Modal
+                        modal_status={this.state.modal_status}
+                        modal_icon={this.state.modal_icon}
+                        icon_color={this.state.icon_color}
+                        title={this.state.title}
+                        has_button={this.state.has_button}
+                        text={this.state.text}
+                        modalAction={this.handleRemove}
+                        actionNameDelete="Устгах"
+                        description={this.state.description}
+                    />
                 </div>
             </Fragment>
         )
