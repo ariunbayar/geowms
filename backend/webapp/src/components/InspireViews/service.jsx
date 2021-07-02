@@ -1,4 +1,5 @@
-import {getGetOptions,handleResponse,getPostOptions} from '../../helpers/service'
+import { handleResponse, getGetOptions, getPostOptions } from "@helpUtils/handleRequest"
+
 export const service ={
     getall,
     getPropertyFields,

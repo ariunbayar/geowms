@@ -20,10 +20,10 @@ function requestReject(ids, feature_id, desc, action_type) {
     return fetch(`${prefix}/reject/`, requestOptions).then(handleResponse)
 }
 
-function requestApprove(ids, feature_id) {
+function requestApprove(ids, feature_id, ref_in_direct) {
     const requestOptions = {
         ...getPostOptions(),
-        body: JSON.stringify({ids, feature_id}),
+        body: JSON.stringify({ids, feature_id, ref_in_direct}),
     }
     return fetch(`${prefix}/approve/`, requestOptions).then(handleResponse)
 }
