@@ -568,7 +568,6 @@ def _get_shapes_geoms(shape_geometry):
 
 @require_GET
 @ajax_required
-@llc_required(lambda u: u)
 def get_file_shapes(request, content, id):
     list_of_datas = []
 
