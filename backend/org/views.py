@@ -311,6 +311,7 @@ def employee_update(request, payload, pk, level):
                 )
         if is_user:
             utils.send_approve_email(user)
+            
         rsp = {
             'success': True, 'errors': errors
         }
