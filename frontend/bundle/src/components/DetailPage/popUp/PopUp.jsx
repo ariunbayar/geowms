@@ -144,7 +144,7 @@ class PopUpCmp extends Component {
         if (this.props.is_from_inspire) data = [datas[number - 1]]
         else data = datas[number - 1]
 
-        if (code != "gp_layer_geodeticalpoint_gp_view") {
+        if (!code.includes("gp_layer_geodeticalpoint_gp_view")) {
             this.is_from_inspire = false
         }
         this.setState({ data, mode, datas, code, geom_name, is_enable })
@@ -191,7 +191,11 @@ class PopUpCmp extends Component {
                                 window.location.href=`/payment/purchase/${payment_id}/`;
                             }, 1000);
                         }
-                    }).catch(error => alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу"))
+                    })
+                    .catch(error => {
+                        alert("Алдаа гарсан тул хуудсыг дахин ачааллуулна уу")
+                        this.setState({ is_purchase: false })
+                    })
             }
         }
     }
