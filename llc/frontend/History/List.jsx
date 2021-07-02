@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 
 import { PortalDataTable } from '@utils/DataTable/index'
 import { service } from "../Request/service";
-import { makeStateColor, makeKindColor } from '../helpers/functions'
+import { makeStateColor, makeKindColor } from '@helpUtils/functions'
 
 export class List extends Component {
 
