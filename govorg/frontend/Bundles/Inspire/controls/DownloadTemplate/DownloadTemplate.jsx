@@ -18,9 +18,12 @@ export class DownloadTemplate extends Control {
         const elementa = document.createElement('a')
         elementa.setAttribute('data-toggle', 'tooltip')
         elementa.setAttribute('data-placement', 'right')
-        elementa.setAttribute('href', file ? file.url : "")
         elementa.setAttribute('title', file ? file.name : "Тemplate хоосон байна.")
         element.setAttribute('id', '⚙-toggle-downtemp-id')
+
+        if (file){
+            elementa.setAttribute('href', file.url)
+        }
 
         const elementi = document.createElement('i')
         elementi.setAttribute('aria-hidden', 'true')

@@ -9,6 +9,7 @@ export default class ImportTemplate extends Component {
             is_open: false
         }
     }
+
     render() {
         const { is_open } = this.state
         return (
@@ -16,7 +17,7 @@ export default class ImportTemplate extends Component {
                 <h5 className="text-uppercase text-center pt-2">
                     Feature template оруулах
                 <label htmlFor="check" className="m-2" ></label>
-                <input type="checkbox" id="check" checked={is_open} onChange={() => this.setState({ is_open: true })} />
+                <input type="checkbox" id="check" checked={is_open} onChange={() => this.setState(prevState => ({is_open: !prevState.is_open}))} />
                 </h5>
                 {
                     is_open &&
