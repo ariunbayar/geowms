@@ -81,9 +81,11 @@ def _name_display(id, items):
 @require_POST
 @ajax_required
 @llc_required(lambda u: u)
-def llc_request_list(request, content, payload):
+def llc_request_list(request, content, payload, action):
+    action_type = utils.str2bool(action)
     company_name = content.get('company_name')
     qs = RequestFiles.objects.filter(name__exact=company_name)
+<<<<<<< HEAD
     qs = RequestFiles.objects.exclude(state=RequestFiles.STATE_SOLVED)
 
     start_index = 1
@@ -111,24 +113,12 @@ def llc_request_list(request, content, payload):
             'start_index': start_index,
         }
 
+=======
+    if action_type:
+        qs = qs.exclude(state=RequestFiles.STATE_SOLVED)
+>>>>>>> 85f7a521abc3e6353936c20732cff809ed5327e5
     else:
-        rsp = {
-            'items': [],
-            'page': payload.get('page'),
-            'total_page': 1,
-            'start_index': start_index
-        }
-
-    return JsonResponse(rsp)
-
-
-@require_POST
-@ajax_required
-@llc_required(lambda u: u)
-def llc_request_history_list(request, content, payload):
-    company_name = content.get('company_name')
-    qs = RequestFiles.objects.filter(name__exact=company_name)
-    qs = RequestFiles.objects.filter(state=RequestFiles.STATE_SOLVED)
+        qs = qs.filter(state=RequestFiles.STATE_SOLVED)
 
     start_index = 1
     if qs:
@@ -164,7 +154,6 @@ def llc_request_history_list(request, content, payload):
         }
 
     return JsonResponse(rsp)
-
 
 
 def _get_leve_2_geo_id(layer):
