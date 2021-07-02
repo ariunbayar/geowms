@@ -10,7 +10,6 @@ export class DownloadTemplate extends Control {
             target: options.target,
         })
 
-
         const file = options.file
         const cssClasses = '⚙-toggle-downtemp'
         const element = this.element
@@ -20,9 +19,16 @@ export class DownloadTemplate extends Control {
         elementa.setAttribute('data-placement', 'right')
         elementa.setAttribute('title', file ? file.name : "Тemplate хоосон байна.")
         element.setAttribute('id', '⚙-toggle-downtemp-id')
+        element.setAttribute('role', 'button')
 
         if (file){
             elementa.setAttribute('href', file.url)
+        }
+        else {
+            element.addEventListener('click', (event) => {
+                event.preventDefault()
+                global.NOTIF('warning', 'Тemplate хоосон байна.', 'exclamation')
+            })
         }
 
         const elementi = document.createElement('i')
