@@ -66,7 +66,7 @@ export class Detail extends Component {
         this.state = {
             refresh: false,
             талбарууд: [
-                {'field': 'name', "title": 'Захиалагч байгууллага'},
+                {'field': 'client_org', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Өөрчлөлт', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
@@ -94,13 +94,6 @@ export class Detail extends Component {
                         }
                     },
                     {
-                        "title": 'Устгах',
-                        "text": '',
-                        "icon": 'fa fa-trash-o text-danger',
-
-                        "action": (values) => this.handleRemoveAction(values),
-                    },
-                    {
                         "title": '',
                         'component': FileAndDesc,
                         'props': {
@@ -116,10 +109,7 @@ export class Detail extends Component {
         }
         this.refreshData = this.refreshData.bind(this)
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
-        this.handleRemove = this.handleRemove.bind(this)
-        this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.infoModal = this.infoModal.bind(this)
-
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
     }
@@ -137,34 +127,6 @@ export class Detail extends Component {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
     }
 
-    handleRemoveAction(values){
-        this.setState({ values })
-        this.handleModalOpen(values)
-    }
-
-    handleModalOpen(values){
-        let not_rm_kind = 'ЦУЦЛАСАН'
-        let not_rm_state = 'ИЛГЭЭСЭН'
-        if(not_rm_kind == values.kind || not_rm_state == values.state) {
-            this.modalChange(
-                'fa fa-exclamation-circle',
-                "danger",
-                'Устгах боломжгүй',
-                `"Энэхүү хүсэлт ${values.kind == 'ЦУЦЛАСАН' ? values.kind : values.state} төлөвт байгаа тул устгах боломжгүй`,
-                false
-            )
-        }
-        else {
-            this.modalChange(
-                'fa fa-exclamation-circle',
-                "warning",
-                'Тохиргоог устгах',
-                `Та "${values.name}" нэртэй тохиргоог устгахдаа итгэлтэй байна уу?`,
-                true
-            )
-        }
-    }
-
     modalChange(modal_icon, icon_color, title, text, has_button, description) {
         this.setState({
             modal_icon: modal_icon,
@@ -180,32 +142,6 @@ export class Detail extends Component {
     modalOpen() {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
-        })
-    }
-
-    handleRemove() {
-        const { id } = this.state.values
-        service.removeRequest(id).then(({ success, info }) => {
-            if(success) {
-                this.modalChange(
-                    'fa fa-check-circle',
-                    "success",
-                    info,
-                    '',
-                    false
-                )
-                this.refreshData()
-            }
-            else {
-                this.modalChange(
-                    'fa fa-check-circle',
-                    "danger",
-                    info,
-                    '',
-                    false
-                )
-                this.refreshData()
-            }
         })
     }
 
@@ -313,8 +249,6 @@ export class Detail extends Component {
                         title={this.state.title}
                         has_button={this.state.has_button}
                         text={this.state.text}
-                        modalAction={this.handleRemove}
-                        actionNameDelete="Устгах"
                         description={this.state.description}
                     />
                 </div>
