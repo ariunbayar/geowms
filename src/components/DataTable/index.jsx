@@ -113,7 +113,7 @@ export class PortalDataTable extends Component {
                     }
                     {
                         max_data == 'open' &&
-                            <div className="col-md-6">
+                            <div className="col-xl-4 col-sm-4">
                                 <div className="row text-right">
                                     <div className="col">
                                         <strong className={`text-right mt-1 text-${color}`}>Өгөгдлийн хэмжээ:&nbsp;</strong>
