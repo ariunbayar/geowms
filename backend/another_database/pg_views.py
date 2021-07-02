@@ -1,3 +1,4 @@
+from backend.another_database.views import get_unique_id
 from geojson import feature
 from backend import another_database
 import datetime
@@ -66,7 +67,7 @@ def get_pg_table_list(request, payload, pk):
         feature_name = feature_qs.feature_name
         return feature_name
 
-    оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id']
+    оруулах_талбарууд = ['id', 'table_name', 'feature_code', 'updated_at', 'created_at', 'another_database_id', 'table_unique_id']
     хувьсах_талбарууд = [{"field": "feature_code", "action": _change_detail, "new_field": "feature_code"}]
 
     initial_qs = AnotherDatabaseTable.objects.filter(another_database=another_database)
@@ -232,6 +233,7 @@ def _rsp_validation(result, table_name, id_list):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def save_table(request, payload):
+    result = []
     table_id = payload.get('table_id')
     id = payload.get('id')
     feature_name = payload.get('feature_name')
@@ -240,16 +242,26 @@ def save_table(request, payload):
     is_insert = payload.get('is_insert')
     pk_field_configs = payload.get("pk_field_config")
     pk_field_configs = utils.json_dumps(pk_field_configs)
-    result = []
+
     cursor_pg = utils.get_cursor_pg(id)
 
-    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
-    another_database = get_object_or_404(AnotherDatabase, pk=id)
     if not table_id and not is_insert:
         result = utils.check_table_name(cursor_pg, table_name)
+
     info = _rsp_validation(result, table_name, id_list)
     if info:
         return JsonResponse({'success': False, 'info': info})
+
+    feature_name = get_object_or_404(LFeatures, feature_id=feature_name)
+    another_database = get_object_or_404(AnotherDatabase, pk=id)
+    ano_db_table = AnotherDatabaseTable.objects.filter(another_database=another_database)
+    table = ano_db_table.filter(pk=table_id).first()
+
+    if table:
+        table_unique_id = table.table_unique_id
+    else:
+        table_unique_id = get_unique_id(False, another_database)
+
     AnotherDatabaseTable.objects.update_or_create(
         pk=table_id,
         defaults={
@@ -258,9 +270,11 @@ def save_table(request, payload):
             'field_config': utils.json_dumps(id_list),
             'another_database': another_database,
             'created_by': request.user,
-            'field_config_index': pk_field_configs
+            'field_config_index': pk_field_configs,
+            'table_unique_id': table_unique_id
         }
     )
+
     return JsonResponse({
         'success': True,
         'info': 'Амжилттай хадгалагдлаа'
@@ -885,7 +899,7 @@ def _get_ona_datas(cursor, table_name, columns, table_geo_data, start_data, pk_f
     return datas
 
 
-def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
+def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id, table_unique_id):
     geom = None
     if ona_data[table_geo_data]:
         geo_data = _geojson_to_geom(ona_data[table_geo_data])
@@ -894,12 +908,13 @@ def _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id):
         geo_id=new_geo_id,
         geo_data=geom,
         feature_id=feature.feature_id,
-        created_by=unique_id
+        created_by=unique_id,
+        modified_by=table_unique_id
     )
     return new_geo_id, m_datas_object
 
 
-def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
+def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id, table_unique_id):
     property_ids = _get_row_to_list('property_id', columns, True)
     prop_qs = LProperties.objects
     prop_qs = prop_qs.filter(property_id__in=property_ids)
@@ -932,7 +947,8 @@ def _insert_m_datas(ona_data, feature, geo_id, columns, unique_id):
                         geo_id=geo_id,
                         **data,
                         **mdata_value,
-                        created_by=unique_id
+                        created_by=unique_id,
+                        modified_by=table_unique_id
                     ))
 
     return m_datas_object
@@ -968,6 +984,7 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
     success_count = 0
     failed_count = 0
     unique_id = ano_db.unique_id
+    table_unique_id = ano_db_table_pg.table_unique_id
     pk_field_config = ano_db_table_pg.field_config_index
     pk_field_config = utils.json_load(pk_field_config)
     feature_id = feature.feature_id
@@ -1020,11 +1037,11 @@ def _insert_to_geo_db(ano_db, ano_db_table_pg,  table_name, cursor, columns, fea
                 current_geo_id = current_geo_id + 1
                 new_geo_id = feature.feature_code + '__' +  int_to_str(current_geo_id)
                 current_geo_id = new_geo_id
-                geo_id, geo_data_obj = _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id)
+                geo_id, geo_data_obj = _insert_geo_data(ona_data, feature, table_geo_data, unique_id, new_geo_id, table_unique_id)
 
                 geo_data_objs.append(geo_data_obj)
 
-                m_d_data = _insert_m_datas(ona_data, feature, new_geo_id, columns, unique_id)
+                m_d_data = _insert_m_datas(ona_data, feature, new_geo_id, columns, unique_id, table_unique_id)
                 m_datas_object = m_datas_object + m_d_data
                 success_count = success_count + 1
             MGeoDatas.objects.bulk_create(geo_data_objs)
