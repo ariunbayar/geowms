@@ -26,18 +26,19 @@ function makeStateColor (state) {
         "ИЛГЭЭСЭН": 'text-warning',
         "ШИЙДВЭРЛЭГДСЭН": 'text-primary',
     }
-    return obj[state]
+    return obj[state] ? obj[state] : ''
 }
 
 function makeKindColor (kind) {
-    let color
-    if (kind == "ШИЙДВЭРЛЭГДСЭН") color = 'text-success'
-    else if (kind == "ХҮЛЭЭГДЭЖ БУЙ") color = 'text-warning'
-    else if (kind == "ЦУЦЛАСАН") color = 'text-danger'
-    else if (kind == "БУЦААГДСАН") color = 'text-danger'
-    else if (kind == "ШИНЭ") color = 'text-primary'
-    else if (kind == "БАТАЛГААЖСАН") color = 'text-success'
-    return color
+    const obj = {
+        "ШИЙДВЭРЛЭГДСЭН": 'text-success',
+        "ХҮЛЭЭГДЭЖ БУЙ": 'text-warning',
+        "ЦУЦЛАСАН": 'text-danger',
+        "БУЦААГДСАН": 'text-danger',
+        "ШИНЭ": 'text-primary',
+        "БАТАЛГААЖСАН": 'text-success',
+    }
+    return obj[kind] ? obj[kind] : ''
 }
 
 // geometr turul shalgaad Multi gesen bku bol nemj ugdug
