@@ -568,7 +568,7 @@ def _get_shapes_geoms(shape_geometry):
 
 @require_GET
 @ajax_required
-def get_file_shapes(request, content, id):
+def get_file_shapes(request, id):
     list_of_datas = []
 
     llc_data = LLCRequest.objects.filter(id=id).first()
