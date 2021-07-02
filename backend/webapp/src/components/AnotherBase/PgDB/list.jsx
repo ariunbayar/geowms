@@ -14,6 +14,7 @@ export default class List extends Component {
             талбарууд: [
                 {'field': 'feature_code', "title": 'Feature-ийн нэр'},
                 {'field': 'table_name', "title": 'Хүснэгтийн нэр'},
+                {'field': 'table_unique_id', "title": 'Таних тэмдэг'},
                 {'field': 'created_at', "title": 'Үүссэн'},
                 {'field': 'updated_at', "title": 'Зассан'},
             ],

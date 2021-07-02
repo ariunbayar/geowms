@@ -116,10 +116,15 @@ def mongo_get(request, pk):
     return JsonResponse(rsp)
 
 
-def get_unique_id():
+def get_unique_id(is_db, ano_database):
+
     obj = AnotherDatabase.objects.all().order_by('unique_id').first()
+
+    if not is_db:
+        obj = AnotherDatabaseTable.objects.filter(another_database=ano_database).order_by('table_unique_id').first()
+
     if obj:
-        return obj.unique_id + -1
+        return obj.unique_id + -1 if is_db else obj.table_unique_id + -1
     else:
         return -1
 
@@ -153,7 +158,7 @@ def mongo_save(request, payload):
 
     pk = payload.get('id')
 
-    unique_id = get_unique_id()
+    unique_id = get_unique_id(True)
     if pk:
         AnotherDatabase.objects.filter(pk=pk).update(
             connection=connection,
@@ -222,7 +227,7 @@ def mssql_save(request, payload):
 
     pk = payload.get('id')
 
-    unique_id = get_unique_id()
+    unique_id = get_unique_id(True)
 
     if pk:
         AnotherDatabase.objects.filter(pk=pk).update(
@@ -748,7 +753,7 @@ def mssql_save(request, payload):
 
     pk = payload.get('id')
 
-    unique_id = get_unique_id()
+    unique_id = get_unique_id(True)
 
     if pk:
         AnotherDatabase.objects.filter(pk=pk).update(
@@ -811,7 +816,7 @@ def config_save(request, payload):
             definition=definition,
         )
     else:
-        unique_id = get_unique_id()
+        unique_id = get_unique_id(True)
         AnotherDatabase.objects.create(
             connection=connection,
             db_type=db_type,
@@ -825,3 +830,4 @@ def config_save(request, payload):
         'success': True,
     }
     return JsonResponse(rsp)
+
