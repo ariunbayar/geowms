@@ -46,10 +46,21 @@ def all(request):
     return render(request, 'bundle/all.html', context)
 
 
+def _not_hesegchlen_hudaldan_awalt():
+    return [
+        'gnp'
+    ]
+
+
 def detail(request, pk):
 
+    can_draw = True
+
     bundle = get_object_or_404(Bundle, pk=pk)
-    theme = LThemes.objects.filter(theme_id = bundle.ltheme_id).first()
+    theme = LThemes.objects.filter(theme_id=bundle.ltheme_id).first()
+    if theme.theme_code in _not_hesegchlen_hudaldan_awalt():
+        can_draw = False
+
     bundle_layers = BundleLayer.objects.filter(bundle=bundle).values_list('layer__wms_id').distinct()
 
     bundle_display = {
@@ -60,6 +71,7 @@ def detail(request, pk):
             (WMS.objects.get(pk=wms[0]).name)
             for wms in bundle_layers
         ],
+        'can_draw': can_draw,
     }
 
     context = {
