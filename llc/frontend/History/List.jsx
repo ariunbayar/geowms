@@ -10,7 +10,7 @@ export class List extends Component {
         super(props)
         this.state = {
             талбарууд: [
-                {'field': 'name', "title": 'Захиалагч байгууллага'},
+                {'field': 'client_org', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Төрөл', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
