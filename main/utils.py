@@ -1976,3 +1976,31 @@ def test_json_dumps(dct):
 # datatable хэрэглээгүй тохиолдолд хүснэгтийн эхлэлийн тоог өгнө
 def get_start_index(per_page, page):
     return (per_page * (page - 1)) + 1
+
+
+# dict-ээс өөрт хэрэггүй field-үүдээ устгана
+def key_remove_of_dict(dict, keys):
+    for key in keys:
+        del dict[key]
+
+    return dict
+
+
+def has_user(id=None, username=None, email=None):
+    User = apps.get_model('geoportal_app', 'User')
+    is_valid = False
+
+    if username:
+        user = User.objects.filter(username=username).first()
+        if user:
+            is_valid = True
+    elif id:
+        user = User.objects.filter(id=id).first()
+        if user:
+            is_valid = True
+    elif email:
+        user = User.objects.filter(email=email).first()
+        if user:
+            is_valid = True
+
+    return is_valid
