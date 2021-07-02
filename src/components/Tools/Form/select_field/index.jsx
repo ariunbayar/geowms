@@ -2,15 +2,15 @@ import React, { Component } from 'react';
 
 // <SelectField
 //     state_name='feature'
-//     data_list={selected_features}                       //сонголтын жагсаалт
+//     data_list={selected_features}                  //сонголтын жагсаалт
 //     default_value={feature_name}
-//     name_key                                           // data_list датанаас грүппын нэрийг агуулсан key
-//     opt_key                                            // data_list датанаас тухайн грүппийн сонголтын агуулсан key
-//     option_name                                        // сонголтын нэр
-//     option_key                                        // сонголтын value
-//     valid                                             // validation text
-//     className={"comd-4"}                             // Класс өгч болно
-//     default_text={'feature-ийн нэр сонгоно уу'}     // select input - ийг сонгоогүй үед харагдах анхны утга
+//     name_key                                       // data_list датанаас грүппын нэрийг агуулсан key
+//     opt_key                                        // data_list датанаас тухайн грүппийн сонголтын агуулсан key
+//     option_name                                    // сонголтын нэр
+//     option_key                                     // сонголтын value
+//     errors                                         // validition алдаануудыг харуулна
+//     className={"comd-4"}                           // Класс өгч болно
+//     default_text={'feature-ийн нэр сонгоно уу'}    // select input - ийг сонгоогүй үед харагдах анхны утга
 //     handleSelectField={this.handleChange}          // сонголт буцаах функц
 // />
 
@@ -25,7 +25,7 @@ import React, { Component } from 'react';
     state_name='package'
     option_name = "name"
     option_key = "code"
-    valid = "Төрөл таарахгүй байна!"
+    errors = {"feild_name": "TODO", "errors": ['error1, 'error2']}
     data_list={selected_packages}
     default_value={package_name}
     className={"col-md-4"}
