@@ -1639,7 +1639,7 @@ def get_colName_type(view_name, data):
         from
             {view_name} group by geo_data limit 1
             '''.format(
-                view_name=view_name,
+                view_name=view_name.lower(),
                 data=data
                 )
 
@@ -1910,7 +1910,7 @@ def make_view_name(feature):
         feature_code = feature.feature_code
         feature_code = feature_code.split("-")
         view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
-    return view_name
+    return view_name.lower()
 
 
 def get_feature_from_layer_code(layer_code):
