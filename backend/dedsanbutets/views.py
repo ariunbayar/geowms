@@ -380,6 +380,8 @@ def getFields(request, payload):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def propertyFields(request, tid, fid):
+
+    file_list = list()
     file_detail = dict()
 
     theme = get_object_or_404(LThemes, theme_id=tid)
@@ -400,6 +402,7 @@ def propertyFields(request, tid, fid):
 
             file_detail['name'] = str(file)
             file_detail['size'] = file_stat.st_size
+            file_list.append(file_detail)
 
     geom_type = ''
     if geom:
@@ -436,7 +439,7 @@ def propertyFields(request, tid, fid):
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
             'geom_type': geom_type,
             'cache_values': cache_values,
-            'file': file_detail
+            'files': file_list,
         }
     else:
         rsp = {
@@ -447,7 +450,7 @@ def propertyFields(request, tid, fid):
             'view': '',
             'geom_type': geom_type,
             'cache_values': cache_values,
-            'file': file_detail,
+            'files': file_list,
             'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
         }
 
@@ -495,7 +498,6 @@ def make_view(request):
 
 
 def _import_feature_template(file, theme, feature, get_options ):
-
     main_folder = 'feature-template'
     theme_name = theme.theme_name_eng
     feature_name = feature.feature_name_eng
@@ -511,7 +513,6 @@ def _import_feature_template(file, theme, feature, get_options ):
                     os.makedirs(feature_folder)
 
             folder_list = os.listdir(feature_folder)
-
             for item in folder_list:
                 utils.remove_file(feature_folder + '/' + item)
 

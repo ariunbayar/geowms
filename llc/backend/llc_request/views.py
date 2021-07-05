@@ -43,7 +43,8 @@ from main.utils import (
     get_config,
     get_geom,
     datetime_to_string,
-    get_feature
+    get_feature,
+    lat_long_to_utm
 )
 from main import utils
 
@@ -454,7 +455,8 @@ def get_all_geo_json(request, content):
 def get_request_data(request, content, id):
 
     features = []
-    field = {}
+    field = dict()
+    files = list()
     qs = RequestForm.objects.filter(file_id=id).first()
     request_file = RequestFiles.objects.filter(pk=id).first()
     requested_employee = request_file.requested_employee
@@ -465,7 +467,6 @@ def get_request_data(request, content, id):
         'type': 'application/vnd.rar'
     }
 
-    field = dict()
     aimag_name = ''
     aimag_geom = []
     shape_geometries = ShapeGeom.objects.filter(shape__files_id=id)
@@ -504,6 +505,7 @@ def get_request_data(request, content, id):
         file_name = file_name.split('/')
         file_data['name'] = file_name[2]
         file_data['size'] = file_qs.size or ''
+        files.append(file_data)
 
     if qs:
         file_name = str(qs.file.file_path).split('/')[1] if qs.file.file_path else ''
@@ -512,7 +514,7 @@ def get_request_data(request, content, id):
         field['object_type'] = qs.object_type
         field['object_quantum'] = qs.object_quantum
         field['investment_status'] = qs.investment_status
-        field['file_path'] = file_data
+        field['file_path'] = files
         field['selected_tools'] = json_load(qs.file.tools)
         field['file_name'] = file_name
         field['state'] = qs.file.get_state_display()

@@ -38,13 +38,13 @@ class SubmitClass extends Component {
 
     handleSubmit() {
         const {
-            file, project_name,
+            files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             selected_tools, id, file_state,
         } = this.props.values
         var blob = []
-
+        const file = files[0]
 
         if (id) {
             if (!file_state) {
@@ -122,7 +122,7 @@ export class RequestAdd extends Component {
         super(props)
         this.list = []
         this.state = {
-            file: '',
+            files: [],
             project_name: '',
             object_type: '',
             object_count: '',
@@ -150,6 +150,7 @@ export class RequestAdd extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.enableLoader = this.enableLoader.bind(this)
+        this.fileAction = this.fileAction.bind(this)
     }
 
     componentDidMount() {
@@ -168,7 +169,7 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
-                        file: form_field['file_path'],
+                        files: form_field['file_path'],
                         state: form_field['state'],
                         kind: form_field['kind'],
                         desc: form_field['desc'],
@@ -197,28 +198,32 @@ export class RequestAdd extends Component {
 
     handleOnChange(e, selection) {
         var name = ''
-        var { file_name, file_state } = this.state
+        var value = ''
         if (!selection) {
             name = e.target.name
-            const { id } = this.props.match.params
-            var value = ''
-            if (name == 'file') {
-                if (id) {
-                    file_state = true
-                }
-                value = e.target.files[0]
-                file_name = value.name
-            }
-            else {
-                value = e.target.value
-            }
+            value = e.target.value
         }
         else {
             name = e
             value = selection['id']
         }
+
         this.validationForm()
-        this.setState({ [name]: value, file_name, file_state })
+        this.setState({ [name]: value })
+    }
+
+    fileAction(e){
+        const { id } = this.props.match.params
+        var { file_name, file_state, files } = this.state
+        const file = e.target.files[0]
+        file_name = file.name
+        files[0] = file
+
+        if (id) {
+            file_state = true
+        }
+
+        this.setState({ files, file_name, file_state })
     }
 
     validationForm (){
@@ -308,7 +313,6 @@ export class RequestAdd extends Component {
     enableLoader(state){
         this.setState({ is_loading: state })
     }
-
     render (){
         const { id, info } = this.props.match.params
         return (
@@ -325,6 +329,7 @@ export class RequestAdd extends Component {
                         info={info}
                         handleSelectModel={this.handleSelectModel}
                         enableLoader={this.enableLoader}
+                        fileAction={this.fileAction}
                     />
                 </div>
                 <Modal

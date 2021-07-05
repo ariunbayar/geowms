@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './style.css'
 
 // <FileUpload
 //     file={this.props.file}               //ямар файл хадгалагдсанг харуулах зорилгоор file : {'name': "file_name", 'size': "file_size"} бүтэцтэй байна.
@@ -10,43 +11,81 @@ import React, { useState, useEffect } from 'react';
 
 function FileUpload(props) {
 
-    const [current_size, SetSize] = useState('')
-    const [kb_or_Mb, SetSymbol] = useState('')
+    const [files, SetFiles] = useState(props.files)
 
     useEffect(() => {
-        convertFileSize(props.file)
-    }, [props.file])
+        convertFileSize(props.files)
+    },  [props.files.length, props.files[0]?.name])
 
-    const convertFileSize = (file) => {
-        if (file) {
-            let file_size = file.size
-            let divider = 1024
-            file_size = file_size / divider
-            SetSize(file_size.toFixed(3))
-            SetSymbol('KB')
+    const convertFileSize = (files_list) => {
+        let converted_file_list = []
+        let divider = 1024
+        if (files_list) {
+            files_list.map((file, idx) => {
+                const file_detail = new Object()
+                let file_size = file.size
+                file_size = file_size / divider
+                file_size = file_size.toFixed(3)
+                file_detail['id'] = idx
+                file_detail['name'] =  file.name
+                file_detail['size'] = file_size
+                file_detail['size_type'] = 'KB'
+
+                converted_file_list.push(file_detail)
+            })
+            SetFiles(converted_file_list)
         }
     }
 
-    const { file, className, default_text, accept } = props
+
+    const { className, default_text, accept, is_multiple } = props
+    var last_file = files[files.length-1]
+    if ( !is_multiple ){
+        var file = files[0]
+    }
+
     return(
         <div>
             {
                 <div className={`row ${className}`}>
-                    <div className="custom-file col-md-6 my-auto ml-3">
-                        <label className="custom-file-label" htmlFor="customFile"> {file? file.name : default_text}</label>
+                    <div className="custom-file col-5 my-auto ml-3">
+                        <div className='flex-container'>
+                            <label  className='custom-label' htmlFor="clickFile"> {(files && files.length > 0 )? last_file.name : default_text}</label>
+                            <div>
+                                <label className='custom-label-2' htmlFor="clickFile"> <i className="fa fa-upload pr-1 pb-1 " aria-hidden="true"></i>  Browse</label>
+                            </div>
                         <input
                             type="file"
-                            name='file'
-                            id="customFile"
-                            style={{display: 'none'}}
-                            className="custom-file-input"
-                            onChange={(e) => props.getFile(e)}
+                            name='files'
+                            id="clickFile"
+                            className='d-none'
+                            onChange={(e) => props.fileAction(e, 'Get_File', is_multiple)}
+                            multiple={is_multiple}
                             accept={accept}
                         />
+                        </div>
                     </div>
-                    <div className="col-md-5 d-flex flex-column ml-4">
-                        <i> файлын нэр:&nbsp; &nbsp; {file ? file.name: ''} </i>
-                        <i> файлын хэмжээ: &nbsp;{file && file['name'] ? <span>{current_size} &nbsp; {kb_or_Mb}</span> : ''} </i>
+                    <div className="col-5 ml-4 font-italic custom-media ">
+                        {
+                                is_multiple
+                                ?
+                                    <small>
+                                        <ul className="my-auto">
+                                            {
+                                                files.map((file, idx) =>
+                                                    <li>{files ? file.name: ''} - {file.size}  {file.size_type}
+                                                        <i className="fa fa-times ml-2 text-danger" onClick={() => props.fileAction(idx, 'Remove_File', is_multiple)}></i>
+                                                    </li>
+                                                )
+                                            }
+                                        </ul>
+                                    </small>
+                                :
+                                    <div className="d-flex flex-column" style={{fontSize: '10px'}}>
+                                        <i> файлын нэр:&nbsp; &nbsp; {file ? file.name: ''} </i>
+                                        <i> файлын хэмжээ: &nbsp;{file && file['name'] ? <span>{file.size} &nbsp; {file.size_type}</span> : ''} </i>
+                                    </div>
+                        }
                     </div>
                 </div>
             }

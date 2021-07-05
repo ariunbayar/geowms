@@ -69,7 +69,7 @@ export class List extends Component {
         this.setState({ fid, tid, fname, property_loading: true })
         service
             .getPropertyFields(tid, fid)
-            .then(({ success, fields, id_list, view, url, style_name, geom_type, cache_values, open_datas, file }) => {
+            .then(({ success, fields, id_list, view, url, style_name, geom_type, cache_values, open_datas, files }) => {
                 if(success) {
                     fields.map((f_config, idx) =>
                         f_config.data_types.map((data_type, idx) =>
@@ -96,7 +96,7 @@ export class List extends Component {
                         cache_values,
                         property_length: property_length,
                         has_view: success,
-                        file,
+                        files
                     })
                 }
                 else this.setState({ property_loading: false, has_view: success, geom_type, view_style_name: '', file})
@@ -269,7 +269,7 @@ export class List extends Component {
                     property_loading={property_loading}
                     cache_values={cache_values}
                     has_view={this.state.has_view}
-                    file={this.state.file}
+                    files={this.state.files}
                 />
             </div>
         )

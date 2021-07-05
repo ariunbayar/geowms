@@ -36,6 +36,7 @@ export default class SideBar extends Component {
             cache_type: 'seed',
             number_of_cache: 2,
             image_format: 'png',
+            files: []
         }
         this.handleInput = this.handleInput.bind(this)
         this.getTileCacheValue = this.getTileCacheValue.bind(this)
@@ -44,7 +45,7 @@ export default class SideBar extends Component {
         this.getValuesFromState = this.getValuesFromState.bind(this)
         this.makeView = this.makeView.bind(this)
         this.getStyleName = this.getStyleName.bind(this)
-        this.getFile = this.getFile.bind(this)
+        this.fileAction = this.fileAction.bind(this)
     }
 
     getTileCacheValue(field, value){
@@ -67,7 +68,7 @@ export default class SideBar extends Component {
 
     handleSave() {
         const { fid, tid } = this.props
-        const { id_list, view, tile_cache_check, zoom_start, open_datas, file } = this.state
+        const { id_list, view, open_datas, files } = this.state
         let values
         values = this.getValuesFromState()
 
@@ -81,9 +82,8 @@ export default class SideBar extends Component {
         if (view){
             form_datas.append('view_id', view.id)
         }
-
-        if (file['name']){
-            form_datas.append('files', file, file.name)
+        if (files && files.length > 0){
+            form_datas.append('files', files[0])
         }
         form_datas.append('values',  JSON.stringify({values}))
         service
@@ -155,9 +155,9 @@ export default class SideBar extends Component {
             })
         }
 
-        if(pP.file != this.props.file){
-            const file = this.props.file
-            this.setState({file})
+        if(pP.files != this.props.files){
+            const files = this.props.files
+            this.setState({ files })
         }
 
         if (pP.view?.view_name != this.props.view?.view_name){
@@ -209,7 +209,7 @@ export default class SideBar extends Component {
         if(pP.fid !== this.props.fid){
             this.setState({
                 tile_cache_check: false,
-                file: '',
+                files: [],
                 is_open: false,
             })
         }
@@ -263,7 +263,7 @@ export default class SideBar extends Component {
     async makeView() {
         const props = this.props
         const { fid, tid } = props
-        const { view, style_name, file } = this.state
+        const { view, style_name, files } = this.state
 
         const values = this.getValuesFromState()
 
@@ -272,8 +272,8 @@ export default class SideBar extends Component {
         form_datas.append('fid', fid)
         form_datas.append('tid', tid)
         form_datas.append('view_id', view.id)
-        if (file) {
-            form_datas.append('files', file, file.name)
+        if ( files && files.length > 0 ) {
+            form_datas.append('files', files)
         }
         form_datas.append('values',  JSON.stringify({values}))
 
@@ -345,13 +345,21 @@ export default class SideBar extends Component {
         )
     }
 
-    getFile(e){
-        const uploaded_file = e.target.files[0]
-        this.setState({ file: uploaded_file })
+    fileAction(value, action, is_multiple){
+        var files = this.state.files
+        if (action == 'Get_File') {
+            const uploaded_file = value.target.files[0]
+
+            if (is_multiple ) { files.push(uploaded_file) }
+            else { files[0] = uploaded_file }
+        }
+        else { files.splice(value, 1) }
+
+        this.setState({files})
     }
 
     render() {
-        const { fields, fid, fname, has_view, file } = this.props
+        const { fields, fname } = this.props
         const { is_loading, id_list, check_list, check_open, open_datas } = this.state
         const state = this.state
         return (
@@ -366,7 +374,7 @@ export default class SideBar extends Component {
                             fname
                             &&
                                 <div>
-                                    <ImportTemplate {...this.state} fid={fid} getFile={this.getFile}/>
+                                    <ImportTemplate {...this.state} fileAction={this.fileAction}/>
                                     <SetTileCache {...this.state} getTileCacheValue={this.getTileCacheValue}/>
                                     <ChooseStyle {...this.props} {...this.state} getStyleName={this.getStyleName}/>
                                 </div>

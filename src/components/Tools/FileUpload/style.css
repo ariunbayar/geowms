@@ -1,0 +1,59 @@
+.flex-container {
+    display: flex;
+    flex-wrap: nowrap;
+    background-color: white;
+    height: calc(1.0em + .5rem + 3px);
+    border: 1px solid #000;
+    border-color:#e9ecef;
+    border-radius: 0.5em;
+    width: 270px;
+  }
+
+  .flex-container > div {
+    position: sticky;
+    left: 220px;
+    width: 70px;
+    text-align: center;
+    font-size: 13px;
+    background-color: #008cff;
+    border-top-right-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-left: 1px solid #008cff;;
+    border-color: #e9ecef;
+  font-style: italic;
+    padding: 0;
+  }
+
+  .custom-label {
+      font-style: italic;
+      color: #495057;
+      font-size: 10px;
+      margin: auto;
+    width: 75%;
+    padding-left: 10px;
+  }
+
+  .custom-label-2 {
+    font-style: italic;
+    color: #e3e3e3;
+    font-size: 9px;
+    margin: auto;
+  width: 100%;
+}
+
+
+@media (min-width: 576px) and (max-width: 1200px){
+    .flex-container {
+        width: 200px;
+    }
+
+}
+
+@media (min-width: 576px) and (max-width: 1800px){
+
+    .col-5 {
+        max-width: 100%;
+    }
+}
