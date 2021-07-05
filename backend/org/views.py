@@ -40,6 +40,7 @@ from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
 from geoportal_app.forms import UserForm
+# from .forms import EmployeeForm
 
 from main.decorators import ajax_required
 from main import utils
@@ -337,7 +338,7 @@ def _get_point_for_db(coordinate):
 
 
 def _make_user_detail(values):
-    keys = ['is_super', 'position', 'is_admin', 'phone_number', 'state', 'pro_class']
+    keys = ['id', 'is_super', 'position', 'is_admin', 'phone_number', 'state', 'pro_class']
     user_detail = utils.key_remove_of_dict(values, keys)
 
     user_detail['is_superuser'] = values.get('is_super') if values.get('is_super') else False
@@ -346,17 +347,33 @@ def _make_user_detail(values):
     return user_detail
 
 
-def _user_validition(user_detail, has_username):
-    form = UserForm(user_detail, has_username)
+def _user_validition(user_detail):
+    form = UserForm(user_detail)
+    if not form.is_valid():
+        return form.errors
 
-    print(form.is_valid())
+    return {}
 
-    # if form.is_valid() and has_username:
-    #     pass
 
-    #     return False
-    # else:
-    #     return form.errors
+def _make_employee_detail(values):
+    keys = [
+        'id', 'username',  'first_name', 'last_name', 'email',
+        'position', 'gender', 'is_super', 'is_user'
+    ]
+    employee_detail = utils.key_remove_of_dict(values, keys)
+    employee_detail['position_id'] = values.get('position')
+    employee_detail['token'] = TokenGeneratorEmployee().get()
+
+    return employee_detail
+
+
+def _employee_validition(employee_detail):
+    form = EmployeeForm(employee_detail)
+    if not form.is_valid():
+        return form.errors
+
+    return {}
+
 
 
 @require_POST
@@ -368,32 +385,31 @@ def employee_add(request, payload, level, pk):
     payload = payload.get('payload')
     values = payload.get('values')
     username = values.get('username')
+
+    # org = get_object_or_404(Org, pk=pk, level=level)
+
+    # user_detail = _make_user_detail(values)
+    # errors = _user_validition(user_detail)
+
+
+    # employee_detail = _make_employee_detail(values)
+    # errors.update(_employee_validition(employee_detail))
     errors = {}
 
-    org = get_object_or_404(Org, pk=pk, level=level)
-
-    user_detail = _make_user_detail(values)
-    has_username = utils.has_user(username=username)    # TODO True user update , False create
-    errors = _user_validition(user_detail, has_username)
-
-    # if errors:
-    #     return JsonResponse({'success': False, 'errors': errors})
+    print(errors)
 
 
-
-    # print(is_valid)
-
-    # username_errors = form.errors['username']
-
-    # for username_error in username_errors:
-    #     print(username_error)
-
-    # print(form.errors)
-    # errors = _employee_validation(values, None)
-
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
 
     # with transaction.atomic():
-    #     User.objects.create(**user_detail)
+    #     user = User.objects.create(**user_detail)
+    #     token = TokenGeneratorEmployee().get()
+
+
+    #     raise Exception('lol')
+
+    #     # return JsonResponse({'success': True, 'data': 'Амжилттай'})
 
 
 

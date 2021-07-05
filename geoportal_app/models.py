@@ -1,6 +1,13 @@
+import re
+
+from django import utils
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
+from django.core import validators
+from django.utils.deconstruct import deconstructible
+from django.utils.translation import gettext_lazy as _
+
 
 
 class Role(models.Model):
@@ -23,10 +30,28 @@ class Role(models.Model):
         verbose_name = ("Хэрэглэгчийн эрх")
         verbose_name_plural = ("Хэрэглэгчийн эрхүүд")
 
+@deconstructible
+class UserRegistratioinNumberValidator(validators.RegexValidator):
+    regex = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    message = _(
+        'Регистрийн дугаараа зөв оруулна уу! '
+        'Жишээлбэл: АА00000000'
+    )
+    flags = 0
+
 
 class User(AbstractUser):
+    register_validator = UserRegistratioinNumberValidator()
+
     roles = models.ManyToManyField(Role)
-    register = models.CharField(max_length=10, null=True)
+    register = models.CharField(
+        max_length=10,
+        null=True,
+        validators=[register_validator],
+        error_messages={
+            'invalid_register': _('Буруу регистр оруулсан байна!')
+        }
+    )
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
     is_user = models.BooleanField(default=False)

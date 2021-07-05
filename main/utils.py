@@ -1979,11 +1979,12 @@ def get_start_index(per_page, page):
 
 
 # dict-ээс өөрт хэрэггүй field-үүдээ устгана
-def key_remove_of_dict(dict, keys):
+def key_remove_of_dict(values, keys):
+    new_values = dict(values)
     for key in keys:
-        del dict[key]
+        del new_values[key]
 
-    return dict
+    return new_values
 
 
 def has_user(id=None, username=None, email=None):
