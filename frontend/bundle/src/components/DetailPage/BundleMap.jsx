@@ -18,7 +18,7 @@ import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } fro
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import ImageWMS from 'ol/source/ImageWMS';
-import { СуурьДавхарга } from './controls/СуурьДавхарга'
+import { BaseMaps as СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
 import { Modal } from './controls/Modal'
 import { ShopModal } from './ShopControls/Modal'
@@ -35,7 +35,6 @@ import {default as ModalAlert} from "@utils/Modal/Modal"
 import SideBar from "@utils/SideBar"
 import WMSItem from './WMSItem'
 import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
-
 
 export default class BundleMap extends Component {
 
@@ -60,6 +59,7 @@ export default class BundleMap extends Component {
             y: null,
             x: null,
             format: new GeoJSON(),
+            base_layer_controls: [],
 
             modal_status: 'closed',
         }
@@ -172,7 +172,7 @@ export default class BundleMap extends Component {
         Promise.all([
             service.loadBaseLayers(),
             service.loadWMSLayers(bundle_id),
-        ]).then(([{base_layer_list}, {wms_list}]) => {
+        ]).then(([{ base_layer_list }, { wms_list }]) => {
             this.handleMapDataLoaded(base_layer_list, wms_list)
         })
     }
@@ -242,7 +242,7 @@ export default class BundleMap extends Component {
         this.setState({map_wms_list})
 
         const base_layer_name = 'base_layer'
-        const {base_layers, base_layer_controls} =
+        const { base_layers, base_layer_controls } =
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
 
@@ -303,6 +303,7 @@ export default class BundleMap extends Component {
                         thumbnail_1x: base_layer_info.thumbnail_1x,
                         thumbnail_2x: base_layer_info.thumbnail_2x,
                         layer: layer,
+                        name: base_layer_info.name,
                     })
 
                     return acc
@@ -328,7 +329,7 @@ export default class BundleMap extends Component {
             }),
             name: vector_layer_name,
         })
-        this.setState({vector_layer})
+        this.setState({ vector_layer, base_layer_controls })
 
         const maker_layer_name = 'marker_layer'
         const marker_layer = new VectorLayer({
@@ -349,7 +350,6 @@ export default class BundleMap extends Component {
                 coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
                 undefinedHTML: '',
             }),
-            new СуурьДавхарга({layers: base_layer_controls}),
             scale_line,
             this.controls.modal,
             this.controls.shopmodal,
@@ -1139,6 +1139,9 @@ export default class BundleMap extends Component {
     }
 
     render() {
+
+        console.log(this.state.base_layer_controls);
+
         const Menu_comp = () => {
             return (
                 <div>
@@ -1148,6 +1151,7 @@ export default class BundleMap extends Component {
                 </div>
             )
         }
+
         const Search_comp = () => {
             return (
                 <div>
@@ -1156,11 +1160,12 @@ export default class BundleMap extends Component {
                         getOnlyFeature={this.getOnlyFeature}
                         resetFilteredOnlyFeature={this.resetFilteredOnlyFeature}
                         setFeatureOnMap={this.setFeatureOnMap}
-                        bundle_id = {this.state.bundle.id}
+                        bundle_id={this.state.bundle.id}
                     />
                 </div>
             )
         }
+
         const settings_component = () => {
             return(
                 <div>
@@ -1170,6 +1175,13 @@ export default class BundleMap extends Component {
                 </div>
             )
         }
+
+        const BaseMaps = () => {
+            return (
+                <СуурьДавхарга base_layer_controls={this.state.base_layer_controls} />
+            )
+        }
+
         return (
             <div>
                 <div className="row">
@@ -1177,25 +1189,32 @@ export default class BundleMap extends Component {
                         <div className="🌍">
                             <div id="map">
                                 <SideBar
-                                items = {[
-                                    {
-                                        "key": "menus",
-                                        "icon": "fa fa-bars",
-                                        "title": "Давхаргууд",
-                                        "component": Menu_comp,
-                                    },
-                                    {
-                                        "key": "search",
-                                        "icon": "fa fa-search",
-                                        "component": Search_comp
-                                    },
-                                    {
-                                        "key": "settings",
-                                        "icon": "fa fa-gear",
-                                        "component": settings_component,
-                                        "bottom": true
-                                    },
-                                ]}
+                                    items = {[
+                                        {
+                                            "key": "menus",
+                                            "icon": "fa fa-bars",
+                                            "title": "Давхаргууд",
+                                            "component": Menu_comp,
+                                        },
+                                        {
+                                            "key": "search",
+                                            "icon": "fa fa-search",
+                                            "component": Search_comp
+                                        },
+                                        {
+                                            "key": "base_maps",
+                                            "icon": "fa fa-map-o",
+                                            "title": "Суурь давхаргууд",
+                                            "component": BaseMaps,
+                                            "bottom": true
+                                        },
+                                        {
+                                            "key": "settings",
+                                            "icon": "fa fa-gear",
+                                            "component": settings_component,
+                                            "bottom": true
+                                        },
+                                    ]}
                                 />
                             </div>
                         </div>
