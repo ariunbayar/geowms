@@ -1,5 +1,5 @@
 import React, { Component, Suspense, useEffect, useState } from "react";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { BrowserRouter, Switch, Route, NavLink } from "react-router-dom";
 
 import MenuItem from '@utils/MenuItem';
 import SuspenseLoader from "@utils/Loader/SuspenseLoader"
@@ -46,56 +46,86 @@ export default class App extends Component {
   }
 
   render() {
-      return (
-        <div>
-          <DisplayModal getModalFunc={this.getModalFunc}/>
-          <DisplayNotif getNotifFunc={this.getNotifFunc}/>
-          <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
-            <BrowserRouter>
-              <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true" className="color-sidebar bg-dark">
-                <div className="brand-logo">
-                  <a href="/">
-                    <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
-                    <h5 className="logo-text">ГЕОПОРТАЛ</h5>
-                  </a>
-                </div>
-                <TabBars />
+    return (
+      <div>
+        <DisplayModal getModalFunc={this.getModalFunc}/>
+        <DisplayNotif getNotifFunc={this.getNotifFunc}/>
+        <Suspense fallback={<SuspenseLoader is_loading={true} text={"Хуудас ачааллаж байна."}/>}>
+          <BrowserRouter>
+            <div id="sidebar-wrapper" data-simplebar="" data-simplebar-auto-hide="true" className="color-sidebar bg-dark">
+              <div className="brand-logo">
+                <a href="/">
+                  <img src="/static/assets/image/logo/logo-2.png" className="logo-icon" alt="logo icon"></img>
+                  <h5 className="logo-text">ГЕОПОРТАЛ</h5>
+                </a>
               </div>
-                <div className="content-wrapper">
-                  <Switch>
-                    <Route path={"/back/wms/"} component={WMSPage} />
-                    <Route path={"/back/geoserver/"} component={Geoserver} />
-                    <Route path={"/back/org-role/"} component={OrgRole} />
-                    <Route
-                      path="/back/байгууллага/"
-                      component={(props) => <Org {...props} refreshCount={this.handleCount} />}
-                    />
-                    <Route path={"/back/дэд-сан-бүтэц/"} component={(props) => <DedsanBvtets {...props} />} />
-                    <Route path={"/back/inspire-views/"} component={InspireViews} />
-                    <Route exact path={"/back/log/"} component={Log} />
-                    <Route path={"/back/access/"} component={Access} />
-                    <Route exact path={"/back/huulga/"} component={Huulga} />
-                    <Route
-                      path={"/back/суурь-давхарга/"}
-                      component={СуурьДавхаргаХуудас}
-                    />
-                    <Route exact path={"/back/dev/"} component={DevPage} />
-                    <Route path={"/back/user/"} component={UserPage} />
-                    <Route path={"/back/gis/"} component={Gis} />
-                    <Route path={"/back/тохиргоо/"} component={ConfigPage} />
-                    <Route path={"/back/error500/"} component={Error500} />
-                    <Route path={"/back/дэд-сан/"} component={BundlePage} />
-                    <Route path={"/back/gp-geoserver/layer-groups/"} component={GPGeoserver} />
-                    <Route path={"/back/gp-geoserver/style/"} component={GPGeoserver} />
-                    <Route path={"/back/another-base/"} component={AnotherBaseConfig} />
-                    <Route path={"/back/db-export/"} component={DBExport} />
-                  </Switch>
-                </div>
-            </BrowserRouter>
-          </Suspense>
-        </div>
+            <TabBars />
+            </div>
+              <div className="content-wrapper">
+                <Profile user={this.props.user}/>
+                <Switch>
+                  <Route path={"/back/wms/"} component={WMSPage} />
+                  <Route path={"/back/geoserver/"} component={Geoserver} />
+                  <Route path={"/back/org-role/"} component={OrgRole} />
+                  <Route
+                    path="/back/байгууллага/"
+                    render={(props) => <Org {...props} refreshCount={this.handleCount} />}
+                  />
+                  <Route path={"/back/дэд-сан-бүтэц/"} render={(props) => <DedsanBvtets {...props} />} />
+                  <Route path={"/back/inspire-views/"} component={InspireViews} />
+                  <Route exact path={"/back/log/"} component={Log} />
+                  <Route path={"/back/access/"} component={Access} />
+                  <Route exact path={"/back/huulga/"} component={Huulga} />
+                  <Route
+                    path={"/back/суурь-давхарга/"}
+                    component={СуурьДавхаргаХуудас}
+                  />
+                  <Route exact path={"/back/dev/"} component={DevPage} />
+                  <Route path={"/back/user/"} component={UserPage} />
+                  <Route path={"/back/gis/"} component={Gis} />
+                  <Route path={"/back/тохиргоо/"} component={ConfigPage} />
+                  <Route path={"/back/error500/"} component={Error500} />
+                  <Route path={"/back/дэд-сан/"} component={BundlePage} />
+                  <Route path={"/back/gp-geoserver/layer-groups/"} component={GPGeoserver} />
+                  <Route path={"/back/gp-geoserver/style/"} component={GPGeoserver} />
+                  <Route path={"/back/another-base/"} component={AnotherBaseConfig} />
+                  <Route path={"/back/db-export/"} component={DBExport} />
+                  <Route path={"/back/admin/password/change/"} component={PasswordChange} />
+                </Switch>
+              </div>
+          </BrowserRouter>
+        </Suspense>
+      </div>
     );
   }
+}
+
+function Profile(props) {
+  const user = props.user
+  return (
+    <div className="position-absolute t-0 r-0 mt-2 mr-3">
+      <div className="btn-group" style={{ zIndex: 1001 }}>
+        <a className="dropdown-toggle dropdown-toggle-nocaret border-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+          <span className="user-profile"><img src="/static/assets/image/user.png" className="img-circle" alt="user avatar"></img></span>
+        </a>
+        <div className="dropdown-menu dropdown-menu-right">
+        <a className="dropdown-item user-details">
+          <div className="media">
+              <div className="avatar"><img className="align-self-start mr-3" src="/static/assets/image/user.png" alt="user avatar"></img></div>
+              <div className="media-body">
+                  <h6 className="mt-2 user-title">{user.username}</h6>
+                  <p className="user-subtitle">{user.email}</p>
+              </div>
+            </div>
+          </a>
+          <div className="dropdown-divider"></div>
+          <NavLink className="dropdown-item" activeClassName="active" to="/back/admin/password/change/"><i className="icon-lock mr-2"></i>НУУЦ ҮГ СОЛИХ</NavLink>
+          <div className="dropdown-divider"></div>
+          <a className="dropdown-item text-dark" href="/logout/"><i className="icon-power mr-2"></i>ГАРАХ</a>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function TabBars(props) {

@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 
 import { PortalDataTable } from '@utils/DataTable/index'
+import Modal from '@utils/Modal/Modal'
 import { service } from "../Request/service";
 import { makeStateColor, makeKindColor } from '../helpers/functions'
 
@@ -9,14 +10,15 @@ export class List extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            refresh: false,
             талбарууд: [
-                {'field': 'name', "title": 'Захиалагч байгууллага'},
+                {'field': 'client_org', "title": 'Захиалагч байгууллага'},
                 {'field': 'state', "title": 'Төлөв', 'has_action': true},
                 {'field': 'kind', "title": 'Төрөл', 'has_action': true},
                 {'field': 'created_at', "title": 'Үүсгэсэн'},
                 {'field': 'updated_at', "title": 'Шинэчилсэн'},
             ],
-            жагсаалтын_холбоос: '/llc/backend/llc-request-list/',
+            жагсаалтын_холбоос: `/llc/backend/${false}/llc-request-list/`,
             хувьсах_талбарууд: [
                 {"field": "state", "action": (values) => makeStateColor(values) , "action_type": true},
                 {"field": "kind", "action": (values) => makeKindColor(values), "action_type": true},
@@ -27,16 +29,27 @@ export class List extends Component {
                         "text": '',
                         "icon": 'fa fa-eye text-primary',
                         "action": (values) => this.handleUpdateAction(values),
+                    },
+                    {
+                        "title": 'Устгах',
+                        "text": '',
+                        "icon": 'fa fa-trash-o text-danger',
+
+                        "action": (values) => this.handleRemoveAction(values),
                     }
             ],
             state: '',
             kind: '',
+            modal_status: 'closed',
             refresh: false,
             choices: [],
         }
         this.refreshData = this.refreshData.bind(this)
         this.handleSearch = this.handleSearch.bind(this)
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
+        this.handleRemoveAction = this.handleRemoveAction.bind(this)
+        this.infoModal = this.infoModal.bind(this)
     }
 
     componentDidMount(){
@@ -50,6 +63,62 @@ export class List extends Component {
 
     handleUpdateAction(values) {
         this.props.history.push(`/llc/history/${values.id}/дэлгэрэнгүй/`)
+    }
+
+    handleRemoveAction(values){
+        this.setState({ values })
+        this.handleModalOpen()
+    }
+
+    handleModalOpen(){
+        const modal = {
+            modal_status: 'open',
+            modal_icon: `fa fa-exclamation-circle`,
+            icon_color: 'warning',
+            title: 'Устгах',
+            text: 'Та хүсэлтийг устгахдаа итгэлтай байна уу ',
+            has_button: true,
+            actionNameBack: 'Буцах',
+            actionNameDelete: 'устгах',
+            modalAction: this.handleRemove,
+        }
+        global.MODAL(modal)
+    }
+
+    handleRemove() {
+        const { id } = this.state.values
+        service.removeRequest(id).then(({ success, info }) => {
+            if(success) {
+                const modal = {
+                    modal_status: 'open',
+                    modal_icon: 'fa fa-check-circle',
+                    icon_color: "success",
+                    title: 'Амжилттай уcтгалаа',
+                    text: '',
+                }
+                global.MODAL(modal)
+                this.refreshData()
+            }
+            else {
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "danger",
+                    info,
+                    '',
+                    false
+                )
+                const modal = {
+                    modal_status: 'open',
+                    modal_icon: 'fa fa-check-circle',
+                    icon_color: "success",
+                    title: 'Хүсэлт амжилтгүй боллоо',
+                    text: '',
+                }
+                global.MODAL(modal)
+                this.refreshData()
+                this.refreshData()
+            }
+        })
     }
 
     refreshData() {
@@ -70,6 +139,17 @@ export class List extends Component {
             if (this.state.state) custom_query['state'] = this.state.state
         }
         this.setState({ custom_query, [field]: value })
+    }
+
+    infoModal(values) {
+        this.modalChange(
+            'fa fa-info-circle',
+            "warning",
+            'Тайлбар',
+            ModalText,
+            false,
+            values.description,
+        )
     }
 
     render() {

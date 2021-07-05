@@ -205,7 +205,7 @@ function TabBars(props) {
                         employee.is_admin
                         &&
                             <>
-                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Хэрэглэгчийн эрх"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/role/" text="Дүрийн тохиргоо"></MenuItem>
                             <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/perm/position/" text="Албан тушаал"></MenuItem>
                             </>
                     }

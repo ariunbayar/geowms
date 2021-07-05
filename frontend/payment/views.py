@@ -40,7 +40,9 @@ from backend.inspire.models import (
     LFeatureConfigs,
     LDataTypeConfigs,
     LFeatures,
+    LPackages,
     LProperties,
+    LThemes,
     LValueTypes,
     LCodeLists,
     MDatas,
@@ -116,6 +118,11 @@ def purchase_draw(request, payload):
     layer_list = payload.get('layer_list')
     feature_info_list = payload.get('feature_info_list')
     selected_type = payload.get('selected_type')
+    if not selected_type:
+        return JsonResponse({
+            'success': False,
+            'error': 'Төрөл сонгоно уу'
+        })
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     layer_ids = _get_layer_ids(feature_info_list)
@@ -1302,12 +1309,21 @@ def download_purchase(request, pk):
         if is_created:
 
             subject = 'Худалдан авалт'
-            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу!'
+            text = ''
             host_name = utils.get_config('EMAIL_HOST_NAME')
-            msg = '{msg} http://{host_name}/payment/history/api/details/{id}/'.format(id=payment.pk, msg=msg, host_name=host_name)
+            protocol = utils.get_protocol(host_name)
+            href = '{protocol}://{host_name}/payment/history/api/details/{id}/'.format(id=payment.pk, host_name=host_name, protocol=protocol)
+            html = """
+                <!DOCTYPE html>
+                <html>
+                    <head></head>
+                    <body>
+                        <a className="text-primary" href="{href}">Энд дарж</a> худалдан авсан бүтээгдэхүүнээ татаж авна уу!
+                    </body>
+                </html>
+            """.format(text=text, href=href)
             to_email = [payment.user.email]
-
-            utils.send_email(subject, msg, to_email)
+            utils.send_email(subject, '', to_email=to_email, attach=html)
 
     rsp = {
         'success': is_created,
@@ -1377,7 +1393,11 @@ def purchase_from_cart(request, payload):
             if pdf_id:
                 amount = _get_amount(data['id'])
                 if not amount:
-                    wms_layer = get_object_or_404(WMSLayer, code=data['code'])
+                    wms_layer_qs = WMSLayer.objects.filter(code=data['code'])
+                    wms_layer = wms_layer_qs.first()
+                    if not wms_layer:
+                        raise Http404
+
                     amount = wms_layer.feature_price
                     if not amount:
                         amount = 0
@@ -1473,10 +1493,12 @@ def _get_all_property_count(feature_info_list):
 def _calc_per_price(area, area_type, all_len_property, len_object_in_layer, selected_type):
     amount = None
     price = None
+    area = float(area)
     if area_type == 'km':
         amount = float(utils.get_config('POLYGON_PER_KM_AMOUNT'))
     if area_type == 'm':
         amount = float(utils.get_config('POLYGON_PER_M_AMOUNT'))
+
     if selected_type == 'shp' or selected_type == 'pdf':
         price = ((area * amount) + (all_len_property * float(utils.get_config('PROPERTY_PER_AMOUNT')))) * len_object_in_layer
     if selected_type == 'png' or selected_type == 'jpeg' or selected_type == 'tiff':
@@ -1605,20 +1627,44 @@ def _radius_formula(radius):
     radius = radius / 5 # солих шаардлагатай
     return radius
 
-
-def _get_geoserver_base_url():
-    conf_names = [
-        'geoserver_protocol',
-        'geoserver_host',
-        'geoserver_port',
-    ]
-    configs = utils.get_configs(conf_names)
-    base_url = '{protocol}://{host}:{port}'.format(
-        protocol=configs['geoserver_protocol'],
-        host=configs['geoserver_host'],
-        port=configs['geoserver_port'],
-    )
+def _get_geoserver_base_url(layer_code):
+    layer_qs = WMSLayer.objects
+    layer_qs = layer_qs.filter(code=layer_code)
+    layer = layer_qs.first()
+    if not layer:
+        return False
+    base_url = layer.wms.url
+    # conf_names = [
+    #     'geoserver_protocol',
+    #     'geoserver_host',
+    #     'geoserver_port',
+    # ]
+    # configs = utils.get_configs(conf_names)
+    # base_url = '{protocol}://{host}:{port}'.format(
+    #     protocol=configs['geoserver_protocol'],
+    #     host=configs['geoserver_host'],
+    #     port=configs['geoserver_port'],
+    # )
     return base_url
+
+
+def _get_namespace(feature_id):
+    namespace = 'gp_'
+    feature_qs = LFeatures.objects
+    feature_qs = feature_qs.filter(feature_id=feature_id)
+    feature = feature_qs.first()
+
+    pack_qs = LPackages.objects
+    pack_qs = pack_qs.filter(package_id=feature.package_id)
+    pack = pack_qs.first()
+
+    theme_qs = LThemes.objects
+    theme_qs = theme_qs.filter(theme_id=pack.theme_id)
+    theme = theme_qs.first()
+
+    namespace = namespace + theme.theme_code
+
+    return namespace
 
 
 @require_POST
@@ -1639,16 +1685,14 @@ def get_popup_info(request, payload):
         ]
     )
 
-    base_url = _get_geoserver_base_url()
-    base_url = base_url + "/geoserver/wfs"
-
-    cql_filter = "dwithin(geo_data, Point({x} {y}), {radius}, meters)".format(x=coordinate[1], y=coordinate[0], radius=radius)
+    cql_filter = "dwithin(geo_data,Point({x} {y}),{radius},meters)".format(x=coordinate[1], y=coordinate[0], radius=radius)
     gs_geo_id = 'inspire_id'
     geo_id = 'geo_id'
     success_codes = [200]
 
     for view in views_qs:
         view_name = view.view_name
+        feature_id = view.feature_id
 
         viewproperty_ids, property_qs = _get_properties_qs(view)
         properties = property_qs.values("property_code", "property_name", "value_type_id")
@@ -1661,14 +1705,21 @@ def get_popup_info(request, payload):
             'User-Agent': 'geo 1.0'
         }
 
-        code = utils.LAYERPREFIX + view_name
+        layer_code = utils.LAYERPREFIX + view_name
+        namespace = _get_namespace(feature_id)
+        code = namespace + ":" + layer_code
+        base_url = _get_geoserver_base_url(layer_code)
+        if not base_url:
+            continue
 
-        base_geoserver_url = '{url}?service=WFS&version=2.0.0&request=GetFeature&typeName={code}'.format(url=base_url, code=code)
+        base_url = base_url.replace('ows', 'wfs')
+
+        base_geoserver_url = '{url}?service=WFS&version=1.1.0&request=GetFeature&TYPENAME={code}'.format(url=base_url, code=code)
         base_geoserver_url = '{base_url}&propertyName={properties}'.format(base_url=base_geoserver_url, properties=select_properties.lower())
         base_geoserver_url = base_geoserver_url + '&' + 'CQL_FILTER={}'.format(cql_filter)
-        base_geoserver_url = base_geoserver_url + '&format_options=CHARSET:UTF-8'
+        base_geoserver_url = base_geoserver_url + "&" + "srsName=EPSG:4326"
         base_geoserver_url = base_geoserver_url + "&outputFormat=application/json"
-        base_geoserver_url = base_geoserver_url + "&" + "srs=EPSG%3A4326"
+        base_geoserver_url = base_geoserver_url + '&format_options=CHARSET:UTF-8'
 
         rsp = requests.get(base_geoserver_url, headers=headers, timeout=300, verify=False)
         content = rsp.content
@@ -1684,7 +1735,7 @@ def get_popup_info(request, payload):
             del ps[gs_geo_id]
 
             datas = list()
-            datas.append(code)
+            datas.append(layer_code)
             datas.append(list())
             for key, value in ps.items():
                 if key == geo_id:
@@ -1720,6 +1771,9 @@ def get_feature_info(request, payload):
         data['geom_ids'] = geom_ids
 
         view_qs = ViewNames.objects.filter(view_name=layer_code).first()
+        if not view_qs:
+            continue
+
         feature_id = view_qs.feature_id
         data['feature_id'] = feature_id
 
