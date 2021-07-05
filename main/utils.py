@@ -275,12 +275,19 @@ def _make_connection(from_email):
     return connection
 
 
-def _make_html(text, host_name, href):
+def get_protocol(host_name):
+
     protocol = 'https'
     not_secure_ips = ['192.168.10.92']
     if settings.DEBUG or host_name in not_secure_ips:
         protocol = 'http'
 
+    return protocol
+
+
+def _make_html(text, host_name, href):
+
+    protocol = get_protocol(host_name)
     host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
     href = host + href
 

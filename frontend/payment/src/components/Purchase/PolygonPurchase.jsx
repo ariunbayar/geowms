@@ -21,7 +21,6 @@ export class PolygonPurchase extends Component {
 
             purchase_all: [],
             qpay_modal_is: false,
-            is_modal_info_open: false,
             is_modal_open: 'closed',
             alert_msg: 'Монгол Банкаар төлбөр төлөх',
             email_modal_status: 'closed'
@@ -52,16 +51,16 @@ export class PolygonPurchase extends Component {
         }).catch(error => this.addNotif('danger', 'Алдаа гарсан', 'times'))
     }
 
-    modalChange(modal_icon, icon_color, title, text, has_button) {
+    modalChange(modal_icon, icon_color, title, text, has_button, modalClose) {
         this.setState({
             modal_icon: modal_icon,
             icon_color: icon_color,
             title: title,
             text: text,
             has_button: has_button,
+            modalClose: modalClose,
         })
         this.handleModalOpen()
-
     }
 
     handleModalOpen() {
@@ -83,14 +82,15 @@ export class PolygonPurchase extends Component {
     handlePayment (){
         const purchase_id = this.props.match.params.id
         const {purchase_all} = this.state
-        service.payment(purchase_all).then(({ success }) => {
-            if (success) {
-                this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
-            } else {
-                this.props.history.push(`/payment/failed/${purchase_id}/`)
-            }
-        })
-
+        service
+            .payment(purchase_all)
+            .then(({ success }) => {
+                if (success) {
+                    this.props.history.push(`/payment/history/api/details/${purchase_id}/`)
+                } else {
+                    this.props.history.push(`/payment/failed/${purchase_id}/`)
+                }
+            })
     }
 
     handleFormModalOpen(){
@@ -117,7 +117,7 @@ export class PolygonPurchase extends Component {
         })
     }
 
-    handleModalApproveClose(){
+    handleModalApproveClose() {
         const purchase_id = this.props.match.params.id
         if (!this.state.purchase_all.export_files) {
             service.downloadPurchase(purchase_id)
@@ -138,9 +138,10 @@ export class PolygonPurchase extends Component {
             "success",
             'Худалдан авалтын мэдээлэл',
             'Төлөлт амжилттай хийгдлээ. Татах линкийг таны баталгаажуулсан цахим хаягаар илгээх болно.',
-            false
+            false,
+            () => this.handleModalApproveClose()
         )
-        this.setState({ qpay_modal_is: false, is_modal_info_open: is_success })
+        this.setState({ qpay_modal_is: false, is_modal_open: 'open' })
     }
 
     alertOver(){
@@ -153,7 +154,7 @@ export class PolygonPurchase extends Component {
 
     render() {
         const purchase_id = this.props.match.params.id
-        const { alert_msg, is_modal_info_open, is_modal_open } = this.state
+        const { alert_msg, is_modal_open } = this.state
         const { items, layers, email_modal_status} = this.state
         return (
         <div className="container my-4">
@@ -215,19 +216,18 @@ export class PolygonPurchase extends Component {
                                 <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
-                        { is_modal_open &&
-                            <Modal
-                                modalAction={() => this.handleQpay()}
-                                actionNameDelete="Үргэлжлүүлэх"
-                                model_type_icon="warning"
-                                modal_status={is_modal_open}
-                                modal_icon={this.state.modal_icon}
-                                icon_color={this.state.icon_color}
-                                title={this.state.title}
-                                text={this.state.text}
-                                has_button={this.state.has_button}
-                            />
-                        }
+                        <Modal
+                            modalAction={() => this.handleQpay()}
+                            actionNameDelete="Үргэлжлүүлэх"
+                            model_type_icon="warning"
+                            modal_status={is_modal_open}
+                            modal_icon={this.state.modal_icon}
+                            icon_color={this.state.icon_color}
+                            title={this.state.title}
+                            text={this.state.text}
+                            has_button={this.state.has_button}
+                            modalClose={this.state.modalClose}
+                        />
                         <EmailModalForm
                             modalAction={() => this.handleModalOpen()}
                             modalClose={() => this.handleFormModalClose()}
@@ -253,18 +253,6 @@ export class PolygonPurchase extends Component {
                 </div>
             </div>
             <div className={this.state.qpay_modal_is ? 'modal-backdrop fade show' : 'd-none'}></div>
-
-            {
-             is_modal_info_open &&
-                <Modal
-                    modal_status={is_modal_info_open}
-                    modal_icon={this.state.modal_icon}
-                    icon_color={this.state.icon_color}
-                    title={this.state.title}
-                    text={this.state.text}
-                    has_button={this.state.has_button}
-                />
-            }
             <Notif show={this.state.show} too={this.too} style={this.state.style} msg={this.state.msg} icon={this.state.icon}/>
         </div>
         )

@@ -972,7 +972,7 @@ export default class BundleMap extends Component {
         return geom
     }
 
-    toggleDrawed(event){
+    async toggleDrawed(event){
         this.feature_info_list = []
         this.controls.drawModal.showModal(true)
         let layer_codes = []
@@ -1046,18 +1046,15 @@ export default class BundleMap extends Component {
 
         const coordinates = event.feature.getGeometry().getCoordinates()
         const trans_coordinates = this.transformToLatLong(coordinates)
-        service
-            .getFeatureInfo(layer_codes, trans_coordinates)
-            .then(({ datas }) => {
-                layer_ids.map(([layer_code, layer_id], idx) => {
-                    datas.map((data, idx) => {
-                        if (data.layer_code == layer_code) {
-                            datas[idx]['layer_id'] = layer_id
-                        }
-                    })
-                })
-                this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, datas)
+        const { datas } = await service.getFeatureInfo(layer_codes, trans_coordinates)
+        layer_ids.map(([layer_code, layer_id], idx) => {
+            datas.map((data, idx) => {
+                if (data.layer_code == layer_code) {
+                    datas[idx]['layer_id'] = layer_id
+                }
             })
+        })
+        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, datas)
     }
 
     formatArea(polygon) {
