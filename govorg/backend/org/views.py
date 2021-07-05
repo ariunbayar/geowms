@@ -207,16 +207,20 @@ def frontend(request):
 
     approve = False
     revoke = False
-
+    has_position = False
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
+    employee = [ 'position']
+    employee = employee.filter(employee.mergejilten).first()
 
     emp_perm = employee.empperm_set.first()
     if emp_perm:
         emp_perm_insp = emp_perm.empperminspire_set
         approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
         revoke = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_REVOKE).first()
+    if org.level == 2 and  employee.mergejilten:
+        has_position = True
 
     context = {
         'org': {
@@ -227,6 +231,7 @@ def frontend(request):
                 'username': employee.user.username,
                 'geo_id': org.geo_id or None
             },
+            'has_position': has_position,
             'allowed_geom': geom.json if geom else None,
             'approve': True if approve else False,
             'revoke': True if revoke else False,
