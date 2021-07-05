@@ -40,7 +40,7 @@ from govorg.backend.org_request.models import ChangeRequest
 from .forms import EmployeeAddressForm
 from main.components import Datatable
 from geoportal_app.forms import UserForm
-# from .forms import EmployeeForm
+from .forms import EmployeeForm
 
 from main.decorators import ajax_required
 from main import utils
@@ -211,120 +211,67 @@ def _get_address_state_code(address_state):
 @user_passes_test(lambda u: u.is_superuser)
 def employee_update(request, payload, pk, level):
     payload = payload.get("payload")
-
     values = payload.get('values')
-    username = values.get('username')
-    position = int(values.get('position'))
-    state = values.get('state')
-    first_name = values.get('first_name')
-    last_name = values.get('last_name')
-    email = values.get('email')
-    gender = values.get('gender')
-    register = values.get('register')
-    is_admin = values.get('is_admin')
     password = values.get('password')
-    is_super = values.get('is_super')
-    pro_class = values.get('pro_class')
-    phone_number = values.get('phone_number')
     is_user = values.get('is_user')
-    address = payload.get('address')
-    level_1 = address.get('level_1')
-    level_2 = address.get('level_2')
-    level_3 = address.get('level_3')
-    street = address.get('street')
-    apartment = address.get('apartment')
-    door_number = address.get('door_number')
-    point_coordinate = address.get('point')
-    address_state = address.get('address_state')
-    point = _get_point_for_db(point_coordinate)
-    address['point'] = point
 
-    user = get_object_or_404(User, pk=pk)
-    errors = _employee_validation(values, user)
-    form = EmployeeAddressForm(address)
+    qs_user = User.objects
+    qs_user = qs_user.filter(id=pk)
+    if not qs_user:
+        raise Http404
+
+    user = qs_user.first()
+    user_detail = _make_user_detail(values)
+    errors = _user_validition(user_detail, user)
+
+    employee_detail = _make_employee_detail(values)
+    qs_employee = Employee.objects
+    qs_employee = qs_employee.filter(user_id=pk)
+    if not qs_employee:
+        raise Http404
+
+    employee = qs_employee.first()
+    errors.update(_employee_validition(employee_detail, employee))
+
+    employee_add = _make_employee_add(payload)
+    qs_address = EmployeeAddress.objects
+    qs_address = qs_address.filter(employee=employee)
+    if not qs_address:
+        raise Http404
+
+    employee_address = qs_address.first()
+    errors.update(_employee_add_validator(employee_add, employee_address))
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
-    if level == 4:
-        is_super = is_super
-    else:
-        is_super = False
+    with transaction.atomic():
+        if password:
+            password = user.set_password(password)
+            user_detail['password'] = password
 
-    if form.is_valid() and not errors:
-        with transaction.atomic():
-            user.first_name = first_name
-            user.last_name = last_name
-            user.email = email
-            user.gender = gender
-            user.register = register.upper()
-            user.username = username
-            user.is_superuser = is_super
-            user.is_user = is_user or False
-            if password:
-                user.set_password(password)
-            if is_user:
-                user.is_active = True
-            else:
-                user.is_active = False
-            user.save()
+        qs_user.update(**user_detail)
 
-            if pro_class:
-                pro_class = int(pro_class)
-            else:
-                pro_class = None
+        qs_employee.update(**employee_detail)
 
-            employee = Employee.objects
-            employee = employee.filter(user_id=pk)
-            employee.update(
-                position=position,
-                is_admin=is_admin,
-                phone_number=phone_number,
-                state=state,
-                pro_class=pro_class,
-            )
-            employee = employee.first()
+        if qs_address:
+            qs_address.update(**employee_add)
+        else:
+            employee_add['employee'] = employee
+            qs_address.create(**employee_add)
 
-            address = EmployeeAddress.objects
-            address = address.filter(employee=employee)
-            address_state = _get_address_state_code(address_state)
-            if address:
-                address.update(
-                    point=point,
-                    level_1=level_1,
-                    level_2=level_2,
-                    level_3=level_3,
-                    street=street,
-                    apartment=apartment,
-                    door_number=door_number,
-                    address_state=address_state,
-                )
-            else:
-                address.create(
-                    employee=employee,
-                    point=point,
-                    level_1=level_1,
-                    level_2=level_2,
-                    level_3=level_3,
-                    street=street,
-                    apartment=apartment,
-                    door_number=door_number,
-                    address_state=address_state,
-                )
         if is_user:
             utils.send_approve_email(user)
-            
+
         rsp = {
-            'success': True, 'errors': errors
+            'success': True,
+            'employee': {
+                'id': employee.id,
+                'user_id': employee.user_id,
+            }
         }
 
-    else:
-        rsp = {
-            'success': False,
-            'errors': {**form.errors, **errors},
-        }
-
-    return JsonResponse(rsp)
+        return JsonResponse(rsp)
 
 
 def _get_point_for_db(coordinate):
@@ -344,12 +291,17 @@ def _make_user_detail(values):
 
     user_detail['is_superuser'] = values.get('is_super') if values.get('is_super') else False
     user_detail['is_active'] = values.get('is_user')
+    user_detail['register'] = values.get('register').upper()
 
     return user_detail
 
 
-def _user_validition(user_detail):
-    form = UserForm(user_detail)
+def _user_validition(user_detail, user=None):
+    if user:
+        form = UserForm(user_detail, instance=user)
+    else:
+        form = UserForm(user_detail)
+
     if not form.is_valid():
         return form.errors
 
@@ -359,171 +311,95 @@ def _user_validition(user_detail):
 def _make_employee_detail(values):
     keys = [
         'id', 'username',  'first_name', 'last_name', 'email',
-        'position', 'gender', 'is_super', 'is_user'
+        'position', 'gender', 'is_super', 'is_user', 'register',
     ]
     employee_detail = utils.key_remove_of_dict(values, keys)
     employee_detail['position_id'] = values.get('position')
     employee_detail['token'] = TokenGeneratorEmployee().get()
+    employee_detail['pro_class'] = int(values.get('pro_class')) if values.get('pro_class') else None
 
     return employee_detail
 
 
-def _employee_validition(employee_detail):
-    form = EmployeeForm(employee_detail)
+def _employee_validition(employee_detail, employee=None):
+    if employee:
+        form = EmployeeForm(employee_detail, instance=employee)
+    else:
+        form = EmployeeForm(employee_detail)
     if not form.is_valid():
         return form.errors
 
     return {}
 
 
+def _make_employee_add(payload):
+    address = payload.get('address')
+    point_coordinate = address.get('point')
+    point = _get_point_for_db(point_coordinate)
+    address_state = address.get('address_state')
+
+    address['point'] = point
+    address['address_state'] = _get_address_state_code(address_state)
+
+    return address
+
+
+def _employee_add_validator(employee_add, employee_address=None):
+    if employee_address:
+        form = EmployeeAddressForm(employee_add, instance=employee_address)
+    else:
+        form = EmployeeAddressForm(employee_add)
+
+    if not form.is_valid():
+        return form.errors
+
+    return {}
+
 
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_add(request, payload, level, pk):
-    import json
-
     payload = payload.get('payload')
     values = payload.get('values')
-    username = values.get('username')
+    is_user = values.get('is_user')
 
-    # org = get_object_or_404(Org, pk=pk, level=level)
+    org = get_object_or_404(Org, pk=pk, level=level)
 
-    # user_detail = _make_user_detail(values)
-    # errors = _user_validition(user_detail)
+    user_detail = _make_user_detail(values)
+    errors = _user_validition(user_detail)
 
+    employee_detail = _make_employee_detail(values)
+    errors.update(_employee_validition(employee_detail))
 
-    # employee_detail = _make_employee_detail(values)
-    # errors.update(_employee_validition(employee_detail))
-    errors = {}
-
-    print(errors)
-
+    employee_add = _make_employee_add(payload)
+    errors.update(_employee_add_validator(employee_add))
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
-    # with transaction.atomic():
-    #     user = User.objects.create(**user_detail)
-    #     token = TokenGeneratorEmployee().get()
+    with transaction.atomic():
+        user = User.objects.create(**user_detail)
 
+        employee_detail['org'] = org
+        employee_detail['user'] = user
+        employee = Employee.objects.create(**employee_detail)
 
-    #     raise Exception('lol')
+        employee_add['employee'] = employee
+        EmployeeAddress.objects.create(**employee_add)
 
-    #     # return JsonResponse({'success': True, 'data': 'Амжилттай'})
+        if is_user:
+            utils.send_approve_email(user)
 
+        rsp = {
+            'success': True,
+            'employee': {
+                'id': employee.id,
+                'user_id': employee.user_id,
+            }
+        }
 
-
-
-    # username = values.get('username')
-    # position = int(values.get('position'))
-    # state = values.get('state')
-    # first_name = values.get('first_name')
-    # last_name = values.get('last_name')
-    # email = values.get('email')
-    # gender = values.get('gender')
-    # pro_class = values.get('pro_class')
-    # register = values.get('register')
-    # is_admin = values.get('is_admin')
-    # is_super = values.get('is_super')
-    # phone_number = values.get('phone_number')
-    # is_user = values.get('is_user')
-
-
-
-
-    # raise Exception('lool')
-    
-
-
-
-    # address = payload.get('address')
-    # level_1 = address.get('level_1')
-    # level_2 = address.get('level_2')
-    # level_3 = address.get('level_3')
-    # street = address.get('street')
-    # apartment = address.get('apartment')
-    # address_state = address.get('address_state')
-    # door_number = address.get('door_number')
-    # point_coordinate = address.get('point')
-    # point = _get_point_for_db(point_coordinate)
-
-    # address['point'] = point
-
-    # errors = {}
-    # errors = _employee_validation(values, None)
-    # form = EmployeeAddressForm(address)
-
-    # if errors:
-    #     return JsonResponse({'success': False, 'errors': errors})
-
-
-    # if form.is_valid() and not errors:
-    #     with transaction.atomic():
-
-    #         user = User()
-    #         user.username = username
-    #         user.first_name = first_name
-    #         user.last_name = last_name
-    #         user.email = email
-    #         user.gender = gender
-    #         user.is_superuser = is_super if org.level == 4 else False
-    #         user.register = register.upper()
-    #         user.is_user = is_user or False
-    #         if is_user:
-    #             user.is_active = True
-    #         else:
-    #             user.is_active = False
-    #         user.save()
-    #         user.roles.add(2)
-    #         user.save()
-
-    #         if pro_class:
-    #             pro_class = int(pro_class)
-    #         else:
-    #             pro_class = None
-
-    #         employee = Employee()
-    #         employee.position_id = position
-    #         employee.state = state
-    #         employee.org = org
-    #         employee.user_id = user.id
-    #         employee.is_admin = is_admin
-    #         employee.token = TokenGeneratorEmployee().get()
-    #         employee.phone_number = phone_number
-    #         employee.pro_class = pro_class
-    #         employee.save()
-
-    #         employee_address = EmployeeAddress()
-    #         employee_address.employee = employee
-    #         employee_address.level_1 = level_1
-    #         employee_address.level_2 = level_2
-    #         employee_address.level_3 = level_3
-    #         employee_address.street = street
-    #         employee_address.apartment = apartment
-    #         employee_address.door_number = door_number
-    #         employee_address.point = point
-    #         employee_address.address_state = _get_address_state_code(address_state)
-    #         employee_address.save()
-
-    #         if is_user:
-    #             utils.send_approve_email(user)
-
-    #     rsp = {
-    #         'success': True,
-    #         'employee': {
-    #             'id': employee.id,
-    #             'user_id': employee.user_id,
-    #         }
-    #     }
-
-    # else:
-    #     rsp = {
-    #         'success': False,
-    #         'errors': {**form.errors, **errors},
-    #     }
-
-    # return JsonResponse(rsp)
+        return JsonResponse(rsp)
 
 
 def _set_state(employee):
