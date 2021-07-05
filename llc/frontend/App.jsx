@@ -35,16 +35,16 @@ export class App extends Component {
     }
 
     requestCount() {
-        service.getCount().then(({ success, request_count }) => {
-            if (success) {
-                this.setState({ request_count })
+        service.getCount().then(({ success, count }) => {
+            if (success){
+                this.setState({ count })
             }
         })
     }
 
     render() {
         const { llc } = this.props
-        const { request_count } = this.state
+        const { count } = this.state
         return (
             <div>
                 <DisplayModal getModalFunc={this.getModalFunc}/>
@@ -60,8 +60,8 @@ export class App extends Component {
                             </div>
                             <ul className="sidebar-menu do-nicescrol">
                                 <MenuItem icon="gp-text-primary fa fa-database" url="/llc/map/" text="Map"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт" count={request_count}></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Шийдвэрлэгдсэн хүсэлт"></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт" count={count && count.request_count}></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Шийдвэрлэгдсэн хүсэлт" count={count && count.solved_count}></MenuItem>
                             </ul>
                         </div>
                         <div className="clearfix">
