@@ -27,6 +27,7 @@ def all(request):
         base_layer_list.append({
             'tilename': base_layer.tilename,
             'url': base_layer.url,
+            'name': base_layer.name,
             'geoserver_url': wms.cache_url if wms else '',
             'thumbnail_1x': base_layer.thumbnail_1x.url,
             'thumbnail_2x': base_layer.thumbnail_2x.url,
@@ -36,4 +37,5 @@ def all(request):
     rsp = {
         'base_layer_list': base_layer_list,
     }
+
     return JsonResponse(rsp)
