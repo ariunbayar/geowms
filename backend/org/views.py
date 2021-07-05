@@ -883,6 +883,8 @@ def perm_get_list(request, payload):
 @user_passes_test(lambda u: u.is_superuser)
 def create_perm(request, payload):
     values = payload.get('values')
+    role_id = payload.get('pk')
+
     name_check = GovRole.objects.filter(name=values['name'])
     errors = {}
     if name_check:
@@ -898,10 +900,42 @@ def create_perm(request, payload):
             'errors': errors,
         }
     else:
-        GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
+        if role_id:
+            GovRole.objects.filter(id=role_id).update(name=values['name'], description=values['description'])
+        else:
+            GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
         rsp = {
             'success': True,
         }
+
+    return JsonResponse(rsp)
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def role_detail(request, pk):
+    role = GovRole.objects.filter(id=pk).first()
+
+    rsp = {
+        'success': True,
+        'name': role.name,
+        'description': role.description
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def remove_role(request, pk):
+    role = GovRole.objects.filter(id=pk).first()
+    role.delete()
+
+    rsp = {
+        'success': True,
+    }
 
     return JsonResponse(rsp)
 
