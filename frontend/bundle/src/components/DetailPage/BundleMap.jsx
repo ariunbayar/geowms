@@ -1140,8 +1140,6 @@ export default class BundleMap extends Component {
 
     render() {
 
-        console.log(this.state.base_layer_controls);
-
         const Menu_comp = () => {
             return (
                 <div>
