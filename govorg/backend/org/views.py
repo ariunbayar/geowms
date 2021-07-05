@@ -33,11 +33,14 @@ def _get_properties_by_feature(initial_qs, feature_ids):
 
     qs = initial_qs
     qs = qs.filter(property_id__isnull=False)
-
+    qs = qs.exclude(property_id=1)
     qs_for_props = qs.values_list('property_id', flat=True)
+    property = LProperties.objects
+    property = property.exclude(value_type_id='data-type')
+    property = property.exclude(property_code='localId')
     properties = {
         prop.property_id: prop
-        for prop in LProperties.objects.filter(property_id__in=qs_for_props)
+        for prop in property.filter(property_id__in=qs_for_props)
     }
 
     item_pairs = qs.values_list('feature_id', 'property_id', 'perm_kind')
@@ -97,10 +100,9 @@ def _org_role(org):
                 get_property_data_display2(perm_list, None, feature_id, geom=True)
             )
             property_perm_count = count_property_of_feature(props)
-
-            for perm in perm_list:
-                kind_name = get_perm_kind_name(perm['kind'])
-                property_perm_count[kind_name] = property_perm_count[kind_name] + 1
+            # for perm in perm_list:
+            #     kind_name = get_perm_kind_name(perm['kind'])
+            #     property_perm_count[kind_name] = property_perm_count[kind_name] + 1
 
             property_ids_of_feature[feature_id] = property_perm_count
 

@@ -10,6 +10,7 @@ from backend.inspire.models import (
     LFeatureConfigs,
     LDataTypeConfigs,
     LPackages,
+    LProperties,
     LThemes,
     MGeoDatas,
 )
@@ -132,14 +133,11 @@ def get_property_data_display2(perm_list, prop, feature_id, geom):
 def get_all_child_feature(feature_id):
 
     data_type_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).exclude(data_type_id__isnull=True).values_list('data_type_id', flat=True))
-
-    properties = []
-    for data_type_id in data_type_ids:
-        l_data_type_configs = LDataTypeConfigs.objects.filter(data_type_id=data_type_id).values_list('property_id', flat=True)
-
-        for l_data_type_config in l_data_type_configs:
-            properties.append(l_data_type_config)
-
+    data_type_qs = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
+    properties = list(data_type_qs.values_list('property_id', flat=True))
+    properties = LProperties.objects.filter(property_id__in=properties)
+    properties = properties.exclude(value_type_id='data-type')
+    properties = properties.exclude(property_code='localId')
     return len(properties)
 
 
