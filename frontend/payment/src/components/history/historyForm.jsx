@@ -1,8 +1,9 @@
 
 import React, { Component } from "react"
-import {service} from '../service'
-import {HistoryTable} from './historyTable'
+import { HistoryTable } from './historyTable'
 import { Pagination } from "../../../../pagination/pagination"
+
+import { service } from '../service'
 
 
 export default class HistoryForm extends Component {
@@ -34,35 +35,38 @@ export default class HistoryForm extends Component {
     render() {
         const { payment, payment_length, is_loading } = this.state
         return (
-            <div className="card">
-                <div className="card-body">
-                    <div className="container pt-0">
-                        {
-                            is_loading ?
+            <div className="card-body">
+                <div className="container pt-0">
+                    {
+                        is_loading
+                        ?
                             <div className="container pt-0">
                                 <div className="d-flex justify-content-center">
                                     <div className="fa fa-spinner fa-pulse fa-3x fa-fw">
                                     </div>
                                 </div>
                             </div>
-                            :
+                        :
                             <div className="row">
-                                { payment_length === 0 ?
-                                    <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>:
+                                {
+                                    payment_length === 0
+                                    ?
+                                        <tr><td>Худалдан авалт бүртгэлгүй байна</td></tr>
+                                    :
                                         payment.map((p, idx) =>
                                             <HistoryTable
                                                 key={idx}
                                                 values={p}
-                                            >
-                                            </HistoryTable>
+                                            />
                                         )
                                 }
                             </div>
-                        }
-                        {payment_length !=0 &&
+                    }
+                    {
+                        payment_length != 0
+                        &&
                             <Pagination paginate = { this.paginate }/>
-                        }
-                    </div>
+                    }
                 </div>
             </div>
         )
