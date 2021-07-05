@@ -10,7 +10,6 @@ const validationSchema = Yup.object().shape({
         .required('Хоосон байна e-mail хаяг оруулна уу.'),
 })
 
-
 export default class EmailModalForm extends Component {
 
     constructor(props) {
@@ -50,12 +49,12 @@ export default class EmailModalForm extends Component {
         }, 0)
     }
 
-    handleClose(callback) {
+    handleClose(callback, info) {
         this.setState({status: 'closing'})
         setTimeout(() => {
             this.setState({status: 'closed'})
             if (callback) {
-                callback()
+                callback(info)
             } else {
                 this.setState({ status: 'closed' })
                 if (this.props.modalClose) {
@@ -66,16 +65,19 @@ export default class EmailModalForm extends Component {
     }
 
     handleProceed(values, { setStatus, setSubmitting, setErrors }) {
-        service.setEmail(values.email).then(({success, errors}) => {
-            if (success) {
-                setStatus('saved')
-                setSubmitting(false)
-                this.handleClose(this.props.modalAction)
-            }else{
-                setErrors(errors)
-                setSubmitting(false)
-            }
-        })
+        service
+            .setEmail(values.email)
+            .then(({ success, info, errors }) => {
+                if (success) {
+                    setStatus('saved')
+                    setSubmitting(false)
+                    this.handleClose(this.props.modalAction, info)
+                }
+                else {
+                    setErrors(errors)
+                    setSubmitting(false)
+                }
+            })
     }
 
     render () {

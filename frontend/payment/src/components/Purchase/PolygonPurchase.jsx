@@ -63,6 +63,17 @@ export class PolygonPurchase extends Component {
         this.handleModalOpen()
     }
 
+    successModal(info) {
+        this.modalChange(
+            'fa fa-check-circle',
+            'success',
+            info,
+            '',
+            false
+        )
+        this.handleModalOpen()
+    }
+
     handleModalOpen() {
         this.setState({ is_modal_open: 'open' }, () => {
             this.setState({ is_modal_open: 'initial' })
@@ -229,7 +240,7 @@ export class PolygonPurchase extends Component {
                             modalClose={this.state.modalClose}
                         />
                         <EmailModalForm
-                            modalAction={() => this.handleModalOpen()}
+                            modalAction={(info) => this.successModal(info)}
                             modalClose={() => this.handleFormModalClose()}
                             status={email_modal_status}
                         />
