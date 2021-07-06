@@ -10,17 +10,8 @@ import './style.css'
 //     is_multiple                          //Олон файл оруулах үед ашиглана value True  байна.
 // />
 
-// fileAction(value, action, is_multiple){
-//     var files = this.state.files
-//     if (action == 'Get_File') {
-//         const uploaded_file = value.target.files[0]
-
-//         if (is_multiple ) { files.push(uploaded_file) }
-//         else { files[0] = uploaded_file }
-//     }
-//     else { files.splice(value, 1) }
-
-//     this.setState({files})
+// getFile(files){
+//     this.setState({ files })
 // }
 
 
