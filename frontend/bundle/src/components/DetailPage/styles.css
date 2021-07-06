@@ -401,3 +401,19 @@ element.style {
 .borderless th {
     text-transform: lowercase;
 }
+
+.wms-layer-items {
+    list-style: none;
+    margin-bottom: 5px;
+}
+
+.gp-font-plus {
+    cursor: pointer;
+    color: #034ea2;
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+.gp-font-plus:hover {
+    color: rgba(3, 78, 162, 0.7);
+}
