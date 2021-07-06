@@ -60,15 +60,21 @@ class ModalComponent extends Component{
             layer_list,
             selected_type,
         }
-        service.paymentDraw(values).then(({ success, payment_id }) => {
-            if (success) {
-                window.location.href = `/payment/purchase/polygon/${payment_id}/`;
-            }
-        }).catch((error) => {
-            alert("Алдаа гарсан байна")
-            this.setState({handlePaymentIsLoad: false})
-        })
-
+        service
+            .paymentDraw(values)
+            .then(({ success, error, payment_id }) => {
+                if (success) {
+                    window.location.href = `/payment/purchase/polygon/${payment_id}/`;
+                }
+                else {
+                    alert(error)
+                    this.setState({ handlePaymentIsLoad: false })
+                }
+            })
+            .catch((error) => {
+                alert("Алдаа гарсан байна")
+                this.setState({ handlePaymentIsLoad: false })
+            })
     }
 
     render() {

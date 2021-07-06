@@ -145,7 +145,7 @@ export default class Modal extends Component {
                         <div className={`modal-content border-0 rounded-lg ${this.props.modal_bg ? this.props.modal_bg : 'bg-light'}`} >
                             <div className="col-md-12 offset-md-12 float-right my-1">
                                 <button type="button" className="close mt-2 mr-2" aria-label="Close">
-                                    <span aria-hidden="true" onClick={() => this.handleClose()} >&times;</span>
+                                    <span aria-hidden="true" onClick={() => this.modalClose()} >&times;</span>
                                 </button>
                             </div>
                             <div className="d-flex justify-content-center">

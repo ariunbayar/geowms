@@ -12,7 +12,7 @@ export default class SideBar extends Component {
         this.activeState = this.activeState.bind(this)
     }
 
-    componentDidMount(){
+    componentDidMount() {
 
     }
 
@@ -45,12 +45,14 @@ export default class SideBar extends Component {
                 <div className="sidebar-content">
                 {items.map((item, idx) =>
                     <div key={idx} className={active_menu == item.key ? "sidebar-pane active" : "sidebar-pane"}>
-                        {item.title &&
-                            <h1 className="sidebar-header">
-                            {item.title}
-                            </h1>
+                        {
+                            item.title
+                            &&
+                                <h1 className="sidebar-header">
+                                    {item.title}
+                                </h1>
                         }
-                        {<item.component/>}
+                        {<item.component />}
                     </div>
                 )}
                 </div>

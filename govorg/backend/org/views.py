@@ -212,14 +212,14 @@ def frontend(request):
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
     employee = [ 'position']
-    employee = employee.filter(employee.mergejilten).first()
+    has_position = Position.objects.filter(name='Мэргэжилтэн')
 
     emp_perm = employee.empperm_set.first()
     if emp_perm:
         emp_perm_insp = emp_perm.empperminspire_set
         approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
         revoke = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_REVOKE).first()
-    if org.level == 2 and  employee.mergejilten:
+    if org.level == 2 and  has_position:
         has_position = True
 
     context = {
