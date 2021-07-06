@@ -70,8 +70,7 @@ function FileUpload(props) {
         SetFiles(file_list)
     }
 
-    const { className, default_text, accept, is_multiple, info_text } = props
-    var is_validate = true
+    const { className, default_text, accept, is_multiple, info_text, is_validate } = props
     var last_file = files[files.length-1]
     if (last_file){
         var default_files = last_file.name
