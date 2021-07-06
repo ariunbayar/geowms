@@ -465,7 +465,6 @@ def make_view(request):
     fid = request.POST.get('fid')
     file = request.FILES['files'] if request.FILES else ''
     values = request.POST.get('values')
-
     values = utils.json_load(values)
     values = values['values']
 
@@ -506,16 +505,17 @@ def _import_feature_template(file, theme, feature, get_options ):
     feature_folder = os.path.join(theme_folder, feature_name)
 
     if not get_options:
-        if file:
-            if not os.path.exists(theme_folder):
-                os.makedirs(theme_folder)
-            if not os.path.exists(feature_folder):
-                    os.makedirs(feature_folder)
+        if not os.path.exists(theme_folder):
+            os.makedirs(theme_folder)
+        if not os.path.exists(feature_folder):
+                os.makedirs(feature_folder)
 
-            folder_list = os.listdir(feature_folder)
-            for item in folder_list:
-                utils.remove_file(feature_folder + '/' + item)
+        folder_list = os.listdir(feature_folder)
+        for item in folder_list:
+            print(item)
+            utils.remove_file(feature_folder + '/' + item)
 
+        if file :
             utils.save_file_to_storage(file, feature_folder, file.name)
 
     else :
@@ -565,8 +565,7 @@ def propertyFieldsSave(request):
         }
     )[0]
 
-    if file:
-        _import_feature_template(file, theme, feature, False)
+    _import_feature_template(file, theme, feature, False)
 
     view_prop_qs = ViewProperties.objects
     view_prop_qs.filter(view=view).delete()

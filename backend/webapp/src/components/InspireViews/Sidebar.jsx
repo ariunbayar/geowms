@@ -350,7 +350,7 @@ export default class SideBar extends Component {
     }
 
     getFile(files) {
-        this.setState({files})
+        this.setState({ files })
     }
 
     render() {
