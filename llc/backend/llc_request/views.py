@@ -729,24 +729,6 @@ def get_search_field(request, content):
     })
 
 
-""" 
- @require_POST
-@ajax_required
-@llc_required(lambda u: u)
-def get_count(request, content):
-    company_name = content.get('company_name')
-    request_count = RequestFiles.objects.filter(name__exact=company_name)
-    solved_count = RequestFiles.objects.filter(name__exact=company_name)
-
-    if request_count:
-        request_count = request_count.exclude(state=RequestFiles.STATE_SOLVED)
-    else:
-        request_count = solved_count.filter(state=RequestFiles.STATE_SOLVED)
-
-        return JsonResponse({
-        })  """
-
-
 @require_GET
 @ajax_required
 @llc_required(lambda u: u)
@@ -763,5 +745,5 @@ def get_count(request, content):
 
     return JsonResponse({
         'success': True,
-        'count': count,
+        'counts': count,
     })

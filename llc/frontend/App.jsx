@@ -18,6 +18,7 @@ export class App extends Component {
         super(props)
         this.state = {
             request_count: 0,
+            solved_count: 0
         }
     this.requestCount = this.requestCount.bind(this)
     }
@@ -35,16 +36,16 @@ export class App extends Component {
     }
 
     requestCount() {
-        service.getCount().then(({ success, count }) => {
+        service.getCount().then(({ success, counts }) => {
             if (success){
-                this.setState({ count })
+                this.setState({ ...counts })
             }
         })
     }
 
     render() {
         const { llc } = this.props
-        const { count } = this.state
+        const { solved_count, request_count } = this.state
         return (
             <div>
                 <DisplayModal getModalFunc={this.getModalFunc}/>
@@ -60,8 +61,8 @@ export class App extends Component {
                             </div>
                             <ul className="sidebar-menu do-nicescrol">
                                 <MenuItem icon="gp-text-primary fa fa-database" url="/llc/map/" text="Map"></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт" count={count && count.request_count}></MenuItem>
-                                <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Шийдвэрлэгдсэн хүсэлт" count={count && count.solved_count}></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-plug" url="/llc/llc-request/" text="Хүсэлт" count={request_count}></MenuItem>
+                                <MenuItem icon="gp-text-primary fa fa-history" url="/llc/history/" text="Шийдвэрлэгдсэн хүсэлт" count={solved_count}></MenuItem>
                             </ul>
                         </div>
                         <div className="clearfix">
