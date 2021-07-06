@@ -1,3 +1,4 @@
+from govorg.backend.role import employee
 import os
 import io
 from django.http.response import Http404
@@ -143,61 +144,6 @@ def employee_token_refresh(request, pk):
     return JsonResponse(rsp)
 
 
-def _employee_validation(payload, user):
-    username = payload.get('username')
-    position = payload.get('position')
-    first_name = payload.get('first_name')
-    last_name = payload.get('last_name')
-    email = payload.get('email')
-    gender = payload.get('gender')
-    register = payload.get('register')
-    errors = {}
-    if not username:
-        errors['username'] = 'Хоосон байна утга оруулна уу!'
-    elif len(username) > 150:
-        errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
-    if not position:
-        errors['position'] = 'Хоосон байна утга оруулна уу!'
-    if not first_name:
-        errors['first_name'] = 'Хоосон байна утга оруулна уу!'
-    elif len(first_name) > 30:
-        errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
-    if not last_name:
-        errors['last_name'] = 'Хоосон байна утга оруулна уу!'
-    elif len(last_name) > 150:
-        errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
-    if not email:
-        errors['email'] = 'Хоосон байна утга оруулна уу!'
-    elif len(email) > 254:
-        errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
-    if not gender:
-        errors['gender'] = 'Хоосон байна утга оруулна уу!'
-    elif len(gender) > 100:
-        errors['gender'] = '100-с илүүгүй урттай утга оруулна уу!'
-    if not register:
-        errors['register'] = 'Хоосон байна утга оруулна уу!'
-    if user:
-        if user.email != email:
-            if User.objects.filter(email=email).first():
-                errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-        if user.username != username:
-            if User.objects.filter(username=username).first():
-                errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
-    else:
-        if User.objects.filter(email=email).first():
-            errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-        if User.objects.filter(username=username).first():
-            errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
-    if not utils.is_email(email):
-        errors['email'] = 'Email хаяг алдаатай байна.'
-    if len(register) ==  10:
-        if not utils.is_register(register):
-            errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
-    else:
-        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
-    return errors
-
-
 def _get_address_state_code(address_state):
     if address_state:
         address_state = EmployeeAddress.STATE_REGULER_CODE
@@ -222,7 +168,6 @@ def employee_update(request, payload, pk, level):
 
     user = qs_user.first()
     user_detail = _make_user_detail(values)
-    errors = _user_validition(user_detail, user)
 
     employee_detail = _make_employee_detail(values)
     qs_employee = Employee.objects
@@ -231,7 +176,6 @@ def employee_update(request, payload, pk, level):
         raise Http404
 
     employee = qs_employee.first()
-    errors.update(_employee_validition(employee_detail, employee))
 
     employee_add = _make_employee_add(payload)
     qs_address = EmployeeAddress.objects
@@ -240,6 +184,8 @@ def employee_update(request, payload, pk, level):
         raise Http404
 
     employee_address = qs_address.first()
+    errors = _user_validition(user_detail, user)
+    errors.update(_employee_validition(employee_detail, employee))
     errors.update(_employee_add_validator(employee_add, employee_address))
 
     if errors:
@@ -251,9 +197,7 @@ def employee_update(request, payload, pk, level):
             user_detail['password'] = password
 
         qs_user.update(**user_detail)
-
         qs_employee.update(**employee_detail)
-
         if qs_address:
             qs_address.update(**employee_add)
         else:
@@ -356,6 +300,24 @@ def _employee_add_validator(employee_add, employee_address=None):
     return {}
 
 
+def _is_fired_employee(username, qs_user, qs_employee):
+    qs_user = qs_user.filter(username=username)
+    user = qs_user.first()
+
+    if not user:
+        return False, None, None
+
+    qs_employee = qs_employee.filter(user=user)
+    employee = qs_employee.first()
+    if not employee:
+        return False, None, None
+
+    if employee.state == 3:
+        return True, user, employee
+
+    return False, None, None
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -363,30 +325,58 @@ def employee_add(request, payload, level, pk):
     payload = payload.get('payload')
     values = payload.get('values')
     is_user = values.get('is_user')
+    username = values.get('username')
 
     org = get_object_or_404(Org, pk=pk, level=level)
+    qs_user = User.objects
+    qs_employee = Employee.objects
+    qs_employee_address = EmployeeAddress.objects
 
     user_detail = _make_user_detail(values)
-    errors = _user_validition(user_detail)
-
     employee_detail = _make_employee_detail(values)
-    errors.update(_employee_validition(employee_detail))
+    employee_add_detail = _make_employee_add(payload)
+    is_fired_employee, user, employee = _is_fired_employee(username, qs_user, qs_employee)
 
-    employee_add = _make_employee_add(payload)
-    errors.update(_employee_add_validator(employee_add))
+    if is_fired_employee:
+        errors = _user_validition(user_detail, user)
+        errors.update(_employee_validition(employee_detail, employee))
+        employee_address = qs_employee_address.filter(employee=employee).first()
+        errors.update(_employee_add_validator(employee_add_detail, employee_address))
+    else:
+        errors = _user_validition(user_detail)
+        errors.update(_employee_validition(employee_detail))
+        errors.update(_employee_add_validator(employee_add_detail))
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
     with transaction.atomic():
-        user = User.objects.create(**user_detail)
+        if is_fired_employee:
+            state = int(employee_detail.get('state'))
+            if state == 3:
+                rsp = {
+                    "success": False,
+                    "errors": {
+                        "state": 'Энэ хэрэглэгч нь нь бүртгэлтэй байна. "ЧӨЛӨӨЛӨГДСӨН"-өөс бусад төлөвт шинээр үүсгэх боломжтой!'
+                    }
+                }
+                return JsonResponse(rsp)
+
+            user.is_superuser = user_detail.get('is_superuser')
+            user.first_name = user_detail.get('first_name')
+            user.last_name = user_detail.get('last_name')
+            user.gender = user_detail.get('gender')
+            user.register = user_detail.get('register')
+            user.save()
+        else:
+            user = qs_user.create(**user_detail)
 
         employee_detail['org'] = org
         employee_detail['user'] = user
-        employee = Employee.objects.create(**employee_detail)
+        employee = qs_employee.create(**employee_detail)
 
-        employee_add['employee'] = employee
-        EmployeeAddress.objects.create(**employee_add)
+        employee_add_detail['employee'] = employee
+        qs_employee_address.create(**employee_add_detail)
 
         if is_user:
             utils.send_approve_email(user)
@@ -418,9 +408,9 @@ def employee_remove(request, pk):
     user_log = Payment.objects.filter(user=user)
     if user_log:
         return JsonResponse({'success': False})
-    else:
-        check = _set_state(employee)
-        return JsonResponse({'success': check})
+
+    check = _set_state(employee)
+    return JsonResponse({'success': check})
 
 
 def _remove_user(user, employee):
@@ -438,7 +428,6 @@ def _remove_user(user, employee):
         user.delete()
 
         return True
-    return False
 
 
 def _org_validation(org_name, org_id):
@@ -465,7 +454,7 @@ def _org_validation(org_name, org_id):
 
 def _delete_perms(perms_inspire):
     perms_inspire.delete()
-    return 
+    return
 
 
 @require_POST
@@ -614,7 +603,6 @@ def org_remove(request, payload, level):
         org.position_set.all().delete()
         org.delete()
         return JsonResponse({'success': True})
-    return JsonResponse({'success': False})
 
 
 @require_POST

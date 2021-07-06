@@ -1,6 +1,3 @@
-import re
-
-from django import utils
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
@@ -8,6 +5,7 @@ from django.core import validators
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
+from main import utils
 
 
 class Role(models.Model):
@@ -32,7 +30,7 @@ class Role(models.Model):
 
 @deconstructible
 class UserRegistratioinNumberValidator(validators.RegexValidator):
-    regex = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    regex = utils.RE_REGISTER
     message = _(
         'Регистрийн дугаараа зөв оруулна уу! '
         'Жишээлбэл: АА00000000'

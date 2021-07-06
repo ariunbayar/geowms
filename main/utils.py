@@ -47,6 +47,7 @@ import main.geoserver as geoserver
 
 
 LAYERPREFIX = 'gp_layer_'
+RE_REGISTER = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
 
 
 def resize_b64_to_sizes(src_b64, sizes):
