@@ -572,7 +572,10 @@ def _get_emp_perm_display(emp_perm):
     property_of_feature = {}
 
     for feature_id in feature_ids:
-        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id)
+        emp_perm_properties = emp_perm_properties.exclude(property_id__isnull=True)
+        emp_perm_properties = emp_perm_properties.exclude(property_id=1)
+        emp_perm_properties = emp_perm_properties.values('property_id', 'perm_kind')
         property_data, perm_list = get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True)
         properties.append(property_data)
         property_perm_count = count_property_of_feature(emp_perm_properties)

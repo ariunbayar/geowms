@@ -320,7 +320,6 @@ export default class InsPerms extends Component {
     render() {
         const {themes, package_features, fid, tid, pid, properties, perms, prevTid, t_name, is_open, p_name, f_name, is_role_border, is_emp_border, border_left_right_none_bg } = this.state
         const { action_type, is_employee, addable_is_check, editable_is_check } = this.props
-        console.log("themes", package_features)
         return (
             <div className="row">
                 <div className="col-xl-6 col-sm-12 p-0 fixed-height">
