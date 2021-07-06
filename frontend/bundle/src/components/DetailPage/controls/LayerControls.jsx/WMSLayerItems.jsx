@@ -15,14 +15,16 @@ export default class WMSLayerItems extends Component {
     render() {
         return (
             <ul style={{listStyle: 'none'}}>
-                {this.state.layers.map((layer, idx) =>
-                    <WMSLayerItem
-                        layer={layer}
-                        addLayer={this.props.addLayer}
-                        key={idx}
-                        name={this.props.name}
-                    />
-                )}
+                {
+                    this.state.layers.map((layer, idx) =>
+                        <WMSLayerItem
+                            layer={layer}
+                            addLayer={this.props.addLayer}
+                            key={idx}
+                            name={this.props.name}
+                        />
+                    )
+                }
             </ul>
         )
     }

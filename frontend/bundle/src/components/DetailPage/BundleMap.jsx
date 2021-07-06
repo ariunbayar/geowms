@@ -33,7 +33,7 @@ import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import {default as ModalAlert} from "@utils/Modal/Modal"
 import SideBar from "@utils/SideBar"
-import WMSItem from './WMSItem'
+import WMSItem from './controls/LayerControls.jsx/WMSItem'
 import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
 
 export default class BundleMap extends Component {
