@@ -211,15 +211,14 @@ def frontend(request):
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
-    employee = [ 'position']
-    has_position = Position.objects.filter(name='Мэргэжилтэн')
-
     emp_perm = employee.empperm_set.first()
+    if  employee.org.level == 2 and employee.position.name.lower() == 'мэргэжилтэн':
+        has_position = True
     if emp_perm:
         emp_perm_insp = emp_perm.empperminspire_set
         approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
         revoke = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_REVOKE).first()
-    if org.level == 2 and  has_position:
+    if org.level == 2 and has_position:
         has_position = True
 
     context = {
@@ -239,7 +238,6 @@ def frontend(request):
     }
 
     return render(request, 'org/index.html', context)
-
 
 @require_GET
 @ajax_required
