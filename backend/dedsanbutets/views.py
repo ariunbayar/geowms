@@ -512,7 +512,6 @@ def _import_feature_template(file, theme, feature, get_options ):
 
         folder_list = os.listdir(feature_folder)
         for item in folder_list:
-            print(item)
             utils.remove_file(feature_folder + '/' + item)
 
         if file :
