@@ -88,7 +88,7 @@ class SubmitClass extends Component {
                         </button>
                     :
                         <div className="col-md-8 mt-2 ">
-                            <p className="btn btn-secondary">
+                            <button className="btn btn-secondary btn-sm ">
                                 <i
                                     className="fa fa-angle-double-left"
                                     onClick ={()=> values.history.push(this.state.url)}
@@ -96,16 +96,17 @@ class SubmitClass extends Component {
                                 >
                                     Буцах
                                 </i>
-                            </p> &nbsp; &nbsp; &nbsp; &nbsp;
+                            </button> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
                                 show_save_btn
                                 ?
-                                    <p
-                                        className="btn btn-primary"
+                                    <button
+                                        className="btn btn-primary btn-sm"
                                         onClick ={()=> this.handleSubmit()}
-                                        >
+                                        disabled={!values.files.length > 0}
+                                    >
                                             <i className="fa"> Хадгалах</i>
-                                    </p>
+                                    </button>
                                 :
                                     null
                             }

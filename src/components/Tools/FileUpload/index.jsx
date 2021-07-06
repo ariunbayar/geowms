@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import './style.css'
 
 // <FileUpload
-//     file={this.props.file}               //ямар файл хадгалагдсанг харуулах зорилгоор file : {'name': "file_name", 'size': "file_size"} бүтэцтэй байна.
+//     files={this.props.file}               //ямар файл хадгалагдсанг харуулах зорилгоор file : {'name': "file_name", 'size': "file_size"} бүтэцтэй байна.
 //     className="mt-2"                     //Main Component -д нэг div дотор дуудах учир зөвхөн тухайн div ямар байрлалтай байх style ийг өгнө
 //     default_text="Файл оруулна уу"       //Component анх дуудахад file input дээр гарч ирэх text
 //     getFile={this.props.handleOnChange}  //upload хийгдэх үед тухайн файлыг хадгалж авах функц жич: getFile гэсэн нэрээр заавал дамжуулах
 //     accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"         // ямар файлын төрөл авахыг заана.
 //     is_multiple                          //Олон файл оруулах үед ашиглана value True  байна.
+//     is_validate={true}                   //зөвхөн validation style ийш харуулна.
+//     info_text='Zip файл оруулах ёстой'  //
+
 // />
 
 // getFile(files){
@@ -67,7 +70,8 @@ function FileUpload(props) {
         SetFiles(file_list)
     }
 
-    const { className, default_text, accept, is_multiple } = props
+    const { className, default_text, accept, is_multiple, info_text } = props
+    var is_validate = true
     var last_file = files[files.length-1]
     if (last_file){
         var default_files = last_file.name
@@ -81,9 +85,15 @@ function FileUpload(props) {
             {
                 <div className={`row ${className}`}>
                     <div className="custom-file col-5 my-auto ml-3">
-                        <div className='flex-container'>
-                            <label className='custom-label' htmlFor="clickFile"> {(files && files.length > 0 )? default_files : default_text}</label>
-                            <i className="fa fa-trash-o m-1 mr-2 float-right" role="button" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
+                        <div className={`flex-container ${is_validate && 'border-danger'}`}>
+                            <label className='custom-label'  htmlFor="clickFile"> {(files && files.length > 0 )? default_files : default_text}</label>
+                                {
+                                    !is_validate
+                                    ?
+                                        <i className="fa fa-trash-o m-1 mr-2 float-right" role="button" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
+                                    :
+                                        <i className="fa fa-exclamation-circle m-1 mr-2 blink text-danger"></i>
+                                }
                             <div>
                                 <label className='custom-label-2' htmlFor="clickFile"> <i className="fa fa-upload pr-1 pb-1 " aria-hidden="true"></i>  Browse</label>
                             </div>
@@ -97,6 +107,7 @@ function FileUpload(props) {
                             accept={accept}
                         />
                         </div>
+                        <i className="fa fa-exclamation-circle custom-descripion float-top">&nbsp;&nbsp;{info_text ? info_text : 'Файл оруулсан байх ёстой'}</i>
                     </div>
                     <div className="col-5 ml-4 font-italic custom-media ">
                         {
