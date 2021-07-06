@@ -232,14 +232,29 @@ export default class BundleMap extends Component {
                 }),
             }
         })
-        map_wms_list.map((wms, idx) =>
-            wms.layers.map((layer, idx) => {
+
+        map_wms_list.map((wms, w_idx) => {
+            map_wms_list[w_idx]['is_display'] = false
+            map_wms_list[w_idx]['is_display_layers'] = false
+
+            const wms_layers = wms.layers.map((layer, idx) => {
+                const is_checked = layer.defaultCheck == 1
+
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
                 layer.defaultCheck == 0 && layer.wms_tile.setVisible(false)
                 layer['legend'] = layer.wms_tile.getSource().getLegendUrl()
+                layer['is_legend_display'] = is_checked
+                layer['checked'] = is_checked
+
+                if (is_checked) {
+                    map_wms_list[w_idx]['is_display'] = is_checked
+                    map_wms_list[w_idx]['is_display_layers'] = is_checked
+                }
+
             })
-        )
-        this.setState({map_wms_list})
+            return wms_layers
+        })
+        this.setState({ map_wms_list })
 
         const base_layer_name = 'base_layer'
         const { base_layers, base_layer_controls } =
@@ -1145,10 +1160,12 @@ export default class BundleMap extends Component {
 
         const Menu_comp = () => {
             return (
-                <div>
-                    {this.state.map_wms_list.map((wms, idx) =>
-                        <WMSItem wms={wms} key={idx} addLayer={this.addLayerToSearch}/>
-                    )}
+                <div className="pt-2">
+                    {
+                        this.state.map_wms_list.map((wms, idx) =>
+                            <WMSItem wms={wms} key={idx} addLayer={this.addLayerToSearch}/>
+                        )
+                    }
                 </div>
             )
         }

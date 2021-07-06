@@ -12,49 +12,74 @@ export default class WMSLayerItem extends Component {
             tile: props.layer.tile,
             wms_tile: props.layer.wms_tile,
             wms_or_cache_ur: props.layer.wms_or_cache_ur,
-            is_visible: props.layer.defaultCheck,
+            is_visible: props.layer.checked,
             legend: props.layer.legend,
-
+            is_legend_display: props.layer.is_legend_display,
         }
-
         this.toggle = this.toggle.bind(this)
     }
 
-    componentDidMount() {
-        if(this.state.wms_or_cache_ur)
-        {
-            this.state.tile.setVisible(this.props.layer.defaultCheck)
-        }else
-        {
-            this.state.wms_tile.setVisible(this.props.layer.defaultCheck)
-        }
+    UNSAFE_componentWillReceiveProps(nP) {
+        this.setState({
+            name: nP.layer.name,
+            code: nP.layer.code,
+            tile: nP.layer.tile,
+            wms_tile: nP.layer.wms_tile,
+            wms_or_cache_ur: nP.layer.wms_or_cache_ur,
+            is_visible: nP.layer.checked,
+            legend: nP.layer.legend,
+            is_legend_display: nP.layer.is_legend_display,
+        })
     }
 
     toggle(is_visible) {
+        this.props.layer.checked = is_visible
         this.props.addLayer([this.props.layer], this.props.name, is_visible)
-        this.setState({is_visible})
+        this.props.checkAllIsLayersDisplay(is_visible)
+        this.setState({ is_visible })
+    }
+
+    setDisplayImage() {
+        const is_legend_display = !this.state.is_legend_display
+        this.props.layer.is_legend_display = is_legend_display
+        this.setState({ is_legend_display })
     }
 
     render() {
-
-        const { name, code, is_visible, legend } = this.state
+        const { name, code, is_visible, legend, is_legend_display } = this.state
         return (
             <li>
-                <label>
-                    <div className="custom-control custom-switch">
-                        <input
-                        type="checkbox" className="custom-control-input" id={code}
-                        onChange={(e) => this.toggle(e.target.checked)}
-                        checked={is_visible}
-                    />
-                    <label className="custom-control-label" htmlFor={code}>{name}</label>
+                <div className="d-flex my-auto">
+                    <div className="mr-2 my-auto">
+                        <i
+                            className={`fa fa-caret-${is_legend_display ? "down" : "right"}`}
+                            aria-hidden="true"
+                            onClick={() => this.setDisplayImage()}
+                        >
+                        </i>
                     </div>
-                </label>
-                <ul>
-                    <li>
-                        <img className="img" src={legend}/>
-                    </li>
-                </ul>
+                    <div className="my-auto d-flex">
+                        <div className="mr-2 my-auto">
+                            <input
+                                type="checkbox"
+                                className=""
+                                id={code}
+                                onChange={(e) => this.toggle(e.target.checked)}
+                                checked={is_visible}
+                            />
+                        </div>
+                        <label className="my-auto" htmlFor={code}>{name}</label>
+                    </div>
+                </div>
+                {
+                    is_legend_display
+                    ?
+                        <div className="pl-4">
+                            <img className="img" src={legend}/>
+                        </div>
+                    :
+                        null
+                }
             </li>
         )
     }
