@@ -530,7 +530,6 @@ def propertyFieldsSave(request):
     tid = request.POST.get('tid')
     fid = request.POST.get('fid')
     view_id = request.POST.get('view_id')
-    view_id = utils.json_load(view_id)
 
     values = request.POST.get('values')
 
@@ -569,11 +568,13 @@ def propertyFieldsSave(request):
     view_prop_qs.filter(view=view).delete()
 
     for prop_id in id_list:
-        view_prop_qs.create(view=view, property_id=prop_id)
+        if prop_id:
+            view_prop_qs.create(view=view, property_id=prop_id)
 
     is_created = _check_geoserver_detail(table_name, theme)
     if values or not is_created:
         rsp = _create_geoserver_detail(table_name, theme, request.user.id, feature, values)
+
     else:
         rsp = {
             "success": True,

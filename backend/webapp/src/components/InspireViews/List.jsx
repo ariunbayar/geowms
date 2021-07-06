@@ -110,7 +110,7 @@ export class List extends Component {
     }
 
     activeView(event){
-        this.setState({ fields: [], id_list: [], view: '' })
+        this.setState({ fields: [], id_list: [], view: '', files: [] })
         const id = event.id
         const prev_event = this.state.prev_event
         const prev_theme_event = this.state.prev_theme_event

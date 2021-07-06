@@ -82,8 +82,8 @@ function FileUpload(props) {
                 <div className={`row ${className}`}>
                     <div className="custom-file col-5 my-auto ml-3">
                         <div className='flex-container'>
-                            <label  className='custom-label' htmlFor="clickFile"> {(files && files.length > 0 )? default_files : default_text}</label>
-                            <i className="fa fa-trash-o m-1 mr-2 float-right" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
+                            <label className='custom-label' htmlFor="clickFile"> {(files && files.length > 0 )? default_files : default_text}</label>
+                            <i className="fa fa-trash-o m-1 mr-2 float-right" role="button" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
                             <div>
                                 <label className='custom-label-2' htmlFor="clickFile"> <i className="fa fa-upload pr-1 pb-1 " aria-hidden="true"></i>  Browse</label>
                             </div>
@@ -107,7 +107,7 @@ function FileUpload(props) {
                                             {
                                                 files.map((file, idx) =>
                                                     <li key={idx}>{file ? file.name: ''} - {file ? (file.size, file.size_type): ''}
-                                                        <i className="fa fa-times ml-2 text-danger" onClick={() => fileAction(idx, 'Remove_File', is_multiple)}></i>
+                                                        <i role="button" className="fa fa-times ml-2 text-danger" onClick={() => fileAction(idx, 'Remove_File', is_multiple)}></i>
                                                     </li>
                                                 )
                                             }
