@@ -85,7 +85,6 @@ export class PermAcc extends Component {
     render () {
         const { perms, r_name } = this.state
         const { name, index, type, id, total_length, small, is_open, t_name, p_name, f_name, now_length } = this.props
-        console.log("f_nalme", f_name, total_length, now_length)
         return (
             <div className={"role-card-body " + (type == "feature" ? "ml-5" : "card-header")} id={`${index}-${type}`}>
                 <div className="row">

@@ -100,9 +100,9 @@ def _org_role(org):
                 get_property_data_display2(perm_list, None, feature_id, geom=True)
             )
             property_perm_count = count_property_of_feature(props)
-            # for perm in perm_list:
-            #     kind_name = get_perm_kind_name(perm['kind'])
-            #     property_perm_count[kind_name] = property_perm_count[kind_name] + 1
+            for perm in perm_list:
+                kind_name = get_perm_kind_name(perm['kind'])
+                property_perm_count[kind_name] = property_perm_count[kind_name] + 1
 
             property_ids_of_feature[feature_id] = property_perm_count
 

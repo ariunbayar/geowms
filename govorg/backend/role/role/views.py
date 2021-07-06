@@ -253,7 +253,7 @@ def _get_emp_roles_data_display(emp_role):
     property_of_feature = {}
 
     for feature_id in feature_ids:
-        emp_perm_properties = EmpRoleInspire.objects.filter(emp_role=emp_role, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True)
+        emp_perm_properties = EmpRoleInspire.objects.filter(emp_role=emp_role, feature_id=feature_id).exclude(property_id__isnull=True)
         emp_perm_properties = emp_perm_properties.exclude(property_id=1)
         emp_perm_properties = emp_perm_properties.values('property_id', 'perm_kind')
         property_data, perm_list = get_property_data_display(None, feature_id, emp_role, EmpRoleInspire, True)
