@@ -1,42 +1,25 @@
-import React, {Component} from "react"
-import {Control} from 'ol/control'
-import {CLASS_CONTROL, CLASS_UNSELECTABLE} from 'ol/css.js'
-
+import React, { useEffect } from "react"
 
 const CLASS_ACTIVE = 'active'
 
+export function BaseMaps(props) {
 
-export class СуурьДавхарга extends Control {
+    var element = null
+    var last_active = null
 
-    constructor(opt_options) {
-
-        const options = opt_options || {}
-
-        super({
-            element: document.createElement('div'),
-            target: options.target,
-        })
-
-        this.toggleLayer = this.toggleLayer.bind(this)
-        this.initLayer = this.initLayer.bind(this)
-        this.handleClick = this.handleClick.bind(this)
-
-        this.last_active = null
-
-        const base_layers = options.layers.map(this.initLayer)
-
-        const cssClasses = `суурь-давхаргууд ${CLASS_UNSELECTABLE} ${CLASS_CONTROL}`
-
-        const element = this.element
-        element.className = cssClasses
+    useEffect(() => {
+        element = document.getElementsByClassName('суурь-давхаргууд')
+        element = element[0]
+        const base_layers = props.base_layer_controls.map(initLayer)
         base_layers.forEach((l) => element.appendChild(l))
 
-    }
+    }, [props.base_layer_controls])
 
-    initLayer({thumbnail_1x, thumbnail_2x, layer, is_active}) {
+    const initLayer = ({ thumbnail_1x, thumbnail_2x, layer, is_active, name }) => {
 
         const el = document.createElement('a')
         el.setAttribute('href', '#')
+        el.innerHTML = `<b>${name}</b>`
         el.className = 'суурь-давхарга' + (is_active ? ' ' + CLASS_ACTIVE : '')
 
         const img = document.createElement('img')
@@ -45,33 +28,36 @@ export class СуурьДавхарга extends Control {
 
         el.addEventListener('click', (event) => {
             event.preventDefault()
-            this.handleClick(el, layer)
+            handleClick(el, layer)
         })
 
-        this.toggleLayer(is_active === true, el, layer)
+        toggleLayer(is_active === true, el, layer)
 
         return el
 
     }
 
-    toggleLayer(is_active, el, layer) {
+    const toggleLayer = (is_active, el, layer) => {
 
-        if (this.last_active && is_active) {
-            this.last_active.layer.setVisible(false)
-            this.last_active.el.classList.toggle(CLASS_ACTIVE, false)
+        if (last_active && is_active) {
+            last_active.layer.setVisible(false)
+            last_active.el.classList.toggle(CLASS_ACTIVE, false)
         }
 
         layer.setVisible(is_active)
         el.classList.toggle(CLASS_ACTIVE, is_active)
 
         if (is_active)
-            this.last_active = {el, layer}
+            last_active = {el, layer}
     }
 
-    handleClick(el, layer) {
-        if (this.last_active && this.last_active.el === el)
+    const handleClick = (el, layer) => {
+        if (last_active && last_active.el === el)
             return
-        this.toggleLayer(true, el, layer)
+        toggleLayer(true, el, layer)
     }
 
+    return (
+        <div className="суурь-давхаргууд"></div>
+    )
 }
