@@ -72,7 +72,7 @@ class SubmitClass extends Component {
 
     render() {
         var { values } = this.props
-            const { agreed_submit, show_save_btn } = this.state
+        const { agreed_submit, show_save_btn } = this.state
         return (
             <Fragment>
                 {
@@ -88,7 +88,7 @@ class SubmitClass extends Component {
                         </button>
                     :
                         <div className="col-md-8 mt-2 ">
-                            <button className="btn btn-secondary btn-sm ">
+                            <button className="btn btn-secondary btn-sm">
                                 <i
                                     className="fa fa-angle-double-left"
                                     onClick ={()=> values.history.push(this.state.url)}

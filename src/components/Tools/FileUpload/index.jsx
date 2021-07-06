@@ -86,48 +86,54 @@ function FileUpload(props) {
                     <div className="custom-file col-5 my-auto ml-3">
                         <div className={`flex-container ${is_validate && 'border-danger'}`}>
                             <label className='custom-label'  htmlFor="clickFile"> {(files && files.length > 0 )? default_files : default_text}</label>
-                                {
-                                    !is_validate
-                                    ?
-                                        <i className="fa fa-trash-o m-1 mr-2 float-right" role="button" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
-                                    :
-                                        <i className="fa fa-exclamation-circle m-1 mr-2 blink text-danger"></i>
-                                }
+                            {
+                                !is_validate
+                                ?
+                                    <i className="fa fa-trash-o m-1 mr-2 float-right" role="button" onClick={(e) => fileAction(e, 'Remove_File', is_multiple)}></i>
+                                :
+                                    <i className="fa fa-exclamation-circle m-1 mr-2 blink text-danger"></i>
+                            }
                             <div>
                                 <label className='custom-label-2' htmlFor="clickFile"> <i className="fa fa-upload pr-1 pb-1 " aria-hidden="true"></i>  Browse</label>
                             </div>
-                        <input
-                            type="file"
-                            name='files'
-                            id="clickFile"
-                            className='d-none'
-                            onChange={(e) => fileAction(e, 'Get_File', is_multiple)}
-                            multiple={is_multiple}
-                            accept={accept}
-                        />
+                            <input
+                                type="file"
+                                name='files'
+                                id="clickFile"
+                                className='d-none'
+                                onChange={(e) => fileAction(e, 'Get_File', is_multiple)}
+                                multiple={is_multiple}
+                                accept={accept}
+                            />
                         </div>
-                        <i className="fa fa-exclamation-circle custom-descripion float-top">&nbsp;&nbsp;{info_text ? info_text : 'Файл оруулсан байх ёстой'}</i>
+                        {
+                            info_text
+                            ?
+                                <i className="fa fa-exclamation-circle custom-descripion float-top">&nbsp;&nbsp;{info_text}</i>
+                            :
+                                null
+                        }
                     </div>
                     <div className="col-5 ml-4 font-italic custom-media ">
                         {
-                                is_multiple
-                                ?
-                                    <small>
-                                        <ul className="my-auto">
-                                            {
-                                                files.map((file, idx) =>
-                                                    <li key={idx}>{file ? file.name: ''} - {file ? (file.size, file.size_type): ''}
-                                                        <i role="button" className="fa fa-times ml-2 text-danger" onClick={() => fileAction(idx, 'Remove_File', is_multiple)}></i>
-                                                    </li>
-                                                )
-                                            }
-                                        </ul>
-                                    </small>
-                                :
-                                    <div className="d-flex flex-column" style={{fontSize: '10px'}}>
-                                        <i> файлын нэр:&nbsp; &nbsp; {file ? file.name: ''} </i>
-                                        <i> файлын хэмжээ: &nbsp;{file && file['name'] ? <span>{file.size} &nbsp; {file.size_type}</span> : ''} </i>
-                                    </div>
+                            is_multiple
+                            ?
+                                <ul className="my-auto">
+                                    {
+                                        files.map((file, idx) =>
+                                            <li key={idx}>{file ? file.name: ''} - {file ? (file.size, file.size_type): ''}
+                                                <small>
+                                                    <i role="button" className="fa fa-times ml-2 text-danger" onClick={() => fileAction(idx, 'Remove_File', is_multiple)}></i>
+                                                </small>
+                                            </li>
+                                        )
+                                    }
+                                </ul>
+                            :
+                                <div className="d-flex flex-column" style={{fontSize: '10px'}}>
+                                    <i> файлын нэр:&nbsp; &nbsp; {file ? file.name: ''} </i>
+                                    <i> файлын хэмжээ: &nbsp;{file && file['name'] ? <span>{file.size} &nbsp; {file.size_type}</span> : ''} </i>
+                                </div>
                         }
                     </div>
                 </div>

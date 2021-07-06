@@ -221,7 +221,7 @@ export default class RequestDetail extends Component {
                         {
                             desc_info
                             &&
-                                <div className="form-group col-md-12">  
+                                <div className="form-group col-md-12">
                                     <label htmlFor='description-id'>Тайлбар</label>
                                     <textarea
                                         type="text"
@@ -246,6 +246,7 @@ export default class RequestDetail extends Component {
                                         className="mt-2"
                                         default_text="Файл оруулна уу"
                                         getFile={this.props.getFile}
+                                        info_text='Файл оруулсан байх ёстой'
                                         accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"
                                     />
                                 </div>
