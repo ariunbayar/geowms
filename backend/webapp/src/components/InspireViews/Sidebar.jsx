@@ -173,7 +173,7 @@ export default class SideBar extends Component {
 
         if(pP.fields !== this.props.fields){
             const fields = this.props.fields
-            this.setState({ fields })
+            this.setState({ fields, files: this.props.files })
         }
 
         if(pP.id_list !== this.props.id_list){
