@@ -127,30 +127,7 @@ export class Detail extends Component {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
     }
 
-
-    handleModalOpen(values){
-        let not_rm_kind = 'ШИНЭ'
-        let not_rm_state = 'ШИНЭ'
-        if(not_rm_kind == values.kind || not_rm_state == values.state) {
-            this.modalChange(
-                'fa fa-exclamation-circle',
-                "warning",
-                'Тохиргоог устгах',
-                `"Та ${values.kind == 'ШИНЭ' ? values.kind : values.state} төлөвт байгаа тохиргоог устгахдаа итгэлтэй байна уу?`,
-                true
-            )
-        }
-        else {
-            this.modalChange(
-                'fa fa-exclamation-circle',
-                "danger",
-                'Устгах боломжгүй',
-                `"Энэхүү хүсэлт ${values.state} төлөвт байгаа тул устгах боломжгүй`,
-                false
-            )
-        }
-    }
-
+    
     modalChange(modal_icon, icon_color, title, text, has_button, description) {
         this.setState({
             modal_icon: modal_icon,
