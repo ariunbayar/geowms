@@ -266,7 +266,7 @@ def _get_emp_roles_data_display(emp_role):
             property_perm_count[kind_name] = property_perm_count[kind_name] + 1
 
         property_of_feature[feature_id] = property_perm_count
-
+        emp_perm_properties = emp_perm_properties.distinct('property_id')
         for property_id in emp_perm_properties:
             prop = LProperties.objects.get(property_id=property_id['property_id'])
             property_data, perm_list = get_property_data_display(prop, feature_id, emp_role, EmpRoleInspire, False)

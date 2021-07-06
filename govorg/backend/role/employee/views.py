@@ -130,8 +130,10 @@ def _get_role_name(item):
 
 
 def _get_position_name(postition_id, item):
+    position_name = ''
     position = Position.objects.filter(id=postition_id).first()
-    position_name = position.name
+    if position:
+        position_name = position.name
     return position_name
 
 
@@ -572,8 +574,7 @@ def _get_emp_perm_display(emp_perm):
     property_of_feature = {}
 
     for feature_id in feature_ids:
-        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id)
-        emp_perm_properties = emp_perm_properties.exclude(property_id__isnull=True)
+        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).exclude(property_id__isnull=True)
         emp_perm_properties = emp_perm_properties.exclude(property_id=1)
         emp_perm_properties = emp_perm_properties.values('property_id', 'perm_kind')
         property_data, perm_list = get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True)
