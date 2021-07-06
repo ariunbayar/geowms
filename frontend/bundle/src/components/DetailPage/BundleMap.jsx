@@ -669,6 +669,9 @@ export default class BundleMap extends Component {
                 }
                 this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire, false)
             })
+            .catch((error) => {
+                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, true, true, false)
+            })
     }
 
     checkTile(wms_tile, tile) {
@@ -1192,23 +1195,27 @@ export default class BundleMap extends Component {
                                             "key": "menus",
                                             "icon": "fa fa-bars",
                                             "title": "Давхаргууд",
+                                            "tooltip": "Давхаргууд",
                                             "component": Menu_comp,
                                         },
                                         {
                                             "key": "search",
                                             "icon": "fa fa-search",
+                                            "tooltip": "Хайлт",
                                             "component": Search_comp
                                         },
                                         {
                                             "key": "base_maps",
                                             "icon": "fa fa-map-o",
                                             "title": "Суурь давхаргууд",
+                                            "tooltip": "Суурь давхаргууд",
                                             "component": BaseMaps,
                                             "bottom": true
                                         },
                                         {
                                             "key": "settings",
                                             "icon": "fa fa-gear",
+                                            "tooltip": "Тохиргоо",
                                             "component": settings_component,
                                             "bottom": true
                                         },
