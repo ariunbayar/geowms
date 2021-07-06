@@ -2,6 +2,7 @@ from django import forms
 
 from geoportal_app.models import User
 
+
 class UserForm(forms.ModelForm):
 
     class Meta:
@@ -23,6 +24,7 @@ class UserForm(forms.ModelForm):
             'username': {
                 'required': 'Нэвтрэх нэрийг оруулна уу!',
                 'max_length': 'Нэвтрэх нэр %(limit_value)d тэмдэгт байх ёстой!',
+                'unique': 'Хэрэглэгч бүртгэлтэй байна!',
             },
             'last_name': {
                 'required': 'Овогоо оруулна уу!',
@@ -35,6 +37,7 @@ class UserForm(forms.ModelForm):
             'email': {
                 'required': 'Мэйлээ оруулна уу!',
                 'max_length': 'Мэйл %(limit_value)d тэмдэгт байх ёстой!',
+                'unique': 'Мэйл хаяг бүртгэлтэй байна!',
 
             },
             'gender': {
