@@ -94,13 +94,6 @@ export class Detail extends Component {
                         }
                     },
                     {
-                        "title": 'Устгах',
-                        "text": '',
-                        "icon": 'fa fa-trash-o text-danger',
-
-                        "action": (values) => this.handleRemoveAction(values),
-                    },
-                    {
                         "title": '',
                         'component': FileAndDesc,
                         'props': {
@@ -116,8 +109,6 @@ export class Detail extends Component {
         }
         this.refreshData = this.refreshData.bind(this)
         this.handleUpdateAction = this.handleUpdateAction.bind(this)
-        this.handleRemove = this.handleRemove.bind(this)
-        this.handleRemoveAction = this.handleRemoveAction.bind(this)
         this.infoModal = this.infoModal.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
@@ -136,10 +127,6 @@ export class Detail extends Component {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
     }
 
-    handleRemoveAction(values){
-        this.setState({ values })
-        this.handleModalOpen(values)
-    }
 
     handleModalOpen(values){
         let not_rm_kind = 'ШИНЭ'
@@ -182,31 +169,6 @@ export class Detail extends Component {
         })
     }
 
-    handleRemove() {
-        const { id } = this.state.values
-        service.removeRequest(id).then(({ success, info }) => {
-            if(success) {
-                this.modalChange(
-                    'fa fa-check-circle',
-                    "success",
-                    info,
-                    '',
-                    false
-                )
-                this.refreshData()
-            }
-            else {
-                this.modalChange(
-                    'fa fa-check-circle',
-                    "danger",
-                    info,
-                    '',
-                    false
-                )
-                this.refreshData()
-            }
-        })
-    }
 
     refreshData() {
         this.setState({ refresh: !this.state.refresh })
@@ -312,8 +274,6 @@ export class Detail extends Component {
                         title={this.state.title}
                         has_button={this.state.has_button}
                         text={this.state.text}
-                        modalAction={this.handleRemove}
-                        actionNameDelete="Устгах"
                         description={this.state.description}
                     />
                 </div>
