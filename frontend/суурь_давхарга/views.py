@@ -21,8 +21,9 @@ def all(request):
             base_layer_url = base_layer.url.replace('wms/', '')
             base_layer_url = base_layer_url.replace('wmts/', '')
             pk = int(base_layer_url.split('/')[-2])
-            wms = WMS.objects.get(pk=pk)
-            wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
+            wms = WMS.objects.filter(pk=pk).first()
+            if wms:
+                wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
 
         base_layer_list.append({
             'tilename': base_layer.tilename,
