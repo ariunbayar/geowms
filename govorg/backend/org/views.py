@@ -51,10 +51,13 @@ def _get_properties_by_feature(initial_qs, feature_ids):
     }
 
     for feature_id, property_id, perm_kind in item_pairs:
-        feature_property_ids[feature_id].append({
-            "perm_kind": perm_kind,
-            "prop_obj": properties[property_id],
-        })
+        try:
+            feature_property_ids[feature_id].append({
+                "perm_kind": perm_kind,
+                "prop_obj": properties[property_id],
+            })
+        except Exception:
+            pass
 
     return feature_property_ids
 
