@@ -521,7 +521,6 @@ def _import_feature_template(file, theme, feature, get_options ):
         return feature_folder
 
 
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
