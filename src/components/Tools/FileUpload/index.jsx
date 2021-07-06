@@ -90,7 +90,7 @@ function FileUpload(props) {
                                         <ul className="my-auto">
                                             {
                                                 files.map((file, idx) =>
-                                                    <li>{files ? file.name: ''} - {file.size}  {file.size_type}
+                                                    <li key={idx}>{files ? file.name: ''} - {file.size}  {file.size_type}
                                                         <i className="fa fa-times ml-2 text-danger" onClick={() => props.fileAction(idx, 'Remove_File', is_multiple)}></i>
                                                     </li>
                                                 )

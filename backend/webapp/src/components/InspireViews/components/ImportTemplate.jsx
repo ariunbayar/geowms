@@ -22,13 +22,14 @@ export default class ImportTemplate extends Component {
                 <input type="checkbox" id="check" checked={is_open} onChange={() => this.setState(prevState => ({is_open: !prevState.is_open}))}/>
                 </h5>
                 {
-                    is_open &&
-                    <FileUpload
-                        className="mt-4"
-                        default_text="Template оруулна уу"
-                        files={files}
-                        fileAction={fileAction}
-                    />
+                    is_open
+                    &&
+                        <FileUpload
+                            className="mt-4"
+                            default_text="Template оруулна уу"
+                            files={files}
+                            fileAction={fileAction}
+                        />
                 }
             </div>
         )

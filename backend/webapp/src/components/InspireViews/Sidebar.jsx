@@ -156,7 +156,11 @@ export default class SideBar extends Component {
         }
 
         if(pP.files != this.props.files){
-            const files = this.props.files
+            const props_files = this.props.files
+            let files = props_files
+            if (!files) {
+                files = []
+            }
             this.setState({ files })
         }
 
@@ -345,7 +349,7 @@ export default class SideBar extends Component {
         )
     }
 
-    fileAction(value, action, is_multiple){
+    fileAction(value, action, is_multiple) {
         var files = this.state.files
         if (action == 'Get_File') {
             const uploaded_file = value.target.files[0]

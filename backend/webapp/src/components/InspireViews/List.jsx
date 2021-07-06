@@ -99,7 +99,7 @@ export class List extends Component {
                         files
                     })
                 }
-                else this.setState({ property_loading: false, has_view: success, geom_type, view_style_name: '', file})
+                else this.setState({ property_loading: false, has_view: success, geom_type, view_style_name: '', files})
             })
     }
 
