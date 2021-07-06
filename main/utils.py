@@ -568,7 +568,7 @@ def get_geom(geo_id, geom_type=None, srid=4326):
 
 
 def is_register(register):
-    re_register = r'[АБВГДЕЁЖЗИЙКЛМНОӨПРСТУҮФХЦЧШЩЪЫЬЭЮЯ]{2}[0-9]{8}'
+    re_register = RE_REGISTER
     return re.search(re_register, register.upper()) is not None
 
 
