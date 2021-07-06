@@ -5,9 +5,26 @@ import './style.css'
 //     file={this.props.file}               //ямар файл хадгалагдсанг харуулах зорилгоор file : {'name': "file_name", 'size': "file_size"} бүтэцтэй байна.
 //     className="mt-2"                     //Main Component -д нэг div дотор дуудах учир зөвхөн тухайн div ямар байрлалтай байх style ийг өгнө
 //     default_text="Файл оруулна уу"       //Component анх дуудахад file input дээр гарч ирэх text
-//     getFile={this.props.handleOnChange}  //upload хийгдэх үед тухайн файлыг хадгалж авах функц жич: getFile гэсэн нэрээр заавал дамжуулах
+//     fileAction={this.props.handleOnChange}  //upload хийгдэх үед тухайн файлыг хадгалж авах функц жич: getFile гэсэн нэрээр заавал дамжуулах
 //     accept="zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"         // ямар файлын төрөл авахыг заана.
+//     is_multiple                          //Олон файл оруулах үед ашиглана value True  байна.
 // />
+
+// fileAction(value, action, is_multiple){
+//     var files = this.state.files
+//     if (action == 'Get_File') {
+//         const uploaded_file = value.target.files[0]
+
+//         if (is_multiple ) { files.push(uploaded_file) }
+//         else { files[0] = uploaded_file }
+//     }
+//     else { files.splice(value, 1) }
+
+//     this.setState({files})
+// }
+
+
+// props.files заавал list байна.
 
 function FileUpload(props) {
 
