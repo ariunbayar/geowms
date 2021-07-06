@@ -45,7 +45,7 @@ export default class SideBar extends Component {
         this.getValuesFromState = this.getValuesFromState.bind(this)
         this.makeView = this.makeView.bind(this)
         this.getStyleName = this.getStyleName.bind(this)
-        this.fileAction = this.fileAction.bind(this)
+        this.getFile = this.getFile.bind(this)
     }
 
     getTileCacheValue(field, value){
@@ -277,7 +277,7 @@ export default class SideBar extends Component {
         form_datas.append('tid', tid)
         form_datas.append('view_id', view.id)
         if ( files && files.length > 0 ) {
-            form_datas.append('files', files)
+            form_datas.append('files', files[0])
         }
         form_datas.append('values',  JSON.stringify({values}))
 
@@ -349,16 +349,7 @@ export default class SideBar extends Component {
         )
     }
 
-    fileAction(value, action, is_multiple) {
-        var files = this.state.files
-        if (action == 'Get_File') {
-            const uploaded_file = value.target.files[0]
-
-            if (is_multiple ) { files.push(uploaded_file) }
-            else { files[0] = uploaded_file }
-        }
-        else { files.splice(value, 1) }
-
+    getFile(files) {
         this.setState({files})
     }
 
@@ -378,7 +369,7 @@ export default class SideBar extends Component {
                             fname
                             &&
                                 <div>
-                                    <ImportTemplate {...this.state} fileAction={this.fileAction}/>
+                                    <ImportTemplate {...this.state} getFile={this.getFile}/>
                                     <SetTileCache {...this.state} getTileCacheValue={this.getTileCacheValue}/>
                                     <ChooseStyle {...this.props} {...this.state} getStyleName={this.getStyleName}/>
                                 </div>

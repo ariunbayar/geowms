@@ -72,7 +72,7 @@ class SubmitClass extends Component {
 
     render() {
         var { values } = this.props
-        const { agreed_submit, show_save_btn } = this.state
+            const { agreed_submit, show_save_btn } = this.state
         return (
             <Fragment>
                 {
@@ -150,7 +150,7 @@ export class RequestAdd extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.enableLoader = this.enableLoader.bind(this)
-        this.fileAction = this.fileAction.bind(this)
+        this.getFile = this.getFile.bind(this)
     }
 
     componentDidMount() {
@@ -212,16 +212,15 @@ export class RequestAdd extends Component {
         this.setState({ [name]: value })
     }
 
-    fileAction(e){
+    getFile(files){
         const { id } = this.props.match.params
-        var { file_name, file_state, files } = this.state
-        const file = e.target.files[0]
-        file_name = file.name
-        files[0] = file
-
-        if (id) {
-            file_state = true
-        }
+        var { file_name, file_state } = this.state
+        const file = files[0]
+        if(files && files.length > 0)
+            file_name = file.name
+            if (id) {
+                file_state = true
+            }
 
         this.setState({ files, file_name, file_state })
     }
@@ -329,7 +328,7 @@ export class RequestAdd extends Component {
                         info={info}
                         handleSelectModel={this.handleSelectModel}
                         enableLoader={this.enableLoader}
-                        fileAction={this.fileAction}
+                        getFile={this.getFile}
                     />
                 </div>
                 <Modal

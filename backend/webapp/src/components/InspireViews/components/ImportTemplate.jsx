@@ -13,7 +13,8 @@ export default class ImportTemplate extends Component {
 
     render() {
         const { is_open } = this.state
-        const { fileAction, files } =this.props
+        const { getFile, files } =this.props
+
         return (
             <div className="border mb-3 w-100  py-2 pl-3">
                 <h5 className="text-uppercase text-center pt-2">
@@ -28,7 +29,7 @@ export default class ImportTemplate extends Component {
                             className="mt-4"
                             default_text="Template оруулна уу"
                             files={files}
-                            fileAction={fileAction}
+                            getFile={getFile}
                         />
                 }
             </div>
