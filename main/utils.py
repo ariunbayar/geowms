@@ -1997,6 +1997,7 @@ def key_remove_of_dict(values, keys):
     return new_values
 
 
+# TODO хэрэглэгч байгааг шалгаж болно
 def has_user(id=None, username=None, email=None):
     User = apps.get_model('geoportal_app', 'User')
     is_valid = False
