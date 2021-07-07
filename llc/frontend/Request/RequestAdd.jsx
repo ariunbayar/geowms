@@ -38,13 +38,13 @@ class SubmitClass extends Component {
 
     handleSubmit() {
         const {
-            file, project_name,
+            files, project_name,
             object_type, object_count,
             hurungu_oruulalt, zahialagch,
             selected_tools, id, file_state,
         } = this.props.values
         var blob = []
-
+        const file = files[0]
 
         if (id) {
             if (!file_state) {
@@ -88,7 +88,7 @@ class SubmitClass extends Component {
                         </button>
                     :
                         <div className="col-md-8 mt-2 ">
-                            <p className="btn btn-secondary">
+                            <button className="btn btn-secondary btn-sm">
                                 <i
                                     className="fa fa-angle-double-left"
                                     onClick ={()=> values.history.push(this.state.url)}
@@ -96,16 +96,17 @@ class SubmitClass extends Component {
                                 >
                                     Буцах
                                 </i>
-                            </p> &nbsp; &nbsp; &nbsp; &nbsp;
+                            </button> &nbsp; &nbsp; &nbsp; &nbsp;
                             {
                                 show_save_btn
                                 ?
-                                    <p
-                                        className="btn btn-primary"
+                                    <button
+                                        className="btn btn-primary btn-sm"
                                         onClick ={()=> this.handleSubmit()}
-                                        >
+                                        disabled={!values.files.length > 0}
+                                    >
                                             <i className="fa"> Хадгалах</i>
-                                    </p>
+                                    </button>
                                 :
                                     null
                             }
@@ -122,7 +123,7 @@ export class RequestAdd extends Component {
         super(props)
         this.list = []
         this.state = {
-            file: '',
+            files: [],
             project_name: '',
             object_type: '',
             object_count: '',
@@ -150,6 +151,7 @@ export class RequestAdd extends Component {
         this.modalClose = this.modalClose.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.enableLoader = this.enableLoader.bind(this)
+        this.getFile = this.getFile.bind(this)
     }
 
     componentDidMount() {
@@ -168,7 +170,7 @@ export class RequestAdd extends Component {
                         object_count: form_field['object_quantum'],
                         hurungu_oruulalt: form_field['investment_status'],
                         selected_tools: form_field['selected_tools'],
-                        file: form_field['file_path'],
+                        files: form_field['file_path'],
                         state: form_field['state'],
                         kind: form_field['kind'],
                         desc: form_field['desc'],
@@ -197,28 +199,31 @@ export class RequestAdd extends Component {
 
     handleOnChange(e, selection) {
         var name = ''
-        var { file_name, file_state } = this.state
+        var value = ''
         if (!selection) {
             name = e.target.name
-            const { id } = this.props.match.params
-            var value = ''
-            if (name == 'file') {
-                if (id) {
-                    file_state = true
-                }
-                value = e.target.files[0]
-                file_name = value.name
-            }
-            else {
-                value = e.target.value
-            }
+            value = e.target.value
         }
         else {
             name = e
             value = selection['id']
         }
+
         this.validationForm()
-        this.setState({ [name]: value, file_name, file_state })
+        this.setState({ [name]: value })
+    }
+
+    getFile(files){
+        const { id } = this.props.match.params
+        var { file_name, file_state } = this.state
+        const file = files[0]
+        if(files && files.length > 0)
+            file_name = file.name
+            if (id) {
+                file_state = true
+            }
+
+        this.setState({ files, file_name, file_state })
     }
 
     validationForm (){
@@ -308,7 +313,6 @@ export class RequestAdd extends Component {
     enableLoader(state){
         this.setState({ is_loading: state })
     }
-
     render (){
         const { id, info } = this.props.match.params
         return (
@@ -325,6 +329,7 @@ export class RequestAdd extends Component {
                         info={info}
                         handleSelectModel={this.handleSelectModel}
                         enableLoader={this.enableLoader}
+                        getFile={this.getFile}
                     />
                 </div>
                 <Modal
