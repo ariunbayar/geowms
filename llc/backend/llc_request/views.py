@@ -675,8 +675,7 @@ def remove_request(request, content, id):
     shapes = RequestFilesShape.objects.filter(files=initial_query.id)
     form = RequestForm.objects.filter(file=initial_query.id)
     lvl2_request = LLCRequest.objects.filter(file=initial_query)
-
-    if initial_query:
+    if initial_query.state ==RequestFiles.STATE_SENT or initial_query.kind ==RequestFiles.KIND_DISMISS:
         for shape in shapes:
             geom = ShapeGeom.objects.filter(shape=shape)
             if geom:

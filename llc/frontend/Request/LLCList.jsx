@@ -94,6 +94,13 @@ export class Detail extends Component {
                         }
                     },
                     {
+                        "title": 'Устгах',
+                        "text": '',
+                        "icon": 'fa fa-trash-o text-danger',
+
+                        "action": (values) => this.handleRemoveAction(values),
+                    },
+                    {
                         "title": '',
                         'component': FileAndDesc,
                         'props': {
@@ -112,6 +119,8 @@ export class Detail extends Component {
         this.infoModal = this.infoModal.bind(this)
         this.modalChange = this.modalChange.bind(this)
         this.modalOpen = this.modalOpen.bind(this)
+        this.handleRemove = this.handleRemove.bind(this)
+        this.handleRemoveAction = this.handleRemoveAction.bind(this)
     }
 
     componentDidMount(){
@@ -172,6 +181,62 @@ export class Detail extends Component {
             false,
             values.description,
         )
+    }
+
+    handleRemoveAction(values){
+        this.setState({ values })
+        this.handleModalOpen()
+    }
+
+    handleModalOpen(){
+        const modal = {
+            modal_status: 'open',
+            modal_icon: `fa fa-exclamation-circle`,
+            icon_color: 'warning',
+            title: 'Устгах',
+            text: 'Та хүсэлтийг устгахдаа итгэлтай байна уу ',
+            has_button: true,
+            actionNameBack: 'Буцах',
+            actionNameDelete: 'устгах',
+            modalAction: this.handleRemove,
+        }
+        global.MODAL(modal)
+    }
+
+    handleRemove() {
+        const { id } = this.state.values
+        service.removeRequest(id).then(({ success, info }) => {
+            if(success) {
+                const modal = {
+                    modal_status: 'open',
+                    modal_icon: 'fa fa-check-circle',
+                    icon_color: "success",
+                    title: 'Амжилттай уcтгалаа',
+                    text: '',
+                }
+                global.MODAL(modal)
+                this.refreshData()
+            }
+            else {
+                this.modalChange(
+                    'fa fa-check-circle',
+                    "danger",
+                    info,
+                    '',
+                    false
+                )
+                const modal = {
+                    modal_status: 'open',
+                    modal_icon: 'fa fa-check-circle',
+                    icon_color: "success",
+                    title: 'Хүсэлт амжилтгүй боллоо',
+                    text: '',
+                }
+                global.MODAL(modal)
+                this.refreshData()
+                this.refreshData()
+            }
+        })
     }
 
     render() {
@@ -247,6 +312,8 @@ export class Detail extends Component {
                         title={this.state.title}
                         has_button={this.state.has_button}
                         text={this.state.text}
+                        actionNameBack={ this.state.actionNameBack }
+                        actionNameDelete={ this.state.actionNameDelete }
                         description={this.state.description}
                     />
                 </div>

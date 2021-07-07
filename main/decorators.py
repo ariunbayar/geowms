@@ -198,11 +198,11 @@ def llc_required(f):
                 content = {}
 
                 if rsp.status_code == 200:
-                    content['llc_detail'] = rsp.json()
-                    content['company_name'] = content['llc_detail'][0]['company_name']
-                    content['register_number'] = content['llc_detail'][0]['company_register_number']
+                    # content['llc_detail'] = rsp.json()
+                    # content['company_name'] = content['llc_detail'][0]['company_name']
+                    # content['register_number'] = content['llc_detail'][0]['company_register_number']
                     args = [content, *args]
-                    return f(request, *args, **kwargs)
+                return f(request, *args, **kwargs)
             else:
                 return redirect(settings.LOGIN_REDIRECT_URL)
         wrap.__doc__ = f.__doc__
