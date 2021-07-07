@@ -1,4 +1,3 @@
-from logging import error
 import os
 import io
 from django.http.response import Http404
@@ -9,7 +8,6 @@ from collections import Counter
 
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.postgres.search import SearchVector
-from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.db import transaction
 from django.http import JsonResponse
@@ -137,7 +135,7 @@ def employee_update(request, payload, pk, level):
     qs_employee = Employee.objects
     qs_address = EmployeeAddress.objects
 
-    qs_update_employee = qs_employee.filter(id=pk) # TODO нэг албан хаагчийн query set
+    qs_update_employee = qs_employee.filter(id=pk)  # TODO нэг албан хаагчийн query set
     employee = qs_update_employee.first()
     user_id = employee.user_id
     qs_employee = qs_employee.filter(~Q(id=pk), user_id=user_id)
@@ -171,7 +169,7 @@ def employee_update(request, payload, pk, level):
             user_detail['password'] = password
 
         qs_user.update(**user_detail)
-        qs_update_employee.update(**employee_detail) # TODO тухайн албан хаагчаа update хийнэ
+        qs_update_employee.update(**employee_detail)    # TODO тухайн албан хаагчаа update хийнэ
         if employee_address:
             qs_address.update(**employee_address_detail)
         else:
@@ -359,10 +357,10 @@ def org_add(request, payload, level):
         org = Org.objects.create(name=org_name, level=level, geo_id=geo_id)
 
         gov_perm = GovPerm.objects.create(
-                org=org,
-                created_by=request.user,
-                updated_by=request.user
-            )
+            org=org,
+            created_by=request.user,
+            updated_by=request.user
+        )
         if org_role_filter:
             gov_perm.gov_role = org_role_filter
             gov_perm.save()
@@ -496,44 +494,12 @@ def detail(request, level, pk):
     })
 
 
-def _get_name(user_id, item):
-    user = User.objects.filter(pk=user_id).first()
-    full_name = user.last_name[0].upper() + '.' + user.first_name.upper()
-    return full_name
-
-
-def _get_email(user_id, item):
-    user = User.objects.filter(pk=user_id).first()
-    return user.email
-
-
-def _get_role_name(item):
-    role_name = ''
-    role = EmpPerm.objects.filter(employee=item['id']).first()
-    if role and role.emp_role:
-        role_name = role.emp_role.name
-    return role_name
-
-
-def _get_position_name(postition_id, item):
-    position = Position.objects.filter(id=postition_id).first()
-    position_name = position.name
-    return position_name
-
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_list(request, payload, level, pk):
     org = get_object_or_404(Org, pk=pk, level=level)
-    employees_display = []
-    page = payload.get('page')
-    query = payload.get('query') or ''
-    per_page = payload.get('perpage')
-    sort_name = payload.get('sort_name') or 'first_name'
     is_user = payload.get('is_user')
-
 
     qs = Employee.objects
     qs = qs.filter(org=org)
@@ -555,14 +521,14 @@ def employee_list(request, payload, level, pk):
         }
         return JsonResponse(rsp)
 
-    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token']
+    оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token', 'created_at', 'updated_at']
     хувьсах_талбарууд = [
-        {"field": "user_id", "action": _get_name, "new_field": "user__first_name"},
-        {"field": "user_id", "action": _get_email, "new_field": "user__email"},
-        {"field": "position_id", "action": _get_position_name, "new_field": "position"},
+        {"field": "user_id", "action": backend_org_utils._get_name, "new_field": "user__first_name"},
+        {"field": "user_id", "action": backend_org_utils._get_email, "new_field": "user__email"},
+        {"field": "position_id", "action": backend_org_utils._get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [
-        {"field": "role_name", "action": _get_role_name},
+        {"field": "role_name", "action": backend_org_utils._get_role_name},
     ]
 
     datatable = Datatable(
@@ -634,23 +600,6 @@ def perm_get_list(request, payload):
     return JsonResponse(rsp)
 
 
-def _perm_name_validation(payload, perm):
-    values = payload.get('values')
-    role_id = payload.get('pk')
-    errors = {}
-    check_name = False
-
-    if role_id:
-        if perm.name != values['name']:
-            check_name = True
-
-    if check_name or not role_id:
-        perm_by_name = GovRole.objects.filter(name=values['name']).first()
-        if perm_by_name:
-            errors['name'] = 'Нэр давхцаж байна!'
-    return errors
-
-
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -659,9 +608,9 @@ def create_perm(request, payload):
     role_id = payload.get('pk')
     if role_id:
         gov_role = get_object_or_404(GovRole, pk=role_id)
-        errors = _perm_name_validation(payload, gov_role)
+        errors = backend_org_utils._perm_name_validation(payload, gov_role)
     else:
-        errors = _perm_name_validation(payload, None)
+        errors = backend_org_utils._perm_name_validation(payload, None)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
@@ -671,7 +620,6 @@ def create_perm(request, payload):
         GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
 
     return JsonResponse({'success': True, 'errors': errors})
-
 
 
 @require_GET
@@ -713,7 +661,8 @@ def get_inspire_roles(request, pk):
     govRole = get_object_or_404(GovRole, pk=pk)
     for themes in LThemes.objects.order_by('theme_id'):
         package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils._get_theme_packages_gov(themes.theme_id, govRole)
-        data.append({
+        data.append(
+            {
                 'id': themes.theme_id,
                 'code': themes.theme_code,
                 'name': themes.theme_name,
@@ -725,16 +674,19 @@ def get_inspire_roles(request, pk):
                 'perm_update': t_perm_update,
                 'perm_approve': t_perm_approve,
                 'perm_revoke': t_perm_revoke,
-            })
+            }
+        )
 
     for datas in GovRoleInspire.objects.filter(gov_role=govRole):
-        roles.append({
+        roles.append(
+            {
                 'perm_kind': datas.perm_kind,
                 'feature_id': datas.feature_id,
                 'data_type_id': datas.data_type_id,
                 'property_id': datas.property_id,
                 'geom': datas.geom,
-            })
+            }
+        )
 
     return JsonResponse({
         'data': data,
@@ -913,24 +865,13 @@ def save_gov_roles(request, payload, level, pk):
     return JsonResponse(rsp)
 
 
-def _get_roles_display():
-
-    return [
-        {
-            'id': gov_role.id,
-            'name': gov_role.name,
-        }
-        for gov_role in GovRole.objects.all()
-    ]
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def form_options(request, option):
 
     admin_levels = utils.get_administrative_levels()
-    roles = _get_roles_display()
+    roles = backend_org_utils._get_roles_display()
 
     if option == 'second':
         rsp = {
@@ -947,14 +888,6 @@ def form_options(request, option):
         }
 
     return JsonResponse(rsp)
-
-
-def _is_cloned_feature(address_qs):
-    is_cloned = False
-    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
-    if erguul_id:
-        is_cloned = True
-    return is_cloned
 
 
 @require_GET
@@ -974,9 +907,9 @@ def get_addresses(request, level, pk):
             point_info = dict()
             point = addresses.point
             point_info['id'] = addresses.employee.id
-            point_info['first_name'] = addresses.employee.user.first_name # etseg
-            point_info['last_name'] = addresses.employee.user.last_name # onooj ogson ner
-            point_info['is_cloned'] = _is_cloned_feature(addresses)
+            point_info['first_name'] = addresses.employee.user.first_name   # etseg
+            point_info['last_name'] = addresses.employee.user.last_name     # onooj ogson ner
+            point_info['is_cloned'] = backend_org_utils._is_cloned_feature(addresses)
             feature = utils.get_feature_from_geojson(point.json, properties=point_info)
             points.append(feature)
 
@@ -988,8 +921,8 @@ def get_addresses(request, level, pk):
             point = erguul.point
             erguul_info['id'] = employee.id
             erguul_info['is_erguul'] = True
-            erguul_info['first_name'] = employee.user.first_name # etseg
-            erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+            erguul_info['first_name'] = employee.user.first_name    # etseg
+            erguul_info['last_name'] = employee.user.last_name  # onooj ogson ner
 
             feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
             points.append(feature)
@@ -1018,7 +951,7 @@ def get_address(request, pk):
         point_info['id'] = addresses.employee.id
         point_info['first_name'] = addresses.employee.user.first_name  # etseg
         point_info['last_name'] = addresses.employee.user.last_name  # onooj ogson ner
-        point_info['is_cloned'] = _is_cloned_feature(addresses)
+        point_info['is_cloned'] = backend_org_utils._is_cloned_feature(addresses)
         feature = utils.get_feature_from_geojson(point.json, properties=point_info)
         points.append(feature)
 
@@ -1028,8 +961,8 @@ def get_address(request, pk):
         point = erguul.point
         erguul_info['id'] = employee.id
         erguul_info['is_erguul'] = True
-        erguul_info['first_name'] = employee.user.first_name # etseg
-        erguul_info['last_name'] = employee.user.last_name # onooj ogson ner
+        erguul_info['first_name'] = employee.user.first_name    # etseg
+        erguul_info['last_name'] = employee.user.last_name  # onooj ogson ner
 
         feature = utils.get_feature_from_geojson(point.json, properties=erguul_info)
         points.append(feature)
@@ -1059,7 +992,7 @@ def get_emp_info(request, payload, pk):
     title = ''
 
     info['org_name'] = employee.org.name
-    info['last_name'] = employee.user.last_name # ovog
+    info['last_name'] = employee.user.last_name     # ovog
     info['first_name'] = employee.user.first_name
     info['phone_number'] = employee.phone_number or ''
 
@@ -1077,7 +1010,7 @@ def get_emp_info(request, payload, pk):
         erguul_qs = EmployeeErguul.objects
         erguul_qs = erguul_qs.filter(address=address_id)
         erguul = erguul_qs.first()
-        erguul_address = erguul.level_3 + ", " + erguul.street  + " гудамж " + erguul.apartment + " байр"
+        erguul_address = erguul.level_3 + ", " + erguul.street + " гудамж " + erguul.apartment + " байр"
 
         info['erguul_address'] = erguul_address
         info['part_time'] = erguul.get_part_time_display()
@@ -1093,22 +1026,6 @@ def get_emp_info(request, payload, pk):
     return JsonResponse(rsp)
 
 
-def _get_erguul_qs(employee):
-    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
-    erguul_qs = EmployeeErguul.objects
-    erguul_qs = erguul_qs.filter(address_id=address_id)
-    erguul_qs = erguul_qs.filter(is_over=False)
-    erguul = erguul_qs.values().first()
-    return erguul
-
-
-def _get_erguul(erguul, field):
-    value = ''
-    if erguul:
-        value = erguul[field]
-    return value
-
-
 @require_GET
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -1117,7 +1034,7 @@ def get_erguuleg_fields(request, pk):
     send_fields = list()
 
     employee = get_object_or_404(Employee, pk=pk)
-    erguul = _get_erguul_qs(employee)
+    erguul = backend_org_utils._get_erguul_qs(employee)
 
     if erguul:
         erguul_id = erguul['id']
@@ -1129,7 +1046,7 @@ def get_erguuleg_fields(request, pk):
             not_field = ['created_at']
             if f.name not in not_field:
                 if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
-                    value = _get_erguul(erguul, f.name)
+                    value = backend_org_utils._get_erguul(erguul, f.name)
                     field_type = ''
                     if 'date' in f.name:
                         field_type = 'date'
@@ -1272,8 +1189,8 @@ def get_erguuls(request):
             employee = erguul.address.employee
             point = erguul.point
             data['id'] = employee.id
-            data['first_name'] = employee.user.first_name # etseg
-            data['last_name'] = employee.user.last_name # onooj ogson ner
+            data['first_name'] = employee.user.first_name  # etseg
+            data['last_name'] = employee.user.last_name  # onooj ogson ner
             feature = utils.get_feature_from_geojson(point.json, properties=data)
             points.append(feature)
 
@@ -1283,14 +1200,6 @@ def get_erguuls(request):
         'feature_collection': feature_collection,
     }
     return JsonResponse(rsp)
-
-
-def _get_choices(Model, field_name):
-    choices = list()
-    for f in Model._meta.get_fields():
-        if f.name == field_name:
-            choices = f.choices
-    return choices
 
 
 @require_POST
@@ -1303,8 +1212,8 @@ def get_select_values(request, payload):
     qs = qs.filter(org_id=org_id)
     positions = list(qs.values())
 
-    states = _get_choices(Employee, 'state')
-    pro_classes = _get_choices(Employee, 'pro_class')
+    states = backend_org_utils._get_choices(Employee, 'state')
+    pro_classes = backend_org_utils._get_choices(Employee, 'pro_class')
 
     rsp = {
         'success': True,
@@ -1517,7 +1426,7 @@ def pos_update(request, payload, pk):
         ).update(**payload)
         rsp = {
             'success': True,
-            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'.format(name=name)
+            'data': 'Албан тушаалыг амжилттай шинэчлэлээ.'
         }
 
     return JsonResponse(rsp)

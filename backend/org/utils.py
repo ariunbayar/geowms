@@ -1,4 +1,3 @@
-from django.forms.utils import pretty_name
 from django.http.response import Http404
 from django.db.models import Count, Q
 
@@ -12,10 +11,14 @@ from backend.inspire.models import LDataTypes
 from backend.inspire.models import LDataTypeConfigs
 from backend.inspire.models import GovPermInspire
 from backend.inspire.models import GovRoleInspire
+from backend.inspire.models import EmpPerm
+from backend.inspire.models import GovRole
 
 from .models import Employee
 from .models import EmployeeAddress
 from .models import Org
+from .models import Position
+from .models import EmployeeErguul
 from .forms import EmployeeForm
 from .forms import EmployeeAddressForm
 from geoportal_app.models import User
@@ -51,7 +54,7 @@ def _make_user_detail(values):
 
 def _make_employee_detail(values, employee=None):
     keys = [
-        'id', 'username',  'first_name', 'last_name', 'email',
+        'id', 'username', 'first_name', 'last_name', 'email',
         'position', 'gender', 'is_super', 'is_user', 'register',
     ]
     employee_detail = utils.key_remove_of_dict(values, keys)
@@ -226,7 +229,8 @@ def _get_theme_packages_gov(theme_id, govRole):
     for package in LPackages.objects.filter(theme_id=theme_id):
         t_perm_all = t_perm_all + 1
         features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = _get_package_features_gove(package.package_id, govRole)
-        package_data.append({
+        package_data.append(
+            {
                 'id': package.package_id,
                 'code': package.package_code,
                 'name': package.package_name,
@@ -238,33 +242,34 @@ def _get_theme_packages_gov(theme_id, govRole):
                 'perm_update': p_perm_update,
                 'perm_approve': p_perm_approve,
                 'perm_revoke': p_perm_revoke,
-            })
+            }
+        )
         if p_perm_all == p_perm_view and p_perm_all != 0:
             t_perm_view = t_perm_view + 1
         elif 0 < p_perm_view and p_perm_all != 0:
             t_perm_view = t_perm_view + 0.5
 
-        if p_perm_all == p_perm_create  and p_perm_all != 0:
+        if p_perm_all == p_perm_create and p_perm_all != 0:
             t_perm_create = t_perm_create + 1
         elif 0 < p_perm_create and p_perm_all != 0:
             t_perm_create = t_perm_create + 0.5
 
-        if p_perm_all == p_perm_remove  and p_perm_all != 0:
+        if p_perm_all == p_perm_remove and p_perm_all != 0:
             t_perm_remove = t_perm_remove + 1
         elif 0 < p_perm_remove and p_perm_all != 0:
             t_perm_remove = t_perm_remove + 0.5
 
-        if p_perm_all == p_perm_update  and p_perm_all != 0:
+        if p_perm_all == p_perm_update and p_perm_all != 0:
             t_perm_update = t_perm_update + 1
         elif 0 < p_perm_update and p_perm_all != 0:
             t_perm_update = t_perm_update + 0.5
 
-        if p_perm_all == p_perm_approve  and p_perm_all != 0:
+        if p_perm_all == p_perm_approve and p_perm_all != 0:
             t_perm_approve = t_perm_approve + 1
         elif 0 < p_perm_approve and p_perm_all != 0:
             t_perm_approve = t_perm_approve + 0.5
 
-        if p_perm_all == p_perm_revoke  and p_perm_all != 0:
+        if p_perm_all == p_perm_revoke and p_perm_all != 0:
             t_perm_revoke = t_perm_revoke + 1
         elif 0 < p_perm_revoke and p_perm_all != 0:
             t_perm_revoke = t_perm_revoke + 0.5
@@ -299,9 +304,9 @@ def _get_feature_property_gov(feature_id, govRole):
             for prop in properties:
                 perm_all = perm_all + 1
                 property_obj = {
-                    'id':prop['property_id'],
-                    'code':prop['property_code'],
-                    'name':prop['property_name'],
+                    'id': prop['property_id'],
+                    'code': prop['property_code'],
+                    'name': prop['property_name'],
                     'perm_all': 6,
                     'perm_view': 0,
                     'perm_create': 0,
@@ -356,9 +361,9 @@ def _get_package_features_gove(package_id, govRole):
         if not perm_all == 1:
             p_perm_all = p_perm_all + 1
             feat_values.append({
-                'id':feat.feature_id,
-                'code':feat.feature_code,
-                'name':feat.feature_name,
+                'id': feat.feature_id,
+                'code': feat.feature_code,
+                'name': feat.feature_name,
                 'data_types': data_type_list,
                 'perm_all': perm_all,
                 'perm_view': perm_view,
@@ -413,9 +418,9 @@ def _get_package_features(package_id, gov_perm):
         if not perm_all == 1:
             p_perm_all = p_perm_all + 1
             feat_values.append({
-                'id':feat.feature_id,
-                'code':feat.feature_code,
-                'name':feat.feature_name,
+                'id': feat.feature_id,
+                'code': feat.feature_code,
+                'name': feat.feature_name,
                 'data_types': data_type_list,
                 'perm_all': perm_all,
                 'perm_view': perms['perm_view'],
@@ -493,27 +498,27 @@ def _get_theme_packages(theme_id, gov_perm):
         elif 0 < p_perm_view and p_perm_all != 0:
             t_perm_view = t_perm_view + 0.5
 
-        if p_perm_all == p_perm_create  and p_perm_all != 0:
+        if p_perm_all == p_perm_create and p_perm_all != 0:
             t_perm_create = t_perm_create + 1
         elif 0 < p_perm_create and p_perm_all != 0:
             t_perm_create = t_perm_create + 0.5
 
-        if p_perm_all == p_perm_remove  and p_perm_all != 0:
+        if p_perm_all == p_perm_remove and p_perm_all != 0:
             t_perm_remove = t_perm_remove + 1
         elif 0 < p_perm_remove and p_perm_all != 0:
             t_perm_remove = t_perm_remove + 0.5
 
-        if p_perm_all == p_perm_update  and p_perm_all != 0:
+        if p_perm_all == p_perm_update and p_perm_all != 0:
             t_perm_update = t_perm_update + 1
         elif 0 < p_perm_update and p_perm_all != 0:
             t_perm_update = t_perm_update + 0.5
 
-        if p_perm_all == p_perm_approve  and p_perm_all != 0:
+        if p_perm_all == p_perm_approve and p_perm_all != 0:
             t_perm_approve = t_perm_approve + 1
         elif 0 < p_perm_approve and p_perm_all != 0:
             t_perm_approve = t_perm_approve + 0.5
 
-        if p_perm_all == p_perm_revoke  and p_perm_all != 0:
+        if p_perm_all == p_perm_revoke and p_perm_all != 0:
             t_perm_revoke = t_perm_revoke + 1
         elif 0 < p_perm_revoke and p_perm_all != 0:
             t_perm_revoke = t_perm_revoke + 0.5
@@ -620,3 +625,88 @@ def _pos_name_or_id_check(qs_pos, name, pos_id=None):
         else:
             has_pos_name = True
     return has_pos_name
+
+
+def _get_name(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    full_name = user.last_name[0].upper() + '.' + user.first_name.upper()
+    return full_name
+
+
+def _get_email(user_id, item):
+    user = User.objects.filter(pk=user_id).first()
+    return user.email
+
+
+def _get_role_name(item):
+    role_name = ''
+    role = EmpPerm.objects.filter(employee=item['id']).first()
+    if role and role.emp_role:
+        role_name = role.emp_role.name
+    return role_name
+
+
+def _get_position_name(postition_id, item):
+    position = Position.objects.filter(id=postition_id).first()
+    position_name = position.name
+    return position_name
+
+
+def _perm_name_validation(payload, perm):
+    values = payload.get('values')
+    role_id = payload.get('pk')
+    errors = {}
+    check_name = False
+
+    if role_id:
+        if perm.name != values['name']:
+            check_name = True
+
+    if check_name or not role_id:
+        perm_by_name = GovRole.objects.filter(name=values['name']).first()
+        if perm_by_name:
+            errors['name'] = 'Нэр давхцаж байна!'
+    return errors
+
+
+def _get_roles_display():
+
+    return [
+        {
+            'id': gov_role.id,
+            'name': gov_role.name,
+        }
+        for gov_role in GovRole.objects.all()
+    ]
+
+
+def _is_cloned_feature(address_qs):
+    is_cloned = False
+    erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
+    if erguul_id:
+        is_cloned = True
+    return is_cloned
+
+
+def _get_erguul_qs(employee):
+    address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
+    erguul_qs = EmployeeErguul.objects
+    erguul_qs = erguul_qs.filter(address_id=address_id)
+    erguul_qs = erguul_qs.filter(is_over=False)
+    erguul = erguul_qs.values().first()
+    return erguul
+
+
+def _get_erguul(erguul, field):
+    value = ''
+    if erguul:
+        value = erguul[field]
+    return value
+
+
+def _get_choices(Model, field_name):
+    choices = list()
+    for f in Model._meta.get_fields():
+        if f.name == field_name:
+            choices = f.choices
+    return choices
