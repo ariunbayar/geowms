@@ -33,7 +33,6 @@ def _get_properties_by_feature(initial_qs, feature_ids):
 
     qs = initial_qs
     qs = qs.filter(property_id__isnull=False)
-    qs = qs.exclude(property_id=1)
     qs_for_props = qs.values_list('property_id', flat=True)
     property = LProperties.objects
     property = property.exclude(value_type_id='data-type')
