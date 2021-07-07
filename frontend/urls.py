@@ -49,7 +49,6 @@ urlpatterns = [
     path('p/', include(([
         path('үйлчилгээ/', page_views.service, name='service'),
         path('тусламж/', page_views.help, name='help'),
-        path('статистик/', page_views.statistics, name='statistics'),
     ], 'page'))),
 
 

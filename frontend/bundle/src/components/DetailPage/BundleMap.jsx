@@ -18,7 +18,7 @@ import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } fro
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import ImageWMS from 'ol/source/ImageWMS';
-import { СуурьДавхарга } from './controls/СуурьДавхарга'
+import { BaseMaps as СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
 import { Modal } from './controls/Modal'
 import { ShopModal } from './ShopControls/Modal'
@@ -33,9 +33,8 @@ import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
 import {default as ModalAlert} from "@utils/Modal/Modal"
 import SideBar from "@utils/SideBar"
-import WMSItem from './WMSItem'
+import WMSItem from './controls/LayerControls/WMSItem'
 import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
-
 
 export default class BundleMap extends Component {
 
@@ -60,6 +59,7 @@ export default class BundleMap extends Component {
             y: null,
             x: null,
             format: new GeoJSON(),
+            base_layer_controls: [],
 
             modal_status: 'closed',
         }
@@ -172,7 +172,7 @@ export default class BundleMap extends Component {
         Promise.all([
             service.loadBaseLayers(),
             service.loadWMSLayers(bundle_id),
-        ]).then(([{base_layer_list}, {wms_list}]) => {
+        ]).then(([{ base_layer_list }, { wms_list }]) => {
             this.handleMapDataLoaded(base_layer_list, wms_list)
         })
     }
@@ -232,17 +232,32 @@ export default class BundleMap extends Component {
                 }),
             }
         })
-        map_wms_list.map((wms, idx) =>
-            wms.layers.map((layer, idx) => {
+
+        map_wms_list.map((wms, w_idx) => {
+            map_wms_list[w_idx]['is_display'] = false
+            map_wms_list[w_idx]['is_display_layers'] = false
+
+            const wms_layers = wms.layers.map((layer, idx) => {
+                const is_checked = layer.defaultCheck == 1
+
                 layer.defaultCheck == 0 && layer.tile.setVisible(false)
                 layer.defaultCheck == 0 && layer.wms_tile.setVisible(false)
                 layer['legend'] = layer.wms_tile.getSource().getLegendUrl()
+                layer['is_legend_display'] = is_checked
+                layer['checked'] = is_checked
+
+                if (is_checked) {
+                    map_wms_list[w_idx]['is_display'] = is_checked
+                    map_wms_list[w_idx]['is_display_layers'] = is_checked
+                }
+
             })
-        )
-        this.setState({map_wms_list})
+            return wms_layers
+        })
+        this.setState({ map_wms_list })
 
         const base_layer_name = 'base_layer'
-        const {base_layers, base_layer_controls} =
+        const { base_layers, base_layer_controls } =
             base_layer_list.reduce(
                 (acc, base_layer_info, idx) => {
 
@@ -303,6 +318,7 @@ export default class BundleMap extends Component {
                         thumbnail_1x: base_layer_info.thumbnail_1x,
                         thumbnail_2x: base_layer_info.thumbnail_2x,
                         layer: layer,
+                        name: base_layer_info.name,
                     })
 
                     return acc
@@ -328,7 +344,7 @@ export default class BundleMap extends Component {
             }),
             name: vector_layer_name,
         })
-        this.setState({vector_layer})
+        this.setState({ vector_layer, base_layer_controls })
 
         const maker_layer_name = 'marker_layer'
         const marker_layer = new VectorLayer({
@@ -349,7 +365,6 @@ export default class BundleMap extends Component {
                 coordinateFormat: (coord) => coordinateFormat(coord, '{y},{x}', 6),
                 undefinedHTML: '',
             }),
-            new СуурьДавхарга({layers: base_layer_controls}),
             scale_line,
             this.controls.modal,
             this.controls.shopmodal,
@@ -669,6 +684,9 @@ export default class BundleMap extends Component {
                 }
                 this.controls.popup.getData(true, datas, this.onClickCloser, this.setSourceInPopUp, this.cartButton, is_empty, is_from_inspire, false)
             })
+            .catch((error) => {
+                this.controls.popup.getData(true, [], this.onClickCloser, this.setSourceInPopUp, this.cartButton, true, true, false)
+            })
     }
 
     checkTile(wms_tile, tile) {
@@ -972,7 +990,7 @@ export default class BundleMap extends Component {
         return geom
     }
 
-    toggleDrawed(event){
+    async toggleDrawed(event){
         this.feature_info_list = []
         this.controls.drawModal.showModal(true)
         let layer_codes = []
@@ -1046,18 +1064,15 @@ export default class BundleMap extends Component {
 
         const coordinates = event.feature.getGeometry().getCoordinates()
         const trans_coordinates = this.transformToLatLong(coordinates)
-        service
-            .getFeatureInfo(layer_codes, trans_coordinates)
-            .then(({ datas }) => {
-                layer_ids.map(([layer_code, layer_id], idx) => {
-                    datas.map((data, idx) => {
-                        if (data.layer_code == layer_code) {
-                            datas[idx]['layer_id'] = layer_id
-                        }
-                    })
-                })
-                this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, datas)
+        const { datas } = await service.getFeatureInfo(layer_codes, trans_coordinates)
+        layer_ids.map(([layer_code, layer_id], idx) => {
+            datas.map((data, idx) => {
+                if (data.layer_code == layer_code) {
+                    datas[idx]['layer_id'] = layer_id
+                }
             })
+        })
+        this.calcPrice(feature_geometry, layer_info, coodrinatLeftTop_map_coord, coodrinatRightBottom_map_coord, datas)
     }
 
     formatArea(polygon) {
@@ -1142,15 +1157,19 @@ export default class BundleMap extends Component {
     }
 
     render() {
+
         const Menu_comp = () => {
             return (
-                <div>
-                    {this.state.map_wms_list.map((wms, idx) =>
-                        <WMSItem wms={wms} key={idx} addLayer={this.addLayerToSearch}/>
-                    )}
+                <div className="pt-2">
+                    {
+                        this.state.map_wms_list.map((wms, idx) =>
+                            <WMSItem wms={wms} key={idx} addLayer={this.addLayerToSearch}/>
+                        )
+                    }
                 </div>
             )
         }
+
         const Search_comp = () => {
             return (
                 <div>
@@ -1159,11 +1178,12 @@ export default class BundleMap extends Component {
                         getOnlyFeature={this.getOnlyFeature}
                         resetFilteredOnlyFeature={this.resetFilteredOnlyFeature}
                         setFeatureOnMap={this.setFeatureOnMap}
-                        bundle_id = {this.state.bundle.id}
+                        bundle_id={this.state.bundle.id}
                     />
                 </div>
             )
         }
+
         const settings_component = () => {
             return(
                 <div>
@@ -1173,6 +1193,13 @@ export default class BundleMap extends Component {
                 </div>
             )
         }
+
+        const BaseMaps = () => {
+            return (
+                <СуурьДавхарга base_layer_controls={this.state.base_layer_controls} />
+            )
+        }
+
         return (
             <div>
                 <div className="row">
@@ -1180,25 +1207,36 @@ export default class BundleMap extends Component {
                         <div className="🌍">
                             <div id="map">
                                 <SideBar
-                                items = {[
-                                    {
-                                        "key": "menus",
-                                        "icon": "fa fa-bars",
-                                        "title": "Давхаргууд",
-                                        "component": Menu_comp,
-                                    },
-                                    {
-                                        "key": "search",
-                                        "icon": "fa fa-search",
-                                        "component": Search_comp
-                                    },
-                                    {
-                                        "key": "settings",
-                                        "icon": "fa fa-gear",
-                                        "component": settings_component,
-                                        "bottom": true
-                                    },
-                                ]}
+                                    items = {[
+                                        {
+                                            "key": "menus",
+                                            "icon": "fa fa-bars",
+                                            "title": "Давхаргууд",
+                                            "tooltip": "Давхаргууд",
+                                            "component": Menu_comp,
+                                        },
+                                        {
+                                            "key": "search",
+                                            "icon": "fa fa-search",
+                                            "tooltip": "Хайлт",
+                                            "component": Search_comp
+                                        },
+                                        {
+                                            "key": "base_maps",
+                                            "icon": "fa fa-map-o",
+                                            "title": "Суурь давхаргууд",
+                                            "tooltip": "Суурь давхаргууд",
+                                            "component": BaseMaps,
+                                            "bottom": true
+                                        },
+                                        {
+                                            "key": "settings",
+                                            "icon": "fa fa-gear",
+                                            "tooltip": "Тохиргоо",
+                                            "component": settings_component,
+                                            "bottom": true
+                                        },
+                                    ]}
                                 />
                             </div>
                         </div>

@@ -60,7 +60,7 @@ export class App extends Component {
     }
 
     render() {
-        const { employee, allowed_geom } = this.props.org
+        const { employee, allowed_geom, has_position } = this.props.org
         const { base_layer_list, org_role, is_loading } = this.state
 
         return (
@@ -135,7 +135,7 @@ export class App extends Component {
 function TabBars(props) {
 
     const employee = props.employee
-    const { approve, revoke } = props
+    const { approve, revoke, has_position} = props
 
     const [request_count, setRequestCount] = useState(0)
     const [revoke_count, setRevokeCount] = useState(0)
@@ -238,7 +238,9 @@ function TabBars(props) {
                 >
                 </MenuItem>
             }
-            <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт" count={llc_count}></MenuItem>
+            {
+                has_position && <MenuItem icon="gp-text-primary fa fa-plug" url="/gov/llc-request/" text="ААН-Хүсэлт" count={llc_count}></MenuItem>
+            }
             <MenuItem icon="gp-text-primary fa fa-database" url="/gov/org/map/" text="Дэд сан">
                 <ul className="sidebar-submenu">
                     <MenuItem icon="gp-text-primary fa fa-circle-o" url="/gov/tuuhen-ov/" text="Түүхэн өв бүртгэл"></MenuItem>

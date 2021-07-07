@@ -118,6 +118,11 @@ def purchase_draw(request, payload):
     layer_list = payload.get('layer_list')
     feature_info_list = payload.get('feature_info_list')
     selected_type = payload.get('selected_type')
+    if not selected_type:
+        return JsonResponse({
+            'success': False,
+            'error': 'Төрөл сонгоно уу'
+        })
 
     bundle = get_object_or_404(Bundle, pk=bundle_id)
     layer_ids = _get_layer_ids(feature_info_list)
@@ -1304,12 +1309,21 @@ def download_purchase(request, pk):
         if is_created:
 
             subject = 'Худалдан авалт'
-            msg = 'Дараах холбоос дээр дарж худалдан авсан бүтээгдэхүүнээ татаж авна уу!'
+            text = ''
             host_name = utils.get_config('EMAIL_HOST_NAME')
-            msg = '{msg} http://{host_name}/payment/history/api/details/{id}/'.format(id=payment.pk, msg=msg, host_name=host_name)
+            protocol = utils.get_protocol(host_name)
+            href = '{protocol}://{host_name}/payment/history/api/details/{id}/'.format(id=payment.pk, host_name=host_name, protocol=protocol)
+            html = """
+                <!DOCTYPE html>
+                <html>
+                    <head></head>
+                    <body>
+                        <a className="text-primary" href="{href}">Энд дарж</a> худалдан авсан бүтээгдэхүүнээ татаж авна уу!
+                    </body>
+                </html>
+            """.format(text=text, href=href)
             to_email = [payment.user.email]
-
-            utils.send_email(subject, msg, to_email)
+            utils.send_email(subject, '', to_email=to_email, attach=html)
 
     rsp = {
         'success': is_created,
@@ -1479,10 +1493,12 @@ def _get_all_property_count(feature_info_list):
 def _calc_per_price(area, area_type, all_len_property, len_object_in_layer, selected_type):
     amount = None
     price = None
+    area = float(area)
     if area_type == 'km':
         amount = float(utils.get_config('POLYGON_PER_KM_AMOUNT'))
     if area_type == 'm':
         amount = float(utils.get_config('POLYGON_PER_M_AMOUNT'))
+
     if selected_type == 'shp' or selected_type == 'pdf':
         price = ((area * amount) + (all_len_property * float(utils.get_config('PROPERTY_PER_AMOUNT')))) * len_object_in_layer
     if selected_type == 'png' or selected_type == 'jpeg' or selected_type == 'tiff':
@@ -1726,7 +1742,7 @@ def get_popup_info(request, payload):
                     datas[1].append([key, value, key])
                 for prop in properties:
                     if prop['property_code'].lower() == key and value:
-                        datas[1].append([prop['property_name'], value, key])
+                        datas[1].append([prop['property_name'], str(value), key])
             if datas:
                 infos.append(datas)
 
@@ -1755,6 +1771,9 @@ def get_feature_info(request, payload):
         data['geom_ids'] = geom_ids
 
         view_qs = ViewNames.objects.filter(view_name=layer_code).first()
+        if not view_qs:
+            continue
+
         feature_id = view_qs.feature_id
         data['feature_id'] = feature_id
 

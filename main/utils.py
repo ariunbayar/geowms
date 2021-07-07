@@ -275,12 +275,19 @@ def _make_connection(from_email):
     return connection
 
 
-def _make_html(text, host_name, href):
+def get_protocol(host_name):
+
     protocol = 'https'
     not_secure_ips = ['192.168.10.92']
     if settings.DEBUG or host_name in not_secure_ips:
         protocol = 'http'
 
+    return protocol
+
+
+def _make_html(text, host_name, href):
+
+    protocol = get_protocol(host_name)
     host = "{protocol}://{host_name}".format(protocol=protocol, host_name=host_name)
     href = host + href
 
@@ -1641,7 +1648,7 @@ def get_colName_type(view_name, data):
         from
             {view_name} group by geo_data limit 1
             '''.format(
-                view_name=view_name,
+                view_name=view_name.lower(),
                 data=data
                 )
 
@@ -1912,7 +1919,7 @@ def make_view_name(feature):
         feature_code = feature.feature_code
         feature_code = feature_code.split("-")
         view_name = slugifyWord(feature.feature_name_eng) + "_" + feature_code[len(feature_code) - 1] + '_view'
-    return view_name
+    return view_name.lower()
 
 
 def get_feature_from_layer_code(layer_code):

@@ -21,12 +21,14 @@ def all(request):
             base_layer_url = base_layer.url.replace('wms/', '')
             base_layer_url = base_layer_url.replace('wmts/', '')
             pk = int(base_layer_url.split('/')[-2])
-            wms = WMS.objects.get(pk=pk)
-            wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
+            wms = WMS.objects.filter(pk=pk).first()
+            if wms:
+                wms_args['layers'] = ','.join([ob.code for ob in wms.wmslayer_set.all()])
 
         base_layer_list.append({
             'tilename': base_layer.tilename,
             'url': base_layer.url,
+            'name': base_layer.name,
             'geoserver_url': wms.cache_url if wms else '',
             'thumbnail_1x': base_layer.thumbnail_1x.url,
             'thumbnail_2x': base_layer.thumbnail_2x.url,
@@ -36,4 +38,5 @@ def all(request):
     rsp = {
         'base_layer_list': base_layer_list,
     }
+
     return JsonResponse(rsp)
