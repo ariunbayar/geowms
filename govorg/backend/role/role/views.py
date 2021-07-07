@@ -11,7 +11,6 @@ from main import utils
 from backend.org.models import Org, Employee
 from backend.inspire.models import (
     GovPerm,
-    GovPermInspire,
     EmpRole,
     EmpRoleInspire,
     LFeatures,
@@ -108,7 +107,7 @@ def _set_emp_role_data(emp_role, name, description):
 
 def _set_emp_role_inspire_data(emp_role, role, user):
 
-    gov_perm_inspire =  role.get('gov_perm_inspire_id')
+    gov_perm_inspire = role.get('gov_perm_inspire_id')
 
     emp_role_inspire = EmpRoleInspire()
     emp_role_inspire.gov_perm_inspire_id = gov_perm_inspire
@@ -184,7 +183,7 @@ def create(request, payload):
     errors = _role_name_validation(payload, None)
     user = request.user
     if errors:
-        return JsonResponse({'success': False, 'errors':errors})
+        return JsonResponse({'success': False, 'errors': errors})
 
     gov_perm = get_object_or_404(GovPerm, pk=payload.get('gov_perm_id'))
     emp_role = EmpRole()

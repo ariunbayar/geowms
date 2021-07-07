@@ -1,11 +1,9 @@
-from re import L
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.http import JsonResponse, Http404
 from django.db import transaction
 from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
-from django.db.models import CharField, Value
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Count, Q
 
@@ -14,7 +12,6 @@ from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, E
 from main.decorators import ajax_required
 from backend.token.utils import TokenGeneratorEmployee
 from backend.payment.models import Payment
-from govorg.backend.org_request.models import ChangeRequest
 from main import utils
 from main.components import Datatable
 from backend.inspire.models import (
@@ -22,7 +19,6 @@ from backend.inspire.models import (
     EmpPerm,
     EmpRoleInspire,
     EmpPermInspire,
-    LFeatureConfigs,
     LFeatures,
     LPackages,
     LProperties,
@@ -38,11 +34,6 @@ from govorg.backend.utils import (
 )
 
 from backend.org.forms import EmployeeAddressForm
-
-from backend.org.models import Employee, Org
-from backend.dedsanbutets.models import ViewNames
-from govorg.backend.org_request.models import ChangeRequest
-from govorg.backend.org_request.views import _get_geom
 
 
 def _get_address_state_db_value(address_state):
@@ -443,9 +434,9 @@ def create(request, payload):
         }
     else:
         rsp = {
-                'success': False,
-                'errors': {**form.errors, **errors},
-            }
+            'success': False,
+            'errors': {**form.errors, **errors},
+        }
 
     return JsonResponse(rsp)
 

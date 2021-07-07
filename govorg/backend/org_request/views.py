@@ -16,7 +16,7 @@ from django.conf import settings
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
-from backend.org.models import Employee, Org
+from backend.org.models import Employee
 from backend.inspire.models import (
     LThemes,
     LFeatures,
@@ -45,13 +45,11 @@ from main.utils import (
     get_fields,
     get_feature_from_geojson,
     json_load,
-    get_geom,
     get_geoJson,
     get_cursor_pg,
     convert_3d_with_srid,
     datetime_to_string,
     get_feature,
-    value_types
 )
 from main import utils
 
@@ -95,6 +93,7 @@ LLC_REQUEST_REVOKE = {
     'state': LLCRequest.STATE_SOLVED,
     'kind': LLCRequest.KIND_REVOKE,
 }
+
 
 def _get_geom(geo_id, fid):
     cursor = connections['default'].cursor()
@@ -200,8 +199,8 @@ def get_change_all(request):
             }
     else:
         rsp = {
-                'success': False,
-            }
+            'success': False,
+        }
 
     return JsonResponse(rsp)
 
@@ -497,7 +496,7 @@ def _set_llc_request(llc_request_id, payload):
         llc_request_data['kind'] = LLC_REQUEST_DISSMIS['kind']
         llc_request_data['state'] = LLC_REQUEST_DISSMIS['state']
         info = 'Амжилттай буцаалаа'
-        request_shape['state'] = RequestFilesShape.STATE_SENT # TODO soligdoj magdgv
+        request_shape['state'] = RequestFilesShape.STATE_SENT  # TODO soligdoj magdgv
         request_shape['kind'] = RequestFilesShape.KIND_DISMISS
         llc_changerequest_qs = llc_changerequest_qs.filter(feature_id=feature_id)
 
@@ -684,7 +683,7 @@ def _create_mdatas(geo_id, feature_id, form, value):
 
     if form["value_type"] == "option":
         if form["data"]:
-            value['code_list_id'] = form ["data"]
+            value['code_list_id'] = form["data"]
 
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
@@ -1056,12 +1055,11 @@ def request_approve(request, payload):
                 }
                 return JsonResponse(rsp)
 
-
             info = _refresh_view_direct_or_crontab(is_refresh, feature_id)
 
             rsp = {
-            'success': True,
-            'info': info
+                'success': True,
+                'info': info
             }
 
     return JsonResponse(rsp)
@@ -1251,7 +1249,7 @@ def get_request_data(request, id):
                 'name': feature_name
             },
             'order_no': shape_geometry.order_no or '',
-            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
+            'order_at': datetime_to_string(shape_geometry.order_at) if shape_geometry.order_at else ''
         })
 
     return JsonResponse({
@@ -1467,7 +1465,7 @@ def llc_request_approve(request, request_id):
     has_req_qs = has_req_qs.filter(llc_request_id=request_id)
     has_req_qs = has_req_qs.exclude(state=ChangeRequest.STATE_APPROVE)
     if has_req_qs:
-        #TODO huseltiin logiig enechee bichij boloh ym
+        # TODO huseltiin logiig enechee bichij boloh ym
         has_req_qs.delete()
 
     for file_shape in request_file_shapes.values():
