@@ -878,30 +878,71 @@ def perm_get_list(request, payload):
     return JsonResponse(rsp)
 
 
+def _perm_name_validation(payload, perm):
+    values = payload.get('values')
+    role_id = payload.get('pk')
+    errors = {}
+    check_name = False
+
+    if role_id:
+        if perm.name != values['name']:
+            check_name = True
+
+    if check_name or not role_id:
+        perm_by_name = GovRole.objects.filter(name=values['name']).first()
+        if perm_by_name:
+            errors['name'] = 'Нэр давхцаж байна!'
+    return errors
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def create_perm(request, payload):
     values = payload.get('values')
-    name_check = GovRole.objects.filter(name=values['name'])
-    errors = {}
-    if name_check:
-        errors['name'] = 'Нэр давхцаж байна'
-        rsp = {
-            'success': False,
-            'errors': errors,
-        }
-    elif values['name'].isspace():
-        errors['name'] = 'Хоосон байна утга оруулна уу!'
-        rsp = {
-            'success': False,
-            'errors': errors,
-        }
+    role_id = payload.get('pk')
+    if role_id:
+        gov_role = get_object_or_404(GovRole, pk=role_id)
+        errors = _perm_name_validation(payload, gov_role)
+    else:
+        errors = _perm_name_validation(payload, None)
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
+
+    if role_id:
+        GovRole.objects.filter(id=role_id).update(name=values['name'], description=values['description'])
     else:
         GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
-        rsp = {
-            'success': True,
-        }
+
+    return JsonResponse({'success': True, 'errors': errors})
+
+
+
+@require_GET
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def role_detail(request, pk):
+    role = GovRole.objects.filter(id=pk).first()
+
+    rsp = {
+        'success': True,
+        'name': role.name,
+        'description': role.description
+    }
+
+    return JsonResponse(rsp)
+
+
+@require_POST
+@ajax_required
+@user_passes_test(lambda u: u.is_superuser)
+def remove_role(request, pk):
+    role = GovRole.objects.filter(id=pk).first()
+    role.delete()
+
+    rsp = {
+        'success': True,
+    }
 
     return JsonResponse(rsp)
 

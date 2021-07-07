@@ -207,12 +207,16 @@ def frontend(request):
 
     approve = False
     revoke = False
-
+    has_position = False
     employee = get_object_or_404(Employee, user=request.user)
     org = get_object_or_404(Org, employee=employee)
+    emp_perm = employee.empperm_set.first()
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
 
-    emp_perm = employee.empperm_set.first()
+    if  employee.org.level == 2 and employee.position:
+        if employee.position.name.lower() == 'мэргэжилтэн':
+            has_position = True
+
     if emp_perm:
         emp_perm_insp = emp_perm.empperminspire_set
         approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
@@ -227,6 +231,7 @@ def frontend(request):
                 'username': employee.user.username,
                 'geo_id': org.geo_id or None
             },
+            'has_position': has_position,
             'allowed_geom': geom.json if geom else None,
             'approve': True if approve else False,
             'revoke': True if revoke else False,
@@ -234,7 +239,6 @@ def frontend(request):
     }
 
     return render(request, 'org/index.html', context)
-
 
 @require_GET
 @ajax_required
