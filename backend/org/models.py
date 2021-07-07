@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.conf import settings
 
+
 class Org(models.Model):
     LEVEL_CHOICES = [
         (1, '1-р түвшин'),
