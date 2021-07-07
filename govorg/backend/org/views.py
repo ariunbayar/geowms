@@ -31,7 +31,7 @@ from django.views.decorators.cache import cache_page
 
 def _get_properties_by_feature(initial_qs, feature_ids):
 
-    qs = initial_qs
+    qs = initial_qs.order_by('feature_id')
     qs = qs.exclude(geom=True)
     qs_for_props = qs.values_list('property_id', flat=True)
     property = LProperties.objects
@@ -48,17 +48,35 @@ def _get_properties_by_feature(initial_qs, feature_ids):
         feature_id: []
         for feature_id in feature_ids
     }
+    feature_data = qs.first().feature_id
+    property_of_features = []
+
+    #TODO ялгаатай datatype-тай ижилхэн property-ийг ялгах
 
     for feature_id, property_id, perm_kind, data_type_id in item_pairs:
-        try:
-            feature_property_ids[feature_id].append({
-                "perm_kind": perm_kind,
-                "prop_obj": properties[property_id],
-                "data_type_id": data_type_id if data_type_id else '',
-            })
-        except Exception:
-            pass
+        if feature_id != feature_data:
+            property_of_features = []
 
+        sum = 0
+        property_of_features.append({
+            'id': property_id,
+            'perm': perm_kind
+        })
+
+        for property in property_of_features:
+            if property['id'] == property_id and property['perm'] == perm_kind:
+                sum += 1
+
+        if sum < 2:
+            try:
+                feature_property_ids[feature_id].append({
+                    "perm_kind": perm_kind,
+                    "prop_obj": properties[property_id],
+                    "data_type_id": data_type_id if data_type_id else '',
+                })
+            except Exception:
+                pass
+        feature_data = feature_id
     return feature_property_ids
 
 
