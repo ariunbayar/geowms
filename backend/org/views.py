@@ -889,9 +889,9 @@ def _perm_name_validation(payload, perm):
             check_name = True
 
     if check_name or not role_id:
-        perm_by_name = GovRole.objects.filter(name=values['name'])
+        perm_by_name = GovRole.objects.filter(name=values['name']).first()
         if perm_by_name:
-            errors['role_name'] = 'Нэр давхцаж байна !.'
+            errors['name'] = 'Нэр давхцаж байна!'
     return errors
 
 
@@ -913,11 +913,8 @@ def create_perm(request, payload):
         GovRole.objects.filter(id=role_id).update(name=values['name'], description=values['description'])
     else:
         GovRole.objects.create(name=values['name'], description=values['description'], created_by=request.user, updated_by=request.user)
-    rsp = {
-        'success': True,
-    }
 
-    return JsonResponse(rsp)
+    return JsonResponse({'success': True, 'errors': errors})
 
 
 
