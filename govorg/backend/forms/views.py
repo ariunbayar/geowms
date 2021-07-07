@@ -1,6 +1,5 @@
 import os
 import json
-import pyproj
 import uuid
 
 from fpdf import FPDF
@@ -11,7 +10,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse
-from django.contrib.gis.geos import GEOSGeometry, Point, Polygon
+from django.contrib.gis.geos import Point, Polygon
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector
 from django.conf import settings
@@ -25,30 +24,19 @@ from backend.inspire.models import (
     LProperties, MDatas, MGeoDatas,
     EmpPermInspire, EmpPerm
 )
-from backend.org.models import Employee, Org
+from backend.org.models import Employee
 from geoportal_app.models import User
 from .models import TsegRequest
 
 from .models import (
     TsegUstsan,
-    TsegPersonal,
     TuuhSoyol,
     TuuhSoyolPoint,
     TuuhSoyolHuree,
     TuuhSoyolAyuulHuree,
     Mpoint_view,
-    Mpoint2,
-    Mpoint3,
-    Mpoint4,
-    Mpoint5,
-    Mpoint6,
-    Mpoint7,
-    Mpoint8,
-    Mpoint9,
-    Mpoint10,
     TuuhSoyolHureePol,
     TuuhSoyolAyuulHureePol,
-    TsegUstsanLog,
 )
 
 from main.decorators import ajax_required
@@ -74,15 +62,15 @@ def createPdf(values, requests):
         L = float(y)
         B = float(x)
         LA = int(L)
-        LB = int((L-LA)*60)
-        LC = float((L-LA-LB/60)*3600 )
+        LB = int((L - LA) * 60)
+        LC = float((L - LA - LB / 60) * 3600)
         LC = "%.6f" % LC
         BA = int(B)
-        BB = int((B-BA)*60)
-        BC = float((B-BA-BB/60)*3600 )
+        BB = int((B - BA) * 60)
+        BC = float((B - BA - BB / 60) * 3600)
         BC = "%.6f" % BC
-        Bchar = str(BA) + '°' + str(BB) + "'" + str(float(BC))  + '"'
-        Lchar = str(LA) + '°' + str(LB) + "'" + str(float(LC))  + '"'
+        Bchar = str(BA) + '°' + str(BB) + "'" + str(float(BC)) + '"'
+        Lchar = str(LA) + '°' + str(LB) + "'" + str(float(LC)) + '"'
         transformer = Transformer.from_crs(4326, 26917)
         transformer = Transformer.from_crs("EPSG:4326", 'EPSG:3857')
         transformer
@@ -157,9 +145,9 @@ def createPdf(values, requests):
     pdf.cell(94, 70, '', 1, 0, 'C')
     pdf.ln(70)
     if 'photoOfControlPointToNear' in values:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear']), x = 11, y = 83, w = 92, h = 60, type = '', link = '')
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPointToNear']), x=11, y=83, w=92, h=60, type='', link='')
     if 'photoOfControlPoinFromFar' in values:
-        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar']), x = 105, y = 83, w = 92, h = 60, type = '', link = '')
+        pdf.image(os.path.join(settings.MEDIA_ROOT, values['photoOfControlPoinFromFar']), x=105, y=83, w=92, h=60, type='', link='')
     # mor 6
     pdf.ln(0)
     pdf.cell(188, 8, '8. Байршлийн тухай', 1, 0, 'C')
@@ -175,9 +163,9 @@ def createPdf(values, requests):
         pdf.cell(94, 62, '', 1, 0, 'C')
         pdf.ln(62)
         if 'pointCentreType' in values:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['pointCentreType']), x = 11, y = newH + 8, w = 92, h =60, type = '', link = '')
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['pointCentreType']), x=11, y=newH + 8, w=92, h=0, type='', link='')
         if 'overviewPhotoOfControlPointLocation' in values:
-            pdf.image(os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation']), x = 105, y = newH + 8, w = 92, h =60, type = '', link = '')
+            pdf.image(os.path.join(settings.MEDIA_ROOT, values['overviewPhotoOfControlPointLocation']), x=105, y=newH + 8, w=92, h=0, type='', link='')
     else:
         pdf.ln(0)
     # mor 6
@@ -193,7 +181,7 @@ def createPdf(values, requests):
     else:
         date = ''
 
-    pdf.cell(84, 8, 'Огноо: ' +  date, 1, 0, 'C')
+    pdf.cell(84, 8, 'Огноо: ' + date, 1, 0, 'C')
 
     # mor 6
     pdf.ln(8)
@@ -222,15 +210,16 @@ def create(request, payload):
     form_datas = payload.get('form_datas')
     if form_datas['date']:
         date = form_datas['date']
-    TuuhSoyol.objects.using('postgis_db').create( id = unique_id,
-                                dugaar=form_datas['dugaar'],
-                                date=date,
-                                inspireid="geo",
-                                too_shirheg=form_datas['too_shirheg'],
-                                aimagname=payload.get('aimagname'),
-                                sumname=payload.get('sumname'),
-                                burtgegch=form_datas['burtgegch']
-                            )
+    TuuhSoyol.objects.using('postgis_db').create(
+        id=unique_id,
+        dugaar=form_datas['dugaar'],
+        date=date,
+        inspireid="geo",
+        too_shirheg=form_datas['too_shirheg'],
+        aimagname=payload.get('aimagname'),
+        sumname=payload.get('sumname'),
+        burtgegch=form_datas['burtgegch']
+    )
     return JsonResponse({'success': True})
 
 
@@ -259,7 +248,6 @@ def hureeCountEdit(request, payload):
     return JsonResponse({'success': True})
 
 
-
 @require_POST
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
@@ -268,15 +256,16 @@ def update(request, payload):
     form_datas = payload.get('form_datas')
     if form_datas['date']:
         date = form_datas['date']
-    TuuhSoyol.objects.using('postgis_db').filter(id=form_datas['id']).update(
-                                                        dugaar=form_datas['dugaar'],
-                                                        date=date,
-                                                        inspireid="geo",
-                                                        too_shirheg=form_datas['too_shirheg'],
-                                                        aimagname=payload.get('aimagname'),
-                                                        sumname=payload.get('sumname'),
-                                                        burtgegch=form_datas['burtgegch']
-                                                    )
+    TuuhSoyol.objects.using('postgis_db').filter(
+        id=form_datas['id']).update(
+        dugaar=form_datas['dugaar'],
+        date=date,
+        inspireid="geo",
+        too_shirheg=form_datas['too_shirheg'],
+        aimagname=payload.get('aimagname'),
+        sumname=payload.get('sumname'),
+        burtgegch=form_datas['burtgegch']
+    )
     return JsonResponse({'success': True})
 
 
@@ -384,12 +373,12 @@ def dursgaltGazarUpdate(request, payload):
     if form_datas['torol_zuil_torol_zuil_tree2']:
         type2 = form_datas['torol_zuil_torol_zuil_tree2']
     stone = form_datas_values['torol_zuiltorol_zuil_name']
-    length =form_datas_values['hemjee_urt']
-    width =form_datas_values['hemjee_orgon']
-    hight =form_datas_values['hemjee_ondor']
-    area =form_datas_values['hemjee_talbai']
-    depth =form_datas_values['hemjee_zuzaan']
-    meridian =form_datas_values['hemjee_golch']
+    length = form_datas_values['hemjee_urt']
+    width = form_datas_values['hemjee_orgon']
+    hight = form_datas_values['hemjee_ondor']
+    area = form_datas_values['hemjee_talbai']
+    depth = form_datas_values['hemjee_zuzaan']
+    meridian = form_datas_values['hemjee_golch']
     other = form_datas_values['hemjee_busad_hemjee']
     number = form_datas_values['hemjee_too_shirheg']
     protection = form_datas_values['dgh_angilal']
@@ -415,37 +404,38 @@ def dursgaltGazarUpdate(request, payload):
     hayg = form_datas_values['dgh_hayg_tailbar_eseh_hayg']
     omchlol = form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt']
     protection_irgen = form_datas_values['dg_ezen_dursgalt_gazar_ezen']
-    tuuhsoyolpoint = TuuhSoyolPoint.objects.using('postgis_db').filter(pk=form_datas['durgal_id']).update(
-                            tuuh_soyl=tuuhsoyl.id,
-                            dursgal=dursgal,
-                            dursgal2=dursgal2, descriptio=descriptio,
-                            type1=form_datas['torol_zuil_torol_zuil'],
-                            type2=type2,
-                            stone=stone, length=length,
-                            area=area,
-                            width=width, hight=hight, depth=depth,
-                            meridian=meridian, other=other,
-                            number=number, hemjee_comment=form_datas_values['hemjee_temdeglel'],
-                            protection_irgen=protection_irgen,
-                            protection_irgen_commnent=form_datas_values['dg_ezen_temdeglel'],
-                            protection=protection, protecti_1=protecti_1,
-                            tus=tus, tus_comment=form_datas_values['dgh_tusgai_temdeglel'],
-                            yaral=yaral, yaral_comment=form_datas_values['dgh_yaaraltai_temdeglel'],
-                            omchlol=omchlol, omchlol_comment=form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
-                            malts=malts, malts_comment=form_datas_values['dgh_maltan_sudaltan_temdeglel'],
-                            human=human, human_comment=form_datas_values['dgh_gemtliin_temdeglel'],
-                            natural=natural, natural_comment=form_datas_values['dgh_baigaliin_huchin_zuil_temdeglel'],
-                            recover=recover, recover_comment=form_datas_values['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
-                            recover1=recover1,recover1_comment=form_datas_values['dgh_sergeen_zasvarlah_eseh_temdeglel'],
-                            protecti_2=protecti_2, protecti_2_comment=form_datas_values['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
-                            hashaa=hashaa, hashaa_comment=form_datas_values['dgh_hashaa_baigaa_eseh_temdeglel'],
-                            saravch=saravch, saravch_comment=form_datas_values['dgh_saravchtai_eseh_temdeglel'],
-                            hayg=hayg, hayg_comment=form_datas_values['dgh_hayg_tailbar_eseh_temdeglel'],
-                            other1=other1,
-                            x=x, y=y,
-                            ondor=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
-                            geom = geom
-                            )
+    TuuhSoyolPoint.objects.using('postgis_db').filter(pk=form_datas['durgal_id']).update(
+        tuuh_soyl=tuuhsoyl.id,
+        dursgal=dursgal,
+        dursgal2=dursgal2, descriptio=descriptio,
+        type1=form_datas['torol_zuil_torol_zuil'],
+        type2=type2,
+        stone=stone, length=length,
+        area=area,
+        width=width, hight=hight, depth=depth,
+        meridian=meridian, other=other,
+        number=number, hemjee_comment=form_datas_values['hemjee_temdeglel'],
+        protection_irgen=protection_irgen,
+        protection_irgen_commnent=form_datas_values['dg_ezen_temdeglel'],
+        protection=protection, protecti_1=protecti_1,
+        tus=tus, tus_comment=form_datas_values['dgh_tusgai_temdeglel'],
+        yaral=yaral, yaral_comment=form_datas_values['dgh_yaaraltai_temdeglel'],
+        omchlol=omchlol, omchlol_comment=form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
+        malts=malts, malts_comment=form_datas_values['dgh_maltan_sudaltan_temdeglel'],
+        human=human, human_comment=form_datas_values['dgh_gemtliin_temdeglel'],
+        natural=natural, natural_comment=form_datas_values['dgh_baigaliin_huchin_zuil_temdeglel'],
+        recover=recover, recover_comment=form_datas_values['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
+        recover1=recover1, recover1_comment=form_datas_values['dgh_sergeen_zasvarlah_eseh_temdeglel'],
+        protecti_2=protecti_2, protecti_2_comment=form_datas_values['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
+        hashaa=hashaa, hashaa_comment=form_datas_values['dgh_hashaa_baigaa_eseh_temdeglel'],
+        saravch=saravch, saravch_comment=form_datas_values['dgh_saravchtai_eseh_temdeglel'],
+        hayg=hayg, hayg_comment=form_datas_values['dgh_hayg_tailbar_eseh_temdeglel'],
+        other1=other1,
+        x=x, y=y,
+        ondor=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
+        geom=geom
+    )
+
     return JsonResponse({'success': True})
 
 
@@ -465,12 +455,12 @@ def dursgaltGazarCreate(request, payload):
     if form_datas['torol_zuil_torol_zuil_tree2']:
         type2 = form_datas['torol_zuil_torol_zuil_tree2']
     stone = form_datas_values['torol_zuiltorol_zuil_name']
-    length =form_datas_values['hemjee_urt']
-    width =form_datas_values['hemjee_orgon']
-    area =form_datas_values['hemjee_talbai']
-    hight =form_datas_values['hemjee_ondor']
-    depth =form_datas_values['hemjee_zuzaan']
-    meridian =form_datas_values['hemjee_golch']
+    length = form_datas_values['hemjee_urt']
+    width = form_datas_values['hemjee_orgon']
+    area = form_datas_values['hemjee_talbai']
+    hight = form_datas_values['hemjee_ondor']
+    depth = form_datas_values['hemjee_zuzaan']
+    meridian = form_datas_values['hemjee_golch']
     other = form_datas_values['hemjee_busad_hemjee']
     number = form_datas_values['hemjee_too_shirheg']
     protection = form_datas_values['dgh_angilal']
@@ -497,37 +487,38 @@ def dursgaltGazarCreate(request, payload):
     hayg = form_datas_values['dgh_hayg_tailbar_eseh_hayg']
     omchlol = form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_hamgaalalt']
     protection_irgen = form_datas_values['dg_ezen_dursgalt_gazar_ezen']
-    tuuhsoyolpoint = TuuhSoyolPoint.objects.using('postgis_db').create(
-                            tuuh_soyl=tuuhsoyl.id,
-                            dursgal=dursgal,
-                            dursgal2=dursgal2, descriptio=descriptio,
-                            type1=form_datas['torol_zuil_torol_zuil'],
-                            type2=type2,
-                            stone=stone, length=length,
-                            width=width, hight=hight, depth=depth,
-                            area=area,
-                            meridian=meridian, other=other,
-                            number=number, hemjee_comment=form_datas_values['hemjee_temdeglel'],
-                            protection_irgen=protection_irgen,
-                            protection_irgen_commnent=form_datas_values['dg_ezen_temdeglel'],
-                            protection=protection, protecti_1=protecti_1,
-                            tus=tus, tus_comment=form_datas_values['dgh_tusgai_temdeglel'],
-                            yaral=yaral, yaral_comment=form_datas_values['dgh_yaaraltai_temdeglel'],
-                            omchlol=omchlol, omchlol_comment=form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
-                            malts=malts, malts_comment=form_datas_values['dgh_maltan_sudaltan_temdeglel'],
-                            human=human, human_comment=form_datas_values['dgh_gemtliin_temdeglel'],
-                            natural=natural, natural_comment=form_datas_values['dgh_baigaliin_huchin_zuil_temdeglel'],
-                            recover=recover, recover_comment=form_datas_values['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
-                            recover1=recover1,recover1_comment=form_datas_values['dgh_sergeen_zasvarlah_eseh_temdeglel'],
-                            protecti_2=protecti_2, protecti_2_comment=form_datas_values['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
-                            hashaa=hashaa, hashaa_comment=form_datas_values['dgh_hashaa_baigaa_eseh_temdeglel'],
-                            saravch=saravch, saravch_comment=form_datas_values['dgh_saravchtai_eseh_temdeglel'],
-                            hayg=hayg, hayg_comment=form_datas_values['dgh_hayg_tailbar_eseh_temdeglel'],
-                            other1=other1,
-                            x=x, y=y,
-                            ondor=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
-                            geom = geom
-                            )
+    TuuhSoyolPoint.objects.using('postgis_db').create(
+        tuuh_soyl=tuuhsoyl.id,
+        dursgal=dursgal,
+        dursgal2=dursgal2, descriptio=descriptio,
+        type1=form_datas['torol_zuil_torol_zuil'],
+        type2=type2,
+        stone=stone, length=length,
+        width=width, hight=hight, depth=depth,
+        area=area,
+        meridian=meridian, other=other,
+        number=number, hemjee_comment=form_datas_values['hemjee_temdeglel'],
+        protection_irgen=protection_irgen,
+        protection_irgen_commnent=form_datas_values['dg_ezen_temdeglel'],
+        protection=protection, protecti_1=protecti_1,
+        tus=tus, tus_comment=form_datas_values['dgh_tusgai_temdeglel'],
+        yaral=yaral, yaral_comment=form_datas_values['dgh_yaaraltai_temdeglel'],
+        omchlol=omchlol, omchlol_comment=form_datas_values['dgh_omchlol_ezemshih_omchlol_sanal_temdeglel'],
+        malts=malts, malts_comment=form_datas_values['dgh_maltan_sudaltan_temdeglel'],
+        human=human, human_comment=form_datas_values['dgh_gemtliin_temdeglel'],
+        natural=natural, natural_comment=form_datas_values['dgh_baigaliin_huchin_zuil_temdeglel'],
+        recover=recover, recover_comment=form_datas_values['dgh_sergeen_zasvarlasan_eseh_temdeglel'],
+        recover1=recover1, recover1_comment=form_datas_values['dgh_sergeen_zasvarlah_eseh_temdeglel'],
+        protecti_2=protecti_2, protecti_2_comment=form_datas_values['dgh_hamgaalaltiin_zereg_oorchloh_sanal_temdeglel'],
+        hashaa=hashaa, hashaa_comment=form_datas_values['dgh_hashaa_baigaa_eseh_temdeglel'],
+        saravch=saravch, saravch_comment=form_datas_values['dgh_saravchtai_eseh_temdeglel'],
+        hayg=hayg, hayg_comment=form_datas_values['dgh_hayg_tailbar_eseh_temdeglel'],
+        other1=other1,
+        x=x, y=y,
+        ondor=form_datas_values['torol_zuil_dursgalt_gazriin_coordinatalt'],
+        geom=geom
+    )
+
     return JsonResponse({'success': True})
 
 
@@ -543,11 +534,11 @@ def dursgaltGazarAll(request, payload):
     sort_name = payload.get('sort_name')
     if not sort_name:
         sort_name = 'id'
-    if query == None:
+    if query is None:
         query = ''
-    if page == None:
+    if page is None:
         page = 1
-    data = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl = tuuh_soyol).annotate(search=SearchVector('dursgal')).filter(search__contains=query).order_by(sort_name)
+    data = TuuhSoyolPoint.objects.using('postgis_db').filter(tuuh_soyl=tuuh_soyol).annotate(search=SearchVector('dursgal')).filter(search__contains=query).order_by(sort_name)
 
     total_items = Paginator(data, per_page)
     items_page = total_items.page(page)
@@ -566,14 +557,15 @@ def dursgaltGazarAll(request, payload):
         })
     total_page = total_items.num_pages
     rsp = {
-    'items': form_data,
-    'page': page,
-    'total_page': total_page
+        'items': form_data,
+        'page': page,
+        'total_page': total_page
     }
+
     return JsonResponse(rsp)
 
 
-def findPoint(x,y, tuug_soyol):
+def findPoint(x, y, tuug_soyol):
     find_cursor = connections['postgis_db'].cursor()
     find_cursor.execute(''' select * from tuuhsoyolhureepol where ST_DWithin(geom, ST_MakePoint(%s, %s)::geography, 1) and tuuh_soyl = %s ''', [y, x, tuug_soyol])
     check = find_cursor.fetchone()
@@ -588,7 +580,7 @@ def findPoint(x,y, tuug_soyol):
 @login_required(login_url='/gov/secure/login/')
 def dursgaltGazarAbout(request, payload):
     form_data = []
-    for data in TuuhSoyolPoint.objects.using('postgis_db').filter(pk = payload.get('id')):
+    for data in TuuhSoyolPoint.objects.using('postgis_db').filter(pk=payload.get('id')):
         form_data.append({
             'dursgal': data.dursgal,
             'dursgal2': data.dursgal2,
@@ -833,7 +825,6 @@ def tseg_inspire_list(request, payload):
     display_items = []
     page = payload.get("page")
     per_page = payload.get("perpage")
-    query = payload.get("query")
     sort_name = payload.get("sort_name")
     if not sort_name:
         sort_name = '-created_on'
@@ -927,7 +918,6 @@ def tseg_personal_remove(request, id):
             'msg': 'Таны хамрах хүрээ биш байна',
         }
         return JsonResponse(rsp)
-
 
     if qs:
         qs.update(state=TsegRequest.STATE_REJECT)
@@ -1044,11 +1034,11 @@ def tsegPersonalUpdate(request, payload):
     if requests:
         if geo_json['coordinates']:
             LA = int(float(latlongx))
-            LB = int((float(latlongx)-LA)*60)
-            LC = float("{:.6f}".format(((float(latlongx))-LA-LB/60)*3600 ))
+            LB = int((float(latlongx) - LA) * 60)
+            LC = float("{:.6f}".format(((float(latlongx)) - LA - LB / 60) * 3600))
             BA = int(float(latlongy))
-            BB = int((float(latlongy)-BA)*60)
-            BC = (float(float(latlongy))-BA-BB/60)*3600
+            BB = int((float(latlongy) - BA) * 60)
+            BC = (float(float(latlongy)) - BA - BB / 60) * 3600
             if pk:
                 values = json.loads(requests.values)
             if geo_id:
@@ -1070,7 +1060,7 @@ def tsegPersonalUpdate(request, payload):
             data['barishil_tuhai'] = values['locationNote'] if 'locationNote' in values else ''
             data['bairshil_tseg_oiroos_img_url'] = '/media/' + values['pointCentreType'] if values and 'pointCentreType' in values else ''
             data['bairshil_tseg_holoos_img_url'] = '/media/' + values['overviewPhotoOfControlPointLocation'] if values and 'overviewPhotoOfControlPointLocation' in values else ''
-            data['sudalga_or_shine'] =  values['pointCentreType'] if 'pointCentreType' in values else ''
+            data['sudalga_or_shine'] = values['pointCentreType'] if 'pointCentreType' in values else ''
             data['date'] = utils.datetime_to_string(values['beginLifespanVersion']) if values and 'beginLifespanVersion' in values else ''
             data['hotolson'] = values['EmployeeName'] if 'EmployeeName' in values else ''
             data['alban_tushaal'] = values['EmployeePosition'] if 'EmployeePosition' in values else ''
@@ -1083,7 +1073,7 @@ def tsegPersonalUpdate(request, payload):
 
             if pk:
                 data['id'] = requests.id if requests.id else ''
-                data['point_id'] = requests.point_id if  requests.point_id else ''
+                data['point_id'] = requests.point_id if requests.point_id else ''
                 data['point_name'] = requests.point_name if requests.point_name else ''
                 data['pid'] = requests.pdf_id if requests.pdf_id else ''
                 data['aimag'] = requests.aimag if requests.aimag else ''
@@ -1114,6 +1104,7 @@ def tsegPersonalUpdate(request, payload):
 class UnAcceptedValueError(Exception):
     def __init__(self, data):
         self.data = data
+
     def __str__(self):
         return repr(self.data)
 
@@ -1182,7 +1173,7 @@ def findSum(request, payload):
             cc = cc + 1
         cc = (12 - cc) * 12 + c
         LA = int(L)
-        LB = int((L-LA) * 60)
+        LB = int((L - LA) * 60)
         LC = float((L - LA - LB / 60) * 3600)
         BA = int(B)
         BB = int((B - BA) * 60)
@@ -1215,13 +1206,13 @@ def findSum(request, payload):
 
 def _get_point_class_name(point_class):
     obj = {
-        str(utils.InspireCodeList('G102_P').code_list_id): '2', # gnss in baingin ajillagatai
-        str(utils.InspireCodeList('G103_P').code_list_id): '3', # gps iin suljee
-        str(utils.InspireCodeList('G104_P').code_list_id): '4', # trangulyts
-        str(utils.InspireCodeList('G105_P').code_list_id): '5', # polygometer
-        str(utils.InspireCodeList('G106_P').code_list_id): '6', # gravimeter
-        str(utils.InspireCodeList('G107_P').code_list_id): '7', # ulsin geodiez undur suljee
-        str(utils.InspireCodeList('G108_P').code_list_id): '8', # zuraglalliin suljee
+        str(utils.InspireCodeList('G102_P').code_list_id): '2',  # gnss in baingin ajillagatai
+        str(utils.InspireCodeList('G103_P').code_list_id): '3',  # gps iin suljee
+        str(utils.InspireCodeList('G104_P').code_list_id): '4',  # trangulyts
+        str(utils.InspireCodeList('G105_P').code_list_id): '5',  # polygometer
+        str(utils.InspireCodeList('G106_P').code_list_id): '6',  # gravimeter
+        str(utils.InspireCodeList('G107_P').code_list_id): '7',  # ulsin geodiez undur suljee
+        str(utils.InspireCodeList('G108_P').code_list_id): '8',  # zuraglalliin suljee
     }
     return obj[str(point_class)]
 
@@ -1322,19 +1313,19 @@ def _make_request_datas(values, request_values):
 def _get_values(request):
     value = dict()
     value['Pointid'] = request.POST.get('toviin_dugaar').zfill(4) if(len(request.POST.get('toviin_dugaar')) < 4) else request.POST.get('toviin_dugaar')
-    value['Geodeticаlnetworktype'] = int(request.POST.get('suljeenii_torol')) #bolson
-    value['Geodeticnetworkorderclass'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None # bolson
-    value['locationNote'] = request.POST.get('barishil_tuhai') # bolson
-    value['Nomenclature'] = str(request.POST.get('trapetsiin_dugaar')) + "-" + str(request.POST.get('BA')) + "-" + str(request.POST.get('LA'))#bolson
-    value['EmployeePosition'] = request.POST.get('alban_tushaal') # bolson
-    value['EmployeeName'] = request.POST.get('hotolson') # bolson
-    value['CompanyName'] = request.POST.get('alban_baiguullga') # bolson
-    value['Pointname'] = request.POST.get('tesgiin_ner') # bolson
-    value['beginLifespanVersion'] = request.POST.get('date') #bolson
-    value['AdministrativeUnitSubClass'] = utils.get_code_list_id_from_name(request.POST.get('sum_name'), 'AdministrativeUnitSubClass') if request.POST.get('sum_name') else None #bolson
-    value['SoilType'] = request.POST.get('hors_shinj_baidal') #mdku
+    value['Geodeticаlnetworktype'] = int(request.POST.get('suljeenii_torol'))  # bolson
+    value['Geodeticnetworkorderclass'] = request.POST.get('center_typ') if request.POST.get('center_typ') else None  # bolson
+    value['locationNote'] = request.POST.get('barishil_tuhai')  # bolson
+    value['Nomenclature'] = str(request.POST.get('trapetsiin_dugaar')) + "-" + str(request.POST.get('BA')) + "-" + str(request.POST.get('LA'))  # bolson
+    value['EmployeePosition'] = request.POST.get('alban_tushaal')  # bolson
+    value['EmployeeName'] = request.POST.get('hotolson')  # bolson
+    value['CompanyName'] = request.POST.get('alban_baiguullga')  # bolson
+    value['Pointname'] = request.POST.get('tesgiin_ner')  # bolson
+    value['beginLifespanVersion'] = request.POST.get('date')  # bolson
+    value['AdministrativeUnitSubClass'] = utils.get_code_list_id_from_name(request.POST.get('sum_name'), 'AdministrativeUnitSubClass') if request.POST.get('sum_name') else None  # bolson
+    value['SoilType'] = request.POST.get('hors_shinj_baidal')  # mdku
     # value['endLifespanVersion'] = date # ustsanii daraah hadagalah # TODO
-    value['ellipsoidheight'] = request.POST.get('ondor')#bolson
+    value['ellipsoidheight'] = request.POST.get('ondor')  # bolson
     return value
 
 
@@ -1343,7 +1334,6 @@ def _get_values(request):
 @login_required(login_url='/gov/secure/login/')
 def tsegPersonal(request):
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
-    pk = request.POST.get('idx')
     geo_id = request.POST.get('geo_id')
     point_id = request.POST.get('toviin_dugaar')
 
@@ -1428,10 +1418,10 @@ def tsegPersonal(request):
             request_values['aimag'] = request.POST.get('aimag_name') if request.POST.get('aimag_name') else None
             request_values['sum'] = request.POST.get('sum_name') if request.POST.get('sum_name') else None
             _make_request_datas(value, request_values)
-            return JsonResponse({ 'success': True, 'name': False, 'ids': False })
+            return JsonResponse({'success': True, 'name': False, 'ids': False})
 
         if create_tseg:
-            has_name, has_ids = utils.check_saved_data(request.POST.get('tesgiin_ner'), point_id) # tsegiin ner bolon object id ni huuchin hadgalsan uguig shalgana
+            has_name, has_ids = utils.check_saved_data(request.POST.get('tesgiin_ner'), point_id)  # tsegiin ner bolon object id ni huuchin hadgalsan uguig shalgana
 
             if has_name or has_ids:
                 name = False
@@ -1440,7 +1430,7 @@ def tsegPersonal(request):
                     name = True
                 if has_ids:
                     ids = True
-                return JsonResponse({'success': False, 'name': name, 'ids':ids})
+                return JsonResponse({'success': False, 'name': name, 'ids': ids})
 
             # TODO
             # if not request.POST.get('file1'):
@@ -1526,17 +1516,17 @@ def tsegUstsan(request):
     if tseg_id != -1:
         Tsegs = get_object_or_404(TsegUstsan, id=tseg_id)
         TsegUstsan.objects.filter(id=tseg_id).update(
-                email=email,
-                name=baiguulla,
-                alban_tushaal=alban_tushaal,
-                phone=phone,
-                tseg_id=tseg_dugaar,
-                oiroltsoo_bairlal=oiroltsoo_bairlal,
-                evdersen_baidal=evdersen_baidal,
-                shaltgaan=shaltgaan,
-                sergeeh_sanal=sergeeh_sanal,
-                gps_hemjilt=TorF,
-            )
+            email=email,
+            name=baiguulla,
+            alban_tushaal=alban_tushaal,
+            phone=phone,
+            tseg_id=tseg_dugaar,
+            oiroltsoo_bairlal=oiroltsoo_bairlal,
+            evdersen_baidal=evdersen_baidal,
+            shaltgaan=shaltgaan,
+            sergeeh_sanal=sergeeh_sanal,
+            gps_hemjilt=TorF,
+        )
         if img_holoos and len(img_holoos) > 2000:
             Tsegs.img_holoos.delete(save=False)
             [image_x2] = utils.resize_b64_to_sizes(img_holoos, [(200, 200)])
@@ -1547,7 +1537,7 @@ def tsegUstsan(request):
             [image_x2] = utils.resize_b64_to_sizes(img_oiroos, [(200, 200)])
             Tsegs.img_oiroos = SimpleUploadedFile('icon.png', image_x2)
             Tsegs.save()
-        if img_baruun  and len(img_baruun) > 2000:
+        if img_baruun and len(img_baruun) > 2000:
             Tsegs.img_baruun.delete(save=False)
             [image_x2] = utils.resize_b64_to_sizes(img_baruun, [(200, 200)])
             Tsegs.img_baruun = SimpleUploadedFile('icon.png', image_x2)
@@ -1711,11 +1701,10 @@ def tsegUstsanList(request, payload):
     total_page = []
     if not sort_name:
         sort_name = 'id'
-    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email','tseg_id','name')).filter(search__icontains=query).order_by(sort_name)
+    tsegs = TsegUstsan.objects.annotate(search=SearchVector('email', 'tseg_id', 'name')).filter(search__icontains=query).order_by(sort_name)
 
     total_items = Paginator(tsegs, per_page)
     items_page = total_items.page(page)
-    page_items = items_page.object_list
     for item in items_page.object_list:
         display_items.append({
             'id': item.id,
@@ -1788,10 +1777,8 @@ def hureeCreate(request, payload):
     y = payload.get('y')
     tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     dursgalt_id = payload.get('dursgalt_id')
-    x_t=float(x)
-    y_t=float(y)
-    TuuhSoyolHuree.objects.create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl = dursgalt_id,  x=x, y=y)
-    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    TuuhSoyolHuree.objects.create(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl=dursgalt_id, x=x, y=y)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl=dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
     point = []
     points = []
     if tuuh_hure_datas.count() > 2:
@@ -1805,11 +1792,11 @@ def hureeCreate(request, payload):
         point = (y, x)
         points.append(point)
         geom = Polygon(points)
-        check = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+        check = TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
         if not check:
-            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolHureePol.objects.using('postgis_db').create(tuuh_soyl=dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom=geom)
         else:
-            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl=dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom=geom)
 
     return JsonResponse({'success': True})
 
@@ -1823,12 +1810,10 @@ def hureeUpdate(request, payload):
     tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     x = payload.get('x')
     y = payload.get('y')
-    x_t=float(x)
-    y_t=float(y)
     point = []
     points = []
     TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
-    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
     if tuuh_hure_datas.count() > 2:
         for tuuh_hure in tuuh_hure_datas:
             x = float(tuuh_hure.x)
@@ -1840,7 +1825,7 @@ def hureeUpdate(request, payload):
         point = (y, x)
         points.append(point)
         geom = Polygon(points)
-        TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl=tuuhen_ov).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+        TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl_huree_id=tuuh_soyl_huree_id, tuuh_soyl=tuuhen_ov).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom=geom)
 
     return JsonResponse({'success': True})
 
@@ -1853,7 +1838,7 @@ def hureeDelete(request, payload):
     ayul_id = payload.get('ayul_id')
     tuuh_soyl_huree_id = payload.get('tuuh_soyl_huree_id')
     tuuhsoyl = TuuhSoyolHuree.objects.filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
-    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
+    tuuh_hure_datas = TuuhSoyolHuree.objects.filter(tuuh_soyl=tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id)
     point = []
     points = []
     if tuuhsoyl:
@@ -1869,7 +1854,7 @@ def hureeDelete(request, payload):
             point = (y, x)
             points.append(point)
             geom = Polygon(points)
-            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+            TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).update(tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom=geom)
         else:
             TuuhSoyolHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov, tuuh_soyl_huree_id=tuuh_soyl_huree_id).delete()
     else:
@@ -1917,9 +1902,7 @@ def ayulHureeCreate(request, payload):
     x = payload.get('x')
     y = payload.get('y')
     idx = payload.get('dursgalt_id')
-    x_t=float(x)
-    y_y=float(y)
-    TuuhSoyolAyuulHuree.objects.create(tuuh_soyl = idx, x=x, y=y)
+    TuuhSoyolAyuulHuree.objects.create(tuuh_soyl=idx, x=x, y=y)
     tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=idx)
     point = []
     points = []
@@ -1934,11 +1917,11 @@ def ayulHureeCreate(request, payload):
         point = (y, x)
         points.append(point)
         geom = Polygon(points)
-        check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx)
+        check = TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl=idx)
         if not check:
-            TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl = idx, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').create(tuuh_soyl=idx, geom=geom)
         else:
-            TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = idx).update(tuuh_soyl = idx, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl=idx).update(tuuh_soyl=idx, geom=geom)
 
     return JsonResponse({'success': True})
 
@@ -1951,10 +1934,8 @@ def ayulHureeUpdate(request, payload):
     huree_id = payload.get('id')
     x = payload.get('x')
     y = payload.get('y')
-    x_t=float(x)
-    y_t=float(y)
-    TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)
-    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = tuuhen_ov, id = huree_id)
+    # TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=idx).update(x=x, y=y)  # TODO idx undefined variable
+    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov, id=huree_id)
     point = []
     points = []
     if tuuh_hure_datas.count() > 2:
@@ -1967,8 +1948,8 @@ def ayulHureeUpdate(request, payload):
         y = float(tuuh_hure_datas[0].y)
         point = (y, x)
         points.append(point)
-        geom = Polygon(points)
-        TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)
+        # geom = Polygon(points)
+        # TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = dursgalt_id, tuuh_soyl_huree_id=tuuh_soyl_huree_id, geom = geom)  # TODO idx undefined variable
     return JsonResponse({'success': True})
 
 
@@ -1979,7 +1960,7 @@ def ayulHureeDelete(request, payload):
     tuuhen_ov = payload.get('tuuhen_ov')
     ayul_id = payload.get('ayul_id')
     tuuhsoyl = TuuhSoyolAyuulHuree.objects.filter(id=ayul_id, tuuh_soyl=tuuhen_ov)
-    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl = tuuhen_ov)
+    tuuh_hure_datas = TuuhSoyolAyuulHuree.objects.filter(tuuh_soyl=tuuhen_ov)
     point = []
     points = []
     if tuuhsoyl:
@@ -1995,9 +1976,9 @@ def ayulHureeDelete(request, payload):
             point = (y, x)
             points.append(point)
             geom = Polygon(points)
-            TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl = tuuhen_ov, geom = geom)
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').update(tuuh_soyl=tuuhen_ov, geom=geom)
         else:
-            TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl = tuuhen_ov).delete()
+            TuuhSoyolAyuulHureePol.objects.using('postgis_db').filter(tuuh_soyl=tuuhen_ov).delete()
     else:
         return JsonResponse({'success': False})
     return JsonResponse({'success': True})
@@ -2014,7 +1995,7 @@ def tsegUstsanEdit(request, payload):
     img_zuun_url = ''
     img_omno_url = ''
     img_hoino_url = ''
-    for tseg in TsegUstsan.objects.filter(pk = payload.get('id')):
+    for tseg in TsegUstsan.objects.filter(pk=payload.get('id')):
         if tseg.img_holoos:
             img_holoos_url = tseg.img_holoos.url
         if tseg.img_holoos:
@@ -2047,7 +2028,7 @@ def tsegUstsanEdit(request, payload):
             'img_omno': img_omno_url,
             'img_hoino': img_hoino_url,
         })
-    rsp ={
+    rsp = {
         'form_data': form_data
     }
     return JsonResponse(rsp)
@@ -2091,7 +2072,7 @@ def tsegPersonalNameSearch(request, payload):
             return JsonResponse(rsp)
         else:
             rsp = {
-                'point_ids':False,
+                'point_ids': False,
             }
             return JsonResponse(rsp)
     elif(name == 'hors_shinj_baidal'):
@@ -2103,12 +2084,12 @@ def tsegPersonalNameSearch(request, payload):
                     "tseg": tseg.replace(',', '')
                 })
             rsp = {
-                'hors_shinj_baidal_list':hors_shinj_baidal_list[:10],
+                'hors_shinj_baidal_list': hors_shinj_baidal_list[:10],
             }
             return JsonResponse(rsp)
         else:
             rsp = {
-                'hors_shinj_baidal_list':False,
+                'hors_shinj_baidal_list': False,
             }
             return JsonResponse(rsp)
 
@@ -2167,7 +2148,7 @@ def _save_property_zero(geo_id, values):
         else:
             for types in utils._value_types():
                 if prop.value_type_id == types['value_names']:
-                        data[types['value_type']] = value
+                    data[types['value_type']] = value
         datas.append(data)
 
     for data in datas:
@@ -2244,7 +2225,7 @@ def tseg_personal_success(request, id):
 
                 new_geo_id = utils.save_value_to_mdatas(value.values, feature_code, [coroutines[0], coroutines[1], 0])
 
-                #TODO arilana hurs hatuu onooson
+                # TODO arilana hurs hatuu onooson
                 _save_property_zero(new_geo_id, value.values)
 
                 utils.refreshMaterializedView(value.feature_id)
@@ -2286,12 +2267,12 @@ def tuuhenOvList(request, payload):
     tuuhs = TuuhSoyol.objects.using('postgis_db').annotate(search=SearchVector(
         'dugaar',
         'burtgegch',
-        )).filter(search__icontains=query).order_by(sort_name)
+    )).filter(search__icontains=query).order_by(sort_name)
     total_items = Paginator(tuuhs, per_page)
     items_page = total_items.page(page)
     for item in items_page.object_list:
         display_item.append({
-            'id' : item.id,
+            'id': item.id,
             'dugaar': item.dugaar,
             'date': item.date,
             'inspireid': item.inspireid,
@@ -2325,7 +2306,7 @@ def rows(request, payload):
             tuuh_soyl = %s
         ORDER BY id ASC
     """
-    cursor.execute(sql,[tuuh_soyl])
+    cursor.execute(sql, [tuuh_soyl])
     rows = utils.dict_fetchall(cursor)
     rows = list(rows)
     rsp = {
@@ -2349,7 +2330,7 @@ def ayuul_geoms(request, payload):
             tuuh_soyl = %s
         ORDER BY id ASC
     """
-    cursor.execute(sql,[tuuh_soyl])
+    cursor.execute(sql, [tuuh_soyl])
     ayuul_geoms = utils.dict_fetchall(cursor)
     ayuul_geoms = list(ayuul_geoms)
     rsp = {
@@ -2440,7 +2421,7 @@ def get_tseg(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def emp_tseg_roles(request):
-    inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
+    inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE': False, 'PERM_REMOVE': False, 'PERM_UPDATE': False, 'PERM_APPROVE': False, 'PERM_REVOKE': False}
     employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
     if point_feature_id:

@@ -28,6 +28,7 @@ class Role(models.Model):
         verbose_name = ("Хэрэглэгчийн эрх")
         verbose_name_plural = ("Хэрэглэгчийн эрхүүд")
 
+
 @deconstructible
 class UserRegistratioinNumberValidator(validators.RegexValidator):
     regex = utils.RE_REGISTER
@@ -56,7 +57,7 @@ class User(AbstractUser):
 
 
 class UserValidationEmail(models.Model):
-    user  = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_approve = models.BooleanField(default=False)
     token = models.CharField(max_length=100, null=True, db_index=True)
     valid_before = models.DateTimeField()
