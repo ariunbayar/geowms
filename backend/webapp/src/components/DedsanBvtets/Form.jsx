@@ -258,7 +258,7 @@ export default class Forms extends Component {
                                 null
                         }
                         <button
-                            disabled={!values.data}
+                            // disabled={!values.data}
                             type="button"
                             onClick={() => this.openModal('check-circle text-success', btn_name, `Та ${edit_name ? `${prop_edit_name} - нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`, this.onSubmit)}
                             className={`btn ${edit_name ? 'col-md-7' : 'btn-block'} gp-btn-primary`}
@@ -284,7 +284,8 @@ function Select(props) {
 
     return (
         <select
-            className={'form-control ' + (!value && 'is-invalid')}
+            // className={'form-control ' + (!value && 'is-invalid')}
+            className='form-control'
             placeholder={props.field_name}
             disabled={
                 props.can_connect_feature && props.field_name.includes('connect_feature')
@@ -327,9 +328,10 @@ function Input(props) {
             placeholder={props.field_name}
             onChange={handleOnChange}
             value={value || ''}
-            className={'form-control ' + (!value && 'is-invalid')}
+            // className={'form-control ' + (!value && 'is-invalid')}
+            className='form-control'
             disabled={props.data && props.field_name.includes("id") && !(props.field_name == props.model_name + "_id") ? 'disabled' : ''}
-            title={!value && 'Хоосон байна !!!'}
+            // title={!value && 'Хоосон байна !!!'}
         />
     )
 }
