@@ -32,7 +32,7 @@ from django.views.decorators.cache import cache_page
 def _get_properties_by_feature(initial_qs, feature_ids):
 
     qs = initial_qs
-    qs = qs.filter(property_id__isnull=False)
+    qs = qs.exclude(geom=True)
     qs_for_props = qs.values_list('property_id', flat=True)
     property = LProperties.objects
     property = property.exclude(value_type_id='data-type')
@@ -42,18 +42,19 @@ def _get_properties_by_feature(initial_qs, feature_ids):
         for prop in property.filter(property_id__in=qs_for_props)
     }
 
-    item_pairs = qs.values_list('feature_id', 'property_id', 'perm_kind')
+    item_pairs = qs.values_list('feature_id', 'property_id', 'perm_kind', 'data_type_id')
 
     feature_property_ids = {
         feature_id: []
         for feature_id in feature_ids
     }
 
-    for feature_id, property_id, perm_kind in item_pairs:
+    for feature_id, property_id, perm_kind, data_type_id in item_pairs:
         try:
             feature_property_ids[feature_id].append({
                 "perm_kind": perm_kind,
                 "prop_obj": properties[property_id],
+                "data_type_id": data_type_id if data_type_id else '',
             })
         except Exception:
             pass
@@ -110,14 +111,24 @@ def _org_role(org):
 
             # property давхардал арилгах
             check_list = []
+
+            def _check_in_list(prop):
+                coming_data_type_id = prop['data_type_id']
+                coming_property_id = prop['prop_obj'].property_id
+                for property_id, data_type_id in check_list:
+                    if coming_data_type_id == data_type_id and coming_property_id == property_id:
+                        return False
+                return True
+
             # properties
             for prop in props:
-                if not prop['prop_obj'] in check_list:
+                if _check_in_list(prop):
+                    data_type_id = prop['data_type_id']
                     perm_list = get_perm_list(feature_id, prop['prop_obj'].property_id, False, perm_list_all)
                     properties.append(
-                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, geom=False)
+                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, False, data_type_id)
                     )
-                    check_list.append(prop['prop_obj'])
+                    check_list.append([prop['prop_obj'].property_id, data_type_id])
 
         def _get_package_features_data_display(package_id, feature_ids):
 
@@ -127,7 +138,7 @@ def _org_role(org):
             qs = qs.values_list('feature_id', flat=True)
 
             package_feature_ids = list(qs)
-            return  get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature)
+            return  get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature, gov_perm_inspire_qs)
 
 
         package_features = []

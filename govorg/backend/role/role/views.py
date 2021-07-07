@@ -243,8 +243,9 @@ def update(request, payload, pk):
         return JsonResponse({'success': True, 'errors': errors})
 
 
-def _get_emp_roles_data_display(emp_role):
-
+def _get_emp_roles_data_display(emp_role, org):
+    gov_perm = org.govperm_set.first()
+    gov_perm_inspire_qs = gov_perm.govperminspire_set
     feature_ids = EmpRoleInspire.objects.filter(emp_role=emp_role).distinct('feature_id').values_list('feature_id', flat=True)
     package_ids = LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True)
     theme_ids = LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True)
@@ -273,7 +274,7 @@ def _get_emp_roles_data_display(emp_role):
             properties.append(property_data)
 
     package_features = [
-        get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
+        get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature, gov_perm_inspire_qs)
         for package_id in package_ids
     ]
 
@@ -306,7 +307,7 @@ def detail(request, pk):
         'role_name': emp_role.name,
         'role_description': emp_role.description,
         'gov_perm_id': emp_role.gov_perm.id,
-        'roles': _get_emp_roles_data_display(emp_role),
+        'roles': _get_emp_roles_data_display(emp_role, org),
         'success': True,
     }
     return JsonResponse(rsp)

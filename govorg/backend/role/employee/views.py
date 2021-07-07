@@ -566,6 +566,8 @@ def update(request, payload, pk):
 
 def _get_emp_perm_display(emp_perm):
 
+    gov_perm = emp_perm.employee.org.govperm_set.first()
+    gov_perm_inspire_qs = gov_perm.govperminspire_set
     feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm).distinct('feature_id').values_list('feature_id', flat=True)
     package_ids = LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True)
     theme_ids = LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True)
@@ -593,7 +595,7 @@ def _get_emp_perm_display(emp_perm):
             properties.append(property_data)
 
     package_features = [
-        get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
+        get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature, gov_perm_inspire_qs)
         for package_id in package_ids
     ]
 

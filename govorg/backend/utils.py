@@ -110,7 +110,7 @@ def get_property_data_display(prop, feature_id, role_model, inspire_model, geom)
     return get_property_data_display2(perm_list, prop, feature_id, geom), perm_list
 
 
-def get_property_data_display2(perm_list, prop, feature_id, geom):
+def get_property_data_display2(perm_list, prop, feature_id, geom, data_type_id=''):
 
     roles = get_convert_display_name(perm_list)
 
@@ -118,33 +118,36 @@ def get_property_data_display2(perm_list, prop, feature_id, geom):
         return {
             'id': 'geom',
             'name': 'geom',
+            'data_type_id': '',
             'parent_id': feature_id,
             'roles': roles
-            }
+        }
     else:
         return {
             'id': prop.property_id,
             'name': prop.property_name,
+            'data_type_id': data_type_id,
             'parent_id': feature_id,
             'roles': roles
-            }
+        }
 
 
-def get_all_child_feature(feature_id):
+def get_all_child_feature(feature_id, gov_perm_inspire_qs):
 
-    data_type_ids = list(LFeatureConfigs.objects.filter(feature_id=feature_id).exclude(data_type_id__isnull=True).values_list('data_type_id', flat=True))
-    data_type_qs = LDataTypeConfigs.objects.filter(data_type_id__in=data_type_ids)
-    properties = list(data_type_qs.values_list('property_id', flat=True))
-    properties = LProperties.objects.filter(property_id__in=properties)
-    properties = properties.exclude(value_type_id='data-type')
-    properties = properties.exclude(property_code='localId')
-    return len(properties)
+    qs = gov_perm_inspire_qs.filter(feature_id=feature_id)
+    qs = qs.distinct('property_id')
+    property_ids = qs.values_list('property_id', flat=True)
+    prop_qs = LProperties.objects.filter(property_id__in=property_ids)
+    prop_qs = prop_qs.exclude(value_type_id='data-type')
+    prop_qs = prop_qs.exclude(property_code='localId')
+    total = prop_qs.count()
+    return total
 
 
-def _get_feature_data_display(feature_id, property_of_feature):
+def _get_feature_data_display(feature_id, property_of_feature, gov_perm_inspire_qs):
 
     feature = get_object_or_404(LFeatures, feature_id=feature_id)
-    all_child = get_all_child_feature(feature_id)
+    all_child = get_all_child_feature(feature_id, gov_perm_inspire_qs)
     geom_count = 1
     all_child = all_child + geom_count
     return {
@@ -156,14 +159,14 @@ def _get_feature_data_display(feature_id, property_of_feature):
     },count_child_of_parent(all_child, property_of_feature)
 
 
-def get_package_features_data_display(package_id, feature_ids, property_of_feature):
+def get_package_features_data_display(package_id, feature_ids, property_of_feature, gov_perm_inspire_qs):
 
     package = get_object_or_404(LPackages, package_id=package_id)
     features = []
     package_count = get_perm_kind_count_obj()
 
     for feature_id in feature_ids:
-        feature_data_display, feature_count = _get_feature_data_display(feature_id, property_of_feature[feature_id])
+        feature_data_display, feature_count = _get_feature_data_display(feature_id, property_of_feature[feature_id], gov_perm_inspire_qs)
         features.append(feature_data_display)
         for perm_kind in GovPermInspire.PERM_KIND_CHOICES:
             package_count[perm_kind[1]] = package_count[perm_kind[1]] + feature_count[perm_kind[1]]
