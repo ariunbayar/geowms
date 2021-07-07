@@ -12,6 +12,7 @@ import ConfigDan from './ConfigDan'
 import ConfigPayment from './ConfigPayment'
 import ConfigQpay from './ConfigQpay'
 import ConfigValueTypes from './ConfigInspireValueTypes'
+import ConfigQgisPlugin from './ConfigQgisPlugin'
 
 export default class ConfigPage extends Component {
 
@@ -37,6 +38,7 @@ export default class ConfigPage extends Component {
                     <div className="col-lg-4">
                         <ConfigDan/>
                         <ConfigQpay/>
+                        <ConfigQgisPlugin/>
                     </div>
                     <div className="col-lg-4">
                         {/* <ConfigValueTypes/> */}
