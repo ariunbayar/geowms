@@ -7,7 +7,7 @@ from geojson import FeatureCollection
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, Value
 from django.contrib.postgres.search import SearchVector
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from geoportal_app.models import User
 from backend.org.models import Org, Employee, EmployeeAddress, EmployeeErguul, ErguulTailbar, Position
@@ -141,7 +141,8 @@ def _get_position_name(postition_id, item):
 def list(request, payload):
     is_user = payload.get('is_user')
 
-    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+    org = get_object_or_404(Org, employee=employee)
 
     qs = Employee.objects
     qs = qs.filter(org=org)
@@ -381,9 +382,10 @@ def create(request, payload):
     is_user = user_detail['is_user'] or False
 
     emp_role_id = payload.get('emp_role_id') or None
-    org = get_object_or_404(Org, employee__user=request.user)
-    user = get_object_or_404(User, employee__user=request.user)
-    get_object_or_404(Employee, user=request.user, is_admin=True)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+    org = get_object_or_404(Org, employee=employee)
+    user = get_object_or_404(User, username=request.user)
+    get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user, is_admin=True)
 
     errors = _employee_validation(None, user_detail)
     if errors:
@@ -465,7 +467,7 @@ def update(request, payload, pk):
     role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
     remove_perms = payload.get('remove_perm')
-    employee = get_object_or_404(Employee, pk=pk)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), pk=pk)
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     new_emp_role = EmpRole.objects.filter(id=role_id).first()
 
@@ -482,7 +484,7 @@ def update(request, payload, pk):
     if employee.user == request.user:
         can_update = True
     else:
-        get_object_or_404(Employee, user=request.user, is_admin=True)
+        get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user, is_admin=True)
         can_update = True
 
     if can_update:
@@ -648,8 +650,8 @@ def detail(request, pk):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def delete(request, pk):
-    get_object_or_404(Employee, user=request.user, is_admin=True)
-    employee = get_object_or_404(Employee, pk=pk)
+    get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user, is_admin=True)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), pk=pk)
     user_log = Payment.objects.filter(user=employee.user)
     if user_log:
         return JsonResponse({'success': False})
@@ -690,8 +692,8 @@ def delete(request, pk):
 @login_required(login_url='/gov/secure/login/')
 def refresh_token(request, pk):
 
-    employee = get_object_or_404(Employee, pk=pk)
-    req_employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), pk=pk)
+    req_employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     if req_employee.is_admin:
 
         employee.token = TokenGeneratorEmployee().get()
@@ -777,7 +779,7 @@ def _get_feature_collection(employees):
 def get_addresses(request, payload):
     value = payload.get('value')
     choose = payload.get('choose')
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     if employee.is_admin:
         if choose == 'all':
             employees = Employee.objects.all()
@@ -832,7 +834,7 @@ def _get_tailbar(tailbar, field):
 @login_required(login_url='/gov/secure/login/')
 def get_field_tailbar(request):
     tailbar_id = ''
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     send_fields = []
     tailbar = _get_erguul_qs(employee)
     if tailbar:
@@ -907,7 +909,7 @@ def save_field_tailbar(request, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_erguul(request):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     feature_collection = _get_feature_collection([employee])
 
     rsp = {
@@ -946,7 +948,7 @@ def _get_fullname(address_id, item):
 @login_required(login_url='/gov/secure/login/')
 def erguul_list(request, payload):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     is_admin = employee.is_admin
 
     if is_admin:

@@ -216,7 +216,7 @@ def _geojson_to_featurecollection(geo_json, item):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_list(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
         qs = ChangeRequest.objects
@@ -394,7 +394,7 @@ def _new_revoke_request(employee, payload):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def revoke_new(request, payload):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
 
     success, info = has_employee_perm(employee, payload.get('fid'), True, EmpPermInspire.PERM_REVOKE, payload.get('geo_json'))
     if success:

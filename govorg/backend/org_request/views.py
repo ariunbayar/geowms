@@ -181,7 +181,7 @@ def _get_org_request(ob, employee):
 @login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
     org_request_list = list()
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org_request_qs = ChangeRequest.objects
     org_request_qs = org_request_qs.exclude(form_json__isnull=True, geo_json__isnull=True, group_id__isnull=True)
     org_request_qs = org_request_qs.filter(employee=employee)
@@ -418,7 +418,7 @@ def _хувьсах_талбарууд():
 @login_required(login_url='/gov/secure/login/')
 def get_list(request, payload):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
         qs = ChangeRequest.objects
@@ -543,7 +543,7 @@ def request_reject(request, payload):
     ids = payload.get('ids')
     feature_id = payload.get('feature_id')
     action_type = payload.get('action_type')
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
     qs = EmpPermInspire.objects
@@ -954,7 +954,7 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
 @login_required(login_url='/gov/secure/login/')
 def request_approve(request, payload):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
 
     request_ids = payload.get("ids")
@@ -1087,7 +1087,7 @@ def _refresh_view_direct_or_crontab(is_refresh, feature_id):
 @login_required(login_url='/gov/secure/login/')
 def get_count(request):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     qs = ChangeRequest.objects
     qs = qs.filter(state=ChangeRequest.STATE_NEW)
@@ -1426,7 +1426,7 @@ def _has_overlap(request_file_shapes):
 @ajax_required
 def llc_request_approve(request, request_id):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     llc_request = get_object_or_404(LLCRequest, id=request_id)
     request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)

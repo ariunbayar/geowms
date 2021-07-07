@@ -748,7 +748,7 @@ def _get_qs_in_boundary(initial_qs, org):
 def _get_org_from_request(request):
     qs = request.user
     qs = qs.employee_set
-    qs = qs.get(user=request.user)
+    qs = qs.get(~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = qs.org
     return org
 
@@ -1342,7 +1342,7 @@ def _get_values(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def tsegPersonal(request):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     pk = request.POST.get('idx')
     geo_id = request.POST.get('geo_id')
     point_id = request.POST.get('toviin_dugaar')
@@ -2179,7 +2179,7 @@ def _check_tseg_role(perm_name, user):
     info = ''
     point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first()
     if point_feature_id:
-        employee = get_object_or_404(Employee, user=user)
+        employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=user)
         emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
         perm_kind = EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id.feature_id, perm_kind=perm_name, geom=True)
         if perm_kind:
@@ -2441,10 +2441,10 @@ def get_tseg(request, payload):
 @login_required(login_url='/gov/secure/login/')
 def emp_tseg_roles(request):
     inspire_roles = {'PERM_VIEW': False, 'PERM_CREATE':False, 'PERM_REMOVE':False, 'PERM_UPDATE':False, 'PERM_APPROVE':False, 'PERM_REVOKE':False}
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     point_feature_id = LFeatures.objects.filter(feature_code='gnp-gp-gp').first().feature_id
     if point_feature_id:
-        employee = get_object_or_404(Employee, user__username=request.user)
+        employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
         emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
         perm_kinds = list(EmpPermInspire.objects.filter(emp_perm_id=emp_perm.id, feature_id=point_feature_id, geom=True).distinct('perm_kind').values_list('perm_kind', flat=True))
 

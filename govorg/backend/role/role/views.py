@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.http.response import Http404
 from django.db import transaction
+from django.db.models import Q
 from main.decorators import ajax_required
 
 from main import utils
@@ -45,7 +46,8 @@ def _get_role_data_display(role):
 @login_required
 def list(request):
 
-    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+    org = get_object_or_404(Org, employee=employee)
     gov_perm = get_object_or_404(GovPerm, org=org)
     emp_roles = EmpRole.objects.filter(gov_perm=gov_perm)
 
@@ -67,7 +69,8 @@ def list(request):
 @login_required
 def role_list(request, payload):
 
-    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+    org = get_object_or_404(Org, employee=employee)
     gov_perm = get_object_or_404(GovPerm, org=org)
     qs = EmpRole.objects.filter(gov_perm=gov_perm)
     if qs:

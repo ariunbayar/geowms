@@ -1,7 +1,6 @@
 from django.contrib.gis.db import models
 from django.conf import settings
 
-
 class Org(models.Model):
     LEVEL_CHOICES = [
         (1, '1-р түвшин'),
@@ -31,6 +30,8 @@ class Employee(models.Model):
     STATE_BREAK = 'Чөлөөтэй'
     STATE_FIRED = 'Чөлөөлөгдсөн'
     STATE_SICK = 'Өвчтэй'
+
+    STATE_FIRED_CODE = 3
 
     STATE_CHOICES = [
         (1, STATE_WORKING),
