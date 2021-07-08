@@ -710,10 +710,7 @@ def conver_sld_json(request, payload):
 def style_list(request):
 
     style_names = []
-    geoserver_style = geoserver.get_styles()
-    for style in geoserver_style:
-        style_names.append(style.get('name'))
-
+    style_names = geoserver.get_styles()
     return JsonResponse({
         'style_list': style_names,
     })

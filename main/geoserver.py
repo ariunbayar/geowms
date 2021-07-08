@@ -401,15 +401,31 @@ def get_wmts_url(wms_name):
 
 
 def get_styles():
-
+    styles = []
     BASE_URL, AUTH = getHeader()
     HEADERS = {
         'Content-type': 'application/json',
     }
     url = 'styles'
+    ws_link = 'workspaces'
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
-    styles = rsp.json()
-    return styles.get('styles').get('style')
+    styles_datas = rsp.json()
+
+    styles_datas = styles_datas.get('styles').get('style')
+    for style in styles_datas:
+        styles.append(style['name'])
+
+    rsp = requests.get(BASE_URL + ws_link, headers=HEADERS, auth=AUTH)
+    ws_datas = rsp.json()
+    for workspace in ws_datas['workspaces']['workspace']:
+        ws_style_url = ws_link + '/' + workspace['name'] + '/styles'
+        rsp = requests.get(BASE_URL + ws_style_url, headers=HEADERS, auth=AUTH)
+        result = rsp.json()
+        if result and result['styles']:
+            for ws_style in result['styles']['style']:
+                style_name = ws_style['name']
+                styles.append(style_name)
+    return styles
 
 
 def get_layer_style(layer_name):

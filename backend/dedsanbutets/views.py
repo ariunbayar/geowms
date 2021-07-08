@@ -83,10 +83,7 @@ def bundleButetsAll(request):
             theme.delete()
 
     utils.check_gp_design()
-    geoserver_style = geoserver.get_styles()
-    for style in geoserver_style:
-        style_names.append(style.get('name'))
-
+    style_names = geoserver.get_styles()
     url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
     rsp = {
         'success': True,
