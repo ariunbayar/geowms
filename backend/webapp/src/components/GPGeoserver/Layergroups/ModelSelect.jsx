@@ -93,6 +93,7 @@ export default class ModelSelectLayer extends Component {
             (status == "open" ? " show" : "") +
             (status == "closed" ? " d-none" : "")
         const { layer_list, current_layers, search_query, layerPerPage, current_page } = this.state
+        const { total_items } = this.props
         return (
             <Fragment>
                 <div className={className + " ml-3 pl-4 mt-4 pt-4 rounded text-wrap h-75 position-fixed w-75"}  tabIndex="-1"  role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style={{top: "15%"}}>
@@ -154,6 +155,7 @@ export default class ModelSelectLayer extends Component {
                                     <GSPaginate
                                         paginate={this.paginate}
                                         item_list={layer_list}
+                                        total_items={total_items}
                                         search_query={search_query}
                                         per_page={layerPerPage}
                                         page={current_page}
