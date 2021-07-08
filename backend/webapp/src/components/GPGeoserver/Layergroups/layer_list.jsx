@@ -152,6 +152,7 @@ export class List extends Component {
                     <GSPaginate
                         paginate={ this.paginate }
                         item_list={ group_list }
+                        total_items={ group_list }
                         search_query={ search_query }
                         per_page={ groupPerPage }
                         page={ currentPage }
