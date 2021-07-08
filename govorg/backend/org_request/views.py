@@ -1100,7 +1100,7 @@ def get_count(request):
     geo_id = employee.org.geo_id
     llc = LLCRequest.objects
     llc = llc.filter(file__geo_id=geo_id, file__requested_employee=employee.user.id)
-    llc_count = llc.exclude(kind__in=[LLCRequest.KIND_APPROVED, LLCRequest.KIND_REVOKE]).count()
+    llc_count = llc.exclude(state=LLCRequest.STATE_SOLVED).count()
     rsp = {
         'success': True,
         'count': request_count,
