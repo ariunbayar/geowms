@@ -44,14 +44,6 @@ def _get_address_state_db_value(address_state):
     return address_state
 
 
-def _get_address_state_code(address_state):
-    if address_state:
-        address_state = EmployeeAddress.STATE_REGULER_CODE
-    elif not address_state:
-        address_state = EmployeeAddress.STATE_SHORT_CODE
-    return address_state
-
-
 def _get_employee_display(employee):
 
     user = employee.user
@@ -185,36 +177,6 @@ def list(request, payload):
     return JsonResponse(rsp)
 
 
-def _set_user(user, user_detail):
-
-    user.username = user_detail['username']
-    user.first_name = user_detail['first_name']
-    user.last_name = user_detail['last_name']
-    user.email = user_detail['email']
-    user.gender = user_detail['gender']
-    user.register = user_detail['register']
-    user.phone_number = user_detail['phone_number']
-    user.is_user = user_detail['is_user']
-
-    is_user = user_detail['is_user']
-    if is_user:
-        user.is_active = True
-    else:
-        user.is_active = False
-
-    user.save()
-
-
-def _set_employee(employee, user_detail):
-    employee.position_id = int(user_detail['position'])
-    employee.state = int(user_detail['state']) if user_detail['state'] else None
-    employee.pro_class = int(user_detail['pro_class']) if user_detail['pro_class'] else None
-    employee.is_admin = user_detail['is_admin']
-    employee.phone_number = user_detail['phone_number']
-
-    employee.save()
-
-
 def _set_emp_perm_ins(emp_perm, perm, user):
 
     feature_id = perm.get('feature_id')
@@ -245,74 +207,6 @@ def _set_emp_perm_ins(emp_perm, perm, user):
     emp_perm_inspire.updated_by = user
     emp_perm_inspire.perm_kind = perm_kind
     return emp_perm_inspire
-
-
-def _employee_validation(user, user_detail):
-    errors = {}
-    username = user_detail['username']
-    last_name = user_detail['last_name']
-    first_name = user_detail['first_name']
-    position = user_detail['position']
-    email = user_detail['email']
-    register = user_detail['register']
-    phone_number = user_detail['phone_number']
-    if not username:
-        errors['username'] = 'Хоосон байна утга оруулна уу.'
-    elif len(username) > 150:
-        errors['username'] = '150-с илүүгүй урттай утга оруулна уу!'
-    if not position:
-        errors['position'] = 'Хоосон байна утга оруулна уу.'
-    if not first_name:
-        errors['first_name'] = 'Хоосон байна утга оруулна уу.'
-    elif len(first_name) > 30:
-        errors['first_name'] = '30-с илүүгүй урттай утга оруулна уу!'
-    if not last_name:
-        errors['last_name'] = 'Хоосон байна утга оруулна уу.'
-    elif len(last_name) > 150:
-        errors['last_name'] = '150-с илүүгүй урттай утга оруулна уу!'
-    if not email:
-        errors['email'] = 'Хоосон байна утга оруулна уу.'
-    elif len(email) > 254:
-        errors['email'] = '254-с илүүгүй урттай утга оруулна уу!'
-    if not register:
-        errors['register'] = 'Хоосон байна утга оруулна уу.'
-    if not phone_number:
-        errors['phone_number'] = 'Хоосон байна утга оруулна уу.'
-    elif len(phone_number) > 8:
-        errors['phone_number'] = '8-с илүүгүй урттай утга оруулна уу!'
-    elif len(phone_number) < 8:
-        errors['phone_number'] = '8 урттай утга оруулна уу!'
-    if user:
-        if user.email != email:
-            if User.objects.filter(email=email).first():
-                errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-        if user.username != username:
-            if User.objects.filter(username=username).first():
-                errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
-    else:
-        if User.objects.filter(email=email).first():
-            errors['email'] = 'Email хаяг бүртгэлтэй байна.'
-        if User.objects.filter(username=username).first():
-            errors['username'] = 'Ийм нэр бүртгэлтэй байна.'
-    if not utils.is_email(email):
-        errors['email'] = 'Email хаяг алдаатай байна.'
-    if len(register) == 10:
-        if not utils.is_register(register):
-            errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
-    else:
-        errors['register'] = 'Регистер дугаараа зөв оруулна уу.'
-    return errors
-
-
-def _get_point_for_db(coordinate):
-    if not coordinate:
-        return ''
-
-    if isinstance(coordinate, str):
-        coordinate = coordinate.split(",")
-
-    point = utils.get_geom_for_filter_from_coordinate(coordinate, 'Point')
-    return point
 
 
 def _check_local_id(emp_perm, user):
