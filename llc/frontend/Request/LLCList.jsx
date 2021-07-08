@@ -211,7 +211,7 @@ export class Detail extends Component {
                     modal_status: 'open',
                     modal_icon: 'fa fa-check-circle',
                     icon_color: "success",
-                    title: 'Амжилттай уcтгалаа',
+                    title: 'Хүсэлт амжилттай боллоо',
                     text: '',
                 }
                 global.MODAL(modal)
@@ -222,16 +222,10 @@ export class Detail extends Component {
                     'fa fa-check-circle',
                     "danger",
                     info,
-                    '',
+                    'Хүсэлт амжилтгүй боллоо',
                     false
                 )
-                const modal = {
-                    modal_status: 'open',
-                    modal_icon: 'fa fa-check-circle',
-                    icon_color: "success",
-                    title: 'Хүсэлт амжилтгүй боллоо',
-                    text: '',
-                }
+
                 global.MODAL(modal)
                 this.refreshData()
                 this.refreshData()
