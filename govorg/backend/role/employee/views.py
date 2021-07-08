@@ -33,7 +33,7 @@ from govorg.backend.utils import (
     get_perm_kind_name
 )
 
-from backend.org.forms import EmployeeAddressForm
+from govorg.backend.role.employee import utils as employee_utils
 
 
 def _get_address_state_db_value(address_state):
@@ -356,89 +356,82 @@ def _check_local_id(emp_perm, user):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def create(request, payload):
-
-    user_detail = payload.get('user_detail')
+    values = payload.get('user_detail')
+    username = values.get('username')
     roles = payload.get('roles')
-    address = payload.get('address')
-    level_1 = address.get('level_1')
-    level_2 = address.get('level_2')
-    level_3 = address.get('level_3')
-    street = address.get('street')
-    apartment = address.get('apartment')
-    door_number = address.get('door_number')
-    point_coordinate = address.get('point_coordinate')
-    address_state = address.get('address_state')
-    point = _get_point_for_db(point_coordinate)
-    address['point'] = point
-    is_user = user_detail['is_user'] or False
-
     emp_role_id = payload.get('emp_role_id') or None
-    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+    is_user = values.get('is_user')
+    errors = dict()
+
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user, is_admin=True)
     org = get_object_or_404(Org, employee=employee)
-    user = get_object_or_404(User, username=request.user)
-    get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user, is_admin=True)
 
-    errors = _employee_validation(None, user_detail)
+    qs_user = User.objects
+    qs_employee = Employee.objects
+    qs_employee_address = EmployeeAddress.objects
+
+    qs_user = qs_user.filter(username=username)
+    user = qs_user.first()
+
+    user_detail = employee_utils._make_user_detail(payload)
+    employee_detail = employee_utils._make_employee_detail(payload)
+    employee_address_detail = employee_utils._make_employee_address(payload)
+
+    if int(employee_detail.get('state')) == 3:   # TODO халагдсан төлөвт ажилтан нэмэхгүй
+        error = {"state": '"ЧӨЛӨӨЛӨГДСӨН"-өөс бусад төлөвт шинээр албан хаагч үүсгэх боломжтой!'}
+        errors.update(error)
+
+    if user:
+        is_fired_employee = employee_utils._is_fired_employee(user, qs_employee)
+        if is_fired_employee:
+            errors.update(employee_utils._user_validition(user_detail, user))
+        else:
+            errors.update(employee_utils._user_validition(user_detail))
+    else:
+        errors.update(employee_utils._user_validition(user_detail))
+
+    errors.update(employee_utils._employee_validition(employee_detail))
+    errors.update(employee_utils._employee_add_validator(employee_address_detail))
+
     if errors:
-        return JsonResponse({
-            'success': False,
-            'errors': errors
-        })
+        return JsonResponse({'success': False, 'errors': errors})
 
-    form = EmployeeAddressForm(address)
+    with transaction.atomic():
+        user, created = qs_user.update_or_create(username=username, defaults=user_detail)
 
-    if form.is_valid() and not errors:
-        with transaction.atomic():
-            user = User()
-            _set_user(user, user_detail)
+        employee_detail['org'] = org
+        employee_detail['user'] = user
+        employee = qs_employee.create(**employee_detail)
 
-            employee = Employee()
-            employee.org = org
-            employee.user = user
-            employee.token = TokenGeneratorEmployee().get()
-            _set_employee(employee, user_detail)
+        employee_address_detail['employee'] = employee
+        qs_employee_address.create(**employee_address_detail)
 
-            emp_perm = EmpPerm()
-            emp_perm.created_by = user
-            emp_perm.emp_role_id = emp_role_id
-            emp_perm.employee_id = employee.id
-            emp_perm.updated_by = user
-            emp_perm.save()
+        emp_perm = EmpPerm()
+        emp_perm.emp_role_id = emp_role_id
+        emp_perm.employee_id = employee.id
+        emp_perm.created_by = request.user
+        emp_perm.updated_by = request.user
+        emp_perm.save()
 
-            employee_address = EmployeeAddress()
-            employee_address.employee = employee
-            employee_address.level_1 = level_1
-            employee_address.level_2 = level_2
-            employee_address.level_3 = level_3
-            employee_address.street = street
-            employee_address.apartment = apartment
-            employee_address.door_number = door_number
-            employee_address.point = point
-            employee_address.address_state = _get_address_state_code(address_state)
-            employee_address.save()
+        obj_array = []
+        for role in roles:
+            emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
+            obj_array.append(emp_perm_inspire)
 
-            obj_array = []
-            for role in roles:
-                emp_perm_inspire = _set_emp_perm_ins(emp_perm, role, request.user)
-                obj_array.append(emp_perm_inspire)
+        EmpPermInspire.objects.bulk_create(obj_array)
 
-            EmpPermInspire.objects.bulk_create(obj_array)
-
-            if is_user:
-                utils.send_approve_email(user)
-            _check_local_id(emp_perm, user)
+        if is_user:
+            utils.send_approve_email(user)
 
         rsp = {
             'success': True,
-            'info': 'Амжилттай хадгаллаа'
-        }
-    else:
-        rsp = {
-            'success': False,
-            'errors': {**form.errors, **errors},
+            'employee': {
+                'id': employee.id,
+                'user_id': employee.user_id,
+            }
         }
 
-    return JsonResponse(rsp)
+        return JsonResponse(rsp)
 
 
 def _delete_old_emp_role(emp_perm):
@@ -453,106 +446,97 @@ def _delete_remove_perm(remove_perms):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def update(request, payload, pk):
-    user_detail = payload.get('user_detail')
-    can_update = False
     role_id = payload.get('role_id') or None
     add_perms = payload.get('add_perm')
     remove_perms = payload.get('remove_perm')
-    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), pk=pk)
+    values = payload.get('user_detail')
+    is_user = values.get('is_user')
+    errors = dict()
+
+    get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user, is_admin=True)  # TODO бйагууллагын админ засах эрхтэй
+
+    qs_user = User.objects
+    qs_employee = Employee.objects
+    qs_address = EmployeeAddress.objects
+
+    employee_qs = qs_employee.filter(~Q(state=Employee.STATE_FIRED_CODE))  # TODO update хийх ажилтны query_set
+    employee_qs = employee_utils._check_qs(qs_employee, {"pk": pk})
+    employee = employee_qs.first()
+
+    qs_user = employee_utils._check_qs(qs_user, {"pk": employee.user_id})
+    qs_address = employee_utils._check_qs(qs_address, {"employee": employee})
+    employee_address = qs_address.first()
+
+    user = qs_user.first()
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     new_emp_role = EmpRole.objects.filter(id=role_id).first()
 
-    address = payload.get('address')
-    point_coordinate = address.get('point')
-    point = _get_point_for_db(point_coordinate)
-    address['point'] = point
+    user_detail = employee_utils._make_user_detail(payload)
+    employee_detail = employee_utils._make_employee_detail(payload, employee)
+    employee_address_detail = employee_utils._make_employee_address(payload)
 
-    address_state = address.get('address_state')
-    address_state = _get_address_state_code(address_state)
-    address['address_state'] = address_state
-    is_user = user_detail['is_user'] or False
+    qs_employee = qs_employee.filter(~Q(pk=pk), user=user)
+    is_fired_employee = employee_utils._is_fired_employee(user, qs_employee)
 
-    if employee.user == request.user:
-        can_update = True
-    else:
-        get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user, is_admin=True)
-        can_update = True
+    if not is_fired_employee:
+        error = {"username": 'Хэрэглэгч бүртгэлтэй байна!'}
+        errors.update(error)
 
-    if can_update:
-        errors = _employee_validation(employee.user, user_detail)
-        if errors:
-            return JsonResponse({
-                'success': False,
-                'errors': errors
-            })
+    errors.update(employee_utils._user_validition(user_detail, user))
+    errors.update(employee_utils._employee_validition(employee_detail, employee))
+    errors.update(employee_utils._employee_add_validator(employee_address_detail, employee_address))
 
-        form = EmployeeAddressForm(address)
-        if form.is_valid() and not errors:
-            with transaction.atomic():
-                if emp_perm:
-                    old_emp_role = emp_perm.emp_role
-                    if new_emp_role != old_emp_role:
-                        _delete_old_emp_role(emp_perm)
-                        emp_perm.emp_role = new_emp_role
-                        emp_perm.save()
-                else:
-                    user = get_object_or_404(User, employee=employee)
-                    emp_perm = EmpPerm()
-                    emp_perm.created_by = user
-                    emp_perm.emp_role_id = role_id
-                    emp_perm.employee_id = employee.id
-                    emp_perm.updated_by = user
-                    emp_perm.save()
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors})
 
-                if remove_perms:
-                    _delete_remove_perm(remove_perms)
+    with transaction.atomic():
+        qs_user.update(**user_detail)
+        employee_qs.update(**employee_detail)    # TODO тухайн албан хаагчаа update хийнэ
 
-                if add_perms:
-                    obj_array = []
-                    for perm in add_perms:
-                        emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
-                        obj_array.append(emp_perm_inspire)
-
-                    emp_inspire_perms = EmpPermInspire.objects.filter(emp_perm=emp_perm)
-                    if emp_inspire_perms:
-                        emp_inspire_perms.delete()
-
-                    EmpPermInspire.objects.bulk_create(obj_array)
-
-                address_qs = EmployeeAddress.objects
-                address_qs = address_qs.filter(employee=employee)
-                if address_qs:
-                    address_qs.update(
-                        **address
-                    )
-                else:
-                    address_qs.create(employee=employee, **address)
-
-                user = employee.user
-                _set_user(user, user_detail)
-
-                employee = employee
-                _set_employee(employee, user_detail)
-
-                if is_user:
-                    utils.send_approve_email(user)
-
-                _check_local_id(emp_perm, user)
-
-            return JsonResponse({
-                'success': True,
-                'info': 'Амжилттай хадгаллаа'
-            })
+        if employee_address:
+            qs_address.update(**employee_address_detail)
         else:
-            return JsonResponse({
-                'success': False,
-                'errors': {**form.errors, **errors},
-            })
+            employee_address_detail['employee'] = employee
+            qs_address.create(**employee_address_detail)
 
-    return JsonResponse({
-        'success': False,
-        'info': 'Хадгалахад алдаа гарлаа'
-    })
+        if emp_perm:
+            old_emp_role = emp_perm.emp_role
+            if new_emp_role != old_emp_role:
+                _delete_old_emp_role(emp_perm)
+                emp_perm.emp_role = new_emp_role
+                emp_perm.save()
+        else:
+            emp_perm = EmpPerm()
+            emp_perm.created_by = user
+            emp_perm.emp_role_id = role_id
+            emp_perm.employee_id = employee.id
+            emp_perm.updated_by = user
+            emp_perm.save()
+
+        if remove_perms:
+            _delete_remove_perm(remove_perms)
+
+        if add_perms:
+            obj_array = []
+            for perm in add_perms:
+                emp_perm_inspire = _set_emp_perm_ins(emp_perm, perm, request.user)
+                obj_array.append(emp_perm_inspire)
+
+            emp_inspire_perms = EmpPermInspire.objects.filter(emp_perm=emp_perm)
+            if emp_inspire_perms:
+                emp_inspire_perms.delete()
+
+            EmpPermInspire.objects.bulk_create(obj_array)
+
+        _check_local_id(emp_perm, user)
+
+        if is_user:
+            utils.send_approve_email(user)
+
+        return JsonResponse({
+            'success': True,
+            'info': 'Амжилттай хадгаллаа'
+        })
 
 
 def _get_emp_perm_display(emp_perm):

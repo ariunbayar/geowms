@@ -33,8 +33,8 @@ def _get_address_state_db_value(address_state):
     return address_state
 
 
-def _check_qs(model, selected_filter):
-    qs = model.filter(**selected_filter)
+def _check_qs(Model, selected_filter):
+    qs = Model.filter(**selected_filter)
     if not qs:
         raise Http404
 

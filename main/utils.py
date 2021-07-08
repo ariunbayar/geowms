@@ -12,6 +12,7 @@ import json
 import psycopg2
 import socket
 import shutil
+import uuid
 from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
@@ -654,8 +655,7 @@ def _geom_contains_feature_geoms(geo_json, feature_ids, perm_kind=None):
             AND feature_id in ({feature_ids})
         """.format(feature_ids=', '.join(['{}'.format(f) for f in feature_ids]))
         cursor.execute(sql, [str(geo_json), str(geo_json), str(geo_json)])
-        is_included = [dict((cursor.description[i][0], value) \
-            for i, value in enumerate(row)) for row in cursor.fetchall()]
+        is_included = [dict((cursor.description[i][0], value) for i, value in enumerate(row)) for row in cursor.fetchall()]
 
     return is_included
 
@@ -703,7 +703,7 @@ def get_emp_property_roles(employee, fid):
             if prop.get('property_id') not in property_ids:
                 property_ids.append(prop.get('property_id'))
         for property_id in property_ids:
-            property_roles = {'PERM_VIEW': True, 'PERM_CREATE':True, 'PERM_REMOVE':True, 'PERM_UPDATE':True, 'PERM_APPROVE':True, 'PERM_REVOKE':True}
+            property_roles = {'PERM_VIEW': True, 'PERM_CREATE': True, 'PERM_REMOVE': True, 'PERM_UPDATE': True, 'PERM_APPROVE': True, 'PERM_REVOKE': True}
             for prop in property_perms:
                 if property_id == prop['property_id']:
                     if prop.get('perm_kind') == EmpPermInspire.PERM_VIEW:
@@ -766,7 +766,6 @@ def get_1stOrder_geo_id():
     qs = qs.filter(code_list_id=code_list_id)
 
     return qs.filter(feature_config_id__in=feature_config_ids).first().geo_id
-
 
 
 def get_geoJson(data):
@@ -862,7 +861,7 @@ def geoJsonConvertGeom(geojson):
         sql = """ SELECT ST_GeomFromText(ST_AsText(ST_Force3D(ST_GeomFromGeoJSON(%s))), 4326) """
         cursor.execute(sql, [str(geojson)])
         geom = cursor.fetchone()
-        geom =  ''.join(geom)
+        geom = ''.join(geom)
         geom = GEOSGeometry(geom).hex
         geom = geom.decode("utf-8")
     return geom
@@ -1060,13 +1059,11 @@ def get_geoms_with_point_buffer_from_view(point_coordinates, view_name, radius):
 
 
 def save_img_to_folder(image, folder_name, file_name, ext):
-    import PIL.Image as Image
-    import io, uuid
     uniq = uuid.uuid4().hex[:8]
     file_full_name = file_name + '_' + uniq + ext
     bytes = bytearray(image)
     image = Image.open(io.BytesIO(bytes))
-    image = image.resize((720,720), Image.ANTIALIAS)
+    image = image.resize((720, 720), Image.ANTIALIAS)
     image = image.save(os.path.join(settings.MEDIA_ROOT, folder_name, file_full_name))
     return folder_name + '/' + file_full_name
 
@@ -1111,7 +1108,8 @@ def image_to_byte_array(image_path):
     image.save(img_byte_arr, format=image.format)
     img_byte_arr = img_byte_arr.getvalue()
     return img_byte_arr
-# ------------------------------------------------------------------------------------------------
+
+
 # feature code oor feature iin qs awah
 def get_feature_from_code(feature_code):
     Lfeature = apps.get_model('backend_inspire', 'LFeatures')
@@ -1271,7 +1269,7 @@ def get_filter_field_with_value(properties_qs, l_feature_c_qs, data_type_c_qs, p
 
 
 def _get_filter_field_with_values(properties_qs, l_feature_c_qs, data_type_c_qs, property_codes=[]):
-    datas = list ()
+    datas = list()
     for prop in properties_qs:
         data = dict()
         if property_codes:
@@ -1648,10 +1646,10 @@ def get_colName_type(view_name, data):
             ST_Extent(geo_data)
         from
             {view_name} group by geo_data limit 1
-            '''.format(
-                view_name=view_name.lower(),
-                data=data
-                )
+    '''.format(
+        view_name=view_name.lower(),
+        data=data
+    )
 
     sql = '''
         SELECT
@@ -1727,17 +1725,18 @@ def check_gp_design():
     else:
         srs = 4326
     if check_layer.status_code == 404:
-        layer_create = geoserver.create_layer(
-                        ws_name,
-                        ds_name,
-                        layer_name,
-                        layer_title,
-                        table_name,
-                        srs,
-                        geom_att,
-                        extends,
-                        False
+        geoserver.create_layer(
+            ws_name,
+            ds_name,
+            layer_name,
+            layer_title,
+            table_name,
+            srs,
+            geom_att,
+            extends,
+            False
         )
+
 
 # Тухай Folder -т байгаа файлуудыг буцаадаг
 def get_all_file_paths(directory):
@@ -1754,7 +1753,7 @@ def get_all_file_paths(directory):
 
 def check_pg_connection(host, db, port, user, password, schema):
     try:
-        schema =schema or 'public'
+        schema = schema or 'public'
         connection = psycopg2.connect(
             user=user,
             password=password,
@@ -1767,7 +1766,7 @@ def check_pg_connection(host, db, port, user, password, schema):
         cursor = connection.cursor()
         connection.autocommit = True
         return cursor
-    except Exception as error:
+    except Exception:
         return []
 
 
@@ -1992,7 +1991,8 @@ def get_start_index(per_page, page):
 def key_remove_of_dict(values, keys):
     new_values = dict(values)
     for key in keys:
-        del new_values[key]
+        if key in values:
+            del new_values[key]
 
     return new_values
 

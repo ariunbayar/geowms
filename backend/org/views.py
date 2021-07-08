@@ -124,7 +124,6 @@ def employee_token_refresh(request, pk):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def employee_update(request, payload, pk, level):
-
     payload = payload.get("payload")
     values = payload.get('values')
     password = values.get('password')
@@ -153,9 +152,6 @@ def employee_update(request, payload, pk, level):
     errors.update(backend_org_utils._employee_validition(employee_detail, employee))
     errors.update(backend_org_utils._employee_add_validator(employee_address_detail, employee_address))
 
-    if int(employee_detail.get('state')) == 3:   # TODO халагдсан төлөвт ажилтан нэмэхгүй
-        error = {"state": '"ЧӨЛӨӨЛӨГДСӨН"-өөс бусад төлөвт шинээр албан хаагч үүсгэх боломжтой!'}
-        errors.update(error)
     if not is_fired_employee:
         error = {"username": 'Хэрэглэгч бүртгэлтэй байна!'}
         errors.update(error)
@@ -198,12 +194,13 @@ def employee_add(request, payload, level, pk):
     values = payload.get('values')
     is_user = values.get('is_user')
     username = values.get('username')
-    errors = list()
+    errors = dict()
 
     org = get_object_or_404(Org, pk=pk, level=level)
     qs_user = User.objects
     qs_employee = Employee.objects
     qs_employee_address = EmployeeAddress.objects
+
     qs_user = qs_user.filter(username=username)
     user = qs_user.first()
 
@@ -218,11 +215,11 @@ def employee_add(request, payload, level, pk):
     if user:
         is_fired_employee = backend_org_utils._is_fired_employee(user, qs_employee)
         if is_fired_employee:
-            errors = backend_org_utils._user_validition(user_detail, user)
+            errors.update(backend_org_utils._user_validition(user_detail, user))
         else:
-            errors = backend_org_utils._user_validition(user_detail)
+            errors.update(backend_org_utils._user_validition(user_detail))
     else:
-        errors = backend_org_utils._user_validition(user_detail)
+        errors.update(backend_org_utils._user_validition(user_detail))
 
     errors.update(backend_org_utils._employee_validition(employee_detail))
     errors.update(backend_org_utils._employee_add_validator(employee_add_detail))
@@ -1207,6 +1204,10 @@ def get_erguuls(request):
 @login_required
 def get_select_values(request, payload):
     org_id = payload.get('org_id')
+
+    if not org_id:
+        employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+        org_id = employee.org_id
 
     qs = Position.objects
     qs = qs.filter(org_id=org_id)
