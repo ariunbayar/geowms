@@ -5,7 +5,6 @@ import {service} from './service'
 export default class BundleFormTable extends Component {
     constructor(props) {
         super(props)
-        this.too = 0;
         this.state = {
             id: props.values.id,
             check: this.props.roleChecks.checks,
@@ -38,7 +37,7 @@ export default class BundleFormTable extends Component {
                 const data = { "bundleId":bundleId, "roleId":roleId, "layerId":layerId }
                 service.roleRemove(data).then(({ success, item }) => {
                     if (success) {
-                    global.NOTIF('success', 'Амжилттай устгалаа', 'check')
+                        global.NOTIF('success', 'Амжилттай устгалаа', 'check')
                     }
                 })
             }
