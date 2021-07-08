@@ -1089,8 +1089,6 @@ def _refresh_view_direct_or_crontab(is_refresh, feature_id):
 def get_count(request):
 
     employee = get_object_or_404(Employee, user=request.user)
-    user_name = request.user
-    user_query = User.objects.filter(username=user_name).first()
     emp_features = _get_emp_features(employee)
     qs = ChangeRequest.objects
     qs = qs.filter(state=ChangeRequest.STATE_NEW)
@@ -1101,7 +1099,7 @@ def get_count(request):
 
     geo_id = employee.org.geo_id
     llc = LLCRequest.objects
-    llc = llc.filter(file__geo_id=geo_id, file__requested_employee=user_query.id)
+    llc = llc.filter(file__geo_id=geo_id, file__requested_employee=employee.user.id)
     llc_count = llc.exclude(kind__in=[LLCRequest.KIND_APPROVED, LLCRequest.KIND_REVOKE]).count()
     rsp = {
         'success': True,
