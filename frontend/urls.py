@@ -84,6 +84,8 @@ urlpatterns = [
         path('check-email/', profile_views.check_email, name='check-email'),
         path('set-email/', profile_views.set_email, name='set-email'),
         path('info/', profile_views.user_info),
+        path('information/', profile_views.user_info_all),
+        path('information/updateEmail', profile_views.user_update_password),
         path('update-password/', profile_views.user_update_password),
     ], 'profile'))),
 

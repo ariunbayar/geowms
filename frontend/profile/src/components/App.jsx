@@ -22,7 +22,7 @@ export class App extends Component {
                     <div className="col-md-2">
                         <div className="my-0 pt-2">
                             <div className="list-group border">
-                                <NavLink className="menu" exact to={'/profile/api/'} activeClassName="active">
+                                <NavLink className="menu" exact to={'/profile/api/information'} activeClassName="active">
                                     <div className="list-group-item d-flex justify-content-between align-items-center col-md-12 border-0">
                                         Хувийн мэдээлэл
                                     </div>
@@ -39,7 +39,7 @@ export class App extends Component {
                     </div>
                     <div className="col-md-10 p-0">
                         <Switch>
-                            <Route path="/profile/api/" component={Info}/>
+                            <Route path="/profile/api/information" component={Info}/>
                             <Route path="/profile/tseg-personal/"
                                 component={(props) => <Bar {...props} is_display={this.state.is_display} />}
                             />

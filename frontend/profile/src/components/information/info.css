@@ -1,0 +1,48 @@
+.table{
+    transition-duration: 0.4s;
+    background-color: white;
+    color: black;
+    border: 1px solid #121312;
+    border-radius: 12px;
+    font-size: 12px;
+    float: left;
+  }
+
+.table:hover {
+    background-color: #ececf3;
+    color: blue;
+  }
+.button-after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+
+.card {
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 20px 0 rgba(69, 90, 100, 0.08);
+    box-shadow: 0 1px 20px 0 rgba(69, 90, 100, 0.08);
+    border: none;
+    margin-bottom: 30px
+}
+.m-r-0 {
+  margin-right: 0px
+}
+
+.m-l-0 {
+  margin-left: 0px
+}
+.card-block {
+  padding: 1.25rem
+}
+.card .card-block p {
+  line-height: 25px
+}
+.p-b-5 {
+  padding-bottom: 5px !important
+}
+
+.h6 {
+  font-size: 18px;
+  line-height: 25px;
+}
