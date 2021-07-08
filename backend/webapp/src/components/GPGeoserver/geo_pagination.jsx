@@ -8,6 +8,7 @@ export class GSPaginate extends Component {
             items: props.item_list,
             page: props.page,
             total_page: 1,
+            total_items: props.total_item,
             is_loading: false,
             search_query: props.search_query,
             per_page: props.per_page,
@@ -21,33 +22,37 @@ export class GSPaginate extends Component {
     }
 
     componentDidMount() {
-        const { page, per_page, items, search_query, filter_name} = this.state
-        this.load(page, per_page, items, search_query, filter_name)
+        const { page, per_page, items, search_query, filter_name, total_items} = this.state
+        this.load(page, per_page, items, search_query, filter_name, total_items)
     }
 
-    load(page, per_page, items, search_query, filter_name) {
-        this.paginate(page, per_page, items, search_query, filter_name)
+    load(page, per_page, items, search_query, filter_name, total_items) {
+        this.paginate(page, per_page, items, search_query, filter_name, total_items)
     }
 
     componentDidUpdate(pP, pS) {
-        const { page, per_page, item_list, search_query, filter_name} = this.props
+        const { page, per_page, item_list, search_query, filter_name, total_items} = this.props
         if (
                 pP.item_list != this.props.item_list ||
                 pP.page != page ||
                 pP.search_query != search_query ||
-                pP.filter_name != filter_name
+                pP.filter_name != filter_name || pP.total_items != total_items
             ) {
-            this.setState({search_query, page, items:item_list, filter_name})
-            this.load(page, per_page, item_list, search_query, filter_name)
+            this.setState({search_query, page, items:item_list, filter_name, total_items})
+            this.load(page, per_page, item_list, search_query, filter_name, total_items)
         }
     }
 
-    paginate(page, per_page, items, search_query, filter_name) {
+    paginate(page, per_page, items, search_query, filter_name, total_items) {
         const lastIndex = page*per_page
         const firtsIndex = lastIndex-per_page
+        var set_items = {}
+        var filter =[]
+        var current_list = []
+        var totalPages = ''
         if (search_query.length >= 1) {
             if (filter_name) {
-                var filter = items.filter(item => {
+                filter = total_items.filter(item => {
                     if (item[filter_name]) {
                         return item[filter_name].toString().toLowerCase().includes(search_query.toLowerCase())
                     }
@@ -58,35 +63,36 @@ export class GSPaginate extends Component {
             }
 
             else {
-                var filter = items.filter(item => {
+                filter = total_items.filter(item => {
                     return item.toString().toLowerCase().includes(search_query.toLowerCase())
                 })
             }
-
-            const current_list= filter.slice(firtsIndex, lastIndex)
-            const totalPages=Math.ceil(filter.length / per_page)
-            this.props.paginate(current_list, page, search_query)
-            this.setState({total_page: totalPages})
+            current_list= filter.slice(0, filter.length)
+            totalPages=Math.ceil(filter.length / per_page)
+            set_items['total_page'] = totalPages
         }
         else {
-            const current_list = items.slice(firtsIndex, lastIndex)
-            const totalPages = Math.ceil( items.length / per_page)
-            this.props.paginate(current_list, page, search_query)
-            this.setState({total_page: totalPages, search_query: ''})
+            current_list = items.slice(firtsIndex, lastIndex)
+            totalPages = Math.ceil( items.length / per_page)
+            set_items['total_page'] = totalPages
+            set_items['search_query'] = ''
         }
+
+        this.props.paginate(current_list, page, search_query)
+        this.setState({...set_items})
     }
 
     nextPage() {
-        const { page, per_page, items, search_query, total_page, filter_name} = this.state
+        const { page, per_page, items, search_query, total_page, filter_name, total_items} = this.state
         if(page < total_page) {
-            this.load(page + 1, per_page, items, search_query, filter_name)
+            this.load(page + 1, per_page, items, search_query, filter_name, total_items)
         }
     }
 
     prevPage() {
-        const { page, per_page, items, search_query, filter_name} = this.state
+        const { page, per_page, items, search_query, filter_name, total_items} = this.state
         if (page >1) {
-            this.load(page - 1, per_page, items, search_query, filter_name)
+            this.load(page - 1, per_page, items, search_query, filter_name, total_items)
         }
     }
 
