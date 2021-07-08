@@ -16,7 +16,8 @@ from django.conf import settings
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
-from backend.org.models import Employee, Org
+from backend.org.models import Employee
+from geoportal_app.models import User
 from backend.inspire.models import (
     LThemes,
     LFeatures,
@@ -1147,9 +1148,10 @@ def _get_ann_name(kind, item):
 @gov_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-
+    user_name = request.user
+    user_query = User.objects.filter(username=user_name).first()
     qs = LLCRequest.objects
-    qs = qs.filter(file__geo_id=request.org.geo_id)
+    qs = qs.filter(file__geo_id=request.org.geo_id, file__requested_employee=user_query.id)
 
     start_index = 1
 
@@ -1163,7 +1165,7 @@ def get_llc_list(request, payload):
         ]
 
         datatable = Datatable(
-            model=RequestFiles,
+            model=LLCRequest,
             payload=payload,
             initial_qs=qs,
             оруулах_талбарууд=оруулах_талбарууд,
