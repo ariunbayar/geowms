@@ -48,11 +48,12 @@ def get_tool_datas(request, content):
         rsp_bagaj = requests.post(bagaj_url, headers=HEADERS, verify=False)
         tool_datas = rsp_bagaj.json()
         tool_datas = json_load(tool_datas)
-        for tool_data in tool_datas:
-            expired_date = datetime.strptime(tool_data['expired_date'], "%Y-%m-%d %H:%M:%S")
-            confirmed_date = datetime.strptime(tool_data['confirmed_date'], "%Y-%m-%d %H:%M:%S")
-            tool_data['expired_date'] = datetime_to_string(expired_date)
-            tool_data['confirmed_date'] = datetime_to_string(confirmed_date)
+        if tool_datas:
+            for tool_data in tool_datas:
+                expired_date = datetime.strptime(tool_data['expired_date'], "%Y-%m-%d %H:%M:%S")
+                confirmed_date = datetime.strptime(tool_data['confirmed_date'], "%Y-%m-%d %H:%M:%S")
+                tool_data['expired_date'] = datetime_to_string(expired_date)
+                tool_data['confirmed_date'] = datetime_to_string(confirmed_date)
 
     return JsonResponse({
         'tool_datas': tool_datas

@@ -114,7 +114,7 @@ export class App extends Component {
                                         <Route path="/gov/zip-code/" component={ZipCode} />
                                         <Route path="/gov/org-request/" component={OrgRequest} />
                                         <Route path="/gov/history/" component={ChangeRequest} />
-                                        <Route exact path="/gov/perm/all/" render={(props) => <InsPerms {...props} org_roles={org_role}/>} />
+                                        <Route exact path="/gov/perm/all/" render={(props) => <InsPerms {...props} org_roles={org_role} role_perm={org_role}/>} />
                                         <Route exact path="/gov/perm/org/" component={Gov} />
                                         <Route path="/gov/perm/employee/" render={(props) => <Employee {...props} org_roles={org_role} employee={employee} />}/>
                                         <Route exact path="/gov/help/" component={Help} />

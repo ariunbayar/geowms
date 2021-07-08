@@ -19,11 +19,10 @@ export default class List extends Component {
                 {'field': 'updated_at', "title": 'Зассан'},
             ],
             нэмэлт_талбарууд: [
- 
                 {
                     "title": 'Засах',
-                    "text": '', "icon":
-                    'fa fa-pencil-square-o text-success',
+                    "text": '',
+                    "icon": 'fa fa-pencil-square-o text-success',
                     "action": (values) => this.goLink(values),
                 },
                 {
