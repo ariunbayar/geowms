@@ -177,19 +177,20 @@ export default class ConfigPayment extends Component {
                                                 &&
                                                 <div className='form-row'>
                                                     {
-                                                        initial_values.code_list.map((code_list, idx) =>
-                                                            <div key={idx}className="form-group col-md-6">
-                                                                <label>
-                                                                    {code_list.code_list_name}
-                                                                </label>
-                                                                <Field
-                                                                    id={code_list.code_list_name}
-                                                                    name={code_list.code_list_code}
-                                                                    type="text"
-                                                                    className="form-control"
-                                                                />
-                                                            </div>
-                                                        )
+                                                        initial_values.code_list &&
+                                                            initial_values.code_list.map((code_list, idx) =>
+                                                                <div key={idx}className="form-group col-md-6">
+                                                                    <label>
+                                                                        {code_list.code_list_name}
+                                                                    </label>
+                                                                    <Field
+                                                                        id={code_list.code_list_name}
+                                                                        name={code_list.code_list_code}
+                                                                        type="text"
+                                                                        className="form-control"
+                                                                    />
+                                                                </div>
+                                                            )
                                                     }
                                                 </div>
                                             }

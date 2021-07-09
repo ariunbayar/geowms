@@ -444,16 +444,15 @@ def payment_configs(request):
     configs = Config.objects
     part_payment = configs.filter(name__in=default_values.keys())
     point_payment = configs.filter(name='point_price').first()
-
-    if point_payment :
-        point_payment = point_payment.value
+    point_payment = point_payment.value
+    if point_payment:
         point_payment = point_payment.replace("\'", "\"")
         point_payment = utils.json_load(point_payment)
 
     rsp = {
         **default_values,
         **{conf.name: conf.value for conf in part_payment},
-        **{code['code_list_code']: point_payment[code['code_list_code']] for code in code_list},
+        **{code['code_list_code']: point_payment[code['code_list_code']] for code in code_list if point_payment},
         'code_list': code_list
     }
 
