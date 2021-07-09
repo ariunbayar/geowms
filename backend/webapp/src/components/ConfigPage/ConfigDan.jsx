@@ -23,12 +23,12 @@ export default class ConfigDan extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
-                AUTHORIZE:'',
-                TOKEN:'',
-                SERVICE:'',
-                CLIENT_ID:'',
-                CLIENT_SECRET:'',
-                CALLBACK_URI:'',
+                AUTHORIZE: '',
+                TOKEN: '',
+                SERVICE: '',
+                CLIENT_ID: '',
+                CLIENT_SECRET: '',
+                CALLBACK_URI: '',
             },
             values: {},
         }
@@ -126,7 +126,7 @@ export default class ConfigDan extends Component {
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="AUTHORIZE">AUTHORIZE</label>
+                                                <label htmlFor="id_AUTHORIZE">AUTHORIZE</label>
                                                 <Field
                                                     name="AUTHORIZE"
                                                     id="id_AUTHORIZE"
@@ -137,7 +137,7 @@ export default class ConfigDan extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="TOKEN">TOKEN</label>
+                                                <label htmlFor="id_TOKEN">TOKEN</label>
                                                 <Field
                                                     name="TOKEN"
                                                     id="id_TOKEN"
@@ -148,7 +148,7 @@ export default class ConfigDan extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="SERVICE">SERVICE</label>
+                                                <label htmlFor="id_SERVICE">SERVICE</label>
                                                 <Field
                                                     name="SERVICE"
                                                     id="id_SERVICE"
@@ -159,7 +159,7 @@ export default class ConfigDan extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="CLIENT_ID">CLIENT ID</label>
+                                                <label htmlFor="id_CLIENT_ID">CLIENT ID</label>
                                                 <Field
                                                     name="CLIENT_ID"
                                                     id="id_CLIENT_ID"
@@ -170,7 +170,7 @@ export default class ConfigDan extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="CLIENT_SECRET">CLIENT SECRET</label>
+                                                <label htmlFor="id_CLIENT_SECRET">CLIENT SECRET</label>
                                                 <Field
                                                     name="CLIENT_SECRET"
                                                     id="id_CLIENT_SECRET"
@@ -181,7 +181,7 @@ export default class ConfigDan extends Component {
                                         </div>
                                         <div className="form-row">
                                             <div className="form-group col-md-12">
-                                                <label htmlFor="CALLBACK_URI">CALLBACK URI</label>
+                                                <label htmlFor="id_CALLBACK_URI">CALLBACK URI</label>
                                                 <Field
                                                     name="CALLBACK_URI"
                                                     id="id_CALLBACK_URI"

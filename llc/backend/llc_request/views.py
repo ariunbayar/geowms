@@ -688,12 +688,17 @@ def remove_request(request, content, id):
     form = RequestForm.objects.filter(file=initial_query.id)
     lvl2_request = LLCRequest.objects.filter(file=initial_query)
 
-    if initial_query:
-        for shape in shapes:
-            geom = ShapeGeom.objects.filter(shape=shape)
-            if geom:
-                geom.delete()
-            shape.delete()
+    if initial_query.state == RequestFiles.STATE_SENT or initial_query.kind == RequestFiles.KIND_DISMISS:
+        return JsonResponse({
+                'success': False,
+                'info': 'Устгах боломжгүй файл байна.'
+        })
+
+    for shape in shapes:
+        geom = ShapeGeom.objects.filter(shape=shape)
+        if geom:
+            geom.delete()
+        shape.delete()
 
         if form:
             form.delete()
@@ -704,17 +709,12 @@ def remove_request(request, content, id):
             change_requests.delete()
             lvl2_request.delete()
 
-        initial_query.delete()
-        _delete_prev_files(initial_query)
-
-        return JsonResponse({
-            'success': True,
-            'info': "Амжилттай устгалаа"
-        })
+    initial_query.delete()
+    _delete_prev_files(initial_query)
 
     return JsonResponse({
-        'success': False,
-        'info': "Устгахад алдаа гарлаа"
+            'success': True,
+            'info': 'Амжилттай устгалаа'
     })
 
 

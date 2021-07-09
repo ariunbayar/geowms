@@ -16,7 +16,7 @@ from django.conf import settings
 
 from backend.geoserver.models import WmtsCacheConfig
 from backend.another_database.models import AnotherDatabaseTable
-from backend.org.models import Employee, Org
+from backend.org.models import Employee
 from backend.inspire.models import (
     LThemes,
     LFeatures,
@@ -45,13 +45,11 @@ from main.utils import (
     get_fields,
     get_feature_from_geojson,
     json_load,
-    get_geom,
     get_geoJson,
     get_cursor_pg,
     convert_3d_with_srid,
     datetime_to_string,
     get_feature,
-    value_types
 )
 from main import utils
 
@@ -95,6 +93,7 @@ LLC_REQUEST_REVOKE = {
     'state': LLCRequest.STATE_SOLVED,
     'kind': LLCRequest.KIND_REVOKE,
 }
+
 
 def _get_geom(geo_id, fid):
     cursor = connections['default'].cursor()
@@ -181,7 +180,7 @@ def _get_org_request(ob, employee):
 @login_required(login_url='/gov/secure/login/')
 def get_change_all(request):
     org_request_list = list()
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org_request_qs = ChangeRequest.objects
     org_request_qs = org_request_qs.exclude(form_json__isnull=True, geo_json__isnull=True, group_id__isnull=True)
     org_request_qs = org_request_qs.filter(employee=employee)
@@ -200,8 +199,8 @@ def get_change_all(request):
             }
     else:
         rsp = {
-                'success': False,
-            }
+            'success': False,
+        }
 
     return JsonResponse(rsp)
 
@@ -418,7 +417,7 @@ def _хувьсах_талбарууд():
 @login_required(login_url='/gov/secure/login/')
 def get_list(request, payload):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     if emp_features:
         qs = ChangeRequest.objects
@@ -497,7 +496,7 @@ def _set_llc_request(llc_request_id, payload):
         llc_request_data['kind'] = LLC_REQUEST_DISSMIS['kind']
         llc_request_data['state'] = LLC_REQUEST_DISSMIS['state']
         info = 'Амжилттай буцаалаа'
-        request_shape['state'] = RequestFilesShape.STATE_SENT # TODO soligdoj magdgv
+        request_shape['state'] = RequestFilesShape.STATE_SENT  # TODO soligdoj magdgv
         request_shape['kind'] = RequestFilesShape.KIND_DISMISS
         llc_changerequest_qs = llc_changerequest_qs.filter(feature_id=feature_id)
 
@@ -543,7 +542,7 @@ def request_reject(request, payload):
     ids = payload.get('ids')
     feature_id = payload.get('feature_id')
     action_type = payload.get('action_type')
-    employee = get_object_or_404(Employee, user__username=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user__username=request.user)
     emp_perm = EmpPerm.objects.filter(employee_id=employee.id).first()
 
     qs = EmpPermInspire.objects
@@ -684,7 +683,7 @@ def _create_mdatas(geo_id, feature_id, form, value):
 
     if form["value_type"] == "option":
         if form["data"]:
-            value['code_list_id'] = form ["data"]
+            value['code_list_id'] = form["data"]
 
     if 'value_date' in value:
         if not isinstance(value['value_date'], datetime.datetime):
@@ -954,7 +953,7 @@ def _change_choise_of_llc_req_files(llc_req_id, feature_id, state, kind, descrip
 @login_required(login_url='/gov/secure/login/')
 def request_approve(request, payload):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_perm = get_object_or_404(EmpPerm, employee=employee)
 
     request_ids = payload.get("ids")
@@ -1056,12 +1055,11 @@ def request_approve(request, payload):
                 }
                 return JsonResponse(rsp)
 
-
             info = _refresh_view_direct_or_crontab(is_refresh, feature_id)
 
             rsp = {
-            'success': True,
-            'info': info
+                'success': True,
+                'info': info
             }
 
     return JsonResponse(rsp)
@@ -1087,7 +1085,7 @@ def _refresh_view_direct_or_crontab(is_refresh, feature_id):
 @login_required(login_url='/gov/secure/login/')
 def get_count(request):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_features = _get_emp_features(employee)
     qs = ChangeRequest.objects
     qs = qs.filter(state=ChangeRequest.STATE_NEW)
@@ -1098,8 +1096,8 @@ def get_count(request):
 
     geo_id = employee.org.geo_id
     llc = LLCRequest.objects
-    llc = llc.filter(file__geo_id=geo_id)
-    llc_count = llc.exclude(kind__in=[LLCRequest.KIND_APPROVED, LLCRequest.KIND_REVOKE]).count()
+    llc = llc.filter(file__geo_id=geo_id, file__requested_employee=employee.user.id)
+    llc_count = llc.exclude(state=LLCRequest.STATE_SOLVED).count()
     rsp = {
         'success': True,
         'count': request_count,
@@ -1147,9 +1145,9 @@ def _get_ann_name(kind, item):
 @gov_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-
+    empoyee = get_object_or_404(Employee, user=request.user)
     qs = LLCRequest.objects
-    qs = qs.filter(file__geo_id=request.org.geo_id)
+    qs = qs.filter(file__geo_id=request.org.geo_id, file__requested_employee=empoyee.user_id)
 
     start_index = 1
 
@@ -1163,7 +1161,7 @@ def get_llc_list(request, payload):
         ]
 
         datatable = Datatable(
-            model=RequestFiles,
+            model=LLCRequest,
             payload=payload,
             initial_qs=qs,
             оруулах_талбарууд=оруулах_талбарууд,
@@ -1251,7 +1249,7 @@ def get_request_data(request, id):
                 'name': feature_name
             },
             'order_no': shape_geometry.order_no or '',
-            'order_at': datetime_to_string (shape_geometry.order_at) if shape_geometry.order_at else ''
+            'order_at': datetime_to_string(shape_geometry.order_at) if shape_geometry.order_at else ''
         })
 
     return JsonResponse({
@@ -1426,7 +1424,7 @@ def _has_overlap(request_file_shapes):
 @ajax_required
 def llc_request_approve(request, request_id):
 
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     llc_request = get_object_or_404(LLCRequest, id=request_id)
     request_file_shape_qs = RequestFilesShape.objects.filter(files_id=llc_request.file.id)
     request_file_shapes = request_file_shape_qs.exclude(**REQUEST_SHAPE_APPROVED)
@@ -1467,7 +1465,7 @@ def llc_request_approve(request, request_id):
     has_req_qs = has_req_qs.filter(llc_request_id=request_id)
     has_req_qs = has_req_qs.exclude(state=ChangeRequest.STATE_APPROVE)
     if has_req_qs:
-        #TODO huseltiin logiig enechee bichij boloh ym
+        # TODO huseltiin logiig enechee bichij boloh ym
         has_req_qs.delete()
 
     for file_shape in request_file_shapes.values():
