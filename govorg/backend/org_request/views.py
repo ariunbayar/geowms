@@ -142,7 +142,7 @@ def _get_org_request(ob, employee):
         else:
             geo_json = FeatureCollection([old_geo_data])
 
-    elif geo_json and ob.old_geo_id:
+    else:
         geo_json = ob.geo_json
         geo_json = get_geoJson(geo_json)
         geo_json = FeatureCollection([geo_json])
@@ -166,7 +166,7 @@ def _get_org_request(ob, employee):
         'state': ob.get_state_display(),
         'kind': ob.get_kind_display(),
         'group_id': ob.group_id,
-        'form_json': json.loads(ob.form_json) if ob.form_json else '',
+        'form_json': utils.json_load(ob.form_json) if ob.form_json else '',
         'geo_json': geo_json if geo_json else '',
         'created_at': ob.created_at.strftime('%Y-%m-%d'),
         'employee': employee.user.first_name,

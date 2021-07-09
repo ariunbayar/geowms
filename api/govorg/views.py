@@ -1,5 +1,4 @@
 from frontend.page.views import service
-from django.db.models import base
 import requests
 import json
 
@@ -11,8 +10,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 
 from api.utils import filter_layers, replace_src_url, filter_layers_wfs
-from backend.dedsanbutets.models import ViewNames
-from backend.govorg.models import GovOrgWMSLayer, GovOrg as System
+from backend.govorg.models import GovOrg as System
 from backend.inspire.models import (
     LCodeLists,
     LFeatureConfigs,
@@ -28,6 +26,7 @@ from backend.org.models import Employee, Org
 from backend.wms.models import WMSLog
 from govorg.backend.org_request.models import ChangeRequest
 from main import utils
+from main.inspire import GEoIdGenerator
 from django.core.cache import cache
 from main.decorators import get_conf_geoserver_base_url
 
@@ -289,13 +288,16 @@ def _get_property_data(values, employee, feature_id, geo_id):
 def qgis_submit(request, token, fid):
     update = request.POST.get('update')
     delete = request.POST.get('delete')
+    create = request.POST.get('create')
     employee = get_object_or_404(Employee, token=token)
     org = get_object_or_404(Org, pk=employee.org_id)
     update_lists = json.loads(update)
     delete_lists = json.loads(delete)
+    create_lists = json.loads(create)
     objs = []
     msg = []
     form_json = []
+    geo_id = ''
     for update_item in update_lists:
         feature_id = fid
         if update_item['att']['localid']:
@@ -352,7 +354,34 @@ def qgis_submit(request, token, fid):
             msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
         else:
             msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
-    hoho = ChangeRequest.objects.bulk_create(objs)
+
+    for create_item in create_lists:
+        package = LFeatures.objects.filter(feature_id=fid).first()
+        theme = LPackages.objects.filter(package_id=package.package_id).first()
+        new_geo_id = GEoIdGenerator(fid, package.feature_code).get()
+
+        geo_json = _geojson_convert_3d_geojson(create_item['geom'])
+        form_json = _get_property_data(create_item['att'], employee, fid, new_geo_id)
+
+        success, info = utils.has_employee_perm(employee, fid, True, EmpPermInspire.PERM_REMOVE, geo_json)
+        if success:
+            objs.append(ChangeRequest(
+                new_geo_id=new_geo_id,
+                theme_id=theme.theme_id,
+                package_id=package.package_id,
+                feature_id=fid,
+                employee=employee,
+                org=org,
+                state=ChangeRequest.STATE_CONTROL,
+                kind=ChangeRequest.KIND_CREATE,
+                form_json=utils.json_dumps(form_json),
+                geo_json=geo_json,
+            ))
+            msg.append({'geo_id': geo_id, 'info': 'Амжилттай хадгалагдлаа', 'type': True, 'state': 'delete'})
+        else:
+            msg.append({'geo_id': geo_id, 'info': info, 'type': False, 'state': 'delete'})
+
+    ChangeRequest.objects.bulk_create(objs)
     return JsonResponse({'success': True, 'msg': msg})
 
 
