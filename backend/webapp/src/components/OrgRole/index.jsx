@@ -17,6 +17,7 @@ export default class OrgRole extends Component {
             <Switch>
                 <Route exact path={"/back/org-role/"} component={List}/>
                 <Route exact path={"/back/org-role/add/"} component={Forms}/>
+                <Route exact path={"/back/org-role/add/:id/"} component={Forms}/>
                 <Route exact path={"/back/org-role/update/:id/"} component={Roles}/>
             </Switch>
         )

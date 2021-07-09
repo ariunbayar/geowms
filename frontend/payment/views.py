@@ -1749,7 +1749,7 @@ def get_popup_info(request, payload):
                     datas[1].append([key, value, key])
                 for prop in properties:
                     if prop['property_code'].lower() == key and value:
-                        datas[1].append([prop['property_name'], value, key])
+                        datas[1].append([prop['property_name'], str(value), key])
             if datas:
                 infos.append(datas)
 

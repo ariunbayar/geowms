@@ -162,7 +162,7 @@ export class EmployeeAdd extends Component {
             'level_1': aimag_name,
             'level_2': sum_name,
             'level_3': horoo_name,
-            'point_coordinate': point_coordinate,
+            'point': point_coordinate,
             'address_state': address_state,
         }
         if(is_address_map) {
@@ -380,7 +380,7 @@ export class EmployeeAdd extends Component {
                                                         type="text"
                                                         placeholder="Нэвтрэх нэр"
                                                     />
-                                                    <ErrorMessage name="username" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="username" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                             <div className="form-group col-md-6">
@@ -393,7 +393,7 @@ export class EmployeeAdd extends Component {
                                                         type="text"
                                                         placeholder="Овог"
                                                     />
-                                                    <ErrorMessage name="last_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="last_name" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -408,7 +408,7 @@ export class EmployeeAdd extends Component {
                                                         type="text"
                                                         placeholder="Нэр"
                                                     />
-                                                    <ErrorMessage name="first_name" component="div" className="text-danger"/>
+                                                    <ErrorMessage name="first_name" component="div" className="invalid-feedback"/>
                                                 </div>
                                             </div>
                                             <div className="form-group col-md-6">
@@ -437,7 +437,7 @@ export class EmployeeAdd extends Component {
                                                     type="text"
                                                     placeholder="Цахим хаяг"
                                                 />
-                                                <ErrorMessage name="email" component="div" className="text-danger"/>
+                                                <ErrorMessage name="email" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="gender">Хүйс:</label>
@@ -461,7 +461,7 @@ export class EmployeeAdd extends Component {
                                                     type="text"
                                                     placeholder="Регистер"
                                                 />
-                                                <ErrorMessage name="register" component="div" className="text-danger"/>
+                                                <ErrorMessage name="register" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-group col-md-6">
                                                 <label htmlFor="choose_role">Role: </label>
@@ -471,7 +471,7 @@ export class EmployeeAdd extends Component {
                                                         <option key={idx} value={role.role_id}>{role.role_name}</option>
                                                     )}
                                                 </select>
-                                                <ErrorMessage name="choose_role" component="div" className="text-danger"/>
+                                                <ErrorMessage name="choose_role" component="div" className="invalid-feedback"/>
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -484,7 +484,7 @@ export class EmployeeAdd extends Component {
                                                     type="text"
                                                     placeholder="Утасны дугаар"
                                                 />
-                                                <ErrorMessage name="phone_number" component="div" className="text-danger"/>
+                                                <ErrorMessage name="phone_number" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-row col-md-3 mt-4 text-center"><br/>
                                                 <label className="" htmlFor='id_is_admin'>Байгууллагын админ</label>
@@ -494,7 +494,7 @@ export class EmployeeAdd extends Component {
                                                     id="id_is_admin"
                                                     type="checkbox"
                                                 />
-                                                <ErrorMessage name="is_admin" component="div" className="text-danger"/>
+                                                <ErrorMessage name="is_admin" component="div" className="invalid-feedback"/>
                                             </div>
                                             <div className="form-row col-md-3 mt-4 text-center"><br/>
                                                 <label htmlFor='id_is_user'>Хэрэглэгч</label>

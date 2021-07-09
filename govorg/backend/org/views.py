@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.db.models import F
+from django.db.models import F, Q
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -31,28 +31,52 @@ from django.views.decorators.cache import cache_page
 
 def _get_properties_by_feature(initial_qs, feature_ids):
 
-    qs = initial_qs
-    qs = qs.filter(property_id__isnull=False)
-
+    qs = initial_qs.order_by('feature_id')
+    qs = qs.exclude(geom=True)
     qs_for_props = qs.values_list('property_id', flat=True)
+    property = LProperties.objects
+    property = property.exclude(value_type_id='data-type')
+    property = property.exclude(property_code='localId')
     properties = {
         prop.property_id: prop
-        for prop in LProperties.objects.filter(property_id__in=qs_for_props)
+        for prop in property.filter(property_id__in=qs_for_props)
     }
 
-    item_pairs = qs.values_list('feature_id', 'property_id', 'perm_kind')
+    item_pairs = qs.values_list('feature_id', 'property_id', 'perm_kind', 'data_type_id')
 
     feature_property_ids = {
         feature_id: []
         for feature_id in feature_ids
     }
+    feature_data = qs.first().feature_id
+    property_of_features = []
 
-    for feature_id, property_id, perm_kind in item_pairs:
-        feature_property_ids[feature_id].append({
-            "perm_kind": perm_kind,
-            "prop_obj": properties[property_id],
+    #TODO ялгаатай datatype-тай ижилхэн property-ийг ялгах
+
+    for feature_id, property_id, perm_kind, data_type_id in item_pairs:
+        if feature_id != feature_data:
+            property_of_features = []
+
+        sum = 0
+        property_of_features.append({
+            'id': property_id,
+            'perm': perm_kind
         })
 
+        for property in property_of_features:
+            if property['id'] == property_id and property['perm'] == perm_kind:
+                sum += 1
+
+        if sum < 2:
+            try:
+                feature_property_ids[feature_id].append({
+                    "perm_kind": perm_kind,
+                    "prop_obj": properties[property_id],
+                    "data_type_id": data_type_id if data_type_id else '',
+                })
+            except Exception:
+                pass
+        feature_data = feature_id
     return feature_property_ids
 
 
@@ -97,7 +121,6 @@ def _org_role(org):
                 get_property_data_display2(perm_list, None, feature_id, geom=True)
             )
             property_perm_count = count_property_of_feature(props)
-
             for perm in perm_list:
                 kind_name = get_perm_kind_name(perm['kind'])
                 property_perm_count[kind_name] = property_perm_count[kind_name] + 1
@@ -106,14 +129,24 @@ def _org_role(org):
 
             # property давхардал арилгах
             check_list = []
+
+            def _check_in_list(prop):
+                coming_data_type_id = prop['data_type_id']
+                coming_property_id = prop['prop_obj'].property_id
+                for property_id, data_type_id in check_list:
+                    if coming_data_type_id == data_type_id and coming_property_id == property_id:
+                        return False
+                return True
+
             # properties
             for prop in props:
-                if not prop['prop_obj'] in check_list:
+                if _check_in_list(prop):
+                    data_type_id = prop['data_type_id']
                     perm_list = get_perm_list(feature_id, prop['prop_obj'].property_id, False, perm_list_all)
                     properties.append(
-                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, geom=False)
+                        get_property_data_display2(perm_list, prop['prop_obj'], feature_id, False, data_type_id)
                     )
-                    check_list.append(prop['prop_obj'])
+                    check_list.append([prop['prop_obj'].property_id, data_type_id])
 
         def _get_package_features_data_display(package_id, feature_ids):
 
@@ -123,7 +156,7 @@ def _org_role(org):
             qs = qs.values_list('feature_id', flat=True)
 
             package_feature_ids = list(qs)
-            return  get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature)
+            return  get_package_features_data_display(package_id, package_feature_ids, property_ids_of_feature, gov_perm_inspire_qs)
 
 
         package_features = []
@@ -207,12 +240,16 @@ def frontend(request):
 
     approve = False
     revoke = False
-
-    employee = get_object_or_404(Employee, user=request.user)
+    has_position = False
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     org = get_object_or_404(Org, employee=employee)
+    emp_perm = employee.empperm_set.first()
     geom = utils.get_geom(org.geo_id, 'MultiPolygon')
 
-    emp_perm = employee.empperm_set.first()
+    if  employee.org.level == 2 and employee.position:
+        if employee.position.name.lower() == 'мэргэжилтэн':
+            has_position = True
+
     if emp_perm:
         emp_perm_insp = emp_perm.empperminspire_set
         approve = emp_perm_insp.filter(perm_kind=EmpPermInspire.PERM_APPROVE).first()
@@ -227,6 +264,7 @@ def frontend(request):
                 'username': employee.user.username,
                 'geo_id': org.geo_id or None
             },
+            'has_position': has_position,
             'allowed_geom': geom.json if geom else None,
             'approve': True if approve else False,
             'revoke': True if revoke else False,
@@ -234,7 +272,6 @@ def frontend(request):
     }
 
     return render(request, 'org/index.html', context)
-
 
 @require_GET
 @ajax_required
@@ -259,7 +296,8 @@ def get_perms(request):
 @login_required(login_url='/gov/secure/login/')
 def emp_role(request):
 
-    org = get_object_or_404(Org, employee__user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
+    org = get_object_or_404(Org, employee=employee)
     rsp = {
         'success': True,
         'emp_role': _emp_role(org, request.user)
@@ -272,7 +310,7 @@ def emp_role(request):
 @ajax_required
 @login_required(login_url='/gov/secure/login/')
 def get_approve_and_revoke(request):
-    employee = get_object_or_404(Employee, user=request.user)
+    employee = get_object_or_404(Employee, ~Q(state=Employee.STATE_FIRED_CODE), user=request.user)
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
 
     approve = EmpPermInspire.objects.filter(emp_perm=emp_perm, perm_kind=EmpPermInspire.PERM_APPROVE).first()

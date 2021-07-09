@@ -1,27 +1,30 @@
 import React, { Component, Fragment } from "react"
 
-import Modal from "@utils/Modal/Modal"
-
 
 export class ButtonDelete extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-            modal_status: 'closed',
         }
-        this.handleButtonClick = this.handleButtonClick.bind(this)
-        this.modalClose = this.modalClose.bind(this)
     }
 
     handleButtonClick() {
-        this.setState({ modal_status: 'open' }, () => {
-            this.setState({ modal_status: 'initial' })
-        })
-    }
-
-    modalClose() {
-        this.setState({ modal_status: 'closed' })
+        console.log(this.state.modal_status);
+        const modal = {
+            modal_status: 'open',
+            modal_icon: `fa fa-exclamation-circle`,
+            icon_color: 'warning',
+            modal_bg: '',
+            title: 'Албан хаагчийг чөлөөлөх',
+            text: `${`Та "${this.props.employee_name}" нэртэй албан хаагчийн төлөв чөлөөлөгдсөн болно. Та чөлөөлөх итгэлтэй байна уу?`}`,
+            has_button: true,
+            actionNameDelete: 'Тийм',
+            actionNameBack: 'Үгүй',
+            modalAction: this.props.onClick,
+            modalClose: null
+        }
+        global.MODAL(modal)
     }
 
     render() {
@@ -29,22 +32,11 @@ export class ButtonDelete extends Component {
         return (
             <Fragment>
                 <span
-                    onClick={ this.handleButtonClick }
+                    onClick={() => this.handleButtonClick()}
                     className="btn btn-danger waves-effect waves-light m-1"
                 >
-                    <i className="fa fa fa-trash-o"></i> Устгах
+                    <i className="fa fa fa-trash-o"></i> Чөлөөлөх
                 </span>
-
-                <Modal
-                    modal_status={this.state.modal_status}
-                    modal_icon={'fa fa-exclamation-circle'}
-                    icon_color={'warning'}
-                    has_button={true}
-                    title="Албан хаагчийг устгах"
-                    text={`Та "${this.props.employee_name}" нэртэй албан хаагчийн төлөв чөлөөлөгдсөн болно. Та устгахдаа итгэлтэй байна уу?`}
-                    actionNameDelete="Устгах"
-                    modalAction={ this.props.onClick }
-                />
             </Fragment>
         )
     }

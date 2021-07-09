@@ -126,7 +126,6 @@ export class Detail extends Component {
     handleUpdateAction(values) {
         this.props.history.push(`/llc/llc-request/${values.id}/дэлгэрэнгүй/`)
     }
-
     modalChange(modal_icon, icon_color, title, text, has_button, description) {
         this.setState({
             modal_icon: modal_icon,
@@ -144,7 +143,6 @@ export class Detail extends Component {
             this.setState({ modal_status: 'initial' })
         })
     }
-
     refreshData() {
         this.setState({ refresh: !this.state.refresh })
     }

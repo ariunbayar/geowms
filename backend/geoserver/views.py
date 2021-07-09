@@ -437,7 +437,7 @@ def update_geo_cache(request):
 def check_styles_name(request, payload):
     style_name = payload.get('style_name')
     style_update = payload.get('style_update')
-    info = _check_style_name(style_name, style_update)
+    info, has_styles = _check_style_name(style_name, style_update)
     if info:
         return JsonResponse({'success': False, 'info': info})
     else:
@@ -477,6 +477,7 @@ def get_style_data(request, payload):
 
 def _check_style_name(style_name, old_style_name):
     info = ''
+    has_style = []
     if not style_name:
         info = 'Style-ийн нэр хоосон байна.'
 
@@ -491,8 +492,16 @@ def _check_style_name(style_name, old_style_name):
             info = '{style_name} нэртэй style geoserver дээр бүртгэлтэй байна'.format(style_name=style_name)
 
     if old_style_name:
+        layer_list = geoserver.get_layers()
+        if layer_list:
+            for layer in layer_list:
+                layer_name = layer['name']
+                layer_style_name = geoserver.get_layer_style(layer_name)
+
+                if layer_style_name == old_style_name:
+                    has_style.append(layer_name)
         geoserver.delete_style(old_style_name)
-    return info
+    return info, has_style
 
 
 @require_POST
@@ -501,18 +510,23 @@ def _check_style_name(style_name, old_style_name):
 def create_style(request, payload):
 
     style_datas = payload.get('style_datas')
-    style_name = payload.get('style_name')
-    style_title = payload.get('style_title')
-    style_abstract = payload.get('style_abstract')
+    style_name = payload.get('style_name') or ''
+    style_title = payload.get('style_title') or ''
+    style_abstract = payload.get('style_abstract') or ''
     style_update = payload.get('style_update')
     old_style_name = payload.get('old_style_name')
-    info = _check_style_name(style_name, style_update)
+    info, has_styles = _check_style_name(style_name, style_update)
 
     if info:
         return JsonResponse({'success': False, 'info': info})
 
     rsp = geoserver.create_style(style_datas, style_name, style_title, style_abstract, old_style_name)
+
     if rsp.status_code == 201:
+        if has_styles:
+            for layer in has_styles:
+                geoserver.update_layer_style(layer, style_name)
+
         return JsonResponse({
             'success': True,
             'info': 'Амжилттай хадгалагдлаа'
@@ -528,6 +542,7 @@ def _get_fill_stroke(data):
     shape_data = []
     geom_type = ''
     style_datas = []
+    wellknownname = ''
     try:
         rule_name = data.get('Name') or ''
         max_range = data.get('MaxScaleDenominator') or 0
@@ -710,10 +725,7 @@ def conver_sld_json(request, payload):
 def style_list(request):
 
     style_names = []
-    geoserver_style = geoserver.get_styles()
-    for style in geoserver_style:
-        style_names.append(style.get('name'))
-
+    style_names = geoserver.get_styles()
     return JsonResponse({
         'style_list': style_names,
     })

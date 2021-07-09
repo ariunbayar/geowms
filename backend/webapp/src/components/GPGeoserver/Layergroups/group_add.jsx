@@ -460,6 +460,7 @@ export class GroupAdd extends Component {
                             modalClose={this.modalClose}
                             modalAction={modalAction}
                             layer_list={values}
+                            total_items={layer_detail}
                             title={modal_title}
                             more_detail={more_detail}
                         />

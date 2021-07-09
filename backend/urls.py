@@ -150,6 +150,8 @@ urlpatterns = [
         path('<int:pk>/position/remove/', org_views.pos_remove),
         path('<int:pk>/position/edit/', org_views.pos_update),
         path('<int:pk>/position/detail/', org_views.pos_detail),
+        path('org-role/<int:pk>/remove-role/', org_views.remove_role),
+        path('org-role/<int:pk>/role-detail/', org_views.role_detail),
     ], 'org'))),
 
     path('api/log/', include(([
