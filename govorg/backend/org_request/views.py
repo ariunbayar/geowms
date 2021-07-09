@@ -1148,10 +1148,9 @@ def _get_ann_name(kind, item):
 @gov_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-    user_name = request.user
-    user_query = User.objects.filter(username=user_name).first()
+    empoyee = get_object_or_404(Employee, user=request.user)
     qs = LLCRequest.objects
-    qs = qs.filter(file__geo_id=request.org.geo_id, file__requested_employee=user_query.id)
+    qs = qs.filter(file__geo_id=request.org.geo_id, file__requested_employee=empoyee.user_id)
 
     start_index = 1
 
