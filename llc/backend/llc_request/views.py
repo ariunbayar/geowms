@@ -703,10 +703,10 @@ def remove_request(request, content, id):
             form.delete()
 
         if lvl2_request:
-           requet_files = list(lvl2_request.values_list('id', flat=True))
-           change_requests = ChangeRequest.objects.filter(llc_request_id__in=requet_files)
-           change_requests.delete()
-           lvl2_request.delete()
+            requet_files = list(lvl2_request.values_list('id', flat=True))
+            change_requests = ChangeRequest.objects.filter(llc_request_id__in=requet_files)
+            change_requests.delete()
+            lvl2_request.delete()
 
         initial_query.delete()
         _delete_prev_files(initial_query)
@@ -714,6 +714,7 @@ def remove_request(request, content, id):
     return JsonResponse({
             'success': True,
     })
+
 
 def _delete_prev_files(file):
     main_folder = 'llc-request-files'
