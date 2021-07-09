@@ -43,7 +43,7 @@ class index extends Component {
     render() {
         const { search_value, search_datas, is_searching } = this.state
         return (
-            <div className="rounded shadow-sm px-2 pb-2 mb-3 bg-white rounded row mx-0">
+            <div className="row mx-0">
                 <div className="d-flex justify-content-center">
                     <div className="search-bundle">
                         <input

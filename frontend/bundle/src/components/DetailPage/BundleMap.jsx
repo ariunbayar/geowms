@@ -1123,6 +1123,7 @@ export default class BundleMap extends Component {
                                         {
                                             "key": "search",
                                             "icon": "fa fa-search",
+                                            "title": "Хайлт",
                                             "tooltip": "Хайлт",
                                             "component": Search_comp
                                         },

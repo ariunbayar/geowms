@@ -47,8 +47,7 @@ class index extends Component {
                 this.setState({ sum: aimag_data.children, aimag_id, sum_id: -1, horoo_id: -1 })
             }
             else {
-                this.setState({ aimag_id: -1, sum_id: -1, horoo_id: -1, sum: [], horoo: [] })
-                this.props.resetButton()
+                this.handleSubmitClear()
             }
         }
     }
@@ -85,6 +84,8 @@ class index extends Component {
         this.state.layers.map((layer, idx) => {
             window.map.getLayers().forEach(map_layer => {
                 if (
+                    (layer && map_layer)
+                    &&
                     (layer.get(LAYERKNOWKEY) && map_layer.get(LAYERKNOWKEY))
                     &&
                     (layer.get(LAYERKNOWKEY) == map_layer.get(LAYERKNOWKEY))
@@ -105,7 +106,7 @@ class index extends Component {
         this.clearLayers()
         this.funcs.resetSearch()
 
-        this.setState({ sum_id: -1, aimag_id: -1, horoo_id: -1 })
+        this.setState({ sum_id: -1, aimag_id: -1, horoo_id: -1, sum: [], horoo: [] })
     }
 
     async setGeom(geo_id) {
@@ -136,8 +137,6 @@ class index extends Component {
         else {
             wms_list = [{ "layers": add_layers }]
         }
-
-        console.log(wms_list)
 
         wms_list.map(({ is_display, layers }, idx) => {
             layers.map(({ checked, code, wms_or_cache_ur, tile, wms_tile }, l_idx) => {
@@ -255,9 +254,8 @@ class index extends Component {
     render() {
         const { sum, aimag, horoo } = this.state
         return (
-            <form className="rounded shadow-sm p-3 mb-3 bg-white rounded">
+            <form>
                 <div className="form-group">
-                    <label className="font-weight-bold" htmlFor="formGroupInput">Аймгаар хайх</label>
                     <div className="input-group mb-3">
                         <select name="center_typ" as="select"
                             onChange={(e) => this.handleInput(e)}
@@ -300,7 +298,7 @@ class index extends Component {
                             }
                         </select>
                     </div>
-                    <div className="input-group mb-3">
+                    <div className="input-group">
                         <div>
                             <button
                                 className="btn gp-btn-primary"

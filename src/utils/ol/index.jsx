@@ -3,11 +3,23 @@ import { GeoJSON } from 'ol/format'
 import { transform, fromLonLat } from 'ol/proj'
 import { logicOp } from '../functions'
 
+const options_scale = [
+    {'zoom': '2.9903484967519145', 'scale': 5000000},
+    {'zoom': '4.3576399772248543', 'scale': 1000000},
+    {'zoom': '7.3376399772248575', 'scale': 100000},
+    {'zoom': '8.738265134288114', 'scale': 50000},
+    {'zoom': '9.721598467621447', 'scale': 25000},
+    {'zoom': '10.781598467621446', 'scale': 10000},
+    {'zoom': '12.194931800954776', 'scale': 5000},
+    {'zoom': '14.383305008368451', 'scale': 1000},
+]
+
 const vars = {
     "data_projection": "EPSG:4326",
     "feature_projection": 'EPSG:3857',
     "format": new GeoJSON(),
     "au_search_layer_name": "administrative",
+    "options_scale": options_scale
 }
 
 export {

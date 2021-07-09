@@ -127,7 +127,7 @@ function purchaseFromCart(datas) {
 function searchPoint(point_id) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({point_id})
+        body: JSON.stringify({ point_id })
     }
     return fetch('/gov/api/tseg-personal/find-point/', requestOptions).then(handleResponse)
 }
