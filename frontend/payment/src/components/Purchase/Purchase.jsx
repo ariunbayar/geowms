@@ -26,7 +26,6 @@ export class Purchase extends Component {
         this.qPayClose = this.qPayClose.bind(this)
         this.alertOver = this.alertOver.bind(this)
         this.alertOut = this.alertOut.bind(this)
-        this.handleModalOpen = this.handleModalOpen.bind(this)
         this.handleModalClose = this.handleModalClose.bind(this)
         this.handleModalApproveClose = this.handleModalApproveClose.bind(this)
         this.addNotif = this.addNotif.bind(this)
@@ -157,19 +156,19 @@ export class Purchase extends Component {
                     </table>
                     <div className="row text-center">
                         <div className="col-md-6">
-                            <button style={{width:'80%'}}
+                            <button style={{ width:'80%' }}
                                 className="btn gp-btn-primary text-center btn-lg mt-3"
                                 disabled
                                 onMouseOut={() => this.alertOut()}
                                 onMouseOver={() => this.alertOver()}
                                 onClick={() => this.handlePayment()}
                             >
-                                <h4 className="text-succes p-3">{alert_msg}</h4>
+                                <h4 className="text-succes p-3 text-white">{alert_msg}</h4>
                             </button>
                         </div>
                         <div className="col-md-6">
-                            <button type="button" data-toggle="modal" style={{width:'80%'}}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModalOpen()}>
-                                <h4 className="text-succes p-3">QPAY-ээр төлбөр төлөх</h4>
+                            <button type="button" data-toggle="modal" style={{ width:'80%' }}  className="btn gp-btn-primary text-center mt-3" onClick={() => this.handleModalOpen()}>
+                                <h4 className="text-succes p-3 text-white">QPAY-ээр төлбөр төлөх</h4>
                             </button>
                         </div>
                         { is_modal_open &&

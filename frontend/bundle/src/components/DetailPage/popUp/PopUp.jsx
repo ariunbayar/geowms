@@ -308,9 +308,9 @@ class PopUpCmp extends Component {
                                 :
                                 is_from_inspire && this.is_from_inspire
                                 ?
-                                    <div className="btn-group flex-wrap d-flex justify-content-center">
+                                    <div className="btn-group flex-wrap d-flex justify-content-center p-3">
                                         <button
-                                            className="btn btn-xs btn-primary mx-3"
+                                            className="btn btn-xs btn-primary mx-1 my-1"
                                             onClick={() => this.checkDataForPurchase()}
                                             disabled={is_enable ? "" : "disabled"}
                                             // disabled={true}
@@ -325,7 +325,7 @@ class PopUpCmp extends Component {
                                             {/* Засвартай байгаа */}
                                         </button>
                                         <button
-                                            className="btn btn-xs btn-primary my-2 mx-3"
+                                            className="btn btn-xs btn-primary mx-1 my-1"
                                             onClick={() => this.openCartSide()}
                                             disabled={is_enable ? "" : "disabled"}
                                         >

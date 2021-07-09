@@ -9,7 +9,7 @@ export {
     logicOp
 }
 
-//TODO энэ жишээ ийм маягаар явна
+//энэ жишээ ийм маягаар явна
 function test(params) {
     alert("it worked")
     return params
