@@ -23,7 +23,12 @@ export default class ConfigEmail extends Component {
         this.state = {
             is_editing: false,
             initial_values: {
-                system_local_base_url:'',
+                EMAIL_USE_TLS: '',
+                EMAIL_HOST: '',
+                EMAIL_HOST_NAME: '',
+                EMAIL_HOST_USER: '',
+                EMAIL_HOST_PASSWORD: '',
+                EMAIL_PORT: '',
             },
             values: {},
         }

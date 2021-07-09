@@ -83,10 +83,7 @@ def bundleButetsAll(request):
             theme.delete()
 
     utils.check_gp_design()
-    geoserver_style = geoserver.get_styles()
-    for style in geoserver_style:
-        style_names.append(style.get('name'))
-
+    style_names = geoserver.get_styles()
     url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
     rsp = {
         'success': True,
@@ -429,6 +426,11 @@ def propertyFields(request, tid, fid):
         view = view_qs.first()
         id_list = [data.property_id for data in ViewProperties.objects.filter(view_id=view.id)]
         url = reverse('api:service:geo_design_proxy', args=['geoserver_design_view'])
+
+        style_name = geoserver.get_layer_style('gp_layer_' + view_name)
+        if ':' in style_name:
+            style_name = style_name.split(':')[1]
+
         rsp = {
             'success': True,
             'fields': _lfeatureconfig(fid),
@@ -436,7 +438,7 @@ def propertyFields(request, tid, fid):
             'open_datas': utils.json_load(view.open_datas) if view.open_datas else [],
             'view': view_qs.values('id', 'view_name').first(),
             'url': request.build_absolute_uri(url),
-            'style_name': geoserver.get_layer_style('gp_layer_' + view_name),
+            'style_name': style_name,
             'geom_type': geom_type,
             'cache_values': cache_values,
             'files': file_list,

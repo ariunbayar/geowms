@@ -21,7 +21,7 @@ export class PermSwitches extends Component {
         const { radio_switch_class_name } = this.state
         var max = 0
         const width = document.getElementsByClassName(`${radio_switch_class_name}`)[0].offsetWidth
-        if(total_length === now_length) {
+        if(total_length <= now_length) {
             element.style.backgroundColor = '#006CB6'
             max = Math.ceil(width / 2)
         }
