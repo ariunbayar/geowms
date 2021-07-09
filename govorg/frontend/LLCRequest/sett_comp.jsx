@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from "react"
 
 import { makeStateColor, makeKindColor } from "@helpUtils/functions"
-import utils from "@helpUtils/functions"
+import * as utils from "@helpUtils/functions"
 import Modal from "@utils/Modal/Modal"
 import BackButton from "@utils/Button/BackButton"
 

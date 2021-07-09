@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 
+import * as utils from "@helpUtils/ol"
+
 import TileLayer from 'ol/layer/Tile';
 import TileWMS from 'ol/source/TileWMS';
-
-import * as utils from "@helpUtils/ol"
 
 var SEARCHLAYERNAME = 'administrative_boundary'
 const LAYERKNOWKEY = 'name'
@@ -29,6 +29,7 @@ class index extends Component {
         this.funcs = this.props.funcs
         this.getFeatureInfoFromInspire = this.getFeatureInfoFromInspire.bind(this)
         this.setVisibleLayer = this.setVisibleLayer.bind(this)
+        this.clearLayers = this.clearLayers.bind(this)
 
     }
 
@@ -40,15 +41,13 @@ class index extends Component {
         if (e.target.value) {
             const aimag_id = e.target.value
             if (aimag_id !== '-1') {
-                this.setState({ aimag_id, sum_id: -1, horoo_id: -1 })
-
                 const aimag_data = this.state.aimag[aimag_id]
 
                 this.setGeom(aimag_data.geo_id)
-                this.setState({ sum: aimag_data.children })
+                this.setState({ sum: aimag_data.children, aimag_id, sum_id: -1, horoo_id: -1 })
             }
             else {
-                this.setState({ aimag_id: -1, sum_id: -1, horoo_id: -1 })
+                this.setState({ aimag_id: -1, sum_id: -1, horoo_id: -1, sum: [], horoo: [] })
                 this.props.resetButton()
             }
         }
@@ -82,14 +81,29 @@ class index extends Component {
         }
     }
 
+    clearLayers() {
+        this.state.layers.map((layer, idx) => {
+            window.map.getLayers().forEach(map_layer => {
+                if (
+                    (layer.get(LAYERKNOWKEY) && map_layer.get(LAYERKNOWKEY))
+                    &&
+                    (layer.get(LAYERKNOWKEY) == map_layer.get(LAYERKNOWKEY))
+                ) {
+                    window.map.removeLayer(map_layer)
+                }
+            })
+        })
+        this.setState({ layers: [] })
+    }
+
     handleSubmitClear() {
         const source = this.state.vector_layer.getSource()
-
-        utils.removeLayer(window.map, SEARCHLAYERNAME, LAYERKNOWKEY, 'startsWith')
         utils.removeFeatureFromSource(utils.vars.au_search_layer_name, source)
 
         this.props.setCenterOfMap()
         this.props.resetSearchLayerFeatures()
+        this.clearLayers()
+        this.funcs.resetSearch()
 
         this.setState({ sum_id: -1, aimag_id: -1, horoo_id: -1 })
     }

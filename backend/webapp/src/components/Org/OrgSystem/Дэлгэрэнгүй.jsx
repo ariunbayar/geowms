@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
 import Loader from "@utils/Loader"
-import utils from "@helpUtils/functions"
+import * as utils from "@helpUtils/functions"
 import {service} from './service'
 
 export class Дэлгэрэнгүй extends Component {

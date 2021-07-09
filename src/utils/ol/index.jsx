@@ -1,6 +1,7 @@
 // import * as utils from "@helpUtils/ol"
 import { GeoJSON } from 'ol/format'
 import { transform, fromLonLat } from 'ol/proj'
+import { logicOp } from '../functions'
 
 const vars = {
     "data_projection": "EPSG:4326",
@@ -45,18 +46,12 @@ function writeFeat(features) {
 
 // газрын зургаас layer устгах устгахдаа юугаар тааруулж устгах key ээ өгнө
 function removeLayer(map, layer_name, get_key='name', op='exact') {
-
-    function logicOp(op_name, a, b) {
-        if (op_name == 'exact') {
-            return a == b
-        }
-        return a[op_name](b)
-    }
-
     map.getLayers().forEach(layer => {
+
         if (layer && layer.get(get_key) && logicOp(op, layer.get(get_key), layer_name)){
             map.removeLayer(layer)
         }
+
     });
 }
 

@@ -107,6 +107,7 @@ export default class BundleMap extends Component {
         this.setVisibleMarket = this.setVisibleMarket.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
         this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
+        this.resetSearch = this.resetSearch.bind(this)
     }
 
     initMarker() {
@@ -146,12 +147,12 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
-      service
-        .getUser()
-        .then(({ is_authenticated }) => {
-            this.setState({is_authenticated})
-        })
-        this.loadMapData(this.state.bundle.id)
+        service
+            .getUser()
+            .then(({ is_authenticated }) => {
+                this.setState({ is_authenticated })
+            })
+            this.loadMapData(this.state.bundle.id)
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -434,6 +435,10 @@ export default class BundleMap extends Component {
         const elementa = element.children[0]
         this.element_content = elementa.children[1]
         this.element_closer = elementa.children[0]
+    }
+
+    resetSearch() {
+        this.setState({ refreshLayerFn: null })
     }
 
     // updateViewProjection() {
@@ -1068,7 +1073,7 @@ export default class BundleMap extends Component {
             const funcs = {
                 setVisibleMarket: this.setVisibleMarket,
                 "is_not_visible_layers": this.is_not_visible_layers,
-                "map_wms_list": this.state.map_wms_list
+                resetSearch: this.resetSearch
             }
 
             return (

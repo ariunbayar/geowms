@@ -1,12 +1,4 @@
-// import utils from "@helpUtils/functions" -- бүх функцийг нэг хувьсагчинд хийж дуудах
-export default {
-    test,
-    makeStateColor,
-    makeKindColor,
-    checkMultiGeomTypeName,
-    copyToClipboard,
-}
-
+// import * as utils from "@helpUtils/functions" -- бүх функцийг нэг хувьсагчинд хийж дуудах
 // import { test } from "@helpUtils/functions" -- тухайн дуудах функээ л дуудах
 export {
     test,
@@ -14,6 +6,7 @@ export {
     makeKindColor,
     checkMultiGeomTypeName,
     copyToClipboard,
+    logicOp
 }
 
 //TODO энэ жишээ ийм маягаар явна
@@ -63,4 +56,12 @@ function copyToClipboard(text, notif_text='Амжилттай хууллаа') {
     if (global.NOTIF) {
         global.NOTIF('success', notif_text, 'check')
     }
+}
+
+// string дээр хэрэглэгдэх logic үйлдэл энэ функцээс хэрэглэж болно
+function logicOp(op_name, a, b) {
+    if (op_name == 'exact') {
+        return a == b
+    }
+    return a[op_name](b)
 }
