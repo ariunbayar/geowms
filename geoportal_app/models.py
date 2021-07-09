@@ -3,10 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
 from django.core import validators
 from django.utils.deconstruct import deconstructible
-from django.utils.translation import gettext_lazy as _
 
 from main import utils
-
 
 class Role(models.Model):
     ROLE1 = 1
@@ -28,14 +26,15 @@ class Role(models.Model):
         verbose_name = ("Хэрэглэгчийн эрх")
         verbose_name_plural = ("Хэрэглэгчийн эрхүүд")
 
+
 @deconstructible
 class UserRegistratioinNumberValidator(validators.RegexValidator):
     regex = utils.RE_REGISTER
-    message = _(
-        'Регистрийн дугаараа зөв оруулна уу! '
-        'Жишээлбэл: АА00000000'
-    )
-    flags = 0
+    message = '''
+        Регистрийн дугаараа зөв оруулна уу! \n
+        Жишээлбэл: АА00000000
+    '''
+    flags = 0  # default 0
 
 
 class User(AbstractUser):
@@ -46,9 +45,6 @@ class User(AbstractUser):
         max_length=10,
         null=True,
         validators=[register_validator],
-        error_messages={
-            'invalid_register': _('Буруу регистр оруулсан байна!')
-        }
     )
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
@@ -56,7 +52,7 @@ class User(AbstractUser):
 
 
 class UserValidationEmail(models.Model):
-    user  = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_approve = models.BooleanField(default=False)
     token = models.CharField(max_length=100, null=True, db_index=True)
     valid_before = models.DateTimeField()
