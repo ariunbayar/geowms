@@ -374,24 +374,36 @@ def save_request(request, content):
     if is_file:
         datasource_exts = ['.gml', '.geojson']
         for name in glob.glob(os.path.join(extract_path, '*')):
+            check_data_type = 0
             for ext in datasource_exts:
-                if ext in name:
-                    ds = DataSource(name)
-                    for layer in ds:
-                        if len(layer) >= 1:
-                            org_data = _get_leve_2_geo_id(layer)
-                            if not org_data:
-                                utils.remove_folder(extract_path)
-                                return JsonResponse({
-                                    'success': False,
-                                    'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
-                                })
-                        else:
-                            utils.remove_folder(extract_path)
-                            return JsonResponse({
-                                'success': False,
-                                'info': 'Файл хоосон байна !!!'
-                            })
+                if ext not in name:
+                    check_data_type += 1
+
+            if check_data_type == 2:
+                delete_folder = str(file_path).split("/")[1]
+                delete_folder = os.path.join(settings.MEDIA_ROOT, main_path, delete_folder)
+                utils.remove_folder(delete_folder)
+                return JsonResponse({
+                    'success': False,
+                    'info': 'GML, GEOJSON өргөтгөлтэй файл оруулах боломжтой !!!'
+                })
+
+            ds = DataSource(name)
+            for layer in ds:
+                if len(layer) >= 1:
+                    org_data = _get_leve_2_geo_id(layer)
+                    if not org_data:
+                        utils.remove_folder(extract_path)
+                        return JsonResponse({
+                            'success': False,
+                            'info': 'Хамрах хүрээний байгууллага олдсонгүй. Системийн админд хандана уу !!!'
+                        })
+                else:
+                    utils.remove_folder(extract_path)
+                    return JsonResponse({
+                        'success': False,
+                        'info': 'Файл хоосон байна !!!'
+                        })
 
         request_file_data['name'] = company_name
         request_file_data['tools'] = json_dumps(get_tools)

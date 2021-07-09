@@ -1,7 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now
+from django.core import validators
+from django.utils.deconstruct import deconstructible
 
+from main import utils
 
 class Role(models.Model):
     ROLE1 = 1
@@ -24,16 +27,33 @@ class Role(models.Model):
         verbose_name_plural = ("Хэрэглэгчийн эрхүүд")
 
 
+@deconstructible
+class UserRegistratioinNumberValidator(validators.RegexValidator):
+    regex = utils.RE_REGISTER
+    message = '''
+        Регистрийн дугаараа зөв оруулна уу! \n
+        Жишээлбэл: АА00000000
+    '''
+    flags = 0  # default 0
+
+
 class User(AbstractUser):
+    register_validator = UserRegistratioinNumberValidator()
+
     roles = models.ManyToManyField(Role)
-    register = models.CharField(max_length=10, null=True)
+    register = models.CharField(
+        max_length=10,
+        null=True,
+        validators=[register_validator],
+    )
     gender = models.CharField(max_length=10, null=True)
     is_sso = models.BooleanField(default=False)
     is_user = models.BooleanField(default=False)
+    email = models.EmailField(blank=True, unique=True)
 
 
 class UserValidationEmail(models.Model):
-    user  = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     is_approve = models.BooleanField(default=False)
     token = models.CharField(max_length=100, null=True, db_index=True)
     valid_before = models.DateTimeField()
