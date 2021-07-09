@@ -133,21 +133,19 @@ def wms_layers(request, pk):
 
     for wms, layers in groupby(qs_layers, lambda ob: ob.wms):
         chache_url = ''
+        url = ''
         if wms.is_active:
-            url = wms.url
-            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in url or '192.168.10.15' in url):
-                ws_name = url.split('/')[3]
-                if wms.cache_url:
-                    chache_url = 'https://geo.nsdi.gov.mn/{ws_name}/gwc/service/wmts'.format(
-                        ws_name=ws_name,
-                    )
+            check_url = wms.url
+            if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in check_url or '192.168.10.15' in check_url):
+                chache_url = wms.cache_url
+                url = check_url
             else:
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
                 chache_url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wmts'))
 
             wms_data = {
                 'name': wms.name,
-                'url': request.build_absolute_uri(url),
+                'url': url,
                 'chache_url': chache_url,
                 'layers': [_layer_to_display(layer) for layer in layers],
                 'wms_or_cache_ur': True if wms.cache_url else False,
