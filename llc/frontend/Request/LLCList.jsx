@@ -212,7 +212,6 @@ export class Detail extends Component {
                     modal_icon: 'fa fa-check-circle',
                     icon_color: "success",
                     title: 'Амжилттай устгалаа',
-                    text:'',
                 }
                 global.MODAL(modal)
                 this.refreshData()
@@ -223,7 +222,6 @@ export class Detail extends Component {
                     modal_icon: 'fa fa-times-circle',
                     icon_color: "danger",
                     title: 'Устгах боломжгүй файл байна.',
-                    text:'',
                 }
                 global.MODAL(modal)
             }
