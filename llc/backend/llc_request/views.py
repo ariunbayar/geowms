@@ -709,8 +709,8 @@ def remove_request(request, content, id):
             change_requests.delete()
             lvl2_request.delete()
 
-        initial_query.delete()
-        _delete_prev_files(initial_query)
+    initial_query.delete()
+    _delete_prev_files(initial_query)
 
     return JsonResponse({
             'success': True,

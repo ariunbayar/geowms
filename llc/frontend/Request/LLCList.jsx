@@ -208,7 +208,11 @@ export class Detail extends Component {
         }
 
         else {
-            modal['text'] = `Энэхүү хүсэлт ${values.state == state ? values.state : values.kind || values.kind == kind ? values.kind : values.state } байгаа тул устгах боломжгүй`
+
+            var info = state
+            if (values.kind == kind ) info = kind
+
+            modal['text'] = `Энэхүү хүсэлт ${info} байгаа тул устгах боломжгүй`
         }
 
         global.MODAL(modal)
