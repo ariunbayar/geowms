@@ -29,7 +29,7 @@ export default class ConfigPayment extends Component {
 
         this.handleEdit = this.handleEdit.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.ChangeState = this.ChangeState.bind(this)
+        this.changeState = this.changeState.bind(this)
     }
 
     componentDidMount() {
@@ -78,7 +78,7 @@ export default class ConfigPayment extends Component {
 
         }
 
-        ChangeState(state){
+        changeState(state){
             this.setState(prevState => ({ [state]: !prevState[state] }))
         }
 
@@ -95,7 +95,7 @@ export default class ConfigPayment extends Component {
                 <div className="card-header">
                     Үнийн тохиргоо
                     <div className="card-action">
-                        <a href="#" onClick={ this.handleEdit }>
+                        <a role="button" onClick={ this.handleEdit }>
                             <i className="fa fa-edit"></i>
                         </a>
                     </div>
@@ -117,82 +117,87 @@ export default class ConfigPayment extends Component {
                                 <Form>
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
-                                            <label role='button' className={is_seperate && 'text-info col-md-12'} htmlFor='payment_seperate'>
+                                            <label
+                                                role='button'
+                                                className={is_seperate ? 'text-info col-md-12' : ""}
+                                                htmlFor='payment_seperate' onClick={() => this.changeState('is_seperate') }
+                                            >
                                                 <i
                                                     id='payment_seperate'
                                                     role='button'
                                                     className={`fa ${is_seperate ? 'fa-angle-right' : 'fa-angle-down'} text-secondary mr-2`}
-                                                    onClick={() => this.ChangeState('is_seperate') }>
+                                                >
                                                 </i>
                                                 Хэсэгчлэн худалдан авалтын үнэ
                                             </label>
                                             {
                                                 is_seperate
                                                 &&
-                                                <>
-                                                    <div className="form-group col-md-6">
-                                                        <label htmlFor="POLYGON_PER_KM_AMOUNT">POLYGON PER KM AMOUNT</label>
-                                                        <Field
-                                                            name="POLYGON_PER_KM_AMOUNT"
-                                                            id="id_POLYGON_PER_KM_AMOUNT"
-                                                            type="text"
-                                                            className="form-control"
-                                                        />
-                                                    </div>
-                                                    <div className="form-group col-md-6">
-                                                        <label htmlFor="POLYGON_PER_M_AMOUNT">POLYGON PER M AMOUNT</label>
-                                                        <Field
-                                                            name="POLYGON_PER_M_AMOUNT"
-                                                            id="id_POLYGON_PER_M_AMOUNT"
-                                                            type="text"
-                                                            className="form-control"
-                                                        />
-                                                    </div>
-                                                    <div className="form-row">
-                                                        <div className="form-group col-md-12">
+                                                    <div className="row px-3">
+                                                        <div className="form-group col-md-6">
+                                                            <label htmlFor="POLYGON_PER_KM_AMOUNT">POLYGON PER KM AMOUNT</label>
+                                                            <Field
+                                                                name="POLYGON_PER_KM_AMOUNT"
+                                                                id="id_POLYGON_PER_KM_AMOUNT"
+                                                                type="number"
+                                                                className="form-control"
+                                                            />
+                                                        </div>
+                                                        <div className="form-group col-md-6">
+                                                            <label htmlFor="POLYGON_PER_M_AMOUNT">POLYGON PER M AMOUNT</label>
+                                                            <Field
+                                                                name="POLYGON_PER_M_AMOUNT"
+                                                                id="id_POLYGON_PER_M_AMOUNT"
+                                                                type="number"
+                                                                className="form-control"
+                                                            />
+                                                        </div>
+                                                        <div className="form-group col-md-6">
                                                             <label htmlFor="PROPERTY_PER_AMOUNT">PROPERTY PER AMOUNT</label>
                                                             <Field
                                                                 name="PROPERTY_PER_AMOUNT"
                                                                 id="id_PROPERTY_PER_AMOUNT"
-                                                                type="text"
+                                                                type="number"
                                                                 className="form-control"
                                                             />
                                                         </div>
                                                     </div>
-                                                </>
                                             }
                                         </div>
                                         <div className="form-row">
-                                            <label role='button' className={`${is_point && 'text-info'} mb-1`}>
+                                            <label
+                                                role='button'
+                                                className={`${is_point ? 'text-info' : ""} mb-1`}
+                                                onClick={() => this.changeState('is_point')}
+                                            >
                                                 <i
                                                     role='button'
                                                     className={`fa ${is_point ? 'fa-angle-right' : 'fa-angle-down'} text-secondary mr-2`}
-                                                    onClick={() => this.ChangeState('is_point')}>
-
+                                                >
                                                 </i>
                                                 Цэгүүдийн үнэ
                                             </label>
                                             {
                                                 is_point
                                                 &&
-                                                <div className='form-row'>
-                                                    {
-                                                        initial_values.code_list &&
-                                                            initial_values.code_list.map((code_list, idx) =>
-                                                                <div key={idx}className="form-group col-md-6">
-                                                                    <label>
-                                                                        {code_list.code_list_name}
-                                                                    </label>
-                                                                    <Field
-                                                                        id={code_list.code_list_name}
-                                                                        name={code_list.code_list_code}
-                                                                        type="text"
-                                                                        className="form-control"
-                                                                    />
-                                                                </div>
-                                                            )
-                                                    }
-                                                </div>
+                                                    <div className='row px-3'>
+                                                        {
+                                                            initial_values.code_list &&
+                                                                initial_values.code_list.map((code_list, idx) =>
+                                                                    <div key={idx}className="form-group col-md-6">
+                                                                        <label>
+                                                                            {code_list.code_list_name}
+                                                                        </label>
+                                                                        <Field
+                                                                            id={code_list.code_list_name}
+                                                                            name={code_list.code_list_code}
+                                                                            type="number"
+                                                                            className="form-control"
+                                                                        />
+                                                                    </div>
+                                                                )
+                                                        }
+                                                    </div>
                                             }
                                         </div>
                                         { is_editing &&

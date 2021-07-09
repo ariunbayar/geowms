@@ -1348,23 +1348,21 @@ def _str_to_int(value):
     if isinstance(value, str):
         value = int(value)
     return value
-import ast
-import json
+
 
 def _get_amount(geo_id):
     m_data_qs = _filter_Model([{'geo_id': geo_id}], Model=MDatas)
     m_data_qs = _filter_Model([{'property_id': 10101103, 'feature_config_id': 101, 'data_type_id': 101011}], initial_qs=m_data_qs)
     m_data = m_data_qs.first()
     if m_data:
-        amount = utils.get_config('point_price')
-        amount = amount.replace("\'", "\"")
+        amount = utils.get_config('POINT_PRICE')
         amount = utils.json_load(amount)
         code_list_qs = _filter_Model([{'code_list_id': m_data.code_list_id}], Model=LCodeLists)
         code_list = code_list_qs.first()
         if code_list:
             code_list_code = code_list.code_list_code
             if amount[code_list_code]:
-                return  int(amount[code_list_code])
+                return _str_to_int(amount[code_list_code])
     return False
 
 
