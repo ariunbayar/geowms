@@ -623,6 +623,13 @@ def _str_to_bool(str):
     return False
 
 
+def _rsp_validation(data):
+    info = ''
+    if not data['data']:
+        info = 'Хоосон байна утга оруулна уу!'
+    return info
+
+
 @require_POST
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -645,6 +652,9 @@ def save(request, payload):
         #     datas[data['field_name']] = order_no
         else:
             datas[data['field_name']] = data['data']
+            info = _rsp_validation(data)
+            if info:
+                return JsonResponse({'success': False, 'info': info})
 
     model_qs = Model.objects
 
@@ -676,7 +686,7 @@ def save(request, payload):
         model_qs.filter(**model_filter).update(**datas)
     rsp = {
         'success': True,
-        'info': 'Амжилттай'
+        'info': 'Амжилттай хадгаллаа'
     }
 
     return JsonResponse(rsp)

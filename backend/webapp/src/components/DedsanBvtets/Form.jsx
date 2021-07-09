@@ -28,17 +28,62 @@ export default class Forms extends Component {
         this.handleRemove = this.handleRemove.bind(this)
     }
 
+    // handleModalopen() {
+    //     this.openModal('check-circle text-success', btn_name, 
+    //     const modal = {
+    //         modal_status: "open",
+    //         modal_icon: "fa fa-exclamation-circle",
+    //         modal_bg: '',
+    //         icon_color: 'warning',
+    //         title: 'Хадгалах',
+    //         text: `Та ${edit_name ? `${prop_edit_name} нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`,
+    //         has_button: true,
+    //         actionNameBack: 'Үгүй',
+    //         actionNameDelete: 'Тийм',
+    //         modalAction: () => this.Save(value, idx),
+    //         modalClose: () => this.modalClose(idx)
+    //     }
+    //     global.MODAL(modal)
+    // }
+
     onSubmit() {
         this.setState({ is_loading: true })
         const { values, model_name, code, model_id, edit_name } = this.state
         service.save(values, model_name, model_id, edit_name).then(({ success, info }) => {
+            this.setState({ is_loading: false, info })
             if (success) {
-                this.setState({ is_loading: false, info })
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-check-circle",
+                    modal_bg: '',
+                    icon_color: 'success',
+                    title: info,
+                    text: '',
+                    has_button: false,
+                    actionNameBack: '',
+                    actionNameDelete: '',
+                    modalAction: null,
+                    modalClose: null
+                }
+                global.MODAL(modal)
                 if (code !== '') this.props.refresh(code)
                 else this.props.refresh()
             }
-            else{
-                alert(info)
+            else {
+                const modal = {
+                    modal_status: "open",
+                    modal_icon: "fa fa-time-circle",
+                    modal_bg: '',
+                    icon_color: 'warning',
+                    title: info,
+                    text: '',
+                    has_button: false,
+                    actionNameBack: '',
+                    actionNameDelete: '',
+                    modalAction: null,
+                    modalClose: null
+                }
+                global.MODAL(modal)
             }
         })
     }
@@ -258,9 +303,8 @@ export default class Forms extends Component {
                                 null
                         }
                         <button
-                            // disabled={!values.data}
                             type="button"
-                            onClick={() => this.openModal('check-circle text-success', btn_name, `Та ${edit_name ? `${prop_edit_name} - нэртэй` : ''} ${prop_name}-г ${btn_name.toLowerCase()}даа итгэлтэй байна уу ?`, this.onSubmit)}
+                            onClick={this.onSubmit}
                             className={`btn ${edit_name ? 'col-md-7' : 'btn-block'} gp-btn-primary`}
                         >
                             {btn_name}
@@ -284,7 +328,6 @@ function Select(props) {
 
     return (
         <select
-            // className={'form-control ' + (!value && 'is-invalid')}
             className='form-control'
             placeholder={props.field_name}
             disabled={
@@ -328,10 +371,8 @@ function Input(props) {
             placeholder={props.field_name}
             onChange={handleOnChange}
             value={value || ''}
-            // className={'form-control ' + (!value && 'is-invalid')}
             className='form-control'
             disabled={props.data && props.field_name.includes("id") && !(props.field_name == props.model_name + "_id") ? 'disabled' : ''}
-            // title={!value && 'Хоосон байна !!!'}
         />
     )
 }
