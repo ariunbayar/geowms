@@ -1,6 +1,7 @@
-from frontend.page.views import service
 import re
+from frontend.page.views import service
 from xml.etree import ElementTree
+from main import utils
 
 re_layer = re.compile(r'^(.*?<Layer[^>]*>)(.*)(</Layer>.*)$', re.S)
 re_layer_wfs = re.compile(r'^(.*?<FeatureTypeList[^>]*>)(.*)(</FeatureTypeList>.*)$', re.S)
@@ -122,3 +123,9 @@ def replace_src_url(content, old_url, new_url, service_type):
 
     content = content.replace(old_url, new_url)
     return content.encode()
+
+
+def get_cql_filter(geo_id, srid=4326):
+    cql_data = utils.get_2d_data(geo_id, srid=srid)
+    cql_filter = 'WITHIN(geo_data, {cql_data})'.format(cql_data=cql_data)
+    return cql_filter if cql_data else ''

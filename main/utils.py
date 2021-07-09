@@ -1404,9 +1404,9 @@ def get_mdata_value(feature_code, geo_id, is_display=False):
     return send_value
 
 
-def get_2d_data(geo_id):
-    mgeo_qs = MGeoDatas.objects.filter(geo_id=geo_id).first()
-    hex = mgeo_qs.geo_data.wkt
+def get_2d_data(geo_id, srid=4326):
+    geo_data = get_geom(geo_id, srid=srid)
+    hex = geo_data.wkt
     hex = hex.replace(' Z', '')
     hex = hex.replace(' 0', '')
     data = hex

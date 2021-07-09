@@ -1,13 +1,17 @@
-import React, { Component, Fragment } from "react"
+import React, { Component } from "react"
 
-import {helpers} from '../../../helpers'
-import ReactDOM from 'react-dom'
-import {Control} from 'ol/control'
-import {CLASS_CONTROL, CLASS_HIDDEN} from 'ol/css.js'
+import Modal from "@utils/Modal/Modal"
+import * as utils from "@helpUtils/ol"
+
+import AdministrativeUnitSearch from "./components/AdministrativeUnitSearch"
+import PropertySearch from "./components/PropertySearch"
+
 import { service } from "../service"
 import './style.css'
-import Modal from"@utils/Modal/Modal"
 
+
+const MNZOOM = 5.041301562246971
+const MNCENTER = [103.525827, 46.723984]
 
 export class SearchBarComponent extends Component {
 
@@ -23,9 +27,6 @@ export class SearchBarComponent extends Component {
             tseg_dugaar_zoom: 7.3376399772248575,
             bairlal_scale: 5000000,
             zoom3: 10,
-            aimag_id: -1,
-            sum_id: -1,
-            horoo_id: -1,
             BA:'',
             BB:'',
             BC:'',
@@ -34,9 +35,6 @@ export class SearchBarComponent extends Component {
             LC:'',
             point_id: '',
             error_msg: '',
-            aimag: [],
-            sum: [],
-            horoo: [],
             feature_ids: [],
             options_scale: [
                {'zoom': '2.9903484967519145', 'scale': 5000000},
@@ -48,61 +46,48 @@ export class SearchBarComponent extends Component {
                {'zoom': '12.194931800954776', 'scale': 5000},
                {'zoom': '14.383305008368451', 'scale': 1000},
             ],
-            search_value: '',
             bundle_id: props.bundle_id,
-            search_datas: [],
-            is_searching: false,
             modal_status: 'closed',
+            aimag: [],
         }
 
         this.handleSubmitCoordinate = this.handleSubmitCoordinate.bind(this)
-        this.handleSubmitClear = this.handleSubmitClear.bind(this)
         this.handleSubmitCoordinateName = this.handleSubmitCoordinateName.bind(this)
         this.handleSubmitCoordinateGradus = this.handleSubmitCoordinateGradus.bind(this)
-        this.handleInput = this.handleInput.bind(this)
-        this.handleInputSum = this.handleInputSum.bind(this)
         this.resetButton = this.resetButton.bind(this)
-        this.setCenterOfMap = this.setCenterOfMap.bind(this)
         this.getGeom = this.getGeom.bind(this)
-        this.handleChange = this.handleChange.bind(this)
-        this.handleSearch = this.handleSearch.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
-        this.handleChange = this.handleChange.bind(this)
+        this.resetSearchLayerFeatures = this.resetSearchLayerFeatures.bind(this)
     }
 
     handleSubmitCoordinate(event) {
         event.preventDefault()
         // const coord = helpers.parseCoordinateString(this.state.coordinate)
         const coordinates = [this.state.coordinatey, this.state.coordinatex]
-        this.props.handleSetCenter(coordinates, this.state.bairlal_one_zoom)
+        utils.setCenter(coordinates, this.state.bairlal_one_zoom)
         this.props.setFeatureOnMap(undefined, coordinates, this.state.bairlal_scale)
     }
 
-    handleSubmitClear(event) {
-        event.preventDefault()
-        this.setState({ sum_id: -1, aimag_id: -1 })
-        this.setCenterOfMap()
-        this.props.resetShowArea()
-    }
-
-    componentDidMount(){
-        service.getAimags().then(({info, success}) => {
-            if(success){
-                this.setState({ aimag: info })
-            }
-            else{
-                this.setState({error_msg: info})
-            }setTimeout(() => {
-                this.setState({error_msg: ''})
-            }, 2222);
-        })
+    componentDidMount() {
+        service.getAimags()
+            .then(({ info, success }) => {
+                if(success){
+                    this.setState({ aimag: info })
+                }
+                else{
+                    this.setState({ error_msg: info })
+                }
+                setTimeout(() => {
+                    this.setState({ error_msg: '' })
+                }, 2222);
+            })
     }
 
     handleSubmitCoordinateName(event) {
         event.preventDefault()
         service.searchPoint(this.state.point_id).then(({info, success}) => {
             if(success){
-                this.props.handleSetCenter(info, parseInt(this.state.tseg_dugaar_zoom))
+                utils.setCenter(info, parseInt(this.state.tseg_dugaar_zoom))
             }
             else{
                 this.setState({error_msg: info})
@@ -123,116 +108,59 @@ export class SearchBarComponent extends Component {
             var Bbut=(BC/3600)+(BB/60)+BA-BBB
             var niitB=Bbut+BBB
             var array = [X, niitB]
-            this.props.handleSetCenter(array, this.state.bairlal_two_zoom)
+            utils.setCenter(array, this.state.bairlal_two_zoom)
 
         }
     }
 
-    getGeom(geo_id) {
-        service
-            .getGeom(geo_id)
-            .then(({ feature }) => {
-                if (feature != '') {
-                    this.props.setFeatureOnMap(feature)
-                }
-                else {
-                    this.modalChange(
-                        'fa fa-exclamation-circle',
-                        '',
-                        'warning',
-                        'GEOM өгөгдөл байхгүй байна',
-                        '',
-                        false,
-                        '',
-                        '',
-                        null,
-                        null
-                    )
-                }
-            })
-            .catch((error) => alert("Алдаа гарсан байна"))
-    }
+    async getGeom(geo_id, refreshLayerFn) {
 
-    handleInput(e){
-        if(e.target.value){
-            const aimag_id = e.target.value
-            if (aimag_id !== '-1') {
-                this.setState({ aimag_id, sum_id: -1, horoo_id: -1 })
-
-                const aimag_data = this.state.aimag[aimag_id]
-
-                this.getGeom(aimag_data.geo_id)
-
-                this.setState({ sum: aimag_data.children })
-            }
-            else {
-                this.setState({ aimag_id: -1, sum_id: -1, horoo_id: -1 })
-                this.resetButton()
-            }
+        // try {
+        const { success, data } = await service.getGeom(geo_id)
+        if (data) {
+            this.props.setFeatureOnMap(data, refreshLayerFn)
         }
-    }
-
-    handleInputSum(e, field, array){
-        if(e.target.value){
-            const id = e.target.value
-            if (id !== '-1') {
-                this.setState({ [field]: id })
-
-                const data = array[id]
-
-                this.getGeom(data.geo_id)
-
-                if (field == 'sum_id') {
-                    this.setState({ horoo: data.children })
-                }
-            }
-            else {
-                var array_name
-                if (field == 'horoo_id') {
-                    this.setState({ [field]: -1 })
-                    array_name = 'sum'
-                }
-                if (field == 'sum_id') {
-                    this.setState({ [field]: -1, horoo_id: -1 })
-                    array_name = 'aimag'
-                }
-                this.getGeom(this.state[array_name][this.state[array_name + '_id']].geo_id)
-
-            }
+        else {
+            this.modalChange(
+                'fa fa-exclamation-circle',
+                '',
+                'warning',
+                'GEOM өгөгдөл байхгүй байна',
+                '',
+                false,
+                '',
+                '',
+                null,
+                null
+            )
         }
+        return data
+        // }
+        // catch {
+            // alert("Алдаа гарсан байна")
+            // return
+        // }
     }
 
     setCenterOfMap() {
-        var array = [103.525827, 46.723984]
-        this.props.handleSetCenter(array, 5.041301562246971, false)
+        utils.setCenter(MNCENTER, MNZOOM)
+    }
+
+    resetSearchLayerFeatures() {
+        this.props.map_wms_list.map(({ layers, is_display }, idx) => {
+            if (is_display) {
+                layers.map(({ checked, tile, wms_tile, wms_or_cache_ur }, l_idx) => {
+                    if (checked) {
+                        wms_or_cache_ur ? tile.setVisible(checked) : wms_tile.setVisible(checked)
+                    }
+                })
+            }
+        })
     }
 
     resetButton() {
         this.setState({ bairlal_one_zoom: 7.3376399772248575, bairlal_scale: 5000000 })
         this.setCenterOfMap()
-        this.props.resetShowArea()
-    }
-
-    handleChange(value) {
-        this.setState({ search_value: value })
-    }
-
-    handleSearch() {
-        if (!this.state.is_searching){
-            this.setState({ is_searching: !this.state.is_searching })
-            service
-                .getFindValues(this.state.bundle_id, this.state.search_value)
-                .then(({ datas }) => {
-                    if (datas) {
-                        this.setState({ search_datas: datas })
-                    }
-                    this.setState({ is_searching: !this.state.is_searching })
-                })
-                .catch(() => {
-                    this.setState({ is_searching: !this.state.is_searching })
-                    alert("Алдаа гарсан байна")
-                })
-        }
     }
 
     handleModalOpen() {
@@ -260,7 +188,7 @@ export class SearchBarComponent extends Component {
     }
 
     render() {
-        const {error_msg, sum, aimag, options_scale, horoo, search_datas, is_searching} = this.state
+        const { error_msg, options_scale, bundle_id } = this.state
         return (
             <div>
                 {/* <div className="form-group  rounded shadow-sm p-3 mb-3 bg-white rounded">
@@ -274,91 +202,21 @@ export class SearchBarComponent extends Component {
                     </div>
                 </div> */}
 
-                <div className="rounded shadow-sm px-2 pb-2 mb-3 bg-white rounded row mx-0">
-                    <div className="d-flex justify-content-center">
-                        <div className="search-bundle">
-                            <input
-                                type="search"
-                                className="search-bundle-input"
-                                placeholder="Хайх..."
-                                value={this.state.search_value}
-                                onChange={e => this.handleChange(e.target.value)}
-                            />
-                            <a role="button" className="search-bundle-icon text-white" onClick={this.handleSearch}>
-                                {
-                                    is_searching ?
-                                        <i className="spinner-border text-light"></i>
-                                    :
-                                       <i className="fa fa-search"></i>
-                                }
-                            </a>
-                        </div>
-                    </div>
-                    {
-                    search_datas.map((data, idx) =>
-                            <li className="list-group-item form-control list-active" key={idx} id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>
-                                <i className="fa fa-history mr-3 d-flex align-items-center" role="button" id={data.geo_id} onClick={(e) => this.getGeom(e.target.id)}>   {data.name}</i>
-                            </li>
-                        )
-                    }
-                </div>
-                <form onSubmit={this.handleSubmitClear} className="rounded shadow-sm p-3 mb-3 bg-white rounded">
-                    <div className="form-group">
-                        <label className="font-weight-bold" htmlFor="formGroupInput">Аймгаар хайх</label>
-                        <div className="input-group mb-3">
-                            <select name="center_typ" as="select"
-                                onChange={(e) => this.handleInput(e)}
-                                value={this.state.aimag_id}
-                                className='form-control'
-                            >
-                                    <option value='-1'>--- Аймаг/Нийслэл сонгоно уу ---</option>
-                                    {
-                                        aimag.map((data, idx) =>
-                                            <option key={idx} value={idx}>{data.name}</option>
-                                        )
-                                    }
-                            </select>
-                        </div>
-                        <div className="input-group mb-3">
-                            <select name="center_typ" as="select"
-                                onChange={(e) => this.handleInputSum(e, 'sum_id', sum)}
-                                className='form-control'
-                                value={this.state.sum_id}
-                            >
-                                <option value="-1">--- Сум/дүүрэг сонгоно уу ---</option>
-                                {
-                                    sum.map((data, idx) =>
-                                        <option key={idx} value={idx}>{data.name}</option>
-                                    )
-                                }
-                            </select>
-                        </div>
-                        <div className="input-group mb-3">
-                            <select name="center_typ" as="select"
-                                onChange={(e) => this.handleInputSum(e, 'horoo_id', horoo)}
-                                className='form-control'
-                                value={this.state.horoo_id}
-                            >
-                                <option value="-1">--- Хороо/Баг сонгоно уу ---</option>
-                                {
-                                    horoo.map((data, idx) =>
-                                        <option key={idx} value={idx}>{data.name}</option>
-                                    )
-                                }
-                            </select>
-                        </div>
-                        <div className="input-group mb-3">
-                            <div>
-                                <button
-                                    className="btn gp-btn-primary"
-                                    type="submit"
-                                >
-                                    <i className="fa fa-trash mr-1"></i>Цэвэрлэх
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                <PropertySearch
+                    getGeom={this.getGeom}
+                    bundle_id={bundle_id}
+                />
+
+                <AdministrativeUnitSearch
+                    setCenterOfMap={() => this.setCenterOfMap()}
+                    resetButton={this.resetButton}
+                    aimag={this.state.aimag}
+                    map_wms_list={this.props.map_wms_list}
+                    resetSearchLayerFeatures={this.resetSearchLayerFeatures}
+                    getGeom={this.getGeom}
+                    vector_layer={this.props.vector_layer}
+                    funcs={this.props.funcs}
+                />
 
                 <form onSubmit={this.handleSubmitCoordinateName} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
@@ -432,6 +290,7 @@ export class SearchBarComponent extends Component {
                         </div>
                     </div>
                 </form>
+
                 <form onSubmit={this.handleSubmitCoordinateGradus} className=" rounded shadow-sm p-3 mb-3 bg-white rounded">
                     <div className="form-group">
                         <label className="font-weight-bold" htmlFor="formGroupInput">Өргөрөг</label>

@@ -1800,7 +1800,8 @@ def get_geom(request, payload):
         feature = utils.get_feature_from_geojson(geo_json)
 
     rsp = {
-        'feature': feature
+        'success': True,
+        'data': feature,
     }
 
     return JsonResponse(rsp)

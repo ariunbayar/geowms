@@ -2,47 +2,51 @@ import React, { Component } from "react"
 
 import 'ol/ol.css'
 import { Map, View, Feature, Overlay } from 'ol'
-import { transform as transformCoordinate, fromLonLat, Projection } from 'ol/proj'
+import { transform as transformCoordinate, fromLonLat } from 'ol/proj'
 import { WMSGetFeatureInfo, GeoJSON } from 'ol/format'
 import { getArea } from 'ol/sphere';
-import { toLonLat, get as getProjection } from 'ol/proj';
-import {getCenter} from 'ol/extent';
-import OSM from 'ol/source/OSM';
-import { Vector as VectorLayer, Tile, Image } from 'ol/layer'
+import { toLonLat } from 'ol/proj';
+import { Vector as VectorLayer, Tile } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
-import { Icon, Style, Stroke, Fill, Circle as CircleStyle } from 'ol/style'
-import { Point, Circle, Polygon } from 'ol/geom'
-import { TileImage, TileWMS } from 'ol/source'
+import { Icon, Style, Stroke } from 'ol/style'
+import { Point } from 'ol/geom'
+import { TileImage, TileWMS, WMTS } from 'ol/source'
 import { format as coordinateFormat } from 'ol/coordinate';
 import { defaults as defaultControls, FullScreen, MousePosition, ScaleLine } from 'ol/control'
-import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
-import ImageWMS from 'ol/source/ImageWMS';
+import Draw, { createBox } from 'ol/interaction/Draw';
+
+import { securedImageWMS, clearLocalData } from "@utils/Map/Helpers"
+import { default as ModalAlert } from "@utils/Modal/Modal"
+import SideBar from "@utils/SideBar"
+import * as utils from "@helpUtils/ol"
+
 import { BaseMaps as СуурьДавхарга } from './controls/СуурьДавхарга'
 import { CoordinateCopy } from './controls/CoordinateCopy'
 import { Modal } from './controls/Modal'
+import { DrawPayModal } from './controls/DrawPayModal'
+import { DrawButton } from './controls/Draw'
+import WMSItem from './controls/LayerControls/WMSItem'
 import { ShopModal } from './ShopControls/Modal'
 import { ShopCart } from './ShopControls/ShopCart'
-import { DrawPayModal } from './controls/DrawPayModal'
-import "./styles.css"
-import { service } from './service'
-import { SearchBarComponent } from './searchControl/SearchBar'
-import { DrawButton } from './controls/Draw'
-import { PopUp } from './popUp/PopUp'
-import Draw, { createBox } from 'ol/interaction/Draw';
 import { AlertRoot } from "./ShopControls/alert"
-import {default as ModalAlert} from "@utils/Modal/Modal"
-import SideBar from "@utils/SideBar"
-import WMSItem from './controls/LayerControls/WMSItem'
-import {securedImageWMS, clearLocalData} from "@utils/Map/Helpers"
+import { SearchBarComponent } from './searchControl/SearchBar'
+import { PopUp } from './popUp/PopUp'
+
+import { service } from './service'
+import "./styles.css"
+
 
 export default class BundleMap extends Component {
 
     constructor(props) {
         super(props)
+
         this.sendFeatureInfo = []
         this.is_not_visible_layers = []
         this.saved_aimag_name = ''
+        this.au_search_layer_name = utils.vars.au_search_layer_name
+
         this.state = {
             projection: 'EPSG:3857',
             is_authenticated: false,
@@ -79,7 +83,6 @@ export default class BundleMap extends Component {
         this.handleToggle = this.handleToggle.bind(this)
         this.handleMapDataLoaded = this.handleMapDataLoaded.bind(this)
         this.handleMapClick = this.handleMapClick.bind(this)
-        this.handleSetCenter = this.handleSetCenter.bind(this)
         this.loadMapData = this.loadMapData.bind(this)
         this.showFeaturesAt = this.showFeaturesAt.bind(this)
         this.toggleDraw = this.toggleDraw.bind(this)
@@ -99,13 +102,11 @@ export default class BundleMap extends Component {
         this.featureFromUrl = this.featureFromUrl.bind(this)
         this.check_inspire_layer = this.check_inspire_layer.bind(this)
         this.transformToLatLong = this.transformToLatLong.bind(this)
-        this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
         this.removeFeatureFromSource = this.removeFeatureFromSource.bind(this)
-        this.getFeatureInfoFromInspire = this.getFeatureInfoFromInspire.bind(this)
-        this.writeFeat = this.writeFeat.bind(this)
         this.getPopUpInfo = this.getPopUpInfo.bind(this)
         this.setVisibleMarket = this.setVisibleMarket.bind(this)
         this.handleModalOpen = this.handleModalOpen.bind(this)
+        this.setFeatureOnMap = this.setFeatureOnMap.bind(this)
     }
 
     initMarker() {
@@ -145,8 +146,9 @@ export default class BundleMap extends Component {
     }
 
     componentDidMount() {
-      service.getUser().then(({is_authenticated}) =>
-        {
+      service
+        .getUser()
+        .then(({ is_authenticated }) => {
             this.setState({is_authenticated})
         })
         this.loadMapData(this.state.bundle.id)
@@ -254,7 +256,6 @@ export default class BundleMap extends Component {
             })
             return wms_layers
         })
-        this.setState({ map_wms_list })
 
         const base_layer_name = 'base_layer'
         const { base_layers, base_layer_controls } =
@@ -338,13 +339,9 @@ export default class BundleMap extends Component {
                     color: 'rgba(100, 255, 0, 1)',
                     width: 2
                 }),
-                fill: new Fill({
-                    color: 'rgba(100, 255, 0, 0.3)'
-                })
             }),
             name: vector_layer_name,
         })
-        this.setState({ vector_layer, base_layer_controls })
 
         const maker_layer_name = 'marker_layer'
         const marker_layer = new VectorLayer({
@@ -406,6 +403,7 @@ export default class BundleMap extends Component {
         map.on('click', this.handleMapClick)
         this.map = map
         window.map = map
+        this.setState({ vector_layer, base_layer_controls, map_wms_list })
         this.controls.popup.blockPopUp(true, this.getElement, this.onClickCloser)
     }
 
@@ -451,8 +449,6 @@ export default class BundleMap extends Component {
     // }
 
     handleMapClick(event) {
-        const view = this.map.getView()
-        const projection = view.getProjection()
         if(!this.state.is_draw_open) {
 
             const coordinate = event.coordinate
@@ -497,26 +493,10 @@ export default class BundleMap extends Component {
     }
 
     addLayerToSearch(add_layers, layer_name, is_visible) {
-        if (this.state.filtered_wms) {
-            if (is_visible) {
-                add_layers.map(layer => {
-                    this.is_not_visible_layers.push(layer.code)
-                    layer.wms_or_cache_ur ? layer.tile.setVisible(false) : layer.wms_tile.setVisible(false)
-                })
-            }
-            else {
-                add_layers.map(layer => {
-                    const filtered = this.is_not_visible_layers.filter(layer_code => {
-                        return layer_code !== layer.code
-
-                    })
-                    this.is_not_visible_layers = filtered
-                    layer.wms_or_cache_ur ? layer.tile.setVisible(false) : layer.wms_tile.setVisible(false)
-                })
-            }
-            const { aimag_name, search_coordinate, sum_name, search_scale } = this.state
-            this.getOnlyFeature(aimag_name, search_coordinate, sum_name, search_scale, this.is_not_visible_layers)
-        } else {
+        if (this.state.refreshLayerFn) {
+            this.state.refreshLayerFn('', is_visible, add_layers)
+        }
+        else {
             add_layers.map(layer => {
                 layer.wms_or_cache_ur ? layer.tile.setVisible(is_visible) : layer.wms_tile.setVisible(is_visible)
             })
@@ -524,7 +504,7 @@ export default class BundleMap extends Component {
     }
 
     resetFilteredOnlyFeature() {
-        this.removeFeatureFromSource('aimag_sum')
+        this.removeFeatureFromSource(this.au_search_layer_name)
         this.removeFeatureFromSource('buffer')
 
         this.map.getLayers().forEach((layer) => {
@@ -556,7 +536,7 @@ export default class BundleMap extends Component {
     }
 
     drawBorderCircle(buffer_feature) {
-        this.removeFeatureFromSource('aimag_sum')
+        this.removeFeatureFromSource(this.au_search_layer_name)
         const { vector_layer } = this.state
         const features = (this.state.format.readFeatures(buffer_feature, {
             dataProjection: this.state.projection_display,
@@ -852,16 +832,6 @@ export default class BundleMap extends Component {
         layer.setVisible(!layer.getVisible())
     }
 
-    handleSetCenter(coord, zoom, has_marker=true) {
-        this.removeFeatureFromSource('buffer')
-        this.removeFeatureFromSource('aimag_sum')
-        const view = this.map.getView()
-        const map_projection = view.getProjection()
-        const map_coord = transformCoordinate(coord, this.state.projection_display, map_projection)
-        if (has_marker) this.marker.point.setCoordinates(map_coord)
-        view.animate({zoom: zoom}, {center: view.setCenter(map_coord)});
-    }
-
     removeFeatureFromSource(featureID) {
         const { vector_layer } = this.state
         const source = vector_layer.getSource()
@@ -880,106 +850,6 @@ export default class BundleMap extends Component {
 
     setVisibleMarket(is_true) {
         this.marker_layer.setVisible(is_true)
-    }
-
-    getFeatureInfoFromInspire(feature, point_coordinate, scale) {
-        this.onClickCloser()
-        this.setVisibleMarket(false)
-
-        let parsed_geojson
-        let km_scale = null
-
-        if (feature) {
-            const geom = this.writeFeat(feature[0])
-            parsed_geojson = JSON.parse(geom).geometry
-        }
-        else {
-            parsed_geojson = point_coordinate
-            km_scale = this.getKiloFromScale(scale)
-        }
-
-        const wms_array = this.getWMSArray()
-        wms_array.map(({ layers }, w_idx) => {
-            if(layers) {
-                layers.map(({tile, code}, idx) => {
-                    if (tile.getVisible()) {
-                        const {layer_code, is_feature} = this.check_inspire_layer(code)
-                        if (is_feature) {
-                            this.is_not_visible_layers.push(layer_code)
-                        }
-                    }
-                })
-            }
-        })
-
-        this.allLayerVisible('inside')
-
-        service
-            .getContainGeoms(this.is_not_visible_layers, parsed_geojson, km_scale)
-            .then(({ features, layers_code, buffer, success }) => {
-                if (success) {
-                    this.is_not_visible_layers = layers_code
-                    const features_col = (this.state.format.readFeatures(features, {
-                        dataProjection: this.state.projection_display,
-                        featureProjection: this.state.projection,
-                    }))
-                    const style = new Style({
-                        image: new CircleStyle({
-                            radius: 5,
-                            fill: new Fill({
-                            color: 'red',
-                            }),
-                        }),
-                        stroke: new Stroke({
-                            color: 'blue',
-                            width: 2,
-                        }),
-                        fill: new Fill({
-                            color: 'rgba(0,191,255,0.3)',
-                        }),
-                    })
-                    const source =  new VectorSource({
-                        features: features_col,
-                    })
-                    const layer = new VectorLayer({
-                        source: source,
-                        name: "inside",
-                        style: style,
-                    })
-                    if (buffer) {
-                        this.drawBorderCircle(buffer)
-                    }
-                    this.map.addLayer(layer)
-                    layer.setVisible(true)
-                    this.setState({ filtered_layer: layer })
-                }
-            })
-    }
-
-    writeFeat(features) {
-        const {format} = this.state
-        const data = format.writeFeatureObject(features, {
-            dataProjection: this.state.projection_display,
-            featureProjection: this.state.projection,
-        })
-        const changedFeature = JSON.stringify(data)
-        return changedFeature
-    }
-
-    setFeatureOnMap(feature, point_coordinate, scale) {
-        if (feature) {
-            const { vector_layer } = this.state
-            const id = 'aimag_sum'
-            this.removeFeatureFromSource(id)
-            var feature =  new GeoJSON().readFeatures(feature, {
-                dataProjection: this.state.projection_display,
-                featureProjection: this.state.projection,
-            });
-            feature[0].setProperties({ id })
-            vector_layer.getSource().addFeature(feature[0])
-            this.map.getView().fit(feature[0].getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
-        }
-        this.getFeatureInfoFromInspire(feature, point_coordinate, scale)
     }
 
     transformToLatLong(coordinateList) {
@@ -1112,41 +982,42 @@ export default class BundleMap extends Component {
 
     toggleDraw() {
 
-        const {is_authenticated} = this.state
+        const { is_authenticated } = this.state
 
-        if (is_authenticated){
+        if (is_authenticated) {
 
-          this.setState(prevState => ({
-              is_draw_open: !prevState.is_draw_open,
-          }))
+            this.setState(prevState => ({
+                is_draw_open: !prevState.is_draw_open,
+            }))
 
-          if(this.state.is_draw_open){
-              const source_draw = new VectorSource()
+            if(this.state.is_draw_open) {
+                const source_draw = new VectorSource()
 
-              const draw_layer = new VectorLayer({
-                  source: source_draw
-              })
+                const draw_layer = new VectorLayer({
+                    source: source_draw
+                })
 
-              this.setState({source_draw})
+                this.setState({source_draw})
 
-              const draw = new Draw({
-                  source: this.state.source_draw,
-                  type: 'Circle',
-                  geometryFunction: createBox(),
-              });
-              this.setState({draw, draw_layer})
-              this.map.addLayer(draw_layer);
-              this.map.addInteraction(draw);
-              draw.on('drawend', this.toggleDrawed)
-              draw.on('drawstart', this.toggleDrawRemove)
-          }
-          else{
-              this.map.removeInteraction(this.state.draw);
-              this.toggleDrawRemove()
-          }
+                const draw = new Draw({
+                    source: this.state.source_draw,
+                    type: 'Circle',
+                    geometryFunction: createBox(),
+                });
+                this.setState({draw, draw_layer})
+                this.map.addLayer(draw_layer);
+                this.map.addInteraction(draw);
+                draw.on('drawend', this.toggleDrawed)
+                draw.on('drawstart', this.toggleDrawRemove)
+            }
+            else {
+                this.map.removeInteraction(this.state.draw);
+                this.toggleDrawRemove()
+            }
+
         }
-        else{
-          this.handleModalOpen()
+        else {
+            this.handleModalOpen()
         }
     }
 
@@ -1154,6 +1025,28 @@ export default class BundleMap extends Component {
         this.setState({ modal_status: 'open' }, () => {
             this.setState({ modal_status: 'initial' })
         })
+    }
+
+    setFeatureOnMap(feature, refreshLayerFn) {
+        if (feature) {
+            const { vector_layer } = this.state
+
+            const id = this.au_search_layer_name
+            const source = vector_layer.getSource()
+            utils.removeFeatureFromSource(id, source)
+
+            const parsed_feature = utils.vars.format.readFeatures(feature, {
+                dataProjection: utils.vars.display_projection,
+                featureProjection: utils.vars.feature_projection,
+            })[0];
+
+            parsed_feature.setProperties({ id })
+            source.addFeature(parsed_feature)
+            this.map.getView().fit(parsed_feature.getGeometry(),{ padding: [100, 100, 100, 100], duration: 2000 })
+            if (refreshLayerFn) {
+                this.setState({ refreshLayerFn })
+            }
+        }
     }
 
     render() {
@@ -1171,14 +1064,21 @@ export default class BundleMap extends Component {
         }
 
         const Search_comp = () => {
+
+            const funcs = {
+                setVisibleMarket: this.setVisibleMarket,
+                "is_not_visible_layers": this.is_not_visible_layers,
+                "map_wms_list": this.state.map_wms_list
+            }
+
             return (
                 <div>
                     <SearchBarComponent
-                        handleSetCenter={this.handleSetCenter}
-                        getOnlyFeature={this.getOnlyFeature}
-                        resetFilteredOnlyFeature={this.resetFilteredOnlyFeature}
                         setFeatureOnMap={this.setFeatureOnMap}
+                        vector_layer={this.state.vector_layer}
+                        map_wms_list={this.state.map_wms_list}
                         bundle_id={this.state.bundle.id}
+                        funcs={funcs}
                     />
                 </div>
             )

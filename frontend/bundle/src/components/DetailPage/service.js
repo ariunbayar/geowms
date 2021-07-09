@@ -195,10 +195,10 @@ function getContainGeoms(layers_code, geometry, km_scale) {
     return fetch('/payment/get-contain-geoms/', requestOptions).then(handleResponse)
 }
 
-function getFindValues(id, value) {
+function getFindValues(bundle_id, value) {
     const requestOptions = {
         ..._getPostOptions(),
-        body: JSON.stringify({id, value})
+        body: JSON.stringify({ bundle_id, value })
     }
     return fetch('/api/search/', requestOptions).then(handleResponse)
 }

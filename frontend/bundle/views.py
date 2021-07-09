@@ -177,18 +177,20 @@ def get_user(request):
 @ajax_required
 def aimag(request):
 
-    admin_levels = utils.get_administrative_levels()
+    admin_levels = utils.geo_cache('admin_levels', '', utils.get_administrative_levels(), 1800)
     if admin_levels:
         success = True
-        info = admin_levels
+        data = admin_levels
+
     else:
         success = False
-        info = "Уучлаарай ямар нэгэн мэдээлэл олдсонгүй"
+        data = "Уучлаарай ямар нэгэн мэдээлэл олдсонгүй"
 
+    first_au_level_geo_id = utils.geo_cache('first_au_level_geo_id', '', utils.get_1stOrder_geo_id(), 1800)
     rsp = {
         'success': success,
-        'info': info,
-        'firstOrder_geom': utils.get_1stOrder_geo_id(),
+        'info': data,
+        'firstOrder_geom': first_au_level_geo_id,
     }
     return JsonResponse(rsp)
 
@@ -225,13 +227,13 @@ def sumfind(request, payload):
 @require_POST
 @ajax_required
 def get_search_value(request, payload):
-    id = payload.get('id')
+    bundle_id = payload.get('bundle_id')
     search_value = payload.get('value')
     pk = cache.get('pk')
-    if pk != id:
-        cache.set('pk', id, 300)
-        theme = get_object_or_404(LThemes, pk=id)
-        theme_id = theme.theme_id
+    if pk != bundle_id:
+        cache.set('pk', bundle_id, 300)
+        bundle = get_object_or_404(Bundle, pk=bundle_id)
+        theme_id = bundle.ltheme.theme_id
 
         qs_packages = LPackages.objects
         qs_packages = qs_packages.filter(theme_id=theme_id)
@@ -255,7 +257,6 @@ def get_search_value(request, payload):
     datas = list()
     for obj in first_5_datas:
         data = dict()
-        data['id'] = obj.id
         data['geo_id'] = obj.geo_id
         data['name'] = obj.value_text
         datas.append(data)
