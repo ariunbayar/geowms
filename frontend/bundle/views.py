@@ -137,7 +137,11 @@ def wms_layers(request, pk):
         if wms.is_active:
             check_url = wms.url
             if utils.check_nsdi_address(request) and ('geo.nsdi.gov.mn' in check_url or '192.168.10.15' in check_url):
-                chache_url = wms.cache_url
+                ws_name = check_url.split('/')[3]
+                if wms.cache_url:
+                    chache_url = 'https://geo.nsdi.gov.mn/{ws_name}/gwc/service/wmts'.format(
+                        ws_name=ws_name,
+                    )
                 url = check_url
             else:
                 url = reverse('api:service:wms_proxy', args=(bundle.pk, wms.pk, 'wms'))
