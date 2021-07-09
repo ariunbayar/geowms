@@ -190,47 +190,40 @@ export class Detail extends Component {
 
     handleModalOpen(values){
         this.setState({values})
-        var kind = 'ИЛГЭЭСЭН'
-        var state = 'БУЦААГДСАН'
-        if(kind != values.kind || state != values.state) {
-            const modal = {
-                modal_status: 'open',
-                modal_icon: 'fa fa-exclamation-circle',
-                icon_color: 'warning',
-                title: 'Устгах',
-                text: 'Та хүсэлтийг устгахдаа итгэлтай байна уу ',
-                has_button: true,
-                actionNameBack: 'Буцах',
-                actionNameDelete: 'Устгах',
-                modalAction: this.handleRemove,
-            }
-            global.MODAL(modal)
-            this.refreshData()
+        var state = 'ИЛГЭЭСЭН'
+        var kind = 'БУЦААГДСАН'
+        var modal = {}
+
+        modal['modal_status'] = 'open'
+        modal['title'] = 'Устгах хүсэлт'
+        modal['icon_color'] = 'warning'
+        modal['modal_icon'] = 'fa fa-exclamation-circle'
+
+        if(kind != values.kind && state != values.state) {
+            modal['text'] = 'Та хүсэлтийг устгахдаа итгэлтай байна уу '
+            modal['has_button'] = true
+            modal['actionNameBack'] = 'Буцах'
+            modal['actionNameDelete'] = 'Устгах'
+            modal['modalAction'] = this.handleRemove
         }
+
         else {
-            const modal = {
-                modal_status: 'open',
-                modal_icon: 'fa fa-timer-circle',
-                icon_color: 'danger',
-                title: 'Устгах боломжгүй',
-                text: 'Энэхүү хүсэлт БУЦААГДСАН төлөвт байгаа тул устгах боломжгүй',
-                has_button: false,
-                actionNameBack: 'Буцах',
-                modalAction: this.handleRemove,
-            }
-            global.MODAL(modal)
+            modal['text'] = `Энэхүү хүсэлт ${values.state == state ? values.state : values.kind || values.kind == kind ? values.kind : values.state } байгаа тул устгах боломжгүй`
         }
+
+        global.MODAL(modal)
     }
 
     handleRemove() {
         const { id } = this.state.values
-        service.removeRequest(id).then(({success}) => {
+        service.removeRequest(id).then(({success, info}) => {
+            console.log()
             if(success) {
                 const modal = {
                     modal_status: 'open',
                     modal_icon: 'fa fa-check-circle',
                     icon_color: "success",
-                    title: 'Амжилттай устгалаа',
+                    title: info,
                 }
                 global.MODAL(modal)
                 this.refreshData()
@@ -240,10 +233,11 @@ export class Detail extends Component {
                     modal_status: 'open',
                     modal_icon: 'fa fa-times-circle',
                     icon_color: "danger",
-                    title: 'Устгах боломжгүй файл байна.',
+                    title: info,
                 }
                 global.MODAL(modal)
             }
+
         })
     }
 

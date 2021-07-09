@@ -690,7 +690,8 @@ def remove_request(request, content, id):
 
     if initial_query.state == RequestFiles.STATE_SENT or initial_query.kind == RequestFiles.KIND_DISMISS:
         return JsonResponse({
-            'success': False,
+                'success': False,
+                'info': 'Устгах боломжгүй файл байна.'
         })
 
     for shape in shapes:
@@ -713,6 +714,7 @@ def remove_request(request, content, id):
 
     return JsonResponse({
             'success': True,
+            'info': 'Амжилттай устгалаа'
     })
 
 

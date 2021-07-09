@@ -87,13 +87,13 @@ export class List extends Component {
 
     handleRemove() {
         const { id } = this.state.values
-        service.removeRequest(id).then(({success}) => {
+        service.removeRequest(id).then(({success, info}) => {
             if(success) {
                 const modal = {
                     modal_status: 'open',
                     modal_icon: 'fa fa-check-circle',
                     icon_color: "success",
-                    title: 'Амжилттай уcтгалаа',
+                    title: info,
                 }
                 global.MODAL(modal)
                 this.refreshData()
@@ -103,7 +103,7 @@ export class List extends Component {
                     modal_status: 'open',
                     modal_icon: 'fa fa-times-circle',
                     icon_color: "danger",
-                    title: 'Устгах боломжгүй файл байна',
+                    title: info,
                 }
                 global.MODAL(modal)
             }
