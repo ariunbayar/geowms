@@ -109,6 +109,7 @@ export class RoleDetail extends Component {
                             <InsPerms
                                 dontDid={true}
                                 org_roles={roles}
+                                role_perm = {roles}
                             />
                         }
                     </div>

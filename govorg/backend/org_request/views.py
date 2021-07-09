@@ -1096,8 +1096,8 @@ def get_count(request):
 
     geo_id = employee.org.geo_id
     llc = LLCRequest.objects
-    llc = llc.filter(file__geo_id=geo_id)
-    llc_count = llc.exclude(kind__in=[LLCRequest.KIND_APPROVED, LLCRequest.KIND_REVOKE]).count()
+    llc = llc.filter(file__geo_id=geo_id, file__requested_employee=employee.user.id)
+    llc_count = llc.exclude(state=LLCRequest.STATE_SOLVED).count()
     rsp = {
         'success': True,
         'count': request_count,
@@ -1145,9 +1145,9 @@ def _get_ann_name(kind, item):
 @gov_required
 @login_required(login_url='/gov/secure/login/')
 def get_llc_list(request, payload):
-
+    empoyee = get_object_or_404(Employee, user=request.user)
     qs = LLCRequest.objects
-    qs = qs.filter(file__geo_id=request.org.geo_id)
+    qs = qs.filter(file__geo_id=request.org.geo_id, file__requested_employee=empoyee.user_id)
 
     start_index = 1
 
@@ -1161,7 +1161,7 @@ def get_llc_list(request, payload):
         ]
 
         datatable = Datatable(
-            model=RequestFiles,
+            model=LLCRequest,
             payload=payload,
             initial_qs=qs,
             оруулах_талбарууд=оруулах_талбарууд,

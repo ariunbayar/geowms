@@ -65,8 +65,8 @@ def _get_employee_display(employee):
         'token': employee.token,
         'created_at': employee.created_at.strftime('%Y-%m-%d'),
         'updated_at': employee.updated_at.strftime('%Y-%m-%d'),
-        'position': employee.position.name,
-        'position_id': employee.position.id,
+        'position': employee.position.name if employee.position else '',
+        'position_id': employee.position.id if employee.position else '',
         'state': employee.get_state_display(),
         'state_id': employee.state,
         'pro_class_id': employee.pro_class,
@@ -113,8 +113,10 @@ def _get_role_name(item):
 
 
 def _get_position_name(postition_id, item):
+    position_name = ''
     position = Position.objects.filter(id=postition_id).first()
-    position_name = position.name
+    if position:
+        position_name = position.name
     return position_name
 
 
@@ -438,6 +440,8 @@ def update(request, payload, pk):
 
 def _get_emp_perm_display(emp_perm):
 
+    gov_perm = emp_perm.employee.org.govperm_set.first()
+    gov_perm_inspire_qs = gov_perm.govperminspire_set
     feature_ids = EmpPermInspire.objects.filter(emp_perm=emp_perm).distinct('feature_id').values_list('feature_id', flat=True)
     package_ids = LFeatures.objects.filter(feature_id__in=feature_ids).distinct('package_id').exclude(package_id__isnull=True).values_list('package_id', flat=True)
     theme_ids = LPackages.objects.filter(package_id__in=package_ids).distinct('theme_id').exclude(theme_id__isnull=True).values_list('theme_id', flat=True)
@@ -446,22 +450,26 @@ def _get_emp_perm_display(emp_perm):
     property_of_feature = {}
 
     for feature_id in feature_ids:
-        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).distinct('property_id').exclude(property_id__isnull=True).values('property_id', 'perm_kind')
+        emp_perm_properties = EmpPermInspire.objects.filter(emp_perm=emp_perm, feature_id=feature_id).exclude(property_id__isnull=True)
+        emp_perm_properties = emp_perm_properties.exclude(property_id=1)
+        emp_perm_properties = emp_perm_properties.values('property_id', 'perm_kind')
         property_data, perm_list = get_property_data_display(None, feature_id, emp_perm, EmpPermInspire, True)
         properties.append(property_data)
+
         property_perm_count = count_property_of_feature(emp_perm_properties)
         for perm in perm_list:
             kind_name = get_perm_kind_name(perm['kind'])
             property_perm_count[kind_name] = property_perm_count[kind_name] + 1
-        property_of_feature[feature_id] = property_perm_count
 
+        property_of_feature[feature_id] = property_perm_count
+        emp_perm_properties = emp_perm_properties.distinct('property_id')
         for property_id in emp_perm_properties:
             prop = LProperties.objects.get(property_id=property_id['property_id'])
             property_data, perm_list = get_property_data_display(prop, feature_id, emp_perm, EmpPermInspire, False)
             properties.append(property_data)
 
     package_features = [
-        get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature)
+        get_package_features_data_display(package_id, LFeatures.objects.filter(package_id=package_id, feature_id__in=feature_ids).values_list('feature_id', flat=True), property_of_feature, gov_perm_inspire_qs)
         for package_id in package_ids
     ]
 
