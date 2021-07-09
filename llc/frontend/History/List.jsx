@@ -87,7 +87,7 @@ export class List extends Component {
 
     handleRemove() {
         const { id } = this.state.values
-        service.removeRequest(id).then(({ success}) => {
+        service.removeRequest(id).then(({success}) => {
             if(success) {
                 const modal = {
                     modal_status: 'open',
