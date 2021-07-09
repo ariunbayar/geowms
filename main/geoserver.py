@@ -443,7 +443,16 @@ def get_layer_style(layer_name):
 def check_geoserver_style(style_name):
     BASE_URL, AUTH = getHeader()
     url = 'styles/' + style_name + '.sld'
+    ws_link = 'workspaces'
     rsp = requests.get(BASE_URL + url, headers=HEADERS, auth=AUTH)
+    if rsp.status_code != 200:
+        rsp = requests.get(BASE_URL + ws_link, headers=HEADERS, auth=AUTH)
+        ws_datas = rsp.json()
+        for workspace in ws_datas['workspaces']['workspace']:
+            ws_style_url = ws_link + '/' + workspace['name'] + '/' + url
+            rsp = requests.get(BASE_URL + ws_style_url, headers=HEADERS, auth=AUTH)
+            if rsp.status_code == 200:
+                break
     return rsp
 
 
@@ -463,10 +472,10 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
     BASE_URL, AUTH = getHeader()
 
     def _get_style_content(values):
-        geom_type = values.get('shape_type')
-        rule_name = values.get('rule_name')
-        min_range = values.get('min_range')
-        max_range = values.get('max_range')
+        geom_type = values.get('shape_type') or ''
+        rule_name = values.get('rule_name') or ''
+        min_range = values.get('min_range') or ''
+        max_range = values.get('max_range') or ''
         min_range_content = ''
         max_range_content = ''
         if min_range:
@@ -485,8 +494,8 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
                 <CssParameter name="fill-opacity">{fill_opacity}</CssParameter>
             </Fill>
         '''.format(
-            fill_color=values.get('fill_color'),
-            fill_opacity=values.get('color_opacity'),
+            fill_color=values.get('fill_color') or '',
+            fill_opacity=values.get('color_opacity') or '',
         )
 
         stroke_content = '''
@@ -496,10 +505,10 @@ def create_style(values, style_name, style_title, style_abstract, old_style_name
                 <CssParameter name="stroke-dasharray">{dashed_line_length} {dashed_line_gap}</CssParameter>
             </Stroke>
         '''.format(
-            stroke_color=values.get('style_color'),
-            stroke_width=values.get('style_size'),
-            dashed_line_length=values.get('dashed_line_length'),
-            dashed_line_gap=values.get('dashed_line_gap')
+            stroke_color=values.get('style_color') or '',
+            stroke_width=values.get('style_size') or '',
+            dashed_line_length=values.get('dashed_line_length') or '',
+            dashed_line_gap=values.get('dashed_line_gap') or ''
         )
 
         if geom_type == 'PointSymbolizer':
