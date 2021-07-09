@@ -104,7 +104,7 @@ export class List extends Component {
                     modal_status: 'open',
                     modal_icon: 'fa fa-times-circle',
                     icon_color: "danger",
-                    title: 'Хүсэлт амжилтгүй боллоо',
+                    title: 'Устгах боломжгүй файл байна',
                     info,
                 }
                 global.MODAL(modal)
