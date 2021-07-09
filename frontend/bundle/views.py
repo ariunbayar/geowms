@@ -109,11 +109,11 @@ def wms_layers(request, pk):
                 feature_id = feature.feature_id
                 wmts_obj = WmtsCacheConfig.objects.filter(feature_id=feature_id).first()
                 if wmts_obj:
-                    if wmts_obj.zoom_start < 4:
+                    if wmts_obj.zoom_start and wmts_obj.zoom_start < 4:
                         zoom_start = 5
                     else:
                         zoom_start = wmts_obj.zoom_start
-                    if wmts_obj.zoom_stop < 13:
+                    if wmts_obj.zoom_stop and wmts_obj.zoom_stop < 13:
                         zoom_stop = 21
                     else:
                         zoom_stop = wmts_obj.zoom_stop

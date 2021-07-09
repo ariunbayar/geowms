@@ -1,7 +1,8 @@
 import re
 import subprocess
 import json
-
+from django.db.models import F
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.core.paginator import Paginator
 from django.contrib.postgres.search import SearchVector
@@ -11,13 +12,13 @@ from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.cache import cache_page
 from django.utils.timezone import localtime
 from backend.bundle.models import Bundle
-from backend.inspire.models import LThemes
+from backend.inspire.models import LCodeLists, LProperties, LThemes
 from .models import Config
 from backend.inspire.models import LValueTypes
 from backend.org.models import Org
 from backend.config.models import Error500
 from main.decorators import ajax_required
-from main import geoserver
+from main import geoserver, utils
 
 
 CACHE_TIMEOUT_DISK_INFO = 5
@@ -435,11 +436,23 @@ def payment_configs(request):
         'PROPERTY_PER_AMOUNT': '',
     }
 
-    configs = Config.objects.filter(name__in=default_values.keys())
+    property_code = 'Geodeticаlnetworktype'
+    obj = get_object_or_404(LProperties, property_code__iexact=property_code)
+    code_list = LCodeLists.objects.filter(property_id=obj.property_id)
+    code_list = list(code_list.values('code_list_code', 'code_list_name'))
+
+    configs = Config.objects
+    part_payment = configs.filter(name__in=default_values.keys())
+    point_payment = configs.filter(name='POINT_PRICE').first()
+    point_payment = point_payment.value
+    if point_payment:
+        point_payment = utils.json_load(point_payment)
 
     rsp = {
         **default_values,
-        **{conf.name: conf.value for conf in configs},
+        **{conf.name: conf.value for conf in part_payment},
+        **point_payment,
+        'code_list': code_list
     }
 
     return JsonResponse(rsp)
@@ -449,11 +462,26 @@ def payment_configs(request):
 @ajax_required
 @user_passes_test(lambda u: u.is_superuser)
 def payment_configs_save(request, payload):
-
+    point_obj = dict()
+    code_list = payload.get('code_list')
+    config_name = "POINT_PRICE"
     config_names = (
         'POLYGON_PER_KM_AMOUNT',
         'POLYGON_PER_M_AMOUNT',
         'PROPERTY_PER_AMOUNT',
+    )
+
+    for code in code_list:
+        code_list_code = code['code_list_code']
+        price = payload.get(code_list_code, '')
+        point_obj[code_list_code] = price
+
+    point_obj = utils.json_dumps(point_obj)
+    Config.objects.update_or_create(
+        name=config_name,
+        defaults={
+            "value": point_obj
+        }
     )
 
     for config_name in config_names:
