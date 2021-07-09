@@ -117,7 +117,7 @@ export default class ConfigPayment extends Component {
                                 <Form>
                                     <fieldset disabled={ !is_editing }>
                                         <div className="form-row">
-                                            <label className={is_seperate && 'text-info col-md-12'} htmlFor='payment_seperate'>
+                                            <label role='button' className={is_seperate && 'text-info col-md-12'} htmlFor='payment_seperate'>
                                                 <i
                                                     id='payment_seperate'
                                                     role='button'
@@ -163,7 +163,7 @@ export default class ConfigPayment extends Component {
                                             }
                                         </div>
                                         <div className="form-row">
-                                            <label className=''  className={`${is_point && 'text-info'} mb-1`}>
+                                            <label role='button' className={`${is_point && 'text-info'} mb-1`}>
                                                 <i
                                                     role='button'
                                                     className={`fa ${is_point ? 'fa-angle-right' : 'fa-angle-down'} text-secondary mr-2`}
