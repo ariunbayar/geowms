@@ -15,6 +15,24 @@ class Org(models.Model):
 
 
 class Position(models.Model):
+
+    DEFAULT_POSITIONS = [
+        "Байхгүй",
+        "Сайд",
+        "Дэд сайд",
+        "Төрийн нарийн бичгийн дарга",
+        "Дарга",
+        "Орлогч дарга",
+        "Тэргүүн дэд",
+        "Газрын дарга",
+        "Хэлтсийн дарга",
+        "Ахлах шинжээч",
+        "Шинжээч",
+        "Ахлах мэргэжилтэн",
+        "Мэргэжилтэн",
+        "Зөвлөх"
+    ]
+
     class Meta:
         db_table = "backend_org_position"
 
@@ -32,23 +50,30 @@ class Employee(models.Model):
     STATE_FIRED = 'Чөлөөлөгдсөн'
     STATE_SICK = 'Өвчтэй'
 
+    STATE_WORKING_CODE = 1
+    STATE_BREAK_CODE = 2
     STATE_FIRED_CODE = 3
+    STATE_SICK_CODE = 4
 
     STATE_CHOICES = [
-        (1, STATE_WORKING),
-        (2, STATE_BREAK),
-        (3, STATE_FIRED),
-        (4, STATE_SICK),
+        (STATE_WORKING_CODE, STATE_WORKING),
+        (STATE_BREAK_CODE, STATE_BREAK),
+        (STATE_FIRED_CODE, STATE_FIRED),
+        (STATE_SICK_CODE, STATE_SICK),
     ]
 
     ANGIIN_DARGA = 'Ангийн дарга'
     GISHUUN = 'Гишүүн'
     NARIIN_BICHGIIN_DARGA = 'Нарийн бичгийн дарга'
 
+    ANGIIN_DARGA_CODE = 1
+    GISHUUN_CODE = 2
+    NARIIN_BICHGIIN_DARGA_CODE = 3
+
     CLASS_CHOICES = [
-        (1, ANGIIN_DARGA),
-        (2, GISHUUN),
-        (3, NARIIN_BICHGIIN_DARGA),
+        (ANGIIN_DARGA_CODE, ANGIIN_DARGA),
+        (GISHUUN_CODE, GISHUUN),
+        (NARIIN_BICHGIIN_DARGA_CODE, NARIIN_BICHGIIN_DARGA),
     ]
 
     org = models.ForeignKey(Org, on_delete=models.PROTECT)

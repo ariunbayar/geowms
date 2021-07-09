@@ -267,25 +267,25 @@ def create(request, payload):
     qs_user = qs_user.filter(username=username)
     user = qs_user.first()
 
-    user_detail = employee_utils._make_user_detail(payload)
-    employee_detail = employee_utils._make_employee_detail(payload)
-    employee_address_detail = employee_utils._make_employee_address(payload)
+    user_detail = employee_utils.make_user_detail(payload)
+    employee_detail = employee_utils.make_employee_detail(payload)
+    employee_address_detail = employee_utils.make_employee_address(payload)
 
-    if int(employee_detail.get('state')) == 3:   # TODO халагдсан төлөвт ажилтан нэмэхгүй
-        error = {"state": '"ЧӨЛӨӨЛӨГДСӨН"-өөс бусад төлөвт шинээр албан хаагч үүсгэх боломжтой!'}
+    if int(employee_detail.get('state')) == 3:  # TODO халагдсан төлөвт ажилтан нэмэхгүй байгаа өөрчилж магадгүй
+        error = {"state": '"{}"-өөс бусад төлөвт шинээр албан хаагч үүсгэх боломжтой!'.format(Employee.STATE_FIRED.upper())}
         errors.update(error)
 
     if user:
-        is_fired_employee = employee_utils._is_fired_employee(user, qs_employee)
+        is_fired_employee = employee_utils.is_fired_employee(user, qs_employee)
         if is_fired_employee:
-            errors.update(employee_utils._user_validition(user_detail, user))
+            errors.update(employee_utils.user_validition(user_detail, user))
         else:
-            errors.update(employee_utils._user_validition(user_detail))
+            errors.update(employee_utils.user_validition(user_detail))
     else:
-        errors.update(employee_utils._user_validition(user_detail))
+        errors.update(employee_utils.user_validition(user_detail))
 
-    errors.update(employee_utils._employee_validition(employee_detail))
-    errors.update(employee_utils._employee_add_validator(employee_address_detail))
+    errors.update(employee_utils.employee_validition(employee_detail))
+    errors.update(employee_utils.employee_add_validator(employee_address_detail))
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
@@ -354,36 +354,39 @@ def update(request, payload, pk):
     qs_address = EmployeeAddress.objects
 
     employee_qs = qs_employee.filter(~Q(state=Employee.STATE_FIRED_CODE))  # TODO update хийх ажилтны query_set
-    employee_qs = employee_utils._check_qs(qs_employee, {"pk": pk})
+    employee_qs = employee_utils.check_qs(qs_employee, {"pk": pk})
     employee = employee_qs.first()
 
-    qs_user = employee_utils._check_qs(qs_user, {"pk": employee.user_id})
-    qs_address = employee_utils._check_qs(qs_address, {"employee": employee})
+    qs_user = employee_utils.check_qs(qs_user, {"pk": employee.user_id})
+    qs_address = employee_utils.check_qs(qs_address, {"employee": employee})
     employee_address = qs_address.first()
 
     user = qs_user.first()
     emp_perm = EmpPerm.objects.filter(employee=employee).first()
     new_emp_role = EmpRole.objects.filter(id=role_id).first()
 
-    user_detail = employee_utils._make_user_detail(payload)
-    employee_detail = employee_utils._make_employee_detail(payload, employee)
-    employee_address_detail = employee_utils._make_employee_address(payload)
+    user_detail = employee_utils.make_user_detail(payload)
+    employee_detail = employee_utils.make_employee_detail(payload, employee)
+    employee_address_detail = employee_utils.make_employee_address(payload)
 
     qs_employee = qs_employee.filter(~Q(pk=pk), user=user)
-    is_fired_employee = employee_utils._is_fired_employee(user, qs_employee)
+    is_fired_employee = employee_utils.is_fired_employee(user, qs_employee)
 
     if not is_fired_employee:
         error = {"username": 'Хэрэглэгч бүртгэлтэй байна!'}
         errors.update(error)
 
-    errors.update(employee_utils._user_validition(user_detail, user))
-    errors.update(employee_utils._employee_validition(employee_detail, employee))
-    errors.update(employee_utils._employee_add_validator(employee_address_detail, employee_address))
+    errors.update(employee_utils.user_validition(user_detail, user))
+    errors.update(employee_utils.employee_validition(employee_detail, employee))
+    errors.update(employee_utils.employee_add_validator(employee_address_detail, employee_address))
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
     with transaction.atomic():
+
+        old_is_user = user.is_user
+
         qs_user.update(**user_detail)
         employee_qs.update(**employee_detail)    # TODO тухайн албан хаагчаа update хийнэ
 
@@ -424,7 +427,7 @@ def update(request, payload, pk):
 
         _check_local_id(emp_perm, user)
 
-        if is_user:
+        if not old_is_user and is_user:
             utils.send_approve_email(user)
 
         return JsonResponse({
@@ -530,7 +533,7 @@ def delete(request, pk):
         return JsonResponse({'success': True})
 
 
-# ------------- Хэрэглэгчийг баазаас устгах үед ашиглана -------------
+# -----------TODO Хэрэглэгчийг баазаас устгах үед ашиглана -------------
 # @require_GET
 # @ajax_required
 # @login_required(login_url='/gov/secure/login/')

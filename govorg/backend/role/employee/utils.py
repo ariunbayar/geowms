@@ -9,7 +9,7 @@ from backend.org.forms import EmployeeAddressForm
 from geoportal_app.forms import UserForm
 
 
-def _make_user_detail(values):
+def make_user_detail(values):
     values = values.get('user_detail')
 
     keys = ['phone_number', 'position', 'choose_role', 'state', 'pro_class', 'is_admin']
@@ -21,7 +21,7 @@ def _make_user_detail(values):
     return user_detail
 
 
-def _make_employee_detail(values, employee=None):
+def make_employee_detail(values, employee=None):
     values = values.get('user_detail')
     keys = [
         'username', 'first_name', 'last_name', 'email',
@@ -38,7 +38,7 @@ def _make_employee_detail(values, employee=None):
     return employee_detail
 
 
-def _get_point_for_db(coordinate):
+def get_point_for_db(coordinate):
     if not coordinate:
         return ''
 
@@ -49,7 +49,7 @@ def _get_point_for_db(coordinate):
     return point
 
 
-def _get_address_state_code(address_state):
+def get_address_state_code(address_state):
     if address_state:
         address_state = EmployeeAddress.STATE_REGULER_CODE
     elif not address_state:
@@ -57,19 +57,19 @@ def _get_address_state_code(address_state):
     return address_state
 
 
-def _make_employee_address(payload):
+def make_employee_address(payload):
     address = payload.get('address')
     point_coordinate = address.get('point')
     address_state = address.get('address_state')
 
-    point = _get_point_for_db(point_coordinate)
+    point = get_point_for_db(point_coordinate)
     address['point'] = point
-    address['address_state'] = _get_address_state_code(address_state)
+    address['address_state'] = get_address_state_code(address_state)
 
     return address
 
 
-def _user_validition(user_detail, user=None):
+def user_validition(user_detail, user=None):
     if user:
         form = UserForm(user_detail, instance=user)
     else:
@@ -81,7 +81,7 @@ def _user_validition(user_detail, user=None):
     return {}
 
 
-def _employee_validition(employee_detail, employee=None):
+def employee_validition(employee_detail, employee=None):
     if employee:
         form = EmployeeForm(employee_detail, instance=employee)
     else:
@@ -92,7 +92,7 @@ def _employee_validition(employee_detail, employee=None):
     return {}
 
 
-def _employee_add_validator(employee_address_detail, employee_address=None):
+def employee_add_validator(employee_address_detail, employee_address=None):
     if employee_address:
         form = EmployeeAddressForm(employee_address_detail, instance=employee_address)
     else:
@@ -104,7 +104,7 @@ def _employee_add_validator(employee_address_detail, employee_address=None):
     return {}
 
 
-def _is_fired_employee(user, qs_employee):
+def is_fired_employee(user, qs_employee):
     qs_employee = qs_employee.filter(user=user)
     qs_employee = qs_employee.filter(~Q(state=Employee.STATE_FIRED_CODE))
     if not qs_employee:
@@ -113,7 +113,7 @@ def _is_fired_employee(user, qs_employee):
     return False
 
 
-def _check_qs(Model, selected_filter):
+def check_qs(Model, selected_filter):
     qs = Model.filter(**selected_filter)
     if not qs:
         raise Http404

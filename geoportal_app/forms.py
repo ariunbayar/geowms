@@ -38,7 +38,6 @@ class UserForm(forms.ModelForm):
                 'required': 'Мэйлээ оруулна уу!',
                 'max_length': 'Мэйл %(limit_value)d тэмдэгт байх ёстой!',
                 'unique': 'Мэйл хаяг бүртгэлтэй байна!',
-
             },
             'gender': {
                 'required': 'Хүйсээ оруулна уу!',

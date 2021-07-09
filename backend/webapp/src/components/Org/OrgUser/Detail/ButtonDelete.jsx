@@ -58,8 +58,8 @@ export class ButtonDelete extends Component {
                             modal_icon: `fa fa-exclamation-circle`,
                             icon_color: 'warning',
                             modal_bg: '',
-                            title: 'Албан хаагчийг устгах',
-                            text: `${`Та "${this.props.employee_name}" нэртэй албан хаагчийн төлөв чөлөөлөгдсөн болно. Та устгахдаа итгэлтэй байна уу?`}`,
+                            title: 'Албан хаагчийг чөлөөлөх',
+                            text: `${`Та "${this.props.employee_name}" нэртэй албан хаагчийн төлөв чөлөөлөгдсөн болно. Та чөлөөлөхдөө итгэлтэй байна уу?`}`,
                             has_button: true,
                             actionNameDelete: 'Тийм',
                             actionNameBack: 'Үгүй',
@@ -71,7 +71,7 @@ export class ButtonDelete extends Component {
                     }
                     className="btn btn-danger waves-effect waves-light m-1"
                 >
-                    <i className="fa fa fa-trash-o"></i> Устгах
+                    <i className="fa fa fa-trash-o"></i> Чөлөөлөх
                 </span>
             </Fragment>
         )

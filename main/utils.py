@@ -13,7 +13,6 @@ import psycopg2
 import socket
 import shutil
 import uuid
-from django.shortcuts import get_object_or_404
 
 from collections import namedtuple
 from datetime import timedelta, datetime
@@ -30,6 +29,7 @@ from django.db import connections
 from django.utils import timezone
 from django.core.mail import send_mail, get_connection
 from django.core.cache import cache
+from django.shortcuts import get_object_or_404
 
 from main.inspire import InspireProperty
 from main.inspire import InspireCodeList
@@ -1785,7 +1785,7 @@ def get_pg_cursor(conn_details):
 
 
 def get_pg_conf(conn_id):
-    another_db = get_object_or_404(AnotherDatabase, pk=conn_id)
+    another_db = get_object_or_404(AnotherDatabase, pk=conn_id) # TODO get object 404 hereglku
     connection = json_load(another_db.connection)
     form_datas = {
         'id': conn_id,

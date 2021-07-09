@@ -98,7 +98,7 @@ def employee_detail(request, pk):
         'apartment': address.apartment if hasattr(address, 'apartment') else '',
         'door_number': address.door_number if hasattr(address, 'door_number') else '',
         'point': address.point.json if hasattr(address, 'point') else '',
-        'address_state': backend_org_utils._get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
+        'address_state': backend_org_utils.get_address_state_db_value(address.address_state) if hasattr(address, 'address_state') else '',
         'address_state_display': address.get_address_state_display() if hasattr(address, 'address_state') else '',
     }
 
@@ -138,19 +138,19 @@ def employee_update(request, payload, pk, level):
     employee = qs_update_employee.first()
     user_id = employee.user_id
     qs_employee = qs_employee.filter(~Q(id=pk), user_id=user_id)
-    qs_user = backend_org_utils._check_qs(qs_user, {"id": user_id})
+    qs_user = backend_org_utils.check_qs(qs_user, {"id": user_id})
     user = qs_user.first()
-    qs_address = backend_org_utils._check_qs(qs_address, {"employee": employee})
+    qs_address = backend_org_utils.check_qs(qs_address, {"employee": employee})
     employee_address = qs_address.first()
 
-    user_detail = backend_org_utils._make_user_detail(values)
-    employee_detail = backend_org_utils._make_employee_detail(values, employee)
-    employee_address_detail = backend_org_utils._make_employee_add(payload)
-    is_fired_employee = backend_org_utils._is_fired_employee(user, qs_employee)
+    user_detail = backend_org_utils.make_user_detail(values)
+    employee_detail = backend_org_utils.make_employee_detail(values, employee)
+    employee_address_detail = backend_org_utils.make_employee_add(payload)
+    is_fired_employee = backend_org_utils.is_fired_employee(user, qs_employee)
 
-    errors = backend_org_utils._user_validition(user_detail, user)
-    errors.update(backend_org_utils._employee_validition(employee_detail, employee))
-    errors.update(backend_org_utils._employee_add_validator(employee_address_detail, employee_address))
+    errors = backend_org_utils.user_validition(user_detail, user)
+    errors.update(backend_org_utils.employee_validition(employee_detail, employee))
+    errors.update(backend_org_utils.employee_add_validator(employee_address_detail, employee_address))
 
     if not is_fired_employee:
         error = {"username": 'Хэрэглэгч бүртгэлтэй байна!'}
@@ -204,25 +204,25 @@ def employee_add(request, payload, level, pk):
     qs_user = qs_user.filter(username=username)
     user = qs_user.first()
 
-    user_detail = backend_org_utils._make_user_detail(values)
-    employee_detail = backend_org_utils._make_employee_detail(values)
-    employee_add_detail = backend_org_utils._make_employee_add(payload)
+    user_detail = backend_org_utils.make_user_detail(values)
+    employee_detail = backend_org_utils.make_employee_detail(values)
+    employee_add_detail = backend_org_utils.make_employee_add(payload)
 
-    if int(employee_detail.get('state')) == 3:   # TODO халагдсан төлөвт ажилтан нэмэхгүй
+    if int(employee_detail.get('state')) == 3:  # TODO халагдсан төлөвт ажилтан нэмэхгүй байгаа өөрчилж магадгүй
         error = {"state": '"ЧӨЛӨӨЛӨГДСӨН"-өөс бусад төлөвт шинээр албан хаагч үүсгэх боломжтой!'}
         errors.update(error)
 
     if user:
-        is_fired_employee = backend_org_utils._is_fired_employee(user, qs_employee)
+        is_fired_employee = backend_org_utils.is_fired_employee(user, qs_employee)
         if is_fired_employee:
-            errors.update(backend_org_utils._user_validition(user_detail, user))
+            errors.update(backend_org_utils.user_validition(user_detail, user))
         else:
-            errors.update(backend_org_utils._user_validition(user_detail))
+            errors.update(backend_org_utils.user_validition(user_detail))
     else:
-        errors.update(backend_org_utils._user_validition(user_detail))
+        errors.update(backend_org_utils.user_validition(user_detail))
 
-    errors.update(backend_org_utils._employee_validition(employee_detail))
-    errors.update(backend_org_utils._employee_add_validator(employee_add_detail))
+    errors.update(backend_org_utils.employee_validition(employee_detail))
+    errors.update(backend_org_utils.employee_add_validator(employee_add_detail))
 
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
@@ -257,11 +257,8 @@ def employee_add(request, payload, level, pk):
 def employee_remove(request, pk):
 
     employee = get_object_or_404(Employee, pk=pk)
-    user_log = Payment.objects.filter(user=employee.user_id)
-    if user_log:
-        return JsonResponse({'success': False})
 
-    is_success = backend_org_utils._set_state(employee)
+    is_success = backend_org_utils.set_state(employee)
     return JsonResponse({'success': is_success})
 
 
@@ -294,7 +291,7 @@ def org_add(request, payload, level):
     geo_id = payload.get('geo_id')
     objs = []
 
-    errors = backend_org_utils._org_validation(org_name, org_id)
+    errors = backend_org_utils.org_validation(org_name, org_id)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
     # Байгууллага засах хэсэг
@@ -377,24 +374,7 @@ def org_add(request, payload, level):
                 ))
             GovPermInspire.objects.bulk_create(objs)
 
-        def_pos = [
-            "Байхгүй",
-            "Сайд",
-            "Дэд сайд",
-            "Төрийн нарийн бичгийн дарга",
-            "Дарга",
-            "Орлогч дарга",
-            "Тэргүүн дэд",
-            "Газрын дарга",
-            "Хэлтсийн дарга",
-            "Ахлах шинжээч",
-            "Шинжээч",
-            "Ахлах мэргэжилтэн",
-            "Мэргэжилтэн",
-            "Зөвлөх"
-        ]
-
-        for pos in def_pos:
+        for pos in Position.DEFAULT_POSITIONS:
             Position.objects.create(
                 name=pos,
                 org=org
@@ -520,12 +500,12 @@ def employee_list(request, payload, level, pk):
 
     оруулах_талбарууд = ['id', 'position_id', 'is_admin', 'user_id', 'token', 'created_at', 'updated_at']
     хувьсах_талбарууд = [
-        {"field": "user_id", "action": backend_org_utils._get_name, "new_field": "user__first_name"},
-        {"field": "user_id", "action": backend_org_utils._get_email, "new_field": "user__email"},
-        {"field": "position_id", "action": backend_org_utils._get_position_name, "new_field": "position"},
+        {"field": "user_id", "action": backend_org_utils.get_name, "new_field": "user__first_name"},
+        {"field": "user_id", "action": backend_org_utils.get_email, "new_field": "user__email"},
+        {"field": "position_id", "action": backend_org_utils.get_position_name, "new_field": "position"},
     ]
     нэмэлт_талбарууд = [
-        {"field": "role_name", "action": backend_org_utils._get_role_name},
+        {"field": "role_name", "action": backend_org_utils.get_role_name},
     ]
 
     datatable = Datatable(
@@ -605,9 +585,9 @@ def create_perm(request, payload):
     role_id = payload.get('pk')
     if role_id:
         gov_role = get_object_or_404(GovRole, pk=role_id)
-        errors = backend_org_utils._perm_name_validation(payload, gov_role)
+        errors = backend_org_utils.perm_name_validation(payload, gov_role)
     else:
-        errors = backend_org_utils._perm_name_validation(payload, None)
+        errors = backend_org_utils.perm_name_validation(payload, None)
     if errors:
         return JsonResponse({'success': False, 'errors': errors})
 
@@ -657,7 +637,7 @@ def get_inspire_roles(request, pk):
     roles = []
     govRole = get_object_or_404(GovRole, pk=pk)
     for themes in LThemes.objects.order_by('theme_id'):
-        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils._get_theme_packages_gov(themes.theme_id, govRole)
+        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils.get_theme_packages_gov(themes.theme_id, govRole)
         data.append(
             {
                 'id': themes.theme_id,
@@ -771,7 +751,7 @@ def get_gov_roles(request, level, pk):
     gov_perm = GovPerm.objects.filter(org=org).first()
 
     for themes in LThemes.objects.order_by('theme_id'):
-        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils._get_theme_packages(themes.theme_id, gov_perm)
+        package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke = backend_org_utils.get_theme_packages(themes.theme_id, gov_perm)
         data.append({
             'id': themes.theme_id,
             'code': themes.theme_code,
@@ -868,7 +848,7 @@ def save_gov_roles(request, payload, level, pk):
 def form_options(request, option):
 
     admin_levels = utils.get_administrative_levels()
-    roles = backend_org_utils._get_roles_display()
+    roles = backend_org_utils.get_roles_display()
 
     if option == 'second':
         rsp = {
@@ -906,7 +886,7 @@ def get_addresses(request, level, pk):
             point_info['id'] = addresses.employee.id
             point_info['first_name'] = addresses.employee.user.first_name   # etseg
             point_info['last_name'] = addresses.employee.user.last_name     # onooj ogson ner
-            point_info['is_cloned'] = backend_org_utils._is_cloned_feature(addresses)
+            point_info['is_cloned'] = backend_org_utils.is_cloned_feature(addresses)
             feature = utils.get_feature_from_geojson(point.json, properties=point_info)
             points.append(feature)
 
@@ -948,7 +928,7 @@ def get_address(request, pk):
         point_info['id'] = addresses.employee.id
         point_info['first_name'] = addresses.employee.user.first_name  # etseg
         point_info['last_name'] = addresses.employee.user.last_name  # onooj ogson ner
-        point_info['is_cloned'] = backend_org_utils._is_cloned_feature(addresses)
+        point_info['is_cloned'] = backend_org_utils.is_cloned_feature(addresses)
         feature = utils.get_feature_from_geojson(point.json, properties=point_info)
         points.append(feature)
 
@@ -1031,7 +1011,7 @@ def get_erguuleg_fields(request, pk):
     send_fields = list()
 
     employee = get_object_or_404(Employee, pk=pk)
-    erguul = backend_org_utils._get_erguul_qs(employee)
+    erguul = backend_org_utils.get_erguul_qs(employee)
 
     if erguul:
         erguul_id = erguul['id']
@@ -1043,7 +1023,7 @@ def get_erguuleg_fields(request, pk):
             not_field = ['created_at']
             if f.name not in not_field:
                 if hasattr(f, 'verbose_name') and hasattr(f, 'max_length'):
-                    value = backend_org_utils._get_erguul(erguul, f.name)
+                    value = backend_org_utils.get_erguul(erguul, f.name)
                     field_type = ''
                     if 'date' in f.name:
                         field_type = 'date'
@@ -1078,7 +1058,7 @@ def save_erguul(request, payload):
 
     employee = get_object_or_404(Employee, id=emp_id)
 
-    point = backend_org_utils._get_point_for_db(payload.get('point'))
+    point = backend_org_utils.get_point_for_db(payload.get('point'))
     values['point'] = point
 
     if 'date_start' in values:
@@ -1213,8 +1193,8 @@ def get_select_values(request, payload):
     qs = qs.filter(org_id=org_id)
     positions = list(qs.values())
 
-    states = backend_org_utils._get_choices(Employee, 'state')
-    pro_classes = backend_org_utils._get_choices(Employee, 'pro_class')
+    states = backend_org_utils.get_choices(Employee, 'state')
+    pro_classes = backend_org_utils.get_choices(Employee, 'pro_class')
 
     rsp = {
         'success': True,
@@ -1386,7 +1366,7 @@ def pos_create(request, payload, pk):
     payload['org_id'] = pk
     qs = Position.objects
     qs_pos = qs.filter(org_id=pk)
-    has_pos_name = backend_org_utils._pos_name_or_id_check(qs_pos, name)
+    has_pos_name = backend_org_utils.pos_name_or_id_check(qs_pos, name)
 
     if has_pos_name:
         rsp = {
@@ -1411,7 +1391,7 @@ def pos_update(request, payload, pk):
     pos_id = int(payload.get("pos_id"))
     qs = Position.objects
     qs_pos = qs.filter(org_id=pk)
-    has_pos_name = backend_org_utils._pos_name_or_id_check(qs_pos, name, pos_id)
+    has_pos_name = backend_org_utils.pos_name_or_id_check(qs_pos, name, pos_id)
 
     if has_pos_name:
         rsp = {

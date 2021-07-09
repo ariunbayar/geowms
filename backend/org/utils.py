@@ -25,7 +25,7 @@ from geoportal_app.models import User
 from geoportal_app.forms import UserForm
 
 
-def _get_address_state_db_value(address_state):
+def get_address_state_db_value(address_state):
     if address_state == EmployeeAddress.STATE_REGULER_CODE:
         address_state = True
     else:
@@ -33,7 +33,7 @@ def _get_address_state_db_value(address_state):
     return address_state
 
 
-def _check_qs(Model, selected_filter):
+def check_qs(Model, selected_filter):
     qs = Model.filter(**selected_filter)
     if not qs:
         raise Http404
@@ -41,7 +41,7 @@ def _check_qs(Model, selected_filter):
     return qs
 
 
-def _make_user_detail(values):
+def make_user_detail(values):
     keys = ['id', 'is_super', 'position', 'is_admin', 'phone_number', 'state', 'pro_class']
     user_detail = utils.key_remove_of_dict(values, keys)
 
@@ -52,7 +52,7 @@ def _make_user_detail(values):
     return user_detail
 
 
-def _make_employee_detail(values, employee=None):
+def make_employee_detail(values, employee=None):
     keys = [
         'id', 'username', 'first_name', 'last_name', 'email',
         'position', 'gender', 'is_super', 'is_user', 'register',
@@ -68,7 +68,7 @@ def _make_employee_detail(values, employee=None):
     return employee_detail
 
 
-def _get_point_for_db(coordinate):
+def get_point_for_db(coordinate):
     if not coordinate:
         return ''
 
@@ -79,7 +79,7 @@ def _get_point_for_db(coordinate):
     return point
 
 
-def _get_address_state_code(address_state):
+def get_address_state_code(address_state):
     if address_state:
         address_state = EmployeeAddress.STATE_REGULER_CODE
     elif not address_state:
@@ -87,19 +87,19 @@ def _get_address_state_code(address_state):
     return address_state
 
 
-def _make_employee_add(payload):
+def make_employee_add(payload):
     address = payload.get('address')
     point_coordinate = address.get('point')
-    point = _get_point_for_db(point_coordinate)
+    point = get_point_for_db(point_coordinate)
     address_state = address.get('address_state')
 
     address['point'] = point
-    address['address_state'] = _get_address_state_code(address_state)
+    address['address_state'] = get_address_state_code(address_state)
 
     return address
 
 
-def _user_validition(user_detail, user=None):
+def user_validition(user_detail, user=None):
     if user:
         form = UserForm(user_detail, instance=user)
     else:
@@ -111,7 +111,7 @@ def _user_validition(user_detail, user=None):
     return {}
 
 
-def _employee_validition(employee_detail, employee=None):
+def employee_validition(employee_detail, employee=None):
     if employee:
         form = EmployeeForm(employee_detail, instance=employee)
     else:
@@ -122,7 +122,7 @@ def _employee_validition(employee_detail, employee=None):
     return {}
 
 
-def _employee_add_validator(employee_address_detail, employee_address=None):
+def employee_add_validator(employee_address_detail, employee_address=None):
     if employee_address:
         form = EmployeeAddressForm(employee_address_detail, instance=employee_address)
     else:
@@ -134,23 +134,23 @@ def _employee_add_validator(employee_address_detail, employee_address=None):
     return {}
 
 
-def _is_fired_employee(user, qs_employee):
+def is_fired_employee(user, qs_employee):
     qs_employee = qs_employee.filter(user=user)
-    qs_employee = qs_employee.filter(~Q(state=3))
+    qs_employee = qs_employee.filter(~Q(state=Employee.STATE_FIRED_CODE))
     if not qs_employee:
         return True
 
     return False
 
 
-def _set_state(employee):
-    employee.state = 3
+def set_state(employee):
+    employee.state = Employee.STATE_FIRED_CODE
     employee.save()
 
     return True
 
 
-def _org_validation(org_name, org_id):
+def org_validation(org_name, org_id):
     org = Org.objects.filter(pk=org_id).first()
     errors = {}
 
@@ -172,52 +172,7 @@ def _org_validation(org_name, org_id):
     return errors
 
 
-def _get_employee(employee, filter_from_user):
-    if filter_from_user:
-        emp_obj = Employee.objects.filter(user=employee).first()
-        id = employee.id
-        last_name = employee.last_name
-        first_name = employee.last_name[0].upper() + '.' + employee.first_name.upper()
-        email = employee.email
-        is_active = employee.is_active
-        is_sso = employee.is_sso
-        is_admin = emp_obj.is_admin
-        position = emp_obj.position.name
-        created_at = emp_obj.created_at.strftime('%Y-%m-%d')
-        updated_at = emp_obj.updated_at.strftime('%Y-%m-%d')
-        is_user = employee.is_user
-    else:
-        user = User.objects.filter(pk=employee.user_id).first()
-        id = user.id
-        last_name = user.last_name
-        first_name = user.last_name[0].upper() + '.' + user.first_name.upper()
-        email = user.email
-        is_active = user.is_active
-        is_sso = user.is_sso
-        is_admin = employee.is_admin
-        position = employee.position.name
-        created_at = employee.created_at.strftime('%Y-%m-%d')
-        updated_at = employee.updated_at.strftime('%Y-%m-%d')
-        is_user = user.is_user
-
-    employee_detail = {
-        'id': id,
-        'last_name': last_name,
-        'first_name': first_name,
-        'email': email,
-        'is_active': is_active,
-        'is_sso': is_sso,
-        'is_admin': is_admin,
-        'position': position,
-        'created_at': created_at,
-        'updated_at': updated_at,
-        "is_user": is_user
-    }
-
-    return employee_detail
-
-
-def _get_theme_packages_gov(theme_id, govRole):
+def get_theme_packages_gov(theme_id, govRole):
     package_data = []
     t_perm_all = 0
     t_perm_view = 0
@@ -279,7 +234,7 @@ def _get_theme_packages_gov(theme_id, govRole):
     return package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke
 
 
-def _get_feature_property_gov(feature_id, govRole):
+def get_feature_property_gov(feature_id, govRole):
     data_type_list = []
     data_types_ids = LFeatureConfigs.objects.filter(feature_id=feature_id)
     perm_all = 1
@@ -347,7 +302,7 @@ def _get_feature_property_gov(feature_id, govRole):
     return data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke
 
 
-def _get_package_features_gove(package_id, govRole):
+def get_package_features_gove(package_id, govRole):
     feat_values = []
     p_perm_all = 0
     p_perm_view = 0
@@ -357,7 +312,7 @@ def _get_package_features_gove(package_id, govRole):
     p_perm_approve = 0
     p_perm_revoke = 0
     for feat in LFeatures.objects.filter(package_id=package_id):
-        data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke = _get_feature_property_gov(feat.feature_id, govRole)
+        data_type_list, perm_all, perm_view, perm_create, perm_remove, perm_update, perm_approve, perm_revoke = get_feature_property_gov(feat.feature_id, govRole)
         if not perm_all == 1:
             p_perm_all = p_perm_all + 1
             feat_values.append({
@@ -403,7 +358,7 @@ def _get_package_features_gove(package_id, govRole):
     return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke
 
 
-def _get_package_features(package_id, gov_perm):
+def get_package_features(package_id, gov_perm):
     feat_values = []
     p_perm_all = 0
     p_perm_view = 0
@@ -414,7 +369,7 @@ def _get_package_features(package_id, gov_perm):
     p_perm_revoke = 0
 
     for feat in LFeatures.objects.filter(package_id=package_id):
-        data_type_list, perm_all, perms = _get_feature_property(feat.feature_id, gov_perm)
+        data_type_list, perm_all, perms = get_feature_property(feat.feature_id, gov_perm)
         if not perm_all == 1:
             p_perm_all = p_perm_all + 1
             feat_values.append({
@@ -468,7 +423,7 @@ def _get_package_features(package_id, gov_perm):
     return feat_values, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke
 
 
-def _get_theme_packages(theme_id, gov_perm):
+def get_theme_packages(theme_id, gov_perm):
     package_data = []
     t_perm_all = 0
     t_perm_view = 0
@@ -479,7 +434,7 @@ def _get_theme_packages(theme_id, gov_perm):
     t_perm_revoke = 0
     for package in LPackages.objects.filter(theme_id=theme_id):
         t_perm_all = t_perm_all + 1
-        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = _get_package_features(package.package_id, gov_perm)
+        features_all, p_perm_all, p_perm_view, p_perm_create, p_perm_remove, p_perm_update, p_perm_approve, p_perm_revoke = get_package_features(package.package_id, gov_perm)
         package_data.append({
             'id': package.package_id,
             'code': package.package_code,
@@ -528,7 +483,7 @@ def _get_theme_packages(theme_id, gov_perm):
     return package_data, t_perm_all, t_perm_view, t_perm_create, t_perm_remove, t_perm_update, t_perm_approve, t_perm_revoke
 
 
-def _get_feature_property(feature_id, gov_perm):
+def get_feature_property(feature_id, gov_perm):
     data_type_list = []
     perm_all = 1
 
@@ -615,7 +570,7 @@ def _get_feature_property(feature_id, gov_perm):
     return data_type_list, perm_all, perms
 
 
-def _pos_name_or_id_check(qs_pos, name, pos_id=None):
+def pos_name_or_id_check(qs_pos, name, pos_id=None):
     has_pos_name = False
     qs_pos = qs_pos.filter(name=name)
     if qs_pos:
@@ -627,18 +582,18 @@ def _pos_name_or_id_check(qs_pos, name, pos_id=None):
     return has_pos_name
 
 
-def _get_name(user_id, item):
+def get_name(user_id, item):
     user = User.objects.filter(pk=user_id).first()
     full_name = user.last_name[0].upper() + '.' + user.first_name.upper()
     return full_name
 
 
-def _get_email(user_id, item):
+def get_email(user_id, item):
     user = User.objects.filter(pk=user_id).first()
     return user.email
 
 
-def _get_role_name(item):
+def get_role_name(item):
     role_name = ''
     role = EmpPerm.objects.filter(employee=item['id']).first()
     if role and role.emp_role:
@@ -646,13 +601,13 @@ def _get_role_name(item):
     return role_name
 
 
-def _get_position_name(postition_id, item):
+def get_position_name(postition_id, item):
     position = Position.objects.filter(id=postition_id).first()
     position_name = position.name
     return position_name
 
 
-def _perm_name_validation(payload, perm):
+def perm_name_validation(payload, perm):
     values = payload.get('values')
     role_id = payload.get('pk')
     errors = {}
@@ -669,7 +624,7 @@ def _perm_name_validation(payload, perm):
     return errors
 
 
-def _get_roles_display():
+def get_roles_display():
 
     return [
         {
@@ -680,7 +635,7 @@ def _get_roles_display():
     ]
 
 
-def _is_cloned_feature(address_qs):
+def is_cloned_feature(address_qs):
     is_cloned = False
     erguul_id = address_qs.employeeerguul_set.values_list('id', flat=True).first()
     if erguul_id:
@@ -688,7 +643,7 @@ def _is_cloned_feature(address_qs):
     return is_cloned
 
 
-def _get_erguul_qs(employee):
+def get_erguul_qs(employee):
     address_id = employee.employeeaddress_set.values_list('id', flat=True).first()
     erguul_qs = EmployeeErguul.objects
     erguul_qs = erguul_qs.filter(address_id=address_id)
@@ -697,14 +652,14 @@ def _get_erguul_qs(employee):
     return erguul
 
 
-def _get_erguul(erguul, field):
+def get_erguul(erguul, field):
     value = ''
     if erguul:
         value = erguul[field]
     return value
 
 
-def _get_choices(Model, field_name):
+def get_choices(Model, field_name):
     choices = list()
     for f in Model._meta.get_fields():
         if f.name == field_name:
