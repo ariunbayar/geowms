@@ -100,23 +100,14 @@ export class List extends Component {
                 this.refreshData()
             }
             else {
-                this.modalChange(
-                    'fa fa-check-circle',
-                    "danger",
-                    info,
-                    '',
-                    false
-                )
                 const modal = {
                     modal_status: 'open',
-                    modal_icon: 'fa fa-check-circle',
-                    icon_color: "success",
+                    modal_icon: 'fa fa-times-circle',
+                    icon_color: "danger",
                     title: 'Хүсэлт амжилтгүй боллоо',
-                    text: '',
+                    info,
                 }
                 global.MODAL(modal)
-                this.refreshData()
-                this.refreshData()
             }
         })
     }

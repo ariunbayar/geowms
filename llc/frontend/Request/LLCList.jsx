@@ -211,24 +211,21 @@ export class Detail extends Component {
                     modal_status: 'open',
                     modal_icon: 'fa fa-check-circle',
                     icon_color: "success",
-                    title: 'Хүсэлт амжилттай боллоо',
-                    text: '',
+                    title: 'Амжилттай уcтгалаа',
+                    info,
                 }
                 global.MODAL(modal)
                 this.refreshData()
             }
             else {
-                this.modalChange(
-                    'fa fa-check-circle',
-                    "danger",
+                const modal = {
+                    modal_status: 'open',
+                    modal_icon: 'fa fa-times-circle',
+                    icon_color: "danger",
+                    title: 'Хүсэлт амжилтгүй боллоо',
                     info,
-                    'Хүсэлт амжилтгүй боллоо',
-                    false
-                )
-
+                }
                 global.MODAL(modal)
-                this.refreshData()
-                this.refreshData()
             }
         })
     }
