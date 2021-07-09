@@ -103,16 +103,16 @@ export class List extends Component {
     remove(model_name, model_id, name, formLorR) {
         const modal = {
             modal_status: "open",
-            modal_icon: modal_icon,
-            modal_bg: modal_bg,
-            icon_color: icon_color,
-            title: title,
-            text: text,
-            has_button: has_button,
-            actionNameBack: actionNameBack,
-            actionNameDelete: actionNameDelete,
-            modalAction: modalAction,
-            modalClose: modalClose
+            modal_icon: "fa fa-check-circle",
+            modal_bg: "",
+            icon_color: "success",
+            title: "Амжилттай устгалаа",
+            text: data,
+            has_button: false,
+            actionNameBack: "",
+            actionNameDelete: "",
+            modalAction: null,
+            modalClose: null
         }
         global.MODAL(modal)
         this.setState({ model_name, model_id, name, formLorR })
